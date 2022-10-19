@@ -14,6 +14,10 @@ public class Competencia {
     @Column(name = "descricao")
     private String descricao;
 
+    public Competencia(String nome, String descricao) {
+        this.nome = nome;
+        this.descricao = descricao;
+    }
 
     public Long getId() {
         return id;
