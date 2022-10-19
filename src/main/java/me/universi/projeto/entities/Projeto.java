@@ -16,10 +16,14 @@ public class Projeto {
     @Column(name = "descricao")
     private String descricao;
 
+    public Projeto() {
+    }
+
     public Projeto(String name, String descricao){
         this.nome = name;
         this.descricao = descricao;
     }
+
     public Long getId() {
         return id;
     }
@@ -42,5 +46,11 @@ public class Projeto {
 
     public void setDescricao(String descricao) {
         this.descricao = descricao;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "Projeto [nome=\""+this.nome+"\", descricao=\""+this.descricao+"\"]";
     }
 }
