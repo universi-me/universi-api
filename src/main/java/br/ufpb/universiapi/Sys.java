@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class Sys{
     @Autowired
     public UsuarioRepository usuarioRepository;
+    @Autowired
+    public CompetenciaRepository competenciaRepository;
 
     public static void main(String [] args)
     {
@@ -26,6 +28,8 @@ public class Sys{
 
         Usuario userNew = new Usuario("User name", "test@email.com", "senha");
         usuarioRepository.save(userNew);
+        Competencia competenciaNew = new Competencia("Java","Sou top em java");
+        competenciaRepository.save(competenciaNew);
 
         return "Ola Mundo!";
     }
