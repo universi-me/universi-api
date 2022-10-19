@@ -1,19 +1,26 @@
 package br.ufpb.universiapi;
 
+import br.ufpb.universiapi.entities.Perfil;
 import br.ufpb.universiapi.entities.Usuario;
+import br.ufpb.universiapi.repositories.PerfilRepository;
 import br.ufpb.universiapi.repositories.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @SpringBootApplication(exclude = {SecurityAutoConfiguration.class }) // temp desabilitar SpringSecurity login para funcionar o H2 console
 @RestController
 public class Sys{
+
+    @Autowired
+    public PerfilRepository perfilRepository;
     @Autowired
     public UsuarioRepository usuarioRepository;
+
 
     public static void main(String [] args)
     {
