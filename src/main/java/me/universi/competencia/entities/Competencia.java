@@ -1,4 +1,4 @@
-package br.ufpb.universiapi.entities;
+package me.universi.competencia.entities;
 
 import javax.persistence.*;
 

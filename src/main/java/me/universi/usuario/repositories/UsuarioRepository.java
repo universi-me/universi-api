@@ -1,6 +1,6 @@
-package br.ufpb.universiapi.repositories;
+package me.universi.usuario.repositories;
 
-import br.ufpb.universiapi.entities.Usuario;
+import me.universi.usuario.entities.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
