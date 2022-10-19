@@ -1,6 +1,6 @@
-package br.ufpb.universiapi.repositories;
+package me.universi.perfil.repositories;
 
-import br.ufpb.universiapi.entities.Perfil;
+import me.universi.perfil.entities.Perfil;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PerfilRepository extends JpaRepository<Perfil, Long> {

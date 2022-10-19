@@ -1,6 +1,6 @@
-package br.ufpb.universiapi.repositories;
+package me.universi.competencia.repositories;
 
-import br.ufpb.universiapi.entities.Competencia;
+import me.universi.competencia.entities.Competencia;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

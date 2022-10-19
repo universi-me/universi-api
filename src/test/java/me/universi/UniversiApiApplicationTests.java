@@ -1,4 +1,4 @@
-package br.ufpb.universiapi;
+package me.universi;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

@@ -1,4 +1,4 @@
-package br.ufpb.universiapi.controller;
+package me.universi.usuario.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

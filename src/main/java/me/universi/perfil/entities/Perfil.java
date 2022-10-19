@@ -1,8 +1,6 @@
-package br.ufpb.universiapi.entities;
+package me.universi.perfil.entities;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import me.universi.usuario.entities.Usuario;
 
 import javax.persistence.*;
 
