@@ -11,8 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @SpringBootApplication(exclude = {SecurityAutoConfiguration.class }) // temp desabilitar SpringSecurity login para funcionar o H2 console
 @RestController
-public class Sys
-{
+public class Sys{
     @Autowired
     public UsuarioRepository usuarioRepository;
 
