@@ -5,13 +5,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
-public class ApplicationConfig extends WebSecurityConfigurerAdapter
+@EnableWebSecurity
+public class ApplicationConfig
 {
     @Autowired
     private SecurityUserDetailsService userDetailsService;
@@ -21,8 +23,8 @@ public class ApplicationConfig extends WebSecurityConfigurerAdapter
         return new BCryptPasswordEncoder();
     }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception
     {
         http
             .csrf().disable()
@@ -30,11 +32,11 @@ public class ApplicationConfig extends WebSecurityConfigurerAdapter
             .antMatchers("/css/*").permitAll()
             .anyRequest().authenticated()
             .and()
-            .formLogin().loginPage("/logar")
-            .permitAll()
+            .formLogin().loginPage("/logar").permitAll()
             .and()
             .logout().invalidateHttpSession(true)
             .clearAuthentication(true).permitAll();
+        return http.build();
     }
 
     @Bean
@@ -47,10 +49,10 @@ public class ApplicationConfig extends WebSecurityConfigurerAdapter
     }
 
     // desabilitar SpringSecurity no H2 console
-    @Override
-    public void configure(WebSecurity web) throws Exception
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer()
     {
-        web
+        return (web) -> web
             .ignoring()
             .antMatchers("/h2-console/**");
     }
