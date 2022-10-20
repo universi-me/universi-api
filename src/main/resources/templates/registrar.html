@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta http-equiv="X-UA-compatible" content="IE=edge">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <!-- CSS only -->
+   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"
+         rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi"
+         crossorigin="anonymous">
+
+   <link rel="stylesheet" href="css/style.css">
+
+   <title>Cadastro de Usuário</title>
+</head>
+<body style="max-width:400px;margin: 0 auto;">
+<center><img src="https://avatars.githubusercontent.com/u/116006104" width="200" alt="Universi.me"/></center>
+<div th:if="${param.error}">
+   <p th:text="${session.error}" th:unless="${session == null}">[...]</p>
+</div>
+<form th:action="@{/registrar}" method="post">
+   <div class="mb-3">
+      <label for="username" class="form-label">Email:</label>
+      <input type="email" class="form-control" id="username" aria-describedby="emailHelp" name="username">
+   </div>
+   <div class="mb-3">
+      <label for="name" class="form-label">Nome Completo:</label>
+      <input type="name" class="form-control" id="name" name="name">
+   </div>
+   <div class="mb-3">
+      <label for="password" class="form-label">Senha:</label>
+      <input type="password" class="form-control" id="password" name="password">
+   </div>
+   <button type="submit" class="btn btn-primary">Registrar-se</button>
+</form>
+<p align="right"><button onclick="location.href='/logar'" class="btn btn-primary">Logar</button></p>
+</body>
+</html>
