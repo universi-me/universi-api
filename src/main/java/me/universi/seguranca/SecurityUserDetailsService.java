@@ -33,11 +33,10 @@ public class SecurityUserDetailsService implements UserDetailsService
 
     public void createUser(Usuario user) throws Exception
     {
-        Optional<Usuario> usuario = userRepository.findByEmail(user.getEmail());
-        if (usuario.isPresent()) {
-            throw new Exception("Usuário com email \""+user.getEmail()+"\" já esta cadastrado!");
+        if (user==null) {
+            throw new Exception("Usuario está vazio!");
         }
-        if (user.getEmail()==null || user.getEmail().length()==0) {
+        if (user.getEmail()==null || user.getEmail().length()==0 || !user.getEmail().contains("@")) {
             throw new Exception("Verifique o campo Email!");
         }
         if (user.getNome()==null || user.getNome().length()==0) {
@@ -45,6 +44,10 @@ public class SecurityUserDetailsService implements UserDetailsService
         }
         if (user.getSenha()==null || user.getSenha().length()==0) {
             throw new Exception("Verifique o campo Senha!");
+        }
+        Optional<Usuario> usuario = userRepository.findByEmail(user.getEmail());
+        if (usuario.isPresent()) {
+            throw new Exception("Usuário com email \""+user.getEmail()+"\" já esta cadastrado!");
         }
         userRepository.save((Usuario) user);
     }
