@@ -9,11 +9,11 @@ public class Usuario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_usuario")
     private Long id;
-    @Column(name = "name")
+    @Column(name = "nome")
     private String nome;
     @Column(name = "email")
     private String email;
-    @Column(name = "password")
+    @Column(name = "senha")
     private String senha;
 
     public Usuario(String name, String email, String password){
