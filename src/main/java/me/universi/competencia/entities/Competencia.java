@@ -1,5 +1,7 @@
 package me.universi.competencia.entities;
 
+import me.universi.competencia.enums.Nivel;
+
 import javax.persistence.*;
 
 @Entity(name = "competencia")
@@ -13,6 +15,9 @@ public class Competencia {
     private String nome;
     @Column(name = "descricao")
     private String descricao;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "nivel")
+    private Nivel nivel;
 
     public Competencia(String nome, String descricao) {
         this.nome = nome;
@@ -42,4 +47,8 @@ public class Competencia {
     public void setDescricao(String descricao) {
         this.descricao = descricao;
     }
+
+    public Nivel getNivel() { return nivel; }
+
+    public void setNivel(Nivel nivel) { this.nivel = nivel; }
 }
