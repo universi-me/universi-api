@@ -1,6 +1,10 @@
 package me.universi.grupo.entities;
 
+import me.universi.grupo.enums.GrupoTipo;
+import me.universi.perfil.entities.Perfil;
+
 import javax.persistence.*;
+import java.util.Collection;
 
 @Entity(name = "Grupo")
 public class Grupo {
@@ -15,6 +19,20 @@ public class Grupo {
 
     @Column(name = "descricao")
     public String descricao;
+
+    @ManyToOne
+    @JoinColumn(name="id_profile")
+    public Perfil admin;
+
+
+    // TODO: relacionamento
+    public Collection<Perfil> participantes;
+
+    //public Imagem imagem;
+
+    @Column(name = "tipo")
+    @Enumerated(EnumType.STRING)
+    public GrupoTipo tipo;
 
     public Grupo() {
     }
