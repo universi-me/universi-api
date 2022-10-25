@@ -15,32 +15,32 @@ public class GrupoController
     public GrupoRepository grupoRepository;
 
     // http://localhost:8080/projeto/criar?nome=teste&descricao=teste2
-    @RequestMapping("/projeto/criar")
+    @RequestMapping("/grupo/criar")
     public String create(@RequestParam("nome") String nome, @RequestParam("descricao") String descricao)
     {
         Grupo grupoNew = new Grupo(nome, descricao);
         grupoRepository.save(grupoNew);
-        return "Projeto Criado: "+ grupoNew.toString();
+        return "Grupo Criado: "+ grupoNew.toString();
     }
 
     // http://localhost:8080/projeto/remover?id=1
-    @RequestMapping("/projeto/remover")
+    @RequestMapping("/grupo/remover")
     public String remove(@RequestParam("id") Long id)
     {
         try {
             Grupo proj = grupoRepository.findById(id).get();
             if (proj != null) {
                 grupoRepository.delete(proj);
-                return "Projeto Removido: " + proj.toString();
+                return "Grupo Removido: " + proj.toString();
             }
         }catch (EntityNotFoundException e) {
-            return "Projeto não encontrado";
+            return "Grupo não encontrado";
         }
         return "Falha ao remover";
     }
 
     // http://localhost:8080/projeto/obter?id=1
-    @RequestMapping("/projeto/obter")
+    @RequestMapping("/grupo/obter")
     public Grupo get(@RequestParam("id") Long id)
     {
         try {
@@ -52,7 +52,7 @@ public class GrupoController
     }
 
     // http://localhost:8080/projeto/listar
-    @RequestMapping("/projeto/listar")
+    @RequestMapping("/grupo/listar")
     public List<Grupo> getlist()
     {
         List<Grupo> ret = grupoRepository.findAll();
