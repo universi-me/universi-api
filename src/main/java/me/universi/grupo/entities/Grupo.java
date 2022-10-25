@@ -21,8 +21,8 @@ public class Grupo {
     public String descricao;
 
     // TODO: relacionamento
-    //@ManyToOne
-    //@JoinColumn(name="id_profile")
+    @ManyToOne
+    @JoinColumn(name="id_profile")
     public Perfil admin;
 
 
