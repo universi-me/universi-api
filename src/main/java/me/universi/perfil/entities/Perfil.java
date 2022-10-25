@@ -3,6 +3,7 @@ package me.universi.perfil.entities;
 import me.universi.competencia.entities.Competencia;
 import me.universi.link.entities.Link;
 import me.universi.perfil.enums.Sexo;
+import me.universi.recomendacao.entities.Recomendacao;
 import me.universi.usuario.entities.Usuario;
 import me.universi.grupo.entities.Grupo;
 
@@ -43,6 +44,10 @@ public class Perfil {
     @Column(name = "sexo")
     @Enumerated(EnumType.STRING)
     private Sexo sexo;
+    @OneToMany(mappedBy = "origem")
+    private Collection<Recomendacao> recomendacoesFeitas;
+    @OneToMany(mappedBy = "destino")
+    private Collection<Recomendacao> recomendacoesRecebidas;
 
     public Perfil(Long id, Usuario usuario, String bio, Link link, Collection<Competencia> competencias, Collection<Grupo> grupos, Collection<Link> links) {
         this.id = id;
