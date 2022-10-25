@@ -1,8 +1,7 @@
-package me.universi.projeto.controller;
+package me.universi.grupo.controller;
 
-import me.universi.Sys;
-import me.universi.projeto.entities.Projeto;
-import me.universi.projeto.repositories.ProjetoRepository;
+import me.universi.grupo.entities.Grupo;
+import me.universi.grupo.repositories.GrupoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,18 +9,18 @@ import javax.persistence.EntityNotFoundException;
 import java.util.List;
 
 @RestController
-public class ProjetoController
+public class GrupoController
 {
     @Autowired
-    public ProjetoRepository projetoRepository;
+    public GrupoRepository grupoRepository;
 
     // http://localhost:8080/projeto/criar?nome=teste&descricao=teste2
     @RequestMapping("/projeto/criar")
     public String create(@RequestParam("nome") String nome, @RequestParam("descricao") String descricao)
     {
-        Projeto projetoNew = new Projeto(nome, descricao);
-        projetoRepository.save(projetoNew);
-        return "Projeto Criado: "+ projetoNew.toString();
+        Grupo grupoNew = new Grupo(nome, descricao);
+        grupoRepository.save(grupoNew);
+        return "Projeto Criado: "+ grupoNew.toString();
     }
 
     // http://localhost:8080/projeto/remover?id=1
@@ -29,9 +28,9 @@ public class ProjetoController
     public String remove(@RequestParam("id") Long id)
     {
         try {
-            Projeto proj = projetoRepository.findById(id).get();
+            Grupo proj = grupoRepository.findById(id).get();
             if (proj != null) {
-                projetoRepository.delete(proj);
+                grupoRepository.delete(proj);
                 return "Projeto Removido: " + proj.toString();
             }
         }catch (EntityNotFoundException e) {
@@ -42,10 +41,10 @@ public class ProjetoController
 
     // http://localhost:8080/projeto/obter?id=1
     @RequestMapping("/projeto/obter")
-    public Projeto get(@RequestParam("id") Long id)
+    public Grupo get(@RequestParam("id") Long id)
     {
         try {
-            Projeto proj = projetoRepository.findById(id).get();
+            Grupo proj = grupoRepository.findById(id).get();
             return proj;
         }catch (EntityNotFoundException e) {
             return null;
@@ -54,9 +53,9 @@ public class ProjetoController
 
     // http://localhost:8080/projeto/listar
     @RequestMapping("/projeto/listar")
-    public List<Projeto> getlist()
+    public List<Grupo> getlist()
     {
-        List<Projeto> ret = projetoRepository.findAll();
+        List<Grupo> ret = grupoRepository.findAll();
         return ret;
     }
 }

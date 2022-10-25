@@ -1,13 +1,13 @@
-package me.universi.projeto.entities;
+package me.universi.grupo.entities;
 
 import javax.persistence.*;
 
-@Entity(name = "Projeto")
-public class Projeto {
+@Entity(name = "Grupo")
+public class Grupo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_projeto")
+    @Column(name = "id_grupo")
     public Long id;
 
     @Column(name = "nome")
@@ -16,10 +16,10 @@ public class Projeto {
     @Column(name = "descricao")
     public String descricao;
 
-    public Projeto() {
+    public Grupo() {
     }
 
-    public Projeto(String name, String descricao){
+    public Grupo(String name, String descricao){
         this.nome = name;
         this.descricao = descricao;
     }
@@ -27,6 +27,6 @@ public class Projeto {
     @Override
     public String toString()
     {
-        return "Projeto [nome=\""+this.nome+"\", descricao=\""+this.descricao+"\"]";
+        return "Grupo [nome=\""+this.nome+"\", descricao=\""+this.descricao+"\"]";
     }
 }
