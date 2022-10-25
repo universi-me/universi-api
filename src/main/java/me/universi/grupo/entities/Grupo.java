@@ -20,8 +20,9 @@ public class Grupo {
     @Column(name = "descricao")
     public String descricao;
 
-    @ManyToOne
-    @JoinColumn(name="id_profile")
+    // TODO: relacionamento
+    //@ManyToOne
+    //@JoinColumn(name="id_profile")
     public Perfil admin;
 
 
@@ -37,9 +38,13 @@ public class Grupo {
     public Grupo() {
     }
 
-    public Grupo(String name, String descricao){
+    public Grupo(String name, String descricao, Perfil admin, Collection<Perfil> participantes, GrupoTipo tipo)
+    {
         this.nome = name;
         this.descricao = descricao;
+        this.admin = admin;
+        this.participantes = participantes;
+        this.tipo = tipo;
     }
 
     @Override
