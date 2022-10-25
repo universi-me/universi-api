@@ -39,7 +39,7 @@ public class Perfil {
             inverseJoinColumns = { @JoinColumn(name = "id_grupo") }
     )
     private Collection<Grupo> grupos;
-    @OneToMany(mappedBy = "link")
+    @OneToMany(mappedBy = "perfil")
     private Collection<Link> links;
     @Column(name = "sexo")
     @Enumerated(EnumType.STRING)
