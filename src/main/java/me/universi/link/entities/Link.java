@@ -1,6 +1,7 @@
 package me.universi.link.entities;
 
 import me.universi.link.enums.TipoLink;
+import me.universi.perfil.entities.Perfil;
 
 import javax.persistence.*;
 
@@ -11,9 +12,13 @@ public class Link {
     @Column(name = "id_link")
     private long id;
     @Column(name = "tipo")
+    @Enumerated(EnumType.STRING)
     private TipoLink tipo;
     @Column(name = "url")
     private String url;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_perfil")
+    private Perfil perfil;
 
     public Link(TipoLink tipo, String url){
         this.tipo = tipo;
