@@ -18,7 +18,7 @@ public class GrupoController
     @RequestMapping("/grupo/criar")
     public String create(@RequestParam("nome") String nome, @RequestParam("descricao") String descricao)
     {
-        Grupo grupoNew = new Grupo(nome, descricao, null, null, null);
+        Grupo grupoNew = new Grupo();
         grupoRepository.save(grupoNew);
         return "Grupo Criado: "+ grupoNew.toString();
     }
