@@ -1,5 +1,6 @@
 package me.universi.perfil.entities;
 
+import me.universi.link.entities.Link;
 import me.universi.usuario.entities.Usuario;
 
 import javax.persistence.*;
@@ -14,9 +15,11 @@ public class Perfil {
 
     @OneToOne
     private Usuario usuario;
-
     @Column(name = "bio")
     private String bio;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "id_link")
+    private Link link;
 
     public Perfil(){
     }

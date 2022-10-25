@@ -1,4 +1,4 @@
-package me.universi.link.entities;
+package me.universi.link.enums;
 
 public enum TipoLink {
     GITHUB, LINKEDIN;

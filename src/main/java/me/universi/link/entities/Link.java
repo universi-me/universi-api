@@ -1,5 +1,7 @@
 package me.universi.link.entities;
 
+import me.universi.link.enums.TipoLink;
+
 import javax.persistence.*;
 
 @Entity(name = "link")
