@@ -26,11 +26,11 @@ public class LoginController
         return "conta";
     }
 
-    @GetMapping("/logar")
-    public String logar(HttpServletRequest request, HttpSession session)
+    @GetMapping("/login")
+    public String login(HttpServletRequest request, HttpSession session)
     {
         session.setAttribute("error", getErrorMessage(request, "SPRING_SECURITY_LAST_EXCEPTION"));
-        return "logar";
+        return "login";
     }
 
     @GetMapping("/registrar")
@@ -52,7 +52,7 @@ public class LoginController
             session.setAttribute("error", e.getMessage());
             return "redirect:/registrar?error";
         }
-        return "redirect:/logar";
+        return "redirect:/login";
     }
 
     private String getErrorMessage(HttpServletRequest request, String key)

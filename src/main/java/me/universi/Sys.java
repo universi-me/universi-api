@@ -9,10 +9,12 @@ import me.universi.perfil.repositories.PerfilRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ImportResource;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @SpringBootApplication
+@ImportResource({"classpath:spring-security.xml"})
 @RestController
 public class Sys{
 
@@ -37,6 +39,8 @@ public class Sys{
         usuarioRepository.save(userNew);
         Competencia competenciaNew = new Competencia("Java","Sou top em java");
         competenciaRepository.save(competenciaNew);
+
+
 
         return "Ola Mundo!";
     }

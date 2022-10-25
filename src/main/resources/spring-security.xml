@@ -1,0 +1,44 @@
+<beans:beans
+    xmlns="http://www.springframework.org/schema/security"
+    xmlns:beans="http://www.springframework.org/schema/beans"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/security
+        http://www.springframework.org/schema/security/spring-security.xsd">
+
+
+	<http use-expressions="true">
+		<csrf disabled="true"/>
+		
+		<intercept-url pattern="/login*" access="permitAll"/>
+		<intercept-url pattern="/registrar*" access="permitAll"/>
+		<intercept-url pattern="/css/*" access="permitAll"/>
+		
+		<!-- Perimitir acesso ao H2-console sem login -->
+		<intercept-url pattern="/h2-console/**" access="permitAll"/>
+		
+		<intercept-url pattern="/**" access="isAuthenticated()"/>
+		
+		<form-login login-page="/login" authentication-failure-url="/login?error"/>
+		<logout logout-success-url="/login?logout" />
+		
+		
+		<!-- Corrigir H2-console -->
+		<headers>
+			<frame-options policy="SAMEORIGIN"/>
+		</headers>
+	</http>
+	
+	<beans:bean id="SecurityUserDetailsService" class="me.universi.seguranca.SecurityUserDetailsService"></beans:bean>
+	<beans:bean id="encoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"></beans:bean>
+	
+	<beans:bean id="authenticationProvider" class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
+		<beans:property name="passwordEncoder" ref="encoder" />
+		<beans:property name="userDetailsService" ref="SecurityUserDetailsService" />
+	</beans:bean>
+	
+</beans:beans>
