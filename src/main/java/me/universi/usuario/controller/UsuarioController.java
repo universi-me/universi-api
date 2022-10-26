@@ -38,13 +38,13 @@ public class UsuarioController
         return "registrar";
     }
 
-    @PostMapping(value = "/registrar", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    @RequestMapping(value = "/registrar", method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public String registrarUsuarioForm(@RequestParam Map<String, Object> body, HttpServletRequest request, HttpSession session)
     {
         return registrarUsuario(body, request, session);
     }
 
-    @PostMapping(value = "/registrar", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/registrar", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     public String registrarUsuarioJson(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session)
     {
         return registrarUsuario(body, request, session);
