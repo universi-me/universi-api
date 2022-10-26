@@ -27,8 +27,8 @@ public class Grupo {
     @ManyToMany(cascade = { CascadeType.ALL })
     @JoinTable(
             name = "perfil_grupo",
-            joinColumns = { @JoinColumn(name = "id_perfil") },
-            inverseJoinColumns = { @JoinColumn(name = "id_grupo") }
+            joinColumns = { @JoinColumn(name = "id_grupo") },
+            inverseJoinColumns = { @JoinColumn(name =  "id_perfil") }
     )
     public Collection<Perfil> participantes;
 
