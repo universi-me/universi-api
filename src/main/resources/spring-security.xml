@@ -33,7 +33,7 @@
 		</headers>
 	</http>
 	
-	<beans:bean id="SecurityUserDetailsService" class="me.universi.seguranca.SecurityUserDetailsService"></beans:bean>
+	<beans:bean id="SecurityUserDetailsService" class="me.universi.usuario.services.SecurityUserDetailsService"></beans:bean>
 	<beans:bean id="encoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"></beans:bean>
 	
 	<beans:bean id="authenticationProvider" class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">

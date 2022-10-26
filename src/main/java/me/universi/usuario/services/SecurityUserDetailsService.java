@@ -1,4 +1,4 @@
-package me.universi.seguranca;
+package me.universi.usuario.services;
 
 import me.universi.usuario.entities.Usuario;
 import me.universi.usuario.repositories.UsuarioRepository;
