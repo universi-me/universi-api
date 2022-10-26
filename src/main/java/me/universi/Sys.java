@@ -28,7 +28,7 @@ public class Sys{
 
     public static void main(String [] args)
     {
-        System.out.println("H2 ativo na http://localhost:8080/h2-console");
+        System.out.println("H2 ativo na http://localhost/h2-console");
         SpringApplication.run(Sys.class, args);
     }
 
