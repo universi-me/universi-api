@@ -1,6 +1,7 @@
 package me.universi.usuario.services;
 
 import me.universi.usuario.entities.Usuario;
+import me.universi.usuario.enums.Autoridade;
 import me.universi.usuario.repositories.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -21,10 +22,8 @@ public class SecurityUserDetailsService implements UserDetailsService
     {
         Optional<Usuario> usuario = userRepository.findByEmail(username);
         if (usuario.isPresent()) {
-            Usuario user = usuario.get();
-            List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
-            UserDetails userDetails =  new org.springframework.security.core.userdetails.User(user.getEmail(),user.getSenha(), true,true, true,true,authorities);
-            return userDetails;
+
+            return usuario.get();
         }
         throw new UsernameNotFoundException("Usuário não encontrado!");
     }
@@ -47,6 +46,7 @@ public class SecurityUserDetailsService implements UserDetailsService
         if (usuario.isPresent()) {
             throw new Exception("Usuário com email \""+user.getEmail()+"\" já esta cadastrado!");
         }
+        user.setAutoridade(Autoridade.ROLE_USER);
         userRepository.save((Usuario) user);
     }
 }

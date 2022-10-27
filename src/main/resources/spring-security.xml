@@ -12,12 +12,18 @@
 
 
 	<http use-expressions="true">
+		<expression-handler ref="defaultWebSecurityExpressionHandler" />
 		<csrf disabled="true"/>
-		
-		<intercept-url pattern="/login*" access="permitAll"/>
-		<intercept-url pattern="/registrar*" access="permitAll"/>
+
+		<intercept-url pattern="/login" access="permitAll"/>
+		<intercept-url pattern="/registrar" access="permitAll"/>
 		<intercept-url pattern="/css/*" access="permitAll"/>
-		
+		<intercept-url pattern="/favicon.ico" access="permitAll"/>
+
+		<!-- Test rules -->
+		<intercept-url pattern="/admin" access="hasRole('ADMIN')"/>
+		<intercept-url pattern="/user" access="hasRole('USER')"/>
+
 		<!-- Perimitir acesso ao H2-console sem login -->
 		<intercept-url pattern="/h2-console/**" access="permitAll"/>
 		
@@ -32,10 +38,39 @@
 			<frame-options policy="SAMEORIGIN"/>
 		</headers>
 	</http>
-	
+
+
+	<beans:bean id="roleHierarchy" class="org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl">
+		<beans:property name="hierarchy">
+			<beans:value>
+				ROLE_ADMIN > ROLE_USER
+			</beans:value>
+		</beans:property>
+	</beans:bean>
+	<beans:bean id="methodSecurityExpressionHandler" class="org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler">
+		<beans:property name = "roleHierarchy" ref="roleHierarchy"/>
+	</beans:bean>
+	<beans:bean id="defaultWebSecurityExpressionHandler"
+				class="org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler">
+		<beans:property name="roleHierarchy" ref="roleHierarchy"/>
+	</beans:bean>
+	<beans:bean id="accessDecisionManager" class="org.springframework.security.access.vote.AffirmativeBased">
+		<beans:constructor-arg>
+			<beans:list>
+				<beans:bean id="roleVoter" class="org.springframework.security.access.vote.RoleHierarchyVoter">
+					<beans:constructor-arg ref="roleHierarchy" />
+				</beans:bean>
+				<beans:bean class="org.springframework.security.web.access.expression.WebExpressionVoter">
+					<beans:property name="expressionHandler" ref="defaultWebSecurityExpressionHandler"/>
+				</beans:bean>
+			</beans:list>
+		</beans:constructor-arg>
+	</beans:bean>
+
+
 	<beans:bean id="SecurityUserDetailsService" class="me.universi.usuario.services.SecurityUserDetailsService"></beans:bean>
+
 	<beans:bean id="encoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"></beans:bean>
-	
 	<beans:bean id="authenticationProvider" class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
 		<beans:property name="passwordEncoder" ref="encoder" />
 		<beans:property name="userDetailsService" ref="SecurityUserDetailsService" />
