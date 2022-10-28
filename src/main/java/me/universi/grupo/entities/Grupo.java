@@ -40,6 +40,16 @@ public class Grupo {
     @JsonIdentityReference(alwaysAsId = true)
     public Collection<Perfil> participantes;
 
+    @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
+    @JoinTable(
+            name = "grupo_grupo",
+            joinColumns = { @JoinColumn(name = "id_grupo", referencedColumnName = "id_grupo") },
+            inverseJoinColumns = { @JoinColumn(name = "id_subgrupo", referencedColumnName = "id_grupo") }
+    )
+    @JsonIdentityInfo(generator= ObjectIdGenerators.PropertyGenerator.class, property="id", scope = Grupo.class)
+    @JsonIdentityReference(alwaysAsId = true)
+    public Collection<Grupo> subGrupos;
+
     //public Imagem imagem;
 
     @Column(name = "tipo")
@@ -49,7 +59,7 @@ public class Grupo {
     public Grupo() {
     }
 
-    public Grupo(String nickname, String name, String descricao, Perfil admin, Collection<Perfil> participantes, GrupoTipo tipo)
+    public Grupo(String nickname, String name, String descricao, Perfil admin, Collection<Perfil> participantes, GrupoTipo tipo, Collection<Grupo> subGrupos)
     {
         this.nickname = nickname;
         this.nome = name;
@@ -57,6 +67,7 @@ public class Grupo {
         this.admin = admin;
         this.participantes = participantes;
         this.tipo = tipo;
+        this.subGrupos = subGrupos;
     }
 
     public Long getId() {
@@ -109,6 +120,14 @@ public class Grupo {
 
     public void setNickname(String nickname) {
         this.nickname = nickname;
+    }
+
+    public Collection<Grupo> getSubGrupos() {
+        return subGrupos;
+    }
+
+    public void setSubGrupos(Collection<Grupo> subGrupos) {
+        this.subGrupos = subGrupos;
     }
 
     @Override
