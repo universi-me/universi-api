@@ -13,6 +13,9 @@ public class Grupo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_grupo")
     public Long id;
+    
+    @Column(name = "nickname")
+    public String nickname;
 
     @Column(name = "nome")
     public String nome;
@@ -41,9 +44,9 @@ public class Grupo {
     public Grupo() {
     }
 
-    public Grupo(Long id, String name, String descricao, Perfil admin, Collection<Perfil> participantes, GrupoTipo tipo)
+    public Grupo(String nickname, String name, String descricao, Perfil admin, Collection<Perfil> participantes, GrupoTipo tipo)
     {
-        this.id = id;
+        this.nickname = nickname;
         this.nome = name;
         this.descricao = descricao;
         this.admin = admin;
@@ -53,10 +56,6 @@ public class Grupo {
 
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getNome() {
@@ -97,6 +96,14 @@ public class Grupo {
 
     public void setTipo(GrupoTipo tipo) {
         this.tipo = tipo;
+    }
+    
+    public String getNickname() {
+        return nickname;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
     }
 
     @Override
