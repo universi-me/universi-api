@@ -127,36 +127,45 @@ public class Usuario implements UserDetails {
         this.autoridade = autoridade;
     }
 
+    @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Arrays.asList(new SimpleGrantedAuthority(this.autoridade.toString()));
+        if(this.autoridade != null) {
+            return Arrays.asList(new SimpleGrantedAuthority(this.autoridade.toString()));
+        }
+        return null;
     }
 
+    @JsonIgnore
     @Override
     public String getPassword() {
         return this.senha;
     }
 
+    @JsonIgnore
     @Override
     public String getUsername() {
         return this.email;
     }
 
+    @JsonIgnore
     @Override
     public boolean isAccountNonExpired() {
         return !this.usuario_expirado;
     }
 
+    @JsonIgnore
     @Override
     public boolean isAccountNonLocked() {
         return !this.conta_bloqueada;
     }
 
+    @JsonIgnore
     @Override
     public boolean isCredentialsNonExpired() {
         return !this.credenciais_expiradas;
     }
-
+    @JsonIgnore
     @Override
     public boolean isEnabled() {
         return !this.inativo;
