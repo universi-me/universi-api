@@ -1,5 +1,8 @@
 package me.universi.grupo.entities;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import me.universi.grupo.enums.GrupoTipo;
 import me.universi.perfil.entities.Perfil;
 
@@ -33,6 +36,8 @@ public class Grupo {
             joinColumns = { @JoinColumn(name = "id_grupo") },
             inverseJoinColumns = { @JoinColumn(name =  "id_perfil") }
     )
+    @JsonIdentityInfo(generator= ObjectIdGenerators.PropertyGenerator.class, property="id", scope = Perfil.class)
+    @JsonIdentityReference(alwaysAsId = true)
     public Collection<Perfil> participantes;
 
     //public Imagem imagem;
