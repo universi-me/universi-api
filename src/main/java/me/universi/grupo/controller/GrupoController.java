@@ -2,6 +2,8 @@ package me.universi.grupo.controller;
 
 import me.universi.grupo.entities.Grupo;
 import me.universi.grupo.repositories.GrupoRepository;
+import me.universi.usuario.entities.Usuario;
+import me.universi.usuario.repositories.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -11,6 +13,7 @@ import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 public class GrupoController
@@ -18,16 +21,73 @@ public class GrupoController
     @Autowired
     public GrupoRepository grupoRepository;
 
+    @Autowired
+    public UsuarioRepository usuarioRepository;
+
     // mapaear tudo exceto, /css, /js, /img, /favicon.ico, comflita com static resources do Thymeleaf
     @GetMapping(value = {"{url:(?!css$|js$|img$|favicon.ico$).*}/**"})
     public String grupo_handler(HttpServletRequest request, HttpSession session, ModelMap map)
     {
-        String requestSt = request.getRequestURI();
-        System.out.println("path: "+ requestSt);
+        String username = request.getRemoteUser();
+        Usuario usuario = usuarioRepository.findByEmail(username).get();
+        map.addAttribute("usuario", usuario);
 
-        // TODO, popular página grupo
+        String requestPathSt = request.getRequestURI().toLowerCase();
+        String[] nicknameArr = requestPathSt.split("/");
+
+        boolean grupoValido = false;
+
+        Optional<Grupo> grupoRootOpt = grupoRepository.findByNickname(nicknameArr[1]);
+        if(grupoRootOpt.isPresent()) {
+            Grupo grupoRoot = grupoRootOpt.get();
+            grupoValido = grupoRoot.isGrupoRoot() && !parentescoInvalido(grupoRoot, nicknameArr);
+        }
+
+        if(grupoValido) {
+            Optional<Grupo> grupoAtualOpt = grupoRepository.findByNickname(nicknameArr[nicknameArr.length - 1]);
+            if (grupoAtualOpt.isPresent()) {
+                Grupo grupoAtual = grupoAtualOpt.get();
+                map.addAttribute("grupo", grupoAtual);
+            }
+        } else {
+            map.put("error", "Grupo não foi encontrado!");
+        }
 
         return "grupo";
+    }
+
+    /*
+        Verificar o parentesco dos subgrupos
+     */
+    public boolean parentescoInvalido(Grupo grupoRoot, String[] sequenciaNickArr)
+    {
+        boolean parenteCkeckFalhou = false;
+        Grupo grupoInsta = grupoRoot;
+        for(int i = 0; i<sequenciaNickArr.length; i++)
+        {
+            String nicknameNow = sequenciaNickArr[i];
+            if(nicknameNow==null || nicknameNow.length()==0) {
+                continue;
+            }
+            if(i==1) {
+                // ignorar o primeiro, ja verificou antes
+                continue;
+            }
+            Grupo sub = null;
+            for(Grupo grupoNow : grupoInsta.subGrupos) {
+                if(nicknameNow.equals(grupoNow.nickname.toLowerCase())) {
+                    sub = grupoNow;
+                    break;
+                }
+            }
+            if (sub != null) {
+                grupoInsta = sub;
+            } else {
+                parenteCkeckFalhou = true;
+                break;
+            }
+        }
+        return parenteCkeckFalhou;
     }
 
     // http://localhost:8080/projeto/criar?nome=teste&descricao=teste2

@@ -2,14 +2,79 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity3"> 
    <head> 
       <title>
-         Hello World!
+         Grupo
       </title> 
    </head>
+   <script>
+   function goto_url(pathName) {
+      var url = window.location.href;
+      if(!url.endsWith("/")) {
+         url = url + "/";
+      }
+      url = url + pathName;
+      window.location.href = url;
+   }
+   </script>
    <body> 
-      <h1 th:inline="text">Grupo, Hello [[${#httpServletRequest.remoteUser}]]!</h1>
-      <p th:text="${session.path}" th:unless="${session == null}">[...]</p>
+      <h1 th:inline="text">Hello [[${usuario.nome}]]!</h1>
       <form th:action="@{/logout}" method="post">
-         <input type="submit" value="Sign Out"/> 
-         </form>
+         <input type="submit" value="Sign Out"/>
+      </form>
+
+      <h2 th:text="${error}" th:unless="${error == null}">Menssagem de error.</h2>
+	  
+	  <div th:unless="${error != null}">
+
+      <h2>Detalhes do Grupo</h2>
+      Nome: <div th:text="${grupo.nome}">Grupo Nome</div><br/>
+      Id: <div th:text="${grupo.id}">Grupo Id</div><br/>
+      Nickname: <div th:text="${grupo.nickname}">Grupo Nickname</div><br/>
+	  Descricao: <div th:text="${grupo.descricao}">Grupo descricao</div><br/>
+	  Admin: <div th:text="${grupo.admin.usuario.nome}">Grupo admin</div><br/>
+	  Tipo: <div th:text="${grupo.tipo}">Grupo tipo</div><br/>
+	  
+	  <h2>Participantes</h2>
+      <table>
+         <thead>
+         <tr>
+            <th> Nome </th>
+            <th> Bio </th>
+         </tr>
+         </thead>
+         <tbody>
+         <tr th:if="${grupo.participantes.empty}">
+            <td colspan="2"> Sem Participantes </td>
+         </tr>
+         <tr th:each="participante : ${grupo.participantes}">
+            <td><a th:href="@{/p/{path}(path=${participante.usuario.getUsername()})}"><span th:text="${participante.usuario.nome}"> Nome </span></a></td>
+            <td><span th:text="${participante.bio}"> Bio </span></td>
+         </tr>
+         </tbody>
+      </table>
+	  
+      <h2>Sub Grupos</h2>
+      <table>
+         <thead>
+         <tr>
+            <th> Grupo </th>
+            <th> Admin </th>
+         </tr>
+         </thead>
+         <tbody>
+         <tr th:if="${grupo.subGrupos.empty}">
+            <td colspan="2"> Sem sub Grupos </td>
+         </tr>
+         <tr th:each="grupoNow : ${grupo.subGrupos}">
+            <td><a th:onclick="goto_url([[${grupoNow.nickname}]]);event.preventDefault();" href="#"><span th:text="${grupoNow.nome}"> Grupo Nome </span></a></td>
+            <td><span th:text="${grupoNow.admin.usuario.nome}"> Admin </span></td>
+         </tr>
+         </tbody>
+      </table>
+	</div>
+      <br/><br/>
+      <form>
+         <input type="button" value="Voltar" onclick="history.back()">
+      </form>
+
    </body> 
 <html> 
