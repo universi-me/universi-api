@@ -19,9 +19,14 @@ public class Competencia {
     @Column(name = "nivel")
     private Nivel nivel;
 
-    public Competencia(String nome, String descricao) {
+
+    public Competencia() {
+    }
+
+    public Competencia(String nome, String descricao, Nivel nivel) {
         this.nome = nome;
         this.descricao = descricao;
+        this.nivel = nivel;
     }
 
     public Long getId() {
@@ -51,4 +56,15 @@ public class Competencia {
     public Nivel getNivel() { return nivel; }
 
     public void setNivel(Nivel nivel) { this.nivel = nivel; }
+
+    public boolean equals(Object obj) {
+        if(!(obj instanceof Competencia)) return false;
+        Competencia competencia = (Competencia) obj;
+
+        return this.nome.equals(competencia.getNome()) && this.descricao.equals(competencia.getDescricao())
+                 && this.nivel.equals(competencia.getNivel());
+
+
+
+    }
 }
