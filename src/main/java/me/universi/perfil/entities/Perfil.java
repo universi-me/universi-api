@@ -59,6 +59,10 @@ public class Perfil {
         this.links = links;
     }
 
+    public Perfil(){
+
+    }
+
     public Long getId() {
         return id;
     }
