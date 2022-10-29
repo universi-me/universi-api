@@ -2,20 +2,48 @@ package me.universi;
 
 import me.universi.competencia.entities.Competencia;
 import me.universi.competencia.repositories.CompetenciaRepository;
+import me.universi.grupo.entities.Grupo;
+import me.universi.grupo.enums.GrupoTipo;
+import me.universi.grupo.repositories.GrupoRepository;
+import me.universi.perfil.entities.Perfil;
 import me.universi.usuario.entities.Usuario;
+import me.universi.usuario.enums.Autoridade;
 import me.universi.usuario.repositories.UsuarioRepository;
 import me.universi.perfil.repositories.PerfilRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.format.support.FormattingConversionService;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+import org.springframework.web.servlet.resource.PathResourceResolver;
+import org.springframework.web.servlet.resource.ResourceUrlProvider;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import javax.swing.text.html.Option;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Optional;
 
 @SpringBootApplication
 @ImportResource({"classpath:spring-security.xml"})
-@RestController
+@Controller
 public class Sys{
 
     @Autowired
@@ -24,7 +52,11 @@ public class Sys{
     public UsuarioRepository usuarioRepository;
     @Autowired
     public CompetenciaRepository competenciaRepository;
+    @Autowired
+    public GrupoRepository grupoRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public static void main(String [] args)
     {
@@ -33,15 +65,89 @@ public class Sys{
     }
 
     @GetMapping("/")
-    String hello() {
+    String index(HttpServletRequest request, HttpSession session, ModelMap map)
+    {
+        return "index";
+    }
 
-        Usuario userNew = new Usuario("User name", "test@email.com", "senha");
+    public Perfil random_perfil(String nome)
+    {
+        Usuario userNew = new Usuario(nome, "test@email.com", passwordEncoder.encode("senha"));
+        userNew.setAutoridade(Autoridade.ROLE_USER);
         usuarioRepository.save(userNew);
-        Competencia competenciaNew = new Competencia("Java","Sou top em java");
+
+        userNew.setNome(userNew.getNome()+"_"+userNew.getId());
+
+        Competencia competenciaNew = new Competencia();
+        competenciaNew.setNome("Java - admin"+userNew.getId());
+        competenciaNew.setDescricao("Sou top em java - admin"+userNew.getId());
         competenciaRepository.save(competenciaNew);
 
+        Competencia competenciaNew1 = new Competencia();
+        competenciaNew1.setNome("Java - admin 1"+userNew.getId());
+        competenciaNew1.setDescricao("Sou top em java - admin 1"+userNew.getId());
+        competenciaRepository.save(competenciaNew1);
+
+        Perfil admin_perfil = new Perfil();
+        admin_perfil.setUsuario(userNew);
+        admin_perfil.setBio("Bio - admin_perfil"+userNew.getId());
+
+        Collection<Competencia> competencias = new ArrayList<Competencia>();
+        competencias.add(competenciaNew);
+        competencias.add(competenciaNew1);
+        admin_perfil.setCompetencias(competencias);
 
 
-        return "Ola Mundo!";
+        return admin_perfil;
+    }
+
+    @GetMapping("/popular")
+    String popular()
+    {
+        Optional<Grupo> ufpb_grupo = grupoRepository.findByNickname("ufpb");
+
+        if(ufpb_grupo.isPresent()) {
+            return "redirect:/";
+        }
+
+        Perfil admin_perfil = random_perfil("perfil_admin");
+        perfilRepository.save(admin_perfil);
+
+        Perfil perfil_1 = random_perfil("perfil_1");
+        perfilRepository.save(perfil_1);
+
+        Perfil perfil_2 = random_perfil("perfil_2");
+        perfilRepository.save(perfil_2);
+
+
+        Grupo novoGrupo = new Grupo();
+        novoGrupo.setNickname("ufpb");
+        novoGrupo.setTipo(GrupoTipo.INSTITUICAO);
+        novoGrupo.setGrupoRoot(true);
+        novoGrupo.setAdmin(admin_perfil);
+        novoGrupo.setDescricao("Grupo da Instituição da UFPB");
+        novoGrupo.setNome("UFPB");
+
+        Collection<Perfil> participantes = new ArrayList<Perfil>();
+        participantes.add(perfil_1);
+        participantes.add(perfil_2);
+        novoGrupo.setParticipantes(participantes);
+
+        Collection<Grupo> subs = new ArrayList<Grupo>();
+
+        Grupo novoGrupo2 = new Grupo();
+        novoGrupo2.setTipo(GrupoTipo.CAMPUS);
+        novoGrupo2.setNickname("campus4");
+        novoGrupo2.setAdmin(admin_perfil);
+        novoGrupo2.setDescricao("Grupo do Campus IV");
+        novoGrupo2.setNome("Campus IV");
+
+        subs.add(novoGrupo2);
+
+        novoGrupo.subGrupos = subs;
+
+        grupoRepository.save(novoGrupo);
+
+        return "redirect:/";
     }
 }
