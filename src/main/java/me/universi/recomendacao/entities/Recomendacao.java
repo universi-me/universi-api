@@ -29,6 +29,7 @@ public class Recomendacao {
         this.competencia = competencia;
         this.descricao = descricao;
     }
+    public Recomendacao() {}
 
     public Perfil getOrigem() {
         return origem;
