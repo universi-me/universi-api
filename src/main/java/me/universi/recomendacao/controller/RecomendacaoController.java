@@ -38,11 +38,14 @@ public class RecomendacaoController {
     @ResponseBody
     public String create(@RequestParam("id") Long id, @RequestParam("descricao") String descricao) {
         try{
-            Recomendacao recomendacao = recomendacaoService.findById(id);
             //TODO - CRIAR VALIDAÇÃO DE PARÂMETROS
-            recomendacao.setDescricao(descricao);
-            recomendacaoService.save(recomendacao);
-            return "Recomendacao atualizada: " + recomendacao.toString();
+            Recomendacao recomendacao = recomendacaoService.findById(id);
+            if(recomendacao != null){
+                recomendacao.setDescricao(descricao);
+                recomendacaoService.update(recomendacao);
+                return "Recomendacao atualizada: " + recomendacao.toString();
+            }
+            return "Recomendação não encontrada";
         }catch(EntityNotFoundException e){
             return "Recomendação não encontrada";
         }
@@ -53,7 +56,7 @@ public class RecomendacaoController {
     @ResponseBody
     public String remove(@RequestParam("id") Long id) {
         try {
-            Recomendacao recomendacao = recomendacaoService.findById(id).get();
+            Recomendacao recomendacao = recomendacaoService.findById(id);
             if (recomendacao != null) {
                 recomendacaoService.delete(recomendacao);
                 return "Recomendação Removida: " + recomendacao.toString();
@@ -69,8 +72,12 @@ public class RecomendacaoController {
     @ResponseBody
     public Recomendacao get(@PathVariable Long id) {
         try {
-            Recomendacao recomendacao = recomendacaoService.findById(id).get();
-            return recomendacao;
+            Recomendacao recomendacao = recomendacaoService.findById(id);
+            if(recomendacao != null){
+                return recomendacao;
+            }else{
+                return null;
+            }
         } catch (EntityNotFoundException e) {
             return null;
         }
@@ -80,7 +87,7 @@ public class RecomendacaoController {
     @RequestMapping("/recomendacao/listar")
     @ResponseBody
     public List<Recomendacao> getlist() {
-        List<Recomendacao> recs = recomendcaoService.findAll();
+        List<Recomendacao> recs = recomendacaoService.findAll();
         return recs;
     }
 }
