@@ -27,7 +27,7 @@ public class Perfil {
     private Link link;
     @ManyToMany(cascade = { CascadeType.ALL })
     @JoinTable(
-            name = "oerfil_competencia",
+            name = "perfil_competencia",
             joinColumns = { @JoinColumn(name = "id_perfil") },
             inverseJoinColumns = { @JoinColumn(name = "id_competencia") }
     )
