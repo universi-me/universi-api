@@ -27,52 +27,70 @@ public class CompetenciaController {
     @Autowired
     public CompetenciaRepository competenciaRepository;
 
-    // http://localhost:8080/competencia/criar?nome=teste&descricao=teste2&nivel=NENHUMA_EXPERIENCIA
+    // http://localhost:80/competencia/criar?nome=teste&descricao=teste2&nivel=NENHUMA_EXPERIENCIA
     @RequestMapping("/competencia/criar")
-    public String create(@RequestParam("nome") String nome, @RequestParam("descricao") String descricao, @RequestParam("nivel") Nivel nivel) {
-        Competencia competenciaNew = new Competencia(nome, descricao, nivel);
-        competenciaRepository.save(competenciaNew);
-        return "Competencia Criada: " + competenciaNew.toString();
+    public String create(@RequestParam("nome") String nome, @RequestParam("descricao") String descricao, @RequestParam("nivel") String nivel)
+    {
+        try
+        {
+            Nivel nivel_ = Nivel.valueOf(nivel); // string para enum
+            Competencia competenciaNew = new Competencia(nome, descricao, nivel_); // nova competência
+            competenciaRepository.save(competenciaNew);
+            return "Competencia Criada: " + competenciaNew.toString();
+        }
+        catch (IllegalArgumentException e)
+        {
+            return "Nível '"+nivel+"' não existe";
+        }
     }
 
-    // http://localhost:8080/competencia/atualizar?id=3&nome=teste&descricao=teste2&nivel=NENHUMA_EXPERIENCIA
+    // http://localhost:80/competencia/atualizar?id=3&nome=teste&descricao=teste2&nivel=NENHUMA_EXPERIENCIA
     @RequestMapping("/competencia/atualizar")
-    public String update(@RequestParam("id") Long id, @RequestParam("nome") String nome, @RequestParam("descricao") String descricao, @RequestParam("nivel") Nivel nivel) {
+    public String update(@RequestParam("id") Long id, @RequestParam("nome") String nome, @RequestParam("descricao") String descricao, @RequestParam("nivel") String nivel) {
+
         Competencia comp,compOld;
+
         try {
+            Nivel nivel_ = Nivel.valueOf(nivel);
             comp = competenciaRepository.findById(id).get();
-            compOld = competenciaRepository.findById(id).get();
+            compOld = new Competencia(comp.getNome(), comp.getDescricao(), comp.getNivel());
             if (comp != null) { // verifica se a competencia existe
-                Boolean nivelOk = false;
+
                 for (Nivel n : Nivel.values()) { // verifica se nivel existe
-                    if (nivel.equals(n)){
-                        nivelOk = true; // nivel existe
+                    System.out.println(n);
+                    if (nivel_.equals(n) && !nivel_.equals(comp.getNivel())){
+                        comp.setNivel(nivel_);
+//                        System.out.println("novo nível");
                         break; // sai do loop
                     }
                 }
 
-                if(nivelOk)
-                    comp.setNivel(nivel);
-
-                if(nome != null)
+                if(nome != null && !nome.equals(comp.getNome())) {
+//                    System.out.println("novo nome");
                     comp.setNome(nome);
+                }
 
-                if (descricao != null)
+                if (descricao != null && !descricao.equals(comp.getDescricao())) {
+//                    System.out.println("nova descrição");
                     comp.setDescricao(descricao);
+                }
 
                 competenciaRepository.save(comp);
             }
         } catch (EntityNotFoundException e) {
             return "Competencia não encontrada";
+        } catch (IllegalArgumentException e) {
+            return "Nível '"+nivel+"' não existe";
         }
+
         if(comp.equals(compOld))
-            return "Competencia não foi modificada pelo usuario" + comp.toString();
+            return "Competencia não foi modificada pelo usuario: " + comp.toString();
 
         return "Competencia atualizada: " + comp.toString();
     }
 
 
-    // http://localhost:8080/competencia/remover?id=1
+    // http://localhost:80/competencia/remover?id=1
     @RequestMapping("/competencia/remover")
     public String remove(@RequestParam("id") Long id) {
         try {
@@ -87,7 +105,7 @@ public class CompetenciaController {
         return "Falha ao remover";
     }
 
-    // http://localhost:8080/competencia/obter?id=1
+    // http://localhost:80/competencia/obter?id=1
     @RequestMapping("/competencia/obter")
     public Competencia get(@RequestParam("id") Long id) {
         try {
@@ -98,7 +116,7 @@ public class CompetenciaController {
         }
     }
 
-    // http://localhost:8080/competencia/listar
+    // http://localhost:80/competencia/listar
     @RequestMapping("/competencia/listar")
     public List<Competencia> getlist() {
         List<Competencia> comps = competenciaRepository.findAll();
