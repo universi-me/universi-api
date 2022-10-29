@@ -29,6 +29,7 @@ public class CompetenciaController {
 
     // http://localhost:80/competencia/criar?nome=teste&descricao=teste2&nivel=NENHUMA_EXPERIENCIA
     @RequestMapping("/competencia/criar")
+    @ResponseBody
     public String create(@RequestParam("nome") String nome, @RequestParam("descricao") String descricao, @RequestParam("nivel") String nivel)
     {
         try
@@ -46,6 +47,7 @@ public class CompetenciaController {
 
     // http://localhost:80/competencia/atualizar?id=3&nome=teste&descricao=teste2&nivel=NENHUMA_EXPERIENCIA
     @RequestMapping("/competencia/atualizar")
+    @ResponseBody
     public String update(@RequestParam("id") Long id, @RequestParam("nome") String nome, @RequestParam("descricao") String descricao, @RequestParam("nivel") String nivel) {
 
         Competencia comp,compOld;
@@ -92,6 +94,7 @@ public class CompetenciaController {
 
     // http://localhost:80/competencia/remover?id=1
     @RequestMapping("/competencia/remover")
+    @ResponseBody
     public String remove(@RequestParam("id") Long id) {
         try {
             Competencia comp = competenciaRepository.findById(id).get();
@@ -107,6 +110,7 @@ public class CompetenciaController {
 
     // http://localhost:80/competencia/obter?id=1
     @RequestMapping("/competencia/obter")
+    @ResponseBody
     public Competencia get(@RequestParam("id") Long id) {
         try {
             Competencia comp = competenciaRepository.findById(id).get();
@@ -118,6 +122,7 @@ public class CompetenciaController {
 
     // http://localhost:80/competencia/listar
     @RequestMapping("/competencia/listar")
+    @ResponseBody
     public List<Competencia> getlist() {
         List<Competencia> comps = competenciaRepository.findAll();
         return comps;
