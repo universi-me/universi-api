@@ -56,10 +56,18 @@ public class Grupo {
     @Enumerated(EnumType.STRING)
     public GrupoTipo tipo;
 
+    // halilidade do grupo ser acessado diretamente pelo url. (pai de todos os grupos)
+    @Column(name = "gruporoot")
+    public boolean grupoRoot;
+
+    // grupo pode criar subGrupos
+    @Column(name = "podeCriarGrupo")
+    public boolean podeCriarGrupo;
+
     public Grupo() {
     }
 
-    public Grupo(String nickname, String name, String descricao, Perfil admin, Collection<Perfil> participantes, GrupoTipo tipo, Collection<Grupo> subGrupos)
+    public Grupo(String nickname, String name, String descricao, Perfil admin, Collection<Perfil> participantes, GrupoTipo tipo, Collection<Grupo> subGrupos, boolean grupoRoot, boolean podeCriarGrupo)
     {
         this.nickname = nickname;
         this.nome = name;
@@ -68,6 +76,8 @@ public class Grupo {
         this.participantes = participantes;
         this.tipo = tipo;
         this.subGrupos = subGrupos;
+        this.grupoRoot = grupoRoot;
+        this.podeCriarGrupo = podeCriarGrupo;
     }
 
     public Long getId() {
@@ -128,6 +138,22 @@ public class Grupo {
 
     public void setSubGrupos(Collection<Grupo> subGrupos) {
         this.subGrupos = subGrupos;
+    }
+
+    public boolean isGrupoRoot() {
+        return grupoRoot;
+    }
+
+    public void setGrupoRoot(boolean grupoRoot) {
+        this.grupoRoot = grupoRoot;
+    }
+
+    public boolean isPodeCriarGrupo() {
+        return podeCriarGrupo;
+    }
+
+    public void setPodeCriarGrupo(boolean podeCriarGrupo) {
+        this.podeCriarGrupo = podeCriarGrupo;
     }
 
     @Override
