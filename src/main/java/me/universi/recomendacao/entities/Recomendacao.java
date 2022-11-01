@@ -12,10 +12,10 @@ public class Recomendacao {
     @Column(name = "id_recomendacao")
     private Long id;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "recomendacoesFeitas")
+    @JoinColumn(name = "origem")
     private Perfil origem;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "recomendacoesRecebidas")
+    @JoinColumn(name = "destino")
     private Perfil destino;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_competencia")
