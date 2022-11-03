@@ -1,6 +1,8 @@
 package me.universi.recomendacao.service;
 
+import me.universi.competencia.entities.Competencia;
 import me.universi.recomendacao.entities.Recomendacao;
+import me.universi.recomendacao.exceptions.RecomendacaoInvalidaException;
 import me.universi.recomendacao.repositories.RecomendacaoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,24 +14,20 @@ import java.util.Optional;
 public class RecomendacaoService {
     @Autowired
     private RecomendacaoRepository recomendacaoRepository;
+
     public Recomendacao findById(Long id) {
         Optional <Recomendacao> recomendacaoOptional = recomendacaoRepository.findById(id);
         if(recomendacaoOptional.isPresent()){
             return recomendacaoOptional.get();
         }else{
             return null;
-            //TODO - IMPLEMENTAR EXCEPTION AO NÃO ENCONTRAR
         }
     }
-
-    public void save(Recomendacao recomendacao) {
-        //TODO - VALIDAÇÃO
-        if(this.validar()){
+    public void save(Recomendacao recomendacao) throws RecomendacaoInvalidaException {
+        if(this.validar(recomendacao)){
             recomendacaoRepository.save(recomendacao);
         }
-        //TODO - IMPLEMENTAR EXCEPTIONS
     }
-
     public List<Recomendacao> findAll() {
         return recomendacaoRepository.findAll();
     }
@@ -38,16 +36,51 @@ public class RecomendacaoService {
         recomendacaoRepository.delete(recomendacao);
     }
 
-    public boolean validar(){
-        //TODO - VALIDAR ATRIBUTOS
-        return true;
+    public boolean validarPerfilOrigem(Recomendacao recomendacao) throws RecomendacaoInvalidaException {
+        if(recomendacao.getOrigem() == null){
+            throw new RecomendacaoInvalidaException("Perfil de origem inválido: " + recomendacao.getOrigem().toString());
+        }else{
+            recomendacao.getOrigem().getId();
+            return true;
+        }
     }
-
-    public void update(Recomendacao recomendacao) {
-        //TODO - VALIDAÇÃO
-        if(this.validar()){
+    public boolean validarPerfilDestino(Recomendacao recomendacao) throws RecomendacaoInvalidaException {
+        if(recomendacao.getDestino() == null){
+            throw new RecomendacaoInvalidaException("O Perfil de destino da recomendação encontra-se vazio: " + recomendacao.getDestino().toString());
+        }else{
+            recomendacao.getDestino().getId();
+            return true;
+        }
+    }
+    public boolean validarCompetenciaValida(Recomendacao recomendacao) throws RecomendacaoInvalidaException {
+        if(recomendacao.getCompetencia() == null) {
+            throw new RecomendacaoInvalidaException("A competência da recomendação não foi escolhida: " + recomendacao.getCompetencia().toString());
+        }else{
+            recomendacao.getCompetencia().getId();
+            boolean competenciaValida = false;
+            for(Competencia competencia: recomendacao.getDestino().getCompetencias()){
+                if(competencia.getId() == recomendacao.getCompetencia().getId()){
+                    competenciaValida = !competenciaValida;
+                }
+            }
+            if(!competenciaValida){
+                throw new RecomendacaoInvalidaException("A competência não está registrada: " + recomendacao.getCompetencia().toString());
+            }
+        }return true;
+    }
+    public boolean validarDescricao(String descricao) throws RecomendacaoInvalidaException {
+        if(descricao.isEmpty() || descricao == null){
+            throw new RecomendacaoInvalidaException("A destrição da recomendação não é válida: " + descricao);
+        }return true;
+    }
+    public void update(Recomendacao recomendacao) throws RecomendacaoInvalidaException {
+        if(this.validar(recomendacao)){
             recomendacaoRepository.save(recomendacao);
         }
-        //TODO - IMPLEMENTAR EXCEPTIONS
+    }
+    private boolean validar(Recomendacao recomendacao) throws RecomendacaoInvalidaException {
+        if(!validarPerfilOrigem(recomendacao) || !validarPerfilDestino(recomendacao) || !validarDescricao(recomendacao.getDescricao()) || !validarCompetenciaValida(recomendacao)){
+            return false;
+        }return true;
     }
 }
