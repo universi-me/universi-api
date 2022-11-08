@@ -3,6 +3,7 @@ package me.universi.recomendacao.controller;
 
 import me.universi.grupo.entities.Grupo;
 import me.universi.recomendacao.entities.Recomendacao;
+import me.universi.recomendacao.exceptions.RecomendacaoInvalidaException;
 import me.universi.usuario.entities.Usuario;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -30,8 +31,13 @@ public class RecomendacaoController {
         Recomendacao recomendacoNew = new Recomendacao();
         //TODO - SETAR ATRIBUTOS NO OBJETO
         //TODO - TRATAMENTO DE EXCEÇÕES
-        recomendacaoService.save(recomendacoNew);
-        return "Recomendacao criada: " + recomendacoNew.toString();
+        try {
+            recomendacaoService.save(recomendacoNew);
+            return "Recomendacao criada: " + recomendacoNew.toString();
+        } catch (RecomendacaoInvalidaException e) {
+            return e.getMensagem();
+        }
+
     }
     // http://localhost:8080/recomendacao/atualizar?id=5&4&descricao=testeDescricao
     @RequestMapping("/recomendacao/atualizar")
@@ -48,6 +54,8 @@ public class RecomendacaoController {
             return "Recomendação não encontrada";
         }catch(EntityNotFoundException e){
             return "Recomendação não encontrada";
+        } catch (RecomendacaoInvalidaException e) {
+            return e.getMensagem();
         }
     }
 
