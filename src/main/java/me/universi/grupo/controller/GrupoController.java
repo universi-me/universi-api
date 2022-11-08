@@ -1,10 +1,12 @@
 package me.universi.grupo.controller;
 
 import me.universi.grupo.entities.Grupo;
-import me.universi.grupo.repositories.GrupoRepository;
-import me.universi.usuario.entities.Usuario;
-import me.universi.usuario.repositories.UsuarioRepository;
+import me.universi.grupo.enums.GrupoTipo;
+import me.universi.grupo.services.GrupoService;
+import me.universi.perfil.entities.Perfil;
+import me.universi.usuario.services.SecurityUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
@@ -12,41 +14,45 @@ import org.springframework.web.bind.annotation.*;
 import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 @Controller
 public class GrupoController
 {
     @Autowired
-    public GrupoRepository grupoRepository;
+    public GrupoService grupoService;
 
     @Autowired
-    public UsuarioRepository usuarioRepository;
+    public SecurityUserDetailsService usuarioService;
 
     // mapaear tudo exceto, /css, /js, /img, /favicon.ico, comflita com static resources do Thymeleaf
     @GetMapping(value = {"{url:(?!css$|js$|img$|favicon.ico$).*}/**"})
     public String grupo_handler(HttpServletRequest request, HttpSession session, ModelMap map)
     {
         String username = request.getRemoteUser();
-        Usuario usuario = usuarioRepository.findByEmail(username).get();
-        map.addAttribute("usuario", usuario);
+
+        try {
+            UserDetails usuario = usuarioService.loadUserByUsername(username);
+            map.addAttribute("usuario", usuario);
+        }catch (Exception e) {
+            map.put("error", e.getMessage());
+            return "grupo";
+        }
 
         String requestPathSt = request.getRequestURI().toLowerCase();
         String[] nicknameArr = requestPathSt.split("/");
 
         boolean grupoValido = false;
 
-        Optional<Grupo> grupoRootOpt = grupoRepository.findByNickname(nicknameArr[1]);
-        if(grupoRootOpt.isPresent()) {
-            Grupo grupoRoot = grupoRootOpt.get();
+        Grupo grupoRoot = grupoService.findByNickname(nicknameArr[1]);
+        if(grupoRoot != null) {
             grupoValido = grupoRoot.isGrupoRoot() && !parentescoInvalido(grupoRoot, nicknameArr);
         }
 
         if(grupoValido) {
-            Optional<Grupo> grupoAtualOpt = grupoRepository.findByNickname(nicknameArr[nicknameArr.length - 1]);
-            if (grupoAtualOpt.isPresent()) {
-                Grupo grupoAtual = grupoAtualOpt.get();
+            Grupo grupoAtual = grupoService.findByNickname(nicknameArr[nicknameArr.length - 1]);
+            if (grupoAtual != null) {
                 map.addAttribute("grupo", grupoAtual);
             }
         } else {
@@ -93,11 +99,20 @@ public class GrupoController
     // http://localhost:8080/projeto/criar?nome=teste&descricao=teste2
     @RequestMapping("/grupo/criar")
     @ResponseBody
-    public String create(@RequestParam("nome") String nome, @RequestParam("descricao") String descricao)
+    public Grupo create(HttpServletRequest request, @RequestParam("nickname") String nickname, @RequestParam("nome") String nome, @RequestParam("descricao") String descricao, @RequestParam("tipo") GrupoTipo tipo)
     {
         Grupo grupoNew = new Grupo();
-        grupoRepository.save(grupoNew);
-        return "Grupo Criado: "+ grupoNew.toString();
+        grupoNew.setNickname(nickname);
+        grupoNew.setNome(nome);
+        grupoNew.setDescricao(descricao);
+        grupoNew.setTipo(tipo);
+
+        //String username = request.getRemoteUser();
+        //UserDetails usuario = usuarioService.loadUserByUsername(username);
+        //grupoNew.setAdmin();
+
+        grupoService.save(grupoNew);
+        return grupoNew;
     }
 
     // http://localhost:8080/projeto/remover?id=1
@@ -106,9 +121,9 @@ public class GrupoController
     public String remove(@RequestParam("id") Long id)
     {
         try {
-            Grupo proj = grupoRepository.findById(id).get();
+            Grupo proj = grupoService.findById(id);
             if (proj != null) {
-                grupoRepository.delete(proj);
+                grupoService.delete(proj);
                 return "Grupo Removido: " + proj.toString();
             }
         }catch (EntityNotFoundException e) {
@@ -117,13 +132,13 @@ public class GrupoController
         return "Falha ao remover";
     }
 
-    // http://localhost:8080/projeto/obter?id=1
+    // http://localhost:8080/projeto/obter/1
     @RequestMapping("/grupo/obter/{id}")
     @ResponseBody
     public Grupo get(@PathVariable Long id)
     {
         try {
-            Grupo proj = grupoRepository.findById(id).get();
+            Grupo proj = grupoService.findById(id);
             return proj;
         }catch (EntityNotFoundException e) {
             return null;
@@ -135,7 +150,7 @@ public class GrupoController
     @ResponseBody
     public List<Grupo> getlist()
     {
-        List<Grupo> ret = grupoRepository.findAll();
+        List<Grupo> ret = grupoService.findAll();
         return ret;
     }
 }
