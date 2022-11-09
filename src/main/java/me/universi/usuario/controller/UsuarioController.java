@@ -53,21 +53,24 @@ public class UsuarioController
         try {
             Usuario user = new Usuario();
 
-            user.setEmail((String)body.get("username"));
+            user.setNome((String)body.get("username"));
+            user.setEmail((String)body.get("email"));
             user.setSenha(usuarioService.codificarSenha((String)body.get("password")));
-            user.setNome((String)body.get("name"));
 
+            if (user.getNome()==null || user.getNome().length()==0) {
+                throw new Exception("Verifique o campo Usuário!");
+            }
+            if (user.getNome().contains(" ")) {
+                throw new Exception("O campo Usuário não pode conter espaços!");
+            }
             if (user.getEmail()==null || user.getEmail().length()==0 || !user.getEmail().contains("@")) {
                 throw new Exception("Verifique o campo Email!");
-            }
-            if (user.getNome()==null || user.getNome().length()==0) {
-                throw new Exception("Verifique o campo Nome!");
             }
             if (user.getSenha()==null || user.getSenha().length()==0) {
                 throw new Exception("Verifique o campo Senha!");
             }
-            if(usuarioService.usernameExiste(user.getEmail())) {
-                throw new Exception("Usuário com email \""+user.getEmail()+"\" já esta cadastrado!");
+            if(usuarioService.usernameExiste(user.getUsername())) {
+                throw new Exception("Usuário \""+user.getUsername()+"\" já esta cadastrado!");
             }
 
             usuarioService.createUser(user);
