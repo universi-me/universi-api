@@ -29,7 +29,7 @@ public class Usuario implements UserDetails {
     @Column(name = "senha")
     private String senha;
 
-    @OneToOne
+    @OneToOne(mappedBy = "usuario")
     private Perfil perfil;
 
     @JsonIgnore
