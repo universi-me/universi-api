@@ -24,9 +24,6 @@ public class GrupoController
     @Autowired
     public GrupoService grupoService;
 
-    @Autowired
-    public SecurityUserDetailsService usuarioService;
-
     // mapaear tudo exceto, /css, /js, /img, /favicon.ico, comflita com static resources do Thymeleaf
     @GetMapping(value = {"{url:(?!css$|js$|img$|favicon.ico$).*}/**"})
     public String grupo_handler(HttpServletRequest request, HttpSession session, ModelMap map) {
@@ -51,7 +48,7 @@ public class GrupoController
             map.put("error", "Grupo não foi encontrado!");
         }
 
-        return "grupo";
+        return "grupo/grupo";
     }
 
     /*
@@ -91,7 +88,7 @@ public class GrupoController
     // http://localhost:8080/projeto/criar?nome=teste&descricao=teste2
     @RequestMapping("/grupo/criar")
     @ResponseBody
-    public Grupo create(HttpServletRequest request, @RequestParam("nickname") String nickname, @RequestParam("nome") String nome, @RequestParam("descricao") String descricao, @RequestParam("tipo") GrupoTipo tipo)
+    public Grupo create(HttpServletRequest request, HttpSession session, @RequestParam("nickname") String nickname, @RequestParam("nome") String nome, @RequestParam("descricao") String descricao, @RequestParam("tipo") GrupoTipo tipo)
     {
         Grupo grupoNew = new Grupo();
         grupoNew.setNickname(nickname);
@@ -99,9 +96,9 @@ public class GrupoController
         grupoNew.setDescricao(descricao);
         grupoNew.setTipo(tipo);
 
-        //String username = request.getRemoteUser();
-        //UserDetails usuario = usuarioService.loadUserByUsername(username);
-        //grupoNew.setAdmin();
+        //Usuario usuario = (Usuario)session.getAttribute("usuario");
+        //Perfil perfil = usuario.getPerfil();
+        //grupoNew.setAdmin(perfil);
 
         grupoService.save(grupoNew);
         return grupoNew;
