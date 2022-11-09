@@ -18,7 +18,8 @@
 <div th:if="${param.error}">
    <p th:text="${session.error}" th:unless="${session == null}">[...]</p>
 </div>
-<div th:if="${param.logout}">You have been logged out.</div>
+<div th:if="${param.logout}"><p>A sua sessão foi encerrada.</p></div>
+<div th:if="${param.registrado}"><p th:text="${session.registrado}"></p></div>
 <form th:action="@{/login}" method="post">
       <div class="mb-3">
          <label for="username" class="form-label">Email:</label>
