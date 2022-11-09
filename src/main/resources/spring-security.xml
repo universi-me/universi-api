@@ -30,7 +30,7 @@
 		
 		<intercept-url pattern="/**" access="isAuthenticated()"/>
 		
-		<form-login login-page="/login" authentication-failure-url="/login?error"/>
+		<form-login login-page="/login" authentication-failure-url="/login?error" authentication-success-handler-ref="autenticacaoValidaHandler" />
 		<logout logout-success-url="/login?logout" />
 		
 		
@@ -40,6 +40,7 @@
 		</headers>
 	</http>
 
+	<beans:bean id="autenticacaoValidaHandler" class="me.universi.usuario.services.AutenticacaoValidaHandler" />
 
 	<beans:bean id="roleHierarchy" class="org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl">
 		<beans:property name="hierarchy">

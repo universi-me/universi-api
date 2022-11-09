@@ -4,6 +4,7 @@ import me.universi.grupo.entities.Grupo;
 import me.universi.grupo.enums.GrupoTipo;
 import me.universi.grupo.services.GrupoService;
 import me.universi.perfil.entities.Perfil;
+import me.universi.usuario.entities.Usuario;
 import me.universi.usuario.services.SecurityUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,17 +29,8 @@ public class GrupoController
 
     // mapaear tudo exceto, /css, /js, /img, /favicon.ico, comflita com static resources do Thymeleaf
     @GetMapping(value = {"{url:(?!css$|js$|img$|favicon.ico$).*}/**"})
-    public String grupo_handler(HttpServletRequest request, HttpSession session, ModelMap map)
-    {
-        String username = request.getRemoteUser();
-
-        try {
-            UserDetails usuario = usuarioService.loadUserByUsername(username);
-            map.addAttribute("usuario", usuario);
-        }catch (Exception e) {
-            map.put("error", e.getMessage());
-            return "grupo";
-        }
+    public String grupo_handler(HttpServletRequest request, HttpSession session, ModelMap map) {
+        map.addAttribute("usuario", session.getAttribute("usuario"));
 
         String requestPathSt = request.getRequestURI().toLowerCase();
         String[] nicknameArr = requestPathSt.split("/");

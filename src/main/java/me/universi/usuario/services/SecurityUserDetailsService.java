@@ -13,23 +13,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class SecurityUserDetailsService implements UserDetailsService
-{
+public class SecurityUserDetailsService implements UserDetailsService {
     @Autowired
     private UsuarioRepository userRepository;
 
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException
-    {
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<Usuario> usuario = userRepository.findByEmail(username);
         if (usuario.isPresent()) {
-
             return usuario.get();
         }
         throw new UsernameNotFoundException("Usuário não encontrado!");
     }
 
-    public void createUser(Usuario user) throws Exception
-    {
+    public void createUser(Usuario user) throws Exception {
         if (user==null) {
             throw new Exception("Usuario está vazio!");
         }
