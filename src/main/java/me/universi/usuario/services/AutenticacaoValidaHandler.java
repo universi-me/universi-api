@@ -1,5 +1,6 @@
 package me.universi.usuario.services;
 
+import me.universi.usuario.entities.Usuario;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,19 +16,26 @@ import java.security.Principal;
 public class AutenticacaoValidaHandler extends SavedRequestAwareAuthenticationSuccessHandler {
     @Autowired
     private SecurityUserDetailsService userDetailsManager;
-    @Autowired HttpSession session;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws ServletException, IOException {
+
+        HttpSession session = request.getSession(false);
+
         String username = "";
         if(authentication.getPrincipal() instanceof Principal) {
             username = ((Principal)authentication.getPrincipal()).getName();
         }else {
             username = ((UserDetails)authentication.getPrincipal()).getUsername();
         }
+        Usuario usuario = (Usuario)userDetailsManager.loadUserByUsername(username);
+
         // Salvar usuario na sessao
-        UserDetails usuario = userDetailsManager.loadUserByUsername(username);
         session.setAttribute("usuario", usuario);
+
+        // Set session inatividade do usuario em 10min
+        session.setMaxInactiveInterval(10*60);
+
         super.onAuthenticationSuccess(request, response, authentication);
     }
 }
