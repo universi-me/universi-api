@@ -62,7 +62,8 @@ public class UsuarioController
             session.setAttribute("error", e.getMessage());
             return "redirect:/registrar?error";
         }
-        return "redirect:/login";
+        session.setAttribute("registrado", "Usuário registrado com sucesso, efetue o login.");
+        return "redirect:/login?registrado";
     }
 
     private String getErrorMessage(HttpServletRequest request, String key)
