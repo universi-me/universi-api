@@ -5,6 +5,7 @@ import me.universi.competencia.repositories.CompetenciaRepository;
 import me.universi.grupo.entities.Grupo;
 import me.universi.grupo.enums.GrupoTipo;
 import me.universi.grupo.repositories.GrupoRepository;
+import me.universi.grupo.services.GrupoService;
 import me.universi.perfil.entities.Perfil;
 import me.universi.usuario.entities.Usuario;
 import me.universi.usuario.enums.Autoridade;
@@ -54,7 +55,7 @@ public class Sys{
     @Autowired
     public CompetenciaRepository competenciaRepository;
     @Autowired
-    public GrupoRepository grupoRepository;
+    public GrupoService grupoService;
 
     public static void main(String [] args)
     {
@@ -105,9 +106,9 @@ public class Sys{
     @GetMapping("/popular")
     String popular()
     {
-        Optional<Grupo> ufpb_grupo = grupoRepository.findByNickname("ufpb");
+        Grupo ufpb_grupo = grupoService.findByNickname("ufpb");
 
-        if(ufpb_grupo.isPresent()) {
+        if(ufpb_grupo != null) {
             return "redirect:/";
         }
 
@@ -120,7 +121,6 @@ public class Sys{
         Perfil perfil_2 = random_perfil("perfil_2");
         perfilRepository.save(perfil_2);
 
-
         Grupo novoGrupo = new Grupo();
         novoGrupo.setNickname("ufpb");
         novoGrupo.setTipo(GrupoTipo.INSTITUICAO);
@@ -129,12 +129,8 @@ public class Sys{
         novoGrupo.setDescricao("Grupo da Instituição da UFPB");
         novoGrupo.setNome("UFPB");
 
-        Collection<Perfil> participantes = new ArrayList<Perfil>();
-        participantes.add(perfil_1);
-        participantes.add(perfil_2);
-        novoGrupo.setParticipantes(participantes);
-
-        Collection<Grupo> subs = new ArrayList<Grupo>();
+        grupoService.adicionarParticipante(novoGrupo, perfil_1);
+        grupoService.adicionarParticipante(novoGrupo, perfil_1);
 
         Grupo novoGrupo2 = new Grupo();
         novoGrupo2.setTipo(GrupoTipo.CAMPUS);
@@ -143,11 +139,7 @@ public class Sys{
         novoGrupo2.setDescricao("Grupo do Campus IV");
         novoGrupo2.setNome("Campus IV");
 
-        subs.add(novoGrupo2);
-
-        novoGrupo.subGrupos = subs;
-
-        grupoRepository.save(novoGrupo);
+        grupoService.adicionarSubgrupo(novoGrupo, novoGrupo2);
 
         return "redirect:/";
     }
