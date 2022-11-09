@@ -1,6 +1,7 @@
 package me.universi.usuario.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import me.universi.perfil.entities.Perfil;
 import me.universi.usuario.enums.Autoridade;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -27,6 +28,9 @@ public class Usuario implements UserDetails {
     @JsonIgnore
     @Column(name = "senha")
     private String senha;
+
+    @OneToOne
+    private Perfil perfil;
 
     @JsonIgnore
     @Column(name = "usuario_expirado")
@@ -85,6 +89,14 @@ public class Usuario implements UserDetails {
 
     public void setSenha(String senha) {
         this.senha = senha;
+    }
+
+    public Perfil getPerfil() {
+        return perfil;
+    }
+
+    public void setPerfil(Perfil perfil) {
+        this.perfil = perfil;
     }
 
     public boolean isUsuario_expirado() {
