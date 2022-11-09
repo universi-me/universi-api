@@ -11,6 +11,7 @@ import me.universi.usuario.enums.Autoridade;
 import me.universi.usuario.repositories.UsuarioRepository;
 import me.universi.perfil.repositories.PerfilRepository;
 
+import me.universi.usuario.services.SecurityUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.SpringApplication;
@@ -49,14 +50,11 @@ public class Sys{
     @Autowired
     public PerfilRepository perfilRepository;
     @Autowired
-    public UsuarioRepository usuarioRepository;
+    public SecurityUserDetailsService usuarioService;
     @Autowired
     public CompetenciaRepository competenciaRepository;
     @Autowired
     public GrupoRepository grupoRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
     public static void main(String [] args)
     {
@@ -72,9 +70,12 @@ public class Sys{
 
     public Perfil random_perfil(String nome)
     {
-        Usuario userNew = new Usuario(nome, "test@email.com", passwordEncoder.encode("senha"));
-        userNew.setAutoridade(Autoridade.ROLE_USER);
-        usuarioRepository.save(userNew);
+        Usuario userNew = new Usuario(nome, "test@email.com", usuarioService.codificarSenha("senha"));
+        try {
+            usuarioService.createUser(userNew);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
         userNew.setNome(userNew.getNome()+"_"+userNew.getId());
 

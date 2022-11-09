@@ -9,16 +9,14 @@ import me.universi.usuario.services.SecurityUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
 public class UsuarioController
 {
-    @Autowired private SecurityUserDetailsService userDetailsManager;
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private SecurityUserDetailsService usuarioService;
 
     @GetMapping("/conta")
     public String conta() {
@@ -54,10 +52,25 @@ public class UsuarioController
     {
         try {
             Usuario user = new Usuario();
+
             user.setEmail((String)body.get("username"));
-            user.setSenha(passwordEncoder.encode((String)body.get("password")));
+            user.setSenha(usuarioService.codificarSenha((String)body.get("password")));
             user.setNome((String)body.get("name"));
-            userDetailsManager.createUser(user);
+
+            if (user.getEmail()==null || user.getEmail().length()==0 || !user.getEmail().contains("@")) {
+                throw new Exception("Verifique o campo Email!");
+            }
+            if (user.getNome()==null || user.getNome().length()==0) {
+                throw new Exception("Verifique o campo Nome!");
+            }
+            if (user.getSenha()==null || user.getSenha().length()==0) {
+                throw new Exception("Verifique o campo Senha!");
+            }
+            if(usuarioService.usernameExiste(user.getEmail())) {
+                throw new Exception("Usuário com email \""+user.getEmail()+"\" já esta cadastrado!");
+            }
+
+            usuarioService.createUser(user);
         } catch (Exception e) {
             session.setAttribute("error", e.getMessage());
             return "redirect:/registrar?error";
