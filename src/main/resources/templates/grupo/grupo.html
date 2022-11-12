@@ -1,39 +1,29 @@
 <!DOCTYPE html> 
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity3"> 
-   <head> 
-      <title>
-         Grupo
-      </title> 
+   <head>
+      <title th:text="${grupo.nome}+' - Universi.me'" th:unless="${grupo == null}">Grupo</title>
+      <title th:unless="${grupo != null}">Universi.me</title>
+      <script src="/js/main.js"></script>
    </head>
-   <script>
-   function goto_url(pathName) {
-      var url = window.location.href;
-      if(!url.endsWith("/")) {
-         url = url + "/";
-      }
-      url = url + pathName;
-      window.location.href = url;
-   }
-   </script>
    <body> 
-      <h1 th:inline="text">Hello [[${usuario.nome}]]!</h1>
+      <h1 th:inline="text">Oi, [[${usuario.nome}]]!</h1>
       <form th:action="@{/logout}" method="post">
-         <input type="submit" value="Sign Out"/>
+         <input type="submit" value="Logout"/>
       </form>
 
       <h2 th:text="${error}" th:unless="${error == null}">Menssagem de error.</h2>
 	  
 	  <div th:unless="${error != null}">
 
-      <h2>Detalhes do Grupo</h2>
+      <h2>Detalhes do Grupo <a th:onclick="goto_url('editar');event.preventDefault();" href="#">[Editar]</a></h2>
       Nome: <div th:text="${grupo.nome}">Grupo Nome</div><br/>
       Id: <div th:text="${grupo.id}">Grupo Id</div><br/>
       Nickname: <div th:text="${grupo.nickname}">Grupo Nickname</div><br/>
-	  Descricao: <div th:text="${grupo.descricao}">Grupo descricao</div><br/>
-	  Admin: <div th:text="${grupo.admin.usuario.nome}">Grupo admin</div><br/>
+	  Descricao: <pre th:text="${grupo.descricao}">Grupo descricao</pre><br/>
+	  Admin: <div th:text="${grupo.admin.usuario.nome}" th:unless="${grupo.admin == null}">Grupo admin</div><br/>
 	  Tipo: <div th:text="${grupo.tipo}">Grupo tipo</div><br/>
 	  
-	  <h2>Participantes</h2>
+	  <h2>Participantes <a th:onclick="goto_url('adicionar');event.preventDefault();" href="#">[Adicionar]</a></h2>
       <table>
          <thead>
          <tr>
@@ -52,7 +42,7 @@
          </tbody>
       </table>
 	  
-      <h2>Sub Grupos</h2>
+      <h2>Sub Grupos <a th:onclick="goto_url('criar');event.preventDefault();" href="#">[Criar Subgrupo]</a></h2>
       <table>
          <thead>
          <tr>
@@ -66,14 +56,14 @@
          </tr>
          <tr th:each="grupoNow : ${grupo.subGrupos}">
             <td><a th:onclick="goto_url([[${grupoNow.nickname}]]);event.preventDefault();" href="#"><span th:text="${grupoNow.nome}"> Grupo Nome </span></a></td>
-            <td><span th:text="${grupoNow.admin.usuario.nome}"> Admin </span></td>
+            <td><span th:text="${grupoNow.admin.usuario.nome}" th:unless="${grupoNow.admin == null}"> Admin </span></td>
          </tr>
          </tbody>
       </table>
 	</div>
       <br/><br/>
       <form>
-         <input type="button" value="Voltar" onclick="history.back()">
+         <input type="button" value="Voltar" onclick="openSubUrl()">
       </form>
 
    </body> 

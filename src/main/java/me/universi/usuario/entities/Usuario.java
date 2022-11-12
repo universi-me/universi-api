@@ -29,6 +29,7 @@ public class Usuario implements UserDetails {
     @Column(name = "senha")
     private String senha;
 
+    @JsonIgnore
     @OneToOne(mappedBy = "usuario")
     private Perfil perfil;
 

@@ -4,6 +4,8 @@ import me.universi.usuario.entities.Usuario;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.DefaultRedirectStrategy;
+import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 
 import javax.servlet.ServletException;
@@ -35,6 +37,14 @@ public class AutenticacaoValidaHandler extends SavedRequestAwareAuthenticationSu
 
         // Set session inatividade do usuario em 10min
         session.setMaxInactiveInterval(10*60);
+
+        // usuário não tem perfil, redirecionar para editar perfil
+        //if(usuario.getPerfil()==null) {
+        //    RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
+        //    redirectStrategy.sendRedirect(request, response, "/p/" + usuario.getUsername() + "/editar");
+        //} else {
+        //    super.onAuthenticationSuccess(request, response, authentication);
+        //}
 
         super.onAuthenticationSuccess(request, response, authentication);
     }
