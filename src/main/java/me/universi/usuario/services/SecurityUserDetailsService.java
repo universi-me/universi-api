@@ -18,7 +18,7 @@ public class SecurityUserDetailsService implements UserDetailsService {
     private PasswordEncoder passwordEncoder;
 
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<Usuario> usuario = userRepository.findByNome(username);
+        Optional<Usuario> usuario = userRepository.findFirstByNome(username);
         if (usuario.isPresent()) {
             return usuario.get();
         }
@@ -26,7 +26,7 @@ public class SecurityUserDetailsService implements UserDetailsService {
     }
 
     public UserDetails findByEmail(String email) throws Exception {
-        Optional<Usuario> usuario = userRepository.findByEmail(email);
+        Optional<Usuario> usuario = userRepository.findFirstByEmail(email);
         if (usuario.isPresent()) {
             return usuario.get();
         }
