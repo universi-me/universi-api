@@ -27,8 +27,8 @@ public class GrupoService {
         }
     }
 
-    public Grupo findByNickname(String nickname) {
-        Optional<Grupo> grupoOptional = grupoRepository.findByNickname(nickname);
+    public Grupo findFirstByNickname(String nickname) {
+        Optional<Grupo> grupoOptional = grupoRepository.findFirstByNickname(nickname);
         if(grupoOptional.isPresent()){
             return grupoOptional.get();
         }else{
@@ -36,8 +36,8 @@ public class GrupoService {
         }
     }
 
-    public Grupo findByGrupoRootAndNickname(boolean grupoRoot, String nickname) {
-        Optional<Grupo> grupoOptional = grupoRepository.findByGrupoRootAndNickname(grupoRoot, nickname);
+    public Grupo findFirstByGrupoRootAndNickname(boolean grupoRoot, String nickname) {
+        Optional<Grupo> grupoOptional = grupoRepository.findFirstByGrupoRootAndNickname(grupoRoot, nickname);
         if(grupoOptional.isPresent()){
             return grupoOptional.get();
         }else{

@@ -33,8 +33,6 @@ public class GrupoController
         try {
             Usuario usuario = (Usuario)session.getAttribute("usuario");
 
-            map.addAttribute("usuario", usuario);
-
             String requestPathSt = request.getRequestURI().toLowerCase();
 
             boolean flagEditar = requestPathSt.endsWith("/editar");
@@ -43,11 +41,11 @@ public class GrupoController
             boolean flagEdicao = flagEditar | flagCriar | flagAdicionar;
 
             if(flagCriar) {
-                requestPathSt = requestPathSt.substring(0, requestPathSt.length() - 5);
-            } else if(flagEditar) {
                 requestPathSt = requestPathSt.substring(0, requestPathSt.length() - 6);
+            } else if(flagEditar) {
+                requestPathSt = requestPathSt.substring(0, requestPathSt.length() - 7);
             } else if(flagAdicionar) {
-                requestPathSt = requestPathSt.substring(0, requestPathSt.length() - 9);
+                requestPathSt = requestPathSt.substring(0, requestPathSt.length() - 10);
             }
 
             String[] nicknameArr = requestPathSt.split("/");
@@ -55,7 +53,7 @@ public class GrupoController
             Grupo grupoRoot = null;
             Grupo grupoAtual = null;
 
-            grupoRoot = grupoService.findByGrupoRootAndNickname(true, nicknameArr[1]);
+            grupoRoot = grupoService.findFirstByGrupoRootAndNickname(true, nicknameArr[1]);
             if(grupoRoot != null) {
                 grupoAtual = grupoService.parentescoCheckGrupo(grupoRoot, nicknameArr);
             }

@@ -6,7 +6,7 @@
       <script src="/js/main.js"></script>
    </head>
    <body> 
-      <h1 th:inline="text">Oi, [[${usuario.nome}]]!</h1>
+      <h1 th:inline="text">Oi, [[${session.usuario.nome}]]!</h1>
       <form th:action="@{/logout}" method="post">
          <input type="submit" value="Logout"/>
       </form>
