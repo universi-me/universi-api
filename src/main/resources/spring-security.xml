@@ -18,7 +18,10 @@
 		<intercept-url pattern="/" access="permitAll"/>
 		<intercept-url pattern="/login" access="permitAll"/>
 		<intercept-url pattern="/registrar" access="permitAll"/>
-		<intercept-url pattern="/css/*" access="permitAll"/>
+
+		<intercept-url pattern="/css/**" access="permitAll"/>
+		<intercept-url pattern="/js/**" access="permitAll"/>
+		<intercept-url pattern="/img/**" access="permitAll"/>
 		<intercept-url pattern="/favicon.ico" access="permitAll"/>
 
 		<!-- Test rules -->

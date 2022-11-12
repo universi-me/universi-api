@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta http-equiv="X-UA-compatible" content="IE=edge">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <!-- CSS only -->
+   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"
+         rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi"
+         crossorigin="anonymous">
+
+   <link rel="stylesheet" href="/css/style.css">
+   <script src="/js/main.js"></script>
+   <title th:text="${grupo.nome}+': Editar Subgrupo'" th:unless="${grupo == null}">Editar Subgrupo</title>
+   <title th:unless="${grupo != null}">Universi.me</title>
+</head>
+
+<body style="max-width:800px;margin: 0 auto;">
+<center><img src="https://avatars.githubusercontent.com/u/116006104" width="200" alt="Universi.me"/></center>
+<p th:text="'Editar Subgrupo: ' + ${grupo.nome}" th:unless="${grupo == null}">[...]</p>
+<form th:action="@{/grupo/editar}" method="post">
+   <input type="hidden" name="grupoId" id="hiddenField" th:value="${grupo.id}"/>
+   <div class="mb-3">
+      <label for="nome" class="form-label">* Nome: </label>
+      <input type="text" class="form-control" id="nome" name="nome" th:value="${grupo.nome}">
+   </div>
+   <div class="mb-3">
+      <label for="nickname" class="form-label">* Nickname: </label>
+      <input type="text" class="form-control" id="nickname" name="nickname" th:value="${grupo.nickname}">
+   </div>
+   <div class="mb-3">
+      <label for="descricao" class="form-label">* Descricao: </label>
+      <textarea  type="text" class="form-control" id="descricao" name="descricao" th:text="${grupo.descricao}"></textarea>
+   </div>
+   <div class="mb-3">
+      <label for="tipo" class="form-label">* Tipo: </label>
+      <select id="tipo" name="tipo" class="form-control">
+         <option th:each="tipoNow : ${tiposGrupo}" th:value="${tipoNow}" th:text="${tipoNow.label}" th:selected="${tipoNow} == ${grupo.tipo} ? true : false"></option>
+      </select>
+   </div>
+   <p align="right"><button type="submit" class="btn btn-primary">Salvar Alterações</button></p>
+</form>
+<p align="left"><button onclick="openSubUrl()" class="btn btn-primary">Voltar</button></p>
+</body>
+</html>
