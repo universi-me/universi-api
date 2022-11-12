@@ -55,7 +55,7 @@ public class GrupoController
             Grupo grupoRoot = null;
             Grupo grupoAtual = null;
 
-            grupoRoot = grupoService.findByNicknameAndGrupoRoot(nicknameArr[1], true);
+            grupoRoot = grupoService.findByGrupoRootAndNickname(true, nicknameArr[1]);
             if(grupoRoot != null) {
                 grupoAtual = grupoService.parentescoCheckGrupo(grupoRoot, nicknameArr);
             }
