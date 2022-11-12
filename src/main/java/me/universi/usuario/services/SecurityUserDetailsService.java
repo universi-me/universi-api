@@ -25,6 +25,14 @@ public class SecurityUserDetailsService implements UserDetailsService {
         throw new UsernameNotFoundException("Usuário não encontrado!");
     }
 
+    public UserDetails findByEmail(String email) throws Exception {
+        Optional<Usuario> usuario = userRepository.findByEmail(email);
+        if (usuario.isPresent()) {
+            return usuario.get();
+        }
+        throw new Exception("Email de Usuário não encontrado!");
+    }
+
     public void createUser(Usuario user) throws Exception {
         if (user==null) {
             throw new Exception("Usuario está vazio!");
