@@ -36,8 +36,8 @@ public class GrupoService {
         }
     }
 
-    public Grupo findByNicknameAndGrupoRoot(String nickname, boolean grupoRoot) {
-        Optional<Grupo> grupoOptional = grupoRepository.findByNicknameAndGrupoRoot(nickname, grupoRoot);
+    public Grupo findByGrupoRootAndNickname(boolean grupoRoot, String nickname) {
+        Optional<Grupo> grupoOptional = grupoRepository.findByGrupoRootAndNickname(grupoRoot, nickname);
         if(grupoOptional.isPresent()){
             return grupoOptional.get();
         }else{
