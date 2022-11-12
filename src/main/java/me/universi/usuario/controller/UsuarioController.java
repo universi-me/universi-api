@@ -72,6 +72,9 @@ public class UsuarioController
             if(usuarioService.usernameExiste(user.getUsername())) {
                 throw new Exception("Usuário \""+user.getUsername()+"\" já esta cadastrado!");
             }
+            if(usuarioService.emailExiste(user.getEmail())) {
+                throw new Exception("Email \""+user.getEmail()+"\" já esta cadastrado!");
+            }
 
             usuarioService.createUser(user);
         } catch (Exception e) {

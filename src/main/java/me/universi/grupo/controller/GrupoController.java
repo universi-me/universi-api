@@ -145,7 +145,7 @@ public class GrupoController
             Usuario participanteUser = null;
             if(participante != null && participante.length() > 0) {
                 if (participante.contains("@")) {
-                    participanteUser = (Usuario) usuarioService.findByEmail(participante);
+                    participanteUser = (Usuario) usuarioService.findFirstByEmail(participante);
                 } else {
                     participanteUser = (Usuario) usuarioService.loadUserByUsername(participante);
                 }
