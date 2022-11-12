@@ -8,6 +8,6 @@ import java.util.Optional;
 
 @Repository
 public interface GrupoRepository extends JpaRepository<Grupo, Long> {
-    Optional<Grupo> findByNickname(String nickname);
-    Optional<Grupo> findByGrupoRootAndNickname(boolean grupoRoot, String nickname);
+    Optional<Grupo> findFirstByNickname(String nickname);
+    Optional<Grupo> findFirstByGrupoRootAndNickname(boolean grupoRoot, String nickname);
 }

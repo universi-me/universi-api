@@ -106,7 +106,7 @@ public class Sys{
     @GetMapping("/popular")
     String popular()
     {
-        Grupo ufpb_grupo = grupoService.findByNickname("ufpb");
+        Grupo ufpb_grupo = grupoService.findFirstByNickname("ufpb");
 
         if(ufpb_grupo != null) {
             return "redirect:/";

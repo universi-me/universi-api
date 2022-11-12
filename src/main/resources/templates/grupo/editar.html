@@ -24,9 +24,10 @@
       <label for="nome" class="form-label">* Nome: </label>
       <input type="text" class="form-control" id="nome" name="nome" th:value="${grupo.nome}">
    </div>
-   <div class="mb-3">
-      <label for="nickname" class="form-label">* Nickname: </label>
-      <input type="text" class="form-control" id="nickname" name="nickname" th:value="${grupo.nickname}">
+   <label for="nickname" class="form-label">* Nickname</label>
+   <div class="input-group mb-3">
+      <span class="input-group-text" id="basic-addon3" th:text="'https://universi.me'+ ${#strings.replace(session.lastPath,grupo.nickname,'')}"></span>
+      <input type="text" class="form-control" id="nickname" aria-describedby="basic-addon3" name="nickname" th:value="${grupo.nickname}">
    </div>
    <div class="mb-3">
       <label for="descricao" class="form-label">* Descricao: </label>
@@ -34,7 +35,7 @@
    </div>
    <div class="mb-3">
       <label for="tipo" class="form-label">* Tipo: </label>
-      <select id="tipo" name="tipo" class="form-control">
+      <select id="tipo" name="tipo" class="form-select">
          <option th:each="tipoNow : ${tiposGrupo}" th:value="${tipoNow}" th:text="${tipoNow.label}" th:selected="${tipoNow} == ${grupo.tipo} ? true : false"></option>
       </select>
    </div>
