@@ -25,7 +25,7 @@ public class SecurityUserDetailsService implements UserDetailsService {
         throw new UsernameNotFoundException("Usuário não encontrado!");
     }
 
-    public UserDetails findByEmail(String email) throws Exception {
+    public UserDetails findFirstByEmail(String email) throws Exception {
         Optional<Usuario> usuario = userRepository.findFirstByEmail(email);
         if (usuario.isPresent()) {
             return usuario.get();
@@ -51,6 +51,17 @@ public class SecurityUserDetailsService implements UserDetailsService {
                 return true;
             }
         }catch (UsernameNotFoundException e){
+            return false;
+        }
+        return false;
+    }
+
+    public boolean emailExiste(String email) {
+        try {
+            if(findFirstByEmail(email) != null) {
+                return true;
+            }
+        }catch (Exception e){
             return false;
         }
         return false;
