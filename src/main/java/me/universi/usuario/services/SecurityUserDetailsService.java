@@ -10,6 +10,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SecurityUserDetailsService implements UserDetailsService {
     @Autowired
@@ -67,4 +69,17 @@ public class SecurityUserDetailsService implements UserDetailsService {
         return false;
     }
 
+    public Boolean usuarioRegex(String username) {
+        String usuarioRegex = "^[a-z0-9_-]+$";
+        Pattern emailPattern = Pattern.compile(usuarioRegex, Pattern.CASE_INSENSITIVE);
+        Matcher matcher = emailPattern.matcher(username);
+        return matcher.find();
+    }
+
+    public Boolean emailRegex(String email) {
+        String emailRegex = "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$";
+        Pattern emailPattern = Pattern.compile(emailRegex, Pattern.CASE_INSENSITIVE);
+        Matcher matcher = emailPattern.matcher(email);
+        return matcher.find();
+    }
 }

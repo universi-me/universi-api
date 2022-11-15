@@ -51,30 +51,32 @@ public class UsuarioController
     public String registrarUsuario(Map<String, Object> body, HttpServletRequest request, HttpSession session)
     {
         try {
-            Usuario user = new Usuario();
 
-            user.setNome((String)body.get("username"));
-            user.setEmail((String)body.get("email"));
-            user.setSenha(usuarioService.codificarSenha((String)body.get("password")));
+            String nome = (String)body.get("username");
+            String email = (String)body.get("email");
+            String senha = (String)body.get("password");
 
-            if (user.getNome()==null || user.getNome().length()==0) {
+            if (nome==null || nome.length()==0 || !usuarioService.usuarioRegex(nome)) {
                 throw new Exception("Verifique o campo Usuário!");
             }
-            if (user.getNome().contains(" ")) {
-                throw new Exception("O campo Usuário não pode conter espaços!");
-            }
-            if (user.getEmail()==null || user.getEmail().length()==0 || !user.getEmail().contains("@")) {
+            if (email==null || email.length()==0 || !usuarioService.emailRegex(email + "@dcx.ufpb.br")) {
                 throw new Exception("Verifique o campo Email!");
             }
-            if (user.getSenha()==null || user.getSenha().length()==0) {
+            if (senha==null || senha.length()==0) {
                 throw new Exception("Verifique o campo Senha!");
             }
-            if(usuarioService.usernameExiste(user.getUsername())) {
-                throw new Exception("Usuário \""+user.getUsername()+"\" já esta cadastrado!");
+
+            if(usuarioService.usernameExiste(nome)) {
+                throw new Exception("Usuário \""+nome+"\" já esta cadastrado!");
             }
-            if(usuarioService.emailExiste(user.getEmail())) {
-                throw new Exception("Email \""+user.getEmail()+"\" já esta cadastrado!");
+            if(usuarioService.emailExiste(email)) {
+                throw new Exception("Email \""+email+"\" já esta cadastrado!");
             }
+
+            Usuario user = new Usuario();
+            user.setNome(nome);
+            user.setEmail(email + "@dcx.ufpb.br");
+            user.setSenha(usuarioService.codificarSenha(senha));
 
             usuarioService.createUser(user);
         } catch (Exception e) {
