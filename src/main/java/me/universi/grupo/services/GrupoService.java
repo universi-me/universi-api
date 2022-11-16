@@ -8,10 +8,7 @@ import me.universi.usuario.entities.Usuario;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class GrupoService {
@@ -105,6 +102,43 @@ public class GrupoService {
         participantesArr.remove(perfil);
         grupo.setParticipantes(participantesArr);
         this.save(grupo);
+    }
+
+    public boolean nicknameDisponivelParaGrupo(Grupo grupo, String nickname) {
+        boolean disponivel = true;
+        try {
+            String nicknameLower = nickname.toLowerCase();
+
+            String[] palavrasReservadas = new String[] {
+                    "adicionar",
+                    "remover",
+                    "conta",
+                    "grupo",
+                    "editar",
+                    "criar",
+                    "obter",
+                    "listar",
+                    "competencia",
+                    "atualizar",
+                    "recomendacao"
+            };
+
+            if(Arrays.asList(palavrasReservadas).contains(nicknameLower)) {
+                disponivel = false;
+            }
+
+            if(disponivel) {
+                for (Grupo grupoNow : grupo.getSubGrupos()) {
+                    if (grupoNow.nickname.toLowerCase().equals(nicknameLower)) {
+                        disponivel = false;
+                        break;
+                    }
+                }
+            }
+        }catch (Exception e) {
+            disponivel = false;
+        }
+        return disponivel;
     }
 
     public void save(Grupo grupo) {
