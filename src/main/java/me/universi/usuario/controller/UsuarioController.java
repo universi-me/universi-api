@@ -2,8 +2,10 @@ package me.universi.usuario.controller;
 
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import me.universi.grupo.enums.GrupoTipo;
 import me.universi.usuario.entities.Usuario;
 import me.universi.usuario.services.SecurityUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,6 +87,24 @@ public class UsuarioController
         }
         session.setAttribute("registrado", "Usuário registrado com sucesso, efetue o login.");
         return "redirect:/login?registrado";
+    }
+
+    @RequestMapping("/conta/editar")
+    public Object conta_editar(HttpSession session, @RequestParam("password") String password, @RequestParam("senha") String senha) {
+        try {
+            Usuario usuario = (Usuario) session.getAttribute("usuario");
+            if (usuarioService.senhaValida(usuario, senha)) {
+                usuario.setSenha(usuarioService.codificarSenha(password));
+                usuarioService.save(usuario);
+                session.setAttribute("salvo", "As Alterações foram salvas com sucesso.");
+                return "redirect:/conta?salvo";
+            }
+            session.setAttribute("error", "Credenciais Invalidas!");
+            return "redirect:/conta?error";
+        }catch (Exception e) {
+            session.setAttribute("error", e.getMessage());
+            return "redirect:/conta?error";
+        }
     }
 
     private String getErrorMessage(HttpServletRequest request, String key)
