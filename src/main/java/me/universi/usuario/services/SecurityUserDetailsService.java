@@ -82,4 +82,13 @@ public class SecurityUserDetailsService implements UserDetailsService {
         Matcher matcher = emailPattern.matcher(email);
         return matcher.find();
     }
+
+    public boolean senhaValida(Usuario usuario, String senha)
+    {
+        return passwordEncoder.matches(senha, usuario.getPassword());
+    }
+
+    public void save(Usuario usuario) {
+        userRepository.save(usuario);
+    }
 }
