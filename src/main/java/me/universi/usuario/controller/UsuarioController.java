@@ -5,6 +5,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import me.universi.api.entities.Resposta;
 import me.universi.grupo.enums.GrupoTipo;
 import me.universi.usuario.entities.Usuario;
 import me.universi.usuario.services.SecurityUserDetailsService;
@@ -30,17 +31,10 @@ public class UsuarioController {
         return "usuario/registrar";
     }
 
-    @RequestMapping(value = "/registrar", method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public String registrarUsuarioForm(@RequestParam Map<String, Object> body, HttpServletRequest request, HttpSession session) {
-        return registrarUsuario(body, request, session);
-    }
-
-    @RequestMapping(value = "/registrar", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public String registrarUsuarioJson(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
-        return registrarUsuario(body, request, session);
-    }
-
-    public String registrarUsuario(Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    @ResponseBody
+    @PostMapping(value = "/registrar", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public Object registrarUsuarioJson(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+        Resposta resposta = new Resposta();
         try {
 
             String nome = (String)body.get("username");
@@ -71,11 +65,12 @@ public class UsuarioController {
 
             usuarioService.createUser(user);
         } catch (Exception e) {
-            session.setAttribute("error", e.getMessage());
-            return "redirect:/registrar?error";
+            resposta.mensagem = e.getMessage();
+            return resposta;
         }
-        session.setAttribute("registrado", "Usuário registrado com sucesso, efetue o login.");
-        return "redirect:/login?registrado";
+        resposta.sucess = true;
+        resposta.mensagem = "Usuário registrado com sucesso, efetue o login.";
+        return resposta;
     }
 	
 	@GetMapping("/conta")
@@ -83,21 +78,31 @@ public class UsuarioController {
         return "usuario/conta";
     }
 
-    @RequestMapping("/conta/editar")
-    public Object conta_editar(HttpSession session, @RequestParam("password") String password, @RequestParam("senha") String senha) {
+    @ResponseBody
+    @PostMapping(value = "/conta/editar", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public Object conta_editar(HttpSession session, @RequestBody Map<String, Object> body) {
+        Resposta resposta = new Resposta();
         try {
+
+            String password = (String)body.get("password");
+            String senha = (String)body.get("senha");
+
             Usuario usuario = (Usuario) session.getAttribute("usuario");
             if (usuarioService.senhaValida(usuario, senha)) {
                 usuario.setSenha(usuarioService.codificarSenha(password));
                 usuarioService.save(usuario);
-                session.setAttribute("salvo", "As Alterações foram salvas com sucesso.");
-                return "redirect:/conta?salvo";
+
+                resposta.sucess = true;
+                resposta.mensagem = "As Alterações foram salvas com sucesso.";
+
+                return resposta;
             }
-            session.setAttribute("error", "Credenciais Invalidas!");
-            return "redirect:/conta?error";
+
+            resposta.mensagem = "Credenciais Invalidas!";
+            return resposta;
         }catch (Exception e) {
-            session.setAttribute("error", e.getMessage());
-            return "redirect:/conta?error";
+            resposta.mensagem = e.getMessage();
+            return resposta;
         }
     }
 

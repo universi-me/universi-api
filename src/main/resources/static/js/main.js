@@ -1,3 +1,93 @@
+/* Grupo calls */
+function editarGrupo() {
+   var bodyValores = {
+      grupoId: document.querySelector('[name="grupoId"]').value,
+      nome: document.querySelector('#nome').value,
+      nickname: document.querySelector('#nickname').value,
+      descricao: document.querySelector('#descricao').value,
+      tipo: document.querySelector('#tipo').value
+   }
+   api_request('/grupo/editar', bodyValores, null);
+}
+function criarGrupo() {
+   var bodyValores = {
+      grupoId: document.querySelector('[name="grupoId"]').value,
+      nome: document.querySelector('#nome').value,
+      nickname: document.querySelector('#nickname').value,
+      descricao: document.querySelector('#descricao').value,
+      tipo: document.querySelector('#tipo').value
+   }
+   api_request('/grupo/criar', bodyValores, null);
+}
+function adicionarParticipanteAoGrupo() {
+   var bodyValores = {
+      grupoId: document.querySelector('[name="grupoId"]').value,
+      participante: document.querySelector('#participante').value
+   }
+   api_request('/grupo/adicionar', bodyValores, null);
+}
+
+/* Conta calls */
+function editarConta() {
+   var bodyValores = {
+      password: document.querySelector('#password').value,
+      senha: document.querySelector('#senha').value
+   }
+   api_request('/conta/editar', bodyValores, null);
+}
+function efetuarLogin() {
+   var bodyValores = {
+      username: document.querySelector('#username').value,
+      password: document.querySelector('#password').value
+   }
+   api_request('/login.js', bodyValores, null);
+}
+function efetuarRegistro() {
+   var bodyValores = {
+      username: document.querySelector('#username').value,
+      password: document.querySelector('#password').value,
+      email: document.querySelector('#email').value
+   }
+   api_request('/registrar', bodyValores, null);
+}
+
+
+function api_request(path, parametro, callback) {
+    document.getElementById('mensagem_error').hidden = true;
+    document.getElementById('mensagem_ok').hidden = true;
+
+    const http = new XMLHttpRequest();
+    http.open('POST', path, true);
+    http.setRequestHeader('Content-type', 'application/json');
+    http.responseType = 'json';
+    http.send(JSON.stringify(parametro));
+    http.onload = function(e) {
+       if (this.status == 200) {
+         var jsonResponse = this.response;
+
+         if(jsonResponse.mensagem != null && jsonResponse.mensagem.length > 0) {
+            document.getElementById(jsonResponse.sucess?'mensagem_ok':'mensagem_error').hidden = false;
+            document.getElementById(jsonResponse.sucess?'mensagem_ok':'mensagem_error').innerHTML = jsonResponse.mensagem;
+         }
+
+         if(callback != null) {
+            callback(jsonResponse);
+         }
+
+         if(jsonResponse.enderecoParaRedirecionar != null) {
+            openUrlPath(jsonResponse.enderecoParaRedirecionar);
+         }
+
+       } else {
+         document.getElementById('mensagem_error').hidden = false;
+         document.getElementById('mensagem_error').innerHTML = "Um erro ocorreu na requisição.";
+       }
+    };
+}
+
+function openUrlPath(pathName) {
+    window.location.href = pathName;
+}
 
 function goto_url(pathName) {
 	var url = window.location.href;
@@ -8,14 +98,23 @@ function goto_url(pathName) {
 	window.location.href = url;
 }
 
-function RemoveLastDirectoryPartOf(the_url)
-{
+function RemoveLastDirectoryPartOf(the_url) {
 	var the_arr = the_url.split('/');
 	the_arr.pop();
 	return( the_arr.join('/') );
 }
-
-function openSubUrl()
-{
+function openSubUrl() {
 	window.location.href = RemoveLastDirectoryPartOf(window.location.href);
+}
+
+function checkCampo(input, regExInput, msgRegEx) {
+   if(input.value == null || input.value.length==0) {
+      input.setCustomValidity("Verifique o campo.");
+   } else {
+      if (regExInput !=null && !regExInput.test(input.value)) {
+         input.setCustomValidity(((msgRegEx!=null)?msgRegEx:'Não está no formato requerido.')+' Por favor corrigir.');
+      } else {
+         input.setCustomValidity('');
+      }
+   }
 }

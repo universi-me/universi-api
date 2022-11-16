@@ -17,8 +17,16 @@
 
 <body style="max-width:800px;margin: 0 auto;">
 <center><img src="https://avatars.githubusercontent.com/u/116006104" width="200" alt="Universi.me"/></center>
+
+<div id="mensagem_ok" class="alert alert-success" role="alert" hidden>
+   <p>Operação realizada com sucesso.</p>
+</div>
+<div id="mensagem_error" class="alert alert-warning" role="alert" hidden>
+   <p >Um error ocorreu.</p>
+</div>
+
 <p th:text="'Editar Subgrupo: ' + ${grupo.nome}" th:unless="${grupo == null}">[...]</p>
-<form th:action="@{/grupo/editar}" method="post">
+<form onsubmit="editarGrupo();return false;" oninput="validar();">
    <input type="hidden" name="grupoId" id="hiddenField" th:value="${grupo.id}"/>
    <div class="mb-3">
       <label for="nome" class="form-label">* Nome: </label>
@@ -27,7 +35,7 @@
    <label for="nickname" class="form-label">* Nickname</label>
    <div class="input-group mb-3">
       <span class="input-group-text" id="basic-addon3" th:text="'https://universi.me'+ ${#strings.replace(session.lastPath,grupo.nickname,'')}"></span>
-      <input type="text" class="form-control" id="nickname" aria-describedby="basic-addon3" name="nickname" th:value="${grupo.nickname}">
+      <input type="text" class="form-control" disabled id="nickname" aria-describedby="basic-addon3" name="nickname" th:value="${grupo.nickname}">
    </div>
    <div class="mb-3">
       <label for="descricao" class="form-label">* Descricao: </label>
@@ -41,6 +49,19 @@
    </div>
    <p align="right"><button type="submit" class="btn btn-primary">Salvar Alterações</button></p>
 </form>
+<script>
+
+var usuarioFormato = /^([a-z0-9_-]+)$/;
+
+function validar() {
+   checkCampo(nome);
+   checkCampo(nickname, usuarioFormato, "Apenas Letras Minusculas e Números.");
+   checkCampo(descricao);
+   checkCampo(tipo);
+}
+validar();
+
+</script>
 <p align="left"><button onclick="openSubUrl()" class="btn btn-primary">Voltar</button></p>
 </body>
 </html>

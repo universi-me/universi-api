@@ -6,18 +6,12 @@ import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import me.universi.api.entities.Resposta;
 import me.universi.competencia.entities.Competencia;
 import me.universi.competencia.enums.Nivel;
 import me.universi.competencia.repositories.CompetenciaRepository;
-import me.universi.grupo.entities.Grupo;
-import me.universi.grupo.repositories.GrupoRepository;
-import me.universi.usuario.entities.Usuario;
-import me.universi.usuario.enums.Autoridade;
-import me.universi.usuario.services.SecurityUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,36 +22,49 @@ public class CompetenciaController {
     public CompetenciaRepository competenciaRepository;
 
     // http://localhost:80/competencia/criar?nome=teste&descricao=teste2&nivel=NENHUMA_EXPERIENCIA
-    @RequestMapping("/competencia/criar")
+    @PostMapping(value = "/competencia/criar", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public String create(@RequestParam("nome") String nome, @RequestParam("descricao") String descricao, @RequestParam("nivel") String nivel) {
+    public Object create(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+        Resposta resposta = new Resposta();
         try {
-            Nivel nivel_ = Nivel.valueOf(nivel); // string para enum
-            Competencia competenciaNew = new Competencia(nome, descricao, nivel_); // nova competência
+
+            String nome = (String)body.get("nome");
+            String descricao = (String)body.get("descricao");
+            Nivel nivel = (Nivel)Nivel.valueOf((String)body.get("nivel"));
+
+            Competencia competenciaNew = new Competencia(nome, descricao, nivel); // nova competência
             competenciaRepository.save(competenciaNew);
-            return "Competencia Criada: " + competenciaNew.toString();
-        } catch (IllegalArgumentException e) {
-            return "Nível '"+nivel+"' não existe";
+
+            resposta.mensagem = "Competencia Criada: " + competenciaNew.toString();
+            return resposta;
+
+        } catch (Exception e) {
+            resposta.mensagem = e.getMessage();
+            return resposta;
         }
     }
 
     // http://localhost:80/competencia/atualizar?id=3&nome=teste&descricao=teste2&nivel=NENHUMA_EXPERIENCIA
-    @RequestMapping("/competencia/atualizar")
+    @PostMapping(value = "/competencia/atualizar", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public String update(@RequestParam("id") Long id, @RequestParam("nome") String nome, @RequestParam("descricao") String descricao, @RequestParam("nivel") String nivel) {
-
+    public Object update(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+        Resposta resposta = new Resposta();
         Competencia comp,compOld;
-
         try {
-            Nivel nivel_ = Nivel.valueOf(nivel);
+
+            Long id = (Long)Long.valueOf((String)body.get("id"));
+            String nome = (String)body.get("nome");
+            String descricao = (String)body.get("descricao");
+            Nivel nivel = (Nivel)Nivel.valueOf((String)body.get("nivel"));
+
             comp = competenciaRepository.findById(id).get();
             compOld = new Competencia(comp.getNome(), comp.getDescricao(), comp.getNivel());
             if (comp != null) { // verifica se a competencia existe
 
                 for (Nivel n : Nivel.values()) { // verifica se nivel existe
                     System.out.println(n);
-                    if (nivel_.equals(n) && !nivel_.equals(comp.getNivel())){
-                        comp.setNivel(nivel_);
+                    if (nivel.equals(n) && !nivel.equals(comp.getNivel())){
+                        comp.setNivel(nivel);
 //                        System.out.println("novo nível");
                         break; // sai do loop
                     }
@@ -76,52 +83,94 @@ public class CompetenciaController {
                 competenciaRepository.save(comp);
             }
         } catch (EntityNotFoundException e) {
-            return "Competencia não encontrada";
+            resposta.mensagem = "Competencia não encontrada";
+            return resposta;
         } catch (IllegalArgumentException e) {
-            return "Nível '"+nivel+"' não existe";
+            resposta.mensagem = "Nível não existe";
+            return resposta;
         }
 
         if(comp.equals(compOld)) {
-            return "Competencia não foi modificada pelo usuario: " + comp.toString();
+            resposta.mensagem = "Competencia não foi modificada pelo usuario: " + comp.toString();
+            return resposta;
 		}
-		
-        return "Competencia atualizada: " + comp.toString();
+
+        resposta.mensagem = "Competencia atualizada: " + comp.toString();
+        resposta.sucess = true;
+        return resposta;
     }
 
 
     // http://localhost:80/competencia/remover?id=1
-    @RequestMapping("/competencia/remover")
+    @PostMapping(value = "/competencia/remover", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public String remove(@RequestParam("id") Long id) {
+    public Object remove(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+        Resposta resposta = new Resposta();
         try {
+
+            Long id = (Long)Long.valueOf((String)body.get("id"));
+
             Competencia comp = competenciaRepository.findById(id).get();
             if (comp != null) {
                 competenciaRepository.delete(comp);
-                return "Competencia removida: " + comp.toString();
+
+                resposta.mensagem = "Competencia removida: " + comp.toString();
+                resposta.sucess = true;
+                return resposta;
             }
+
+            resposta.mensagem = "Falha ao remover competencia";
+            return resposta;
+
         } catch (EntityNotFoundException e) {
-            return "Competencia não encontrada";
+            resposta.mensagem = "Competencia não encontrada";
+            return resposta;
+        } catch (Exception e) {
+            resposta.mensagem = e.getMessage();
+            return resposta;
         }
-        return "Falha ao remover";
     }
 
     // http://localhost:80/competencia/obter?id=1
-    @RequestMapping("/competencia/obter")
+    @PostMapping(value = "/competencia/obter", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Competencia get(@RequestParam("id") Long id) {
+    public Object get(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+        Resposta resposta = new Resposta();
         try {
+
+            Long id = (Long)Long.valueOf((String)body.get("id"));
+
             Competencia comp = competenciaRepository.findById(id).get();
-            return comp;
-        } catch (EntityNotFoundException e) {
-            return null;
+            resposta.conteudo.put("competencia", comp);
+
+            resposta.mensagem = "Operação realizada com exito.";
+            resposta.sucess = true;
+            return resposta;
+
+        } catch (Exception e) {
+            resposta.mensagem = e.getMessage();
+            return resposta;
         }
     }
 
     // http://localhost:80/competencia/listar
-    @RequestMapping("/competencia/listar")
+    @PostMapping(value = "/competencia/listar", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public List<Competencia> getlist() {
-        List<Competencia> comps = competenciaRepository.findAll();
-        return comps;
+    public Object getlist(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+        Resposta resposta = new Resposta();
+        try {
+
+            List<Competencia> comps = competenciaRepository.findAll();
+
+            resposta.conteudo.put("lista", comps);
+
+            resposta.mensagem = "Operação realizada com exito.";
+            resposta.sucess = true;
+            return resposta;
+
+        } catch (Exception e) {
+            resposta.mensagem = e.getMessage();
+            return resposta;
+        }
     }
 }
