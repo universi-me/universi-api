@@ -106,6 +106,11 @@ public class GrupoController {
             Usuario usuario = (Usuario) session.getAttribute("usuario");
             Grupo grupoPai = grupoService.findById(grupoIdPai);
 
+            if(!grupoService.nicknameDisponivelParaGrupo(grupoPai, nickname)) {
+                resposta.mensagem = "Este Nickname não está disponível para este grupo.";
+                return resposta;
+            }
+
             if(grupoService.verificarPermissaoParaGrupo(grupoPai, usuario)) {
                 Grupo grupoNew = new Grupo();
                 grupoNew.setNickname(nickname);
