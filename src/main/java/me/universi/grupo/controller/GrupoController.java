@@ -19,8 +19,7 @@ import javax.servlet.http.HttpSession;
 import java.util.List;
 
 @Controller
-public class GrupoController
-{
+public class GrupoController {
     @Autowired
     public GrupoService grupoService;
 
@@ -183,8 +182,7 @@ public class GrupoController
     // http://localhost:8080/projeto/obter/1
     @RequestMapping("/grupo/obter/{id}")
     @ResponseBody
-    public Object get(HttpServletResponse response, @PathVariable Long id)
-    {
+    public Object get(HttpServletResponse response, @PathVariable Long id) {
         try {
             Grupo grupo = grupoService.findById(id);
             if(grupo == null) {
@@ -200,8 +198,7 @@ public class GrupoController
     // http://localhost:8080/projeto/listar
     @RequestMapping("/grupo/listar")
     @ResponseBody
-    public List<Grupo> getlist()
-    {
+    public List<Grupo> getlist() {
         List<Grupo> ret = grupoService.findAll();
         return ret;
     }

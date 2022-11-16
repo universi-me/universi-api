@@ -69,22 +69,21 @@ public class SecurityUserDetailsService implements UserDetailsService {
         return false;
     }
 
-    public Boolean usuarioRegex(String username) {
+    public boolean usuarioRegex(String username) {
         String usuarioRegex = "^[a-z0-9_-]+$";
         Pattern emailPattern = Pattern.compile(usuarioRegex, Pattern.CASE_INSENSITIVE);
         Matcher matcher = emailPattern.matcher(username);
         return matcher.find();
     }
 
-    public Boolean emailRegex(String email) {
+    public boolean emailRegex(String email) {
         String emailRegex = "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$";
         Pattern emailPattern = Pattern.compile(emailRegex, Pattern.CASE_INSENSITIVE);
         Matcher matcher = emailPattern.matcher(email);
         return matcher.find();
     }
 
-    public boolean senhaValida(Usuario usuario, String senha)
-    {
+    public boolean senhaValida(Usuario usuario, String senha) {
         return passwordEncoder.matches(senha, usuario.getPassword());
     }
 

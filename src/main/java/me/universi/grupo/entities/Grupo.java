@@ -67,8 +67,7 @@ public class Grupo {
     public Grupo() {
     }
 
-    public Grupo(String nickname, String name, String descricao, Perfil admin, Collection<Perfil> participantes, GrupoTipo tipo, Collection<Grupo> subGrupos, boolean grupoRoot, boolean podeCriarGrupo)
-    {
+    public Grupo(String nickname, String name, String descricao, Perfil admin, Collection<Perfil> participantes, GrupoTipo tipo, Collection<Grupo> subGrupos, boolean grupoRoot, boolean podeCriarGrupo) {
         this.nickname = nickname;
         this.nome = name;
         this.descricao = descricao;
@@ -157,8 +156,7 @@ public class Grupo {
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return "Grupo [id=\""+this.id+"\", nome=\""+this.nome+"\", descricao=\""+this.descricao+"\"]";
     }
 }

@@ -119,8 +119,7 @@ public class GrupoService {
         return grupoRepository.findAll();
     }
 
-    public Grupo parentescoCheckGrupo(Grupo grupoRoot, String[] sequenciaNickArr)
-    {
+    public Grupo parentescoCheckGrupo(Grupo grupoRoot, String[] sequenciaNickArr) {
         Grupo finalGrupo = null;
 
         boolean parenteCkeckFalhou = false;
