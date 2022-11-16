@@ -10,7 +10,9 @@ public enum GrupoTipo {
     LABORATORIO("Laboratório"),
     CA("Centro Acadêmico"),
     GRUPO_DE_ESTUDO("Grupo de Estudo");
+	
     public final String label;
+	
     private GrupoTipo(String label) {
         this.label = label;
     }

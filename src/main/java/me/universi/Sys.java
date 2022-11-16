@@ -4,49 +4,29 @@ import me.universi.competencia.entities.Competencia;
 import me.universi.competencia.repositories.CompetenciaRepository;
 import me.universi.grupo.entities.Grupo;
 import me.universi.grupo.enums.GrupoTipo;
-import me.universi.grupo.repositories.GrupoRepository;
 import me.universi.grupo.services.GrupoService;
 import me.universi.perfil.entities.Perfil;
 import me.universi.usuario.entities.Usuario;
-import me.universi.usuario.enums.Autoridade;
-import me.universi.usuario.repositories.UsuarioRepository;
 import me.universi.perfil.repositories.PerfilRepository;
 
 import me.universi.usuario.services.SecurityUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ImportResource;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.format.support.FormattingConversionService;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
-import org.springframework.web.servlet.resource.PathResourceResolver;
-import org.springframework.web.servlet.resource.ResourceUrlProvider;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Optional;
 
 @SpringBootApplication
 @ImportResource({"classpath:spring-security.xml"})
 @Controller
-public class Sys{
+public class Sys {
 
     @Autowired
     public PerfilRepository perfilRepository;
@@ -57,20 +37,17 @@ public class Sys{
     @Autowired
     public GrupoService grupoService;
 
-    public static void main(String [] args)
-    {
+    public static void main(String [] args) {
         System.out.println("H2 ativo na http://localhost/h2-console");
         SpringApplication.run(Sys.class, args);
     }
 
     @GetMapping("/")
-    String index(HttpServletRequest request, HttpSession session, ModelMap map)
-    {
+    String index(HttpServletRequest request, HttpSession session, ModelMap map) {
         return "index";
     }
 
-    public Perfil random_perfil(String nome)
-    {
+    public Perfil random_perfil(String nome) {
         Usuario userNew = new Usuario(nome, "test@email.com", usuarioService.codificarSenha("senha"));
         try {
             usuarioService.createUser(userNew);
@@ -104,8 +81,7 @@ public class Sys{
     }
 
     @GetMapping("/popular")
-    String popular()
-    {
+    String popular() {
         Grupo ufpb_grupo = grupoService.findFirstByNickname("ufpb");
 
         if(ufpb_grupo != null) {

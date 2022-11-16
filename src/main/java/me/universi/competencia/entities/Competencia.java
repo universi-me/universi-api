@@ -58,13 +58,12 @@ public class Competencia {
     public void setNivel(Nivel nivel) { this.nivel = nivel; }
 
     public boolean equals(Object obj) {
-        if(!(obj instanceof Competencia)) return false;
+        if(!(obj instanceof Competencia)) {
+			return false;
+		}
+		
         Competencia competencia = (Competencia) obj;
 
-        return this.nome.equals(competencia.getNome()) && this.descricao.equals(competencia.getDescricao())
-                 && this.nivel.equals(competencia.getNivel());
-
-
-
+        return this.nome.equals(competencia.getNome()) && this.descricao.equals(competencia.getDescricao()) && this.nivel.equals(competencia.getNivel());
     }
 }

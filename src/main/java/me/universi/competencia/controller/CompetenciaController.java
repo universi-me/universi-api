@@ -30,17 +30,13 @@ public class CompetenciaController {
     // http://localhost:80/competencia/criar?nome=teste&descricao=teste2&nivel=NENHUMA_EXPERIENCIA
     @RequestMapping("/competencia/criar")
     @ResponseBody
-    public String create(@RequestParam("nome") String nome, @RequestParam("descricao") String descricao, @RequestParam("nivel") String nivel)
-    {
-        try
-        {
+    public String create(@RequestParam("nome") String nome, @RequestParam("descricao") String descricao, @RequestParam("nivel") String nivel) {
+        try {
             Nivel nivel_ = Nivel.valueOf(nivel); // string para enum
             Competencia competenciaNew = new Competencia(nome, descricao, nivel_); // nova competência
             competenciaRepository.save(competenciaNew);
             return "Competencia Criada: " + competenciaNew.toString();
-        }
-        catch (IllegalArgumentException e)
-        {
+        } catch (IllegalArgumentException e) {
             return "Nível '"+nivel+"' não existe";
         }
     }
@@ -85,9 +81,10 @@ public class CompetenciaController {
             return "Nível '"+nivel+"' não existe";
         }
 
-        if(comp.equals(compOld))
+        if(comp.equals(compOld)) {
             return "Competencia não foi modificada pelo usuario: " + comp.toString();
-
+		}
+		
         return "Competencia atualizada: " + comp.toString();
     }
 

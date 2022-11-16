@@ -15,43 +15,32 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
-public class UsuarioController
-{
+public class UsuarioController {
     @Autowired
     private SecurityUserDetailsService usuarioService;
 
-    @GetMapping("/conta")
-    public String conta() {
-        return "usuario/conta";
-    }
-
     @GetMapping("/login")
-    public String login(HttpServletRequest request, HttpSession session)
-    {
+    public String login(HttpServletRequest request, HttpSession session) {
         session.setAttribute("error", getErrorMessage(request, "SPRING_SECURITY_LAST_EXCEPTION"));
         return "usuario/login";
     }
 
     @GetMapping("/registrar")
-    public String registrar(HttpSession session)
-    {
+    public String registrar(HttpSession session) {
         return "usuario/registrar";
     }
 
     @RequestMapping(value = "/registrar", method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public String registrarUsuarioForm(@RequestParam Map<String, Object> body, HttpServletRequest request, HttpSession session)
-    {
+    public String registrarUsuarioForm(@RequestParam Map<String, Object> body, HttpServletRequest request, HttpSession session) {
         return registrarUsuario(body, request, session);
     }
 
     @RequestMapping(value = "/registrar", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public String registrarUsuarioJson(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session)
-    {
+    public String registrarUsuarioJson(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
         return registrarUsuario(body, request, session);
     }
 
-    public String registrarUsuario(Map<String, Object> body, HttpServletRequest request, HttpSession session)
-    {
+    public String registrarUsuario(Map<String, Object> body, HttpServletRequest request, HttpSession session) {
         try {
 
             String nome = (String)body.get("username");
@@ -88,6 +77,11 @@ public class UsuarioController
         session.setAttribute("registrado", "Usuário registrado com sucesso, efetue o login.");
         return "redirect:/login?registrado";
     }
+	
+	@GetMapping("/conta")
+    public String conta() {
+        return "usuario/conta";
+    }
 
     @RequestMapping("/conta/editar")
     public Object conta_editar(HttpSession session, @RequestParam("password") String password, @RequestParam("senha") String senha) {
@@ -107,8 +101,7 @@ public class UsuarioController
         }
     }
 
-    private String getErrorMessage(HttpServletRequest request, String key)
-    {
+    private String getErrorMessage(HttpServletRequest request, String key) {
         Exception exception = (Exception) request.getSession().getAttribute(key);
         String error = null;
         if (exception instanceof BadCredentialsException) {
