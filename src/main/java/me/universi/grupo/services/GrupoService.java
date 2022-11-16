@@ -125,6 +125,8 @@ public class GrupoService {
                     "perfil",
                     "registrar",
                     "login",
+                    "logout",
+                    "login.js",
                     "usuario",
                     ""
             };
