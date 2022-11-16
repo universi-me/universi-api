@@ -11,7 +11,7 @@
         http://www.springframework.org/schema/security/spring-security.xsd">
 
 
-	<http use-expressions="true">
+	<http use-expressions="true" auto-config="true">
 		<expression-handler ref="defaultWebSecurityExpressionHandler" />
 		<csrf disabled="true"/>
 
@@ -32,9 +32,10 @@
 		<intercept-url pattern="/h2-console/**" access="permitAll"/>
 		
 		<intercept-url pattern="/**" access="isAuthenticated()"/>
-		
+
+		<custom-filter ref="customUsernamePasswordAuthenticationFilter" after="FORM_LOGIN_FILTER"/>
 		<form-login login-page="/login" authentication-failure-url="/login?error" authentication-success-handler-ref="autenticacaoValidaHandler" />
-		<logout logout-success-url="/login?logout" />
+		<logout invalidate-session="true" logout-success-url="/login?logout" delete-cookies="true"/>
 		
 		
 		<!-- Corrigir H2-console -->
@@ -42,6 +43,22 @@
 			<frame-options policy="SAMEORIGIN"/>
 		</headers>
 	</http>
+
+	<beans:bean id="customUsernamePasswordAuthenticationFilter" class="me.universi.usuario.services.CustomUsernamePasswordAuthenticationFilter">
+		<beans:property name="authenticationManager" ref="authenticationManager"/>
+		<beans:property name="authenticationSuccessHandler" ref="autenticacaoValidaHandler"/>
+		<beans:property name="authenticationFailureHandler" ref="autenticacaofalhaHandler"/>
+		<beans:property name="filterProcessesUrl" value="/login.js"/>
+		<beans:property name="usernameParameter" value="username"/>
+		<beans:property name="passwordParameter" value="password"/>
+	</beans:bean>
+
+
+	<authentication-manager alias="authenticationManager">
+		<authentication-provider ref="authenticationProvider" />
+	</authentication-manager>
+
+	<beans:bean id="autenticacaofalhaHandler" class="me.universi.usuario.services.AutenticacaoFalhaHandler" />
 
 	<beans:bean id="autenticacaoValidaHandler" class="me.universi.usuario.services.AutenticacaoValidaHandler" />
 

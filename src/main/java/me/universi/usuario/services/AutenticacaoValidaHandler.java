@@ -1,12 +1,12 @@
 package me.universi.usuario.services;
 
+import me.universi.api.entities.Resposta;
 import me.universi.usuario.entities.Usuario;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.web.DefaultRedirectStrategy;
-import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
+import org.springframework.security.web.savedrequest.SavedRequest;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -48,6 +48,22 @@ public class AutenticacaoValidaHandler extends SavedRequestAwareAuthenticationSu
             //    super.onAuthenticationSuccess(request, response, authentication);
             //}
         }
-        super.onAuthenticationSuccess(request, response, authentication);
+
+        if ("application/json".equals(request.getHeader("Content-Type"))) {
+
+            Resposta resposta = new Resposta();
+            resposta.sucess = true;
+            resposta.mensagem = "Usuário Logado com sucesso.";
+
+            SavedRequest lastRequestSaved = (SavedRequest)session.getAttribute("SPRING_SECURITY_SAVED_REQUEST");
+            resposta.enderecoParaRedirecionar = lastRequestSaved!=null?lastRequestSaved.getRedirectUrl():"/";
+
+            response.setHeader("Content-Type", "application/json; charset=utf-8");
+            response.getWriter().print(resposta.toString());
+            response.getWriter().flush();
+
+        } else {
+            super.onAuthenticationSuccess(request, response, authentication);
+        }
     }
 }

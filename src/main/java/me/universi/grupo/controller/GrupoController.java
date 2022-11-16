@@ -1,5 +1,6 @@
 package me.universi.grupo.controller;
 
+import me.universi.api.entities.Resposta;
 import me.universi.grupo.entities.Grupo;
 import me.universi.grupo.enums.GrupoTipo;
 import me.universi.grupo.exceptions.GrupoException;
@@ -9,6 +10,7 @@ import me.universi.usuario.entities.Usuario;
 import me.universi.usuario.services.SecurityUserDetailsService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
@@ -16,13 +18,13 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.util.List;
+import java.util.Collection;
+import java.util.Map;
 
 @Controller
 public class GrupoController {
     @Autowired
     public GrupoService grupoService;
-
     @Autowired
     public SecurityUserDetailsService usuarioService;
 
@@ -89,12 +91,20 @@ public class GrupoController {
     }
 
 
-    // http://localhost:8080/projeto/criar?nome=teste&descricao=teste2
-    @RequestMapping("/grupo/criar")
-    public Object grupo_criar(HttpSession session, HttpServletResponse response, @RequestParam("grupoId") Long grupoId, @RequestParam("nickname") String nickname, @RequestParam("nome") String nome, @RequestParam("descricao") String descricao, @RequestParam("tipo") GrupoTipo tipo) {
+    @ResponseBody
+    @RequestMapping(value = "/grupo/criar", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public Object grupo_criar(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+        Resposta resposta = new Resposta();
         try {
+
+            Long grupoIdPai = (Long)Long.valueOf((String)body.get("grupoId"));
+            String nickname = (String)body.get("nickname");
+            String nome = (String)body.get("nome");
+            String descricao = (String)body.get("descricao");
+            GrupoTipo tipo = (GrupoTipo)GrupoTipo.valueOf((String)body.get("tipo"));
+
             Usuario usuario = (Usuario) session.getAttribute("usuario");
-            Grupo grupoPai = grupoService.findById(grupoId);
+            Grupo grupoPai = grupoService.findById(grupoIdPai);
 
             if(grupoService.verificarPermissaoParaGrupo(grupoPai, usuario)) {
                 Grupo grupoNew = new Grupo();
@@ -105,39 +115,61 @@ public class GrupoController {
                 grupoNew.setAdmin(usuario.getPerfil());
                 grupoService.adicionarSubgrupo(grupoPai, grupoNew);
 
-                return "redirect:"+session.getAttribute("lastPath");
+                resposta.mensagem = "Grupo criado com sucesso.";
+                resposta.sucess = true;
+                return resposta;
             }
 
-            return "Falha ao criar grupo";
+            resposta.mensagem = "Falha ao criar grupo";
+            return resposta;
+
         } catch (Exception e) {
-            return e.getMessage();
+            resposta.mensagem = e.getMessage();
+            return resposta;
         }
     }
 
-    @RequestMapping("/grupo/editar")
-    public Object grupo_editar(HttpSession session, HttpServletResponse response, @RequestParam("grupoId") Long grupoId, @RequestParam("nickname") String nickname, @RequestParam("nome") String nome, @RequestParam("descricao") String descricao, @RequestParam("tipo") GrupoTipo tipo) {
+    @ResponseBody
+    @RequestMapping(value = "/grupo/editar", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public Object grupo_editar(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+        Resposta resposta = new Resposta();
         try {
+
+            Long grupoId = (Long)Long.valueOf((String)body.get("grupoId"));
+            String nome = (String)body.get("nome");
+            String descricao = (String)body.get("descricao");
+            GrupoTipo tipo = (GrupoTipo)GrupoTipo.valueOf((String)body.get("tipo"));
+
             Usuario usuario = (Usuario) session.getAttribute("usuario");
             Grupo grupoEdit = grupoService.findById(grupoId);
 
             if(grupoService.verificarPermissaoParaGrupo(grupoEdit, usuario)) {
                 grupoEdit.setNome(nome);
-                grupoEdit.setNickname(nickname);
                 grupoEdit.setDescricao(descricao);
                 grupoEdit.setTipo(tipo);
                 grupoService.save(grupoEdit);
-                return "redirect:"+session.getAttribute("lastPath");
-            }
 
-            return "Falha ao criar grupo";
+                resposta.mensagem = "As Alterações foram salvas com sucesso.";
+                resposta.sucess = true;
+                return resposta;
+            }
+            resposta.mensagem = "Falha ao criar grupo";
+            return resposta;
         } catch (Exception e) {
-            return e.getMessage();
+            resposta.mensagem = e.getMessage();
+            return resposta;
         }
     }
 
-    @RequestMapping("/grupo/adicionar")
-    public Object grupo_adicionar_participante(HttpSession session, HttpServletResponse response, @RequestParam("grupoId") Long grupoId, @RequestParam("participante") String participante) {
+    @ResponseBody
+    @PostMapping(value = "/grupo/adicionar", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public Object grupo_adicionar_participante(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+        Resposta resposta = new Resposta();
         try {
+
+            Long grupoId = (Long)Long.valueOf((String)body.get("grupoId"));
+            String participante = (String)body.get("participante");
+
             Usuario usuario = (Usuario) session.getAttribute("usuario");
             Grupo grupoEdit = grupoService.findById(grupoId);
 
@@ -152,54 +184,100 @@ public class GrupoController {
 
             if(participanteUser != null && grupoService.verificarPermissaoParaGrupo(grupoEdit, usuario)) {
                 grupoService.adicionarParticipante(grupoEdit, participanteUser.getPerfil());
-                return "redirect:"+session.getAttribute("lastPath");
+
+                resposta.sucess = true;
+                resposta.mensagem = "Participante adicionado com sucesso.";
+                return resposta;
             }
 
-            return "Falha ao criar grupo";
+            resposta.mensagem = "Falha ao criar grupo";
+            return resposta;
+
         } catch (Exception e) {
-            return e.getMessage();
+            resposta.mensagem = e.getMessage();
+            return resposta;
         }
     }
 
     // http://localhost:8080/projeto/remover?id=1
     @RequestMapping("/grupo/remover")
     @ResponseBody
-    public Object grupo_remove(HttpSession session, HttpServletResponse response, @RequestParam("id") Long id) {
+    public Object grupo_remove(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+        Resposta resposta = new Resposta();
         try {
+
+            Long grupoId = (Long)Long.valueOf((String)body.get("grupoId"));
+
             Usuario usuario = (Usuario) session.getAttribute("usuario");
-            Grupo grupo = grupoService.findById(id);
+            Grupo grupo = grupoService.findById(grupoId);
 
             if(grupoService.verificarPermissaoParaGrupo(grupo, usuario)) {
                 grupoService.delete(grupo);
+
+                resposta.mensagem = "Grupo removido com exito.";
+                resposta.sucess = true;
+                return resposta;
             }
 
-            return grupo;
+            resposta.mensagem = "Erro ao executar operação.";
+            return resposta;
+
         } catch (Exception e) {
-            return e.getMessage();
+            resposta.mensagem = e.getMessage();
+            return resposta;
         }
     }
 
-    // http://localhost:8080/projeto/obter/1
-    @RequestMapping("/grupo/obter/{id}")
     @ResponseBody
-    public Object get(HttpServletResponse response, @PathVariable Long id) {
+    @RequestMapping(value = "/grupo/obter", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public Object obter_grupo(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+        Resposta resposta = new Resposta();
         try {
-            Grupo grupo = grupoService.findById(id);
-            if(grupo == null) {
-                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                throw new GrupoException("Grupo não encontrado.");
+
+            Long grupoId = (Long)Long.valueOf((String)body.get("grupoId"));
+
+            Grupo grupo = grupoService.findById(grupoId);
+            if(grupo != null) {
+                resposta.conteudo.put("grupo", grupo);
+
+                resposta.mensagem = "Operação Realizada com exito.";
+                resposta.sucess = true;
+                return resposta;
             }
-            return grupo;
+
+            resposta.mensagem = "Erro ao executar operação.";
+            return resposta;
+
         } catch (Exception e) {
-            return e.getMessage();
+            resposta.mensagem = e.getMessage();
+            return resposta;
         }
     }
 
-    // http://localhost:8080/projeto/listar
-    @RequestMapping("/grupo/listar")
     @ResponseBody
-    public List<Grupo> getlist() {
-        List<Grupo> ret = grupoService.findAll();
-        return ret;
+    @PostMapping(value = "/grupo/listar", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public Object listar_subgrupo(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+        Resposta resposta = new Resposta();
+        try {
+
+            Long grupoId = (Long)Long.valueOf((String)body.get("grupoId"));
+
+            Grupo grupo = grupoService.findById(grupoId);
+            if(grupo != null) {
+                Collection<Grupo> listaSubgrupos = grupo.getSubGrupos();
+                resposta.conteudo.put("subgrupos", listaSubgrupos);
+
+                resposta.mensagem = "Operação Realizada com exito.";
+                resposta.sucess = true;
+                return resposta;
+            }
+
+            resposta.mensagem = "Erro ao executar operação.";
+            return resposta;
+
+        } catch (Exception e) {
+            resposta.mensagem = e.getMessage();
+            return resposta;
+        }
     }
 }
