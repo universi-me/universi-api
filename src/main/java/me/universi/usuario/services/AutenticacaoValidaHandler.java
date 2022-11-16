@@ -21,31 +21,33 @@ public class AutenticacaoValidaHandler extends SavedRequestAwareAuthenticationSu
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws ServletException, IOException {
-
         HttpSession session = request.getSession(false);
+        if(session != null) {
 
-        String username = "";
-        if(authentication.getPrincipal() instanceof Principal) {
-            username = ((Principal)authentication.getPrincipal()).getName();
-        }else {
-            username = ((UserDetails)authentication.getPrincipal()).getUsername();
+            String username = null;
+            if (authentication.getPrincipal() instanceof Principal) {
+                username = ((Principal) authentication.getPrincipal()).getName();
+            } else {
+                username = ((UserDetails) authentication.getPrincipal()).getUsername();
+            }
+
+            if(username != null) {
+                Usuario usuario = (Usuario) userDetailsManager.loadUserByUsername(username);
+                // Salvar usuario na sessao
+                session.setAttribute("usuario", usuario);
+            }
+
+            // Set session inatividade do usuario em 10min
+            session.setMaxInactiveInterval(10 * 60);
+
+            // usuário não tem perfil, redirecionar para editar perfil
+            //if(usuario.getPerfil()==null) {
+            //    RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
+            //    redirectStrategy.sendRedirect(request, response, "/p/" + usuario.getUsername() + "/editar");
+            //} else {
+            //    super.onAuthenticationSuccess(request, response, authentication);
+            //}
         }
-        Usuario usuario = (Usuario)userDetailsManager.loadUserByUsername(username);
-
-        // Salvar usuario na sessao
-        session.setAttribute("usuario", usuario);
-
-        // Set session inatividade do usuario em 10min
-        session.setMaxInactiveInterval(10*60);
-
-        // usuário não tem perfil, redirecionar para editar perfil
-        //if(usuario.getPerfil()==null) {
-        //    RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
-        //    redirectStrategy.sendRedirect(request, response, "/p/" + usuario.getUsername() + "/editar");
-        //} else {
-        //    super.onAuthenticationSuccess(request, response, authentication);
-        //}
-
         super.onAuthenticationSuccess(request, response, authentication);
     }
 }
