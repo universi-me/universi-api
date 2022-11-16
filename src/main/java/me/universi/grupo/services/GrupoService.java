@@ -110,6 +110,7 @@ public class GrupoService {
             String nicknameLower = nickname.toLowerCase();
 
             String[] palavrasReservadas = new String[] {
+                    "admin",
                     "adicionar",
                     "remover",
                     "conta",
@@ -120,7 +121,12 @@ public class GrupoService {
                     "listar",
                     "competencia",
                     "atualizar",
-                    "recomendacao"
+                    "recomendacao",
+                    "perfil",
+                    "registrar",
+                    "login",
+                    "usuario",
+                    ""
             };
 
             if(Arrays.asList(palavrasReservadas).contains(nicknameLower)) {
