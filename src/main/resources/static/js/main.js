@@ -42,6 +42,12 @@ function efetuarLogin() {
    }
    api_request('/login.js', bodyValores, null);
 }
+function loginComGoogle(token) {
+   var bodyValores = {
+      token: token,
+   }
+   api_request('/login/google', bodyValores, null);
+}
 function efetuarRegistro() {
    var bodyValores = {
       username: document.querySelector('#username').value,

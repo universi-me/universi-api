@@ -1,19 +1,30 @@
 package me.universi.usuario.controller;
 
+import java.util.Collections;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
 import me.universi.api.entities.Resposta;
-import me.universi.grupo.enums.GrupoTipo;
 import me.universi.usuario.entities.Usuario;
+import me.universi.usuario.enums.Autoridade;
+import me.universi.usuario.exceptions.UsuarioException;
 import me.universi.usuario.services.SecurityUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 
 @Controller
 public class UsuarioController {
@@ -80,15 +91,23 @@ public class UsuarioController {
 
     @ResponseBody
     @PostMapping(value = "/conta/editar", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Object conta_editar(HttpSession session, @RequestBody Map<String, Object> body) {
+    public Object conta_editar(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
         Resposta resposta = new Resposta();
         try {
 
             String password = (String)body.get("password");
+            if(password == null) {
+                throw new UsuarioException("Parametro password é nulo.");
+            }
+
             String senha = (String)body.get("senha");
 
             Usuario usuario = (Usuario) session.getAttribute("usuario");
-            if (usuarioService.senhaValida(usuario, senha)) {
+
+            // se logado com google não checkar senha
+            Boolean logadoComGoogle = (Boolean)session.getAttribute("loginViaGoogle")!=null?(Boolean)session.getAttribute("loginViaGoogle"):false;
+
+            if (logadoComGoogle || usuarioService.senhaValida(usuario, senha)) {
                 usuario.setSenha(usuarioService.codificarSenha(password));
                 usuarioService.save(usuario);
 
@@ -100,6 +119,73 @@ public class UsuarioController {
 
             resposta.mensagem = "Credenciais Invalidas!";
             return resposta;
+        }catch (Exception e) {
+            resposta.mensagem = e.getMessage();
+            return resposta;
+        }
+    }
+
+    @ResponseBody
+    @PostMapping(value = "/login/google", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public Object conta_google(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+        Resposta resposta = new Resposta();
+        try {
+
+            String idTokenString = (String)body.get("token");
+
+            if(idTokenString==null) {
+                throw new UsuarioException("Parametro token é nulo.");
+            }
+
+            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
+                    .setAudience(Collections.singletonList("110833050076-ib680ela4hfqr2c0lhc9h19snrsvltnd.apps.googleusercontent.com"))
+                    .build();
+
+            GoogleIdToken idToken = verifier.verify(idTokenString);
+
+            if (idToken != null) {
+                Payload payload = idToken.getPayload();
+
+                String userId = payload.getSubject();
+
+                String email = payload.getEmail();
+                boolean emailVerified = Boolean.valueOf(payload.getEmailVerified());
+                String name = (String) payload.get("name");
+                String pictureUrl = (String) payload.get("picture");
+                String locale = (String) payload.get("locale");
+                String familyName = (String) payload.get("family_name");
+                String givenName = (String) payload.get("given_name");
+
+
+                HttpSession sessionReq = request.getSession(true);
+
+                // Set session inatividade do usuario em 10min
+                sessionReq.setMaxInactiveInterval(10 * 60);
+
+                Usuario usuario = (Usuario)usuarioService.findFirstByEmail(email);
+
+                Authentication authentication = new UsernamePasswordAuthenticationToken(usuario, null, AuthorityUtils.createAuthorityList(Autoridade.ROLE_USER.name()));
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                if(usuario != null) {
+                    // Salvar usuario na sessao
+                    sessionReq.setAttribute("usuario", usuario);
+
+                    sessionReq.setAttribute("loginViaGoogle", true);
+
+                    resposta.sucess = true;
+                    resposta.enderecoParaRedirecionar = "/conta";
+                    resposta.mensagem = "Usuário Logado com sucesso.";
+                    return resposta;
+                }
+
+            } else {
+                throw new UsuarioException("Token de Autenticação é Inválida.");
+            }
+
+            resposta.mensagem = "Falha ao fazer login com Google.";
+            return resposta;
+
         }catch (Exception e) {
             resposta.mensagem = e.getMessage();
             return resposta;

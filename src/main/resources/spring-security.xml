@@ -17,6 +17,7 @@
 
 		<intercept-url pattern="/" access="permitAll"/>
 		<intercept-url pattern="/login" access="permitAll"/>
+		<intercept-url pattern="/login/google" access="permitAll"/>
 		<intercept-url pattern="/registrar" access="permitAll"/>
 
 		<intercept-url pattern="/css/**" access="permitAll"/>
