@@ -2,6 +2,7 @@ package me.universi.usuario.services;
 
 import me.universi.usuario.entities.Usuario;
 import me.universi.usuario.enums.Autoridade;
+import me.universi.usuario.exceptions.UsuarioException;
 import me.universi.usuario.repositories.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -9,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import javax.servlet.http.HttpSession;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -32,12 +34,12 @@ public class SecurityUserDetailsService implements UserDetailsService {
         if (usuario.isPresent()) {
             return usuario.get();
         }
-        throw new Exception("Email de Usuário não encontrado!");
+        throw new UsuarioException("Email de Usuário não encontrado!");
     }
 
     public void createUser(Usuario user) throws Exception {
         if (user==null) {
-            throw new Exception("Usuario está vazio!");
+            throw new UsuarioException("Usuario está vazio!");
         }
         user.setAutoridade(Autoridade.ROLE_USER);
         userRepository.save((Usuario)user);
@@ -89,5 +91,14 @@ public class SecurityUserDetailsService implements UserDetailsService {
 
     public void save(Usuario usuario) {
         userRepository.save(usuario);
+    }
+
+    public void configurarSessaoParaUsuario(HttpSession session, Usuario usuario) {
+
+        // Set session inatividade do usuario em 10min
+        session.setMaxInactiveInterval(10 * 60);
+
+        // Salvar usuario na sessao
+        session.setAttribute("usuario", usuario);
     }
 }
