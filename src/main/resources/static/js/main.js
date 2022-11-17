@@ -57,11 +57,8 @@ function efetuarRegistro() {
    api_request('/registrar', bodyValores, null);
 }
 
-
+/* API request */
 function api_request(path, parametro, callback) {
-    document.getElementById('mensagem_error').hidden = true;
-    document.getElementById('mensagem_ok').hidden = true;
-
     const http = new XMLHttpRequest();
     http.open('POST', path, true);
     http.setRequestHeader('Content-type', 'application/json');
@@ -72,8 +69,7 @@ function api_request(path, parametro, callback) {
          var jsonResponse = this.response;
 
          if(jsonResponse.mensagem != null && jsonResponse.mensagem.length > 0) {
-            document.getElementById(jsonResponse.sucess?'mensagem_ok':'mensagem_error').hidden = false;
-            document.getElementById(jsonResponse.sucess?'mensagem_ok':'mensagem_error').innerHTML = jsonResponse.mensagem;
+            alert(jsonResponse.mensagem, (jsonResponse.sucess)?'success':'danger');
          }
 
          if(callback != null) {
@@ -85,16 +81,30 @@ function api_request(path, parametro, callback) {
          }
 
        } else {
-         document.getElementById('mensagem_error').hidden = false;
-         document.getElementById('mensagem_error').innerHTML = "Um erro ocorreu na requisição.";
+         alert("Ocorreu Um erro na requisição.", 'warning');
        }
     };
 }
 
+
+/* Alertas */
+const alert = (message, type) => {
+    const wrapper = document.createElement('div')
+    wrapper.innerHTML = [
+      `<div class="alert alert-${type} alert-dismissible" role="alert">`,
+      `   <div>${message}</div>`,
+      '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+      '</div>'
+    ].join('')
+    const areaDeAlertas = document.getElementById('areaDeAlertas');
+    areaDeAlertas.append(wrapper)
+}
+
+
+/* URL calls */
 function openUrlPath(pathName) {
     window.location.href = pathName;
 }
-
 function goto_url(pathName) {
 	var url = window.location.href;
 	if(!url.endsWith("/")) {
@@ -103,7 +113,6 @@ function goto_url(pathName) {
 	url = url + pathName;
 	window.location.href = url;
 }
-
 function RemoveLastDirectoryPartOf(the_url) {
 	var the_arr = the_url.split('/');
 	the_arr.pop();
@@ -113,6 +122,8 @@ function openSubUrl() {
 	window.location.href = RemoveLastDirectoryPartOf(window.location.href);
 }
 
+
+/* verificar campo input */
 function checkCampo(input, regExInput, msgRegEx) {
    if(input.value == null || input.value.length==0) {
       input.setCustomValidity("Verifique o campo.");

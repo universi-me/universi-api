@@ -8,6 +8,7 @@
    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"
          rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi"
          crossorigin="anonymous">
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
    <link rel="stylesheet" href="/css/style.css">
    <script src="/js/main.js"></script>
    <title>Conta</title>
@@ -16,12 +17,7 @@
 <body style="max-width:800px;margin: 0 auto;">
 <center><img src="https://avatars.githubusercontent.com/u/116006104" width="200" alt="Universi.me"/></center>
 
-<div id="mensagem_ok" class="alert alert-success" role="alert" hidden>
-   <p>Operação realizada com sucesso.</p>
-</div>
-<div id="mensagem_error" class="alert alert-warning" role="alert" hidden>
-   <p >Um error ocorreu.</p>
-</div>
+<div id="areaDeAlertas"></div>
 
    <div class="form-group">
       <label for="username" class="col-sm-3 col-form-label">Usuário</label>
@@ -49,7 +45,7 @@
          <input type="password" class="form-control" id="password2" name="password2" placeholder="Nova Senha">
       </div>
    </div>
-   <div class="form-group">
+   <div class="form-group" th:unless="${session.loginViaGoogle != null}">
       <label for="senha" class="col-sm-3 col-form-label">Senha</label>
       <div class="mb-3">
          <input type="password" class="form-control" id="senha" name="senha" placeholder="">
