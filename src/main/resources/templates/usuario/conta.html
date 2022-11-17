@@ -38,13 +38,13 @@
 <br/><br/>
 <form onsubmit="editarConta();return false;" oninput="validar();">
    <div class="form-group">
-      <label for="password" class="col-sm-3 col-form-label">Nova Senha</label>
+      <label for="password" class="col-sm-3 col-form-label">* Nova Senha</label>
       <div class="mb-3">
          <input type="password" class="form-control" id="password" name="password" placeholder="Nova Senha">
       </div>
    </div>
    <div class="form-group">
-      <label for="password2" class="col-sm-3 col-form-label">Confirmar Nova Senha</label>
+      <label for="password2" class="col-sm-3 col-form-label">* Confirmar Nova Senha</label>
       <div class="mb-3">
          <input type="password" class="form-control" id="password2" name="password2" placeholder="Nova Senha">
       </div>
@@ -62,7 +62,6 @@
 
 function validar() {
    checkCampo(password);
-   checkCampo(senha);
    password2.setCustomValidity((password2.value != password.value) ? "As Senhas não correspondem." : "");
 }
 validar();
