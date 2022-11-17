@@ -10,6 +10,7 @@
          crossorigin="anonymous">
     <link rel="stylesheet" href="/css/style.css">
     <script src="/js/main.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
    <title>Login</title>
 </head>
 
@@ -34,10 +35,23 @@
       </div>
       <button type="submit" class="btn btn-primary">Login</button>
 </form>
+<br/>
+<div><center>
+<h5>Entrar com DCX</h5>
+    <div id="g_id_onload"
+         data-client_id="110833050076-ib680ela4hfqr2c0lhc9h19snrsvltnd"
+         data-callback="handleCredentialResponse">
+    </div>
+    <div class="g_id_signin" data-type="standard"></div>
+</center></div>
+<br/><br/>
 <script>
+function handleCredentialResponse(response) {
+    loginComGoogle(response.credential);
+}
 function validar() {
-   username.setCustomValidity((username.value == null || username.value.length==0) ? "Verifique o campo Usuário." : "");
-   password.setCustomValidity((password.value == null || password.value.length==0) ? "Verifique o campo Senha." : "");
+    username.setCustomValidity((username.value == null || username.value.length==0) ? "Verifique o campo Usuário." : "");
+    password.setCustomValidity((password.value == null || password.value.length==0) ? "Verifique o campo Senha." : "");
 }
 validar();
 </script>
