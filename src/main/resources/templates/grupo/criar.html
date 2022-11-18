@@ -43,6 +43,10 @@
          <option th:each="tipoNow : ${tiposGrupo}" th:value="${tipoNow}" th:text="${tipoNow.label}"></option>
       </select>
    </div>
+   <div class="form-check form-switch">
+      <input class="form-check-input" type="checkbox" role="switch" id="podeCriarGrupo" name="podeCriarGrupo">
+      <label class="form-check-label" for="podeCriarGrupo">Qualquer pessoa pode criar subgrupos neste grupo.</label>
+   </div>
    <p align="right"><button type="submit" class="btn btn-primary">Criar Subgrupo</button></p>
 </form>
 <script>

@@ -5,7 +5,8 @@ function editarGrupo() {
       nome: document.querySelector('#nome').value,
       nickname: document.querySelector('#nickname').value,
       descricao: document.querySelector('#descricao').value,
-      tipo: document.querySelector('#tipo').value
+      tipo: document.querySelector('#tipo').value,
+      podeCriarGrupo: document.querySelector('#podeCriarGrupo').checked,
    }
    api_request('/grupo/editar', bodyValores, null);
 }
@@ -15,7 +16,8 @@ function criarGrupo() {
       nome: document.querySelector('#nome').value,
       nickname: document.querySelector('#nickname').value,
       descricao: document.querySelector('#descricao').value,
-      tipo: document.querySelector('#tipo').value
+      tipo: document.querySelector('#tipo').value,
+      podeCriarGrupo: document.querySelector('#podeCriarGrupo').checked,
    }
    api_request('/grupo/criar', bodyValores, null);
 }

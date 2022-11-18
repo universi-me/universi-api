@@ -15,8 +15,8 @@ public class GrupoService {
     @Autowired
     private GrupoRepository grupoRepository;
 
-    public Grupo findById(Long id) {
-        Optional<Grupo> grupoOptional = grupoRepository.findById(id);
+    public Grupo findFirstById(Long id) {
+        Optional<Grupo> grupoOptional = grupoRepository.findFirstById(id);
         if(grupoOptional.isPresent()){
             return grupoOptional.get();
         }else{
@@ -54,10 +54,8 @@ public class GrupoService {
 
         Perfil perfil = usuario.getPerfil();
         if (perfil == null) {
-            //throw new GrupoException("Você precisa de um Perfil.");
-        }
-
-        if(grupo.getAdmin() != perfil) {
+            //throw new GrupoException("Você precisa criar um Perfil.");
+        } else if(perfil.getId()!=0 && grupo.getAdmin().getId() != perfil.getId()) {
             //throw new GrupoException("Apenas administradores podem editar seus grupos!");
         }
 
@@ -69,9 +67,11 @@ public class GrupoService {
         if(grupoArr == null) {
             grupoArr = new ArrayList<Grupo>();
         }
-        grupoArr.add(sub);
-        grupo.setSubGrupos(grupoArr);
-        this.save(grupo);
+        if(!grupoArr.contains(sub)) {
+            grupoArr.add(sub);
+            grupo.setSubGrupos(grupoArr);
+            this.save(grupo);
+        }
     }
 
     public void removerSubgrupo(Grupo grupo, Grupo sub) {
@@ -79,9 +79,11 @@ public class GrupoService {
         if(grupoArr == null) {
             grupoArr = new ArrayList<Grupo>();
         }
-        grupoArr.remove(sub);
-        grupo.setSubGrupos(grupoArr);
-        this.save(grupo);
+        if(grupoArr.contains(sub)) {
+            grupoArr.remove(sub);
+            grupo.setSubGrupos(grupoArr);
+            this.save(grupo);
+        }
     }
 
     public void adicionarParticipante(Grupo grupo, Perfil perfil) {
@@ -89,9 +91,11 @@ public class GrupoService {
         if(participantesArr == null) {
             participantesArr = new ArrayList<Perfil>();
         }
-        participantesArr.add(perfil);
-        grupo.setParticipantes(participantesArr);
-        this.save(grupo);
+        if(!participantesArr.contains(perfil)) {
+            participantesArr.add(perfil);
+            grupo.setParticipantes(participantesArr);
+            this.save(grupo);
+        }
     }
 
     public void removerParticipante(Grupo grupo, Perfil perfil) {
@@ -99,9 +103,11 @@ public class GrupoService {
         if(participantesArr == null) {
             participantesArr = new ArrayList<Perfil>();
         }
-        participantesArr.remove(perfil);
-        grupo.setParticipantes(participantesArr);
-        this.save(grupo);
+        if(participantesArr.contains(perfil)) {
+            participantesArr.remove(perfil);
+            grupo.setParticipantes(participantesArr);
+            this.save(grupo);
+        }
     }
 
     public boolean nicknameDisponivelParaGrupo(Grupo grupo, String nickname) {
