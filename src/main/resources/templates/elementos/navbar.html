@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<div th:fragment="navbar">
+<nav class="navbar navbar-expand-lg bg-light">
+  <div class="container-fluid">
+    <a class="navbar-brand mt-2 mt-lg-0" href="/">
+      <img src="https://i.imgur.com/ba5j9qJ.png" height="40" alt="Universi.me Logo" loading="lazy" />
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="/">Início</a>
+        </li>
+      </ul>
+
+      <div align="right" sec:authorize="isAuthenticated()">
+        <div class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <img
+                    src="https://i.imgur.com/vUBrCxr.png"
+                    class="rounded-circle"
+                    height="40"
+                    alt="Perfil"
+                    loading="lazy"
+            />
+          </a>
+      <ul class="dropdown-menu">
+        <li><a class="dropdown-item" th:href="@{/p/{path}(path=${session.usuario.nome})}">Meu Perfil</a></li>
+        <li><a class="dropdown-item" href="/conta">Minha Conta</a></li>
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item" href="/logout">Logout</a></li>
+      </ul>
+      </div>
+      </div>
+      <div align="right" sec:authorize="isAnonymous()"><button onclick="location.href='/login'" class="btn btn-primary">Login</button></div>
+    </div>
+  </div>
+</nav>
+  <br/>
+  <br/>
+</div>
+
+</body>
+</html>

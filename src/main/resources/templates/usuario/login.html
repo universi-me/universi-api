@@ -15,11 +15,13 @@
    <title>Login</title>
 </head>
 
-<body style="max-width:400px;margin: 0 auto;">
-<center><img src="https://avatars.githubusercontent.com/u/116006104" width="200" alt="Universi.me"/></center>
+<body>
+<div class="container py-4 px-3 mx-auto">
+    <div th:replace="elementos/navbar :: navbar"></div>
+<div id="areaDeAlertas" style="max-width:700px;margin: 0 auto;"></div>
 
-<div id="areaDeAlertas"></div>
-
+    <div style="max-width:400px;margin: 0 auto;">
+        <p><h4 style="text-align: center;">Login</h4></p>
 <form onsubmit="efetuarLogin();return false;" oninput="validar();">
       <div class="mb-3">
          <label for="username" class="form-label">* Usuário:</label>
@@ -42,6 +44,10 @@
     <div class="g_id_signin" data-type="standard"></div>
 </center></div>
 <br/><br/>
+
+        <script th:unless="${param.logout == null}">
+            alert("A sua sessão foi finalizada!", 'success');
+        </script>
 <script>
 function handleCredentialResponse(response) {
     loginComGoogle(response.credential);
@@ -53,5 +59,9 @@ function validar() {
 validar();
 </script>
 <p align="right"><button onclick="location.href='/registrar'" class="btn btn-primary">Registrar-se</button></p>
+    </div>
+
+    <div th:replace="elementos/footer :: footer"></div>
+</div>
 </body>
 </html>
