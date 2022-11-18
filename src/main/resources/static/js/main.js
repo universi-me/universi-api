@@ -33,7 +33,7 @@ function adicionarParticipanteAoGrupo() {
 function editarConta() {
    var bodyValores = {
       password: document.querySelector('#password').value,
-      senha: document.querySelector('#senha').value
+      senha: (document.querySelector('#senha')!=null)?document.querySelector('#senha').value:null,
    }
    api_request('/conta/editar', bodyValores, null);
 }
