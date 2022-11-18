@@ -8,14 +8,16 @@
    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"
          rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi"
          crossorigin="anonymous">
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
    <link rel="stylesheet" href="/css/style.css">
    <script src="/js/main.js"></script>
    <title>Index</title>
 </head>
 <body>
-<p align="right"><button onclick="location.href='/login'" class="btn btn-primary">Login</button></p>
-<center>
-   <img src="https://avatars.githubusercontent.com/u/116006104" width="200" alt="Universi.me"/>
+<div class="container py-4 px-3 mx-auto">
+   <div th:replace="elementos/navbar :: navbar"></div>
+
+   <center>
    <div>Index template.</div>
    <br/>
    <br/>
@@ -23,6 +25,9 @@
    </br>
    <br/>
    <p><a href="/popular">Popular base de dados</a></p>
-</center>
+   </center>
+
+   <div th:replace="elementos/footer :: footer"></div>
+</div>
 </body>
 </html>
