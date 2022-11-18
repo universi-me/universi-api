@@ -67,7 +67,7 @@ public class GrupoController {
             }
 
             if(flagEdicao) {
-                grupoService.verificarPermissaoParaGrupo(grupoAtual, usuario);
+                //grupoService.verificarPermissaoParaGrupo(grupoAtual, usuario);
                 session.setAttribute("lastPath", requestPathSt);
                 map.addAttribute("tiposGrupo", GrupoTipo.values());
 
@@ -102,22 +102,24 @@ public class GrupoController {
             String nome = (String)body.get("nome");
             String descricao = (String)body.get("descricao");
             GrupoTipo tipo = (GrupoTipo)GrupoTipo.valueOf((String)body.get("tipo"));
+            boolean podeCriarGrupo = (Boolean)body.get("podeCriarGrupo");
 
             Usuario usuario = (Usuario) session.getAttribute("usuario");
-            Grupo grupoPai = grupoService.findById(grupoIdPai);
+            Grupo grupoPai = grupoService.findFirstById(grupoIdPai);
 
             if(!grupoService.nicknameDisponivelParaGrupo(grupoPai, nickname)) {
-                resposta.mensagem = "Este Nickname não está disponível para este grupo.";
-                return resposta;
+                throw new GrupoException("Este Nickname não está disponível para este grupo.");
             }
 
-            if(grupoService.verificarPermissaoParaGrupo(grupoPai, usuario)) {
+            if((grupoPai.podeCriarGrupo) || grupoService.verificarPermissaoParaGrupo(grupoPai, usuario)) {
                 Grupo grupoNew = new Grupo();
                 grupoNew.setNickname(nickname);
                 grupoNew.setNome(nome);
                 grupoNew.setDescricao(descricao);
                 grupoNew.setTipo(tipo);
                 grupoNew.setAdmin(usuario.getPerfil());
+                grupoNew.setPodeCriarGrupo(podeCriarGrupo);
+
                 grupoService.adicionarSubgrupo(grupoPai, grupoNew);
 
                 resposta.mensagem = "Grupo criado com sucesso.";
@@ -125,8 +127,7 @@ public class GrupoController {
                 return resposta;
             }
 
-            resposta.mensagem = "Falha ao criar grupo";
-            return resposta;
+            throw new GrupoException("Apenas Administradores podem criar subgrupos.");
 
         } catch (Exception e) {
             resposta.mensagem = e.getMessage();
@@ -144,22 +145,26 @@ public class GrupoController {
             String nome = (String)body.get("nome");
             String descricao = (String)body.get("descricao");
             GrupoTipo tipo = (GrupoTipo)GrupoTipo.valueOf((String)body.get("tipo"));
+            boolean podeCriarGrupo = (Boolean)body.get("podeCriarGrupo");
 
             Usuario usuario = (Usuario) session.getAttribute("usuario");
-            Grupo grupoEdit = grupoService.findById(grupoId);
+            Grupo grupoEdit = grupoService.findFirstById(grupoId);
 
             if(grupoService.verificarPermissaoParaGrupo(grupoEdit, usuario)) {
                 grupoEdit.setNome(nome);
                 grupoEdit.setDescricao(descricao);
                 grupoEdit.setTipo(tipo);
+                grupoEdit.setPodeCriarGrupo(podeCriarGrupo);
+
                 grupoService.save(grupoEdit);
 
                 resposta.mensagem = "As Alterações foram salvas com sucesso.";
                 resposta.sucess = true;
                 return resposta;
             }
-            resposta.mensagem = "Falha ao criar grupo";
-            return resposta;
+
+            throw new GrupoException("Falha ao editar grupo");
+
         } catch (Exception e) {
             resposta.mensagem = e.getMessage();
             return resposta;
@@ -176,7 +181,7 @@ public class GrupoController {
             String participante = (String)body.get("participante");
 
             Usuario usuario = (Usuario) session.getAttribute("usuario");
-            Grupo grupoEdit = grupoService.findById(grupoId);
+            Grupo grupoEdit = grupoService.findFirstById(grupoId);
 
             Usuario participanteUser = null;
             if(participante != null && participante.length() > 0) {
@@ -195,8 +200,7 @@ public class GrupoController {
                 return resposta;
             }
 
-            resposta.mensagem = "Falha ao criar grupo";
-            return resposta;
+            throw new GrupoException("Falha ao adicionar participante ao grupo");
 
         } catch (Exception e) {
             resposta.mensagem = e.getMessage();
@@ -214,7 +218,7 @@ public class GrupoController {
             Long grupoId = (Long)Long.valueOf((String)body.get("grupoId"));
 
             Usuario usuario = (Usuario) session.getAttribute("usuario");
-            Grupo grupo = grupoService.findById(grupoId);
+            Grupo grupo = grupoService.findFirstById(grupoId);
 
             if(grupoService.verificarPermissaoParaGrupo(grupo, usuario)) {
                 grupoService.delete(grupo);
@@ -224,8 +228,7 @@ public class GrupoController {
                 return resposta;
             }
 
-            resposta.mensagem = "Erro ao executar operação.";
-            return resposta;
+            throw new GrupoException("Erro ao executar operação.");
 
         } catch (Exception e) {
             resposta.mensagem = e.getMessage();
@@ -241,7 +244,7 @@ public class GrupoController {
 
             Long grupoId = (Long)Long.valueOf((String)body.get("grupoId"));
 
-            Grupo grupo = grupoService.findById(grupoId);
+            Grupo grupo = grupoService.findFirstById(grupoId);
             if(grupo != null) {
                 resposta.conteudo.put("grupo", grupo);
 
@@ -250,8 +253,7 @@ public class GrupoController {
                 return resposta;
             }
 
-            resposta.mensagem = "Erro ao executar operação.";
-            return resposta;
+            throw new GrupoException("Falha ao obter grupo.");
 
         } catch (Exception e) {
             resposta.mensagem = e.getMessage();
@@ -267,7 +269,7 @@ public class GrupoController {
 
             Long grupoId = (Long)Long.valueOf((String)body.get("grupoId"));
 
-            Grupo grupo = grupoService.findById(grupoId);
+            Grupo grupo = grupoService.findFirstById(grupoId);
             if(grupo != null) {
                 Collection<Grupo> listaSubgrupos = grupo.getSubGrupos();
                 resposta.conteudo.put("subgrupos", listaSubgrupos);
@@ -277,8 +279,7 @@ public class GrupoController {
                 return resposta;
             }
 
-            resposta.mensagem = "Erro ao executar operação.";
-            return resposta;
+            throw new GrupoException("Falha ao listar grupo.");
 
         } catch (Exception e) {
             resposta.mensagem = e.getMessage();
