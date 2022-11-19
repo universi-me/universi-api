@@ -309,6 +309,34 @@ public class GrupoController {
         }
     }
 
+    @ResponseBody
+    @PostMapping(value = "/grupo/participante/listar", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public Object grupo_participante_remover(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+        Resposta resposta = new Resposta();
+        try {
+
+            String grupoId = (String)body.get("grupoId");
+            if(grupoId == null) {
+                throw new GrupoException("Parametro grupoId é nulo.");
+            }
+
+            Grupo grupo = grupoService.findFirstById(Long.valueOf(grupoId));
+
+            if(grupo != null) {
+                resposta.conteudo.put("participantes", grupo.getParticipantes());
+                resposta.sucess = true;
+                resposta.mensagem = "Operação realizada com exito.";
+                return resposta;
+            }
+
+            throw new GrupoException("Falha ao listar participante ao grupo");
+
+        } catch (Exception e) {
+            resposta.mensagem = e.getMessage();
+            return resposta;
+        }
+    }
+
     @RequestMapping("/grupo/remover")
     @ResponseBody
     public Object grupo_remove(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
