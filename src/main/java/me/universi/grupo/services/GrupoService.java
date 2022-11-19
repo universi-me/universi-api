@@ -124,7 +124,7 @@ public class GrupoService {
 
     public Perfil obterParticipanteNoGrupo(Grupo grupo, Long idParticipante)
     {
-        if(idParticipante != null) {
+        if(idParticipante != null && grupo.getParticipantes() != null) {
             for (Perfil participanteNow : grupo.getParticipantes()) {
                 if (participanteNow.getId() == idParticipante) {
                     return participanteNow;
