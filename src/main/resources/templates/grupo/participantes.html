@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CSS only -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"
+          rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi"
+          crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3"
+            crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/main.js"></script>
+    <title th:text="${grupo.nome}+': Participantes'" th:unless="${grupo == null}">Participantes</title>
+    <title th:unless="${grupo != null}">Universi.me</title>
+</head>
+
+<body>
+<div class="container py-4 px-3 mx-auto">
+    <div th:replace="elementos/navbar :: navbar"></div>
+    <div id="areaDeAlertas" style="max-width:700px;margin: 0 auto;"></div>
+
+    <div style="max-width:1000px;margin: 0 auto;">
+        <p><h6 th:text="'Participantes do Grupo: ' + ${grupo.nome}"
+            th:unless="${grupo == null}" style="text-align: center;">Participantes do Grupo</h6></p>
+        <div class="card">
+            <div class="card-header">Adicionar Participante</div>
+            <div class="card-body">
+                <div class="input-group mb-3" style="max-width:400px;margin: 0 auto;">
+                    <input type="text" class="form-control" placeholder="Email/Usuário" aria-label="Email/Usuário"
+                           aria-describedby="addParticipanteBt" id="addParticipante" name="addParticipante">
+                    <button class="btn btn-outline-primary" type="button" id="addParticipanteBt"
+                            th:attr="onclick=|adicionarParticipante('${grupo.getId()}');|">Adicionar</button>
+                </div>
+            </div>
+            <div class="card-header card-footer">Todos os Participantes</div>
+            <div class="card-body">
+                <div class="row">
+
+                    <div class="col-sm-3" th:each="participanteNow : ${grupo.participantes}">
+                        <div class="card" style="width: 10rem;">
+                            <img src="https://i.imgur.com/vUBrCxr.png" class="card-img-top" alt="...">
+                            <div class="card-body">
+                                <h6 class="card-title">Nome do participante</h6>
+                                <p class="card-text" th:text="'@'+ ${participanteNow.usuario.getUsername()}">
+                                    @usuario</p>
+                            </div>
+                            <ul class="list-group list-group-flush" style="text-align: center;">
+                                <li class="list-group-item">
+                                    <a th:href="@{/p/{path}(path=${participanteNow.usuario.getUsername()})}"
+                                       class="btn btn-primary">Ver Perfil</a>
+                                </li>
+                                <li class="list-group-item">
+                                    <button th:attr="onclick=|removerParticipante('${grupo.getId()}','${participanteNow.usuario.getUsername()}');|"
+                                            href="#" class="btn btn-danger">Remover
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+
+        </div>
+        <script>
+            checkCampo(document.querySelector('#addParticipante'));
+
+            function removerParticipante(grupoId, participante) {
+                removerParticipanteDoGrupo(grupoId, participante, function removidoCallback(jsonResponse) {
+                    if(jsonResponse.sucess) {
+                        setTimeout(function () {
+                            location.reload();
+                        }, 1500);
+                    }
+                });
+            }
+            function adicionarParticipante(grupoId) {
+                if(checkCampo(document.querySelector('#addParticipante'))) {
+                    var participante = document.querySelector('#addParticipante').value;
+                    adicionarParticipanteAoGrupo(grupoId, participante, function addCallback(jsonResponse) {
+                        if(jsonResponse.sucess) {
+                            setTimeout(function () {
+                                location.reload();
+                            }, 1500);
+                        }
+                    });
+                }
+            }
+
+
+        </script>
+        <p align="left">
+            <br/>
+            <button onclick="openSubUrl()" class="btn btn-primary">Voltar</button>
+        </p>
+
+        <div th:replace="elementos/footer :: footer"></div>
+    </div>
+</body>
+</html>

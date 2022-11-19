@@ -38,15 +38,19 @@ public class GrupoController {
 
             boolean flagEditar = requestPathSt.endsWith("/editar");
             boolean flagCriar = requestPathSt.endsWith("/criar");
-            boolean flagAdicionar = requestPathSt.endsWith("/adicionar");
-            boolean flagEdicao = flagEditar | flagCriar | flagAdicionar;
+            boolean flagParticipanteAdicionar = requestPathSt.endsWith("/add-participante");
+            boolean flagParticipanteRemover = requestPathSt.endsWith("/rem-participante");
+            boolean flagEdicao = flagEditar | flagCriar | flagParticipanteAdicionar | flagParticipanteRemover;
+            boolean flagParticipantesListar = requestPathSt.endsWith("/participantes");
 
             if(flagCriar) {
                 requestPathSt = requestPathSt.substring(0, requestPathSt.length() - 6);
             } else if(flagEditar) {
                 requestPathSt = requestPathSt.substring(0, requestPathSt.length() - 7);
-            } else if(flagAdicionar) {
-                requestPathSt = requestPathSt.substring(0, requestPathSt.length() - 10);
+            } else if(flagParticipanteAdicionar || flagParticipanteRemover) {
+                requestPathSt = requestPathSt.substring(0, requestPathSt.length() - 16);
+            } else if(flagParticipantesListar) {
+                requestPathSt = requestPathSt.substring(0, requestPathSt.length() - 14);
             }
 
             String[] nicknameArr = requestPathSt.split("/");
@@ -79,9 +83,15 @@ public class GrupoController {
                     return "grupo/criar";
                 }
 
-                if(flagAdicionar) {
-                    return "grupo/adicionar";
+                if(flagParticipanteAdicionar) {
+                    return "grupo/adicionar_participante";
                 }
+
+                if(flagParticipanteRemover) {
+                    return "grupo/remover_participante";
+                }
+            } else if(flagParticipantesListar) {
+                return "grupo/participantes";
             }
 
         } catch (Exception e){
@@ -207,7 +217,7 @@ public class GrupoController {
 
     @ResponseBody
     @PostMapping(value = "/grupo/participante/adicionar", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Object grupo_adicionar_participante(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public Object grupo_participante_adicionar(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
         Resposta resposta = new Resposta();
         try {
 
@@ -222,7 +232,6 @@ public class GrupoController {
             }
 
             Usuario usuario = (Usuario) session.getAttribute("usuario");
-            Grupo grupoEdit = grupoService.findFirstById(Long.valueOf(grupoId));
 
             Usuario participanteUser = null;
             if(participante != null && participante.length() > 0) {
@@ -233,12 +242,16 @@ public class GrupoController {
                 }
             }
 
-            if(participanteUser != null && grupoService.verificarPermissaoParaGrupo(grupoEdit, usuario)) {
-                grupoService.adicionarParticipante(grupoEdit, participanteUser.getPerfil());
+            Grupo grupoEdit = grupoService.findFirstById(Long.valueOf(grupoId));
 
-                resposta.sucess = true;
-                resposta.mensagem = "Participante adicionado com sucesso.";
-                return resposta;
+            if(participanteUser != null && grupoService.verificarPermissaoParaGrupo(grupoEdit, usuario)) {
+                if(grupoService.adicionarParticipante(grupoEdit, participanteUser.getPerfil())) {
+                    resposta.sucess = true;
+                    resposta.mensagem = "Participante adicionado com sucesso.";
+                    return resposta;
+                } else {
+                    throw new GrupoException("Participante já esta neste Grupo.");
+                }
             }
 
             throw new GrupoException("Falha ao adicionar participante ao grupo");
@@ -249,7 +262,81 @@ public class GrupoController {
         }
     }
 
-    // http://localhost:8080/projeto/remover?id=1
+    @ResponseBody
+    @PostMapping(value = "/grupo/participante/remover", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public Object grupo_participante_remover(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+        Resposta resposta = new Resposta();
+        try {
+
+            String grupoId = (String)body.get("grupoId");
+            if(grupoId == null) {
+                throw new GrupoException("Parametro grupoId é nulo.");
+            }
+
+            String participante = (String)body.get("participante");
+            if(participante == null) {
+                throw new GrupoException("Parametro participante é nulo.");
+            }
+
+            Usuario usuario = (Usuario) session.getAttribute("usuario");
+
+            Usuario participanteUser = null;
+            if(participante != null && participante.length() > 0) {
+                if (participante.contains("@")) {
+                    participanteUser = (Usuario) usuarioService.findFirstByEmail(participante);
+                } else {
+                    participanteUser = (Usuario) usuarioService.loadUserByUsername(participante);
+                }
+            }
+
+            Grupo grupoEdit = grupoService.findFirstById(Long.valueOf(grupoId));
+
+            if(participanteUser != null && grupoService.verificarPermissaoParaGrupo(grupoEdit, usuario)) {
+                if(grupoService.removerParticipante(grupoEdit, participanteUser.getPerfil())) {
+                    resposta.sucess = true;
+                    resposta.mensagem = "Participante removido com sucesso.";
+                    return resposta;
+                } else {
+                    throw new GrupoException("Participante não faz parte deste Grupo.");
+                }
+            }
+
+            throw new GrupoException("Falha ao adicionar participante ao grupo");
+
+        } catch (Exception e) {
+            resposta.mensagem = e.getMessage();
+            return resposta;
+        }
+    }
+
+    @ResponseBody
+    @PostMapping(value = "/grupo/participante/listar", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public Object grupo_participante_listar(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+        Resposta resposta = new Resposta();
+        try {
+
+            String grupoId = (String)body.get("grupoId");
+            if(grupoId == null) {
+                throw new GrupoException("Parametro grupoId é nulo.");
+            }
+
+            Grupo grupo = grupoService.findFirstById(Long.valueOf(grupoId));
+
+            if(grupo != null) {
+                resposta.conteudo.put("participantes", grupo.getParticipantes());
+                resposta.sucess = true;
+                resposta.mensagem = "Operação realizada com exito.";
+                return resposta;
+            }
+
+            throw new GrupoException("Falha ao listar participante ao grupo");
+
+        } catch (Exception e) {
+            resposta.mensagem = e.getMessage();
+            return resposta;
+        }
+    }
+
     @RequestMapping("/grupo/remover")
     @ResponseBody
     public Object grupo_remove(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
