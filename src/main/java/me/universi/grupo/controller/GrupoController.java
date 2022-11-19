@@ -97,15 +97,35 @@ public class GrupoController {
         Resposta resposta = new Resposta();
         try {
 
-            Long grupoIdPai = (Long)Long.valueOf((String)body.get("grupoId"));
+            String grupoIdPai = (String)body.get("grupoId");
+            if(grupoIdPai == null) {
+                throw new GrupoException("Parametro grupoId é nulo.");
+            }
+
             String nickname = (String)body.get("nickname");
+            if(nickname == null) {
+                throw new GrupoException("Parametro nickname é nulo.");
+            }
+
             String nome = (String)body.get("nome");
+            if(nome == null) {
+                throw new GrupoException("Parametro nome é nulo.");
+            }
+
             String descricao = (String)body.get("descricao");
-            GrupoTipo tipo = (GrupoTipo)GrupoTipo.valueOf((String)body.get("tipo"));
-            boolean podeCriarGrupo = (Boolean)body.get("podeCriarGrupo");
+            if(descricao == null) {
+                throw new GrupoException("Parametro descricao é nulo.");
+            }
+
+            String tipo = (String)body.get("tipo");
+            if(tipo == null) {
+                throw new GrupoException("Parametro tipo é nulo.");
+            }
+
+            Boolean podeCriarGrupo = (Boolean)body.get("podeCriarGrupo");
 
             Usuario usuario = (Usuario) session.getAttribute("usuario");
-            Grupo grupoPai = grupoService.findFirstById(grupoIdPai);
+            Grupo grupoPai = grupoService.findFirstById(Long.valueOf(grupoIdPai));
 
             if(!grupoService.nicknameDisponivelParaGrupo(grupoPai, nickname)) {
                 throw new GrupoException("Este Nickname não está disponível para este grupo.");
@@ -116,9 +136,11 @@ public class GrupoController {
                 grupoNew.setNickname(nickname);
                 grupoNew.setNome(nome);
                 grupoNew.setDescricao(descricao);
-                grupoNew.setTipo(tipo);
+                grupoNew.setTipo(GrupoTipo.valueOf(tipo));
                 grupoNew.setAdmin(usuario.getPerfil());
-                grupoNew.setPodeCriarGrupo(podeCriarGrupo);
+                if(podeCriarGrupo != null) {
+                    grupoNew.setPodeCriarGrupo(podeCriarGrupo);
+                }
 
                 grupoService.adicionarSubgrupo(grupoPai, grupoNew);
 
@@ -141,20 +163,32 @@ public class GrupoController {
         Resposta resposta = new Resposta();
         try {
 
-            Long grupoId = (Long)Long.valueOf((String)body.get("grupoId"));
+            String grupoId = (String)body.get("grupoId");
+            if(grupoId == null) {
+                throw new GrupoException("Parametro grupoId é nulo.");
+            }
+
             String nome = (String)body.get("nome");
             String descricao = (String)body.get("descricao");
-            GrupoTipo tipo = (GrupoTipo)GrupoTipo.valueOf((String)body.get("tipo"));
-            boolean podeCriarGrupo = (Boolean)body.get("podeCriarGrupo");
+            String tipo = (String)body.get("tipo");
+            Boolean podeCriarGrupo = (Boolean)body.get("podeCriarGrupo");
 
             Usuario usuario = (Usuario) session.getAttribute("usuario");
-            Grupo grupoEdit = grupoService.findFirstById(grupoId);
+            Grupo grupoEdit = grupoService.findFirstById(Long.valueOf(grupoId));
 
             if(grupoService.verificarPermissaoParaGrupo(grupoEdit, usuario)) {
-                grupoEdit.setNome(nome);
-                grupoEdit.setDescricao(descricao);
-                grupoEdit.setTipo(tipo);
-                grupoEdit.setPodeCriarGrupo(podeCriarGrupo);
+                if(nome != null) {
+                    grupoEdit.setNome(nome);
+                }
+                if(descricao != null) {
+                    grupoEdit.setDescricao(descricao);
+                }
+                if(tipo != null) {
+                    grupoEdit.setTipo(GrupoTipo.valueOf(tipo));
+                }
+                if(podeCriarGrupo != null) {
+                    grupoEdit.setPodeCriarGrupo(podeCriarGrupo);
+                }
 
                 grupoService.save(grupoEdit);
 
@@ -172,16 +206,23 @@ public class GrupoController {
     }
 
     @ResponseBody
-    @PostMapping(value = "/grupo/adicionar", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/grupo/participante/adicionar", consumes = MediaType.APPLICATION_JSON_VALUE)
     public Object grupo_adicionar_participante(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
         Resposta resposta = new Resposta();
         try {
 
-            Long grupoId = (Long)Long.valueOf((String)body.get("grupoId"));
+            String grupoId = (String)body.get("grupoId");
+            if(grupoId == null) {
+                throw new GrupoException("Parametro grupoId é nulo.");
+            }
+
             String participante = (String)body.get("participante");
+            if(participante == null) {
+                throw new GrupoException("Parametro participante é nulo.");
+            }
 
             Usuario usuario = (Usuario) session.getAttribute("usuario");
-            Grupo grupoEdit = grupoService.findFirstById(grupoId);
+            Grupo grupoEdit = grupoService.findFirstById(Long.valueOf(grupoId));
 
             Usuario participanteUser = null;
             if(participante != null && participante.length() > 0) {
@@ -215,10 +256,13 @@ public class GrupoController {
         Resposta resposta = new Resposta();
         try {
 
-            Long grupoId = (Long)Long.valueOf((String)body.get("grupoId"));
+            String grupoId = (String)body.get("grupoId");
+            if(grupoId == null) {
+                throw new GrupoException("Parametro grupoId é nulo.");
+            }
 
             Usuario usuario = (Usuario) session.getAttribute("usuario");
-            Grupo grupo = grupoService.findFirstById(grupoId);
+            Grupo grupo = grupoService.findFirstById(Long.valueOf(grupoId));
 
             if(grupoService.verificarPermissaoParaGrupo(grupo, usuario)) {
                 grupoService.delete(grupo);
@@ -242,9 +286,12 @@ public class GrupoController {
         Resposta resposta = new Resposta();
         try {
 
-            Long grupoId = (Long)Long.valueOf((String)body.get("grupoId"));
+            String grupoId = (String)body.get("grupoId");
+            if(grupoId == null) {
+                throw new GrupoException("Parametro grupoId é nulo.");
+            }
 
-            Grupo grupo = grupoService.findFirstById(grupoId);
+            Grupo grupo = grupoService.findFirstById(Long.valueOf(grupoId));
             if(grupo != null) {
                 resposta.conteudo.put("grupo", grupo);
 
@@ -267,9 +314,12 @@ public class GrupoController {
         Resposta resposta = new Resposta();
         try {
 
-            Long grupoId = (Long)Long.valueOf((String)body.get("grupoId"));
+            String grupoId = (String)body.get("grupoId");
+            if(grupoId == null) {
+                throw new GrupoException("Parametro grupoId é nulo.");
+            }
 
-            Grupo grupo = grupoService.findFirstById(grupoId);
+            Grupo grupo = grupoService.findFirstById(Long.valueOf(grupoId));
             if(grupo != null) {
                 Collection<Grupo> listaSubgrupos = grupo.getSubGrupos();
                 resposta.conteudo.put("subgrupos", listaSubgrupos);
