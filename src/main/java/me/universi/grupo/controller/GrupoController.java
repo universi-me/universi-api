@@ -311,7 +311,7 @@ public class GrupoController {
 
     @ResponseBody
     @PostMapping(value = "/grupo/participante/listar", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Object grupo_participante_remover(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public Object grupo_participante_listar(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
         Resposta resposta = new Resposta();
         try {
 
