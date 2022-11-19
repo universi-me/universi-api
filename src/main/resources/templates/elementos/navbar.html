@@ -23,7 +23,7 @@
       </ul>
       <ul class="navbar-nav" align="right" sec:authorize="isAuthenticated()">
         <li class="nav-item">
-          <div th:inline="text">Olá, [[${session.usuario.nome}]]!</div>
+          <div th:inline="text" style="padding-right: 10px;">Olá, [[${session.usuario.nome}]]!</div>
         </li>
       </ul>
 

@@ -1,70 +1,142 @@
-<!DOCTYPE html> 
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity3"> 
-   <head>
-      <title th:text="${grupo.nome}+' - Universi.me'" th:unless="${grupo == null}">Grupo</title>
-      <title th:unless="${grupo != null}">Universi.me</title>
-      <script src="/js/main.js"></script>
-   </head>
-   <body> 
-      <h1 th:inline="text">Oi, [[${session.usuario.nome}]]!</h1>
-      <form th:action="@{/logout}" method="post">
-         <input type="submit" value="Logout"/>
-      </form>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CSS only -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"
+          rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi"
+          crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3"
+            crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/main.js"></script>
+    <title th:text="${grupo.nome}+' - Universi.me'" th:unless="${grupo == null}">Grupo</title>
+    <title th:unless="${grupo != null}">Universi.me</title>
+</head>
+<body>
+<div class="container py-4 px-3 mx-auto">
+    <div th:replace="elementos/navbar :: navbar"></div>
 
-      <h2 th:text="${error}" th:unless="${error == null}">Menssagem de error.</h2>
-	  
-	  <div th:unless="${error != null}">
+    <h2 th:text="${error}" th:unless="${error == null}">Menssagem de error.</h2>
 
-      <h2>Detalhes do Grupo <a th:onclick="goto_url('editar');event.preventDefault();" href="#">[Editar]</a></h2>
-      Nome: <div th:text="${grupo.nome}">Grupo Nome</div><br/>
-      Id: <div th:text="${grupo.id}">Grupo Id</div><br/>
-      Nickname: <div th:text="${grupo.nickname}">Grupo Nickname</div><br/>
-	  Descricao: <pre th:text="${grupo.descricao}">Grupo descricao</pre><br/>
-	  Admin: <div th:text="${grupo.admin.usuario.nome}" th:unless="${grupo.admin == null}">Grupo admin</div><br/>
-	  Tipo: <div th:text="${grupo.tipo}">Grupo tipo</div><br/>
-	  
-	  <h2><a th:onclick="goto_url('participantes');event.preventDefault();" href="#">Participantes</a> <a th:onclick="goto_url('add-participante');event.preventDefault();" href="#">[Adicionar]</a> <a th:onclick="goto_url('rem-participante');event.preventDefault();" href="#">[Remover]</a></h2>
-      <table>
-         <thead>
-         <tr>
-            <th> Nome </th>
-            <th> Bio </th>
-         </tr>
-         </thead>
-         <tbody>
-         <tr th:if="${grupo.participantes.empty}">
-            <td colspan="2"> Sem Participantes </td>
-         </tr>
-         <tr th:each="participante : ${grupo.participantes}">
-            <td><a th:href="@{/p/{path}(path=${participante.usuario.getUsername()})}"><span th:text="${participante.usuario.nome}"> Nome </span></a></td>
-            <td><span th:text="${participante.bio}"> Bio </span></td>
-         </tr>
-         </tbody>
-      </table>
-	  
-      <h2>Sub Grupos <a th:onclick="goto_url('criar');event.preventDefault();" href="#">[Criar Subgrupo]</a></h2>
-      <table>
-         <thead>
-         <tr>
-            <th> Grupo </th>
-            <th> Admin </th>
-         </tr>
-         </thead>
-         <tbody>
-         <tr th:if="${grupo.subGrupos.empty}">
-            <td colspan="2"> Sem sub Grupos </td>
-         </tr>
-         <tr th:each="grupoNow : ${grupo.subGrupos}">
-            <td><a th:onclick="goto_url([[${grupoNow.nickname}]]);event.preventDefault();" href="#"><span th:text="${grupoNow.nome}"> Grupo Nome </span></a></td>
-            <td><span th:text="${grupoNow.admin.usuario.nome}" th:unless="${grupoNow.admin == null}"> Admin </span></td>
-         </tr>
-         </tbody>
-      </table>
-	</div>
-      <br/><br/>
-      <form>
-         <input type="button" value="Voltar" onclick="openSubUrl()">
-      </form>
+    <div style="max-width=80%;margin: 0 auto;" th:unless="${error != null}">
+        <p><h4 th:text="'Grupo: ' + ${grupo.nome}"
+               th:unless="${grupo == null}" style="text-align: center;">Grupo</h4></p>
 
-   </body> 
-<html> 
+
+        <div class="container text-center">
+
+            <div class="row gutters">
+
+                <div class="col" style="max-width:25%;">
+                    <div class="card" style="width: 100%;">
+                        <img src="https://i.imgur.com/SfAl1Vb.png" class="card-img-top" alt="...">
+                        <div class="card-body">
+                            <h5 class="card-title" th:text="${grupo.nome}">Nome do Grupo</h5>
+                        </div>
+                        <div class="card-header card-footer">Descrição</div>
+                        <div class="card-body">
+                            <p class="card-text" th:text="${grupo.descricao}">Descrição do Grupo</p>
+                        </div>
+                        <div class="card-header card-footer">Tipo</div>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">
+                                <p class="card-text" th:text="${grupo.tipo.label}">Tipo</p>
+                            </li>
+                        </ul>
+                        <div class="card-header card-footer">Administrador</div>
+                        <div class="card-body">
+                            <a class="card-text" th:href="@{/p/{path}(path=${grupo.admin.usuario.getUsername()})}"
+                               th:text="${grupo.admin.usuario.nome}" th:unless="${grupo.admin == null}">Nome do
+                                Administrador</a>
+                        </div>
+                        <div class="card-footer" onclick="goto_url('editar');event.preventDefault();">Editar Grupo</div>
+                    </div>
+                </div>
+
+                <div class="col" style="width:60%;">
+
+                    <div class="card" style="width:100%;">
+
+                        <div class="card-header">Participantes</div>
+                        <div class="card-body">
+                            <div class="row">
+                                <h6 th:if="${grupo.participantes.empty}"> Sem Participantes </h6>
+
+                                <div class="col-sm-3" th:each="participanteNow : ${grupo.participantes}"
+                                     style="padding-bottom: 30px;">
+                                    <div class="card" style="width:90%;">
+                                        <img src="https://i.imgur.com/vUBrCxr.png" class="card-img-top" alt="...">
+                                        <div class="card-body">
+                                            <h6 class="card-title">Nome do participante</h6>
+                                            <p class="card-text"
+                                               th:text="'@'+ ${participanteNow.usuario.getUsername()}">
+                                                @usuario</p>
+                                        </div>
+                                        <ul class="list-group list-group-flush" style="text-align: center;">
+                                            <li class="list-group-item">
+                                                <a th:href="@{/p/{path}(path=${participanteNow.usuario.getUsername()})}"
+                                                   class="btn btn-primary">Ver Perfil</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer" onclick="goto_url('participantes');event.preventDefault();">Gerenciar
+                            Participantes
+                        </div>
+                    </div>
+                    <p/>
+                    <div class="card" style="width:100%;">
+                        <div class="card-header">Subgrupos</div>
+                        <div class="card-body">
+                            <div class="row">
+                                <h6 th:if="${grupo.subGrupos.empty}"> Sem Grupos </h6>
+                                <div class="col-sm-3" th:each="grupoNow : ${grupo.subGrupos}"
+                                     style="padding-bottom: 30px;">
+                                    <div class="card" style="width:90%;">
+                                        <img src="https://i.imgur.com/SfAl1Vb.png" class="card-img-top" alt="...">
+                                        <div class="card-body">
+                                            <h6 class="card-title" th:text="${grupoNow.nome}">Nome do Grupo</h6>
+                                        </div>
+                                        <ul class="list-group list-group-flush" style="text-align: center;">
+                                            <li class="list-group-item">
+                                                <a th:onclick="goto_url([[${grupoNow.nickname}]]);event.preventDefault();"
+                                                   class="btn btn-primary">Ver Grupo</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer" onclick="goto_url('criar');event.preventDefault();">Criar Grupo</div>
+                    </div>
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+    <br/><br/>
+    <p align="left">
+        <button onclick="openSubUrl()" class="btn btn-primary">Voltar</button>
+    </p>
+
+</div>
+
+</div>
+
+</div>
+
+<div th:replace="elementos/footer :: footer"></div>
+</div>
+</body>
+</html>
