@@ -21,12 +21,19 @@ function criarGrupo() {
    }
    api_request('/grupo/criar', bodyValores, null);
 }
-function adicionarParticipanteAoGrupo() {
+function adicionarParticipanteAoGrupo(grupoId, participante, callback) {
    var bodyValores = {
-      grupoId: document.querySelector('[name="grupoId"]').value,
-      participante: document.querySelector('#participante').value
+      grupoId: grupoId,
+      participante: participante,
    }
-   api_request('/grupo/adicionar', bodyValores, null);
+   api_request('/grupo/participante/adicionar', bodyValores, callback);
+}
+function removerParticipanteDoGrupo(grupoId, participante, callback) {
+   var bodyValores = {
+      grupoId: grupoId,
+      participante: participante,
+   }
+   api_request('/grupo/participante/remover', bodyValores, callback);
 }
 
 /* Conta calls */
@@ -134,6 +141,8 @@ function checkCampo(input, regExInput, msgRegEx) {
          input.setCustomValidity(((msgRegEx!=null)?msgRegEx:'Não está no formato requerido.')+' Por favor corrigir.');
       } else {
          input.setCustomValidity('');
+         return true;
       }
    }
+   return false;
 }

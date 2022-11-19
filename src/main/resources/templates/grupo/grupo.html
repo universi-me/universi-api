@@ -23,7 +23,7 @@
 	  Admin: <div th:text="${grupo.admin.usuario.nome}" th:unless="${grupo.admin == null}">Grupo admin</div><br/>
 	  Tipo: <div th:text="${grupo.tipo}">Grupo tipo</div><br/>
 	  
-	  <h2>Participantes <a th:onclick="goto_url('adicionar');event.preventDefault();" href="#">[Adicionar]</a></h2>
+	  <h2><a th:onclick="goto_url('participantes');event.preventDefault();" href="#">Participantes</a> <a th:onclick="goto_url('add-participante');event.preventDefault();" href="#">[Adicionar]</a> <a th:onclick="goto_url('rem-participante');event.preventDefault();" href="#">[Remover]</a></h2>
       <table>
          <thead>
          <tr>

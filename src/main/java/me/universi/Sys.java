@@ -4,6 +4,7 @@ import me.universi.competencia.entities.Competencia;
 import me.universi.competencia.repositories.CompetenciaRepository;
 import me.universi.grupo.entities.Grupo;
 import me.universi.grupo.enums.GrupoTipo;
+import me.universi.grupo.exceptions.GrupoException;
 import me.universi.grupo.services.GrupoService;
 import me.universi.perfil.entities.Perfil;
 import me.universi.usuario.entities.Usuario;
@@ -81,7 +82,7 @@ public class Sys {
     }
 
     @GetMapping("/popular")
-    String popular() {
+    String popular() throws GrupoException {
         Grupo ufpb_grupo = grupoService.findFirstByNickname("ufpb");
 
         if(ufpb_grupo != null) {
@@ -106,7 +107,7 @@ public class Sys {
         novoGrupo.setNome("UFPB");
 
         grupoService.adicionarParticipante(novoGrupo, perfil_1);
-        grupoService.adicionarParticipante(novoGrupo, perfil_1);
+        grupoService.adicionarParticipante(novoGrupo, perfil_2);
 
         Grupo novoGrupo2 = new Grupo();
         novoGrupo2.setTipo(GrupoTipo.CAMPUS);

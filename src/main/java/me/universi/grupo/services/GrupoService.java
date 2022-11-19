@@ -86,28 +86,52 @@ public class GrupoService {
         }
     }
 
-    public void adicionarParticipante(Grupo grupo, Perfil perfil) {
+    public boolean adicionarParticipante(Grupo grupo, Perfil perfil) throws GrupoException {
+        if(perfil == null) {
+            throw new GrupoException("Parametro Perfil é nulo.");
+        }
         Collection<Perfil> participantesArr = grupo.getParticipantes();
         if(participantesArr == null) {
             participantesArr = new ArrayList<Perfil>();
         }
-        if(!participantesArr.contains(perfil)) {
+        Perfil participante = obterParticipanteNoGrupo(grupo, perfil.getId());
+        if(participante == null) {
             participantesArr.add(perfil);
             grupo.setParticipantes(participantesArr);
             this.save(grupo);
+            return true;
         }
+        return false;
     }
 
-    public void removerParticipante(Grupo grupo, Perfil perfil) {
+    public boolean removerParticipante(Grupo grupo, Perfil perfil) throws GrupoException {
+        if(perfil == null) {
+            throw new GrupoException("Parametro Perfil é nulo.");
+        }
         Collection<Perfil> participantesArr = grupo.getParticipantes();
         if(participantesArr == null) {
             participantesArr = new ArrayList<Perfil>();
         }
-        if(participantesArr.contains(perfil)) {
-            participantesArr.remove(perfil);
+        Perfil participante = obterParticipanteNoGrupo(grupo, perfil.getId());
+        if(participante != null) {
+            participantesArr.remove(participante);
             grupo.setParticipantes(participantesArr);
             this.save(grupo);
+            return true;
         }
+        return false;
+    }
+
+    public Perfil obterParticipanteNoGrupo(Grupo grupo, Long idParticipante)
+    {
+        if(idParticipante != null) {
+            for (Perfil participanteNow : grupo.getParticipantes()) {
+                if (participanteNow.getId() == idParticipante) {
+                    return participanteNow;
+                }
+            }
+        }
+        return null;
     }
 
     public boolean nicknameDisponivelParaGrupo(Grupo grupo, String nickname) {
@@ -117,6 +141,9 @@ public class GrupoService {
 
             String[] palavrasReservadas = new String[] {
                     "admin",
+                    "rem-participante",
+                    "add-participante",
+                    "participantes",
                     "adicionar",
                     "remover",
                     "conta",
