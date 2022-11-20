@@ -36,7 +36,7 @@
 
 		<custom-filter ref="customUsernamePasswordAuthenticationFilter" after="FORM_LOGIN_FILTER"/>
 		<form-login login-page="/login" authentication-failure-url="/login?error" authentication-success-handler-ref="autenticacaoValidaHandler" />
-		<logout invalidate-session="true" logout-success-url="/login?logout" delete-cookies="true"/>
+		<logout logout-success-url="/login?logout" delete-cookies="JSESSIONID" />
 		
 		
 		<!-- Corrigir H2-console -->
