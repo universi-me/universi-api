@@ -37,7 +37,7 @@
 <div><center>
 <h5>Entrar com DCX</h5>
     <div id="g_id_onload"
-         data-client_id="110833050076-ib680ela4hfqr2c0lhc9h19snrsvltnd.apps.googleusercontent.com"
+         th:data-client_id="${@environment.getProperty('GOOGLE_CLIENT_ID')}"
          data-login_uri="https://universi.me"
          data-callback="handleCredentialResponse">
     </div>
