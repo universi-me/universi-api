@@ -12,6 +12,7 @@ import me.universi.usuario.entities.Usuario;
 import me.universi.usuario.exceptions.UsuarioException;
 import me.universi.usuario.services.SecurityUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,6 +30,8 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 public class UsuarioController {
     @Autowired
     private SecurityUserDetailsService usuarioService;
+    @Autowired
+    private Environment env;
 
     @GetMapping("/login")
     public String login(HttpServletRequest request, HttpSession session) {
@@ -137,7 +140,7 @@ public class UsuarioController {
             }
 
             GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
-                    .setAudience(Collections.singletonList("110833050076-ib680ela4hfqr2c0lhc9h19snrsvltnd.apps.googleusercontent.com"))
+                    .setAudience(Collections.singletonList(env.getProperty("GOOGLE_CLIENT_ID")))
                     .build();
 
             GoogleIdToken idToken = verifier.verify(idTokenString);
