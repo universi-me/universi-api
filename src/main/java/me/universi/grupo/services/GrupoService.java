@@ -24,6 +24,15 @@ public class GrupoService {
         }
     }
 
+    public Grupo findGrupoPaiDoGrupo(Long id) {
+        Optional<Grupo> grupoOptional = grupoRepository.findGrupoPaiDoGrupo(id);
+        if(grupoOptional.isPresent()){
+            return grupoOptional.get();
+        }else{
+            return null;
+        }
+    }
+
     public Grupo findFirstByNickname(String nickname) {
         Optional<Grupo> grupoOptional = grupoRepository.findFirstByNickname(nickname);
         if(grupoOptional.isPresent()){
@@ -233,4 +242,14 @@ public class GrupoService {
         return null;
     }
 
+    public String diretorioParaGrupo(Long grupoId) {
+        ArrayList<String> nickArr = new ArrayList<String>();
+        Grupo grupoCurr = findFirstById(grupoId);
+        while(grupoCurr != null) {
+            nickArr.add(grupoCurr.nickname);
+            grupoCurr = findGrupoPaiDoGrupo(grupoCurr.getId());
+        }
+        Collections.reverse(nickArr);
+        return "/" + String.join("/",nickArr);
+    }
 }
