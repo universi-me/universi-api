@@ -1,3 +1,8 @@
+/* Global var */
+var usuarioFormato = /^([a-z0-9_-]+)$/;
+var emailFormato = /^([a-z0-9._-]+)$/;
+
+
 /* Grupo calls */
 function editarGrupo() {
    var bodyValores = {
