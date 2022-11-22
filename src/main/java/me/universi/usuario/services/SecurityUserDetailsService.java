@@ -26,10 +26,17 @@ public class SecurityUserDetailsService implements UserDetailsService {
         if (usuario.isPresent()) {
             return usuario.get();
         }
+        if(emailRegex(username)) {
+            try {
+                return findFirstByEmail(username);
+            } catch (UsuarioException e) {
+                throw new UsernameNotFoundException("Usuário não encontrado!");
+            }
+        }
         throw new UsernameNotFoundException("Usuário não encontrado!");
     }
 
-    public UserDetails findFirstByEmail(String email) throws Exception {
+    public UserDetails findFirstByEmail(String email) throws UsuarioException {
         Optional<Usuario> usuario = userRepository.findFirstByEmail(email);
         if (usuario.isPresent()) {
             return usuario.get();
@@ -37,7 +44,7 @@ public class SecurityUserDetailsService implements UserDetailsService {
         throw new UsuarioException("Email de Usuário não encontrado!");
     }
 
-    public void createUser(Usuario user) throws Exception {
+    public void createUser(Usuario user) throws UsuarioException {
         if (user==null) {
             throw new UsuarioException("Usuario está vazio!");
         }

@@ -44,9 +44,6 @@
    <button type="submit" class="btn btn-primary">Registrar-se</button>
 </form>
 <script>
-var usuarioFormato = /^([a-z0-9_-]+)$/;
-var emailFormato = /^([a-z0-9._-]+)$/;
-
 function validar() {
    checkCampo(username, usuarioFormato, "Apenas Letras Minusculas e Números.");
    checkCampo(email, emailFormato, "Apenas Letras Minusculas, \".\", \"_\" e Números.");
