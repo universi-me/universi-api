@@ -133,21 +133,23 @@ function RemoveLastDirectoryPartOf(the_url) {
 	return( the_arr.join('/') );
 }
 function openSubUrl() {
-	window.location.href = RemoveLastDirectoryPartOf(window.location.href);
+    window.location.href = RemoveLastDirectoryPartOf(window.location.href);
 }
 
 
 /* verificar campo input */
 function checkCampo(input, regExInput, msgRegEx) {
-   if(input.value == null || input.value.length==0) {
-      input.setCustomValidity("Verifique o campo.");
-   } else {
-      if (regExInput !=null && !regExInput.test(input.value)) {
-         input.setCustomValidity(((msgRegEx!=null)?msgRegEx:'Não está no formato requerido.')+' Por favor corrigir.');
-      } else {
-         input.setCustomValidity('');
-         return true;
-      }
-   }
-   return false;
+    if(input != null) {
+        if(input.value == null || input.value.length==0) {
+            input.setCustomValidity("Verifique o campo.");
+        } else {
+            if (regExInput !=null && !regExInput.test(input.value)) {
+                input.setCustomValidity(((msgRegEx!=null)?msgRegEx:'Não está no formato requerido.')+' Por favor corrigir.');
+            } else {
+                input.setCustomValidity('');
+                return true;
+            }
+        }
+    }
+    return false;
 }
