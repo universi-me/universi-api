@@ -1,74 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-   <meta charset="UTF-8">
-   <meta http-equiv="X-UA-compatible" content="IE=edge">
-   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <!-- CSS only -->
-   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"
-         rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi"
-         crossorigin="anonymous">
-   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
-   <link rel="stylesheet" href="/css/style.css">
-   <script src="/js/main.js"></script>
-   <title th:text="${grupo.nome}+': Editar Subgrupo'" th:unless="${grupo == null}">Editar Subgrupo</title>
-   <title th:unless="${grupo != null}">Universi.me</title>
+    <meta charset="UTF-8">
+    <title>Title</title>
 </head>
-
 <body>
-<div class="container py-4 px-3 mx-auto">
-   <div th:replace="elementos/navbar :: navbar"></div>
 
-<div id="areaDeAlertas" style="max-width:700px;margin: 0 auto;"></div>
 
-   <div style="max-width:800px;margin: 0 auto;">
-<p th:text="'Editar Subgrupo: ' + ${grupo.nome}" th:unless="${grupo == null}" style="text-align: center;">[...]</p>
-<form onsubmit="editarGrupo();return false;" oninput="validar();">
-   <input type="hidden" name="grupoId" id="hiddenField" th:value="${grupo.id}"/>
-   <div class="mb-3">
-      <label for="nome" class="form-label">* Nome: </label>
-      <input type="text" class="form-control" id="nome" name="nome" th:value="${grupo.nome}">
-   </div>
-   <label for="nickname" class="form-label">* Nickname</label>
-   <div class="input-group mb-3">
-      <span class="input-group-text" id="basic-addon3" th:text="'https://universi.me'+ ${#strings.replace(session.lastPath,grupo.nickname,'')}"></span>
-      <input type="text" class="form-control" disabled id="nickname" aria-describedby="basic-addon3" name="nickname" th:value="${grupo.nickname}">
-   </div>
-   <div class="mb-3">
-      <label for="descricao" class="form-label">* Descricao: </label>
-      <textarea  type="text" class="form-control" id="descricao" name="descricao" th:text="${grupo.descricao}"></textarea>
-   </div>
-   <div class="mb-3">
-      <label for="tipo" class="form-label">* Tipo: </label>
-      <select id="tipo" name="tipo" class="form-select">
-         <option th:each="tipoNow : ${tiposGrupo}" th:value="${tipoNow}" th:text="${tipoNow.label}" th:selected="${tipoNow} == ${grupo.tipo} ? true : false"></option>
-      </select>
-   </div>
-   <div class="form-check form-switch">
-      <input class="form-check-input" type="checkbox" role="switch" id="podeCriarGrupo" name="podeCriarGrupo" th:checked="${grupo.podeCriarGrupo} ? true : false">
-      <label class="form-check-label" for="podeCriarGrupo">Qualquer pessoa pode criar subgrupos neste grupo.</label>
-   </div>
-   <p align="right"><button type="submit" class="btn btn-primary">Salvar Alterações</button></p>
-</form>
-<script>
+<div th:fragment="editar">
 
-carregarUploadDeImagem();
+    <div class="card" style="width:100%;">
+        <div class="card-header text-center">Editar Grupo</div>
+        <div class="card-body">
 
-var usuarioFormato = /^([a-z0-9_-]+)$/;
 
-function validar() {
-   checkCampo(nome);
-   checkCampo(nickname, usuarioFormato, "Apenas Letras Minusculas e Números.");
-   checkCampo(descricao);
-   checkCampo(tipo);
-}
-validar();
-
-</script>
-<p align="left"><button onclick="openSubUrl()" class="btn btn-primary">Voltar</button></p>
+            <form onsubmit="editarGrupo();return false;" oninput="validar();">
+                <input type="hidden" name="grupoId" id="hiddenField" th:value="${grupo.id}"/>
+                <div class="mb-3">
+                    <label for="nome" class="form-label">* Nome: </label>
+                    <input type="text" class="form-control" id="nome" name="nome" th:value="${grupo.nome}">
+                </div>
+                <label for="nickname" class="form-label">* Nickname</label>
+                <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon3"
+                  th:text="'https://universi.me'+ ${#strings.replace(session.lastPath,grupo.nickname,'')}"></span>
+                    <input type="text" class="form-control" disabled id="nickname" aria-describedby="basic-addon3"
+                           name="nickname" th:value="${grupo.nickname}">
+                </div>
+                <div class="mb-3">
+                    <label for="descricao" class="form-label">* Descricao: </label>
+                    <textarea type="text" class="form-control" id="descricao" name="descricao"
+                              th:text="${grupo.descricao}"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="tipo" class="form-label">* Tipo: </label>
+                    <select id="tipo" name="tipo" class="form-select">
+                        <option th:each="tipoNow : ${tiposGrupo}" th:value="${tipoNow}" th:text="${tipoNow.label}"
+                                th:selected="${tipoNow} == ${grupo.tipo} ? true : false"></option>
+                    </select>
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="podeCriarGrupo"
+                           name="podeCriarGrupo"
+                           th:checked="${grupo.podeCriarGrupo} ? true : false">
+                    <label class="form-check-label" for="podeCriarGrupo">Qualquer pessoa pode criar subgrupos neste
+                        grupo.</label>
+                </div>
+                <p align="right">
+                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                </p>
+            </form>
+            <script>
+                function validar() {
+                    checkCampo(nome);
+                    checkCampo(nickname, usuarioFormato, "Apenas Letras Minusculas e Números.");
+                    checkCampo(descricao);
+                    checkCampo(tipo);
+                }
+                validar();
+            </script>
+            <p align="left">
+                <button onclick="openSubUrl()" class="btn btn-primary">Voltar</button>
+            </p>
+        </div>
+    </div>
 </div>
 
-   <div th:replace="elementos/footer :: footer"></div>
-</div>
+
+
 </body>
 </html>

@@ -38,17 +38,13 @@ public class GrupoController {
 
             boolean flagEditar = requestPathSt.endsWith("/editar");
             boolean flagCriar = requestPathSt.endsWith("/criar");
-            boolean flagParticipanteAdicionar = requestPathSt.endsWith("/add-participante");
-            boolean flagParticipanteRemover = requestPathSt.endsWith("/rem-participante");
-            boolean flagEdicao = flagEditar | flagCriar | flagParticipanteAdicionar | flagParticipanteRemover;
+            boolean flagEdicao = flagEditar | flagCriar;
             boolean flagParticipantesListar = requestPathSt.endsWith("/participantes");
 
             if(flagCriar) {
                 requestPathSt = requestPathSt.substring(0, requestPathSt.length() - 6);
             } else if(flagEditar) {
                 requestPathSt = requestPathSt.substring(0, requestPathSt.length() - 7);
-            } else if(flagParticipanteAdicionar || flagParticipanteRemover) {
-                requestPathSt = requestPathSt.substring(0, requestPathSt.length() - 16);
             } else if(flagParticipantesListar) {
                 requestPathSt = requestPathSt.substring(0, requestPathSt.length() - 14);
             }
@@ -65,6 +61,7 @@ public class GrupoController {
 
             if(grupoAtual != null) {
                 map.addAttribute("grupo", grupoAtual);
+                map.addAttribute("grupoDiretorio", grupoService.diretorioParaGrupo(grupoAtual.getId()));
             } else {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 throw new GrupoException("Grupo não foi encontrado!");
@@ -76,22 +73,14 @@ public class GrupoController {
                 map.addAttribute("tiposGrupo", GrupoTipo.values());
 
                 if(flagEditar) {
-                    return "grupo/editar";
+                    map.addAttribute("flagEditar", true);
                 }
 
                 if(flagCriar) {
-                    return "grupo/criar";
-                }
-
-                if(flagParticipanteAdicionar) {
-                    return "grupo/adicionar_participante";
-                }
-
-                if(flagParticipanteRemover) {
-                    return "grupo/remover_participante";
+                    map.addAttribute("flagCriar", true);
                 }
             } else if(flagParticipantesListar) {
-                return "grupo/participantes";
+                map.addAttribute("flagParticipantesListar", true);
             }
 
         } catch (Exception e){
