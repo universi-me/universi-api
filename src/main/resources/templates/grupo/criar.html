@@ -28,6 +28,14 @@
                            name="nickname">
                 </div>
                 <div class="mb-3">
+                    <label for="nome" class="form-label">* Imagem: </label>
+                    <p class="text-center"><img src="https://i.imgur.com/SfAl1Vb.png" class="img-thumbnail" alt="" id="imagemUp" name="imagemUp" style="width:150px;"></p>
+                    <div class="input-group mb-3">
+                        <input type="file" class="form-control" id="imagem_file">
+                        <label class="input-group-text" for="imagem_file">Upload</label>
+                    </div>
+                </div>
+                <div class="mb-3">
                     <label for="descricao" class="form-label">* Descricao: </label>
                     <textarea type="text" class="form-control" id="descricao" name="descricao"></textarea>
                 </div>
@@ -56,6 +64,9 @@
                     checkCampo(tipo);
                 }
                 validar();
+
+                cunfigurarUploadDeImagem(document.getElementById("imagem_file"));
+
             </script>
             <p align="left">
                 <button onclick="openSubUrl()" class="btn btn-primary">Voltar</button>

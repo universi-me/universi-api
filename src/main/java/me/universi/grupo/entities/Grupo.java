@@ -26,6 +26,9 @@ public class Grupo {
     @Column(name = "descricao")
     public String descricao;
 
+    @Column(name = "imagem")
+    public String imagem;
+
     @ManyToOne
     @JoinColumn(name="id_profile")
     public Perfil admin;
@@ -49,8 +52,6 @@ public class Grupo {
     @JsonIdentityInfo(generator= ObjectIdGenerators.PropertyGenerator.class, property="id", scope = Grupo.class)
     @JsonIdentityReference(alwaysAsId = true)
     public Collection<Grupo> subGrupos;
-
-    //public Imagem imagem;
 
     @Column(name = "tipo")
     @Enumerated(EnumType.STRING)
@@ -153,6 +154,14 @@ public class Grupo {
 
     public void setPodeCriarGrupo(boolean podeCriarGrupo) {
         this.podeCriarGrupo = podeCriarGrupo;
+    }
+
+    public String getImagem() {
+        return imagem;
+    }
+
+    public void setImagem(String imagem) {
+        this.imagem = imagem;
     }
 
     @Override

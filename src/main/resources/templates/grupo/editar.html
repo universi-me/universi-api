@@ -28,6 +28,14 @@
                            name="nickname" th:value="${grupo.nickname}">
                 </div>
                 <div class="mb-3">
+                    <label for="nome" class="form-label">* Imagem: </label>
+                    <p class="text-center"><img th:src="${grupo.imagem==null?'https://i.imgur.com/SfAl1Vb.png':grupo.imagem}" class="img-thumbnail" alt="" id="imagemUp" name="imagemUp" style="width:150px;"></p>
+                    <div class="input-group mb-3">
+                        <input type="file" class="form-control" id="imagem_file">
+                        <label class="input-group-text" for="imagem_file">Upload</label>
+                    </div>
+                </div>
+                <div class="mb-3">
                     <label for="descricao" class="form-label">* Descricao: </label>
                     <textarea type="text" class="form-control" id="descricao" name="descricao"
                               th:text="${grupo.descricao}"></textarea>
@@ -58,6 +66,9 @@
                     checkCampo(tipo);
                 }
                 validar();
+
+                cunfigurarUploadDeImagem(document.getElementById("imagem_file"));
+
             </script>
             <p align="left">
                 <button onclick="openSubUrl()" class="btn btn-primary">Voltar</button>
@@ -65,7 +76,6 @@
         </div>
     </div>
 </div>
-
 
 
 </body>
