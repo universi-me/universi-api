@@ -111,6 +111,11 @@ public class GrupoController {
                 throw new GrupoException("Parametro nome é nulo.");
             }
 
+            String imagem = (String)body.get("imagem");
+            if(imagem == null) {
+                throw new GrupoException("Parametro imagem é nulo.");
+            }
+
             String descricao = (String)body.get("descricao");
             if(descricao == null) {
                 throw new GrupoException("Parametro descricao é nulo.");
@@ -134,6 +139,7 @@ public class GrupoController {
                 Grupo grupoNew = new Grupo();
                 grupoNew.setNickname(nickname);
                 grupoNew.setNome(nome);
+                grupoNew.setImagem(imagem);
                 grupoNew.setDescricao(descricao);
                 grupoNew.setTipo(GrupoTipo.valueOf(tipo));
                 grupoNew.setAdmin(usuario.getPerfil());
@@ -170,6 +176,8 @@ public class GrupoController {
             String nome = (String)body.get("nome");
             String descricao = (String)body.get("descricao");
             String tipo = (String)body.get("tipo");
+            String imagem = (String)body.get("imagem");
+
             Boolean podeCriarGrupo = (Boolean)body.get("podeCriarGrupo");
 
             Usuario usuario = (Usuario) session.getAttribute("usuario");
@@ -184,6 +192,9 @@ public class GrupoController {
                 }
                 if(tipo != null) {
                     grupoEdit.setTipo(GrupoTipo.valueOf(tipo));
+                }
+                if(imagem != null) {
+                    grupoEdit.setImagem(imagem);
                 }
                 if(podeCriarGrupo != null) {
                     grupoEdit.setPodeCriarGrupo(podeCriarGrupo);

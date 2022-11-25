@@ -9,6 +9,7 @@ function editarGrupo() {
       grupoId: document.querySelector('[name="grupoId"]').value,
       nome: document.querySelector('#nome').value,
       nickname: document.querySelector('#nickname').value,
+      imagem: document.querySelector('#imagemUp').src,
       descricao: document.querySelector('#descricao').value,
       tipo: document.querySelector('#tipo').value,
       podeCriarGrupo: document.querySelector('#podeCriarGrupo').checked,
@@ -20,6 +21,7 @@ function criarGrupo() {
       grupoId: document.querySelector('[name="grupoId"]').value,
       nome: document.querySelector('#nome').value,
       nickname: document.querySelector('#nickname').value,
+      imagem: document.querySelector('#imagemUp').src,
       descricao: document.querySelector('#descricao').value,
       tipo: document.querySelector('#tipo').value,
       podeCriarGrupo: document.querySelector('#podeCriarGrupo').checked,
@@ -71,6 +73,40 @@ function efetuarRegistro() {
    api_request('/registrar', bodyValores, null);
 }
 
+/* Imagem Upload */
+function cunfigurarUploadDeImagem(imagem_input) {
+    if(imagem_input) {
+        imagem_input.addEventListener("change", function () {
+            var $files = imagem_input.files;
+            if ($files.length) {
+              uploadDaImagem($files[0]);
+            }
+        }, false);
+    }
+}
+function uploadDaImagem(file) {
+    if (!file || !file.type.match(/image.*/)) return;
+    var fd = new FormData();
+    fd.append("imagem", file);
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "/imagem/upload");
+    xhr.onload = function() {
+        try {
+            var jsonResp = JSON.parse(xhr.responseText);
+            if(jsonResp.mensagem != null && jsonResp.mensagem.length > 0) {
+               alert(jsonResp.mensagem, (jsonResp.sucess)?'success':'danger');
+            }
+            if(jsonResp.sucess) {
+                var link = jsonResp.conteudo.link;
+                document.getElementById("imagemUp").src = link;
+            }
+        } catch (error) {
+            alert(error, 'warning');
+        }
+    }
+    xhr.send(fd);
+}
+
 /* API request */
 function api_request(path, parametro, callback) {
     const http = new XMLHttpRequest();
@@ -111,7 +147,9 @@ const alert = (message, type) => {
       '</div>'
     ].join('')
     const areaDeAlertas = document.getElementById('areaDeAlertas');
-    areaDeAlertas.append(wrapper)
+    if(areaDeAlertas) {
+        areaDeAlertas.append(wrapper);
+    }
 }
 
 
