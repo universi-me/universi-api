@@ -10,7 +10,7 @@ import me.universi.perfil.entities.Perfil;
 import me.universi.usuario.entities.Usuario;
 import me.universi.perfil.repositories.PerfilRepository;
 
-import me.universi.usuario.services.SecurityUserDetailsService;
+import me.universi.usuario.services.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -32,7 +32,7 @@ public class Sys {
     @Autowired
     public PerfilRepository perfilRepository;
     @Autowired
-    public SecurityUserDetailsService usuarioService;
+    public UsuarioService usuarioService;
     @Autowired
     public CompetenciaRepository competenciaRepository;
     @Autowired
