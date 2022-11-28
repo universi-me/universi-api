@@ -14,7 +14,7 @@
         <div class="card-body">
 
 
-            <form onsubmit="criarGrupo();return false;" oninput="validar();">
+            <form onsubmit="criarGrupoNow();return false;" oninput="validar();">
                 <input type="hidden" name="grupoId" id="hiddenField" th:value="${grupo.id}"/>
                 <div class="mb-3">
                     <label for="nome" class="form-label">* Nome: </label>
@@ -66,6 +66,16 @@
                 validar();
 
                 cunfigurarUploadDeImagem(document.getElementById("imagem_file"));
+
+                function criarGrupoNow() {
+                    criarGrupo(function removidoCallback(jsonResponse) {
+                        if(jsonResponse.sucess) {
+                            setTimeout(function () {
+                                openSubUrl();
+                            }, 1500);
+                        }
+                    });
+                }
 
             </script>
             <p align="left">
