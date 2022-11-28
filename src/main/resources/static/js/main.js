@@ -4,7 +4,7 @@ var emailFormato = /^([a-z0-9._-]+)$/;
 
 
 /* Grupo calls */
-function editarGrupo() {
+function editarGrupo(callback) {
    var bodyValores = {
       grupoId: document.querySelector('[name="grupoId"]').value,
       nome: document.querySelector('#nome').value,
@@ -14,9 +14,9 @@ function editarGrupo() {
       tipo: document.querySelector('#tipo').value,
       podeCriarGrupo: document.querySelector('#podeCriarGrupo').checked,
    }
-   api_request('/grupo/editar', bodyValores, null);
+   api_request('/grupo/editar', bodyValores, callback);
 }
-function criarGrupo() {
+function criarGrupo(callback) {
    var bodyValores = {
       grupoId: document.querySelector('[name="grupoId"]').value,
       nome: document.querySelector('#nome').value,
@@ -26,7 +26,7 @@ function criarGrupo() {
       tipo: document.querySelector('#tipo').value,
       podeCriarGrupo: document.querySelector('#podeCriarGrupo').checked,
    }
-   api_request('/grupo/criar', bodyValores, null);
+   api_request('/grupo/criar', bodyValores, callback);
 }
 function adicionarParticipanteAoGrupo(grupoId, participante, callback) {
    var bodyValores = {

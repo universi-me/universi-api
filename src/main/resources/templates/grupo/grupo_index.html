@@ -53,7 +53,7 @@
                         <div class="card-header card-footer text-center">Administrador</div>
                         <div class="card-body">
                             <a class="card-text" th:href="@{/p/{path}(path=${grupo.admin.usuario.getUsername()})}"
-                               th:text="${grupo.admin.usuario.nome}" th:unless="${grupo.admin == null}">Nome do
+                               th:text="${grupo.admin.nome==null?grupo.admin.usuario.getUsername():grupo.admin.nome}" th:unless="${grupo.admin == null}">Nome do
                                 Administrador</a>
                         </div>
                         <a class="card-footer text-center" th:href="${grupoDiretorio} + '/editar'"
