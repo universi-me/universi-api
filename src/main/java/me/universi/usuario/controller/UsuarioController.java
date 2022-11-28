@@ -10,7 +10,7 @@ import com.google.api.client.json.gson.GsonFactory;
 import me.universi.api.entities.Resposta;
 import me.universi.usuario.entities.Usuario;
 import me.universi.usuario.exceptions.UsuarioException;
-import me.universi.usuario.services.SecurityUserDetailsService;
+import me.universi.usuario.services.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.MediaType;
@@ -29,7 +29,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 @Controller
 public class UsuarioController {
     @Autowired
-    private SecurityUserDetailsService usuarioService;
+    private UsuarioService usuarioService;
     @Autowired
     private Environment env;
 

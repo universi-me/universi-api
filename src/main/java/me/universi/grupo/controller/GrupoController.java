@@ -7,7 +7,7 @@ import me.universi.grupo.exceptions.GrupoException;
 import me.universi.grupo.services.GrupoService;
 
 import me.universi.usuario.entities.Usuario;
-import me.universi.usuario.services.SecurityUserDetailsService;
+import me.universi.usuario.services.UsuarioService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -27,7 +27,7 @@ public class GrupoController {
     @Autowired
     public GrupoService grupoService;
     @Autowired
-    public SecurityUserDetailsService usuarioService;
+    public UsuarioService usuarioService;
 
     // mapaear tudo exceto, /css, /js, /img, /favicon.ico, comflita com static resources do Thymeleaf
     @GetMapping(value = {"{url:(?!css$|js$|img$|favicon.ico$).*}/**"})

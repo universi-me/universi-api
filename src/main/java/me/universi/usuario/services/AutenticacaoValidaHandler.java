@@ -17,7 +17,7 @@ import java.security.Principal;
 
 public class AutenticacaoValidaHandler extends SavedRequestAwareAuthenticationSuccessHandler {
     @Autowired
-    private SecurityUserDetailsService userDetailsManager;
+    private UsuarioService usuarioService;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws ServletException, IOException {
@@ -32,9 +32,9 @@ public class AutenticacaoValidaHandler extends SavedRequestAwareAuthenticationSu
             }
 
             if(username != null) {
-                Usuario usuario = (Usuario) userDetailsManager.loadUserByUsername(username);
+                Usuario usuario = (Usuario) usuarioService.loadUserByUsername(username);
 
-                userDetailsManager.configurarSessaoParaUsuario(session, usuario);
+                usuarioService.configurarSessaoParaUsuario(session, usuario);
             }
 
             // usuário não tem perfil, redirecionar para editar perfil

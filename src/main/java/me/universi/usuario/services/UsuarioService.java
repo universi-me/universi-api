@@ -15,7 +15,7 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class SecurityUserDetailsService implements UserDetailsService {
+public class UsuarioService implements UserDetailsService {
     @Autowired
     private UsuarioRepository userRepository;
     @Autowired
