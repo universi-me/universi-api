@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
@@ -34,6 +35,7 @@ public class GrupoController {
         try {
             Usuario usuario = (Usuario)session.getAttribute("usuario");
 
+            // obter diretorio caminho url
             String requestPathSt = request.getRequestURI().toLowerCase();
 
             boolean flagEditar = requestPathSt.endsWith("/editar");
@@ -42,23 +44,20 @@ public class GrupoController {
             boolean flagParticipantesListar = requestPathSt.endsWith("/participantes");
             boolean flagGruposListar = requestPathSt.endsWith("/grupos");
 
-            if(flagCriar) {
-                requestPathSt = requestPathSt.substring(0, requestPathSt.length() - 6);
-            } else if(flagEditar) {
-                requestPathSt = requestPathSt.substring(0, requestPathSt.length() - 7);
-            } else if(flagParticipantesListar) {
-                requestPathSt = requestPathSt.substring(0, requestPathSt.length() - 14);
-            } else if(flagGruposListar) {
-                requestPathSt = requestPathSt.substring(0, requestPathSt.length() - 7);
-            }
-
             String[] nicknameArr = requestPathSt.split("/");
+
+            if(flagEdicao || flagParticipantesListar || flagGruposListar) {
+                // remover ultimo componente no caminho, flags
+                nicknameArr = Arrays.copyOf(nicknameArr, nicknameArr.length - 1);
+            }
 
             Grupo grupoRoot = null;
             Grupo grupoAtual = null;
 
+            // obter grupo pai, nickname unico e que pode ser acessado diretamente pela url
             grupoRoot = grupoService.findFirstByGrupoRootAndNickname(true, nicknameArr[1]);
             if(grupoRoot != null) {
+                // verificar se o caminho é valido para o grupo, a partir do grupo pai
                 grupoAtual = grupoService.parentescoCheckGrupo(grupoRoot, nicknameArr);
             }
 
@@ -71,15 +70,16 @@ public class GrupoController {
             }
 
             if(flagEdicao) {
+
+                // verficar permissao de edição do grupo
                 //grupoService.verificarPermissaoParaGrupo(grupoAtual, usuario);
 
                 map.addAttribute("tiposGrupo", GrupoTipo.values());
+                map.addAttribute("grupoSubDiretorio", String.join("/", Arrays.copyOf(nicknameArr, nicknameArr.length - 1)));
 
                 if(flagEditar) {
                     map.addAttribute("flagPage", "flagEditar");
-                }
-
-                if(flagCriar) {
+                } else if(flagCriar) {
                     map.addAttribute("flagPage", "flagCriar");
                 }
             } else if(flagParticipantesListar) {
@@ -89,7 +89,7 @@ public class GrupoController {
             }
 
         } catch (Exception e){
-            map.put("error", e.getMessage());
+            map.put("error", "Grupo: " + e.getMessage());
         }
         return "grupo/grupo_index";
     }
