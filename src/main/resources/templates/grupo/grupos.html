@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+
+<div th:fragment="grupos">
+
+    <div class="card" style="width:100%;">
+        <div class="card-header text-center">Gerenciar Grupos</div>
+        <div class="card-body text-center">
+            <div class="input-group mb-3" style="width:150px;margin: 0 auto;">
+                <a th:href="${grupoDiretorio} + '/criar'">
+                <button class="btn btn-outline-primary text-center" type="button" id="addParticipanteBt">Criar Grupo
+                </button></a>
+            </div>
+        </div>
+
+        <div class="card-header card-footer text-center">Todos os Grupos <span th:unless="${grupo == null || grupo.subGrupos.empty}" th:text="'(' + ${grupo.subGrupos.size()} + ')'">(0)</span></div>
+        <div class="card-body">
+            <div class="row">
+                <h6 th:if="${grupo.subGrupos.empty}"> Sem Grupos </h6>
+                <div class="col-sm-3" th:each="grupoNow : ${grupo.subGrupos}" style="padding-bottom: 30px;">
+                    <div class="card" style="width: 10rem;">
+                        <img th:src="${grupoNow.imagem==null?'https://i.imgur.com/SfAl1Vb.png':grupoNow.imagem}"
+                             class="card-img-top" alt="...">
+                        <div class="card-body">
+                            <h6 class="card-title text-center" th:text="${grupoNow.nome}">Nome do Grupo</h6>
+                        </div>
+                        <ul class="list-group list-group-flush" style="text-align: center;">
+                            <li class="list-group-item">
+                                <a th:href="${grupoDiretorio} + '/' + ${grupoNow.nickname}"
+                                   class="btn btn-primary">Ver Grupo</a>
+                            </li>
+                            <li class="list-group-item">
+                                <button th:attr="onclick=|removerGrupo('${grupo.getId()}', '${grupoNow.getId()}');|"
+                                        href="#" class="btn btn-danger">Remover
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                function removerGrupo(grupoId, grupoIdRemover) {
+                    removerSubGrupo(grupoId, grupoIdRemover, function removidoCallback(jsonResponse) {
+                        if(jsonResponse.sucess) {
+                            setTimeout(function () {
+                                location.reload();
+                            }, 1500);
+                        }
+                    });
+                }
+            </script>
+            <p align="left">
+                <br/>
+                <button onclick="openSubUrl()" class="btn btn-primary">Voltar</button>
+            </p>
+
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html>

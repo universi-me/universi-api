@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CSS only -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"
+          rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi"
+          crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3"
+            crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/main.js"></script>
+    <title th:text="${grupo.nome}+' - Universi.me'" th:unless="${grupo == null}">Grupo</title>
+    <title th:unless="${grupo != null}">Universi.me</title>
+</head>
+<body>
+<div class="container py-4 px-3 mx-auto">
+    <div th:replace="elementos/navbar :: navbar"></div>
+    <div id="areaDeAlertas" style="max-width:700px;margin: 0 auto;"></div>
+    <h2 th:text="${error}" th:unless="${error == null}">Menssagem de error.</h2>
+
+
+    <div style="max-width=80%;margin: 0 auto;" th:unless="${error != null}">
+
+        <div id="diretorioAtual" th:unless="${grupoDiretorio == null}" th:value="${grupoDiretorio}"></div>
+
+        <p><h4 th:text="'Grupo: ' + ${grupo.nome}" th:unless="${grupo == null}" style="text-align: center;">Grupo</h4></p>
+
+
+        <div class="container">
+
+            <div class="row gutters">
+
+                <div class="col" style="max-width:25%;min-width:150px;padding-right: 10px;">
+                    <div class="card" style="width: 100%;">
+                        <img th:src="${grupo.imagem==null?'https://i.imgur.com/SfAl1Vb.png':grupo.imagem}" class="card-img-top" alt="Grupo">
+                        <div class="card-body">
+                            <h5 class="card-title text-center" th:text="${grupo.nome}">Nome do Grupo</h5>
+                        </div>
+                        <div class="card-header card-footer text-center">Descrição</div>
+                        <div class="card-body">
+                            <p class="card-text" th:text="${grupo.descricao}">Descrição do Grupo</p>
+                        </div>
+                        <div class="card-header card-footer text-center">Tipo</div>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">
+                                <p class="card-text" th:text="${grupo.tipo.label}">Tipo</p>
+                            </li>
+                        </ul>
+                        <div class="card-header card-footer text-center">Administrador</div>
+                        <div class="card-body">
+                            <a class="card-text" th:href="@{/p/{path}(path=${grupo.admin.usuario.getUsername()})}"
+                               th:text="${grupo.admin.usuario.nome}" th:unless="${grupo.admin == null}">Nome do
+                                Administrador</a>
+                        </div>
+                        <a class="card-footer text-center" th:href="${grupoDiretorio} + '/editar'"
+                             style="background-color:#B4FFC2;text-decoration: none;">Editar Grupo
+                        </a>
+                    </div>
+                </div>
+
+
+                <div class="col" style="width:60%;">
+
+                    <div th:switch="${flagPage==null?'info':flagPage}">
+                        <div th:case="'flagEditar'">
+                            <div th:replace="grupo/editar :: editar" />
+                        </div>
+                        <div th:case="'flagCriar'">
+                            <div th:replace="grupo/criar :: criar" />
+                        </div>
+                        <div th:case="'flagParticipantesListar'">
+                            <div th:replace="grupo/participantes :: participantes" />
+                        </div>
+                        <div th:case="'flagGruposListar'">
+                            <div th:replace="grupo/grupos :: grupos" />
+                        </div>
+                        <div th:case="'info'">
+                            <div th:replace="grupo/info :: info" />
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <br/><br/>
+    <script>
+        
+    </script>
+
+    <p align="left">
+        <br/>
+        <button onclick="openSubUrl()" class="btn btn-primary">Voltar</button>
+    </p>
+
+</div>
+
+</div>
+
+</div>
+
+<div th:replace="elementos/footer :: footer"></div>
+</div>
+</body>
+</html>

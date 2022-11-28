@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class GrupoService {
@@ -157,6 +159,7 @@ public class GrupoService {
                     "remover",
                     "conta",
                     "grupo",
+                    "grupos",
                     "editar",
                     "criar",
                     "obter",
@@ -185,10 +188,22 @@ public class GrupoService {
                     }
                 }
             }
+
+            if(disponivel) {
+                disponivel = nicknameRegex(nickname);
+            }
+
         }catch (Exception e) {
             disponivel = false;
         }
         return disponivel;
+    }
+
+    public boolean nicknameRegex(String nickname) {
+        String nicknameRegex = "^[a-z0-9_-]+$";
+        Pattern emailPattern = Pattern.compile(nicknameRegex, Pattern.CASE_INSENSITIVE);
+        Matcher matcher = emailPattern.matcher(nickname);
+        return matcher.find();
     }
 
     public void save(Grupo grupo) {
