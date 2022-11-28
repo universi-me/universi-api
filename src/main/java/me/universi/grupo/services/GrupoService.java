@@ -26,8 +26,8 @@ public class GrupoService {
         }
     }
 
-    public Grupo findGrupoPaiDoGrupo(Long id) {
-        Optional<Grupo> grupoOptional = grupoRepository.findGrupoPaiDoGrupo(id);
+    public Long findGrupoPaiDoGrupo(Long id) {
+        Optional<Long> grupoOptional = grupoRepository.findGrupoIdPaiDoGrupoId(id);
         if(grupoOptional.isPresent()){
             return grupoOptional.get();
         }else{
@@ -262,9 +262,9 @@ public class GrupoService {
         Grupo grupoCurr = findFirstById(grupoId);
         while(grupoCurr != null) {
             nickArr.add(grupoCurr.nickname);
-            grupoCurr = findGrupoPaiDoGrupo(grupoCurr.getId());
+            grupoCurr = findFirstById(findGrupoPaiDoGrupo(grupoCurr.getId()));
         }
         Collections.reverse(nickArr);
-        return "/" + String.join("/",nickArr);
+        return "/" + String.join("/", nickArr);
     }
 }
