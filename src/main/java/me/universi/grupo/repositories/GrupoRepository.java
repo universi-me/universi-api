@@ -13,6 +13,6 @@ public interface GrupoRepository extends JpaRepository<Grupo, Long> {
     Optional<Grupo> findFirstById(Long id);
     Optional<Grupo> findFirstByNickname(String nickname);
     Optional<Grupo> findFirstByGrupoRootAndNickname(boolean grupoRoot, String nickname);
-    @Query(value = "SELECT * FROM GRUPO_GRUPO WHERE id_subgrupo = :idGrupo LIMIT 1", nativeQuery = true)
-    Optional<Grupo> findGrupoPaiDoGrupo(@Param("idGrupo") Long id);
+    @Query(value = "SELECT ID_GRUPO FROM GRUPO_GRUPO WHERE ID_SUBGRUPO = :IDGrupo LIMIT 1", nativeQuery = true)
+    Optional<Long> findGrupoIdPaiDoGrupoId(@Param("IDGrupo") Long id);
 }
