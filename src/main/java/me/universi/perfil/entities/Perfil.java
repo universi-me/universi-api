@@ -20,6 +20,12 @@ public class Perfil {
 
     @OneToOne
     private Usuario usuario;
+    @Column(name = "nome")
+    private String nome;
+    @Column(name = "sobrenome")
+    private String sobrenome;
+    @Column(name = "imagem")
+    private String imagem;
     @Column(name = "bio")
     private String bio;
     @OneToOne(cascade = CascadeType.ALL)
@@ -117,5 +123,45 @@ public class Perfil {
 
     public void setLinks(Collection<Link> links) {
         this.links = links;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public String getSobrenome() {
+        return sobrenome;
+    }
+
+    public void setSobrenome(String sobrenome) {
+        this.sobrenome = sobrenome;
+    }
+
+    public String getImagem() {
+        return imagem;
+    }
+
+    public void setImagem(String imagem) {
+        this.imagem = imagem;
+    }
+
+    public Sexo getSexo() {
+        return sexo;
+    }
+
+    public void setSexo(Sexo sexo) {
+        this.sexo = sexo;
+    }
+
+    public Collection<Recomendacao> getRecomendacoesFeitas() {
+        return recomendacoesFeitas;
+    }
+
+    public Collection<Recomendacao> getRecomendacoesRecebidas() {
+        return recomendacoesRecebidas;
     }
 }
