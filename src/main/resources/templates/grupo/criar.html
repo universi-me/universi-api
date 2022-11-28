@@ -23,7 +23,7 @@
                 <label for="nickname" class="form-label">* Nickname</label>
                 <div class="input-group mb-3">
                     <span class="input-group-text" id="basic-addon3"
-                          th:text="'https://universi.me'+${session.lastPath}+'/'"></span>
+                          th:text="'https://universi.me'+${grupoDiretorio}+'/'"></span>
                     <input type="text" class="form-control" id="nickname" aria-describedby="basic-addon3"
                            name="nickname">
                 </div>
@@ -53,7 +53,7 @@
                         Grupo.</label>
                 </div>
                 <p align="right">
-                    <button type="submit" class="btn btn-primary">Criar Subgrupo</button>
+                    <button type="submit" class="btn btn-primary">Criar Grupo</button>
                 </p>
             </form>
             <script>

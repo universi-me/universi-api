@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+
+<div th:fragment="info">
+
+    <div class="card" style="width:100%;">
+        <div class="card-header text-center">Participantes <span
+                th:unless="${grupo == null || grupo.participantes.empty}"
+                th:text="'(' +${grupo.participantes.size()}+ ')'">(0)</span></div>
+        <div class="card-body">
+            <div class="row">
+                <h6 th:if="${grupo.participantes.empty}"> Sem Participantes </h6>
+
+                <div class="col-sm-2"
+                     th:each="i : ${#numbers.sequence(grupo.participantes.size() - 1, grupo.participantes.size()>=6?grupo.participantes.size() - 6:0, -1)}"
+                     th:with="participanteNow=${grupo.participantes[i]}"
+                     style="padding-bottom: 30px;">
+                    <div class="card" style="width:100%;min-width:70px;max-width:100px;">
+                        <img src="https://i.imgur.com/vUBrCxr.png" class="card-img-top" alt="...">
+                        <div class="card-body">
+                            <h6 class="card-title">Nome do participante</h6>
+                            <p class="card-text"
+                               th:text="'@'+ ${participanteNow.usuario.getUsername()}">
+                                @usuario</p>
+                        </div>
+                        <ul class="list-group list-group-flush" style="text-align: center;">
+                            <li class="list-group-item">
+                                <a th:href="@{/p/{path}(path=${participanteNow.usuario.getUsername()})}"
+                                   class="btn btn-primary">Ver Perfil</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <a class="card-footer text-center" th:href="${grupoDiretorio} + '/participantes'"
+           style="background-color:#B4FFC2;text-decoration: none;">Gerenciar
+            Participantes
+        </a>
+    </div>
+    <p/>
+    <div class="card" style="width:100%;">
+        <div class="card-header text-center">Subgrupos <span th:unless="${grupo == null || grupo.subGrupos.empty}"
+                                                             th:text="'(' +${grupo.subGrupos.size()}+ ')'">(0)</span>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <h6 th:if="${grupo.subGrupos.empty}"> Sem Grupos </h6>
+                <div class="col-sm-3"
+                     th:each="i : ${#numbers.sequence(grupo.subGrupos.size() - 1, grupo.subGrupos.size()>=6?grupo.subGrupos.size() - 6:0, -1)}"
+                     th:with="grupoNow=${grupo.subGrupos[i]}"
+                     style="padding-bottom: 30px;">
+                    <div class="card" style="width:90%;">
+                        <img th:src="${grupoNow.imagem==null?'https://i.imgur.com/SfAl1Vb.png':grupoNow.imagem}"
+                             class="card-img-top" alt="...">
+                        <div class="card-body">
+                            <h6 class="card-title text-center" th:text="${grupoNow.nome}">Nome do Grupo</h6>
+                        </div>
+                        <ul class="list-group list-group-flush" style="text-align: center;">
+                            <li class="list-group-item">
+                                <a th:href="${grupoDiretorio} + '/' + ${grupoNow.nickname}"
+                                   class="btn btn-primary">Ver Grupo</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <a class="card-footer text-center" th:href="${grupoDiretorio} + '/grupos'"
+           style="background-color:#B4FFC2;text-decoration: none;">Gerenciar Grupos
+        </a>
+    </div>
+</div>
+
+
+</body>
+</html>

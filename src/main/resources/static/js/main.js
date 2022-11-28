@@ -42,6 +42,13 @@ function removerParticipanteDoGrupo(grupoId, participante, callback) {
    }
    api_request('/grupo/participante/remover', bodyValores, callback);
 }
+function removerSubGrupo(grupoId, grupoIdRemover, callback) {
+   var bodyValores = {
+      grupoId: grupoId,
+      grupoIdRemover: grupoIdRemover,
+   }
+   api_request('/grupo/remover', bodyValores, callback);
+}
 
 /* Conta calls */
 function editarConta() {

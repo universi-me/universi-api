@@ -40,6 +40,7 @@ public class GrupoController {
             boolean flagCriar = requestPathSt.endsWith("/criar");
             boolean flagEdicao = flagEditar | flagCriar;
             boolean flagParticipantesListar = requestPathSt.endsWith("/participantes");
+            boolean flagGruposListar = requestPathSt.endsWith("/grupos");
 
             if(flagCriar) {
                 requestPathSt = requestPathSt.substring(0, requestPathSt.length() - 6);
@@ -47,6 +48,8 @@ public class GrupoController {
                 requestPathSt = requestPathSt.substring(0, requestPathSt.length() - 7);
             } else if(flagParticipantesListar) {
                 requestPathSt = requestPathSt.substring(0, requestPathSt.length() - 14);
+            } else if(flagGruposListar) {
+                requestPathSt = requestPathSt.substring(0, requestPathSt.length() - 7);
             }
 
             String[] nicknameArr = requestPathSt.split("/");
@@ -69,24 +72,26 @@ public class GrupoController {
 
             if(flagEdicao) {
                 //grupoService.verificarPermissaoParaGrupo(grupoAtual, usuario);
-                session.setAttribute("lastPath", requestPathSt);
+
                 map.addAttribute("tiposGrupo", GrupoTipo.values());
 
                 if(flagEditar) {
-                    map.addAttribute("flagEditar", true);
+                    map.addAttribute("flagPage", "flagEditar");
                 }
 
                 if(flagCriar) {
-                    map.addAttribute("flagCriar", true);
+                    map.addAttribute("flagPage", "flagCriar");
                 }
             } else if(flagParticipantesListar) {
-                map.addAttribute("flagParticipantesListar", true);
+                map.addAttribute("flagPage", "flagParticipantesListar");
+            } else if(flagGruposListar) {
+                map.addAttribute("flagPage", "flagGruposListar");
             }
 
         } catch (Exception e){
             map.put("error", e.getMessage());
         }
-        return "grupo/grupo";
+        return "grupo/grupo_index";
     }
 
 
@@ -348,11 +353,25 @@ public class GrupoController {
                 throw new GrupoException("Parametro grupoId é nulo.");
             }
 
-            Usuario usuario = (Usuario) session.getAttribute("usuario");
+            String grupoIdRemover = (String)body.get("grupoIdRemover");
+            if(grupoIdRemover == null) {
+                throw new GrupoException("Parametro grupoIdRemover é nulo.");
+            }
+
             Grupo grupo = grupoService.findFirstById(Long.valueOf(grupoId));
+            if(grupo == null) {
+                throw new GrupoException("Grupo não encontrado.");
+            }
+
+            Grupo grupoRemover = grupoService.findFirstById(Long.valueOf(grupoIdRemover));
+            if(grupoRemover == null) {
+                throw new GrupoException("Subgrupo não encontrado.");
+            }
+
+            Usuario usuario = (Usuario) session.getAttribute("usuario");
 
             if(grupoService.verificarPermissaoParaGrupo(grupo, usuario)) {
-                grupoService.delete(grupo);
+                grupoService.removerSubgrupo(grupo, grupoRemover);
 
                 resposta.mensagem = "Grupo removido com exito.";
                 resposta.sucess = true;
