@@ -32,7 +32,7 @@
 
             <div class="row gutters">
 
-                <div class="col" style="max-width:25%;min-width:150px;padding-right: 10px;">
+                <div class="col" style="width:20%;max-width:210px;min-width:150px;padding-right: 10px;">
                     <div class="card" style="width: 100%;">
                         <img th:src="${perfil.imagem==null?'https://i.imgur.com/vUBrCxr.png':perfil.imagem}" class="card-img-top" alt="Perfil">
                         <div class="card-body">
@@ -73,7 +73,7 @@
 
     <p align="left">
         <br/>
-        <button onclick="openSubUrl()" class="btn btn-primary">Voltar</button>
+        <button onclick="javascript:window.history.back();" class="btn btn-primary">Voltar</button>
     </p>
 
 </div>

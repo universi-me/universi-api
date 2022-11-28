@@ -29,10 +29,9 @@
                 </div>
                 <div class="mb-3">
                     <label for="nome" class="form-label">* Imagem: </label>
-                    <p class="text-center"><img th:src="${grupo.imagem==null?'https://i.imgur.com/SfAl1Vb.png':grupo.imagem}" class="img-thumbnail" alt="" id="imagemUp" name="imagemUp" style="width:150px;"></p>
                     <div class="input-group mb-3">
                         <input type="file" class="form-control" id="imagem_file">
-                        <label class="input-group-text" for="imagem_file">Upload</label>
+                        <img th:src="${grupo.imagem==null?'https://i.imgur.com/SfAl1Vb.png':grupo.imagem}" class="img-thumbnail input-group-text text-center" alt="" id="imagemUp" name="imagemUp" style="width:150px;" for="imagem_file"/>
                     </div>
                 </div>
                 <div class="mb-3">
