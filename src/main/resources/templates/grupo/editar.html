@@ -23,7 +23,7 @@
                 <label for="nickname" class="form-label">* Nickname</label>
                 <div class="input-group mb-3">
             <span class="input-group-text" id="basic-addon3"
-                  th:text="'https://universi.me'+ ${#strings.replace(grupoDiretorio,grupo.nickname,'')}"></span>
+                  th:text="'https://universi.me'+${grupoSubDiretorio}+'/'"></span>
                     <input type="text" class="form-control" disabled id="nickname" aria-describedby="basic-addon3"
                            name="nickname" th:value="${grupo.nickname}">
                 </div>
