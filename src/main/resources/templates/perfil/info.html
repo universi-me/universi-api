@@ -63,6 +63,59 @@
             </div>
         </div>
     </div>
+    <p>
+    <div class="card" style="width:100%;">
+        <div class="card-header text-center">Competências
+            <span th:unless="${perfil.getCompetencias() == null || perfil.getCompetencias().empty}"
+             th:text="'(' +${perfil.getCompetencias().size()}+ ')'">
+                (0)
+            </span>
+        </div>
+        <div class="card-body" style="padding-bottom:0px">
+            <div class="row">
+                <h6 th:if="${perfil.getCompetencias().empty}"> Sem Competências </h6>
+
+                <div class="col-sm-4"
+                     th:each="i : ${#numbers.sequence(1, perfil.getCompetencias().size()>=6?6:0, -1)}"
+                     th:with="competenciaNow=${perfil.getCompetencias()[i]}">
+                    <div class="card" style="width:100%; margin-bottom:17px">
+
+                        <!-- Start Cartão da competência -->
+                        <div class="card-body">
+
+                            <!-- Título -->
+                            <h6 class="card-title text-center" th:text="${competenciaNow.getNome()}">Nome da competência</h6>
+
+                            <!-- Nível -->
+                            <h6 class="card-title text-center"
+                            th:text="${'('+ (competenciaNow.getNivel() == null ? 'NENHUMA_EXPERIENCIA' : competenciaNow.getNivel()) + ')'}">
+                                nível da competência
+                            </h6>
+
+                            <br>
+
+                            <!-- Descrição -->
+                            <p style="text-align:center" th:text="${competenciaNow.getDescricao()}">Descrição</p>
+
+
+                        </div>
+                        <!-- End Cartão da competência -->
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <!-- Start Editar competências -->
+    <a class="card-footer text-center"
+       style="background-color:#B4FFC2;
+            text-decoration: none;
+            cursor: pointer">
+       Editar Competências
+    </a>
+    <!-- End Editar competências -->
+
+</div>
 </div>
 
 
