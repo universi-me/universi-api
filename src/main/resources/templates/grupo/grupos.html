@@ -36,6 +36,10 @@
                                    class="btn btn-primary">Ver Grupo</a>
                             </li>
                             <li class="list-group-item">
+                                <a th:href="${grupoDiretorio} + '/' + ${grupoNow.nickname} + '/editar'"
+                                   class="btn btn-warning">Editar</a>
+                            </li>
+                            <li class="list-group-item">
                                 <button th:attr="onclick=|removerGrupo('${grupo.getId()}', '${grupoNow.getId()}');|"
                                         href="#" class="btn btn-danger">Remover
                                 </button>
