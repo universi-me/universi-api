@@ -126,11 +126,9 @@ public class PerfilController {
             perfilAtual.setSexo(Sexo.valueOf(sexo));
 
             perfilService.save(perfilAtual);
-
-            usuarioService.atualizarUsuarioNaSessao(session);
-
             resposta.enderecoParaRedirecionar = "/p/" + ((Usuario)session.getAttribute("usuario")).getUsername();
-            resposta.sucess = true;
+
+            // resposta.mensagem = "Implementar edição de perfil.";
 
         } catch (Exception e) {
             resposta.mensagem = e.getMessage();

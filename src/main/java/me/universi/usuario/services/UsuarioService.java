@@ -44,14 +44,6 @@ public class UsuarioService implements UserDetailsService {
         throw new UsuarioException("Email de Usuário não encontrado!");
     }
 
-    public UserDetails findFirstById(Long id) {
-        Optional<Usuario> usuario = userRepository.findFirstById(id);
-        if (usuario.isPresent()) {
-            return usuario.get();
-        }
-        return null;
-    }
-
     public void createUser(Usuario user) throws UsuarioException {
         if (user==null) {
             throw new UsuarioException("Usuario está vazio!");
@@ -116,18 +108,6 @@ public class UsuarioService implements UserDetailsService {
             }
         }
         return false;
-    }
-
-    public void atualizarUsuarioNaSessao(HttpSession session) {
-        if(session != null) {
-            Usuario usuarioSession = (Usuario) session.getAttribute("usuario");
-            if(usuarioSession != null) {
-                Usuario usuarioAtualizado = (Usuario) findFirstById(usuarioSession.getId());
-                if(usuarioAtualizado != null) {
-                    session.setAttribute("usuario", usuarioAtualizado);
-                }
-            }
-        }
     }
 
     public void configurarSessaoParaUsuario(HttpSession session, Usuario usuario) {

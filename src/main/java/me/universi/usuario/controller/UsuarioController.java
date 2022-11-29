@@ -115,8 +115,6 @@ public class UsuarioController {
                 usuario.setSenha(usuarioService.codificarSenha(password));
                 usuarioService.save(usuario);
 
-                usuarioService.atualizarUsuarioNaSessao(session);
-
                 resposta.sucess = true;
                 resposta.mensagem = "As Alterações foram salvas com sucesso.";
 
@@ -173,14 +171,14 @@ public class UsuarioController {
                     Authentication authentication = new UsernamePasswordAuthenticationToken(usuario, null, AuthorityUtils.createAuthorityList(usuario.getAutoridade().name()));
                     SecurityContextHolder.getContext().setAuthentication(authentication);
 
+                    usuarioService.configurarSessaoParaUsuario(sessionReq, usuario);
+
                     if(!usuario.isEmail_verificado()) {
                         usuario.setEmail_verificado(true);
                         usuarioService.save(usuario);
                     }
 
                     sessionReq.setAttribute("loginViaGoogle", true);
-
-                    usuarioService.configurarSessaoParaUsuario(sessionReq, usuario);
 
                     String redirecionarParaCriarPerfil = null;
                     if(usuario.getPerfil()==null || usuario.getPerfil().getNome()==null) {
