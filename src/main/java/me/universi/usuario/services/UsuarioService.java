@@ -96,17 +96,6 @@ public class UsuarioService implements UserDetailsService {
         return passwordEncoder.matches(senha, usuario.getPassword());
     }
 
-    public boolean usuarioDonoDaSessao(HttpSession session, Usuario usuario)
-    {
-        if(session != null && usuario != null) {
-            Usuario usuarioSession = (Usuario) session.getAttribute("usuario");
-            if(usuarioSession != null) {
-                return (usuarioSession.getId() == usuario.getId());
-            }
-        }
-        return false;
-    }
-
     public void save(Usuario usuario) {
         userRepository.save(usuario);
     }
