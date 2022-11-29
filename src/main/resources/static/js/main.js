@@ -95,23 +95,37 @@ function uploadDaImagem(file) {
     if (!file || !file.type.match(/image.*/)) return;
     var fd = new FormData();
     fd.append("imagem", file);
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", "/imagem/upload");
-    xhr.onload = function() {
-        try {
-            var jsonResp = JSON.parse(xhr.responseText);
-            if(jsonResp.mensagem != null && jsonResp.mensagem.length > 0) {
-               alert(jsonResp.mensagem, (jsonResp.sucess)?'success':'danger');
+    var http = new XMLHttpRequest();
+    http.open("POST", "/imagem/upload");
+    http.responseType = 'json';
+
+    var button = document.querySelectorAll("button[type=submit]")[0];
+    button.setAttribute('disabled', 'disabled');
+
+    http.onload = function(e) {
+        button.removeAttribute('disabled');
+        if (this.status == 200) {
+            try {
+                var jsonResp = this.response;
+                if(jsonResp.mensagem != null && jsonResp.mensagem.length > 0) {
+                   alert(jsonResp.mensagem, (jsonResp.sucess)?'success':'danger');
+                }
+                if(jsonResp.sucess) {
+                    var link = jsonResp.conteudo.link;
+                    document.getElementById("imagemUp").src = link;
+                }
+            } catch (error) {
+                alert(error, 'warning');
             }
-            if(jsonResp.sucess) {
-                var link = jsonResp.conteudo.link;
-                document.getElementById("imagemUp").src = link;
-            }
-        } catch (error) {
-            alert(error, 'warning');
+        } else {
+            alert("Ocorreu Um erro na requisição.", 'warning');
         }
     }
-    xhr.send(fd);
+    http.onerror = function () {
+        button.removeAttribute('disabled');
+        alert("Ocorreu Um erro na requisição.", 'warning');
+    }
+    http.send(fd);
 }
 
 /* API request */
@@ -141,6 +155,9 @@ function api_request(path, parametro, callback) {
          alert("Ocorreu Um erro na requisição.", 'warning');
        }
     };
+    http.onerror = function () {
+        alert("Ocorreu Um erro na requisição.", 'warning');
+    }
 }
 
 
