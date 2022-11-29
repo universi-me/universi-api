@@ -1,11 +1,11 @@
 package me.universi.perfil.controller;
 
 import me.universi.api.entities.Resposta;
-import me.universi.grupo.exceptions.GrupoException;
 import me.universi.grupo.services.GrupoService;
 import me.universi.perfil.entities.Perfil;
 import me.universi.perfil.enums.Sexo;
 import me.universi.perfil.repositories.PerfilRepository;
+import me.universi.perfil.services.PerfilService;
 import me.universi.usuario.entities.Usuario;
 import me.universi.usuario.services.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,11 +22,15 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 
 @Controller
 public class PerfilController {
     @Autowired
     private UsuarioService usuarioService;
+
+    @Autowired
+    private PerfilService perfilService;
 
     @Autowired
     public GrupoService grupoService;
@@ -99,28 +103,40 @@ public class PerfilController {
     @ResponseBody
     @RequestMapping(value = "/perfil/editar", consumes = MediaType.APPLICATION_JSON_VALUE)
     public Object perfil_editar(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
-        Resposta resposta = new Resposta();
+
+        Resposta resposta = new Resposta(); // default
+
         try {
 
             String perfilId = (String)body.get("perfilId");
+
             if(perfilId == null) {
                 throw new Exception("Parametro perfilId é nulo.");
             }
 
-            String nome = (String)body.get("nome");
-            String sobrenome = (String)body.get("sobrenome");
-            String imagem = (String)body.get("imagem");
-            String bio = (String)body.get("bio");
-            String sexo = (String)body.get("sexo");
+            String nome         = (String)body.get("nome");
+            String sobrenome    = (String)body.get("sobrenome");
+            String imagem       = (String)body.get("imagem");
+            String bio          = (String)body.get("bio");
+            String sexo         = (String)body.get("sexo");
 
-            // TODO: Editar perfil
+            Perfil perfilAtual = perfilService.findFirstById(perfilId);
 
-            resposta.mensagem = "Implementar edição de perfil.";
-            return resposta;
+            perfilAtual.setNome(nome);
+            perfilAtual.setSobrenome(sobrenome);
+            perfilAtual.setImagem(imagem);
+            perfilAtual.setBio(bio);
+            perfilAtual.setSexo(Sexo.valueOf(sexo));
+
+            perfilRepository.save(perfilAtual);
+            resposta.enderecoParaRedirecionar = "/p/" + ((Usuario)session.getAttribute("usuario")).getUsername();
+
+            // resposta.mensagem = "Implementar edição de perfil.";
 
         } catch (Exception e) {
             resposta.mensagem = e.getMessage();
-            return resposta;
         }
+
+        return resposta;
     }
 }
