@@ -173,6 +173,11 @@ public class UsuarioController {
 
                     usuarioService.configurarSessaoParaUsuario(sessionReq, usuario);
 
+                    if(!usuario.isEmail_verificado()) {
+                        usuario.setEmail_verificado(true);
+                        usuarioService.save(usuario);
+                    }
+
                     sessionReq.setAttribute("loginViaGoogle", true);
 
                     String redirecionarParaCriarPerfil = null;
