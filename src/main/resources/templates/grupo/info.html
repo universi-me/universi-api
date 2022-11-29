@@ -17,7 +17,7 @@
             <div class="row">
                 <h6 th:if="${grupo.participantes.empty}"> Sem Participantes </h6>
 
-                <div class="col-sm-2"
+                <div class="col-sm-2" th:unless="${grupo.participantes.empty}"
                      th:each="i : ${#numbers.sequence(grupo.participantes.size() - 1, grupo.participantes.size()>=6?grupo.participantes.size() - 6:0, -1)}"
                      th:with="participanteNow=${grupo.participantes[i]}"
                      style="padding-bottom: 30px;">
@@ -49,7 +49,7 @@
         <div class="card-body">
             <div class="row">
                 <h6 th:if="${grupo.subGrupos.empty}"> Sem Grupos </h6>
-                <div class="col-sm-3"
+                <div class="col-sm-3" th:unless="${grupo.subGrupos.empty}"
                      th:each="i : ${#numbers.sequence(grupo.subGrupos.size() - 1, grupo.subGrupos.size()>=6?grupo.subGrupos.size() - 6:0, -1)}"
                      th:with="grupoNow=${grupo.subGrupos[i]}"
                      style="padding-bottom: 30px;">

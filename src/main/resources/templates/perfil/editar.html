@@ -10,11 +10,11 @@
 <div th:fragment="editar">
 
     <div class="card" style="width:100%;">
-        <div class="card-header text-center">Editar Perfil</div>
+        <div class="card-header text-center">Editar Meu Perfil</div>
         <div class="card-body">
 
 
-            <form onsubmit="editarGrupo();return false;" oninput="validar();">
+            <form onsubmit="editarPerfilNow();return false;" oninput="validar();">
                 <input type="hidden" name="perfilId" id="hiddenField" th:value="${perfil.getId()}"/>
                 <div class="mb-3">
                     <label for="nome" class="form-label">* Nome: </label>
@@ -56,6 +56,10 @@
                 validar();
 
                 cunfigurarUploadDeImagem(document.getElementById("imagem_file"));
+
+                function editarPerfilNow() {
+                    editarPerfil(null);
+                }
 
             </script>
             <p align="left">

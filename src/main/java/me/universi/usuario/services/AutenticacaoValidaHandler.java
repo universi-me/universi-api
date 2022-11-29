@@ -5,6 +5,8 @@ import me.universi.usuario.entities.Usuario;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.DefaultRedirectStrategy;
+import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.security.web.savedrequest.SavedRequest;
 
@@ -37,14 +39,15 @@ public class AutenticacaoValidaHandler extends SavedRequestAwareAuthenticationSu
                 usuarioService.configurarSessaoParaUsuario(session, usuario);
             }
 
-            // usuário não tem perfil, redirecionar para editar perfil
-            //if(usuario.getPerfil()==null) {
-            //    RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
-            //    redirectStrategy.sendRedirect(request, response, "/p/" + usuario.getUsername() + "/editar");
-            //} else {
-            //    super.onAuthenticationSuccess(request, response, authentication);
-            //}
         }
+
+        Usuario usuario = (Usuario) session.getAttribute("usuario");
+
+        String redirecionarParaCriarPerfil = null;
+        if(usuario.getPerfil()==null || usuario.getPerfil().getNome()==null) {
+            redirecionarParaCriarPerfil = "/p/" + usuario.getUsername() + "/editar";
+        }
+
 
         if ("application/json".equals(request.getHeader("Content-Type"))) {
 
@@ -53,14 +56,19 @@ public class AutenticacaoValidaHandler extends SavedRequestAwareAuthenticationSu
             resposta.mensagem = "Usuário Logado com sucesso.";
 
             SavedRequest lastRequestSaved = (SavedRequest)session.getAttribute("SPRING_SECURITY_SAVED_REQUEST");
-            resposta.enderecoParaRedirecionar = lastRequestSaved!=null?lastRequestSaved.getRedirectUrl():"/";
+            resposta.enderecoParaRedirecionar = lastRequestSaved!=null?lastRequestSaved.getRedirectUrl():redirecionarParaCriarPerfil!=null?redirecionarParaCriarPerfil:"/";
 
             response.setHeader("Content-Type", "application/json; charset=utf-8");
             response.getWriter().print(resposta.toString());
             response.getWriter().flush();
 
         } else {
-            super.onAuthenticationSuccess(request, response, authentication);
+            if(redirecionarParaCriarPerfil != null) {
+                RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
+                redirectStrategy.sendRedirect(request, response, redirecionarParaCriarPerfil);
+            } else {
+                super.onAuthenticationSuccess(request, response, authentication);
+            }
         }
     }
 }
