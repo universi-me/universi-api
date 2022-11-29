@@ -9,7 +9,7 @@ function editarGrupo(callback) {
       grupoId: document.querySelector('[name="grupoId"]').value,
       nome: document.querySelector('#nome').value,
       nickname: document.querySelector('#nickname').value,
-      imagem: document.querySelector('#imagemUp').src,
+      imagem: document.querySelector('#imagemUp').value,
       descricao: document.querySelector('#descricao').value,
       tipo: document.querySelector('#tipo').value,
       podeCriarGrupo: document.querySelector('#podeCriarGrupo').checked,
@@ -21,7 +21,7 @@ function criarGrupo(callback) {
       grupoId: document.querySelector('[name="grupoId"]').value,
       nome: document.querySelector('#nome').value,
       nickname: document.querySelector('#nickname').value,
-      imagem: document.querySelector('#imagemUp').src,
+      imagem: document.querySelector('#imagemUp').value,
       descricao: document.querySelector('#descricao').value,
       tipo: document.querySelector('#tipo').value,
       podeCriarGrupo: document.querySelector('#podeCriarGrupo').checked,
@@ -113,6 +113,7 @@ function uploadDaImagem(file) {
                 if(jsonResp.sucess) {
                     var link = jsonResp.conteudo.link;
                     document.getElementById("imagemUp").src = link;
+                    document.getElementById("imagemUp").value = link;
                 }
             } catch (error) {
                 alert(error, 'warning');

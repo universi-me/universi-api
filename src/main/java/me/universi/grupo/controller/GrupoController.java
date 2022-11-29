@@ -117,9 +117,6 @@ public class GrupoController {
             }
 
             String imagem = (String)body.get("imagem");
-            if(imagem == null) {
-                throw new GrupoException("Parametro imagem é nulo.");
-            }
 
             String descricao = (String)body.get("descricao");
             if(descricao == null) {
@@ -144,7 +141,9 @@ public class GrupoController {
                 Grupo grupoNew = new Grupo();
                 grupoNew.setNickname(nickname);
                 grupoNew.setNome(nome);
-                grupoNew.setImagem(imagem);
+                if(imagem != null) {
+                    grupoNew.setImagem(imagem);
+                }
                 grupoNew.setDescricao(descricao);
                 grupoNew.setTipo(GrupoTipo.valueOf(tipo));
                 grupoNew.setAdmin(usuario.getPerfil());
