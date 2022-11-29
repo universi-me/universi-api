@@ -21,4 +21,12 @@ public class PerfilService {
         return perfilRepository.findFirstById(Long.parseLong(id)).orElse(null);
     }
 
+    public void save(Perfil perfil) {
+        perfilRepository.save(perfil);
+    }
+
+    public void delete(Perfil perfil) {
+        perfilRepository.delete(perfil);
+    }
+
 }

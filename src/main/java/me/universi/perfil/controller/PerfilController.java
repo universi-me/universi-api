@@ -35,9 +35,6 @@ public class PerfilController {
     @Autowired
     public GrupoService grupoService;
 
-    @Autowired
-    public PerfilRepository perfilRepository;
-
     @GetMapping("/p/**")
     public String perfil_handler(HttpServletRequest request, HttpServletResponse response, HttpSession session, ModelMap map) {
         try {
@@ -71,7 +68,7 @@ public class PerfilController {
                     if(perfil==null && usuario.getId() == usuarioPerfil.getId()) {
                         perfil = new Perfil();
                         perfil.setUsuario(usuario);
-                        perfilRepository.save(perfil);
+                        perfilService.save(perfil);
                     }
 
                 }
