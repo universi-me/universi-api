@@ -2,6 +2,8 @@ package me.universi.imagem.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import me.universi.api.entities.Resposta;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,6 +18,8 @@ import java.util.Map;
 
 @RestController
 public class ImagemController {
+    @Autowired
+    private Environment env;
 
     @PostMapping("/imagem/upload")
     public Object upload_de_imagem(@RequestParam("imagem") MultipartFile imagem) {
@@ -26,7 +30,7 @@ public class ImagemController {
             String boundary = "----WebKitFormBoundary"+Long.toHexString(System.currentTimeMillis());
             URLConnection connection = new URL(urlApi).openConnection();
             connection.setDoOutput(true);
-            connection.setRequestProperty("Authorization", "Client-ID " + "520dd4dcbe12c2a");
+            connection.setRequestProperty("Authorization", "Client-ID " + env.getProperty("IMGUR_CLIENT_ID"));
             connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
 
             OutputStream outPut = connection.getOutputStream();
