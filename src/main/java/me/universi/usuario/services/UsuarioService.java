@@ -100,8 +100,7 @@ public class UsuarioService implements UserDetailsService {
         userRepository.save(usuario);
     }
 
-    public boolean usuarioDonoDaSessao(HttpSession session, Usuario usuario)
-    {
+    public boolean usuarioDonoDaSessao(HttpSession session, Usuario usuario) {
         if(session != null && usuario != null) {
             Usuario usuarioSession = (Usuario) session.getAttribute("usuario");
             if(usuarioSession != null) {
