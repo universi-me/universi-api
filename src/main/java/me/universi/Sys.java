@@ -1,7 +1,7 @@
 package me.universi;
 
 import me.universi.competencia.entities.Competencia;
-import me.universi.competencia.repositories.CompetenciaRepository;
+import me.universi.competencia.services.CompetenciaService;
 import me.universi.grupo.entities.Grupo;
 import me.universi.grupo.enums.GrupoTipo;
 import me.universi.grupo.exceptions.GrupoException;
@@ -34,7 +34,7 @@ public class Sys {
     @Autowired
     public UsuarioService usuarioService;
     @Autowired
-    public CompetenciaRepository competenciaRepository;
+    public CompetenciaService competenciaService;
     @Autowired
     public GrupoService grupoService;
 
@@ -61,12 +61,12 @@ public class Sys {
         Competencia competenciaNew = new Competencia();
         competenciaNew.setNome("Java - admin"+userNew.getId());
         competenciaNew.setDescricao("Sou top em java - admin"+userNew.getId());
-        competenciaRepository.save(competenciaNew);
+        competenciaService.save(competenciaNew);
 
         Competencia competenciaNew1 = new Competencia();
         competenciaNew1.setNome("Java - admin 1"+userNew.getId());
         competenciaNew1.setDescricao("Sou top em java - admin 1"+userNew.getId());
-        competenciaRepository.save(competenciaNew1);
+        competenciaService.save(competenciaNew1);
 
         Perfil admin_perfil = new Perfil();
         admin_perfil.setUsuario(userNew);

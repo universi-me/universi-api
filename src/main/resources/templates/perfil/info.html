@@ -88,7 +88,7 @@
 
                             <!-- Nível -->
                             <h6 class="card-title text-center"
-                            th:text="${'('+ (competenciaNow.getNivel() == null ? 'NENHUMA_EXPERIENCIA' : competenciaNow.getNivel()) + ')'}">
+                            th:text="${'('+ (competenciaNow.getNivel() == null ? 'Nenhuma Experiência' : competenciaNow.getNivel().label) + ')'}">
                                 nível da competência
                             </h6>
 

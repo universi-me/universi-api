@@ -9,7 +9,8 @@ import javax.servlet.http.HttpSession;
 import me.universi.api.entities.Resposta;
 import me.universi.competencia.entities.Competencia;
 import me.universi.competencia.enums.Nivel;
-import me.universi.competencia.repositories.CompetenciaRepository;
+import me.universi.competencia.exceptions.CompetenciaException;
+import me.universi.competencia.services.CompetenciaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -17,11 +18,9 @@ import org.springframework.web.bind.annotation.*;
 
 @Controller
 public class CompetenciaController {
-
     @Autowired
-    public CompetenciaRepository competenciaRepository;
+    public CompetenciaService competenciaService;
 
-    // http://localhost:80/competencia/criar?nome=teste&descricao=teste2&nivel=NENHUMA_EXPERIENCIA
     @PostMapping(value = "/competencia/criar", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Object create(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
@@ -33,7 +32,7 @@ public class CompetenciaController {
             Nivel nivel = (Nivel)Nivel.valueOf((String)body.get("nivel"));
 
             Competencia competenciaNew = new Competencia(nome, descricao, nivel); // nova competência
-            competenciaRepository.save(competenciaNew);
+            competenciaService.save(competenciaNew);
 
             resposta.mensagem = "Competencia Criada: " + competenciaNew.toString();
             return resposta;
@@ -44,7 +43,6 @@ public class CompetenciaController {
         }
     }
 
-    // http://localhost:80/competencia/atualizar?id=3&nome=teste&descricao=teste2&nivel=NENHUMA_EXPERIENCIA
     @PostMapping(value = "/competencia/atualizar", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Object update(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
@@ -52,41 +50,44 @@ public class CompetenciaController {
         Competencia comp,compOld;
         try {
 
-            Long id = (Long)Long.valueOf((String)body.get("id"));
+            String id = (String)body.get("id");
+            if(id == null) {
+                throw new CompetenciaException("Parametro id é nulo.");
+            }
+
             String nome = (String)body.get("nome");
             String descricao = (String)body.get("descricao");
-            Nivel nivel = (Nivel)Nivel.valueOf((String)body.get("nivel"));
+            String nivelSt = (String)body.get("nivel");
 
-            comp = competenciaRepository.findById(id).get();
-            compOld = new Competencia(comp.getNome(), comp.getDescricao(), comp.getNivel());
-            if (comp != null) { // verifica se a competencia existe
-
-                for (Nivel n : Nivel.values()) { // verifica se nivel existe
-                    System.out.println(n);
-                    if (nivel.equals(n) && !nivel.equals(comp.getNivel())){
-                        comp.setNivel(nivel);
-//                        System.out.println("novo nível");
-                        break; // sai do loop
-                    }
-                }
-
-                if(nome != null && !nome.equals(comp.getNome())) {
-//                    System.out.println("novo nome");
-                    comp.setNome(nome);
-                }
-
-                if (descricao != null && !descricao.equals(comp.getDescricao())) {
-//                    System.out.println("nova descrição");
-                    comp.setDescricao(descricao);
-                }
-
-                competenciaRepository.save(comp);
+            comp = competenciaService.findFirstById(Long.valueOf(id));
+            if (comp == null) {
+                throw new CompetenciaException("Competencia não encontrada.");
             }
-        } catch (EntityNotFoundException e) {
-            resposta.mensagem = "Competencia não encontrada";
-            return resposta;
-        } catch (IllegalArgumentException e) {
-            resposta.mensagem = "Nível não existe";
+
+            compOld = new Competencia(comp.getNome(), comp.getDescricao(), comp.getNivel());
+
+            Nivel nivel = Nivel.valueOf(nivelSt);
+
+            for (Nivel n : Nivel.values()) { // verifica se nivel existe
+                System.out.println(n);
+                if (nivel.equals(n) && !nivel.equals(comp.getNivel())){
+                    comp.setNivel(nivel);
+//                       System.out.println("novo nível");
+                    break; // sai do loop
+                }
+            }
+            if(nome != null && !nome.equals(comp.getNome())) {
+//                   System.out.println("novo nome");
+                comp.setNome(nome);
+            }
+            if (descricao != null && !descricao.equals(comp.getDescricao())) {
+//                   System.out.println("nova descrição");
+                comp.setDescricao(descricao);
+            }
+            competenciaService.save(comp);
+
+        } catch (Exception e) {
+            resposta.mensagem = e.getMessage();
             return resposta;
         }
 
@@ -100,8 +101,6 @@ public class CompetenciaController {
         return resposta;
     }
 
-
-    // http://localhost:80/competencia/remover?id=1
     @PostMapping(value = "/competencia/remover", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Object remove(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
@@ -110,9 +109,9 @@ public class CompetenciaController {
 
             Long id = (Long)Long.valueOf((String)body.get("id"));
 
-            Competencia comp = competenciaRepository.findById(id).get();
+            Competencia comp = competenciaService.findFirstById(id);
             if (comp != null) {
-                competenciaRepository.delete(comp);
+                competenciaService.delete(comp);
 
                 resposta.mensagem = "Competencia removida: " + comp.toString();
                 resposta.sucess = true;
@@ -131,7 +130,6 @@ public class CompetenciaController {
         }
     }
 
-    // http://localhost:80/competencia/obter?id=1
     @PostMapping(value = "/competencia/obter", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Object get(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
@@ -140,7 +138,7 @@ public class CompetenciaController {
 
             Long id = (Long)Long.valueOf((String)body.get("id"));
 
-            Competencia comp = competenciaRepository.findById(id).get();
+            Competencia comp = competenciaService.findFirstById(id);
             resposta.conteudo.put("competencia", comp);
 
             resposta.mensagem = "Operação realizada com exito.";
@@ -153,14 +151,13 @@ public class CompetenciaController {
         }
     }
 
-    // http://localhost:80/competencia/listar
     @PostMapping(value = "/competencia/listar", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Object getlist(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
         Resposta resposta = new Resposta();
         try {
 
-            List<Competencia> comps = competenciaRepository.findAll();
+            List<Competencia> comps = competenciaService.findAll();
 
             resposta.conteudo.put("lista", comps);
 
