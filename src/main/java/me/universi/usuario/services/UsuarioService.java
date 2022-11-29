@@ -100,6 +100,17 @@ public class UsuarioService implements UserDetailsService {
         userRepository.save(usuario);
     }
 
+    public boolean usuarioDonoDaSessao(HttpSession session, Usuario usuario)
+    {
+        if(session != null && usuario != null) {
+            Usuario usuarioSession = (Usuario) session.getAttribute("usuario");
+            if(usuarioSession != null) {
+                return (usuarioSession.getId() == usuario.getId());
+            }
+        }
+        return false;
+    }
+
     public void configurarSessaoParaUsuario(HttpSession session, Usuario usuario) {
 
         // Set session inatividade do usuario em 10min
