@@ -1,5 +1,12 @@
 package me.universi.link.enums;
 
 public enum TipoLink {
-    GITHUB, LINKEDIN;
+    GITHUB("GitHub"),
+    LINKEDIN("LinkedIn");
+
+    public final String label;
+
+    private TipoLink(String label) {
+        this.label = label;
+    }
 }
