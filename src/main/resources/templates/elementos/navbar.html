@@ -23,7 +23,7 @@
       </ul>
       <ul class="navbar-nav" align="right" sec:authorize="isAuthenticated()">
         <li class="nav-item">
-          <div th:inline="text" style="padding-right: 10px;">Olá, [[${session.usuario.nome}]]!</div>
+          <div th:text="'Olá, '+${session.usuario.perfil==null?session.usuario.getUsername():session.usuario.perfil.nome}" style="padding-right: 10px;">Olá, Nome!</div>
         </li>
       </ul>
 
@@ -31,7 +31,7 @@
         <div class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             <img
-                    src="https://i.imgur.com/vUBrCxr.png"
+                    th:src="${(session.usuario.perfil==null || session.usuario.perfil.imagem==null)?'https://i.imgur.com/vUBrCxr.png':session.usuario.perfil.imagem}"
                     class="rounded-circle"
                     height="40"
                     alt="Perfil"
