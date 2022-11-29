@@ -30,7 +30,7 @@
                     <div class="card" style="width: 10rem;">
                         <img th:src="${participanteNow.imagem==null?'https://i.imgur.com/vUBrCxr.png':participanteNow.imagem}" class="card-img-top" alt="...">
                         <div class="card-body">
-                            <h6 class="card-title" th:text="${participanteNow.getNome()==null?participanteNow.usuario.getUsername():participanteNow.getNome()}">Nome do participante</h6>
+                            <h6 class="card-title text-center"><span th:text="${participanteNow.getNome()==null?participanteNow.usuario.getUsername():participanteNow.getNome()}">Nome do participante</span><span th:unless="${participanteNow.getNome()==null || participanteNow.usuario.isEmail_verificado() == false}">   <img src="https://i.imgur.com/w3aKauq.png" width="22" /></span></h6>
                         </div>
                         <ul class="list-group list-group-flush" style="text-align: center;">
                             <li class="list-group-item">

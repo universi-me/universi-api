@@ -22,6 +22,7 @@ public class Usuario implements UserDetails {
     @Column(name = "nome")
     private String nome;
 
+    @JsonIgnore
     @Column(name = "email")
     private String email;
 
@@ -32,6 +33,10 @@ public class Usuario implements UserDetails {
     @JsonIgnore
     @OneToOne(mappedBy = "usuario")
     private Perfil perfil;
+
+    @JsonIgnore
+    @Column(name = "email_verificado")
+    private boolean email_verificado;
 
     @JsonIgnore
     @Column(name = "usuario_expirado")
@@ -98,6 +103,14 @@ public class Usuario implements UserDetails {
 
     public void setPerfil(Perfil perfil) {
         this.perfil = perfil;
+    }
+
+    public boolean isEmail_verificado() {
+        return email_verificado;
+    }
+
+    public void setEmail_verificado(boolean email_verificado) {
+        this.email_verificado = email_verificado;
     }
 
     public boolean isUsuario_expirado() {
