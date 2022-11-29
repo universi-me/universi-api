@@ -25,7 +25,7 @@
                     <input type="text" class="form-control" id="sobrenome" name="sobrenome" th:value="${perfil.sobrenome}">
                 </div>
                 <div class="mb-3">
-                    <label for="nome" class="form-label">* Imagem: </label>
+                    <label for="nome" class="form-label">Imagem: </label>
                     <div class="input-group mb-3">
                         <input type="file" class="form-control" id="imagem_file">
                         <img th:src="${perfil.imagem==null?'https://i.imgur.com/vUBrCxr.png':perfil.imagem}" class="img-thumbnail input-group-text text-center" alt="" id="imagemUp" name="imagemUp" style="width:150px;" for="imagem_file"/>
