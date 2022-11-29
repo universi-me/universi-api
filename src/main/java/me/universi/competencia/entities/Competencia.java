@@ -57,6 +57,7 @@ public class Competencia {
 
     public void setNivel(Nivel nivel) { this.nivel = nivel; }
 
+    @Override
     public boolean equals(Object obj) {
         if(!(obj instanceof Competencia)) {
 			return false;
