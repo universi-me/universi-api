@@ -2,6 +2,18 @@
 var usuarioFormato = /^([a-z0-9_-]+)$/;
 var emailFormato = /^([a-z0-9._-]+)$/;
 
+/* Perfil calls */
+function editarPerfil(callback) {
+   var bodyValores = {
+      perfilId: document.querySelector('[name="perfilId"]').value,
+      nome: document.querySelector('#nome').value,
+      sobrenome: document.querySelector('#sobrenome').value,
+      imagem: document.querySelector('#imagemUp').value,
+      bio: document.querySelector('#bio').value,
+      sexo: document.querySelector('#sexo').value,
+   }
+   api_request('/perfil/editar', bodyValores, callback);
+}
 
 /* Grupo calls */
 function editarGrupo(callback) {
@@ -119,12 +131,12 @@ function uploadDaImagem(file) {
                 alert(error, 'warning');
             }
         } else {
-            alert("Ocorreu Um erro na requisição.", 'warning');
+            alert("Ocorreu um erro na requisição.", 'warning');
         }
     }
     http.onerror = function () {
         button.removeAttribute('disabled');
-        alert("Ocorreu Um erro na requisição.", 'warning');
+        alert("Ocorreu um erro na requisição.", 'warning');
     }
     http.send(fd);
 }
@@ -153,11 +165,11 @@ function api_request(path, parametro, callback) {
          }
 
        } else {
-         alert("Ocorreu Um erro na requisição.", 'warning');
+         alert("Ocorreu um erro na requisição.", 'warning');
        }
     };
     http.onerror = function () {
-        alert("Ocorreu Um erro na requisição.", 'warning');
+        alert("Ocorreu um erro na requisição.", 'warning');
     }
 }
 

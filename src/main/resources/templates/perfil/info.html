@@ -17,7 +17,7 @@
             <div class="row">
                 <h6 th:if="${perfil.getRecomendacoesRecebidas().empty}"> Sem Recomendações </h6>
 
-                <div class="col-sm-2"
+                <div class="col-sm-2" th:unless="${perfil.getRecomendacoesRecebidas().empty}"
                      th:each="i : ${#numbers.sequence(perfil.getRecomendacoesRecebidas().size() - 1, perfil.getRecomendacoesRecebidas().size()>=6?perfil.getRecomendacoesRecebidas().size() - 6:0, -1)}"
                      th:with="recomendacaoNow=${perfil.getRecomendacoesRecebidas()[i]}"
                      style="padding-bottom: 30px;">
@@ -42,7 +42,7 @@
         <div class="card-body">
             <div class="row">
                 <h6 th:if="${perfil.grupos.empty}"> Sem Grupos </h6>
-                <div class="col-sm-3"
+                <div class="col-sm-3" th:unless="${perfil.grupos.empty}"
                      th:each="i : ${#numbers.sequence(perfil.grupos.size() - 1, perfil.grupos.size()>=6?perfil.grupos.size() - 6:0, -1)}"
                      th:with="grupoNow=${perfil.grupos[i]}"
                      style="padding-bottom: 30px;">
@@ -75,7 +75,7 @@
             <div class="row">
                 <h6 th:if="${perfil.getCompetencias().empty}"> Sem Competências </h6>
 
-                <div class="col-sm-4"
+                <div class="col-sm-4" th:unless="${perfil.getCompetencias().empty}"
                      th:each="i : ${#numbers.sequence(1, perfil.getCompetencias().size()>=6?6:0, -1)}"
                      th:with="competenciaNow=${perfil.getCompetencias()[i]}">
                     <div class="card" style="width:100%; margin-bottom:17px">

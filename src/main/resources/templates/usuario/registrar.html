@@ -40,8 +40,8 @@
       <label for="password2" class="form-label">* Confirmar Nova Senha:</label>
       <input type="password" class="form-control" id="password2" name="password2">
    </div>
-   <p/>
-   <button type="submit" class="btn btn-primary">Registrar-se</button>
+   <p class="text-center">
+      <button type="submit" class="btn btn-primary">Registrar-se</button></p>
 </form>
 <script>
 function validar() {
@@ -52,7 +52,6 @@ function validar() {
 }
 validar();
 </script>
-<p align="right"><button onclick="location.href='/login'" class="btn btn-primary">Login</button></p>
 </div>
 
    <div th:replace="elementos/footer :: footer"></div>

@@ -23,7 +23,7 @@
       </ul>
       <ul class="navbar-nav" align="right" sec:authorize="isAuthenticated()">
         <li class="nav-item">
-          <div th:text="'Olá, '+${session.usuario.perfil==null?session.usuario.getUsername():session.usuario.perfil.nome}" style="padding-right: 10px;">Olá, Nome!</div>
+          <div th:text="'Olá, '+${(session.usuario.perfil==null || session.usuario.perfil.nome==null)?session.usuario.getUsername():session.usuario.perfil.nome}" style="padding-right: 10px;">Olá, Nome!</div>
         </li>
       </ul>
 
@@ -47,7 +47,10 @@
         </div>
       </div>
       
-      <div align="right" sec:authorize="isAnonymous()"><button onclick="location.href='/login'" class="btn btn-primary">Login</button></div>
+      <div align="right" sec:authorize="isAnonymous()">
+        <button onclick="location.href='/login'" class="btn btn-primary" th:if="${#httpServletRequest.requestURI != '/login'}">Login</button>
+        <button onclick="location.href='/registrar'" class="btn btn-primary" th:if="${#httpServletRequest.requestURI == '/login'}">Registrar-se</button>
+      </div>
     </div>
   </div>
 </nav>

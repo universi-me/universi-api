@@ -77,13 +77,15 @@ public class UsuarioController {
             user.setSenha(usuarioService.codificarSenha(senha));
 
             usuarioService.createUser(user);
+
+            resposta.sucess = true;
+            resposta.mensagem = "Usuário registrado com sucesso, efetue o login para completar o cadastro.";
+            return resposta;
+
         } catch (Exception e) {
             resposta.mensagem = e.getMessage();
             return resposta;
         }
-        resposta.sucess = true;
-        resposta.mensagem = "Usuário registrado com sucesso, efetue o login.";
-        return resposta;
     }
 	
 	@GetMapping("/conta")
@@ -173,8 +175,13 @@ public class UsuarioController {
 
                     sessionReq.setAttribute("loginViaGoogle", true);
 
+                    String redirecionarParaCriarPerfil = null;
+                    if(usuario.getPerfil()==null || usuario.getPerfil().getNome()==null) {
+                        redirecionarParaCriarPerfil = "/p/" + usuario.getUsername() + "/editar";
+                    }
+
                     resposta.sucess = true;
-                    resposta.enderecoParaRedirecionar = "/conta";
+                    resposta.enderecoParaRedirecionar = redirecionarParaCriarPerfil==null?"/conta":redirecionarParaCriarPerfil;
                     resposta.mensagem = "Usuário Logado com sucesso.";
                     return resposta;
                 }

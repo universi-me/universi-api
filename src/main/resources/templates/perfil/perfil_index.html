@@ -23,26 +23,26 @@
     <h2 th:text="${error}" th:unless="${error == null}">Menssagem de error.</h2>
 
 
-    <div style="max-width=80%;margin: 0 auto;" th:unless="${error != null || perfil == null}">
+    <div style="max-width=80%;margin: 0 auto;" th:unless="${error != null}">
 
-        <p><h4 th:text="'Perfil: ' + ${perfil.nome}" th:unless="${perfil == null}" style="text-align: center;">Perfil</h4></p>
+        <p><h4 th:text="'Perfil: ' + ${perfil.nome}" th:unless="${perfil == null || perfil.nome == null}" style="text-align: center;">Perfil</h4></p>
 
 
         <div class="container">
 
             <div class="row gutters">
 
-                <div class="col" style="width:20%;max-width:210px;min-width:150px;padding-right: 10px;">
+                <div class="col" style="width:20%;max-width:210px;min-width:150px;padding-right: 10px;" th:unless="${perfil == null || perfil.nome == null}">
                     <div class="card" style="width: 100%;">
-                        <img th:src="${perfil.imagem==null?'https://i.imgur.com/vUBrCxr.png':perfil.imagem}" class="card-img-top" alt="Perfil">
+                        <img th:src="${(perfil==null || perfil.imagem==null)?'https://i.imgur.com/vUBrCxr.png':perfil.imagem}" class="card-img-top" alt="Perfil">
                         <div class="card-body">
-                            <h5 class="card-title text-center" th:text="${perfil.nome}">Nome do Perfil</h5>
+                            <h5 class="card-title text-center" th:text="${perfil==null?'':perfil.nome}">Nome do Perfil</h5>
                         </div>
-                        <div class="card-header card-footer text-center">Descrição</div>
+                        <div class="card-header card-footer text-center">Bio</div>
                         <div class="card-body">
-                            <p class="card-text" th:text="${perfil.bio}">Bio do Perfil</p>
+                            <p class="card-text" th:text="${perfil==null?'':perfil.bio}">Bio do Perfil</p>
                         </div>
-                        <a class="card-footer text-center" th:href="'/p/' +${perfil.usuario.nome} + '/editar'"
+                        <a class="card-footer text-center" th:unless="${perfil == null}" th:href="'/p/' +${perfil.usuario.nome} + '/editar'"
                              style="background-color:#B4FFC2;text-decoration: none;">Editar Perfil
                         </a>
                     </div>
@@ -58,6 +58,9 @@
                         <div th:case="'info'">
                             <div th:replace="perfil/info :: info" />
                         </div>
+                        <div th:case="'flagCriar'">
+                            <div th:replace="perfil/criar :: criar" />
+                        </div>
                     </div>
 
                 </div>
@@ -67,8 +70,9 @@
     </div>
 
     <br/><br/>
-    <script>
-        
+
+    <script th:if="${session.usuario.perfil==null || session.usuario.perfil.getNome()==null}">
+        alert("Complete o seu cadastro para começar a usar o Universi.me !", 'warning');
     </script>
 
     <p align="left">

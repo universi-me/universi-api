@@ -35,6 +35,10 @@ public class GrupoController {
         try {
             Usuario usuario = (Usuario)session.getAttribute("usuario");
 
+            if(usuario.getPerfil() == null || usuario.getPerfil().getNome() == null) {
+                return "redirect:/p/"+ usuario.getUsername() +"/editar";
+            }
+
             // obter diretorio caminho url
             String requestPathSt = request.getRequestURI().toLowerCase();
 
