@@ -49,7 +49,7 @@ public class ImagemController {
     @GetMapping(value = "/img/imagem/{imagem}", produces = MediaType.IMAGE_JPEG_VALUE)
     public ResponseEntity<InputStreamResource> obterImageEmDisco(HttpServletResponse response, @PathVariable("imagem") String nomeImagem) throws IOException {
         try {
-            String filename = nomeImagem.replaceAll("\\W+", "").replaceAll("jpg", ".jpg");
+            String filename = nomeImagem.replaceAll(".", "").replaceAll("/", "").replaceAll("jpg", ".jpg");
             File initialFile = new File(env.getProperty("DIRETORIO_DA_IMAGEM") + "imagem_" + filename);
             InputStream targetStream = new FileInputStream(initialFile);
             return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(new InputStreamResource(targetStream));
