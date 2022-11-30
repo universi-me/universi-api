@@ -19,7 +19,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 
-
 @RestController
 public class ImagemController {
     @Autowired
@@ -48,22 +47,26 @@ public class ImagemController {
     }
 
     @ResponseBody
-    @GetMapping(value = "/img/imagem/{imagem}", produces = MediaType.IMAGE_JPEG_VALUE)
+    @GetMapping(value = "/img/imagem/{imagem}.jpg", produces = MediaType.IMAGE_JPEG_VALUE)
     public ResponseEntity<InputStreamResource> obterImageEmDisco(HttpServletResponse response, @PathVariable("imagem") String nomeImagem) {
         try {
 
-            String filename = nomeImagem.replaceAll("[^a-z0-9]", "");
-            filename = filename.replaceAll("jpg", "");
+            String filename = nomeImagem.replaceAll("[^a-f0-9]", "");
             filename = filename.replace("..", "");
             filename = filename.replace("/", "");
             filename = filename.replace("\\", "");
 
-            Path path = Paths.get(env.getProperty("DIRETORIO_DA_IMAGEM") + "imagem_" + filename + ".jpg").normalize();
-            
-            File initialFile = new File(path.toUri());
+            Path path = Paths.get(filename).normalize();
 
-            InputStream targetStream = new FileInputStream(initialFile);
-            return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(new InputStreamResource(targetStream));
+            String nomeFile = path.toString();
+
+            if(!nomeFile.contains("..") && !nomeFile.contains("/")) {
+                File initialFile = new File(env.getProperty("DIRETORIO_DA_IMAGEM"), nomeFile);
+
+                InputStream targetStream = new FileInputStream(initialFile);
+                return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(new InputStreamResource(targetStream));
+            }
+            return ResponseEntity.notFound().build();
 
         }catch (Exception e) {
             return ResponseEntity.notFound().build();
@@ -72,20 +75,20 @@ public class ImagemController {
 
     public String salvarImagemEmDisco(MultipartFile imagem) throws Exception {
 
-        String nomeDaImage = Long.toHexString(System.currentTimeMillis())+".jpg";
+        String nomeDaImage = Long.toHexString(System.currentTimeMillis());
 
         File imagemDir = new File(env.getProperty("DIRETORIO_DA_IMAGEM"));
         if (!imagemDir.exists()){
             imagemDir.mkdirs();
         }
 
-        File file = new File(imagemDir.toString() + "/imagem_" + nomeDaImage);
+        File file = new File(imagemDir.toString() + "/" + nomeDaImage);
 
         OutputStream os = new FileOutputStream(file);
         os.write(imagem.getBytes());
 
         if(nomeDaImage != null) {
-            return "/img/imagem/" + nomeDaImage;
+            return "/img/imagem/" + nomeDaImage + ".jpg";
         }
 
         throw new Exception("Falha ao salvar imagem em disco.");
