@@ -100,10 +100,12 @@ public class Sys {
         Grupo novoGrupo = new Grupo();
         novoGrupo.setNickname("ufpb");
         novoGrupo.setTipo(GrupoTipo.INSTITUICAO);
-        novoGrupo.setGrupoRoot(true);
         novoGrupo.setAdmin(admin_perfil);
         novoGrupo.setDescricao("Grupo da Instituição da UFPB");
         novoGrupo.setNome("UFPB");
+
+        novoGrupo.setGrupoRoot(true);
+        novoGrupo.setPodeCriarGrupo(true);
 
         grupoService.adicionarParticipante(novoGrupo, perfil_1);
         grupoService.adicionarParticipante(novoGrupo, perfil_2);

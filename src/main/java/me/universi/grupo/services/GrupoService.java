@@ -64,10 +64,10 @@ public class GrupoService {
         }
 
         Perfil perfil = usuario.getPerfil();
-        if (perfil == null) {
-            //throw new GrupoException("Você precisa criar um Perfil.");
+        if (perfil == null || perfil.getNome() == null) {
+            throw new GrupoException("Você precisa criar um Perfil.");
         } else if(perfil.getId()!=0 && grupo.getAdmin().getId() != perfil.getId()) {
-            //throw new GrupoException("Apenas administradores podem editar seus grupos!");
+            throw new GrupoException("Apenas administradores podem editar seus grupos!");
         }
 
         return true;
