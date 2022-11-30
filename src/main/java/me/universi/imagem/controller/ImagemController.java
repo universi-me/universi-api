@@ -52,20 +52,14 @@ public class ImagemController {
         try {
 
             String filename = nomeImagem.replaceAll("[^a-f0-9]", "");
-            filename = filename.replace("..", "");
-            filename = filename.replace("/", "");
-            filename = filename.replace("\\", "");
 
-            String path = filename;
-
-            String nomeFile = path.toString();
-
-            if(!nomeFile.contains("..") && !nomeFile.contains("/")) {
-                File initialFile = new File(env.getProperty("DIRETORIO_DA_IMAGEM"), nomeFile);
+            if(!filename.contains("..") && !filename.contains("/")) {
+                File initialFile = new File(env.getProperty("DIRETORIO_DA_IMAGEM"), filename);
 
                 InputStream targetStream = new FileInputStream(initialFile);
                 return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(new InputStreamResource(targetStream));
             }
+            
             return ResponseEntity.notFound().build();
 
         }catch (Exception e) {
