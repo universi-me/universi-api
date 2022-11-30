@@ -2,6 +2,7 @@ package me.universi.imagem.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import me.universi.api.entities.Resposta;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.InputStreamResource;
@@ -15,8 +16,6 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Map;
 
 @RestController
@@ -50,23 +49,11 @@ public class ImagemController {
     @GetMapping(value = "/img/imagem/{imagem}.jpg", produces = MediaType.IMAGE_JPEG_VALUE)
     public ResponseEntity<InputStreamResource> obterImageEmDisco(HttpServletResponse response, @PathVariable("imagem") String nomeImagem) {
         try {
-
             String filename = nomeImagem.replaceAll("[^a-f0-9]", "");
-            filename = filename.replace("..", "");
-            filename = filename.replace("/", "");
-            filename = filename.replace("\\", "");
 
-            String path = filename;
-
-            String nomeFile = path.toString();
-
-            if(!nomeFile.contains("..") && !nomeFile.contains("/")) {
-                File initialFile = new File(env.getProperty("DIRETORIO_DA_IMAGEM"), nomeFile);
-
-                InputStream targetStream = new FileInputStream(initialFile);
-                return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(new InputStreamResource(targetStream));
-            }
-            return ResponseEntity.notFound().build();
+            File initialFile = new File(env.getProperty("DIRETORIO_DA_IMAGEM"), FilenameUtils.getName(filename));
+            InputStream targetStream = new FileInputStream(initialFile);
+            return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(new InputStreamResource(targetStream));
 
         }catch (Exception e) {
             return ResponseEntity.notFound().build();
