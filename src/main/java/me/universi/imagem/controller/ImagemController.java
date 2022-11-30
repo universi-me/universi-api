@@ -48,11 +48,14 @@ public class ImagemController {
     @ResponseBody
     @GetMapping(value = "/img/imagem/{imagem}", produces = MediaType.IMAGE_JPEG_VALUE)
     public ResponseEntity<InputStreamResource> obterImageEmDisco(HttpServletResponse response, @PathVariable("imagem") String nomeImagem) throws IOException {
-
-        File initialFile = new File(env.getProperty("DIRETORIO_DA_IMAGEM") + "imagem_" + nomeImagem);
-        InputStream targetStream = new FileInputStream(initialFile);
-
-        return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(new InputStreamResource(targetStream));
+        try {
+            String filename = nomeImagem.replaceAll("/", "");
+            File initialFile = new File(env.getProperty("DIRETORIO_DA_IMAGEM") + "imagem_" + filename);
+            InputStream targetStream = new FileInputStream(initialFile);
+            return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(new InputStreamResource(targetStream));
+        }catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     public String salvarImagemEmDisco(MultipartFile imagem) throws Exception {
