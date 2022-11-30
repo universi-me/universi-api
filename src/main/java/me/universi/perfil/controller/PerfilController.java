@@ -137,7 +137,7 @@ public class PerfilController {
 
             usuarioService.atualizarUsuarioNaSessao(session);
 
-            resposta.enderecoParaRedirecionar = "/p/" + perfilAtual.getUsuario().getUsername();
+            resposta.mensagem = "As Alterações foram salvas com sucesso.";
             resposta.sucess = true;
 
         } catch (Exception e) {
