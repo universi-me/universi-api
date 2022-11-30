@@ -42,7 +42,7 @@
                         <div class="card-body">
                             <p class="card-text" th:text="${perfil==null?'':perfil.getBio()}">Bio do Perfil</p>
                         </div>
-                        <a class="card-footer text-center" th:unless="${perfil == null}" th:href="'/p/' +${perfil.getUsuario().getUsername()} + '/editar'"
+                        <a class="card-footer text-center" th:unless="${perfil == null || #strings.endsWith(#httpServletRequest.requestURI, '/editar')}" th:href="'/p/' +${perfil.getUsuario().getUsername()} + '/editar'"
                              style="background-color:#B4FFC2;text-decoration: none;">Editar Perfil
                         </a>
                     </div>
@@ -57,9 +57,6 @@
                         </div>
                         <div th:case="'info'">
                             <div th:replace="perfil/info :: info" />
-                        </div>
-                        <div th:case="'flagCriar'">
-                            <div th:replace="perfil/criar :: criar" />
                         </div>
                     </div>
 
