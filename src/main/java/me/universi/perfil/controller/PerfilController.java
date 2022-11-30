@@ -63,15 +63,6 @@ public class PerfilController {
             if(usuarioPerfil != null) {
 
                 Perfil perfil = usuarioPerfil.getPerfil();
-                if(flagEditar) {
-
-                    if(perfil==null && usuario.getId() == usuarioPerfil.getId()) {
-                        perfil = new Perfil();
-                        perfil.setUsuario(usuario);
-                        perfilService.save(perfil);
-                    }
-
-                }
 
                 if (perfil == null) {
                     throw new Exception("Usuário não possui um perfil.");
@@ -125,15 +116,12 @@ public class PerfilController {
             perfilAtual.setBio(bio);
             perfilAtual.setSexo(Sexo.valueOf(sexo));
 
-            Usuario usuario = (Usuario)session.getAttribute("usuario");
-            usuario.setPerfil(perfilAtual);
-
             perfilService.save(perfilAtual);
-            usuarioService.save(usuario);
 
-            resposta.enderecoParaRedirecionar = "/p/" + usuario.getUsername();
+            usuarioService.atualizarUsuarioNaSessao(session);
 
-            // resposta.mensagem = "Implementar edição de perfil.";
+            resposta.enderecoParaRedirecionar = "/p/" + perfilAtual.getUsuario().getUsername();
+            resposta.sucess = true;
 
         } catch (Exception e) {
             resposta.mensagem = e.getMessage();

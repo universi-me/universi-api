@@ -1,5 +1,7 @@
 package me.universi.usuario.services;
 
+import me.universi.perfil.entities.Perfil;
+import me.universi.perfil.services.PerfilService;
 import me.universi.usuario.entities.Usuario;
 import me.universi.usuario.enums.Autoridade;
 import me.universi.usuario.exceptions.UsuarioException;
@@ -20,6 +22,8 @@ public class UsuarioService implements UserDetailsService {
     private UsuarioRepository userRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private PerfilService perfilService;
 
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<Usuario> usuario = userRepository.findFirstByNome(username);
@@ -44,12 +48,24 @@ public class UsuarioService implements UserDetailsService {
         throw new UsuarioException("Email de Usuário não encontrado!");
     }
 
+    public UserDetails findFirstById(Long id) {
+        Optional<Usuario> usuario = userRepository.findFirstById(id);
+        if (usuario.isPresent()) {
+            return usuario.get();
+        }
+        return null;
+    }
+
     public void createUser(Usuario user) throws UsuarioException {
         if (user==null) {
             throw new UsuarioException("Usuario está vazio!");
         }
         user.setAutoridade(Autoridade.ROLE_USER);
         userRepository.save((Usuario)user);
+
+        Perfil userPerfil = new Perfil();
+        userPerfil.setUsuario(user);
+        perfilService.save(userPerfil);
     }
 
     public String codificarSenha(String senha) {
@@ -108,6 +124,18 @@ public class UsuarioService implements UserDetailsService {
             }
         }
         return false;
+    }
+
+    public void atualizarUsuarioNaSessao(HttpSession session) {
+        if(session != null) {
+            Usuario usuarioSession = (Usuario) session.getAttribute("usuario");
+            if(usuarioSession != null) {
+                Usuario usuarioAtualizado = (Usuario) findFirstById(usuarioSession.getId());
+                if(usuarioAtualizado != null) {
+                    session.setAttribute("usuario", usuarioAtualizado);
+                }
+            }
+        }
     }
 
     public void configurarSessaoParaUsuario(HttpSession session, Usuario usuario) {
