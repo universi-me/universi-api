@@ -15,6 +15,7 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 
@@ -56,8 +57,10 @@ public class ImagemController {
             filename = filename.replace("..", "");
             filename = filename.replace("/", "");
             filename = filename.replace("\\", "");
+
+            Path path = Paths.get(env.getProperty("DIRETORIO_DA_IMAGEM") + "imagem_" + filename + ".jpg").normalize();
             
-            File initialFile = new File(env.getProperty("DIRETORIO_DA_IMAGEM"),"imagem_" + filename + ".jpg");
+            File initialFile = new File(path.toUri());
 
             InputStream targetStream = new FileInputStream(initialFile);
             return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(new InputStreamResource(targetStream));
