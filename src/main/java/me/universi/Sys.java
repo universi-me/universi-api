@@ -68,8 +68,7 @@ public class Sys {
         competenciaNew1.setDescricao("Sou top em java - admin 1"+userNew.getId());
         competenciaService.save(competenciaNew1);
 
-        Perfil admin_perfil = new Perfil();
-        admin_perfil.setUsuario(userNew);
+        Perfil admin_perfil = userNew.getPerfil();
         admin_perfil.setBio("Bio - admin_perfil"+userNew.getId());
 
         Collection<Competencia> competencias = new ArrayList<Competencia>();

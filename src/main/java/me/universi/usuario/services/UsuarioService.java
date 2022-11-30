@@ -66,6 +66,7 @@ public class UsuarioService implements UserDetailsService {
         Perfil userPerfil = new Perfil();
         userPerfil.setUsuario(user);
         perfilService.save(userPerfil);
+        user.setPerfil(userPerfil);
     }
 
     public String codificarSenha(String senha) {
