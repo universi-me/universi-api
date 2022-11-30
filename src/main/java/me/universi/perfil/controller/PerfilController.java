@@ -63,15 +63,6 @@ public class PerfilController {
             if(usuarioPerfil != null) {
 
                 Perfil perfil = usuarioPerfil.getPerfil();
-                if(flagEditar) {
-
-                    if(perfil==null && usuario.getId() == usuarioPerfil.getId()) {
-                        perfil = new Perfil();
-                        perfil.setUsuario(usuario);
-                        perfilService.save(perfil);
-                    }
-
-                }
 
                 if (perfil == null) {
                     throw new Exception("Usuário não possui um perfil.");

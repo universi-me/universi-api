@@ -1,5 +1,7 @@
 package me.universi.usuario.services;
 
+import me.universi.perfil.entities.Perfil;
+import me.universi.perfil.services.PerfilService;
 import me.universi.usuario.entities.Usuario;
 import me.universi.usuario.enums.Autoridade;
 import me.universi.usuario.exceptions.UsuarioException;
@@ -20,6 +22,8 @@ public class UsuarioService implements UserDetailsService {
     private UsuarioRepository userRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private PerfilService perfilService;
 
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<Usuario> usuario = userRepository.findFirstByNome(username);
@@ -58,6 +62,10 @@ public class UsuarioService implements UserDetailsService {
         }
         user.setAutoridade(Autoridade.ROLE_USER);
         userRepository.save((Usuario)user);
+
+        Perfil userPerfil = new Perfil();
+        userPerfil.setUsuario(user);
+        perfilService.save(userPerfil);
     }
 
     public String codificarSenha(String senha) {
