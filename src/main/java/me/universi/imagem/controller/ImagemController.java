@@ -56,7 +56,7 @@ public class ImagemController {
             filename = filename.replace("/", "");
             filename = filename.replace("\\", "");
 
-            Path path = Paths.get(filename).normalize();
+            String path = filename;
 
             String nomeFile = path.toString();
 
