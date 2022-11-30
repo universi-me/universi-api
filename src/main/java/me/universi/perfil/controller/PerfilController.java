@@ -4,6 +4,7 @@ import me.universi.api.entities.Resposta;
 import me.universi.grupo.services.GrupoService;
 import me.universi.perfil.entities.Perfil;
 import me.universi.perfil.enums.Sexo;
+import me.universi.perfil.exceptions.PerfilException;
 import me.universi.perfil.repositories.PerfilRepository;
 import me.universi.perfil.services.PerfilService;
 import me.universi.usuario.entities.Usuario;
@@ -65,7 +66,7 @@ public class PerfilController {
                 Perfil perfil = usuarioPerfil.getPerfil();
 
                 if (perfil == null) {
-                    throw new Exception("Usuário não possui um perfil.");
+                    throw new PerfilException("Usuário não possui um perfil.");
                 }
 
                 map.put("perfil", perfil);
@@ -80,7 +81,7 @@ public class PerfilController {
             }
 
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            throw new Exception("Perfil Não Encontrado.");
+            throw new PerfilException("Perfil Não Encontrado.");
 
         } catch (Exception e) {
             map.put("error", "Perfil: " + e.getMessage());
@@ -97,7 +98,6 @@ public class PerfilController {
         try {
 
             String perfilId = (String)body.get("perfilId");
-
             if(perfilId == null) {
                 throw new Exception("Parametro perfilId é nulo.");
             }
@@ -109,18 +109,35 @@ public class PerfilController {
             String sexo         = (String)body.get("sexo");
 
             Perfil perfilAtual = perfilService.findFirstById(perfilId);
+            if(perfilAtual == null) {
+                throw new PerfilException("Perfil não encontrado.");
+            }
 
-            perfilAtual.setNome(nome);
-            perfilAtual.setSobrenome(sobrenome);
-            perfilAtual.setImagem(imagem);
-            perfilAtual.setBio(bio);
-            perfilAtual.setSexo(Sexo.valueOf(sexo));
+            if(!usuarioService.usuarioDonoDaSessao(session, perfilAtual.getUsuario())) {
+                throw new PerfilException("Você não tem permissão para editar este perfil.");
+            }
+
+            if(nome != null) {
+                perfilAtual.setNome(nome);
+            }
+            if(sobrenome != null) {
+                perfilAtual.setSobrenome(sobrenome);
+            }
+            if(imagem != null) {
+                perfilAtual.setImagem(imagem);
+            }
+            if(bio != null) {
+                perfilAtual.setBio(bio);
+            }
+            if(sexo != null) {
+                perfilAtual.setSexo(Sexo.valueOf(sexo));
+            }
 
             perfilService.save(perfilAtual);
 
             usuarioService.atualizarUsuarioNaSessao(session);
 
-            resposta.enderecoParaRedirecionar = "/p/" + perfilAtual.getUsuario().getUsername();
+            resposta.mensagem = "As Alterações foram salvas com sucesso.";
             resposta.sucess = true;
 
         } catch (Exception e) {

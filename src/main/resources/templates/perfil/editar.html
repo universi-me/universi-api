@@ -58,7 +58,13 @@
                 cunfigurarUploadDeImagem(document.getElementById("imagem_file"));
 
                 function editarPerfilNow() {
-                    editarPerfil(null);
+                    editarPerfil(function editarCallback(jsonResponse) {
+                        if(jsonResponse.sucess) {
+                            setTimeout(function () {
+                                openSubUrl();
+                            }, 1500);
+                        }
+                    });
                 }
 
             </script>
