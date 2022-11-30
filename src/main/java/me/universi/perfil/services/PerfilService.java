@@ -27,10 +27,16 @@ public class PerfilService {
         perfilRepository.save(perfil);
     }
 
-    public Collection<Perfil> update(Perfil perfil){ return perfilRepository.findAll(); }
+    public void update(Perfil perfil) {
+        perfilRepository.save(perfil);
+    }
+
+    public Collection<Perfil> findAll(){ return perfilRepository.findAll(); }
 
     public void delete(Perfil perfil) {
         perfilRepository.delete(perfil);
     }
+
+    public void deleteAll() { perfilRepository.deleteAll();}
 
 }
