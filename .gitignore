@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Imagem Salvas Em Disco ###
+src/main/resources/static/img/imagem/*

@@ -4,17 +4,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import me.universi.api.entities.Resposta;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
-
 
 @RestController
 public class ImagemController {
@@ -26,50 +29,96 @@ public class ImagemController {
         Resposta resposta = new Resposta();
         try {
 
-            String urlApi = "https://api.imgur.com/3/image";
-            String boundary = "----WebKitFormBoundary"+Long.toHexString(System.currentTimeMillis());
-            URLConnection connection = new URL(urlApi).openConnection();
-            connection.setDoOutput(true);
-            connection.setRequestProperty("Authorization", "Client-ID " + env.getProperty("IMGUR_CLIENT_ID"));
-            connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
+            String link = (Boolean.parseBoolean(env.getProperty("SALVAR_IMAGEM_EM_DISCO")))?salvarImagemEmDisco(imagem):uploadImagemImgur(imagem);
 
-            OutputStream outPut = connection.getOutputStream();
-            outPut.write(("--" + boundary).getBytes());
-            outPut.write(("\n").getBytes());
-            outPut.write(("Content-Disposition: form-data; name=\"image\"; filename=\"" + imagem.getName() + "\"").getBytes());
-            outPut.write(("\n").getBytes());
-            outPut.write(("Content-Type: "+imagem.getContentType()).getBytes());
-            outPut.write(("\n").getBytes());
-            outPut.write(("\n").getBytes());
-            outPut.write(imagem.getBytes());
-            outPut.write(("\n").getBytes());
-            outPut.write(("--" + boundary + "--").getBytes());
-            outPut.write(("\n").getBytes());
-
-            HttpURLConnection connectionResp = ((HttpURLConnection)connection);
-
-            String strCurrentLine = "";
-            if (connectionResp.getResponseCode() == 200) {
-                BufferedReader br = new BufferedReader(new InputStreamReader(connectionResp.getInputStream()));
-                String resp;
-                while ((resp = br.readLine()) != null) {
-                    strCurrentLine += resp;
-                }
-
-                ObjectMapper mapper = new ObjectMapper();
-                Map mapRequest = mapper.readValue(strCurrentLine, Map.class);
-
-                resposta.conteudo.put("link", ((Map)mapRequest.get("data")).get("link").toString());
+            if(link != null) {
+                resposta.conteudo.put("link", link.toString());
                 resposta.sucess = true;
                 return resposta;
             }
 
-            resposta.mensagem = "Falha ao fazer upload da imagem.";
+            resposta.mensagem = "Falha ao salvar imagem.";
             return resposta;
 
         } catch (Exception e) {
             resposta.mensagem = e.getMessage();
             return resposta;
         }
+    }
+
+    @ResponseBody
+    @GetMapping(value = "/img/imagem/{imagem}.jpg", produces = MediaType.IMAGE_JPEG_VALUE)
+    public ResponseEntity<InputStreamResource> obterImageEmDisco(HttpServletResponse response, @PathVariable("imagem") String nomeImagem) {
+        try {
+
+            String filename = nomeImagem.replaceAll("[^a-f0-9]", "");
+
+            if(!filename.contains("..") && !filename.contains("/")) {
+                File initialFile = new File(env.getProperty("DIRETORIO_DA_IMAGEM"), filename);
+
+                InputStream targetStream = new FileInputStream(initialFile);
+                return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(new InputStreamResource(targetStream));
+            }
+            
+            return ResponseEntity.notFound().build();
+
+        }catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    public String salvarImagemEmDisco(MultipartFile imagem) throws Exception {
+
+        String nomeDaImage = Long.toHexString(System.currentTimeMillis());
+
+        File imagemDir = new File(env.getProperty("DIRETORIO_DA_IMAGEM"));
+        if (!imagemDir.exists()){
+            imagemDir.mkdirs();
+        }
+
+        File file = new File(imagemDir.toString() + "/" + nomeDaImage);
+
+        OutputStream os = new FileOutputStream(file);
+        os.write(imagem.getBytes());
+
+        if(nomeDaImage != null) {
+            return "/img/imagem/" + nomeDaImage + ".jpg";
+        }
+
+        throw new Exception("Falha ao salvar imagem em disco.");
+    }
+
+    public String uploadImagemImgur(MultipartFile imagem) throws Exception {
+        String urlApi = "https://api.imgur.com/3/image";
+        String boundary = "----WebKitFormBoundary"+Long.toHexString(System.currentTimeMillis());
+        URLConnection connection = new URL(urlApi).openConnection();
+        connection.setDoOutput(true);
+        connection.setRequestProperty("Authorization", "Client-ID " + env.getProperty("IMGUR_CLIENT_ID"));
+        connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
+        OutputStream outPut = connection.getOutputStream();
+        outPut.write(("--" + boundary).getBytes());
+        outPut.write(("\n").getBytes());
+        outPut.write(("Content-Disposition: form-data; name=\"image\"; filename=\"" + imagem.getName() + "\"").getBytes());
+        outPut.write(("\n").getBytes());
+        outPut.write(("Content-Type: "+imagem.getContentType()).getBytes());
+        outPut.write(("\n").getBytes());
+        outPut.write(("\n").getBytes());
+        outPut.write(imagem.getBytes());
+        outPut.write(("\n").getBytes());
+        outPut.write(("--" + boundary + "--").getBytes());
+        outPut.write(("\n").getBytes());
+        HttpURLConnection connectionResp = ((HttpURLConnection)connection);
+        String strCurrentLine = "";
+        if (connectionResp.getResponseCode() == 200) {
+            BufferedReader br = new BufferedReader(new InputStreamReader(connectionResp.getInputStream()));
+            String resp;
+            while ((resp = br.readLine()) != null) {
+                strCurrentLine += resp;
+            }
+            ObjectMapper mapper = new ObjectMapper();
+            Map mapRequest = mapper.readValue(strCurrentLine, Map.class);
+            return ((Map)mapRequest.get("data")).get("link").toString();
+        }
+        throw new Exception("Falha ao fazer upload da imagem.");
     }
 }
