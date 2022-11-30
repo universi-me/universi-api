@@ -53,7 +53,10 @@ public class ImagemController {
 
             String filename = nomeImagem.replaceAll("[^a-z0-9]", "");
             filename = filename.replaceAll("jpg", "");
-
+            filename = filename.replace("..", "");
+            filename = filename.replace("/", "");
+            filename = filename.replace("\\", "");
+            
             File initialFile = new File(env.getProperty("DIRETORIO_DA_IMAGEM"),"imagem_" + filename + ".jpg");
 
             InputStream targetStream = new FileInputStream(initialFile);
