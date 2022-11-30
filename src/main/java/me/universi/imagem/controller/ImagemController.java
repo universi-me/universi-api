@@ -15,6 +15,7 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.file.Paths;
 import java.util.Map;
 
 
@@ -47,12 +48,17 @@ public class ImagemController {
 
     @ResponseBody
     @GetMapping(value = "/img/imagem/{imagem}", produces = MediaType.IMAGE_JPEG_VALUE)
-    public ResponseEntity<InputStreamResource> obterImageEmDisco(HttpServletResponse response, @PathVariable("imagem") String nomeImagem) throws IOException {
+    public ResponseEntity<InputStreamResource> obterImageEmDisco(HttpServletResponse response, @PathVariable("imagem") String nomeImagem) {
         try {
-            String filename = nomeImagem.replaceAll("[^a-z0-9]", "").replaceAll("jpg", "");
-            File initialFile = new File(env.getProperty("DIRETORIO_DA_IMAGEM") + "imagem_" + filename + ".jpg");
+
+            String filename = nomeImagem.replaceAll("[^a-z0-9]", "");
+            filename = filename.replaceAll("jpg", "");
+
+            File initialFile = new File(env.getProperty("DIRETORIO_DA_IMAGEM"),"imagem_" + filename + ".jpg");
+
             InputStream targetStream = new FileInputStream(initialFile);
             return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(new InputStreamResource(targetStream));
+
         }catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
