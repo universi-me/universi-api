@@ -44,14 +44,33 @@
                              class="img-thumbnail input-group-text text-center" alt="" id="imagemUp" name="imagemUp"
                              style="width:150px;" for="imagem_file"/>
                     </div>
-                    <div class="boxCortar text-center" style="margin: 0 auto;width:60%;" hidden>
-                        <div class="img-thumbnail">
-                            <div class="result text-center" style="margin: 0 auto;"></div>
+
+                </div>
+
+                <div class="modal fade" id="cropModalCenter" tabindex="-1" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                    <div class="modal-dialog modal-lg modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="exampleModalCenterTitle">Ajustar Imagem</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cancelar"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="boxCortar">
+                                    <div class="img-thumbnail">
+                                        <div class="result" style="width:100%;max-height:500px;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="button" class="btn btn-primary cortarBt">Selecionar</button>
+                            </div>
                         </div>
-                        <p><br/>
-                            <button class="btn btn-primary cortarBt">Enviar Imagem</button></p>
                     </div>
                 </div>
+
+
+
                 <div class="mb-3">
                     <label for="bio" class="form-label">* Bio: </label>
                     <textarea type="text" class="form-control" id="bio" name="bio"

@@ -116,21 +116,22 @@ function configurarUploadDeImagemComCrop() {
             const reader = new FileReader();
             reader.onload = (e)=> {
                 if(e.target.result){
-                     let img = document.createElement('img');
-                     img.id = 'image';
-                     img.src = e.target.result
-                     result.innerHTML = '';
-                     result.appendChild(img);
-                     boxCortar.hidden = false;
-                     cropper = new Cropper(img, {aspectRatio: 9 / 10,});
+                     $('#cropModalCenter').on('shown.bs.modal', function (ee) {
+                         let img = document.createElement('img');
+                                              img.id = 'image';
+                                              img.src = e.target.result
+                                              result.innerHTML = '';
+                                              result.appendChild(img);
+                                              cropper = new Cropper(img, {aspectRatio: 9 / 10,});
+                     });
+                     $('#cropModalCenter').modal('show');
                 }
             };
             reader.readAsDataURL(e.target.files[0]);
         }
     });
     cortarBt.addEventListener('click',(e)=>{
-        e.preventDefault();
-        boxCortar.hidden = true;
+        $('#cropModalCenter').modal('hide');
         cropper.getCroppedCanvas().toBlob((blob) => {
               var imageFile = new File([blob], "image.jpeg", {type: "image/jpeg",lastModified: new Date(0)});
               uploadDaImagem(imageFile);
