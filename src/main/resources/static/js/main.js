@@ -118,11 +118,11 @@ function configurarUploadDeImagemComCrop() {
                 if(e.target.result){
                      $('#cropModalCenter').on('shown.bs.modal', function (ee) {
                          let img = document.createElement('img');
-                                              img.id = 'image';
-                                              img.src = e.target.result
-                                              result.innerHTML = '';
-                                              result.appendChild(img);
-                                              cropper = new Cropper(img, {aspectRatio: 9 / 10,});
+                         img.id = 'imageCrop';
+                         img.src = e.target.result
+                         result.innerHTML = '';
+                         result.appendChild(img);
+                         cropper = new Cropper(img, {aspectRatio: 1 / 1,});
                      });
                      $('#cropModalCenter').modal('show');
                 }

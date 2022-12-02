@@ -26,7 +26,7 @@
                 <div class="col-sm-3" th:each="grupoNow : ${grupo.subGrupos}" style="padding-bottom: 30px;">
                     <div class="card" style="width: 10rem;">
                         <img th:src="${grupoNow.imagem==null?'https://i.imgur.com/SfAl1Vb.png':grupoNow.imagem}"
-                             class="card-img-top" alt="...">
+                             class="card-img-top" alt="..." referrerpolicy="no-referrer">
                         <div class="card-body">
                             <h6 class="card-title text-center" th:text="${grupoNow.nome}">Nome do Grupo</h6>
                         </div>

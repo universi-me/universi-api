@@ -64,6 +64,9 @@
    <br/>
    <p align="right"><button type="submit" class="btn btn-primary">Alterar Senha</button></p>
 </form>
+      <script th:if="${session.usuario.senha==null}">
+        alert("Parece que você ainda não tem uma senha, crie uma senha para entrar com o seu login.", 'warning');
+    </script>
 <script>
 
 function validar() {

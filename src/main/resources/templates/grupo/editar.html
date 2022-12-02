@@ -13,7 +13,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropper/2.3.4/cropper.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/0.8.1/cropper.min.js"></script>
     <style>
-        img {
+        #imageCrop {
             display: block;
             max-width: 100%;
         }
@@ -42,7 +42,7 @@
                     <label for="nome" class="form-label">Imagem: </label>
                     <div class="input-group mb-3">
                         <input type="file" class="form-control" id="imagem_file">
-                        <img th:src="${grupo.imagem==null?'https://i.imgur.com/SfAl1Vb.png':grupo.imagem}" class="img-thumbnail input-group-text text-center" alt="" id="imagemUp" name="imagemUp" style="width:150px;" for="imagem_file"/>
+                        <img th:src="${grupo.imagem==null?'https://i.imgur.com/SfAl1Vb.png':grupo.imagem}" class="img-thumbnail input-group-text text-center" alt="" id="imagemUp" name="imagemUp" style="width:150px;" for="imagem_file" referrerpolicy="no-referrer"/>
                     </div>
                 </div>
 

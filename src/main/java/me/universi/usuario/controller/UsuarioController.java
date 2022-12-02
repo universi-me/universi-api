@@ -10,6 +10,8 @@ import javax.servlet.http.HttpSession;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import me.universi.api.entities.Resposta;
+import me.universi.perfil.entities.Perfil;
+import me.universi.perfil.services.PerfilService;
 import me.universi.usuario.entities.Usuario;
 import me.universi.usuario.enums.Autoridade;
 import me.universi.usuario.exceptions.UsuarioException;
@@ -33,6 +35,8 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 public class UsuarioController {
     @Autowired
     private UsuarioService usuarioService;
+    @Autowired
+    private PerfilService perfilService;
     @Autowired
     private Environment env;
 
@@ -245,6 +249,7 @@ public class UsuarioController {
                 throw new UsuarioException("Parametro token é nulo.");
             }
 
+            // verificação de segurança com o payload
             GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
                     .setAudience(Collections.singletonList(env.getProperty("GOOGLE_CLIENT_ID")))
                     .build();
@@ -258,15 +263,48 @@ public class UsuarioController {
 
                 String email = payload.getEmail();
                 //boolean emailVerified = Boolean.valueOf(payload.getEmailVerified());
-                //String name = (String) payload.get("name");
-                //String pictureUrl = (String) payload.get("picture");
+                String name = (String) payload.get("name");
+                String pictureUrl = (String) payload.get("picture");
                 //String locale = (String) payload.get("locale");
                 //String familyName = (String) payload.get("family_name");
                 //String givenName = (String) payload.get("given_name");
 
+                Usuario usuario = null;
 
+                try {
+                    usuario = (Usuario) usuarioService.findFirstByEmail(email);
+                } catch (UsuarioException  e) {
+                    // Registrar Usuário com conta DCX, com informações seguras do payload
+                    String newUsername = ((String)email.split("@")[0]).trim();
+                    if(!usuarioService.usernameExiste(newUsername)) {
 
-                Usuario usuario = (Usuario)usuarioService.findFirstByEmail(email);
+                        usuario = new Usuario();
+                        usuario.setNome(newUsername);
+                        usuario.setEmail(email.trim());
+                        usuarioService.createUser(usuario);
+
+                        Perfil perfil = usuario.getPerfil();
+
+                        if(name != null) {
+                            if(name.contains(" ")) {
+                                String[] nameArr = name.split(" ");
+                                perfil.setNome(((String)nameArr[0]).trim());
+                                perfil.setSobrenome(name.substring(nameArr[0].length()).trim());
+                            } else {
+                                perfil.setNome(name.trim());
+                            }
+                        }
+                        if(pictureUrl != null) {
+                            System.out.println(pictureUrl);
+                            perfil.setImagem(pictureUrl.trim());
+                        }
+
+                        perfilService.save(perfil);
+
+                    } else {
+                        throw new UsuarioException("Usúario \""+newUsername+"\" já existe.");
+                    }
+                }
 
                 if(usuario != null) {
 
