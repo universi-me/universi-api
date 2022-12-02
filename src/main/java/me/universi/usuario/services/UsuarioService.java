@@ -147,4 +147,15 @@ public class UsuarioService implements UserDetailsService {
         // Salvar usuario na sessao
         session.setAttribute("usuario", usuario);
     }
+
+    public boolean usuarioPrecisaDePerfil(Usuario usuario) {
+        try {
+            if((usuario.getPerfil()==null || usuario.getPerfil().getNome()==null) && usuario.getAutoridade()!=Autoridade.ROLE_ADMIN) {
+                return true;
+            }
+            return false;
+        } catch (Exception e) {
+            return true;
+        }
+    }
 }

@@ -5,7 +5,6 @@ import me.universi.grupo.services.GrupoService;
 import me.universi.perfil.entities.Perfil;
 import me.universi.perfil.enums.Sexo;
 import me.universi.perfil.exceptions.PerfilException;
-import me.universi.perfil.repositories.PerfilRepository;
 import me.universi.perfil.services.PerfilService;
 import me.universi.usuario.entities.Usuario;
 import me.universi.usuario.services.UsuarioService;
@@ -23,7 +22,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Optional;
 
 @Controller
 public class PerfilController {
@@ -45,7 +43,7 @@ public class PerfilController {
 
             boolean flagEditar = requestPathSt.endsWith("/editar");
 
-            if(!flagEditar && (usuario.getPerfil() == null || usuario.getPerfil().getNome() == null)) {
+            if(!flagEditar && usuarioService.usuarioPrecisaDePerfil(usuario)) {
                 return "redirect:/p/"+ usuario.getUsername() +"/editar";
             }
 
@@ -71,6 +69,7 @@ public class PerfilController {
 
                 map.put("perfil", perfil);
                 map.put("grupoService", grupoService);
+                map.put("usuarioService", usuarioService);
 
                 if(flagEditar) {
                     map.addAttribute("sexoTipo", Sexo.values());

@@ -44,7 +44,7 @@ public class AutenticacaoValidaHandler extends SavedRequestAwareAuthenticationSu
         Usuario usuario = (Usuario) session.getAttribute("usuario");
 
         String redirecionarParaCriarPerfil = null;
-        if(usuario.getPerfil()==null || usuario.getPerfil().getNome()==null) {
+        if(usuarioService.usuarioPrecisaDePerfil(usuario)) {
             redirecionarParaCriarPerfil = "/p/" + usuario.getUsername() + "/editar";
         }
 
