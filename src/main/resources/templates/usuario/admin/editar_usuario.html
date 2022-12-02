@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+
+<div th:fragment="editar">
+
+    <div class="card" style="width:100%;">
+        <div class="card-header text-center">Gerenciar Conta de Usuário</div>
+        <div class="card-body">
+
+            <form onsubmit="editarContaDeUsuarioNow();return false;">
+                <input type="hidden" name="usuarioId" id="hiddenField" th:value="${usuario.getId()}"/>
+                <div class="mb-3">
+                    <label for="username" class="form-label">Usuário</label>
+                    <input type="text" class="form-control" id="username" name="username" th:value="${usuario.nome}">
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">E-mail</label>
+                    <input type="text" class="form-control" id="email" name="email" th:value="${usuario.email}">
+                </div>
+                <div class="mb-3">
+                    <label for="senha" class="form-label">Senha</label>
+                    <input type="text" class="form-control" id="senha" name="senha">
+                </div>
+                <div class="mb-3">
+                    <label for="nivelConta" class="form-label">Nível de Conta</label>
+                    <select id="nivelConta" name="nivelConta" class="form-select">
+                        <option th:each="tipoNow : ${tiposAutoridades}" th:value="${tipoNow}" th:text="${tipoNow.label}"
+                                th:selected="${tipoNow} == ${usuario.autoridade} ? true : false"></option>
+                    </select>
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="emailVerificado"
+                           name="emailVerificado"
+                           th:checked="${usuario.isEmail_verificado()} ? true : false">
+                    <label class="form-check-label" for="emailVerificado">E-mail verificado</label>
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="contaBloqueada"
+                           name="contaBloqueada"
+                           th:checked="${usuario.isConta_bloqueada()} ? true : false">
+                    <label class="form-check-label" for="contaBloqueada">Conta Bloqueada</label>
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="contaInativa"
+                           name="contaInativa"
+                           th:checked="${usuario.isInativo()} ? true : false">
+                    <label class="form-check-label" for="contaInativa">Conta Inativa</label>
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="credenciaisExpiradas"
+                           name="credenciaisExpiradas"
+                           th:checked="${usuario.isCredenciais_expiradas()} ? true : false">
+                    <label class="form-check-label" for="credenciaisExpiradas">Credenciais Expiradas</label>
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="usuarioExpirado"
+                           name="usuarioExpirado"
+                           th:checked="${usuario.isUsuario_expirado()} ? true : false">
+                    <label class="form-check-label" for="usuarioExpirado">Usuário Expirado</label>
+                </div>
+
+                <p align="right">
+                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                </p>
+            </form>
+            <script>
+
+                function editarContaDeUsuarioNow() {
+                    var bodyValores = {
+                        usuarioId: document.querySelector('[name="usuarioId"]').value,
+                        username: document.querySelector('#username').value,
+                        email: document.querySelector('#email').value,
+                        senha: document.querySelector('#senha').value,
+                        nivelConta: document.querySelector('#nivelConta').value,
+                        emailVerificado: document.querySelector('#emailVerificado').checked,
+                        contaBloqueada: document.querySelector('#contaBloqueada').checked,
+                        contaInativa: document.querySelector('#contaInativa').checked,
+                        credenciaisExpiradas: document.querySelector('#credenciaisExpiradas').checked,
+                        usuarioExpirado: document.querySelector('#usuarioExpirado').checked,
+                    }
+                    api_request('/admin/conta/editar', bodyValores, function editarCallback(jsonResponse) {
+                        if(jsonResponse.sucess) {
+                            setTimeout(function () {
+                                location.reload();
+                            }, 1500);
+                        }
+                    });
+                }
+
+            </script>
+            <p align="left">
+                <button onclick="javascript:window.history.back();" class="btn btn-primary">Voltar</button>
+            </p>
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html>

@@ -7,16 +7,19 @@ import me.universi.usuario.enums.Autoridade;
 import me.universi.usuario.exceptions.UsuarioException;
 import me.universi.usuario.repositories.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpSession;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Service
 public class UsuarioService implements UserDetailsService {
     @Autowired
     private UsuarioRepository userRepository;
@@ -114,7 +117,7 @@ public class UsuarioService implements UserDetailsService {
     }
 
     public void save(Usuario usuario) {
-        userRepository.save(usuario);
+        userRepository.saveAndFlush(usuario);
     }
 
     public boolean usuarioDonoDaSessao(HttpSession session, Usuario usuario) {
@@ -148,9 +151,17 @@ public class UsuarioService implements UserDetailsService {
         session.setAttribute("usuario", usuario);
     }
 
+    public boolean isContaAdmin(Usuario usuarioSession) {
+        try {
+            return (usuarioSession.getAutoridade() == Autoridade.ROLE_ADMIN);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     public boolean usuarioPrecisaDePerfil(Usuario usuario) {
         try {
-            if((usuario.getPerfil()==null || usuario.getPerfil().getNome()==null) && usuario.getAutoridade()!=Autoridade.ROLE_ADMIN) {
+            if((usuario.getPerfil()==null || usuario.getPerfil().getNome()==null) && !isContaAdmin(usuario)) {
                 return true;
             }
             return false;
@@ -158,4 +169,15 @@ public class UsuarioService implements UserDetailsService {
             return true;
         }
     }
+
+    public String erroSpringSecurityMemsagem(Exception exception) {
+        String error = null;
+        if (exception instanceof BadCredentialsException) {
+            error = "Credenciais Invalidas!";
+        } else if(exception != null) {
+            error = exception.getLocalizedMessage();
+        }
+        return error;
+    }
+
 }

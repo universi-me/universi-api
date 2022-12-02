@@ -1,25 +1,28 @@
 package me.universi.usuario.controller;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import me.universi.api.entities.Resposta;
 import me.universi.usuario.entities.Usuario;
+import me.universi.usuario.enums.Autoridade;
 import me.universi.usuario.exceptions.UsuarioException;
 import me.universi.usuario.services.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
@@ -35,13 +38,41 @@ public class UsuarioController {
 
     @GetMapping("/login")
     public String login(HttpServletRequest request, HttpSession session) {
-        session.setAttribute("error", getErrorMessage(request, "SPRING_SECURITY_LAST_EXCEPTION"));
         return "usuario/login";
     }
 
     @GetMapping("/registrar")
     public String registrar(HttpSession session) {
         return "usuario/registrar";
+    }
+
+    @GetMapping("/admin/**")
+    public String admin_handle(HttpServletRequest request, HttpServletResponse response, HttpSession session, ModelMap map) {
+        try {
+
+            // obter diretorio caminho url
+            String requestPathSt = request.getRequestURI();
+
+            boolean flagEditar = requestPathSt.endsWith("/editar");
+
+            String[] componentesArr = requestPathSt.split("/");
+
+            if(flagEditar) {
+                // remover ultimo componente no caminho, flags
+                componentesArr = Arrays.copyOf(componentesArr, componentesArr.length - 1);
+                map.addAttribute("tiposAutoridades", Autoridade.values());
+            }
+
+            String usuario = componentesArr[componentesArr.length - 1];
+
+            Usuario userGet = (Usuario) usuarioService.loadUserByUsername(usuario);
+
+            map.put("usuario", userGet);
+
+        } catch (Exception e) {
+            map.put("error", "Admin: " + e.getMessage());
+        }
+        return "usuario/admin/admin_index";
     }
 
     @ResponseBody
@@ -132,6 +163,77 @@ public class UsuarioController {
     }
 
     @ResponseBody
+    @PostMapping(value = "/admin/conta/editar", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public Object admin_conta_editar(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+        Resposta resposta = new Resposta();
+        try {
+
+            String usuarioId = (String)body.get("usuarioId");
+            if(usuarioId == null) {
+                throw new UsuarioException("Parametro usuarioId é nulo.");
+            }
+
+            String username = (String)body.get("username");
+            String email = (String)body.get("email");
+            String senha = (String)body.get("senha");
+            String nivelConta = (String)body.get("nivelConta");
+
+            Boolean emailVerificado = (Boolean)body.get("emailVerificado");
+            Boolean contaBloqueada = (Boolean)body.get("contaBloqueada");
+            Boolean contaInativa = (Boolean)body.get("contaInativa");
+            Boolean credenciaisExpiradas = (Boolean)body.get("credenciaisExpiradas");
+            Boolean usuarioExpirado = (Boolean)body.get("usuarioExpirado");
+
+            Usuario userEdit = (Usuario) usuarioService.findFirstById(Long.valueOf(usuarioId));
+            if(userEdit == null) {
+                throw new UsuarioException("Usuário não encontrado.");
+            }
+
+            String usernameOld = userEdit.getUsername();
+
+            if(username != null && username.length()>0) {
+                userEdit.setNome(username);
+            }
+            if(email != null && email.length()>0) {
+                userEdit.setEmail(email);
+            }
+            if(senha != null && senha.length()>0) {
+                userEdit.setSenha(usuarioService.codificarSenha(senha));
+            }
+            if(nivelConta != null && nivelConta.length()>0) {
+                userEdit.setAutoridade(Autoridade.valueOf(nivelConta));
+            }
+
+            if(emailVerificado != null) {
+                userEdit.setEmail_verificado(emailVerificado);
+            }
+            if(contaBloqueada != null) {
+                userEdit.setConta_bloqueada(contaBloqueada);
+            }
+            if(contaInativa != null) {
+                userEdit.setInativo(contaInativa);
+            }
+            if(credenciaisExpiradas != null) {
+                userEdit.setCredenciais_expiradas(credenciaisExpiradas);
+            }
+            if(usuarioExpirado != null) {
+                userEdit.setUsuario_expirado(usuarioExpirado);
+            }
+
+            usuarioService.save(userEdit);
+
+            resposta.sucess = true;
+            resposta.mensagem = "As Alterações foram salvas com sucesso.";
+
+            return resposta;
+
+        }catch (Exception e) {
+            resposta.mensagem = e.getMessage();
+            return resposta;
+        }
+    }
+
+    @ResponseBody
     @PostMapping(value = "/login/google", consumes = MediaType.APPLICATION_JSON_VALUE)
     public Object conta_google(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
         Resposta resposta = new Resposta();
@@ -167,6 +269,12 @@ public class UsuarioController {
                 Usuario usuario = (Usuario)usuarioService.findFirstByEmail(email);
 
                 if(usuario != null) {
+
+                    if(usuario.isConta_bloqueada()) {
+                        throw new UsuarioException("Conta de Usuário Bloqueada.");
+                    } else if(!usuario.isEnabled()) {
+                        throw new UsuarioException("Conta de Usuário Desabilitada.");
+                    }
 
                     HttpSession sessionReq = request.getSession(true);
 
@@ -206,14 +314,5 @@ public class UsuarioController {
         }
     }
 
-    private String getErrorMessage(HttpServletRequest request, String key) {
-        Exception exception = (Exception) request.getSession().getAttribute(key);
-        String error = null;
-        if (exception instanceof BadCredentialsException) {
-            error = "Credenciais Invalidas!";
-        } else if(exception != null) {
-            error = exception.getMessage();
-        }
-        return error;
-    }
+
 }
