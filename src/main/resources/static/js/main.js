@@ -103,6 +103,41 @@ function cunfigurarUploadDeImagem(imagem_input) {
         }, false);
     }
 }
+function configurarUploadDeImagemComCrop() {
+    //<!-- Crop Image Start -->
+    let result = document.querySelector('.result'),
+    boxCortar = document.querySelector('.boxCortar'),
+    cortarBt = document.querySelector('.cortarBt'),
+    cropped = document.querySelector('.cropped'),
+    upload = document.querySelector('#imagem_file'),
+    cropper = '';
+    upload.addEventListener('change', (e) => {
+        if (e.target.files.length) {
+            const reader = new FileReader();
+            reader.onload = (e)=> {
+                if(e.target.result){
+                     let img = document.createElement('img');
+                     img.id = 'image';
+                     img.src = e.target.result
+                     result.innerHTML = '';
+                     result.appendChild(img);
+                     boxCortar.hidden = false;
+                     cropper = new Cropper(img, {aspectRatio: 9 / 10,});
+                }
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        }
+    });
+    cortarBt.addEventListener('click',(e)=>{
+        e.preventDefault();
+        boxCortar.hidden = true;
+        cropper.getCroppedCanvas().toBlob((blob) => {
+              var imageFile = new File([blob], "image.jpeg", {type: "image/jpeg",lastModified: new Date(0)});
+              uploadDaImagem(imageFile);
+        });
+    });
+    //<!-- Crop Image End -->
+}
 function uploadDaImagem(file) {
     if (!file || !file.type.match(/image.*/)) return;
     var fd = new FormData();

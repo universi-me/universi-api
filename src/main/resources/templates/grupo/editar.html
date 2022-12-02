@@ -9,6 +9,17 @@
 
 <div th:fragment="editar">
 
+    <!-- Crop Image Start -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropper/2.3.4/cropper.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/0.8.1/cropper.min.js"></script>
+    <style>
+        img {
+            display: block;
+            max-width: 100%;
+        }
+    </style>
+    <!-- Crop Image End -->
+
     <div class="card" style="width:100%;">
         <div class="card-header text-center">Editar Grupo</div>
         <div class="card-body">
@@ -33,6 +44,13 @@
                         <input type="file" class="form-control" id="imagem_file">
                         <img th:src="${grupo.imagem==null?'https://i.imgur.com/SfAl1Vb.png':grupo.imagem}" class="img-thumbnail input-group-text text-center" alt="" id="imagemUp" name="imagemUp" style="width:150px;" for="imagem_file"/>
                     </div>
+                </div>
+                <div class="boxCortar text-center" style="margin: 0 auto;width:60%;" hidden>
+                    <div class="img-thumbnail">
+                        <div class="result text-center" style="margin: 0 auto;"></div>
+                    </div>
+                    <p><br/>
+                        <button class="btn btn-primary cortarBt">Enviar Imagem</button></p>
                 </div>
                 <div class="mb-3">
                     <label for="descricao" class="form-label">* Descricao: </label>
@@ -66,7 +84,7 @@
                 }
                 validar();
 
-                cunfigurarUploadDeImagem(document.getElementById("imagem_file"));
+                configurarUploadDeImagemComCrop();
 
                 function editarGrupoNow() {
                     editarGrupo(function removidoCallback(jsonResponse) {
