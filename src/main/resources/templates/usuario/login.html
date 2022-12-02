@@ -49,6 +49,9 @@
         <script th:unless="${param.logout == null}">
             alert("A sua sessão foi finalizada!", 'success');
         </script>
+        <script th:unless="${param.expirado == null}">
+            alert("A sua sessão expirou.", 'warning');
+        </script>
         <script>
         function handleCredentialResponse(response) {
             loginComGoogle(response.credential);

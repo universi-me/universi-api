@@ -5,6 +5,7 @@ import me.universi.grupo.exceptions.GrupoException;
 import me.universi.grupo.repositories.GrupoRepository;
 import me.universi.perfil.entities.Perfil;
 import me.universi.usuario.entities.Usuario;
+import me.universi.usuario.services.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +15,8 @@ import java.util.regex.Pattern;
 
 @Service
 public class GrupoService {
+    @Autowired
+    private UsuarioService usuarioService;
     @Autowired
     private GrupoRepository grupoRepository;
 
@@ -64,10 +67,12 @@ public class GrupoService {
         }
 
         Perfil perfil = usuario.getPerfil();
-        if (perfil == null || perfil.getNome() == null) {
+        if (usuarioService.usuarioPrecisaDePerfil(usuario)) {
             throw new GrupoException("Você precisa criar um Perfil.");
         } else if(perfil.getId()!=0 && grupo.getAdmin().getId() != perfil.getId()) {
-            throw new GrupoException("Apenas administradores podem editar seus grupos!");
+            if(!usuarioService.isContaAdmin(usuario)) {
+                throw new GrupoException("Apenas administradores podem editar seus grupos!");
+            }
         }
 
         return true;

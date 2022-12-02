@@ -20,6 +20,9 @@
         <li class="nav-item">
           <a class="nav-link active" aria-current="page" href="/">Início</a>
         </li>
+        <li class="nav-item" th:if="${session != null && session.usuario != null && #strings.equals(session.usuario.autoridade, 'ROLE_ADMIN')}">
+          <a class="nav-link active" aria-current="page" href="/admin">Área Administrativa</a>
+        </li>
       </ul>
       <ul class="navbar-nav" align="right" sec:authorize="isAuthenticated()">
         <li class="nav-item">

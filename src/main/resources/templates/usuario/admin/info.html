@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+
+<div th:fragment="info">
+
+    <div class="card" style="width:100%;">
+        <div class="card-header text-center">Gerenciar Conta de Usuário</div>
+        <div class="card-body">
+            <div class="row">
+
+                <div class="input-group mb-3" style="max-width:400px;margin: 0 auto;">
+                    <input type="text" class="form-control" placeholder="Usuário / E-mail" aria-label="Usuário / E-mail"
+                           aria-describedby="gerenciarContaBt" id="gerenciarConta" name="gerenciarConta">
+                    <button class="btn btn-outline-primary" type="button" id="gerenciarContaBt"
+                            onclick="openEditAccountLink()">Gerenciar Conta
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <p/>
+
+    <script>
+        function openEditAccountLink() {
+            var usuario = document.querySelector('#gerenciarConta').value;
+            if(usuario) {
+                window.location.href = "/admin/conta/" + usuario + "/editar";
+            }
+        }
+    </script>
+
+
+</div>
+
+
+
+
+</body>
+</html>

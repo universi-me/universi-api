@@ -113,7 +113,11 @@ public class PerfilController {
             }
 
             if(!usuarioService.usuarioDonoDaSessao(session, perfilAtual.getUsuario())) {
-                throw new PerfilException("Você não tem permissão para editar este perfil.");
+
+                Usuario usuarioSession = (Usuario)session.getAttribute("usuario");
+                if(!usuarioService.isContaAdmin(usuarioSession)) {
+                    throw new PerfilException("Você não tem permissão para editar este perfil.");
+                }
             }
 
             if(nome != null) {

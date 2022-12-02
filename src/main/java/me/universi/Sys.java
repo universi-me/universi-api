@@ -10,10 +10,13 @@ import me.universi.perfil.entities.Perfil;
 import me.universi.usuario.entities.Usuario;
 import me.universi.perfil.repositories.PerfilRepository;
 
+import me.universi.usuario.enums.Autoridade;
 import me.universi.usuario.services.UsuarioService;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -120,5 +123,22 @@ public class Sys {
         grupoService.adicionarSubgrupo(novoGrupo, novoGrupo2);
 
         return "redirect:/";
+    }
+
+    @Bean
+    InitializingBean sendDatabase() {
+        return () -> {
+            if(!usuarioService.usernameExiste("admin")) {
+                System.out.println("Criando usuário: admin:admin");
+                Usuario userAdmin = new Usuario("admin", null, usuarioService.codificarSenha("admin"));
+                try {
+                    usuarioService.createUser(userAdmin);
+                    userAdmin.setAutoridade(Autoridade.ROLE_ADMIN);
+                    usuarioService.save(userAdmin);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
     }
 }
