@@ -148,9 +148,10 @@ public class UsuarioController {
 
             if (logadoComGoogle || usuarioService.senhaValida(usuario, senha)) {
                 usuario.setSenha(usuarioService.codificarSenha(password));
+                usuario.setCredenciais_expiradas(false);
                 usuarioService.save(usuario);
 
-                usuarioService.atualizarUsuarioNaSessao(session);
+                usuarioService.atualizarUsuarioNaSessao();
 
                 resposta.sucess = true;
                 resposta.mensagem = "As Alterações foram salvas com sucesso.";
@@ -295,7 +296,6 @@ public class UsuarioController {
                             }
                         }
                         if(pictureUrl != null) {
-                            System.out.println(pictureUrl);
                             perfil.setImagem(pictureUrl.trim());
                         }
 
@@ -326,7 +326,7 @@ public class UsuarioController {
 
                     sessionReq.setAttribute("loginViaGoogle", true);
 
-                    usuarioService.configurarSessaoParaUsuario(sessionReq, usuario);
+                    usuarioService.configurarSessaoParaUsuario(usuario);
 
                     String redirecionarParaCriarPerfil = null;
                     if(usuario.getPerfil()==null || usuario.getPerfil().getNome()==null) {

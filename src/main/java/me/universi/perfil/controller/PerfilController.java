@@ -1,6 +1,7 @@
 package me.universi.perfil.controller;
 
 import me.universi.api.entities.Resposta;
+import me.universi.competencia.enums.Nivel;
 import me.universi.grupo.services.GrupoService;
 import me.universi.perfil.entities.Perfil;
 import me.universi.perfil.enums.Sexo;
@@ -42,6 +43,7 @@ public class PerfilController {
             String requestPathSt = request.getRequestURI().toLowerCase();
 
             boolean flagEditar = requestPathSt.endsWith("/editar");
+            boolean flagCompetencias = requestPathSt.endsWith("/competencias");
 
             if(!flagEditar && usuarioService.usuarioPrecisaDePerfil(usuario)) {
                 return "redirect:/p/"+ usuario.getUsername() +"/editar";
@@ -49,7 +51,7 @@ public class PerfilController {
 
             String[] nicknameArr = requestPathSt.split("/");
 
-            if (flagEditar) {
+            if (flagEditar || flagCompetencias) {
                 nicknameArr = Arrays.copyOf(nicknameArr, nicknameArr.length - 1);
             }
 
@@ -74,6 +76,9 @@ public class PerfilController {
                 if(flagEditar) {
                     map.addAttribute("sexoTipo", Sexo.values());
                     map.put("flagPage", "flagEditar");
+                } else if(flagCompetencias) {
+                    map.addAttribute("nivelTipo", Nivel.values());
+                    map.put("flagPage", "flagCompetencias");
                 }
 
                 return "perfil/perfil_index";
@@ -103,7 +108,7 @@ public class PerfilController {
 
             String nome         = (String)body.get("nome");
             String sobrenome    = (String)body.get("sobrenome");
-            String imagem       = (String)body.get("imagem");
+            String imagem       = (String)body.get("imagemUrl");
             String bio          = (String)body.get("bio");
             String sexo         = (String)body.get("sexo");
 
@@ -112,7 +117,7 @@ public class PerfilController {
                 throw new PerfilException("Perfil não encontrado.");
             }
 
-            if(!usuarioService.usuarioDonoDaSessao(session, perfilAtual.getUsuario())) {
+            if(!usuarioService.usuarioDonoDaSessao(perfilAtual.getUsuario())) {
 
                 Usuario usuarioSession = (Usuario)session.getAttribute("usuario");
                 if(!usuarioService.isContaAdmin(usuarioSession)) {
@@ -138,7 +143,7 @@ public class PerfilController {
 
             perfilService.save(perfilAtual);
 
-            usuarioService.atualizarUsuarioNaSessao(session);
+            usuarioService.atualizarUsuarioNaSessao();
 
             resposta.mensagem = "As Alterações foram salvas com sucesso.";
             resposta.sucess = true;

@@ -1,10 +1,12 @@
 package me.universi.perfil.services;
 
+import me.universi.competencia.entities.Competencia;
 import me.universi.perfil.entities.Perfil;
 import me.universi.perfil.repositories.PerfilRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 @Service
@@ -38,5 +40,29 @@ public class PerfilService {
     }
 
     public void deleteAll() { perfilRepository.deleteAll();}
+
+    public void adicionarCompetencia(Perfil perfil, Competencia comp) {
+        Collection<Competencia> compArr = perfil.getCompetencias();
+        if(compArr == null) {
+            compArr = new ArrayList<Competencia>();
+        }
+        if(!compArr.contains(comp)) {
+            compArr.add(comp);
+            perfil.setCompetencias(compArr);
+            this.save(perfil);
+        }
+    }
+
+    public void removerCompetencia(Perfil perfil, Competencia comp) {
+        Collection<Competencia> compArr = perfil.getCompetencias();
+        if(compArr == null) {
+            compArr = new ArrayList<Competencia>();
+        }
+        if(compArr.contains(comp)) {
+            compArr.remove(comp);
+            perfil.setCompetencias(compArr);
+            this.save(perfil);
+        }
+    }
 
 }

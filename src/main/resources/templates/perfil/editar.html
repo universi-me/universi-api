@@ -25,7 +25,7 @@
         <div class="card-body">
 
 
-            <form onsubmit="editarPerfilNow();return false;" oninput="validar();">
+            <form onsubmit="editarPerfilNow(this.id);return false;" oninput="validar();" id="formPerfilEditar">
                 <input type="hidden" name="perfilId" id="hiddenField" th:value="${perfil.getId()}"/>
                 <div class="mb-3">
                     <label for="nome" class="form-label">* Nome: </label>
@@ -38,6 +38,7 @@
                 </div>
                 <div class="mb-3">
                     <label for="nome" class="form-label">Imagem: </label>
+                    <input type="hidden" name="imagemUrl" id="imagemUrl"/>
                     <div class="input-group mb-3">
                         <input type="file" class="form-control" id="imagem_file">
                         <img th:src="${perfil.imagem==null?'https://i.imgur.com/vUBrCxr.png':perfil.imagem}"
@@ -78,7 +79,8 @@
                 </div>
                 <div class="mb-3">
                     <label for="sexo" class="form-label">* Sexo: </label>
-                    <select id="sexo" name="sexo" class="form-select">
+                    <select id="sexo" name="sexo" class="form-select" value="">
+                        <option value="" selected disabled hidden>Selecionar...</option>
                         <option th:each="tipoNow : ${sexoTipo}" th:value="${tipoNow}" th:text="${tipoNow.label}"
                                 th:selected="${tipoNow} == ${perfil.getSexo()} ? true : false"></option>
                     </select>
@@ -99,8 +101,8 @@
 
                 configurarUploadDeImagemComCrop();
 
-                function editarPerfilNow() {
-                    editarPerfil(function editarCallback(jsonResponse) {
+                function editarPerfilNow(formId) {
+                    sendForm(formId, '/perfil/editar', function editarCallback(jsonResponse) {
                         if(jsonResponse.sucess) {
                             setTimeout(function () {
                                 openSubUrl();

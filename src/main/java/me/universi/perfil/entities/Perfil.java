@@ -31,7 +31,7 @@ public class Perfil {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "id_link")
     private Link link;
-    @ManyToMany(cascade = { CascadeType.ALL })
+    @ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.ALL })
     @JoinTable(
             name = "perfil_competencia",
             joinColumns = { @JoinColumn(name = "id_perfil") },
@@ -71,10 +71,6 @@ public class Perfil {
 
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public Usuario getUsuario() {

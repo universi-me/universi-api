@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+
+<div th:fragment="competencias">
+
+    <div class="card" style="width:100%;">
+
+        <div class="card-header text-center">Gerenciar Competências</div>
+        <div class="card-body">
+            <div class="input-group mb-3 text-center" style="width:150px;margin: 0 auto;" id="botaoCriar">
+                <button onclick="mostrarForm(true);" class="btn btn-outline-primary text-center" type="button" id="addParticipanteBt">Criar Competência
+                    </button>
+            </div>
+
+            <form onsubmit="criarCompetencia(this.id);return false;" oninput="validar();" id="formCriar" hidden>
+                <input type="hidden" name="competenciaId" id="competenciaId" value=""/>
+                <div class="mb-3">
+                    <label for="nome" class="form-label">* Nome da Competância</label>
+                    <input type="text" class="form-control" id="nome" name="nome" value="">
+                </div>
+                <div class="mb-3">
+                    <label for="descricao" class="form-label">* Descrição</label>
+                    <input type="text" class="form-control" id="descricao" name="descricao" value="">
+                </div>
+                <div class="mb-3">
+                    <label for="nivel" class="form-label">* Nível de experiência</label>
+                    <select id="nivel" name="nivel" class="form-select" value="">
+                        <option value="" selected disabled hidden>Selecionar...</option>
+                        <option th:each="tipoNow : ${nivelTipo}" th:value="${tipoNow}" th:text="${tipoNow.label}"></option>
+                    </select>
+                </div>
+                <p align="right">
+                    <button type="submit" id="formBt" class="btn btn-primary">Criar Competência</button>
+                </p>
+            </form>
+
+        </div>
+
+        <div class="card-header card-footer text-center">Editar Competências
+            <span th:unless="${perfil.getCompetencias() == null || perfil.getCompetencias().empty}"
+                  th:text="'(' +${perfil.getCompetencias().size()}+ ')'">
+                (0)
+            </span>
+
+        </div>
+        <div class="card-body" style="padding-bottom:0px">
+            <div class="row">
+                <h6 th:if="${perfil.getCompetencias().empty}"> Sem Competências </h6>
+
+                <div class="col-sm-4" th:unless="${perfil.getCompetencias().empty}"
+                     th:each="competenciaNow: ${perfil.getCompetencias()}">
+                    <div class="card" style="width:100%; margin-bottom:17px">
+
+                        <!-- Start Cartão da competência -->
+                        <div class="card-body">
+
+                            <!-- Título -->
+                            <h6 class="card-title text-center" th:text="${competenciaNow.getNome()}">Nome da
+                                competência</h6>
+
+                            <!-- Nível -->
+                            <h6 class="card-title text-center"
+                                th:text="${'('+ (competenciaNow.getNivel() == null ? 'Nenhuma Experiência' : competenciaNow.getNivel().label) + ')'}">
+                                nível da competência
+                            </h6>
+
+                            <br>
+
+                            <!-- Descrição -->
+                            <div class="card-text" style="text-align:center" th:text="${competenciaNow.getDescricao()}">Descrição</div>
+
+
+                        </div>
+
+                        <ul class="list-group list-group-flush" style="text-align: center;">
+                            <li class="list-group-item">
+                                <button onclick="editarCompetenciaNow(this.id);"
+                                        class="btn btn-warning" th:id="${competenciaNow.getId()}">Editar</button>
+                            </li>
+                            <li class="list-group-item">
+                                <button onclick="removerCompetenciaNow(this.id);"
+                                        class="btn btn-danger" th:id="${competenciaNow.getId()}">Remover</button>
+                            </li>
+                        </ul>
+
+                        <!-- End Cartão da competência -->
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function validar() {
+            checkCampo(nome);
+            checkCampo(descricao);
+            checkCampo(nivel);
+        }
+        validar();
+        function mostrarForm(modoCriar) {
+            document.getElementById('formCriar').hidden = false;
+            document.getElementById('botaoCriar').hidden = modoCriar ? true : false;
+            document.getElementById('formBt').textContent = modoCriar ? 'Criar Competência' : 'Editar Comptetência';
+            document.getElementById('competenciaId').value = null;
+            document.getElementById('nome').value = null;
+            document.getElementById('descricao').value = null;
+            document.getElementById('nivel').value = '';
+        }
+        function criarCompetencia(formId) {
+            sendForm(formId, (document.getElementById('competenciaId').value)? '/competencia/atualizar' : '/competencia/criar', function editarCallback(jsonResponse) {
+                if(jsonResponse.sucess) {
+                    setTimeout(function () {
+                        window.location.reload();
+                    }, 1500);
+                }
+            });
+        }
+        function removerCompetenciaNow(idCompetencia) {
+            var bodyValores = {
+                competenciaId: idCompetencia,
+            }
+            api_request('/competencia/remover', bodyValores, function removerCallback(jsonResponse) {
+                if(jsonResponse.sucess) {
+                    setTimeout(function () {
+                        window.location.reload();
+                    }, 1500);
+                }
+            });
+        }
+        function editarCompetenciaNow(idCompetencia) {
+            var bodyValores = {
+                competenciaId: idCompetencia,
+            }
+            api_request('/competencia/obter', bodyValores, function obterCallback(jsonResponse) {
+                if(jsonResponse.sucess) {
+                    var competenciaDic = jsonResponse.conteudo.competencia;
+                    mostrarForm(false);
+                    document.getElementById('competenciaId').value = competenciaDic.id;
+                    document.getElementById('nome').value = competenciaDic.nome;
+                    document.getElementById('descricao').value = competenciaDic.descricao;
+                    document.getElementById('nivel').value = competenciaDic.nivel;
+                    validar();
+                }
+            });
+        }
+    </script>
+
+</div>
+
+
+</body>
+</html>
