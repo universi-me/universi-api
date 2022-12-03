@@ -15,6 +15,15 @@
                 th:text="'(' +${perfil.getRecomendacoesRecebidas().size()}+ ')'">(0)</span></div>
         <div class="card-body">
             <div class="row">
+
+                <div class="card-body text-center">
+                    <div class="input-group mb-3" style="width:150px;margin: 0 auto;">
+                        <a th:href="'/recomendar/'+${perfil.usuario.getUsername()}">
+                            <button class="btn btn-outline-primary text-center" type="button" id="addParticipanteBt" th:text="'Recomendar '+${perfil.nome==null?perfil.usuario.nome:perfil.nome}">Recomendar
+                            </button></a>
+                    </div>
+                </div>
+
                 <h6 th:if="${perfil.getRecomendacoesRecebidas().empty}"> Sem Recomendações </h6>
 
                 <div class="col-sm-2" th:unless="${perfil.getRecomendacoesRecebidas().empty}"
@@ -22,13 +31,18 @@
                      th:with="recomendacaoNow=${perfil.getRecomendacoesRecebidas()[i]}"
                      style="padding-bottom: 30px;">
                     <div class="card" style="width:100%;min-width:70px;max-width:100px;">
-                        <img src="https://i.imgur.com/vUBrCxr.png" class="card-img-top" alt="...">
+                        <img th:src="${(recomendacaoNow.origem==null || recomendacaoNow.origem.imagem==null)?'https://i.imgur.com/vUBrCxr.png':recomendacaoNow.origem.imagem}" class="card-img-top" alt="Perfil" referrerpolicy="no-referrer">
                         <div class="card-body">
-                            <h6 class="card-title" th:text="${recomendacaoNow.getDescricao()}">Nome da Recomendação</h6>
-                            <p class="card-text"
-                               th:text="${recomendacaoNow.getDescricao()}">
-                                Descrição da Recomendação</p>
+                            <h6 class="card-title text-center"><span th:text="${recomendacaoNow.origem.getNome()==null?recomendacaoNow.origem.usuario.getUsername():recomendacaoNow.origem.getNome()}">Nome do participante</span><span th:unless="${recomendacaoNow.origem.getNome()==null || recomendacaoNow.origem.usuario.isEmail_verificado() == false}">   <img src="https://i.imgur.com/w3aKauq.png" width="22" /></span></h6>
                         </div>
+                        <ul class="list-group list-group-flush" style="text-align: center;">
+                            <li class="list-group-item" th:unless="${recomendacaoNow.competencia==null}">
+                                <p>Recomendou pela competência: <b th:text="${recomendacaoNow.competencia.nome}"></b></p>
+                            </li>
+                            <li class="list-group-item">
+                                <p class="card-text" th:text="${recomendacaoNow.getDescricao()}">Descrição da Recomendação</p>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>

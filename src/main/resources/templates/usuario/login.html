@@ -40,9 +40,6 @@
             alert("A sua sessão expirou.", 'warning');
         </script>
         <script>
-        function handleCredentialResponse(response) {
-            loginComGoogle(response.credential);
-        }
         function validar() {
             username.setCustomValidity((username.value == null || username.value.length==0) ? "Verifique o campo Usuário." : "");
             password.setCustomValidity((password.value == null || password.value.length==0) ? "Verifique o campo Senha." : "");

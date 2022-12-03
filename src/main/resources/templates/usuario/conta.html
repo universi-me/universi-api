@@ -25,13 +25,13 @@
       </div>
    </div>
       <div class="form-group">
-         <label for="username" class="col-sm-3 col-form-label">Nível de Conta</label>
+         <label for="nivel" class="col-sm-3 col-form-label">Nível de Conta</label>
          <div class="mb-3">
-            <input type="text" readonly disabled class="form-control" id="username" th:placeholder="${session.usuario.autoridade.label}">
+            <input type="text" readonly disabled class="form-control" id="nivel" th:placeholder="${session.usuario.autoridade.label}">
          </div>
       </div>
 <br/><br/>
-<form onsubmit="editarConta();return false;" oninput="validar();">
+<form onsubmit="sendForm(this.id, '/conta/editar', null);return false;" oninput="validar();" id="formConta">
    <div class="form-group">
       <label for="password" class="col-sm-3 col-form-label">* Nova Senha</label>
       <div class="mb-3">
