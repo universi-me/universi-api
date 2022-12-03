@@ -99,6 +99,12 @@
     </div>
 
     <script>
+        function validar() {
+            checkCampo(nome);
+            checkCampo(descricao);
+            checkCampo(nivel);
+        }
+        validar();
         function mostrarForm(modoCriar) {
             document.getElementById('formCriar').hidden = false;
             document.getElementById('botaoCriar').hidden = modoCriar ? true : false;
@@ -141,6 +147,7 @@
                     document.getElementById('nome').value = competenciaDic.nome;
                     document.getElementById('descricao').value = competenciaDic.descricao;
                     document.getElementById('nivel').value = competenciaDic.nivel;
+                    validar();
                 }
             });
         }
