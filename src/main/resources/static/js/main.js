@@ -115,11 +115,14 @@ function uploadDaImagem(file) {
     http.open("POST", "/imagem/upload");
     http.responseType = 'json';
 
-    var button = document.querySelectorAll("button[type=submit]")[0];
-    button.setAttribute('disabled', 'disabled');
 
+    var button = document.querySelectorAll("button[type=submit]")[0];
+    var titleOrig = button.textContent;
+    button.setAttribute('disabled', 'disabled');
+    button.textContent = 'Carregando Imagem...';
     http.onload = function(e) {
         button.removeAttribute('disabled');
+        button.textContent = titleOrig;
         if (this.status == 200) {
             try {
                 var jsonResp = this.response;
@@ -140,6 +143,7 @@ function uploadDaImagem(file) {
     }
     http.onerror = function () {
         button.removeAttribute('disabled');
+        button.textContent = titleOrig;
         alert("Ocorreu um erro na requisição.", 'warning');
     }
     http.send(fd);

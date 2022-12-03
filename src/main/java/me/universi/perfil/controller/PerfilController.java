@@ -131,7 +131,7 @@ public class PerfilController {
             if(sobrenome != null) {
                 perfilAtual.setSobrenome(sobrenome);
             }
-            if(imagem != null) {
+            if(imagem != null && imagem.length()>0) {
                 perfilAtual.setImagem(imagem);
             }
             if(bio != null) {

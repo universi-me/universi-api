@@ -145,7 +145,7 @@ public class GrupoController {
                 Grupo grupoNew = new Grupo();
                 grupoNew.setNickname(nickname);
                 grupoNew.setNome(nome);
-                if(imagem != null) {
+                if(imagem != null && imagem.length()>0) {
                     grupoNew.setImagem(imagem);
                 }
                 grupoNew.setDescricao(descricao);
@@ -201,7 +201,7 @@ public class GrupoController {
                 if(tipo != null) {
                     grupoEdit.setTipo(GrupoTipo.valueOf(tipo));
                 }
-                if(imagem != null) {
+                if(imagem != null && imagem.length()>0) {
                     grupoEdit.setImagem(imagem);
                 }
                 if(podeCriarGrupo != null) {
