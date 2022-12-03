@@ -38,7 +38,7 @@ public class RecomendacaoService {
 
     public boolean validarPerfilOrigem(Recomendacao recomendacao) throws RecomendacaoInvalidaException {
         if(recomendacao.getOrigem() == null){
-            throw new RecomendacaoInvalidaException("Perfil de origem inválido: " + recomendacao.getOrigem().toString());
+            throw new RecomendacaoInvalidaException("Perfil de origem inválido");
         }else{
             recomendacao.getOrigem().getId();
             return true;
@@ -46,7 +46,7 @@ public class RecomendacaoService {
     }
     public boolean validarPerfilDestino(Recomendacao recomendacao) throws RecomendacaoInvalidaException {
         if(recomendacao.getDestino() == null){
-            throw new RecomendacaoInvalidaException("O Perfil de destino da recomendação encontra-se vazio: " + recomendacao.getDestino().toString());
+            throw new RecomendacaoInvalidaException("O Perfil de destino da recomendação encontra-se vazio");
         }else{
             recomendacao.getDestino().getId();
             return true;
@@ -54,7 +54,7 @@ public class RecomendacaoService {
     }
     public boolean validarCompetenciaValida(Recomendacao recomendacao) throws RecomendacaoInvalidaException {
         if(recomendacao.getCompetencia() == null) {
-            throw new RecomendacaoInvalidaException("A competência da recomendação não foi escolhida: " + recomendacao.getCompetencia().toString());
+            throw new RecomendacaoInvalidaException("A competência da recomendação não foi escolhida");
         }else{
             recomendacao.getCompetencia().getId();
             boolean competenciaValida = false;
@@ -64,13 +64,13 @@ public class RecomendacaoService {
                 }
             }
             if(!competenciaValida){
-                throw new RecomendacaoInvalidaException("A competência não está registrada: " + recomendacao.getCompetencia().toString());
+                throw new RecomendacaoInvalidaException("A competência não está registrada");
             }
         }return true;
     }
     public boolean validarDescricao(String descricao) throws RecomendacaoInvalidaException {
         if(descricao.isEmpty() || descricao == null){
-            throw new RecomendacaoInvalidaException("A destrição da recomendação não é válida: " + descricao);
+            throw new RecomendacaoInvalidaException("A destrição da recomendação não é válida");
         }return true;
     }
     public void update(Recomendacao recomendacao) throws RecomendacaoInvalidaException {

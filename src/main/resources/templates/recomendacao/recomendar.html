@@ -26,7 +26,7 @@
                               text=""></textarea>
                 </div>
                 <div class="mb-3">
-                    <label for="competenciaId" class="form-label" th:text="'Competencia de '+ ${usuarioDestino.perfil.nome}">Competencia Do Usuário</label>
+                    <label for="competenciaId" class="form-label" th:text="'Competencia de '+ ${usuarioDestino.perfil.nome==null?usuarioDestino.nome:usuarioDestino.perfil.nome}">Competencia Do Usuário</label>
                     <select id="competenciaId" name="competenciaId" class="form-select" value="">
                         <option value="" selected disabled hidden>Selecionar...</option>
                         <option th:each="competenciaNow : ${usuarioDestino.perfil.competencias}"
