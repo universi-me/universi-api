@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+
+<div th:fragment="recomendar">
+
+
+    <div class="card" style="width:100%;">
+        <div class="card-header text-center">Recomendar Usuário</div>
+        <div class="card-body">
+
+            <h6 class="text-center" th:text="'Fazer recomendação de '+ ${session.usuario.perfil.nome==null?session.usuario.nome:session.usuario.perfil.nome}+' para '+${usuarioDestino.perfil.nome==null?usuarioDestino.nome:usuarioDestino.perfil.nome}"></h6>
+
+            <form onsubmit="sendForm(this.id, '/recomendacao/criar', null);return false;" oninput="validar();" id="formCriarRecomendacao">
+                <input type="hidden" name="origem" id="origem" th:value="${session.usuario.perfil.getId()}"/>
+                <input type="hidden" name="destino" id="destino" th:value="${usuarioDestino.perfil.getId()}"/>
+
+                <div class="mb-3">
+                    <label for="descricao" class="form-label">* Descrição: </label>
+                    <textarea type="text" class="form-control" id="descricao" name="descricao"
+                              text=""></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="competenciaId" class="form-label" th:text="'Competencia de '+ ${usuarioDestino.perfil.nome==null?usuarioDestino.nome:usuarioDestino.perfil.nome}">Competencia Do Usuário</label>
+                    <select id="competenciaId" name="competenciaId" class="form-select" value="">
+                        <option value="" selected disabled hidden>Selecionar...</option>
+                        <option th:each="competenciaNow : ${usuarioDestino.perfil.competencias}"
+                                th:value="${competenciaNow.getId()}" th:text="${competenciaNow.nome}"></option>
+                    </select>
+                </div>
+
+
+                <p align="right">
+                    <button type="submit" class="btn btn-primary">Fazer Recomendação</button>
+                </p>
+            </form>
+
+        </div>
+    </div>
+
+    <script>
+        function validar() {
+            checkCampo(descricao);
+        }
+        validar();
+
+    </script>
+</div>
+
+
+</body>
+</html>

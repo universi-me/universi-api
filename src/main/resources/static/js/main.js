@@ -46,18 +46,11 @@ function removerSubGrupo(grupoId, grupoIdRemover, callback) {
 }
 
 /* Conta calls */
-function editarConta() {
-   var bodyValores = {
-      password: document.querySelector('#password').value,
-      senha: (document.querySelector('#senha')!=null)?document.querySelector('#senha').value:null,
-   }
-   api_request('/conta/editar', bodyValores, null);
-}
-function loginComGoogle(token) {
-   var bodyValores = {
-      token: token,
-   }
-   api_request('/login/google', bodyValores, null);
+function handleCredentialResponse(response) {
+    var bodyValores = {
+       token: response.credential,
+    }
+    api_request('/login/google', bodyValores, null);
 }
 
 /* Imagem Upload */

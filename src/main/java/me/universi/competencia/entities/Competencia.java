@@ -62,9 +62,11 @@ public class Competencia {
         if(!(obj instanceof Competencia)) {
 			return false;
 		}
-		
-        Competencia competencia = (Competencia) obj;
-
-        return this.nome.equals(competencia.getNome()) && this.descricao.equals(competencia.getDescricao()) && this.nivel.equals(competencia.getNivel());
+		try {
+            Competencia competencia = (Competencia) obj;
+            return this.nome.equals(competencia.getNome()) && this.descricao.equals(competencia.getDescricao()) && this.nivel.equals(competencia.getNivel());
+        } catch (Exception e) {
+            return false;
+        }
     }
 }
