@@ -120,7 +120,7 @@ public class GrupoController {
                 throw new GrupoException("Parametro nome é nulo.");
             }
 
-            String imagem = (String)body.get("imagem");
+            String imagem = (String)body.get("imagemUrl");
 
             String descricao = (String)body.get("descricao");
             if(descricao == null) {
@@ -184,7 +184,7 @@ public class GrupoController {
             String nome = (String)body.get("nome");
             String descricao = (String)body.get("descricao");
             String tipo = (String)body.get("tipo");
-            String imagem = (String)body.get("imagem");
+            String imagem = (String)body.get("imagemUrl");
 
             Boolean podeCriarGrupo = (Boolean)body.get("podeCriarGrupo");
 

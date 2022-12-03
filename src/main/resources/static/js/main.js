@@ -2,44 +2,27 @@
 var usuarioFormato = /^([a-z0-9_-]+)$/;
 var emailFormato = /^([a-z0-9._-]+)$/;
 
-/* Perfil calls */
-function editarPerfil(callback) {
+/* Competência calls */
+function editarCompetencia(callback) {
    var bodyValores = {
-      perfilId: document.querySelector('[name="perfilId"]').value,
+      competenciaId: document.querySelector('[name="competenciaId"]').value,
       nome: document.querySelector('#nome').value,
-      sobrenome: document.querySelector('#sobrenome').value,
-      imagem: document.querySelector('#imagemUp').value,
-      bio: document.querySelector('#bio').value,
-      sexo: document.querySelector('#sexo').value,
+      descricao: document.querySelector('#descricao').value,
+      nivel: document.querySelector('#nivel').value,
    }
-   api_request('/perfil/editar', bodyValores, callback);
+   api_request('/competencia/editar', bodyValores, callback);
+}
+function criarCompetencia(callback) {
+   var bodyValores = {
+      competenciaId: document.querySelector('[name="competenciaId"]').value,
+      nome: document.querySelector('#nome').value,
+      descricao: document.querySelector('#descricao').value,
+      nivel: document.querySelector('#nivel').value,
+   }
+   api_request('/competencia/editar', bodyValores, callback);
 }
 
 /* Grupo calls */
-function editarGrupo(callback) {
-   var bodyValores = {
-      grupoId: document.querySelector('[name="grupoId"]').value,
-      nome: document.querySelector('#nome').value,
-      nickname: document.querySelector('#nickname').value,
-      imagem: document.querySelector('#imagemUp').value,
-      descricao: document.querySelector('#descricao').value,
-      tipo: document.querySelector('#tipo').value,
-      podeCriarGrupo: document.querySelector('#podeCriarGrupo').checked,
-   }
-   api_request('/grupo/editar', bodyValores, callback);
-}
-function criarGrupo(callback) {
-   var bodyValores = {
-      grupoId: document.querySelector('[name="grupoId"]').value,
-      nome: document.querySelector('#nome').value,
-      nickname: document.querySelector('#nickname').value,
-      imagem: document.querySelector('#imagemUp').value,
-      descricao: document.querySelector('#descricao').value,
-      tipo: document.querySelector('#tipo').value,
-      podeCriarGrupo: document.querySelector('#podeCriarGrupo').checked,
-   }
-   api_request('/grupo/criar', bodyValores, callback);
-}
 function adicionarParticipanteAoGrupo(grupoId, participante, callback) {
    var bodyValores = {
       grupoId: grupoId,
@@ -70,26 +53,11 @@ function editarConta() {
    }
    api_request('/conta/editar', bodyValores, null);
 }
-function efetuarLogin() {
-   var bodyValores = {
-      username: document.querySelector('#username').value,
-      password: document.querySelector('#password').value
-   }
-   api_request('/login.js', bodyValores, null);
-}
 function loginComGoogle(token) {
    var bodyValores = {
       token: token,
    }
    api_request('/login/google', bodyValores, null);
-}
-function efetuarRegistro() {
-   var bodyValores = {
-      username: document.querySelector('#username').value,
-      password: document.querySelector('#password').value,
-      email: document.querySelector('#email').value
-   }
-   api_request('/registrar', bodyValores, null);
 }
 
 /* Imagem Upload */
@@ -161,7 +129,7 @@ function uploadDaImagem(file) {
                 if(jsonResp.sucess) {
                     var link = jsonResp.conteudo.link;
                     document.getElementById("imagemUp").src = link;
-                    document.getElementById("imagemUp").value = link;
+                    document.getElementById("imagemUrl").value = link;
                 }
             } catch (error) {
                 alert(error, 'warning');
@@ -175,6 +143,33 @@ function uploadDaImagem(file) {
         alert("Ocorreu um erro na requisição.", 'warning');
     }
     http.send(fd);
+}
+
+/* Form Request Body Parse */
+function sendForm(formId, path, callback) {
+    var form = document.getElementById(formId);
+    var arr = $(form).serializeArray(), names = (function(){
+        var n = [],
+            l = arr.length - 1;
+        for(; l>=0; l--){
+            n.push(arr[l].name);
+        }
+        return n;
+    })();
+    $('#'+formId+' input[type="checkbox"]:not(:checked)').each(function(){
+        if($.inArray(this.name, names) === -1){
+            arr.push({name: this.name, value: false});
+        }
+    });
+    var dataBodyDic = arr.reduce(function(obj, item) {
+        var valueItem = item.value;
+        if(valueItem == 'on') {
+            valueItem = true;
+        }
+        obj[item.name] = valueItem;
+        return obj;
+    }, {});
+    api_request(path, dataBodyDic, callback);
 }
 
 /* API request */

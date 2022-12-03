@@ -76,8 +76,7 @@
                 <h6 th:if="${perfil.getCompetencias().empty}"> Sem Competências </h6>
 
                 <div class="col-sm-4" th:unless="${perfil.getCompetencias().empty}"
-                     th:each="i : ${#numbers.sequence(1, perfil.getCompetencias().size()>=6?6:0, -1)}"
-                     th:with="competenciaNow=${perfil.getCompetencias()[i]}">
+                     th:each="competenciaNow : ${perfil.getCompetencias()}">
                     <div class="card" style="width:100%; margin-bottom:17px">
 
                         <!-- Start Cartão da competência -->
@@ -110,8 +109,8 @@
     <a class="card-footer text-center"
        style="background-color:#B4FFC2;
             text-decoration: none;
-            cursor: pointer">
-       Editar Competências
+            cursor: pointer" th:href="'/p/' +${perfil.getUsuario().getUsername()} + '/competencias'">
+       Gerenciar Competências
     </a>
     <!-- End Editar competências -->
 

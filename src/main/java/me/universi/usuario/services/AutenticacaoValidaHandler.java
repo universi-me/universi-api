@@ -36,7 +36,7 @@ public class AutenticacaoValidaHandler extends SavedRequestAwareAuthenticationSu
             if(username != null) {
                 Usuario usuario = (Usuario) usuarioService.loadUserByUsername(username);
 
-                usuarioService.configurarSessaoParaUsuario(session, usuario);
+                usuarioService.configurarSessaoParaUsuario(usuario);
             }
 
         }

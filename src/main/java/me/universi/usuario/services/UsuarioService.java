@@ -13,6 +13,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpSession;
 import java.util.Optional;
@@ -120,7 +122,9 @@ public class UsuarioService implements UserDetailsService {
         userRepository.saveAndFlush(usuario);
     }
 
-    public boolean usuarioDonoDaSessao(HttpSession session, Usuario usuario) {
+    public boolean usuarioDonoDaSessao(Usuario usuario) {
+        ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+        HttpSession session = attr.getRequest().getSession(true);
         if(session != null && usuario != null) {
             Usuario usuarioSession = (Usuario) session.getAttribute("usuario");
             if(usuarioSession != null) {
@@ -130,7 +134,13 @@ public class UsuarioService implements UserDetailsService {
         return false;
     }
 
-    public void atualizarUsuarioNaSessao(HttpSession session) {
+    public HttpSession obterSessaoAtual() {
+        ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+        return attr.getRequest().getSession(true);
+    }
+
+    public void atualizarUsuarioNaSessao() {
+        HttpSession session = obterSessaoAtual();
         if(session != null) {
             Usuario usuarioSession = (Usuario) session.getAttribute("usuario");
             if(usuarioSession != null) {
@@ -142,8 +152,8 @@ public class UsuarioService implements UserDetailsService {
         }
     }
 
-    public void configurarSessaoParaUsuario(HttpSession session, Usuario usuario) {
-
+    public void configurarSessaoParaUsuario(Usuario usuario) {
+        HttpSession session = obterSessaoAtual();
         // Set session inatividade do usuario em 10min
         session.setMaxInactiveInterval(10 * 60);
 

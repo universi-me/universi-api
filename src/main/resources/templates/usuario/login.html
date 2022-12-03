@@ -1,28 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-   <meta charset="UTF-8">
-   <meta http-equiv="X-UA-compatible" content="IE=edge">
-   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <!-- CSS only -->
-   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"
-         rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi"
-         crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="/css/style.css">
-    <script src="/js/main.js"></script>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-   <title>Login</title>
-</head>
+
+<head th:replace="index :: head"></head>
 
 <body>
-<div class="container py-4 px-3 mx-auto">
+<div class="container px-3 mx-auto">
     <div th:replace="elementos/navbar :: navbar"></div>
 <div id="areaDeAlertas" style="max-width:700px;margin: 0 auto;"></div>
 
     <div style="max-width:400px;margin: 0 auto;">
         <p><h4 style="text-align: center;">Login</h4></p>
-<form onsubmit="efetuarLogin();return false;" oninput="validar();">
+<form onsubmit="sendForm(this.id, '/login.js', null);return false;" oninput="validar();" id="formLogin">
       <div class="mb-3">
          <label for="username" class="form-label">* Usuário:</label>
          <input type="username" class="form-control" id="username" name="username" placeholder="Usuário / E-mail">
@@ -39,7 +27,6 @@
 <h5>Entrar com DCX</h5>
     <div id="g_id_onload"
          th:data-client_id="${@environment.getProperty('GOOGLE_CLIENT_ID')}"
-         data-login_uri="https://universi.me"
          data-callback="handleCredentialResponse">
     </div>
     <div class="g_id_signin" data-type="standard"></div>
