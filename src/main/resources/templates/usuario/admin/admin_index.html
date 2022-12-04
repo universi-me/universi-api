@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head th:replace="index :: head"></head>
+<head th:include="index :: head(title=~{::title/text()})">
+    <title>Área Administrativa</title>
+</head>
 
 <body>
 <div class="container px-3 mx-auto">

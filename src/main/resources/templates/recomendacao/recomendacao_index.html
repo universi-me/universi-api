@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head th:include="index :: head">
-	<title>Recomendar</title>
+<head th:include="index :: head(title=~{::title/text()})">
+    <title>Recomendar</title>
 </head>
 
 <body>
