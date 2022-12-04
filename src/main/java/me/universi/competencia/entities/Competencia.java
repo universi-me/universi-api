@@ -19,7 +19,6 @@ public class Competencia {
     @Column(name = "nivel")
     private Nivel nivel;
 
-
     public Competencia() {
     }
 
