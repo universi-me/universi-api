@@ -39,10 +39,6 @@ public class Competencia {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public String getNome() {
         return nome;
     }
@@ -62,6 +58,14 @@ public class Competencia {
     public Nivel getNivel() { return nivel; }
 
     public void setNivel(Nivel nivel) { this.nivel = nivel; }
+
+    public Date getDataDeCriacao() {
+        return dataDeCriacao;
+    }
+
+    public void setDataDeCriacao(Date dataDeCriacao) {
+        this.dataDeCriacao = dataDeCriacao;
+    }
 
     @Override
     public boolean equals(Object obj) {

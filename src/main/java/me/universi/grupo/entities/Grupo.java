@@ -171,6 +171,14 @@ public class Grupo {
         this.imagem = imagem;
     }
 
+    public Date getDataDeCriacao() {
+        return dataDeCriacao;
+    }
+
+    public void setDataDeCriacao(Date dataDeCriacao) {
+        this.dataDeCriacao = dataDeCriacao;
+    }
+
     @Override
     public String toString() {
         return "Grupo [id=\""+this.id+"\", nome=\""+this.nome+"\", descricao=\""+this.descricao+"\"]";

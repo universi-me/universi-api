@@ -38,6 +38,10 @@ public class Recomendacao {
     }
     public Recomendacao() {}
 
+    public Long getId() {
+        return id;
+    }
+
     public Perfil getOrigem() {
         return origem;
     }
@@ -68,5 +72,13 @@ public class Recomendacao {
 
     public void setDescricao(String descricao) {
         this.descricao = descricao;
+    }
+
+    public Date getDataDeCriacao() {
+        return dataDeCriacao;
+    }
+
+    public void setDataDeCriacao(Date dataDeCriacao) {
+        this.dataDeCriacao = dataDeCriacao;
     }
 }

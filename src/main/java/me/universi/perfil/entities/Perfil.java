@@ -167,4 +167,12 @@ public class Perfil {
     public Collection<Recomendacao> getRecomendacoesRecebidas() {
         return recomendacoesRecebidas;
     }
+
+    public Date getDataDeCriacao() {
+        return dataDeCriacao;
+    }
+
+    public void setDataDeCriacao(Date dataDeCriacao) {
+        this.dataDeCriacao = dataDeCriacao;
+    }
 }
