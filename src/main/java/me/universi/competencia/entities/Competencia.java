@@ -1,8 +1,10 @@
 package me.universi.competencia.entities;
 
 import me.universi.competencia.enums.Nivel;
+import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @Entity(name = "competencia")
 public class Competencia {
@@ -19,6 +21,11 @@ public class Competencia {
     @Column(name = "nivel")
     private Nivel nivel;
 
+    @CreationTimestamp
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "data_de_criacao")
+    private Date dataDeCriacao;
+
     public Competencia() {
     }
 
@@ -30,10 +37,6 @@ public class Competencia {
 
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getNome() {
@@ -55,6 +58,14 @@ public class Competencia {
     public Nivel getNivel() { return nivel; }
 
     public void setNivel(Nivel nivel) { this.nivel = nivel; }
+
+    public Date getDataDeCriacao() {
+        return dataDeCriacao;
+    }
+
+    public void setDataDeCriacao(Date dataDeCriacao) {
+        this.dataDeCriacao = dataDeCriacao;
+    }
 
     @Override
     public boolean equals(Object obj) {
