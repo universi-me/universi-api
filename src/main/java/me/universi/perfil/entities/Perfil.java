@@ -6,9 +6,11 @@ import me.universi.perfil.enums.Sexo;
 import me.universi.recomendacao.entities.Recomendacao;
 import me.universi.usuario.entities.Usuario;
 import me.universi.grupo.entities.Grupo;
+import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.util.Collection;
+import java.util.Date;
 
 @Entity(name = "perfil")
 public class Perfil {
@@ -54,6 +56,11 @@ public class Perfil {
     private Collection<Recomendacao> recomendacoesFeitas;
     @OneToMany(mappedBy = "destino")
     private Collection<Recomendacao> recomendacoesRecebidas;
+
+    @CreationTimestamp
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "data_de_criacao")
+    private Date dataDeCriacao;
 
     public Perfil(Long id, Usuario usuario, String bio, Link link, Collection<Competencia> competencias, Collection<Grupo> grupos, Collection<Link> links) {
         this.id = id;

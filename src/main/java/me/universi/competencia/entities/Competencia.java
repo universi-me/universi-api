@@ -1,8 +1,10 @@
 package me.universi.competencia.entities;
 
 import me.universi.competencia.enums.Nivel;
+import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @Entity(name = "competencia")
 public class Competencia {
@@ -18,6 +20,11 @@ public class Competencia {
     @Enumerated(EnumType.STRING)
     @Column(name = "nivel")
     private Nivel nivel;
+
+    @CreationTimestamp
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "data_de_criacao")
+    private Date dataDeCriacao;
 
     public Competencia() {
     }

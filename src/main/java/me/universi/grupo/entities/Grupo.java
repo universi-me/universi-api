@@ -5,9 +5,11 @@ import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import me.universi.grupo.enums.GrupoTipo;
 import me.universi.perfil.entities.Perfil;
+import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.util.Collection;
+import java.util.Date;
 
 @Entity(name = "Grupo")
 public class Grupo {
@@ -64,6 +66,11 @@ public class Grupo {
     // grupo pode criar subGrupos
     @Column(name = "podeCriarGrupo")
     public boolean podeCriarGrupo;
+
+    @CreationTimestamp
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "data_de_criacao")
+    private Date dataDeCriacao;
 
     public Grupo() {
     }
