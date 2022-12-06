@@ -66,6 +66,8 @@ public class GrupoController {
             }
 
             if(grupoAtual != null) {
+                map.addAttribute("grupoService", grupoService);
+                map.addAttribute("usuarioService", usuarioService);
                 map.addAttribute("grupo", grupoAtual);
                 map.addAttribute("grupoDiretorio", grupoService.diretorioParaGrupo(grupoAtual.getId()));
             } else {

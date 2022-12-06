@@ -21,17 +21,17 @@
 
             <div class="row gutters">
 
-                <div class="col" style="width:20%;max-width:210px;min-width:150px;padding-right: 10px;" th:unless="${perfil == null || usuarioService.usuarioPrecisaDePerfil(perfil.usuario)}">
+                <div class="col" style="width:20%;max-width:210px;min-width:150px;padding-right: 10px;" th:unless="${perfil == null || (usuarioService.usuarioPrecisaDePerfil(perfil.usuario) && #strings.endsWith(#httpServletRequest.requestURI, '/editar'))}">
                     <div class="card" style="width: 100%;">
-                        <img th:src="${(perfil==null || perfil.getImagem()==null)?'https://i.imgur.com/vUBrCxr.png':perfil.getImagem()}" class="card-img-top" alt="Perfil" referrerpolicy="no-referrer">
+                        <img th:src="${(perfil==null || perfil.imagem==null)?'https://i.imgur.com/vUBrCxr.png':perfil.imagem}" class="card-img-top" alt="Perfil" referrerpolicy="no-referrer">
                         <div class="card-body">
-                            <h5 class="card-title text-center"><span th:text="${perfil==null?'':perfil.getNome()}">Nome do Perfil</span><span th:unless="${perfil==null || perfil.getNome()==null || perfil.getUsuario().isEmail_verificado() == false}">   <img src="https://i.imgur.com/w3aKauq.png" width="22" /></span></h5>
+                            <h5 class="card-title text-center"><span th:text="${(perfil==null || perfil.getNome()==null)?perfil.usuario.nome:perfil.nome}">Nome do Perfil</span><span th:unless="${perfil==null || perfil.nome==null || perfil.usuario.isEmail_verificado() == false}">   <img src="https://i.imgur.com/w3aKauq.png" width="22" /></span></h5>
                         </div>
                         <div class="card-header card-footer text-center">Bio</div>
                         <div class="card-body">
                             <p class="card-text" th:text="${perfil==null?'':perfil.getBio()}">Bio do Perfil</p>
                         </div>
-                        <a class="card-footer text-center" th:unless="${perfil == null || #strings.endsWith(#httpServletRequest.requestURI, '/editar')}" th:href="'/p/' +${perfil.getUsuario().getUsername()} + '/editar'"
+                        <a class="card-footer text-center" th:unless="${perfil == null || #strings.endsWith(#httpServletRequest.requestURI, '/editar') || !usuarioService.usuarioDonoDaSessao(perfil.usuario)}" th:href="'/p/' +${perfil.getUsuario().getUsername()} + '/editar'"
                              style="background-color:#B4FFC2;text-decoration: none;">Editar Perfil
                         </a>
                     </div>

@@ -36,7 +36,7 @@
                 </div>
             </div>
         </div>
-        <a class="card-footer text-center" th:href="${grupoDiretorio} + '/participantes'"
+        <a th:unless="${!grupoService.temPermissaoParaGrupo(grupo, session.usuario)}" class="card-footer text-center" th:href="${grupoDiretorio} + '/participantes'"
            style="background-color:#B4FFC2;text-decoration: none;">Gerenciar
             Participantes
         </a>
@@ -69,7 +69,7 @@
                 </div>
             </div>
         </div>
-        <a class="card-footer text-center" th:href="${grupoDiretorio} + '/grupos'"
+        <a th:unless="${(!grupo.podeCriarGrupo && (!grupoService.temPermissaoParaGrupo(grupo, session.usuario)))}" class="card-footer text-center" th:href="${grupoDiretorio} + '/grupos'"
            style="background-color:#B4FFC2;text-decoration: none;">Gerenciar Grupos
         </a>
     </div>

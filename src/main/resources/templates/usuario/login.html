@@ -11,7 +11,7 @@
     <div th:replace="elementos/navbar :: navbar"></div>
 <div id="areaDeAlertas" style="max-width:700px;margin: 0 auto;"></div>
 
-    <div style="max-width:400px;margin: 0 auto;">
+    <div style="max-width:400px;margin: 0 auto;border-radius: 15px; background: rgba(255, 255, 255, 0.3);padding:20px;">
         <p><h4 style="text-align: center;">Login</h4></p>
 <form onsubmit="sendForm(this.id, '/login.js', null);return false;" oninput="validar();" id="formLogin">
       <div class="mb-3">

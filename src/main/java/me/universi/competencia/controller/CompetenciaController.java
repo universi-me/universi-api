@@ -63,7 +63,7 @@ public class CompetenciaController {
             Perfil perfil = usuario.getPerfil();
             perfilService.adicionarCompetencia(perfil, competenciaNew);
 
-            resposta.mensagem = "Competencia Criada";
+            resposta.mensagem = "Competência Criada";
             resposta.sucess = true;
             return resposta;
 
@@ -90,7 +90,7 @@ public class CompetenciaController {
 
             Competencia comp = competenciaService.findFirstById(Long.valueOf(id));
             if (comp == null) {
-                throw new CompetenciaException("Competencia não encontrada.");
+                throw new CompetenciaException("Competência não encontrada.");
             }
 
             Usuario usuario = (Usuario) session.getAttribute("usuario");
@@ -113,7 +113,7 @@ public class CompetenciaController {
 
             competenciaService.save(comp);
 
-            resposta.mensagem = "Competencia atualizada";
+            resposta.mensagem = "Competência atualizada";
             resposta.sucess = true;
             return resposta;
 
@@ -136,7 +136,7 @@ public class CompetenciaController {
 
             Competencia comp = competenciaService.findFirstById(Long.valueOf(id));
             if (comp == null) {
-                throw new CompetenciaException("Competencia não encontrada.");
+                throw new CompetenciaException("Competência não encontrada.");
             }
 
             Usuario usuario = (Usuario) session.getAttribute("usuario");
@@ -151,7 +151,7 @@ public class CompetenciaController {
 
             perfilService.removerCompetencia(perfil, comp);
 
-            resposta.mensagem = "Competencia removida";
+            resposta.mensagem = "Competência removida";
             resposta.sucess = true;
             return resposta;
 
