@@ -72,6 +72,9 @@ public class Grupo {
     @Column(name = "data_de_criacao")
     private Date dataDeCriacao;
 
+    @Column(name = "publico")
+    public boolean grupoPublico;
+
     public Grupo() {
     }
 
@@ -177,6 +180,14 @@ public class Grupo {
 
     public void setDataDeCriacao(Date dataDeCriacao) {
         this.dataDeCriacao = dataDeCriacao;
+    }
+
+    public boolean isGrupoPublico() {
+        return grupoPublico;
+    }
+
+    public void setGrupoPublico(boolean grupoPublico) {
+        this.grupoPublico = grupoPublico;
     }
 
     @Override
