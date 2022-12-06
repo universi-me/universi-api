@@ -37,12 +37,18 @@ public class UsuarioController {
     private UsuarioService usuarioService;
     @Autowired
     private PerfilService perfilService;
+
     @Autowired
     private Environment env;
 
     @GetMapping("/login")
     public String login(HttpServletRequest request, HttpSession session) {
         return "usuario/login";
+    }
+
+    @GetMapping("/entrar")
+    public String entrar(HttpServletRequest request, HttpSession session) {
+        return "redirect:"+usuarioService.obterUrlAoLogar();
     }
 
     @GetMapping("/registrar")

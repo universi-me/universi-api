@@ -56,6 +56,10 @@ public class GrupoService {
         }
     }
 
+    public long count() {
+        return grupoRepository.count();
+    }
+
     public boolean verificarPermissaoParaGrupo(Grupo grupo, Usuario usuario) throws GrupoException {
 
         if (grupo == null) {

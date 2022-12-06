@@ -1,5 +1,7 @@
 body{
     padding: 10px;
-    font-family: 'Lato';
+    font-family: "Open Sans", sans-serif;
     font-size: 100%;
+    background: url(/img/landing/hero-bg.png) top center no-repeat;
+    background-repeat: repeat-y;
 }
