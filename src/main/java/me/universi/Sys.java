@@ -116,6 +116,7 @@ public class Sys {
         novoGrupo.setNome("UFPB");
 
         novoGrupo.setGrupoRoot(true);
+        novoGrupo.setGrupoPublico(true);
         novoGrupo.setPodeCriarGrupo(true);
 
         grupoService.adicionarParticipante(novoGrupo, perfil_1);

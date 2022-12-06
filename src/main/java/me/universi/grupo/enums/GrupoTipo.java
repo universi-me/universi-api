@@ -9,6 +9,7 @@ public enum GrupoTipo {
     MONITORIA("Monitoria"),
     LABORATORIO("Laboratório"),
     CA("Centro Acadêmico"),
+    DEPARTAMENTO("Departamento"),
     GRUPO_DE_ESTUDO("Grupo de Estudo");
 	
     public final String label;

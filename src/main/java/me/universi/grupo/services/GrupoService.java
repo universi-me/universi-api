@@ -56,6 +56,11 @@ public class GrupoService {
         }
     }
 
+    public List<Grupo> findByGrupoPublico(boolean grupoPublico) {
+        List<Grupo> grupoOptional = grupoRepository.findByGrupoPublico(grupoPublico);
+        return grupoOptional;
+    }
+
     public long count() {
         return grupoRepository.count();
     }

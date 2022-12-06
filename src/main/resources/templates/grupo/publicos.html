@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head th:include="index :: head(title=~{::title/text()})">
+    <title>Grupos Públicos</title>
+</head>
+
+<body>
+<div class="container px-3 mx-auto">
+    <div th:replace="elementos/navbar :: navbar"></div>
+    <div id="areaDeAlertas" style="max-width:700px;margin: 0 auto;"></div>
+    <h2 th:text="${error}" th:unless="${error == null}">Menssagem de error.</h2>
+
+
+    <div style="max-width=80%;margin: 0 auto;" th:unless="${error != null}">
+
+        <div id="diretorioAtual" th:unless="${grupoDiretorio == null}" th:value="${grupoDiretorio}"></div>
+
+        <p><h4 th:text="'Grupo: ' + ${grupo.nome}" th:unless="${grupo == null}" style="text-align: center;">Grupo</h4></p>
+
+
+        <div class="container">
+
+            <div class="row gutters">
+
+
+                <div class="col" style="width:60%;">
+
+                    <div class="card" style="width:100%;" th:with="gruposPublicos=${grupoService.findByGrupoPublico(true)}">
+                        <div class="card-header text-center">Grupos Públicos <span th:unless="${gruposPublicos == null || gruposPublicos.empty}"
+                                                                             th:text="'(' +${gruposPublicos.size()}+ ')'">(0)</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <h6 th:if="${gruposPublicos.empty}"> Sem Grupos </h6>
+                                <div class="col-sm-3" th:unless="${gruposPublicos.empty}" th:each="grupoNow : ${gruposPublicos}"
+                                     style="padding-bottom: 30px;">
+                                    <div class="card" style="width:90%;">
+                                        <img th:src="${grupoNow.imagem==null?'https://i.imgur.com/SfAl1Vb.png':grupoNow.imagem}"
+                                             class="card-img-top" alt="..." referrerpolicy="no-referrer">
+                                        <div class="card-body">
+                                            <h6 class="card-title text-center" th:text="${grupoNow.nome}">Nome do Grupo</h6>
+                                        </div>
+                                        <ul class="list-group list-group-flush" style="text-align: center;">
+                                            <li class="list-group-item">
+                                                <a th:href="${grupoService.diretorioParaGrupo(grupoNow.id)}"
+                                                   class="btn btn-primary">Ver Grupo</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+				
+				
+            </div>
+        </div>
+
+    </div>
+
+    <br/><br/>
+    <script>
+        
+    </script>
+
+    <p align="left">
+        <br/>
+        <button onclick="javascript:window.history.back();" class="btn btn-primary">Voltar</button>
+    </p>
+
+</div>
+
+</div>
+
+</div>
+
+<div th:replace="elementos/footer :: footer"></div>
+</div>
+</body>
+</html>

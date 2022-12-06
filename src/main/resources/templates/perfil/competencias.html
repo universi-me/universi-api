@@ -11,10 +11,10 @@
 
     <div class="card" style="width:100%;">
 
-        <div class="card-header text-center">Gerenciar Competências</div>
+        <div class="card-header text-center">Gerenciar Minhas Competências</div>
         <div class="card-body">
             <div class="input-group mb-3 text-center" style="width:150px;margin: 0 auto;" id="botaoCriar">
-                <button onclick="mostrarForm(true);" class="btn btn-outline-primary text-center" type="button" id="addParticipanteBt">Criar Competência
+                <button onclick="mostrarForm(true);" class="btn btn-outline-primary text-center" type="button" id="addParticipanteBt">Criar Minha Competência
                     </button>
             </div>
 
@@ -42,7 +42,7 @@
 
         </div>
 
-        <div class="card-header card-footer text-center">Editar Competências
+        <div class="card-header card-footer text-center">Editar Minhas Competências
             <span th:unless="${perfil.getCompetencias() == null || perfil.getCompetencias().empty}"
                   th:text="'(' +${perfil.getCompetencias().size()}+ ')'">
                 (0)

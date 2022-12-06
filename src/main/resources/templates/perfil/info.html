@@ -10,7 +10,7 @@
 <div th:fragment="info">
 
     <div class="card" style="width:100%;">
-        <div class="card-header text-center">Recomendações Recebidas <span
+        <div class="card-header text-center">Minhas Recomendações Recebidas <span
                 th:unless="${perfil == null || perfil.getRecomendacoesRecebidas().empty}"
                 th:text="'(' +${perfil.getRecomendacoesRecebidas().size()}+ ')'">(0)</span></div>
         <div class="card-body">
@@ -50,7 +50,7 @@
     </div>
     <p/>
     <div class="card" style="width:100%;">
-        <div class="card-header text-center">Grupos <span th:unless="${perfil.grupos == null || perfil.grupos.empty}"
+        <div class="card-header text-center">Meus Grupos <span th:unless="${perfil.grupos == null || perfil.grupos.empty}"
                                                              th:text="'(' +${perfil.grupos.size()}+ ')'">(0)</span>
         </div>
         <div class="card-body">
@@ -79,7 +79,7 @@
     </div>
     <p>
     <div class="card" style="width:100%;">
-        <div class="card-header text-center">Competências
+        <div class="card-header text-center">Minhas Competências
             <span th:unless="${perfil.getCompetencias() == null || perfil.getCompetencias().empty}"
              th:text="'(' +${perfil.getCompetencias().size()}+ ')'">
                 (0)
@@ -124,7 +124,7 @@
        style="background-color:#B4FFC2;
             text-decoration: none;
             cursor: pointer" th:href="'/p/' +${perfil.getUsuario().getUsername()} + '/competencias'">
-       Gerenciar Competências
+       Gerenciar Minhas Competências
     </a>
     <!-- End Editar competências -->
 

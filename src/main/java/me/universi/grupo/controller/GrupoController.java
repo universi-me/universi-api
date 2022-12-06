@@ -100,6 +100,14 @@ public class GrupoController {
         return "grupo/grupo_index";
     }
 
+    @GetMapping("/grupos")
+    public String grupos_handler(HttpServletRequest request, HttpServletResponse response, HttpSession session, ModelMap map) {
+
+        map.addAttribute("grupoService", grupoService);
+
+        return "grupo/publicos";
+    }
+
 
     @ResponseBody
     @RequestMapping(value = "/grupo/criar", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -135,6 +143,7 @@ public class GrupoController {
             }
 
             Boolean podeCriarGrupo = (Boolean)body.get("podeCriarGrupo");
+            Boolean grupoPublico = (Boolean)body.get("grupoPublico");
 
             Usuario usuario = (Usuario) session.getAttribute("usuario");
             Grupo grupoPai = grupoService.findFirstById(Long.valueOf(grupoIdPai));
@@ -155,6 +164,9 @@ public class GrupoController {
                 grupoNew.setAdmin(usuario.getPerfil());
                 if(podeCriarGrupo != null) {
                     grupoNew.setPodeCriarGrupo(podeCriarGrupo);
+                }
+                if(grupoPublico != null) {
+                    grupoNew.setGrupoPublico(grupoPublico);
                 }
 
                 grupoService.adicionarSubgrupo(grupoPai, grupoNew);
@@ -189,6 +201,7 @@ public class GrupoController {
             String imagem = (String)body.get("imagemUrl");
 
             Boolean podeCriarGrupo = (Boolean)body.get("podeCriarGrupo");
+            Boolean grupoPublico = (Boolean)body.get("grupoPublico");
 
             Usuario usuario = (Usuario) session.getAttribute("usuario");
             Grupo grupoEdit = grupoService.findFirstById(Long.valueOf(grupoId));
@@ -208,6 +221,9 @@ public class GrupoController {
                 }
                 if(podeCriarGrupo != null) {
                     grupoEdit.setPodeCriarGrupo(podeCriarGrupo);
+                }
+                if(grupoPublico != null) {
+                    grupoEdit.setGrupoPublico(grupoPublico);
                 }
 
                 grupoService.save(grupoEdit);
