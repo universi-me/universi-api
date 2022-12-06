@@ -7,6 +7,7 @@ import me.universi.grupo.enums.GrupoTipo;
 import me.universi.grupo.exceptions.GrupoException;
 import me.universi.grupo.services.GrupoService;
 import me.universi.perfil.entities.Perfil;
+import me.universi.recomendacao.service.RecomendacaoService;
 import me.universi.usuario.entities.Usuario;
 import me.universi.perfil.repositories.PerfilRepository;
 
@@ -40,6 +41,8 @@ public class Sys {
     public CompetenciaService competenciaService;
     @Autowired
     public GrupoService grupoService;
+    @Autowired
+    public RecomendacaoService recomendacaoService;
 
     public static void main(String [] args) {
         System.out.println("H2 ativo na http://localhost/h2-console");
@@ -48,7 +51,12 @@ public class Sys {
 
     @GetMapping("/")
     String index(HttpServletRequest request, HttpSession session, ModelMap map) {
-        return "index";
+
+        map.put("grupoService", grupoService);
+        map.put("usuarioService", usuarioService);
+        map.put("recomendacaoService", recomendacaoService);
+
+        return "landing";
     }
 
     public Perfil random_perfil(String nome) {

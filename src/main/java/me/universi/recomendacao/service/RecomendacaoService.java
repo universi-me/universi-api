@@ -36,6 +36,10 @@ public class RecomendacaoService {
         recomendacaoRepository.delete(recomendacao);
     }
 
+    public long count() {
+        return recomendacaoRepository.count();
+    }
+
     public boolean validarPerfilOrigem(Recomendacao recomendacao) throws RecomendacaoInvalidaException {
         if(recomendacao.getOrigem() == null){
             throw new RecomendacaoInvalidaException("Perfil de origem inválido");

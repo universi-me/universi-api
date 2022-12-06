@@ -75,6 +75,10 @@ public class UsuarioService implements UserDetailsService {
         user.setPerfil(userPerfil);
     }
 
+    public long count() {
+        return userRepository.count();
+    }
+
     public String codificarSenha(String senha) {
         return passwordEncoder.encode(senha);
     }
