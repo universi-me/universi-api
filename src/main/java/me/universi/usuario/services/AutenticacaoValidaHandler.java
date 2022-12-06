@@ -24,30 +24,17 @@ public class AutenticacaoValidaHandler extends SavedRequestAwareAuthenticationSu
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws ServletException, IOException {
         HttpSession session = request.getSession(true);
-        if(session != null) {
 
-            String username = null;
-            if (authentication.getPrincipal() instanceof Principal) {
-                username = ((Principal) authentication.getPrincipal()).getName();
-            } else {
-                username = ((UserDetails) authentication.getPrincipal()).getUsername();
-            }
-
-            if(username != null) {
-                Usuario usuario = (Usuario) usuarioService.loadUserByUsername(username);
-
-                usuarioService.configurarSessaoParaUsuario(usuario);
-            }
-
+        String username = null;
+        if (authentication.getPrincipal() instanceof Principal) {
+            username = ((Principal) authentication.getPrincipal()).getName();
+        } else {
+            username = ((UserDetails) authentication.getPrincipal()).getUsername();
         }
-
-        Usuario usuario = (Usuario) session.getAttribute("usuario");
-
-        String redirecionarParaCriarPerfil = null;
-        if(usuarioService.usuarioPrecisaDePerfil(usuario)) {
-            redirecionarParaCriarPerfil = "/p/" + usuario.getUsername() + "/editar";
+        if(username != null) {
+            Usuario usuario = (Usuario) usuarioService.loadUserByUsername(username);
+            usuarioService.configurarSessaoParaUsuario(usuario);
         }
-
 
         if ("application/json".equals(request.getHeader("Content-Type"))) {
 
@@ -55,20 +42,18 @@ public class AutenticacaoValidaHandler extends SavedRequestAwareAuthenticationSu
             resposta.sucess = true;
             resposta.mensagem = "Usuário Logado com sucesso.";
 
-            SavedRequest lastRequestSaved = (SavedRequest)session.getAttribute("SPRING_SECURITY_SAVED_REQUEST");
-            resposta.enderecoParaRedirecionar = lastRequestSaved!=null?lastRequestSaved.getRedirectUrl():redirecionarParaCriarPerfil!=null?redirecionarParaCriarPerfil:"/";
+            resposta.enderecoParaRedirecionar = usuarioService.obterUrlAoLogar();
 
             response.setHeader("Content-Type", "application/json; charset=utf-8");
             response.getWriter().print(resposta.toString());
             response.getWriter().flush();
 
         } else {
-            if(redirecionarParaCriarPerfil != null) {
-                RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
-                redirectStrategy.sendRedirect(request, response, redirecionarParaCriarPerfil);
-            } else {
-                super.onAuthenticationSuccess(request, response, authentication);
-            }
+
+            RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
+            redirectStrategy.sendRedirect(request, response, usuarioService.obterUrlAoLogar());
+            //super.onAuthenticationSuccess(request, response, authentication);
+
         }
     }
 }

@@ -328,13 +328,8 @@ public class UsuarioController {
 
                     usuarioService.configurarSessaoParaUsuario(usuario);
 
-                    String redirecionarParaCriarPerfil = null;
-                    if(usuario.getPerfil()==null || usuario.getPerfil().getNome()==null) {
-                        redirecionarParaCriarPerfil = "/p/" + usuario.getUsername() + "/editar";
-                    }
-
                     resposta.sucess = true;
-                    resposta.enderecoParaRedirecionar = redirecionarParaCriarPerfil==null?"/conta":redirecionarParaCriarPerfil;
+                    resposta.enderecoParaRedirecionar = usuarioService.obterUrlAoLogar();
                     resposta.mensagem = "Usuário Logado com sucesso.";
                     return resposta;
                 }

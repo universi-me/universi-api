@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -188,6 +189,30 @@ public class UsuarioService implements UserDetailsService {
             error = exception.getLocalizedMessage();
         }
         return error;
+    }
+
+    public String obterUrlAoLogar() {
+        HttpSession session = obterSessaoAtual();
+
+        if(session != null) {
+            Usuario usuarioSession = (Usuario) session.getAttribute("usuario");
+            if (usuarioSession != null) {
+                if(usuarioPrecisaDePerfil(usuarioSession)) {
+                    return "/p/" + usuarioSession.getUsername() + "/editar";
+                } else {
+                    // ao logar mandar para o seu perfil
+                    return "/p/" + usuarioSession.getUsername();
+                }
+            }
+        }
+
+        SavedRequest lastRequestSaved = (SavedRequest)session.getAttribute("SPRING_SECURITY_SAVED_REQUEST");
+        if(lastRequestSaved != null) {
+            // retornar para ultima pagina que usuario clicou
+            return lastRequestSaved.getRedirectUrl();
+        }
+
+        return "/";
     }
 
 }
