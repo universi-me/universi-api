@@ -45,7 +45,7 @@
                                th:text="${grupo.admin.nome==null?grupo.admin.usuario.getUsername():grupo.admin.nome}" th:unless="${grupo.admin == null}">Nome do
                                 Administrador</a>
                         </div>
-                        <a class="card-footer text-center" th:unless="${#strings.endsWith(#httpServletRequest.requestURI, '/editar')}" th:href="${grupoDiretorio} + '/editar'"
+                        <a class="card-footer text-center" th:unless="${#strings.endsWith(#httpServletRequest.requestURI, '/editar') || !grupoService.temPermissaoParaGrupo(grupo, session.usuario)}" th:href="${grupoDiretorio} + '/editar'"
                              style="background-color:#B4FFC2;text-decoration: none;">Editar Grupo
                         </a>
                     </div>

@@ -120,7 +120,7 @@
         </div>
 
     <!-- Start Editar competências -->
-    <a class="card-footer text-center"
+    <a th:unless="${!usuarioService.usuarioDonoDaSessao(perfil.usuario)}" class="card-footer text-center"
        style="background-color:#B4FFC2;
             text-decoration: none;
             cursor: pointer" th:href="'/p/' +${perfil.getUsuario().getUsername()} + '/competencias'">

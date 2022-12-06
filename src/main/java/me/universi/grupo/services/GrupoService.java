@@ -82,6 +82,14 @@ public class GrupoService {
         return true;
     }
 
+    public boolean temPermissaoParaGrupo(Grupo grupo, Usuario usuario) {
+        try {
+            return verificarPermissaoParaGrupo(grupo, usuario);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     public void adicionarSubgrupo(Grupo grupo, Grupo sub) {
         Collection<Grupo> grupoArr = grupo.getSubGrupos();
         if(grupoArr == null) {
