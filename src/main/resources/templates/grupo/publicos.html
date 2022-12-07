@@ -14,11 +14,6 @@
 
     <div style="max-width=80%;margin: 0 auto;" th:unless="${error != null}">
 
-        <div id="diretorioAtual" th:unless="${grupoDiretorio == null}" th:value="${grupoDiretorio}"></div>
-
-        <p><h4 th:text="'Grupo: ' + ${grupo.nome}" th:unless="${grupo == null}" style="text-align: center;">Grupo</h4></p>
-
-
         <div class="container">
 
             <div class="row gutters">
@@ -33,9 +28,9 @@
                         <div class="card-body">
                             <div class="row">
                                 <h6 th:if="${gruposPublicos.empty}"> Sem Grupos </h6>
-                                <div class="col-sm-3" th:unless="${gruposPublicos.empty}" th:each="grupoNow : ${gruposPublicos}"
+                                <div class="col-sm-2" th:unless="${gruposPublicos.empty}" th:each="grupoNow : ${gruposPublicos}"
                                      style="padding-bottom: 30px;">
-                                    <div class="card" style="width:90%;">
+                                    <div class="card" style="width:100%;max-width:160px;">
                                         <img th:src="${grupoNow.imagem==null?'https://i.imgur.com/SfAl1Vb.png':grupoNow.imagem}"
                                              class="card-img-top" alt="..." referrerpolicy="no-referrer">
                                         <div class="card-body">

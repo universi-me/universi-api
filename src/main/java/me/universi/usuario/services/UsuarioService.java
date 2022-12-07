@@ -76,7 +76,11 @@ public class UsuarioService implements UserDetailsService {
     }
 
     public long count() {
-        return userRepository.count();
+        try {
+            return userRepository.count();
+        } catch (Exception e) {
+            return 0;
+        }
     }
 
     public String codificarSenha(String senha) {

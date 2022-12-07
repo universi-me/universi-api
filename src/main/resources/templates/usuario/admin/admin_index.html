@@ -24,21 +24,27 @@
                 <div class="col" style="width:20%;max-width:210px;min-width:150px;padding-right: 10px;">
                     <div class="card" style="width: 100%;">
                         <div class="card-header text-center">Menu</div>
-                        <div class="card-body">
-                            <a href="/admin"><p class="card-text">Painel</p></a>
-                        </div>
+                        <ul class="list-group list-group-flush">
+                            <a class="list-group-item" href="/admin">Painel</a>
+                            <a class="list-group-item" href="/admin/conta">Gerenciar Conta</a>
+                            <a class="list-group-item" href="/admin/grupo">Criar Grupo Master</a>
+                        </ul>
                     </div>
                 </div>
 
 
                 <div class="col" style="width:60%;">
 
-                    <div th:if="${#strings.endsWith(#httpServletRequest.requestURI, '/editar')}">
+                    <div th:if="${#strings.equals(#httpServletRequest.requestURI, '/admin')}">
+                        <div th:replace="usuario/admin/info :: info" />
+                    </div>
+
+                    <div th:if="${#strings.startsWith(#httpServletRequest.requestURI, '/admin/conta')}">
                         <div th:replace="usuario/admin/editar_usuario :: editar" />
                     </div>
 
-                    <div th:unless="${#strings.endsWith(#httpServletRequest.requestURI, '/editar')}">
-                        <div th:replace="usuario/admin/info :: info" />
+                    <div th:if="${#strings.startsWith(#httpServletRequest.requestURI, '/admin/grupo')}" th:with="flagPage=${'flagCriar'}">
+                        <div th:replace="grupo/editar :: editar" />
                     </div>
 
                 </div>
@@ -55,6 +61,15 @@
     </p>
 
 </div>
+
+<script>
+        function openEditAccountLink() {
+            var usuario = document.querySelector('#gerenciarConta').value;
+            if(usuario) {
+                window.location.href = "/admin/conta/" + usuario + "/editar";
+            }
+        }
+</script>
 
 </div>
 

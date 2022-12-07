@@ -25,7 +25,7 @@
         <div class="card-body">
 
             <form onsubmit="sendFormNow(this.id);return false;" oninput="validar();" th:id="${flagPage}">
-                <input type="hidden" name="grupoId" id="hiddenField" th:value="${grupo.id}"/>
+                <input type="hidden" name="grupoId" id="hiddenField" th:value="${grupo.id}" th:unless="${grupo==null}"/>
                 <div class="mb-3">
                     <label for="nome" class="form-label">* Nome: </label>
                     <input type="text" class="form-control" id="nome" name="nome" th:value="${(flagPage=='flagCriar')?'':grupo.nome}">
@@ -33,7 +33,7 @@
                 <label for="nickname" class="form-label">* Nickname</label>
                 <div class="input-group mb-3">
             <span class="input-group-text" id="basic-addon3"
-                  th:text="'https://universi.me'+${(flagPage=='flagCriar')?grupoDiretorio:grupoSubDiretorio}+'/'"></span>
+                  th:text="'https://universi.me'+${(flagPage=='flagCriar')?grupoDiretorio==null?'':grupoDiretorio:grupoSubDiretorio==null?'':grupoSubDiretorio}+'/'"></span>
                     <input type="text" class="form-control" th:disabled="${(flagPage!='flagCriar')} ? true : false" id="nickname" aria-describedby="basic-addon3"
                            name="nickname" th:value="${(flagPage=='flagCriar')?'':grupo.nickname}">
                 </div>
@@ -93,6 +93,12 @@
                            name="grupoPublico"
                            th:checked="${flagPage!='flagCriar' && grupo.grupoPublico} ? true : false">
                     <label class="form-check-label" for="grupoPublico">Grupo Público</label>
+                </div>
+                <div class="form-check form-switch" th:unless="${!usuarioService.isContaAdmin(session.usuario)}">
+                    <input class="form-check-input" type="checkbox" role="switch" id="grupoRoot"
+                           name="grupoRoot"
+                           th:checked="${flagPage!='flagCriar' && grupo.grupoRoot} ? true : false">
+                    <label class="form-check-label" for="grupoRoot">Grupo Master</label>
                 </div>
                 <p align="right">
                     <button type="submit" class="btn btn-primary" th:text="${(flagPage=='flagEditar')?'Salvar Alterações':'Criar Grupo'}">Salvar</button>

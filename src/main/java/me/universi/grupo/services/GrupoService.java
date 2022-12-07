@@ -62,7 +62,11 @@ public class GrupoService {
     }
 
     public long count() {
-        return grupoRepository.count();
+        try {
+            return grupoRepository.count();
+        } catch (Exception e) {
+            return 0;
+        }
     }
 
     public boolean verificarPermissaoParaGrupo(Grupo grupo, Usuario usuario) throws GrupoException {

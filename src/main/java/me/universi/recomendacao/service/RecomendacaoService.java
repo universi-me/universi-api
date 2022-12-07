@@ -37,7 +37,11 @@ public class RecomendacaoService {
     }
 
     public long count() {
-        return recomendacaoRepository.count();
+        try {
+            return recomendacaoRepository.count();
+        } catch (Exception e) {
+            return 0;
+        }
     }
 
     public boolean validarPerfilOrigem(Recomendacao recomendacao) throws RecomendacaoInvalidaException {
