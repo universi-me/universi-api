@@ -1,5 +1,6 @@
 package me.universi.link.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import me.universi.link.enums.TipoLink;
 import me.universi.perfil.entities.Perfil;
 
@@ -16,6 +17,8 @@ public class Link {
     private TipoLink tipo;
     @Column(name = "url")
     private String url;
+
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_perfil")
     private Perfil perfil;
@@ -43,10 +46,15 @@ public class Link {
         this.url = url;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
     public Long getId() {
         return id;
+    }
+
+    public Perfil getPerfil() {
+        return perfil;
+    }
+
+    public void setPerfil(Perfil perfil) {
+        this.perfil = perfil;
     }
 }

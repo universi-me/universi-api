@@ -31,9 +31,20 @@
                         <div class="card-body">
                             <p class="card-text" th:text="${perfil==null?'':perfil.getBio()}">Bio do Perfil</p>
                         </div>
-                        <a class="card-footer text-center" th:unless="${perfil == null || #strings.endsWith(#httpServletRequest.requestURI, '/editar') || !usuarioService.usuarioDonoDaSessao(perfil.usuario)}" th:href="'/p/' +${perfil.getUsuario().getUsername()} + '/editar'"
-                             style="background-color:#B4FFC2;text-decoration: none;">Editar Perfil
-                        </a>
+
+                        <div th:unless="${(perfil==null || perfil.getLinks()==null || perfil.getLinks().empty)}">
+                            <div class="card-header card-footer text-center">Link's</div>
+                            <div class="card-body">
+                                <ul class="list-group">
+                                    <a th:class="${'list-group-item bi-' + linkNow.tipo.bootstrapIconName}" th:each="linkNow : ${perfil.getLinks()}" th:href="${linkNow.url}" th:text="${' '+linkNow.tipo.label}" target="_blank">Link</a>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <ul class="list-group list-group-flush" th:unless="${perfil == null || #strings.endsWith(#httpServletRequest.requestURI, '/editar') || !usuarioService.usuarioDonoDaSessao(perfil.usuario)}">
+                            <a th:href="'/p/' +${perfil.getUsuario().getUsername()} + '/links'" class="list-group-item" style="background-color:#B4FFC2;text-decoration: none;">Gerenciar Links</a>
+                            <a th:href="'/p/' +${perfil.getUsuario().getUsername()} + '/editar'" class="list-group-item" style="background-color:#B4FFC2;text-decoration: none;">Editar Perfil</a>
+                        </ul>
                     </div>
                 </div>
 
@@ -46,6 +57,9 @@
                         </div>
                         <div th:case="'flagCompetencias'">
                             <div th:replace="perfil/competencias :: competencias" />
+                        </div>
+                        <div th:case="'flagLinks'">
+                            <div th:replace="perfil/links :: links" />
                         </div>
                         <div th:case="'info'">
                             <div th:replace="perfil/info :: info" />
