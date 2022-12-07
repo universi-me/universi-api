@@ -18,6 +18,9 @@ public class Link {
     @Column(name = "url")
     private String url;
 
+    @Column(name = "nome")
+    private String nome;
+
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_perfil")
@@ -56,5 +59,13 @@ public class Link {
 
     public void setPerfil(Perfil perfil) {
         this.perfil = perfil;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
     }
 }
