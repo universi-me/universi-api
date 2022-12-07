@@ -3,6 +3,7 @@ package me.universi.perfil.controller;
 import me.universi.api.entities.Resposta;
 import me.universi.competencia.enums.Nivel;
 import me.universi.grupo.services.GrupoService;
+import me.universi.link.enums.TipoLink;
 import me.universi.perfil.entities.Perfil;
 import me.universi.perfil.enums.Sexo;
 import me.universi.perfil.exceptions.PerfilException;
@@ -44,6 +45,7 @@ public class PerfilController {
 
             boolean flagEditar = requestPathSt.endsWith("/editar");
             boolean flagCompetencias = requestPathSt.endsWith("/competencias");
+            boolean flagLinks = requestPathSt.endsWith("/links");
 
             if(!flagEditar && usuarioService.usuarioPrecisaDePerfil(usuario)) {
                 return "redirect:/p/"+ usuario.getUsername() +"/editar";
@@ -51,7 +53,7 @@ public class PerfilController {
 
             String[] nicknameArr = requestPathSt.split("/");
 
-            if (flagEditar || flagCompetencias) {
+            if (flagEditar || flagCompetencias || flagLinks) {
                 nicknameArr = Arrays.copyOf(nicknameArr, nicknameArr.length - 1);
             }
 
@@ -79,6 +81,9 @@ public class PerfilController {
                 } else if(flagCompetencias) {
                     map.addAttribute("nivelTipo", Nivel.values());
                     map.put("flagPage", "flagCompetencias");
+                } else if(flagLinks) {
+                    map.addAttribute("tipoLinks", TipoLink.values());
+                    map.put("flagPage", "flagLinks");
                 }
 
                 return "perfil/perfil_index";
