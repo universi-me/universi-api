@@ -36,7 +36,7 @@
                             <div class="card-header card-footer text-center">Link's</div>
                             <div class="card-body">
                                 <ul class="list-group">
-                                    <a th:class="${'list-group-item bi-' + linkNow.tipo.bootstrapIconName}" th:each="linkNow : ${perfil.getLinks()}" th:href="${linkNow.url}" th:text="${' '+linkNow.tipo.label}" target="_blank">Link</a>
+                                    <a th:class="${'list-group-item bi-' + linkNow.tipo.bootstrapIconName}" th:each="linkNow : ${perfil.getLinks()}" th:href="${linkNow.url}" th:text="${' ' + ((linkNow.nome != null)?linkNow.nome:linkNow.tipo.label)}" target="_blank">Link</a>
                                 </ul>
                             </div>
                         </div>

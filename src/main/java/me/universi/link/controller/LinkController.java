@@ -41,9 +41,14 @@ public class LinkController {
                 throw new LinkException("Parametro tipo é nulo.");
             }
 
+            String nome = (String)body.get("nome");
+
             Link linkNew = new Link();
             linkNew.setTipo(TipoLink.valueOf(tipo));
             linkNew.setUrl(url);
+            if(nome != null) {
+                linkNew.setNome((nome.length()>0)?nome:null);
+            }
 
 
             Perfil perfil = usuario.getPerfil();
@@ -110,6 +115,7 @@ public class LinkController {
 
             String url = (String)body.get("url");
             String tipo = (String)body.get("tipo");
+            String nome = (String)body.get("nome");
 
             Link link = linkService.findFirstById(Long.valueOf(id));
             if (link == null) {
@@ -129,6 +135,9 @@ public class LinkController {
             }
             if (tipo != null) {
                 link.setTipo(TipoLink.valueOf(tipo));
+            }
+            if(nome != null) {
+                link.setNome((nome.length()>0)?nome:null);
             }
 
             linkService.save(link);
