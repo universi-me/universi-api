@@ -48,7 +48,7 @@
         </div>
         <div class="card-body">
             <div class="row">
-                <h6 th:if="${grupo.subGrupos.empty}"> Sem Grupos </h6>
+                <h6 th:if="${grupo.subGrupos.empty}"> Sem Subgrupos </h6>
                 <div class="col-sm-3" th:unless="${grupo.subGrupos.empty}"
                      th:each="i : ${#numbers.sequence(grupo.subGrupos.size() - 1, grupo.subGrupos.size()>=6?grupo.subGrupos.size() - 6:0, -1)}"
                      th:with="grupoNow=${grupo.subGrupos[i]}"
@@ -57,12 +57,12 @@
                         <img th:src="${grupoNow.imagem==null?'https://i.imgur.com/SfAl1Vb.png':grupoNow.imagem}"
                              class="card-img-top" alt="..." referrerpolicy="no-referrer">
                         <div class="card-body">
-                            <h6 class="card-title text-center" th:text="${grupoNow.nome}">Nome do Grupo</h6>
+                            <h6 class="card-title text-center" th:text="${grupoNow.nome}">Nome do Subgrupos</h6>
                         </div>
                         <ul class="list-group list-group-flush" style="text-align: center;">
                             <li class="list-group-item">
                                 <a th:href="${grupoDiretorio} + '/' + ${grupoNow.nickname}"
-                                   class="btn btn-primary">Ver Grupo</a>
+                                   class="btn btn-primary">Ver Subgrupo</a>
                             </li>
                         </ul>
                     </div>
@@ -70,7 +70,7 @@
             </div>
         </div>
         <a th:unless="${(!grupo.podeCriarGrupo && (!grupoService.temPermissaoParaGrupo(grupo, session.usuario)))}" class="card-footer text-center" th:href="${grupoDiretorio} + '/grupos'"
-           style="background-color:#B4FFC2;text-decoration: none;">Gerenciar Grupos
+           style="background-color:#B4FFC2;text-decoration: none;">Gerenciar Subgrupos
         </a>
     </div>
 </div>

@@ -44,7 +44,9 @@
                     </div>
 
                     <div th:if="${#strings.startsWith(#httpServletRequest.requestURI, '/admin/grupo')}" th:with="flagPage=${'flagCriar'}">
-                        <div th:replace="grupo/editar :: editar" />
+                        <div th:with="flagGrupoMaster = true">
+                            <div th:replace="grupo/editar :: editar" />
+                        </div>
                     </div>
 
                 </div>

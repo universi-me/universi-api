@@ -10,19 +10,19 @@
 <div th:fragment="grupos">
 
     <div class="card" style="width:100%;">
-        <div class="card-header text-center">Gerenciar Grupos</div>
+        <div class="card-header text-center">Gerenciar Subgrupos</div>
         <div class="card-body text-center">
             <div class="input-group mb-3" style="width:150px;margin: 0 auto;">
                 <a th:href="${grupoDiretorio} + '/criar'">
-                <button class="btn btn-outline-primary text-center" type="button" id="addParticipanteBt">Criar Grupo
+                <button class="btn btn-outline-primary text-center" type="button" id="addParticipanteBt">Criar Subgrupo
                 </button></a>
             </div>
         </div>
 
-        <div class="card-header card-footer text-center">Todos os Grupos <span th:unless="${grupo == null || grupo.subGrupos.empty}" th:text="'(' + ${grupo.subGrupos.size()} + ')'">(0)</span></div>
+        <div class="card-header card-footer text-center">Todos os Subgrupos <span th:unless="${grupo == null || grupo.subGrupos.empty}" th:text="'(' + ${grupo.subGrupos.size()} + ')'">(0)</span></div>
         <div class="card-body">
             <div class="row">
-                <h6 th:if="${grupo.subGrupos.empty}"> Sem Grupos </h6>
+                <h6 th:if="${grupo.subGrupos.empty}"> Sem Subgrupos </h6>
                 <div class="col-sm-3" th:each="grupoNow : ${grupo.subGrupos}" style="padding-bottom: 30px;">
                     <div class="card" style="width: 10rem;">
                         <img th:src="${grupoNow.imagem==null?'https://i.imgur.com/SfAl1Vb.png':grupoNow.imagem}"
@@ -33,7 +33,7 @@
                         <ul class="list-group list-group-flush" style="text-align: center;">
                             <li class="list-group-item">
                                 <a th:href="${grupoDiretorio} + '/' + ${grupoNow.nickname}"
-                                   class="btn btn-primary">Ver Grupo</a>
+                                   class="btn btn-primary">Ver Subgrupo</a>
                             </li>
                             <li class="list-group-item">
                                 <a th:href="${grupoDiretorio} + '/' + ${grupoNow.nickname} + '/editar'"
