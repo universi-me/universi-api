@@ -10,6 +10,8 @@ import javax.servlet.http.HttpSession;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import me.universi.api.entities.Resposta;
+import me.universi.grupo.enums.GrupoTipo;
+import me.universi.grupo.services.GrupoService;
 import me.universi.perfil.entities.Perfil;
 import me.universi.perfil.services.PerfilService;
 import me.universi.usuario.entities.Usuario;
@@ -37,6 +39,8 @@ public class UsuarioController {
     private UsuarioService usuarioService;
     @Autowired
     private PerfilService perfilService;
+    @Autowired
+    public GrupoService grupoService;
 
     @Autowired
     private Environment env;
@@ -63,21 +67,28 @@ public class UsuarioController {
             // obter diretorio caminho url
             String requestPathSt = request.getRequestURI();
 
-            boolean flagEditar = requestPathSt.endsWith("/editar");
+            map.addAttribute("grupoService", grupoService);
+            map.addAttribute("usuarioService", usuarioService);
 
-            String[] componentesArr = requestPathSt.split("/");
 
-            if(flagEditar) {
-                // remover ultimo componente no caminho, flags
-                componentesArr = Arrays.copyOf(componentesArr, componentesArr.length - 1);
-                map.addAttribute("tiposAutoridades", Autoridade.values());
+            if(requestPathSt.startsWith("/admin/conta")) {
+                boolean flagEditar = requestPathSt.endsWith("/editar");
+                String[] componentesArr = requestPathSt.split("/");
+                if (flagEditar) {
+                    // remover ultimo componente no caminho, flags
+                    componentesArr = Arrays.copyOf(componentesArr, componentesArr.length - 1);
+                    map.addAttribute("tiposAutoridades", Autoridade.values());
+
+                    String usuario = componentesArr[componentesArr.length - 1];
+                    Usuario userGet = (Usuario) usuarioService.loadUserByUsername(usuario);
+                    map.put("usuario", userGet);
+                }
+
             }
 
-            String usuario = componentesArr[componentesArr.length - 1];
-
-            Usuario userGet = (Usuario) usuarioService.loadUserByUsername(usuario);
-
-            map.put("usuario", userGet);
+            if(requestPathSt.startsWith("/admin/grupo")) {
+                map.addAttribute("tiposGrupo", GrupoTipo.values());
+            }
 
         } catch (Exception e) {
             map.put("error", "Admin: " + e.getMessage());

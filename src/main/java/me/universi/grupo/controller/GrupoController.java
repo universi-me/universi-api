@@ -114,10 +114,15 @@ public class GrupoController {
     public Object grupo_criar(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
         Resposta resposta = new Resposta();
         try {
+            Usuario usuario = (Usuario) session.getAttribute("usuario");
+
+            Boolean grupoRoot = (Boolean)body.get("grupoRoot");
 
             String grupoIdPai = (String)body.get("grupoId");
             if(grupoIdPai == null) {
-                throw new GrupoException("Parametro grupoId é nulo.");
+                if(!(grupoRoot != null && usuarioService.isContaAdmin(usuario))) {
+                    throw new GrupoException("Parametro grupoId é nulo.");
+                }
             }
 
             String nickname = (String)body.get("nickname");
@@ -145,14 +150,13 @@ public class GrupoController {
             Boolean podeCriarGrupo = (Boolean)body.get("podeCriarGrupo");
             Boolean grupoPublico = (Boolean)body.get("grupoPublico");
 
-            Usuario usuario = (Usuario) session.getAttribute("usuario");
-            Grupo grupoPai = grupoService.findFirstById(Long.valueOf(grupoIdPai));
+            Grupo grupoPai = grupoIdPai==null?null:grupoService.findFirstById(Long.valueOf(grupoIdPai));
 
-            if(!grupoService.nicknameDisponivelParaGrupo(grupoPai, nickname)) {
+            if(grupoPai!=null && !grupoService.nicknameDisponivelParaGrupo(grupoPai, nickname)) {
                 throw new GrupoException("Este Nickname não está disponível para este grupo.");
             }
 
-            if((grupoPai.podeCriarGrupo) || grupoService.verificarPermissaoParaGrupo(grupoPai, usuario)) {
+            if((grupoRoot != null && grupoRoot && usuarioService.isContaAdmin(usuario)) || ((grupoPai !=null && grupoPai.podeCriarGrupo) || grupoService.verificarPermissaoParaGrupo(grupoPai, usuario))) {
                 Grupo grupoNew = new Grupo();
                 grupoNew.setNickname(nickname);
                 grupoNew.setNome(nome);
@@ -168,8 +172,12 @@ public class GrupoController {
                 if(grupoPublico != null) {
                     grupoNew.setGrupoPublico(grupoPublico);
                 }
-
-                grupoService.adicionarSubgrupo(grupoPai, grupoNew);
+                if((grupoRoot != null && grupoRoot) && usuarioService.isContaAdmin(usuario)) {
+                    grupoNew.setGrupoRoot(true);
+                    grupoService.save(grupoNew);
+                } else {
+                    grupoService.adicionarSubgrupo(grupoPai, grupoNew);
+                }
 
                 resposta.mensagem = "Grupo criado com sucesso.";
                 resposta.sucess = true;
