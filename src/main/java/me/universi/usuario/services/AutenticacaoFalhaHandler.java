@@ -10,6 +10,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+/*
+    Classe para manipular a falhas de login
+ */
+
 public class AutenticacaoFalhaHandler extends SimpleUrlAuthenticationFailureHandler {
     @Autowired
     private UsuarioService usuarioService;

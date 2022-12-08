@@ -1,6 +1,8 @@
 package me.universi.usuario.enums;
 
 /*
+    Role, níveis de autoridades utilizadas para o SpringSecurity
+
     Ao editar, atualizar roleHierarchy em spring-security.xml
 */
 

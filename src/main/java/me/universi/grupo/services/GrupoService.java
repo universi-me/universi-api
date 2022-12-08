@@ -244,6 +244,7 @@ public class GrupoService {
         return grupoRepository.findAll();
     }
 
+    // verifica se o usuario está acessando a url do grupo corretamente, apartir do grupo root/master ate seu subgrupo
     public Grupo parentescoCheckGrupo(Grupo grupoRoot, String[] sequenciaNickArr) {
         Grupo finalGrupo = null;
 
@@ -283,6 +284,7 @@ public class GrupoService {
         return null;
     }
 
+    // retornar url do grupo a partir do id do grupo
     public String diretorioParaGrupo(Long grupoId) {
         ArrayList<String> nickArr = new ArrayList<String>();
         Grupo grupoCurr = findFirstById(grupoId);
@@ -294,5 +296,6 @@ public class GrupoService {
         return "/" + String.join("/", nickArr);
     }
 
+    // pesquisar os 5 primeiros contendo a string maiusculo ou minusculo
     public Collection<Grupo> findTop5ByNomeContainingIgnoreCase(String nome){ return grupoRepository.findTop5ByNomeContainingIgnoreCase(nome); }
 }

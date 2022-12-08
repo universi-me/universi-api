@@ -1,26 +1,7 @@
 /* Global var */
-var usuarioFormato = /^([a-z0-9_-]+)$/;
-var emailFormato = /^([a-z0-9._-]+)$/;
-
-/* Competência calls */
-function editarCompetencia(callback) {
-   var bodyValores = {
-      competenciaId: document.querySelector('[name="competenciaId"]').value,
-      nome: document.querySelector('#nome').value,
-      descricao: document.querySelector('#descricao').value,
-      nivel: document.querySelector('#nivel').value,
-   }
-   api_request('/competencia/editar', bodyValores, callback);
-}
-function criarCompetencia(callback) {
-   var bodyValores = {
-      competenciaId: document.querySelector('[name="competenciaId"]').value,
-      nome: document.querySelector('#nome').value,
-      descricao: document.querySelector('#descricao').value,
-      nivel: document.querySelector('#nivel').value,
-   }
-   api_request('/competencia/editar', bodyValores, callback);
-}
+const usuarioFormato = /^([a-z0-9_-]+)$/;
+const emailFormato = /^([a-z0-9._-]+)$/;
+const tempoDelayParaRedirecionar = 1300;
 
 /* Grupo calls */
 function adicionarParticipanteAoGrupo(grupoId, participante, callback) {
@@ -189,7 +170,9 @@ function api_request(path, parametro, callback) {
          }
 
          if(jsonResponse.enderecoParaRedirecionar != null) {
-            openUrlPath(jsonResponse.enderecoParaRedirecionar);
+            setTimeout(function () {
+                openUrlPath(jsonResponse.enderecoParaRedirecionar);
+            }, tempoDelayParaRedirecionar);
          }
 
        } else {
@@ -257,15 +240,15 @@ function checkCampo(input, regExInput, msgRegEx) {
     return false;
 }
 
-/* Pesquisar Usuário */
-function configurarAutoCompInputId(inputId, clickedField, filtroArr) {
+/* Auto Complete, Pesquisar Usuário ou Grupo */
+function configurarAutoCompInputId(inputId, clickedFieldCallback, filtroArr) {
     if(document.getElementById(inputId) == null) {
         return;
     }
 	$("#"+inputId).autocomplete({
 		source: function (request, response) {
            $.ajax({
-               type: "POST",
+               type: 'POST',
                url: '/pesquisar',
                data: JSON.stringify({
                     term: request.term,
@@ -273,16 +256,16 @@ function configurarAutoCompInputId(inputId, clickedField, filtroArr) {
                }),
                success: response,
                dataType: 'json',
-               contentType: "application/json",
+               contentType: 'application/json',
            });
         },
         minLength: 2,
         delay: 800,
         select: function( event, ui ) {
-            if(clickedField) {
-                clickedField(ui);
+            if(clickedFieldCallback) {
+                clickedFieldCallback(ui);
             }
-       }
+        }
 	}).autocomplete( "instance" )._renderItem = function( ul, item ) {
         return $( "<li><div><img class='img-thumbnail' src='"+item.img+"' width='50' height='50'>  <span>"+item.value+"</span></div></li>" ).appendTo( ul );
     };

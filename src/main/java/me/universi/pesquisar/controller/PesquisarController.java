@@ -30,13 +30,16 @@ public class PesquisarController {
     @RequestMapping(value = "/pesquisar", consumes = MediaType.APPLICATION_JSON_VALUE)
     public Object perfil_pesquisar(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
 
+        // retorno dos resultados
         ArrayList<Object> resultsBusca = new ArrayList<>();
 
+        // termo de pesquisa
         String term = (String)body.get("term");
 
         boolean searchUsuario = false;
         boolean searchGrupo = false;
 
+        // filtros para a pesquisa
         if(body.get("filtro") != null) {
             ArrayList<String> filtro = (ArrayList<String>)(body.get("filtro"));
             searchUsuario = filtro.contains((String)"usuario");

@@ -106,7 +106,10 @@ public class UsuarioController {
         try {
 
             String nome = (String)body.get("username");
+
+            // email somenta parte antes do @
             String email = (String)body.get("email");
+
             String senha = (String)body.get("password");
 
             if (nome==null || nome.length()==0 || !usuarioService.usuarioRegex(nome)) {
@@ -128,6 +131,7 @@ public class UsuarioController {
 
             Usuario user = new Usuario();
             user.setNome(nome);
+            // exclusivo para dcx
             user.setEmail(email + "@dcx.ufpb.br");
             user.setSenha(usuarioService.codificarSenha(senha));
 
@@ -296,6 +300,8 @@ public class UsuarioController {
                     usuario = (Usuario) usuarioService.findFirstByEmail(email);
                 } catch (UsuarioException  e) {
                     // Registrar Usuário com conta DCX, com informações seguras do payload
+
+                    // criar username a partir do email DCX
                     String newUsername = ((String)email.split("@")[0]).trim();
                     if(!usuarioService.usernameExiste(newUsername)) {
 
@@ -307,7 +313,7 @@ public class UsuarioController {
                         Perfil perfil = usuario.getPerfil();
 
                         if(name != null) {
-                            if(name.contains(" ")) {
+                            if(name.contains(" ")) { // se tiver espaço, extrair nome e sobrenome
                                 String[] nameArr = name.split(" ");
                                 perfil.setNome(((String)nameArr[0]).trim());
                                 perfil.setSobrenome(name.substring(nameArr[0].length()).trim());
@@ -327,7 +333,9 @@ public class UsuarioController {
                 }
 
                 if(usuario != null) {
+                    // Forçar o ligin já que p usuário entrou com a conta google.
 
+                    // verificar se algum parametro da conta impede o login, já que estamos forçando o login sem springsecurity
                     if(usuario.isConta_bloqueada()) {
                         throw new UsuarioException("Conta de Usuário Bloqueada.");
                     } else if(!usuario.isEnabled()) {
@@ -339,7 +347,7 @@ public class UsuarioController {
                     Authentication authentication = new UsernamePasswordAuthenticationToken(usuario, null, AuthorityUtils.createAuthorityList(usuario.getAutoridade().name()));
                     SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                    if(!usuario.isEmail_verificado()) {
+                    if(!usuario.isEmail_verificado()) { // ativar selo de verificado na conta
                         usuario.setEmail_verificado(true);
                         usuarioService.save(usuario);
                     }

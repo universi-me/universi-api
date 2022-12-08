@@ -9,6 +9,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.util.Map;
 
+/*
+    Classe para compatibilidade de login via JSON
+ */
+
 public class CustomUsernamePasswordAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private String jsonUsername;
     private String jsonPassword;

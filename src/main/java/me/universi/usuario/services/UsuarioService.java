@@ -199,6 +199,7 @@ public class UsuarioService implements UserDetailsService {
         return error;
     }
 
+    // url de redirecionamento ao logar
     public String obterUrlAoLogar() {
         HttpSession session = obterSessaoAtual();
 

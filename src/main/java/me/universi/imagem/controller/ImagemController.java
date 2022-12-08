@@ -26,9 +26,10 @@ public class ImagemController {
     public Object upload_de_imagem(@RequestParam("imagem") MultipartFile imagem) {
         Resposta resposta = new Resposta();
         try {
-
+            // verificar o modo de salvamento da imagem no enviroment
             String link = (Boolean.parseBoolean(env.getProperty("SALVAR_IMAGEM_EM_DISCO")))?salvarImagemEmDisco(imagem):uploadImagemImgur(imagem);
 
+            // retornar link da imagem remoto ou local.
             if(link != null) {
                 resposta.conteudo.put("link", link.toString());
                 resposta.sucess = true;
@@ -52,8 +53,8 @@ public class ImagemController {
             String filename = nomeImagem.replaceAll("[^a-f0-9]", "");
 
             if(!filename.contains("..") && !filename.contains("/")) {
+                // parse do arquivo imagem salva para saida url.
                 File initialFile = new File(env.getProperty("DIRETORIO_DA_IMAGEM"), filename);
-
                 InputStream targetStream = new FileInputStream(initialFile);
                 return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(new InputStreamResource(targetStream));
             }
@@ -87,6 +88,7 @@ public class ImagemController {
     }
 
     public String uploadImagemImgur(MultipartFile imagem) throws Exception {
+        // post da imagem para api da Imgur e retornar o link.
         String urlApi = "https://api.imgur.com/3/image";
         String boundary = "----WebKitFormBoundary"+Long.toHexString(System.currentTimeMillis());
         URLConnection connection = new URL(urlApi).openConnection();
