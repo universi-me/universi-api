@@ -17,6 +17,9 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.security.Principal;
 
+/*
+    Classe para manipular quando o usuario efetuar o login
+ */
 public class AutenticacaoValidaHandler extends SavedRequestAwareAuthenticationSuccessHandler {
     @Autowired
     private UsuarioService usuarioService;
@@ -36,7 +39,7 @@ public class AutenticacaoValidaHandler extends SavedRequestAwareAuthenticationSu
             usuarioService.configurarSessaoParaUsuario(usuario);
         }
 
-        if ("application/json".equals(request.getHeader("Content-Type"))) {
+        if ("application/json".equals(request.getHeader("Content-Type"))) { // request foi via JSON
 
             Resposta resposta = new Resposta();
             resposta.sucess = true;
