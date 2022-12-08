@@ -75,7 +75,7 @@ public class GrupoController {
                 throw new GrupoException("Grupo não foi encontrado!");
             }
 
-            if(flagEdicao) {
+            if(flagEdicao) { // flags para determinar o tipo da página
 
                 // verficar permissao de edição do grupo
                 //grupoService.verificarPermissaoParaGrupo(grupoAtual, usuario);

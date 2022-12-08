@@ -1,6 +1,7 @@
 package me.universi.link.enums;
 
 public enum TipoLink {
+    LINK("Link", "link-45deg"),
     GITHUB("GitHub", "github"),
     GIT("Git", "git"),
     TWITTER("Twitter", "twitter"),
@@ -13,11 +14,15 @@ public enum TipoLink {
     WHATSAPP("Whatsapp", "whatsapp"),
     TRELLO("Trello", "trello"),
     SLACK("Slack", "slack"),
+    SPOTIFY("Spotify", "spotify"),
+    YOUTUBE("Youtube", "youtube"),
     SKYPE("Skype", "skype"),
-    FACEBOOK("Facebook", "facebook"),
-    LINK("Link", "link-45deg");
+    STACK("Stack overflow", "stack-overflow"),
+    FACEBOOK("Facebook", "facebook");
 
     public final String label;
+
+    // bootstrap icon nome, do Bootstrap Icons
     public final String bootstrapIconName;
 
     private TipoLink(String label, String bootstrapIconName) {
