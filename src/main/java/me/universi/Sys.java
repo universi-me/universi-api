@@ -70,12 +70,12 @@ public class Sys {
         userNew.setNome(userNew.getNome()+"_"+userNew.getId());
 
         Competencia competenciaNew = new Competencia();
-        competenciaNew.setNome("Java - admin"+userNew.getId());
+        //competenciaNew.setNome("Java - admin"+userNew.getId());
         competenciaNew.setDescricao("Sou top em java - admin"+userNew.getId());
         competenciaService.save(competenciaNew);
 
         Competencia competenciaNew1 = new Competencia();
-        competenciaNew1.setNome("Java - admin 1"+userNew.getId());
+        //competenciaNew1.setNome("Java - admin 1"+userNew.getId());
         competenciaNew1.setDescricao("Sou top em java - admin 1"+userNew.getId());
         competenciaService.save(competenciaNew1);
 
@@ -100,13 +100,13 @@ public class Sys {
         }
 
         Perfil admin_perfil = random_perfil("perfil_admin");
-        perfilRepository.save(admin_perfil);
+        perfilRepository.saveAndFlush(admin_perfil);
 
         Perfil perfil_1 = random_perfil("perfil_1");
-        perfilRepository.save(perfil_1);
+        perfilRepository.saveAndFlush(perfil_1);
 
         Perfil perfil_2 = random_perfil("perfil_2");
-        perfilRepository.save(perfil_2);
+        perfilRepository.saveAndFlush(perfil_2);
 
         Grupo novoGrupo = new Grupo();
         novoGrupo.setNickname("ufpb");

@@ -25,7 +25,7 @@ public class RecomendacaoService {
     }
     public void save(Recomendacao recomendacao) throws RecomendacaoInvalidaException {
         if(this.validar(recomendacao)){
-            recomendacaoRepository.save(recomendacao);
+            recomendacaoRepository.saveAndFlush(recomendacao);
         }
     }
     public List<Recomendacao> findAll() {
@@ -61,19 +61,8 @@ public class RecomendacaoService {
         }
     }
     public boolean validarCompetenciaValida(Recomendacao recomendacao) throws RecomendacaoInvalidaException {
-        if(recomendacao.getCompetencia() == null) {
+        if(recomendacao.getCompetenciaTipo() == null) {
             throw new RecomendacaoInvalidaException("A competência da recomendação não foi escolhida");
-        }else{
-            recomendacao.getCompetencia().getId();
-            boolean competenciaValida = false;
-            for(Competencia competencia: recomendacao.getDestino().getCompetencias()){
-                if(competencia.getId() == recomendacao.getCompetencia().getId()){
-                    competenciaValida = !competenciaValida;
-                }
-            }
-            if(!competenciaValida){
-                throw new RecomendacaoInvalidaException("A competência não está registrada");
-            }
         }return true;
     }
     public boolean validarDescricao(String descricao) throws RecomendacaoInvalidaException {
@@ -83,7 +72,7 @@ public class RecomendacaoService {
     }
     public void update(Recomendacao recomendacao) throws RecomendacaoInvalidaException {
         if(this.validar(recomendacao)){
-            recomendacaoRepository.save(recomendacao);
+            recomendacaoRepository.saveAndFlush(recomendacao);
         }
     }
     private boolean validar(Recomendacao recomendacao) throws RecomendacaoInvalidaException {

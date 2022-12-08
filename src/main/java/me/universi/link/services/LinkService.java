@@ -23,7 +23,7 @@ public class LinkService {
     }
 
     public void save(Link competencia) {
-        linkRepository.save(competencia);
+        linkRepository.saveAndFlush(competencia);
     }
 
     public void delete(Link competencia) {

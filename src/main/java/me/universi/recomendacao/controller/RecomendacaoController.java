@@ -3,7 +3,9 @@ package me.universi.recomendacao.controller;
 
 import me.universi.api.entities.Resposta;
 import me.universi.competencia.entities.Competencia;
+import me.universi.competencia.entities.CompetenciaTipo;
 import me.universi.competencia.services.CompetenciaService;
+import me.universi.competencia.services.CompetenciaTipoService;
 import me.universi.perfil.entities.Perfil;
 import me.universi.perfil.services.PerfilService;
 import me.universi.recomendacao.entities.Recomendacao;
@@ -39,6 +41,9 @@ public class RecomendacaoController {
     @Autowired
     private PerfilService perfilService;
 
+    @Autowired
+    public CompetenciaTipoService competenciaTipoService;
+
     @GetMapping("/recomendar")
     public String recomendacao(HttpServletRequest request, HttpServletResponse response, HttpSession session, ModelMap map) {
         return "recomendacao/recomendacao_index";
@@ -50,8 +55,9 @@ public class RecomendacaoController {
             Usuario usuario = (Usuario) session.getAttribute("usuario");
 
             Usuario usuarioDestino = (Usuario) usuarioService.loadUserByUsername(usernameDestino);
-
             map.put("usuarioDestino", usuarioDestino);
+
+            map.put("competenciaTipoService", competenciaTipoService);
 
             map.put("flagPage", "flagRecomendar");
 
@@ -82,7 +88,10 @@ public class RecomendacaoController {
                 throw new RecomendacaoInvalidaException("Parametro descricao é nulo.");
             }
 
-            String competencia = (String)body.get("competenciaId");
+            String competenciaTipoId = (String)body.get("competenciatipoId");
+            if(competenciaTipoId == null) {
+                throw new RecomendacaoInvalidaException("Parametro competenciaTipoId é nulo.");
+            }
 
             Perfil perfilOrigem = perfilService.findFirstById(Long.valueOf(origem));
             if(perfilOrigem == null) {
@@ -94,12 +103,9 @@ public class RecomendacaoController {
                 throw new RecomendacaoInvalidaException("Perfil destino não encontrado.");
             }
 
-            Competencia comp = null;
-            if(competencia != null) {
-                comp = competenciaService.findFirstById(Long.valueOf(competencia));
-                if(comp == null) {
-                    throw new RecomendacaoInvalidaException("Competencia não encontrada.");
-                }
+            CompetenciaTipo compT = competenciaTipoService.findFirstById(Long.valueOf(competenciaTipoId));
+            if(compT == null) {
+                throw new RecomendacaoInvalidaException("Competencia não encontrada.");
             }
 
             Recomendacao recomendacoNew = new Recomendacao();
@@ -107,9 +113,7 @@ public class RecomendacaoController {
             recomendacoNew.setDestino(perfilDestino);
             recomendacoNew.setOrigem(perfilOrigem);
             recomendacoNew.setDescricao(descricao);
-            if(comp != null) {
-                recomendacoNew.setCompetencia(comp);
-            }
+            recomendacoNew.setCompetenciaTipo(compT);
 
             recomendacaoService.save(recomendacoNew);
 
@@ -145,10 +149,6 @@ public class RecomendacaoController {
 
             resposta.mensagem = "Recomendação não encontrada";
             return resposta;
-
-        }catch(EntityNotFoundException e) {
-            resposta.mensagem = "Recomendação não encontrada";
-            return resposta;
         } catch (Exception e) {
             resposta.mensagem = e.getMessage();
             return resposta;
@@ -181,7 +181,7 @@ public class RecomendacaoController {
         return "Falha ao remover";
     }
 
-    @PostMapping(value = "/recomendacao/obter/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/recomendacao/obter", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Object get(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
         Resposta resposta = new Resposta();

@@ -44,12 +44,12 @@ public class CompetenciaTest {
         userNew.setNome(userNew.getNome());
 
         Competencia competencia1 = new Competencia();
-        competencia1.setNome("Java - competencia teste 1"+userNew.getId());
+        //competencia1.setNome("Java - competencia teste 1"+userNew.getId());
         competencia1.setDescricao("Sou top em java - teste 1"+userNew.getId());
         competenciaService.save(competencia1);
 
         Competencia competencia2 = new Competencia();
-        competencia2.setNome("Java - competencia teste 2"+userNew.getId());
+        //competencia2.setNome("Java - competencia teste 2"+userNew.getId());
         competencia2.setDescricao("Sou top em java - teste 2"+userNew.getId());
         competenciaService.save(competencia2);
 

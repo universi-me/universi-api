@@ -36,8 +36,8 @@
                             <h6 class="card-title text-center"><span th:text="${recomendacaoNow.origem.getNome()==null?recomendacaoNow.origem.usuario.getUsername():recomendacaoNow.origem.getNome()}">Nome do participante</span><span th:unless="${recomendacaoNow.origem.getNome()==null || recomendacaoNow.origem.usuario.isEmail_verificado() == false}">   <img src="https://i.imgur.com/w3aKauq.png" width="22" /></span></h6>
                         </div>
                         <ul class="list-group list-group-flush" style="text-align: center;">
-                            <li class="list-group-item" th:unless="${recomendacaoNow.competencia==null}">
-                                <p>Recomendou pela competência: <b th:text="${recomendacaoNow.competencia.nome}"></b></p>
+                            <li class="list-group-item" th:unless="${recomendacaoNow.competenciaTipo==null}">
+                                <p>Recomendou pela competência: <b th:text="${recomendacaoNow.competenciaTipo.nome}"></b></p>
                             </li>
                             <li class="list-group-item">
                                 <p class="card-text" th:text="${recomendacaoNow.getDescricao()}">Descrição da Recomendação</p>
@@ -97,7 +97,7 @@
                         <div class="card-body">
 
                             <!-- Título -->
-                            <h6 class="card-title text-center" th:text="${competenciaNow.getNome()}">Nome da competência</h6>
+                            <h6 class="card-title text-center" th:text="${competenciaNow.competenciaTipo.nome}">Nome da competência</h6>
 
                             <!-- Nível -->
                             <h6 class="card-title text-center"

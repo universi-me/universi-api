@@ -67,7 +67,7 @@ public class UsuarioService implements UserDetailsService {
             throw new UsuarioException("Usuario está vazio!");
         }
         user.setAutoridade(Autoridade.ROLE_USER);
-        userRepository.save((Usuario)user);
+        userRepository.saveAndFlush((Usuario)user);
 
         Perfil userPerfil = new Perfil();
         userPerfil.setUsuario(user);

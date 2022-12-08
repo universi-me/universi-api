@@ -233,7 +233,7 @@ public class GrupoService {
     }
 
     public void save(Grupo grupo) {
-        grupoRepository.save(grupo);
+        grupoRepository.saveAndFlush(grupo);
     }
 
     public void delete(Grupo grupo) {
