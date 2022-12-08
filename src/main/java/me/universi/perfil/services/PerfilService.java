@@ -44,5 +44,6 @@ public class PerfilService {
 
     public void deleteAll() { perfilRepository.deleteAll();}
 
+    // pesquisar os 5 primeiros contendo a string maiusculo ou minusculo
     public Collection<Perfil> findTop5ByNomeContainingIgnoreCase(String nome){ return perfilRepository.findTop5ByNomeContainingIgnoreCase(nome); }
 }

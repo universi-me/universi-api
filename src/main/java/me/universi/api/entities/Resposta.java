@@ -18,8 +18,9 @@ public class Resposta {
 
     @Override
     public String toString() {
-        ObjectMapper mapper = new ObjectMapper();
         try {
+            // Parse esta classe para Json String
+            ObjectMapper mapper = new ObjectMapper();
             return (String)mapper.writeValueAsString(this);
         } catch (JsonProcessingException e) {
             return super.toString();

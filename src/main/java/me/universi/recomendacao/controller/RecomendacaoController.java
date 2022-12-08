@@ -2,7 +2,6 @@ package me.universi.recomendacao.controller;
 
 
 import me.universi.api.entities.Resposta;
-import me.universi.competencia.entities.Competencia;
 import me.universi.competencia.entities.CompetenciaTipo;
 import me.universi.competencia.services.CompetenciaService;
 import me.universi.competencia.services.CompetenciaTipoService;
@@ -137,8 +136,8 @@ public class RecomendacaoController {
             String descricao = (String)body.get("descricao");
 
             //TODO - CRIAR VALIDAÇÃO DE PARÂMETROS
-            Recomendacao recomendacao = recomendacaoService.findById(id);
-            if(recomendacao != null){
+            Recomendacao recomendacao = recomendacaoService.findFirstById(id);
+            if(recomendacao != null) {
                 recomendacao.setDescricao(descricao);
                 recomendacaoService.update(recomendacao);
 
@@ -163,7 +162,7 @@ public class RecomendacaoController {
 
             Long id = (Long)Long.valueOf((String)body.get("id"));
 
-            Recomendacao recomendacao = recomendacaoService.findById(id);
+            Recomendacao recomendacao = recomendacaoService.findFirstById(id);
             if (recomendacao != null) {
                 recomendacaoService.delete(recomendacao);
 
@@ -189,7 +188,7 @@ public class RecomendacaoController {
 
             Long id = (Long)Long.valueOf((String)body.get("id"));
 
-            Recomendacao recomendacao = recomendacaoService.findById(id);
+            Recomendacao recomendacao = recomendacaoService.findFirstById(id);
             if(recomendacao != null){
                 resposta.conteudo.put("recomendacao", recomendacao);
 

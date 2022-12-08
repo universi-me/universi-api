@@ -15,8 +15,8 @@ public class RecomendacaoService {
     @Autowired
     private RecomendacaoRepository recomendacaoRepository;
 
-    public Recomendacao findById(Long id) {
-        Optional <Recomendacao> recomendacaoOptional = recomendacaoRepository.findById(id);
+    public Recomendacao findFirstById(Long id) {
+        Optional <Recomendacao> recomendacaoOptional = recomendacaoRepository.findFirstById(id);
         if(recomendacaoOptional.isPresent()){
             return recomendacaoOptional.get();
         }else{

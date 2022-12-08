@@ -1,6 +1,5 @@
 package me.universi.recomendacao.entities;
 
-import me.universi.competencia.entities.Competencia;
 import me.universi.competencia.entities.CompetenciaTipo;
 import me.universi.perfil.entities.Perfil;
 import org.hibernate.annotations.CreationTimestamp;

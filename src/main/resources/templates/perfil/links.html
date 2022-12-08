@@ -90,7 +90,7 @@
     <script>
         function validar() {
             checkCampo(url);
-            checkCampo(nivel);
+            checkCampo(tipo);
         }
         validar();
         function mostrarForm(modoCriar) {
@@ -107,7 +107,7 @@
                 if(jsonResponse.sucess) {
                     setTimeout(function () {
                         window.location.reload();
-                    }, 1500);
+                    }, tempoDelayParaRedirecionar);
                 }
             });
         }
@@ -119,7 +119,7 @@
                 if(jsonResponse.sucess) {
                     setTimeout(function () {
                         window.location.reload();
-                    }, 1500);
+                    }, tempoDelayParaRedirecionar);
                 }
             });
         }
