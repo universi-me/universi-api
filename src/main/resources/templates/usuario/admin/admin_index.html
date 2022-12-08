@@ -26,8 +26,8 @@
                         <div class="card-header text-center">Menu</div>
                         <ul class="list-group list-group-flush">
                             <a class="list-group-item" href="/admin">Painel</a>
-                            <a class="list-group-item" href="/admin/conta">Gerenciar Conta</a>
                             <a class="list-group-item" href="/admin/grupo">Criar Grupo Master</a>
+                            <a class="list-group-item" href="/admin/conta">Gerenciar Conta</a>
                             <a class="list-group-item" href="/admin/competencia">Gerenciar Competências</a>
                         </ul>
                     </div>
@@ -76,6 +76,11 @@
                 window.location.href = "/admin/conta/" + usuario + "/editar";
             }
         }
+        configurarAutoCompInputId("gerenciarConta", function clicked(ui) {
+            if(ui.item && ui.item.id) {
+                window.location.href = "/admin/conta/" + ui.item.id + "/editar";
+            }
+        });
 </script>
 
 </div>
