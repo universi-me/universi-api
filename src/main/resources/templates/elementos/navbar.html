@@ -29,10 +29,6 @@
                     <li class="nav-item">
                         <a class="nav-link active" aria-current="page" href="/grupos">Grupos</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="/recomendar">Recomendar</a>
-                    </li>
-
 
                 </ul>
                 <ul class="navbar-nav" align="right" sec:authorize="isAuthenticated()">
@@ -93,7 +89,7 @@
         if(ui.item && ui.item.url) {
           window.location.href = ui.item.url;
         }
-      });
+      }, ['usuario', 'grupo']);
     </script>
 
 </div>

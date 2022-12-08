@@ -258,7 +258,7 @@ function checkCampo(input, regExInput, msgRegEx) {
 }
 
 /* Pesquisar Usuário */
-function configurarAutoCompInputId(inputId, clickedField) {
+function configurarAutoCompInputId(inputId, clickedField, filtroArr) {
     if(document.getElementById(inputId) == null) {
         return;
     }
@@ -267,7 +267,10 @@ function configurarAutoCompInputId(inputId, clickedField) {
            $.ajax({
                type: "POST",
                url: '/pesquisar',
-               data: JSON.stringify({term:request.term}),
+               data: JSON.stringify({
+                    term: request.term,
+                    filtro: filtroArr?filtroArr:[],
+               }),
                success: response,
                dataType: 'json',
                contentType: "application/json",
