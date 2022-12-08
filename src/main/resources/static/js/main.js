@@ -256,3 +256,31 @@ function checkCampo(input, regExInput, msgRegEx) {
     }
     return false;
 }
+
+/* Pesquisar Usuário */
+function configurarAutoCompInputId(inputId, clickedField) {
+    if(document.getElementById(inputId) == null) {
+        return;
+    }
+	$("#"+inputId).autocomplete({
+		source: function (request, response) {
+           $.ajax({
+               type: "POST",
+               url: '/pesquisar',
+               data: JSON.stringify({term:request.term}),
+               success: response,
+               dataType: 'json',
+               contentType: "application/json",
+           });
+        },
+        minLength: 2,
+        delay: 800,
+        select: function( event, ui ) {
+            if(clickedField) {
+                clickedField(ui);
+            }
+       }
+	}).autocomplete( "instance" )._renderItem = function( ul, item ) {
+        return $( "<li><div><img class='img-thumbnail' src='"+item.img+"' width='50' height='50'>  <span>"+item.value+"</span></div></li>" ).appendTo( ul );
+    };
+}

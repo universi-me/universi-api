@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,4 +18,5 @@ public interface GrupoRepository extends JpaRepository<Grupo, Long> {
     List<Grupo> findByGrupoPublico(boolean grupoPublico);
     @Query(value = "SELECT ID_GRUPO FROM GRUPO_GRUPO WHERE ID_SUBGRUPO = :IDGrupo LIMIT 1", nativeQuery = true)
     Optional<Long> findGrupoIdPaiDoGrupoId(@Param("IDGrupo") Long id);
+    Collection<Grupo> findTop5ByNomeContainingIgnoreCase(String nome);
 }

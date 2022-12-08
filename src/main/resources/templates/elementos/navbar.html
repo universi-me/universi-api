@@ -7,64 +7,95 @@
 <body>
 
 <div th:fragment="navbar" style="border-radius: 15px; background: rgba(255, 255, 255, 0.3);">
-<nav class="navbar navbar-expand-lg navbar-expand">
-  <div class="container-fluid">
-    <a class="navbar-brand mt-2 mt-lg-0" href="/">
-      <img src="https://i.imgur.com/jOog6Bk.png" height="40" alt="Universi.me Logo" loading="lazy" />
-    </a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0" sec:authorize="isAnonymous()">
-      </ul>
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0" sec:authorize="isAuthenticated()">
-        <li class="nav-item" th:if="${session != null && session.usuario != null && #strings.equals(session.usuario.autoridade, 'ROLE_ADMIN')}">
-          <a class="nav-link active" aria-current="page" href="/admin">Área Administrativa</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="/grupos">Grupos</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="/recomendar">Recomendar</a>
-        </li>
-      </ul>
-      <ul class="navbar-nav" align="right" sec:authorize="isAuthenticated()">
-        <li class="nav-item">
-          <div th:text="'Olá, '+${(session.usuario.perfil==null || session.usuario.perfil.nome==null)?session.usuario.getUsername():session.usuario.perfil.nome}" style="padding-right: 10px;">Olá, Nome!</div>
-        </li>
-      </ul>
+    <nav class="navbar navbar-expand-lg navbar-expand">
+        <div class="container-fluid">
+            <a class="navbar-brand mt-2 mt-lg-0" href="/">
+                <img src="https://i.imgur.com/jOog6Bk.png" height="40" alt="Universi.me Logo" loading="lazy"/>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0" sec:authorize="isAnonymous()">
+                </ul>
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0" sec:authorize="isAuthenticated()">
 
-      <div align="right" sec:authorize="isAuthenticated()">
-        <div class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            <img
-                    th:src="${(session.usuario.perfil==null || session.usuario.perfil.imagem==null)?'https://i.imgur.com/vUBrCxr.png':session.usuario.perfil.imagem}"
-                    class="rounded-circle"
-                    height="40"
-                    width="40"
-                    alt="Perfil"
-                    loading="lazy"
-                    referrerpolicy="no-referrer"
-            />
-          </a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" th:href="@{/p/{path}(path=${session.usuario.nome})}">Meu Perfil</a></li>
-            <li><a class="dropdown-item" href="/conta">Minha Conta</a></li>
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="/logout">Logout</a></li>
-          </ul>
+                    <li class="nav-item"
+                        th:if="${session != null && session.usuario != null && #strings.equals(session.usuario.autoridade, 'ROLE_ADMIN')}">
+                        <a class="nav-link active" aria-current="page" href="/admin">Área Administrativa</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="/grupos">Grupos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="/recomendar">Recomendar</a>
+                    </li>
+
+
+                </ul>
+                <ul class="navbar-nav" align="right" sec:authorize="isAuthenticated()">
+                    <li class="nav-item" style="padding-right: 10px;">
+                        <form class="input-group my-2 my-lg-0" style="height:70%;" onsubmit="return false;">
+                            <input class="form-control mr-sm-2" type="search" placeholder="Pesquisar..." aria-label="Search" id="pesquisarusuario-nav">
+                        </form>
+                    </li>
+                    <li class="nav-item">
+                        <div th:text="'Olá, '+${(session.usuario.perfil==null || session.usuario.perfil.nome==null)?session.usuario.getUsername():session.usuario.perfil.nome}"
+                             style="padding-right: 10px;">Olá, Nome!
+                        </div>
+                    </li>
+                </ul>
+
+                <div align="right" sec:authorize="isAuthenticated()">
+                    <div class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                           aria-expanded="false">
+                            <img
+                                    th:src="${(session.usuario.perfil==null || session.usuario.perfil.imagem==null)?'https://i.imgur.com/vUBrCxr.png':session.usuario.perfil.imagem}"
+                                    class="rounded-circle"
+                                    height="40"
+                                    width="40"
+                                    alt="Perfil"
+                                    loading="lazy"
+                                    referrerpolicy="no-referrer"
+                            />
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" th:href="@{/p/{path}(path=${session.usuario.nome})}">Meu
+                                Perfil</a></li>
+                            <li><a class="dropdown-item" href="/conta">Minha Conta</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="/logout">Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div align="right" sec:authorize="isAnonymous()">
+                    <button onclick="location.href='/login'" class="btn btn-primary"
+                            th:if="${#httpServletRequest.requestURI != '/login'}">Login
+                    </button>
+                    <button onclick="location.href='/registrar'" class="btn btn-primary"
+                            th:if="${#httpServletRequest.requestURI == '/login'}">Registrar-se
+                    </button>
+                </div>
+            </div>
         </div>
-      </div>
-      
-      <div align="right" sec:authorize="isAnonymous()">
-        <button onclick="location.href='/login'" class="btn btn-primary" th:if="${#httpServletRequest.requestURI != '/login'}">Login</button>
-        <button onclick="location.href='/registrar'" class="btn btn-primary" th:if="${#httpServletRequest.requestURI == '/login'}">Registrar-se</button>
-      </div>
-    </div>
-  </div>
-</nav>
-  <p/>
+    </nav>
+
+    <p/>
+
+    <script>
+      configurarAutoCompInputId("pesquisarusuario-nav", function clicked(ui) {
+        if(ui.item && ui.item.url) {
+          window.location.href = ui.item.url;
+        }
+      });
+    </script>
+
 </div>
 
 </body>

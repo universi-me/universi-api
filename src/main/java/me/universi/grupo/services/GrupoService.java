@@ -293,4 +293,6 @@ public class GrupoService {
         Collections.reverse(nickArr);
         return "/" + String.join("/", nickArr);
     }
+
+    public Collection<Grupo> findTop5ByNomeContainingIgnoreCase(String nome){ return grupoRepository.findTop5ByNomeContainingIgnoreCase(nome); }
 }
