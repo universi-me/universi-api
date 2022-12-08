@@ -2,6 +2,7 @@ package me.universi.perfil.controller;
 
 import me.universi.api.entities.Resposta;
 import me.universi.competencia.enums.Nivel;
+import me.universi.competencia.services.CompetenciaTipoService;
 import me.universi.grupo.services.GrupoService;
 import me.universi.link.enums.TipoLink;
 import me.universi.perfil.entities.Perfil;
@@ -35,6 +36,8 @@ public class PerfilController {
 
     @Autowired
     public GrupoService grupoService;
+    @Autowired
+    public CompetenciaTipoService competenciaTipoService;
 
     @GetMapping("/p/**")
     public String perfil_handler(HttpServletRequest request, HttpServletResponse response, HttpSession session, ModelMap map) {
@@ -74,6 +77,8 @@ public class PerfilController {
                 map.put("perfil", perfil);
                 map.put("grupoService", grupoService);
                 map.put("usuarioService", usuarioService);
+                map.put("competenciaTipoService", competenciaTipoService);
+
 
                 if(flagEditar) {
                     map.addAttribute("sexoTipo", Sexo.values());

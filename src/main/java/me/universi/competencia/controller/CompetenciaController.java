@@ -7,9 +7,11 @@ import javax.servlet.http.HttpSession;
 
 import me.universi.api.entities.Resposta;
 import me.universi.competencia.entities.Competencia;
+import me.universi.competencia.entities.CompetenciaTipo;
 import me.universi.competencia.enums.Nivel;
 import me.universi.competencia.exceptions.CompetenciaException;
 import me.universi.competencia.services.CompetenciaService;
+import me.universi.competencia.services.CompetenciaTipoService;
 import me.universi.perfil.entities.Perfil;
 import me.universi.perfil.services.PerfilService;
 import me.universi.usuario.entities.Usuario;
@@ -23,6 +25,8 @@ import org.springframework.web.bind.annotation.*;
 public class CompetenciaController {
     @Autowired
     public CompetenciaService competenciaService;
+    @Autowired
+    public CompetenciaTipoService competenciaTipoService;
 
     @Autowired
     private PerfilService perfilService;
@@ -38,9 +42,9 @@ public class CompetenciaController {
 
             Usuario usuario = (Usuario) session.getAttribute("usuario");
 
-            String nome = (String)body.get("nome");
-            if(nome == null) {
-                throw new CompetenciaException("Parametro nome é nulo.");
+            String competenciaTipoId = (String)body.get("competenciatipoId");
+            if(competenciaTipoId == null) {
+                throw new CompetenciaException("Parametro competenciatipoId é nulo.");
             }
 
             String descricao = (String)body.get("descricao");
@@ -53,15 +57,18 @@ public class CompetenciaController {
                 throw new CompetenciaException("Parametro nivel é nulo.");
             }
 
-            Competencia competenciaNew = new Competencia(); // nova competência
-            competenciaNew.setNome(nome);
+            CompetenciaTipo compT = competenciaTipoService.findFirstById(Long.valueOf(competenciaTipoId));
+            if(compT == null) {
+                throw new CompetenciaException("Tipo de Competência não encontrado.");
+            }
+
+            Competencia competenciaNew = new Competencia();
+            competenciaNew.setPerfil(usuario.getPerfil());
+            competenciaNew.setCompetenciaTipo(compT);
             competenciaNew.setDescricao(descricao);
             competenciaNew.setNivel(Nivel.valueOf(nivel));
 
             competenciaService.save(competenciaNew);
-
-            Perfil perfil = usuario.getPerfil();
-            perfilService.adicionarCompetencia(perfil, competenciaNew);
 
             resposta.mensagem = "Competência Criada";
             resposta.sucess = true;
@@ -84,9 +91,11 @@ public class CompetenciaController {
                 throw new CompetenciaException("Parametro competenciaId é nulo.");
             }
 
-            String nome = (String)body.get("nome");
+            String competenciaTipoId = (String)body.get("competenciaTipoId");
             String descricao = (String)body.get("descricao");
             String nivel = (String)body.get("nivel");
+
+
 
             Competencia comp = competenciaService.findFirstById(Long.valueOf(id));
             if (comp == null) {
@@ -97,12 +106,16 @@ public class CompetenciaController {
 
             Perfil perfil = usuario.getPerfil();
 
-            if(perfil.getCompetencias() == null || !perfil.getCompetencias().contains(comp)) {
+            if(comp.getPerfil().getId() != perfil.getId()) {
                 throw new CompetenciaException("Você não tem permissão para editar esta Competêcia.");
             }
 
-            if(nome != null) {
-                comp.setNome(nome);
+            if(competenciaTipoId != null && competenciaTipoId.length()>0) {
+                CompetenciaTipo compT = competenciaTipoService.findFirstById(Long.valueOf(competenciaTipoId));
+                if(compT == null) {
+                    throw new CompetenciaException("Tipo de Competência não encontrado.");
+                }
+                comp.setCompetenciaTipo(compT);
             }
             if (descricao != null) {
                 comp.setDescricao(descricao);
@@ -143,13 +156,11 @@ public class CompetenciaController {
 
             Perfil perfil = usuario.getPerfil();
 
-            if(perfil.getCompetencias() == null || !perfil.getCompetencias().contains(comp)) {
+            if(comp.getPerfil().getId() != perfil.getId()) {
                 throw new CompetenciaException("Você não tem permissão para editar esta Competêcia.");
             }
 
-            //competenciaService.delete(comp);
-
-            perfilService.removerCompetencia(perfil, comp);
+            competenciaService.delete(comp);
 
             resposta.mensagem = "Competência removida";
             resposta.sucess = true;

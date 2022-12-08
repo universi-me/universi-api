@@ -33,12 +33,7 @@ public class Perfil {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "id_link")
     private Link link;
-    @ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.ALL })
-    @JoinTable(
-            name = "perfil_competencia",
-            joinColumns = { @JoinColumn(name = "id_perfil") },
-            inverseJoinColumns = { @JoinColumn(name = "id_competencia") }
-    )
+    @ManyToMany(mappedBy = "perfil", fetch = FetchType.EAGER, cascade = { CascadeType.ALL })
     private Collection<Competencia> competencias;
     @ManyToMany(cascade = { CascadeType.ALL })
     @JoinTable(

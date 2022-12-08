@@ -21,8 +21,11 @@
             <form onsubmit="criarCompetencia(this.id);return false;" oninput="validar();" id="formCriar" hidden>
                 <input type="hidden" name="competenciaId" id="competenciaId" value=""/>
                 <div class="mb-3">
-                    <label for="nome" class="form-label">* Nome da Competência</label>
-                    <input type="text" class="form-control" id="nome" name="nome" value="">
+                    <label for="competenciatipoId" class="form-label">* Competência</label>
+                    <select id="competenciatipoId" name="competenciatipoId" class="form-select" value="">
+                        <option value="" selected disabled hidden>Selecionar...</option>
+                        <option th:each="competenciaTipoNow : ${competenciaTipoService.findAll()}" th:value="${competenciaTipoNow.id}" th:text="${competenciaTipoNow.nome}"></option>
+                    </select>
                 </div>
                 <div class="mb-3">
                     <label for="descricao" class="form-label">* Descrição</label>
@@ -61,7 +64,7 @@
                         <div class="card-body">
 
                             <!-- Título -->
-                            <h6 class="card-title text-center" th:text="${competenciaNow.getNome()}">Nome da
+                            <h6 class="card-title text-center" th:text="${competenciaNow.competenciaTipo.nome}">Nome da
                                 competência</h6>
 
                             <!-- Nível -->
@@ -110,7 +113,7 @@
             document.getElementById('botaoCriar').hidden = modoCriar ? true : false;
             document.getElementById('formBt').textContent = modoCriar ? 'Criar Competência' : 'Editar Comptetência';
             document.getElementById('competenciaId').value = null;
-            document.getElementById('nome').value = null;
+            document.getElementById('competenciatipoId').value = null;
             document.getElementById('descricao').value = null;
             document.getElementById('nivel').value = '';
         }
@@ -144,7 +147,7 @@
                     var competenciaDic = jsonResponse.conteudo.competencia;
                     mostrarForm(false);
                     document.getElementById('competenciaId').value = competenciaDic.id;
-                    document.getElementById('nome').value = competenciaDic.nome;
+                    document.getElementById('competenciatipoId').value = competenciaDic.competenciaTipo.id;
                     document.getElementById('descricao').value = competenciaDic.descricao;
                     document.getElementById('nivel').value = competenciaDic.nivel;
                     validar();

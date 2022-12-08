@@ -1,7 +1,9 @@
 package me.universi.competencia.services;
 
 import me.universi.competencia.entities.Competencia;
+import me.universi.competencia.entities.CompetenciaTipo;
 import me.universi.competencia.repositories.CompetenciaRepository;
+import me.universi.perfil.entities.Perfil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +25,7 @@ public class CompetenciaService {
     }
 
     public void save(Competencia competencia) {
-        competenciaRepository.save(competencia);
+        competenciaRepository.saveAndFlush(competencia);
     }
 
     public void delete(Competencia competencia) {
@@ -32,5 +34,20 @@ public class CompetenciaService {
 
     public List<Competencia> findAll() {
         return competenciaRepository.findAll();
+    }
+
+    public boolean perfilTemCompetencia(Perfil perfil, Competencia competencia) {
+        try {
+            if(perfil.getCompetencias() != null) {
+                for(Competencia compNow : perfil.getCompetencias()) {
+                    if(competencia.getId() == compNow.getId()) {
+                        return true;
+                    }
+                }
+            }
+        }catch (Exception e) {
+            return false;
+        }
+        return false;
     }
 }

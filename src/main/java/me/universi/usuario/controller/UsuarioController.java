@@ -10,6 +10,7 @@ import javax.servlet.http.HttpSession;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import me.universi.api.entities.Resposta;
+import me.universi.competencia.services.CompetenciaTipoService;
 import me.universi.grupo.enums.GrupoTipo;
 import me.universi.grupo.services.GrupoService;
 import me.universi.perfil.entities.Perfil;
@@ -41,6 +42,8 @@ public class UsuarioController {
     private PerfilService perfilService;
     @Autowired
     public GrupoService grupoService;
+    @Autowired
+    public CompetenciaTipoService competenciaTipoService;
 
     @Autowired
     private Environment env;
@@ -69,7 +72,7 @@ public class UsuarioController {
 
             map.addAttribute("grupoService", grupoService);
             map.addAttribute("usuarioService", usuarioService);
-
+            map.addAttribute("competenciaTipoService", competenciaTipoService);
 
             if(requestPathSt.startsWith("/admin/conta")) {
                 boolean flagEditar = requestPathSt.endsWith("/editar");

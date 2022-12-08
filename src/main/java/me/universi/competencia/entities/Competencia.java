@@ -1,6 +1,8 @@
 package me.universi.competencia.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import me.universi.competencia.enums.Nivel;
+import me.universi.perfil.entities.Perfil;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
@@ -13,8 +15,15 @@ public class Competencia {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_competencia")
     private Long id;
-    @Column(name = "nome")
-    private String nome;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_competenciatipo")
+    private CompetenciaTipo competenciaTipo;
+
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_profile")
+    private Perfil perfil;
     @Column(name = "descricao")
     private String descricao;
     @Enumerated(EnumType.STRING)
@@ -29,22 +38,13 @@ public class Competencia {
     public Competencia() {
     }
 
-    public Competencia(String nome, String descricao, Nivel nivel) {
-        this.nome = nome;
+    public Competencia(String descricao, Nivel nivel) {
         this.descricao = descricao;
         this.nivel = nivel;
     }
 
     public Long getId() {
         return id;
-    }
-
-    public String getNome() {
-        return nome;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
     }
 
     public String getDescricao() {
@@ -67,16 +67,19 @@ public class Competencia {
         this.dataDeCriacao = dataDeCriacao;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if(!(obj instanceof Competencia)) {
-			return false;
-		}
-		try {
-            Competencia competencia = (Competencia) obj;
-            return this.nome.equals(competencia.getNome()) && this.descricao.equals(competencia.getDescricao()) && this.nivel.equals(competencia.getNivel());
-        } catch (Exception e) {
-            return false;
-        }
+    public CompetenciaTipo getCompetenciaTipo() {
+        return competenciaTipo;
+    }
+
+    public void setCompetenciaTipo(CompetenciaTipo competenciaTipo) {
+        this.competenciaTipo = competenciaTipo;
+    }
+
+    public Perfil getPerfil() {
+        return perfil;
+    }
+
+    public void setPerfil(Perfil perfil) {
+        this.perfil = perfil;
     }
 }

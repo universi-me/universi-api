@@ -86,12 +86,12 @@ public class PerfilTest {
         userNew.setNome(userNew.getNome());
 
         Competencia competenciaNew = new Competencia();
-        competenciaNew.setNome("Java - admin"+userNew.getId());
+        //competenciaNew.setNome("Java - admin"+userNew.getId());
         competenciaNew.setDescricao("Sou top em java - admin"+userNew.getId());
         competenciaService.save(competenciaNew);
 
         Competencia competenciaNew1 = new Competencia();
-        competenciaNew1.setNome("Java - admin 1"+userNew.getId());
+        //competenciaNew1.setNome("Java - admin 1"+userNew.getId());
         competenciaNew1.setDescricao("Sou top em java - admin 1"+userNew.getId());
         competenciaService.save(competenciaNew1);
 
