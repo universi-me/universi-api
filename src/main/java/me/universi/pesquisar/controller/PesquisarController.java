@@ -34,28 +34,39 @@ public class PesquisarController {
 
         String term = (String)body.get("term");
 
+        boolean searchUsuario = false;
+        boolean searchGrupo = false;
+
+        if(body.get("filtro") != null) {
+            ArrayList<String> filtro = (ArrayList<String>)(body.get("filtro"));
+            searchUsuario = filtro.contains((String)"usuario");
+            searchGrupo = filtro.contains((String)"grupo");
+        }
+
         if(term != null && term.length() > 0) {
-
-            Collection<Perfil> perfilSearch = perfilService.findTop5ByNomeContainingIgnoreCase(term);
-            for (Perfil perfNow : perfilSearch) {
-                HashMap<String, Object> perfilDic = new HashMap<>();
-                perfilDic.put("value", perfNow.getNome());
-                perfilDic.put("id", perfNow.getUsuario().getUsername());
-                perfilDic.put("img", perfNow.getImagem()==null?"https://i.imgur.com/vUBrCxr.png":perfNow.getImagem());
-                perfilDic.put("url", "/p/" + perfNow.getUsuario().getUsername());
-                perfilDic.put("tipo", "perfil");
-                resultsBusca.add(perfilDic);
+            if(searchUsuario) {
+                Collection<Perfil> perfilSearch = perfilService.findTop5ByNomeContainingIgnoreCase(term);
+                for (Perfil perfNow : perfilSearch) {
+                    HashMap<String, Object> perfilDic = new HashMap<>();
+                    perfilDic.put("value", perfNow.getNome());
+                    perfilDic.put("id", perfNow.getUsuario().getUsername());
+                    perfilDic.put("img", perfNow.getImagem() == null ? "https://i.imgur.com/vUBrCxr.png" : perfNow.getImagem());
+                    perfilDic.put("url", "/p/" + perfNow.getUsuario().getUsername());
+                    perfilDic.put("tipo", "perfil");
+                    resultsBusca.add(perfilDic);
+                }
             }
-
-            Collection<Grupo> grupoSearch = grupoService.findTop5ByNomeContainingIgnoreCase(term);
-            for (Grupo grupoNow : grupoSearch) {
-                HashMap<String, Object> grupoDic = new HashMap<>();
-                grupoDic.put("value", grupoNow.getNome());
-                grupoDic.put("id", grupoNow.getNickname());
-                grupoDic.put("img", grupoNow.getImagem()==null?"https://i.imgur.com/SfAl1Vb.png":grupoNow.getImagem());
-                grupoDic.put("url", grupoService.diretorioParaGrupo(grupoNow.getId()));
-                grupoDic.put("tipo", "grupo");
-                resultsBusca.add(grupoDic);
+            if(searchGrupo) {
+                Collection<Grupo> grupoSearch = grupoService.findTop5ByNomeContainingIgnoreCase(term);
+                for (Grupo grupoNow : grupoSearch) {
+                    HashMap<String, Object> grupoDic = new HashMap<>();
+                    grupoDic.put("value", grupoNow.getNome());
+                    grupoDic.put("id", grupoNow.getNickname());
+                    grupoDic.put("img", grupoNow.getImagem() == null ? "https://i.imgur.com/SfAl1Vb.png" : grupoNow.getImagem());
+                    grupoDic.put("url", grupoService.diretorioParaGrupo(grupoNow.getId()));
+                    grupoDic.put("tipo", "grupo");
+                    resultsBusca.add(grupoDic);
+                }
             }
         }
 
