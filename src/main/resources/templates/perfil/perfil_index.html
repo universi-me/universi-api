@@ -26,6 +26,14 @@
                         <img th:src="${(perfil==null || perfil.imagem==null)?'https://i.imgur.com/vUBrCxr.png':perfil.imagem}" class="card-img-top" alt="Perfil" referrerpolicy="no-referrer">
                         <div class="card-body">
                             <h5 class="card-title text-center"><span th:text="${(perfil==null || perfil.getNome()==null)?perfil.usuario.nome:perfil.nome}">Nome do Perfil</span><span th:unless="${perfil==null || perfil.nome==null || perfil.usuario.isEmail_verificado() == false}">   <img src="https://i.imgur.com/w3aKauq.png" width="22" /></span></h5>
+
+                            <div class="text-center" th:unless="${perfil == null || usuarioService.usuarioDonoDaSessao(perfil.usuario)}">
+                                <br/>
+                                <ul class="list-group">
+                                    <a class="list-group-item bi-hand-thumbs-up" th:href="'/recomendar/'+${perfil.usuario.getUsername()}" style="color: #15be56;"> Recomendar</a>
+                                </ul>
+                            </div>
+
                         </div>
                         <div class="card-header card-footer text-center">Bio</div>
                         <div class="card-body">
