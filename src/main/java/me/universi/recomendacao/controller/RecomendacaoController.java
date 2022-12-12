@@ -102,6 +102,10 @@ public class RecomendacaoController {
                 throw new RecomendacaoInvalidaException("Perfil destino não encontrado.");
             }
 
+            if(perfilOrigem.getId() == perfilDestino.getId()) {
+                throw new RecomendacaoInvalidaException("Você não pode recomendar-se.");
+            }
+
             CompetenciaTipo compT = competenciaTipoService.findFirstById(Long.valueOf(competenciaTipoId));
             if(compT == null) {
                 throw new RecomendacaoInvalidaException("Competencia não encontrada.");
