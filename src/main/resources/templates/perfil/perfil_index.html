@@ -30,7 +30,7 @@
                             <div class="text-center" th:unless="${perfil == null || usuarioService.usuarioDonoDaSessao(perfil.usuario)}">
                                 <br/>
                                 <ul class="list-group">
-                                    <a class="list-group-item bi-hand-thumbs-up" th:href="'/recomendar/'+${perfil.usuario.getUsername()}" style="color: #15be56;"> Recomendar</a>
+                                    <a class="list-group-item bi bi-hand-thumbs-up" th:href="'/recomendar/'+${perfil.usuario.getUsername()}" style="color: #15be56;"> Recomendar</a>
                                 </ul>
                             </div>
 
@@ -85,11 +85,6 @@
     <script th:if="${session.usuario.perfil==null || session.usuario.perfil.getNome()==null}">
         alert("Complete o seu cadastro para começar a usar o Universi.me !", 'warning');
     </script>
-
-    <p align="left">
-        <br/>
-        <button onclick="javascript:window.history.back();" class="btn btn-primary">Voltar</button>
-    </p>
 
 </div>
 
