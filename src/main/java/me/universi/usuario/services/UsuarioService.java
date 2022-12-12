@@ -8,9 +8,11 @@ import me.universi.usuario.exceptions.UsuarioException;
 import me.universi.usuario.repositories.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -175,6 +177,17 @@ public class UsuarioService implements UserDetailsService {
 
         // Salvar usuario na sessao
         session.setAttribute("usuario", usuario);
+    }
+
+    public boolean usuarioEstaLogado() {
+        try {
+            return SecurityContextHolder.getContext().getAuthentication() != null &&
+                    SecurityContextHolder.getContext().getAuthentication().isAuthenticated() &&
+                    !(SecurityContextHolder.getContext().getAuthentication()
+                            instanceof AnonymousAuthenticationToken);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     // verifica se usuario possui a autoridade seguindo a hierarquia do springsecurity

@@ -17,17 +17,17 @@
                     aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <div class="collapse navbar-collapse" id="navbarSupportedContent" th:with="enderecoAtual = ${#httpServletRequest.requestURI}">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0" sec:authorize="isAnonymous()">
                 </ul>
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0" sec:authorize="isAuthenticated()">
 
                     <li class="nav-item"
                         th:if="${session != null && session.usuario != null && #strings.equals(session.usuario.autoridade, 'ROLE_ADMIN')}">
-                        <a class="nav-link active" aria-current="page" href="/admin">Área Administrativa</a>
+                        <a th:class="'nav-link bi bi-tools ' + ${#strings.equals(enderecoAtual, '/admin')?'active':''}" aria-current="page" href="/admin"> Área Administrativa</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="/grupos">Grupos</a>
+                        <a th:class="'nav-link bi bi-people-fill ' + ${#strings.equals(enderecoAtual, '/grupos')?'active':''}" aria-current="page" href="/grupos"> Grupos</a>
                     </li>
 
                 </ul>
@@ -35,6 +35,7 @@
                     <li class="nav-item" style="padding-right: 10px;">
                         <form class="input-group my-2 my-lg-0" style="height:70%;" onsubmit="return false;">
                             <input class="form-control mr-sm-2" type="search" placeholder="Pesquisar..." aria-label="Search" id="pesquisarusuario-nav">
+                            <span class="input-group-text bi bi-search" id="basic-addon1"></span>
                         </form>
                     </li>
                     <li class="nav-item">
@@ -59,13 +60,13 @@
                             />
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" th:href="@{/p/{path}(path=${session.usuario.nome})}">Meu
+                            <li><a class="dropdown-item bi bi-person-lines-fill" th:href="@{/p/{path}(path=${session.usuario.nome})}"> Meu
                                 Perfil</a></li>
-                            <li><a class="dropdown-item" href="/conta">Minha Conta</a></li>
+                            <li><a class="dropdown-item bi bi-gear" href="/conta"> Minha Conta</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item" href="/logout">Logout</a></li>
+                            <li><a class="dropdown-item bi bi-power" href="/logout"> Logout</a></li>
                         </ul>
                     </div>
                 </div>

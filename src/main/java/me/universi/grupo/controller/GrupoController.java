@@ -123,7 +123,7 @@ public class GrupoController {
                 if(!(grupoRoot != null && usuarioService.isContaAdmin(usuario))) {
                     throw new GrupoException("Parametro grupoId é nulo.");
                 }
-            } else if(grupoIdPai.length() > 0 && grupoRoot) {
+            } else if(grupoIdPai.length() > 0 && (grupoRoot!=null && grupoRoot)) {
                 throw new GrupoException("Você não pode criar Grupo Master em Subgrupos.");
             }
 

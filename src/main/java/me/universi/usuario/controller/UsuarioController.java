@@ -50,6 +50,9 @@ public class UsuarioController {
 
     @GetMapping("/login")
     public String login(HttpServletRequest request, HttpSession session) {
+        if(usuarioService.usuarioEstaLogado()) {
+            return "redirect:"+usuarioService.obterUrlAoLogar();
+        }
         return "usuario/login";
     }
 
@@ -60,6 +63,9 @@ public class UsuarioController {
 
     @GetMapping("/registrar")
     public String registrar(HttpSession session) {
+        if(usuarioService.usuarioEstaLogado()) {
+            return "redirect:"+usuarioService.obterUrlAoLogar();
+        }
         return "usuario/registrar";
     }
 
