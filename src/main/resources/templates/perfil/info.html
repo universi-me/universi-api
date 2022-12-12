@@ -16,7 +16,7 @@
         <div class="card-body">
             <div class="row">
 
-                <div class="card-body text-center">
+                <div class="card-body text-center" th:unless="${perfil == null || usuarioService.usuarioDonoDaSessao(perfil.usuario)}">
                     <div class="input-group mb-3" style="width:150px;margin: 0 auto;">
                         <a th:href="'/recomendar/'+${perfil.usuario.getUsername()}">
                             <button class="btn btn-outline-primary text-center" type="button" id="addParticipanteBt" th:text="'Recomendar '+${perfil.nome==null?perfil.usuario.nome:perfil.nome}">Recomendar
