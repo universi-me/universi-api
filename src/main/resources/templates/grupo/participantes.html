@@ -14,7 +14,7 @@
         <div class="card-body">
 
             <div class="input-group mb-3" style="max-width:400px;margin: 0 auto;">
-                <input type="text" class="form-control" placeholder="Usuário / E-mail" aria-label="Usuário / E-mail"
+                <input type="text" class="form-control" placeholder="Nome / Usuário / E-mail" aria-label="Nome / Usuário / E-mail"
                        aria-describedby="addParticipanteBt" id="addParticipante" name="addParticipante">
                 <button class="btn btn-outline-primary" type="button" id="addParticipanteBt"
                         th:attr="onclick=|adicionarParticipante('${grupo.getId()}');|">Adicionar
@@ -50,6 +50,13 @@
             <script>
                 checkCampo(document.querySelector('#addParticipante'));
 
+                configurarAutoCompInputId("addParticipante", function clicked(ui) {
+                    if(ui.item && ui.item.id) {
+                        document.querySelector('#addParticipante').userid = ui.item.id;
+                        $("#addParticipanteBt").click();
+                    }
+                }, ['usuario']);
+
                 function removerParticipante(grupoId, participante) {
                     removerParticipanteDoGrupo(grupoId, participante, function removidoCallback(jsonResponse) {
                         if(jsonResponse.sucess) {
@@ -60,8 +67,10 @@
                     });
                 }
                 function adicionarParticipante(grupoId) {
-                    if(checkCampo(document.querySelector('#addParticipante'))) {
-                        var participante = document.querySelector('#addParticipante').value;
+                    var inputAddParticipante = document.querySelector('#addParticipante');
+                    if(checkCampo(inputAddParticipante)) {
+                        var participante = inputAddParticipante.userid!=null? inputAddParticipante.userid : inputAddParticipante.value;
+                        inputAddParticipante.userid = null;
                         adicionarParticipanteAoGrupo(grupoId, participante, function addCallback(jsonResponse) {
                             if(jsonResponse.sucess) {
                                 setTimeout(function () {
@@ -72,12 +81,15 @@
                     }
                 }
             </script>
-            <p align="left">
-                <br/>
-                <button onclick="openSubUrl()" class="btn btn-primary">Voltar</button>
-            </p>
 
         </div>
+
+        <div class="card-body" style="padding-bottom:0px">
+            <p align="left">
+                <button onclick="openSubUrl()" class="btn btn-primary">Voltar</button>
+            </p>
+        </div>
+
     </div>
 </div>
 
