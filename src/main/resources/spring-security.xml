@@ -94,9 +94,9 @@
 	</beans:bean>
 
 
-	<beans:bean id="SecurityUserDetailsService" class="me.universi.usuario.services.UsuarioService"></beans:bean>
+	<beans:bean id="SecurityUserDetailsService" class="me.universi.usuario.services.UsuarioService" />
 
-	<beans:bean id="encoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"></beans:bean>
+	<beans:bean id="encoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" />
 	<beans:bean id="authenticationProvider" class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
 		<beans:property name="passwordEncoder" ref="encoder" />
 		<beans:property name="userDetailsService" ref="SecurityUserDetailsService" />

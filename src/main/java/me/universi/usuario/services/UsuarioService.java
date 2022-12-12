@@ -7,7 +7,10 @@ import me.universi.usuario.enums.Autoridade;
 import me.universi.usuario.exceptions.UsuarioException;
 import me.universi.usuario.repositories.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -18,6 +21,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpSession;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,6 +34,9 @@ public class UsuarioService implements UserDetailsService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private PerfilService perfilService;
+
+    @Autowired
+    private RoleHierarchyImpl roleHierarchy;
 
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<Usuario> usuario = userRepository.findFirstByNome(username);
@@ -170,9 +177,18 @@ public class UsuarioService implements UserDetailsService {
         session.setAttribute("usuario", usuario);
     }
 
+    // verifica se usuario possui a autoridade seguindo a hierarquia do springsecurity
+    public boolean usuarioTemAutoridade(Usuario usuario, Autoridade autoridade) {
+        Collection<? extends GrantedAuthority> reachableRoles = roleHierarchy.getReachableGrantedAuthorities(usuario.getAuthorities());
+        if (reachableRoles.contains(new SimpleGrantedAuthority(autoridade.toString()))) {
+            return true;
+        }
+        return false;
+    }
+
     public boolean isContaAdmin(Usuario usuarioSession) {
         try {
-            return (usuarioSession.getAutoridade() == Autoridade.ROLE_ADMIN);
+            return usuarioTemAutoridade(usuarioSession, Autoridade.ROLE_ADMIN);
         } catch (Exception e) {
             return false;
         }
