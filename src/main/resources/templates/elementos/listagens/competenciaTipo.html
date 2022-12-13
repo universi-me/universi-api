@@ -11,7 +11,8 @@
 
     <div class="list list-row card" id="sortable" data-sortable-id="0" aria-dropeffect="move">
         <div class="list-item" th:unless="${listaCompetenciaTipo == null}"
-             th:each="competenciaNow: ${listaCompetenciaTipo}">
+             th:each="i : ${#numbers.sequence(listaCompetenciaTipo.size() - 1, 0, -1)}"
+             th:with="competenciaNow = ${listaCompetenciaTipo[i]}">
             <div class="flex">
                 <span class="item-author text-color" data-abc="true" th:text="${competenciaNow.getNome()}"></span>
             </div>

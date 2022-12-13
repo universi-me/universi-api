@@ -10,7 +10,10 @@
 <div th:fragment="participante">
 
     <div class="list list-row card" id="sortable" data-sortable-id="0" aria-dropeffect="move">
-        <div class="list-item" th:unless="${listaParticipantes == null}" th:each="participanteNow : ${listaParticipantes}">
+        <div class="list-item" th:unless="${listaParticipantes == null}"
+             th:each="i : ${#numbers.sequence(listaParticipantes.size() - 1, 0, -1)}"
+             th:with="participanteNow = ${listaParticipantes[i]}">
+            
             <div>
                 <img th:src="${participanteNow.imagem==null?'https://i.imgur.com/vUBrCxr.png':participanteNow.imagem}"
                      class="img-thumbnail" alt="..." referrerpolicy="no-referrer" width="50" height="50">
