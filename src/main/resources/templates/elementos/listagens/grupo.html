@@ -8,33 +8,38 @@
 
 
 <div th:fragment="grupo">
-    <div class="col-sm-3" th:unless="${listaGrupo == null}" th:each="grupoNow : ${listaGrupo}"
-         style="padding-bottom: 30px;">
-        <div th:with="idGrupoPai = ${@grupoService.findGrupoPaiDoGrupo(grupoNow.getId())}">
-            <div class="card" style="width: 60%;" th:unless="${(grupoNow.grupoRoot == false && idGrupoPai == null)}">
+
+    <div class="list list-row card" id="sortable" data-sortable-id="0" aria-dropeffect="move">
+        <div class="list-item" th:unless="${listaGrupo == null}" th:each="grupoNow : ${listaGrupo}"
+             th:if="${!(grupoNow.grupoRoot == false && @grupoService.findGrupoPaiDoGrupo(grupoNow.getId()) == null)}">
+            <div>
                 <img th:src="${grupoNow.imagem==null?'https://i.imgur.com/SfAl1Vb.png':grupoNow.imagem}"
-                     class="card-img-top" alt="..." referrerpolicy="no-referrer">
-                <div class="card-body">
-                    <h6 class="card-title text-center" th:text="${grupoNow.nome}">Nome do Grupo</h6>
-                </div>
-                <ul class="list-group list-group-flush" style="text-align: center;">
-                    <li class="list-group-item">
-                        <a th:href="${@grupoService.diretorioParaGrupo(grupoNow)}"
-                           class="btn btn-primary" th:text="${grupoNow.grupoRoot?'Ver Grupo':'Ver Subgrupo'}">Ver Subgrupo</a>
-                    </li>
-                    <li class="list-group-item" th:unless="${modoEditar == null}">
-                        <a th:href="${@grupoService.diretorioParaGrupo(grupoNow)} + '/editar'"
-                           class="btn btn-warning">Editar</a>
-                    </li>
-                    <li class="list-group-item" th:unless="${modoEditar == null}">
-                        <button th:attr="onclick=|removerGrupo('${idGrupoPai}', '${grupoNow.getId()}');|"
-                                href="#" class="btn btn-danger">Remover
-                        </button>
-                    </li>
-                </ul>
+                     class="img-thumbnail" alt="..." referrerpolicy="no-referrer" width="50" height="50">
+            </div>
+            <div class="flex">
+                <span class="item-author text-color" data-abc="true" th:text="${grupoNow.nome}">Nome do Grupo</span>
+                <div class="item-except text-muted text-sm h-1x" th:text="${grupoNow.tipo.label}">Tipo de Grupo</div>
+            </div>
+            <div class="no-wrap">
+                <div class="item-date text-muted text-sm d-none d-md-block"></div>
+            </div>
+            <div>
+
+                <a th:href="${@grupoService.diretorioParaGrupo(grupoNow)}"
+                   class="btn btn-primary" th:text="${grupoNow.grupoRoot?'Ver Grupo':'Ver Subgrupo'}">Ver
+                    Subgrupo</a>
+
+                <a th:unless="${modoEditar == null}" th:href="${@grupoService.diretorioParaGrupo(grupoNow)} + '/editar'"
+                   class="btn btn-warning">Editar</a>
+
+                <button th:unless="${modoEditar == null}"
+                        th:attr="onclick=|removerGrupo('${@grupoService.findGrupoPaiDoGrupo(grupoNow.getId())}', '${grupoNow.getId()}');|"
+                        href="#" class="btn btn-danger">Remover
+                </button>
             </div>
         </div>
     </div>
+
 </div>
 
 
