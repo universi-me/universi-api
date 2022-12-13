@@ -17,27 +17,10 @@
             <div class="row">
                 <h6 th:if="${grupo.participantes.empty}"> Sem Participantes </h6>
 
-                <div class="col-sm-2" th:unless="${grupo.participantes.empty}"
-                     th:each="i : ${#numbers.sequence(grupo.participantes.size() - 1, grupo.participantes.size()>=6?grupo.participantes.size() - 6:0, -1)}"
-                     th:with="participanteNow=${grupo.participantes[i]}"
-                     style="padding-bottom: 30px;">
-                    <div class="card" style="width:100%;min-width:70px;max-width:100px;">
-                        <img th:src="${participanteNow.imagem==null?'https://i.imgur.com/vUBrCxr.png':participanteNow.imagem}"
-                             class="card-img-top" alt="..." referrerpolicy="no-referrer">
-                        <div class="card-body">
-                            <h6 class="card-title text-center"><span
-                                    th:text="${participanteNow.getNome()==null?participanteNow.usuario.getUsername():participanteNow.getNome()}">Nome do participante</span><span
-                                    th:unless="${participanteNow.getNome()==null || participanteNow.usuario.isEmail_verificado() == false}">   <img
-                                    src="https://i.imgur.com/w3aKauq.png" width="22"/></span></h6>
-                        </div>
-                        <ul class="list-group list-group-flush" style="text-align: center;">
-                            <li class="list-group-item">
-                                <a th:href="@{/p/{path}(path=${participanteNow.usuario.getUsername()})}"
-                                   class="btn btn-primary">Ver Perfil</a>
-                            </li>
-                        </ul>
-                    </div>
+                <div th:with="listaParticipantes = ${grupo.participantes}">
+                    <div th:replace="elementos/listagens/participante :: participante"></div>
                 </div>
+
             </div>
         </div>
         <a th:unless="${!grupoService.temPermissaoParaGrupo(grupo, session.usuario)}" class="card-footer text-center"

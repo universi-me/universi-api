@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+
+<div th:fragment="participante">
+    <div class="col-sm-3" th:unless="${listaParticipantes == null}" th:each="participanteNow : ${listaParticipantes}"
+         style="padding-bottom: 30px;">
+        <div class="card" style="width: 10rem;">
+            <img th:src="${participanteNow.imagem==null?'https://i.imgur.com/vUBrCxr.png':participanteNow.imagem}"
+                 class="card-img-top" alt="..." referrerpolicy="no-referrer">
+            <div class="card-body">
+                <h6 class="card-title text-center"><span
+                        th:text="${participanteNow.getNome()==null?participanteNow.usuario.getUsername():participanteNow.getNome()}">Nome do participante</span><span
+                        th:unless="${participanteNow.getNome()==null || participanteNow.usuario.isEmail_verificado() == false}">   <img
+                        src="https://i.imgur.com/w3aKauq.png" width="22"/></span></h6>
+            </div>
+            <ul class="list-group list-group-flush" style="text-align: center;">
+                <li class="list-group-item">
+                    <a th:href="@{/p/{path}(path=${participanteNow.usuario.getUsername()})}"
+                       class="btn btn-primary">Ver Perfil</a>
+                </li>
+                <li class="list-group-item" th:unless="${modoEditar == null}">
+                    <button th:attr="onclick=|removerParticipante('${grupo.getId()}','${participanteNow.usuario.getUsername()}');|"
+                            href="#" class="btn btn-danger">Remover
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html>
