@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+
+<div th:fragment="recomendacao">
+    <div class="col-sm-2" th:unless="${listaRecomendacoes == null}" th:each="recomendacaoNow : ${listaRecomendacoes}" style="padding-bottom: 30px;">
+
+        <div class="card" style="width:100%;min-width:70px;max-width:100px;">
+            <img th:src="${(recomendacaoNow.origem==null || recomendacaoNow.origem.imagem==null)?'https://i.imgur.com/vUBrCxr.png':recomendacaoNow.origem.imagem}" class="card-img-top" alt="Perfil" referrerpolicy="no-referrer">
+            <div class="card-body">
+                <h6 class="card-title text-center"><span th:text="${recomendacaoNow.origem.getNome()==null?recomendacaoNow.origem.usuario.getUsername():recomendacaoNow.origem.getNome()}">Nome do participante</span><span th:unless="${recomendacaoNow.origem.getNome()==null || recomendacaoNow.origem.usuario.isEmail_verificado() == false}">   <img src="https://i.imgur.com/w3aKauq.png" width="22" /></span></h6>
+            </div>
+            <ul class="list-group list-group-flush" style="text-align: center;">
+                <li class="list-group-item" th:unless="${recomendacaoNow.competenciaTipo==null}">
+                    <p>Recomendou pela competência: <b th:text="${recomendacaoNow.competenciaTipo.nome}"></b></p>
+                </li>
+                <li class="list-group-item">
+                    <p class="card-text" th:text="${recomendacaoNow.getDescricao()}">Descrição da Recomendação</p>
+                </li>
+            </ul>
+        </div>
+
+    </div>
+</div>
+
+
+
+</body>
+</html>
