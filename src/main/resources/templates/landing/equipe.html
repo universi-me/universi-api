@@ -48,9 +48,8 @@
 
       <nav id="navbar" class="navbar">
         <ul>
-          <li><a class="nav-link scrollto active" href="#hero">Início</a></li>
-          <li><a class="nav-link scrollto" href="#about">Sobre</a></li>
-          <li><a class="nav-link scrollto" href="#team">Equipe</a></li>
+          <li><a class="nav-link scrollto" href="/">Início</a></li>
+          <li><a class="nav-link scrollto active" href="#team">Equipe</a></li>
           <li><a class="getstarted scrollto" href="/entrar">Entrar</a></li>
         </ul>
         <i class="bi bi-list mobile-nav-toggle"></i>
@@ -58,103 +57,6 @@
 
     </div>
   </header><!-- End Header -->
-
-  <!-- ======= Hero Section ======= -->
-  <section id="hero" class="hero d-flex align-items-center">
-
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-6 d-flex flex-column justify-content-center">
-          <h1 data-aos="fade-up">Sua Rede Social Acadêmica</h1>
-          <h2 data-aos="fade-up" data-aos-delay="400">Crie Grupos de Estudos, Defina suas Competências, Recomende seus Colegas Pelas Competências.</h2>
-          <div data-aos="fade-up" data-aos-delay="600">
-            <div class="text-center text-lg-start">
-              <a href="/entrar" class="btn-get-started scrollto d-inline-flex align-items-center justify-content-center align-self-center">
-                <span>Entrar</span>
-                <i class="bi bi-arrow-right"></i>
-              </a>
-            </div>
-          </div>
-        </div>
-        <div class="col-lg-6 hero-img" data-aos="zoom-out" data-aos-delay="200">
-          <img src="/img/landing/universi.me.png" class="img-fluid" alt="">
-        </div>
-      </div>
-    </div>
-
-  </section><!-- End Hero -->
-  
-      <!-- ======= Counts Section ======= -->
-    <section id="counts" class="counts">
-      <div class="container" data-aos="fade-up">
-        <div class="row gy-4">
-
-          <div class="col-lg-4 col-md-6">
-            <div class="count-box">
-              <i class="bi bi-hand-thumbs-up"></i>
-              <div>
-                <span data-purecounter-start="0" th:data-purecounter-end="${recomendacaoService.count()}" data-purecounter-duration="1" class="purecounter"></span>
-                <p>Recomendações Feitas</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-lg-4 col-md-6">
-            <div class="count-box">
-              <i class="bi bi-people" style="color: #15be56;"></i>
-              <div>
-                <span data-purecounter-start="0" th:data-purecounter-end="${grupoService.count()}" data-purecounter-duration="1" class="purecounter"></span>
-                <p>Grupos Criados</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-lg-4 col-md-6">
-            <div class="count-box">
-              <i class="bi bi-person" style="color: #bb0852;"></i>
-              <div>
-                <span data-purecounter-start="0" th:data-purecounter-end="${usuarioService.count()}" data-purecounter-duration="1" class="purecounter"></span>
-                <p>Usuários Registrados</p>
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-      </div>
-    </section><!-- End Counts Section -->
-
-  <main id="main">
-    <!-- ======= About Section ======= -->
-    <section id="about" class="about">
-
-      <div class="container" data-aos="fade-up">
-        <div class="row gx-0">
-
-          <div class="col-lg-6 d-flex flex-column justify-content-center" data-aos="fade-up" data-aos-delay="200">
-            <div class="content">
-              <h3>Sobre</h3>
-              <h2>Sobre A Universi.me</h2>
-              <p>
-                Uma rede social acadêmica, onde você terá seu perfil de estudante ou professor, criará projetos, grupos de estudos, definirá suas competências, poderá recomendar colegas, terá seu currículo, entre outras coisas.
-              </p>
-              <div class="text-center text-lg-start">
-                <a href="https://github.com/universi-me/" target="_blank" class="btn-read-more d-inline-flex align-items-center justify-content-center align-self-center">
-                  <span>Leia Mais</span>
-                  <i class="bi bi-arrow-right"></i>
-                </a>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-lg-6 d-flex align-items-center" data-aos="zoom-out" data-aos-delay="200">
-            <img src="/img/landing/about.jpg" class="img-fluid" alt="">
-          </div>
-
-        </div>
-      </div>
-
-    </section><!-- End About Section -->
 
     <!-- ======= Team Section ======= -->
     <section id="team" class="team">
@@ -433,7 +335,6 @@
             <h4>Links Da Página</h4>
             <ul>
               <li><i class="bi bi-chevron-right"></i> <a href="#hero">Início</a></li>
-              <li><i class="bi bi-chevron-right"></i> <a href="#about">Sobre</a></li>
               <li><i class="bi bi-chevron-right"></i> <a href="#team">Equipe</a></li>
               <li><i class="bi bi-chevron-right"></i> <a href="/entrar">Entrar</a></li>
             </ul>

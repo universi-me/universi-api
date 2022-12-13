@@ -51,12 +51,12 @@ public class Sys {
 
     @GetMapping("/")
     String index(HttpServletRequest request, HttpSession session, ModelMap map) {
+        return "landing/landing";
+    }
 
-        map.put("grupoService", grupoService);
-        map.put("usuarioService", usuarioService);
-        map.put("recomendacaoService", recomendacaoService);
-
-        return "landing";
+    @GetMapping("/equipe")
+    String equipe(HttpServletRequest request, HttpSession session, ModelMap map) {
+        return "landing/equipe";
     }
 
     @Bean
