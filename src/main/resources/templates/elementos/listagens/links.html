@@ -22,10 +22,10 @@
             <div>
 
                 <button onclick="editarLinkNow(this.id);"
-                        class="btn btn-warning" th:id="${linkNow.getId()}" th:unless="${modoEditar == null}">Editar
+                        class="btn btn-warning bi-pencil-square" th:id="${linkNow.getId()}" th:unless="${modoEditar == null}"> Editar
                 </button>
                 <button onclick="removerLinkNow(this.id);"
-                        class="btn btn-danger" th:id="${linkNow.getId()}" th:unless="${modoEditar == null}">Remover
+                        class="btn btn-danger bi bi-trash" th:id="${linkNow.getId()}" th:unless="${modoEditar == null}"> Remover
                 </button>
             </div>
         </div>

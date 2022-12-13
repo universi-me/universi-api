@@ -29,7 +29,7 @@
                 <a th:href="@{/p/{path}(path=${participanteNow.usuario.getUsername()})}"
                    class="btn btn-primary">Ver Perfil</a>
                 <button th:unless="${modoEditar == null}" th:attr="onclick=|removerParticipante('${grupo.getId()}','${participanteNow.usuario.getUsername()}');|"
-                        href="#" class="btn btn-danger">Remover
+                        href="#" class="btn btn-danger bi bi-trash"> Remover
                 </button>
 
             </div>

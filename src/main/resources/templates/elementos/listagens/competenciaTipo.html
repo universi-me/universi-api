@@ -21,11 +21,11 @@
             <div>
 
                 <button th:unless="${modoEditar == null}" onclick="editarCompetenciaNow(this.id);"
-                        class="btn btn-warning" th:id="${competenciaNow.getId()}">Editar
+                        class="btn btn-warning bi-pencil-square" th:id="${competenciaNow.getId()}"> Editar
                 </button>
 
                 <button th:unless="${modoEditar == null}" onclick="removerCompetenciaNow(this.id);"
-                        class="btn btn-danger" th:id="${competenciaNow.getId()}">Remover
+                        class="btn btn-danger bi bi-trash" th:id="${competenciaNow.getId()}"> Remover
                 </button>
 
             </div>

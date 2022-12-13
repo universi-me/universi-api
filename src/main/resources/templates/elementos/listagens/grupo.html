@@ -30,11 +30,11 @@
                     Subgrupo</a>
 
                 <a th:unless="${modoEditar == null}" th:href="${@grupoService.diretorioParaGrupo(grupoNow)} + '/editar'"
-                   class="btn btn-warning">Editar</a>
+                   class="btn btn-warning bi-pencil-square"> Editar</a>
 
                 <button th:unless="${modoEditar == null}"
                         th:attr="onclick=|removerGrupo('${@grupoService.findGrupoPaiDoGrupo(grupoNow.getId())}', '${grupoNow.getId()}');|"
-                        href="#" class="btn btn-danger">Remover
+                        href="#" class="btn btn-danger bi bi-trash"> Remover
                 </button>
             </div>
         </div>
