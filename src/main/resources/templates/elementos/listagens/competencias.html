@@ -9,43 +9,76 @@
 
 <div th:fragment="competencias">
 
-    <div class="col-sm-4" th:unless="${listaCompetencias == null}" th:each="competenciaNow : ${listaCompetencias}">
-        <div class="card" style="width:100%; margin-bottom:17px">
+    <div class="list list-row card" id="sortable" data-sortable-id="0" aria-dropeffect="move">
+        <div class="list-item" th:unless="${listaCompetencias == null}" th:each="competenciaNow : ${listaCompetencias}">
 
-            <!-- Start Cartão da competência -->
-            <div class="card-body">
+            <div class="flex">
+                <b class="item-author text-color" data-abc="true" th:text="${competenciaNow.competenciaTipo.nome}">Competecia</b>
+                <div class="item-except text-muted text-sm h-1x"
+                     th:text="${'('+ (competenciaNow.getNivel() == null ? 'Nenhuma Experiência' : competenciaNow.getNivel().label) + ')'}">
+                    Nível
+                </div>
+            </div>
+            <div class="no-wrap">
+                <div class="item-date text-muted text-sm d-none d-md-block" th:text="${competenciaNow.getDescricao()}">
+                    Descrição
+                </div>
+            </div>
+            <div>
 
-                <!-- Título -->
-                <h6 class="card-title text-center" th:text="${competenciaNow.competenciaTipo.nome}">Nome da
-                    competência</h6>
+                <button th:unless="${modoEditar == null}" onclick="editarCompetenciaNow(this.id);"
+                        class="btn btn-warning" th:id="${competenciaNow.getId()}">Editar
+                </button>
 
-                <!-- Nível -->
-                <h6 class="card-title text-center"
-                    th:text="${'('+ (competenciaNow.getNivel() == null ? 'Nenhuma Experiência' : competenciaNow.getNivel().label) + ')'}">
-                    nível da competência
-                </h6>
-
-                <br>
-
-                <!-- Descrição -->
-                <p style="text-align:center" th:text="${competenciaNow.getDescricao()}">Descrição</p>
-
+                <button th:unless="${modoEditar == null}" onclick="removerCompetenciaNow(this.id);"
+                        class="btn btn-danger" th:id="${competenciaNow.getId()}">Remover
+                </button>
 
             </div>
+        </div>
+    </div>
 
-            <ul class="list-group list-group-flush" style="text-align: center;">
-                <li class="list-group-item" th:unless="${modoEditar == null}">
-                    <button onclick="editarCompetenciaNow(this.id);"
-                            class="btn btn-warning" th:id="${competenciaNow.getId()}">Editar</button>
-                </li>
-                <li class="list-group-item" th:unless="${modoEditar == null}">
-                    <button onclick="removerCompetenciaNow(this.id);"
-                            class="btn btn-danger" th:id="${competenciaNow.getId()}">Remover</button>
-                </li>
-            </ul>
-            <!-- End Cartão da competência -->
+</div>
+
+
+<div class="col-sm-4" th:unless="${listaCompetencias == null}" th:each="competenciaNow : ${listaCompetencias}">
+    <div class="card" style="width:100%; margin-bottom:17px">
+
+        <!-- Start Cartão da competência -->
+        <div class="card-body">
+
+            <!-- Título -->
+            <h6 class="card-title text-center" th:text="${competenciaNow.competenciaTipo.nome}">Nome da
+                competência</h6>
+
+            <!-- Nível -->
+            <h6 class="card-title text-center"
+                th:text="${'('+ (competenciaNow.getNivel() == null ? 'Nenhuma Experiência' : competenciaNow.getNivel().label) + ')'}">
+                nível da competência
+            </h6>
+
+            <br>
+
+            <!-- Descrição -->
+            <p style="text-align:center" th:text="${competenciaNow.getDescricao()}">Descrição</p>
+
 
         </div>
+
+        <ul class="list-group list-group-flush" style="text-align: center;">
+            <li class="list-group-item" th:unless="${modoEditar == null}">
+                <button onclick="editarCompetenciaNow(this.id);"
+                        class="btn btn-warning" th:id="${competenciaNow.getId()}">Editar
+                </button>
+            </li>
+            <li class="list-group-item" th:unless="${modoEditar == null}">
+                <button onclick="removerCompetenciaNow(this.id);"
+                        class="btn btn-danger" th:id="${competenciaNow.getId()}">Remover
+                </button>
+            </li>
+        </ul>
+        <!-- End Cartão da competência -->
+
     </div>
 </div>
 

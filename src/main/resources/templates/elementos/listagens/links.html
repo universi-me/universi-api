@@ -9,36 +9,25 @@
 
 <div th:fragment="links">
 
-    <div class="col-sm-4" th:unless="listaLinks == null" th:each="linkNow: ${listaLinks}">
-        <div class="card" style="width:100%; margin-bottom:17px">
-
-            <!-- Start Cartão da link -->
-            <div class="card-body">
-
-                <!-- tipo -->
-                <ul class="list-group">
-                    <a th:class="${'list-group-item bi-' + linkNow.tipo.bootstrapIconName}" th:href="${linkNow.url}"
-                       th:text="${' ' + ((linkNow.nome != null)?linkNow.nome:linkNow.tipo.label)}"
-                       target="_blank">Link</a>
-                </ul>
-
+    <div class="list list-row card" id="sortable" data-sortable-id="0" aria-dropeffect="move">
+        <div class="list-item" th:unless="listaLinks == null" th:each="linkNow: ${listaLinks}">
+            <div class="flex">
+                <a th:class="${'list-group-item bi-' + linkNow.tipo.bootstrapIconName}" th:href="${linkNow.url}"
+                   th:text="${' ' + ((linkNow.nome != null)?linkNow.nome:linkNow.tipo.label)}"
+                   target="_blank">Link</a>
             </div>
+            <div class="no-wrap">
+                <div class="item-date text-muted text-sm d-none d-md-block"></div>
+            </div>
+            <div>
 
-            <ul class="list-group list-group-flush" style="text-align: center;">
-                <li class="list-group-item" th:unless="${modoEditar == null}">
-                    <button onclick="editarLinkNow(this.id);"
-                            class="btn btn-warning" th:id="${linkNow.getId()}">Editar
-                    </button>
-                </li>
-                <li class="list-group-item" th:unless="${modoEditar == null}">
-                    <button onclick="removerLinkNow(this.id);"
-                            class="btn btn-danger" th:id="${linkNow.getId()}">Remover
-                    </button>
-                </li>
-            </ul>
-
-            <!-- End Cartão da competência -->
-
+                <button onclick="editarLinkNow(this.id);"
+                        class="btn btn-warning" th:id="${linkNow.getId()}" th:unless="${modoEditar == null}">Editar
+                </button>
+                <button onclick="removerLinkNow(this.id);"
+                        class="btn btn-danger" th:id="${linkNow.getId()}" th:unless="${modoEditar == null}">Remover
+                </button>
+            </div>
         </div>
     </div>
 
