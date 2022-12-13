@@ -14,9 +14,7 @@
 
     <div style="max-width=80%;margin: 0 auto;" th:unless="${error != null}">
 
-        <div id="diretorioAtual" th:unless="${grupoDiretorio == null}" th:value="${grupoDiretorio}"></div>
-
-        <p><h4 th:text="'Grupo: ' + ${grupo.nome}" th:unless="${grupo == null}" style="text-align: center;">Grupo</h4></p>
+        <p><h4 th:unless="${grupo == null}" th:text="${grupo.grupoRoot?'Grupo':'Subgrupo'} + ': ' + ${grupo.nome}" style="text-align: center;">Grupo</h4></p>
 
 
         <div class="container">

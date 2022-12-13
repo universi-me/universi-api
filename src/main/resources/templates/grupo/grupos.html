@@ -23,30 +23,13 @@
         <div class="card-body">
             <div class="row">
                 <h6 th:if="${grupo.subGrupos.empty}"> Sem Subgrupos </h6>
-                <div class="col-sm-3" th:each="grupoNow : ${grupo.subGrupos}" style="padding-bottom: 30px;">
-                    <div class="card" style="width: 10rem;">
-                        <img th:src="${grupoNow.imagem==null?'https://i.imgur.com/SfAl1Vb.png':grupoNow.imagem}"
-                             class="card-img-top" alt="..." referrerpolicy="no-referrer">
-                        <div class="card-body">
-                            <h6 class="card-title text-center" th:text="${grupoNow.nome}">Nome do Grupo</h6>
-                        </div>
-                        <ul class="list-group list-group-flush" style="text-align: center;">
-                            <li class="list-group-item">
-                                <a th:href="${grupoDiretorio} + '/' + ${grupoNow.nickname}"
-                                   class="btn btn-primary">Ver Subgrupo</a>
-                            </li>
-                            <li class="list-group-item">
-                                <a th:href="${grupoDiretorio} + '/' + ${grupoNow.nickname} + '/editar'"
-                                   class="btn btn-warning">Editar</a>
-                            </li>
-                            <li class="list-group-item">
-                                <button th:attr="onclick=|removerGrupo('${grupo.getId()}', '${grupoNow.getId()}');|"
-                                        href="#" class="btn btn-danger">Remover
-                                </button>
-                            </li>
-                        </ul>
+
+                <div th:with="listaGrupo = ${grupo.subGrupos}">
+                    <div th:with="modoEditar = true">
+                        <div th:replace="elementos/listagens/grupo :: grupo"></div>
                     </div>
                 </div>
+
             </div>
 
             <script>

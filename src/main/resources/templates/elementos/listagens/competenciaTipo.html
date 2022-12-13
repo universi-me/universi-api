@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+
+<div th:fragment="competenciaTipo">
+
+    <div class="list list-row card" id="sortable" data-sortable-id="0" aria-dropeffect="move">
+        <div class="list-item" th:unless="${listaCompetenciaTipo == null}"
+             th:each="competenciaNow: ${listaCompetenciaTipo}">
+            <div class="flex">
+                <span class="item-author text-color" data-abc="true" th:text="${competenciaNow.getNome()}"></span>
+            </div>
+            <div class="no-wrap">
+                <div class="item-date text-muted text-sm d-none d-md-block"></div>
+            </div>
+            <div>
+
+                <button th:unless="${modoEditar == null}" onclick="editarCompetenciaNow(this.id);"
+                        class="btn btn-warning bi-pencil-square" th:id="${competenciaNow.getId()}"> Editar
+                </button>
+
+                <button th:unless="${modoEditar == null}" onclick="removerCompetenciaNow(this.id);"
+                        class="btn btn-danger bi bi-trash" th:id="${competenciaNow.getId()}"> Remover
+                </button>
+
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+
+</body>
+</html>

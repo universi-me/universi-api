@@ -42,35 +42,12 @@
             <div class="row">
                 <h6 th:if="${competenciaTipoService.findAll().empty}"> Sem Competências </h6>
 
-                <div class="col-sm-4" th:unless="${competenciaTipoService.findAll().empty}"
-                     th:each="competenciaNow: ${competenciaTipoService.findAll()}">
-                    <div class="card" style="width:100%; margin-bottom:17px">
-
-                        <!-- Start Cartão da competência -->
-                        <div class="card-body">
-
-                            <!-- Título -->
-                            <h6 class="card-title text-center" th:text="${competenciaNow.getNome()}">Nome da
-                                competência</h6>
-
-
-                        </div>
-
-                        <ul class="list-group list-group-flush" style="text-align: center;">
-                            <li class="list-group-item">
-                                <button onclick="editarCompetenciaNow(this.id);"
-                                        class="btn btn-warning" th:id="${competenciaNow.getId()}">Editar</button>
-                            </li>
-                            <li class="list-group-item">
-                                <button onclick="removerCompetenciaNow(this.id);"
-                                        class="btn btn-danger" th:id="${competenciaNow.getId()}">Remover</button>
-                            </li>
-                        </ul>
-
-                        <!-- End Cartão da competência -->
-
+                <div th:with="listaCompetenciaTipo = ${competenciaTipoService.findAll()}">
+                    <div th:with="modoEditar = true">
+                        <div th:replace="elementos/listagens/competenciaTipo :: competenciaTipo"></div>
                     </div>
                 </div>
+
             </div>
         </div>
 

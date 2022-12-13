@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+
+<div th:fragment="links">
+
+    <div class="list list-row card" id="sortable" data-sortable-id="0" aria-dropeffect="move">
+        <div class="list-item" th:unless="listaLinks == null" th:each="linkNow: ${listaLinks}">
+            <div class="flex">
+                <a th:class="${'list-group-item bi-' + linkNow.tipo.bootstrapIconName}" th:href="${linkNow.url}"
+                   th:text="${' ' + ((linkNow.nome != null)?linkNow.nome:linkNow.tipo.label)}"
+                   target="_blank">Link</a>
+            </div>
+            <div class="no-wrap">
+                <div class="item-date text-muted text-sm d-none d-md-block"></div>
+            </div>
+            <div>
+
+                <button onclick="editarLinkNow(this.id);"
+                        class="btn btn-warning bi-pencil-square" th:id="${linkNow.getId()}" th:unless="${modoEditar == null}"> Editar
+                </button>
+                <button onclick="removerLinkNow(this.id);"
+                        class="btn btn-danger bi bi-trash" th:id="${linkNow.getId()}" th:unless="${modoEditar == null}"> Remover
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+</body>
+</html>
