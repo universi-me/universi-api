@@ -21,7 +21,7 @@ import java.util.Map;
 @Controller
 public class LinkController {
     @Autowired
-    private LinkService linkService;
+    public LinkService linkService;
 
     @PostMapping(value = "/link/criar", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody

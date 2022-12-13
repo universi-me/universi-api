@@ -35,10 +35,10 @@ public class RecomendacaoController {
     public CompetenciaService competenciaService;
 
     @Autowired
-    private UsuarioService usuarioService;
+    public UsuarioService usuarioService;
 
     @Autowired
-    private PerfilService perfilService;
+    public PerfilService perfilService;
 
     @Autowired
     public CompetenciaTipoService competenciaTipoService;

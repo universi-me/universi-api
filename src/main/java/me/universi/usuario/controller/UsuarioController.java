@@ -37,9 +37,9 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 @Controller
 public class UsuarioController {
     @Autowired
-    private UsuarioService usuarioService;
+    public UsuarioService usuarioService;
     @Autowired
-    private PerfilService perfilService;
+    public PerfilService perfilService;
     @Autowired
     public GrupoService grupoService;
     @Autowired

@@ -29,10 +29,10 @@ public class CompetenciaController {
     public CompetenciaTipoService competenciaTipoService;
 
     @Autowired
-    private PerfilService perfilService;
+    public PerfilService perfilService;
 
     @Autowired
-    private UsuarioService usuarioService;
+    public UsuarioService usuarioService;
 
     @PostMapping(value = "/competencia/criar", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
