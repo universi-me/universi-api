@@ -20,6 +20,9 @@ import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ *  Classe básica de teste, precisa de ajustes e limpeza do código
+ */
 @SpringBootTest
 public class CompetenciaTest {
 
@@ -210,6 +213,53 @@ public class CompetenciaTest {
     }
     @Test
     void read(){
-        assertTrue(true);
+        String nome = "competenciaTestread";
+        Usuario userNew = new Usuario(nome, nome+"@email.com", usuarioService.codificarSenha("senha"));
+        try {
+            usuarioService.createUser(userNew);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        userNew.setNome(userNew.getNome());
+
+        CompetenciaTipo compTipo1 = new CompetenciaTipo();
+        compTipo1.setNome("testereadtipo1"+userNew.getId());
+        CompetenciaTipo compTipo2 = new CompetenciaTipo();
+        compTipo2.setNome("testereadtipo2"+userNew.getId());
+        competenciaTipoRepository.save(compTipo1);
+        competenciaTipoRepository.save(compTipo2);
+
+        Competencia competencia1 = new Competencia();
+        competencia1.setCompetenciaTipo(compTipo1);
+        competencia1.setDescricao("Sou top em java - read 1"+userNew.getId());
+        competenciaService.save(competencia1);
+
+        Competencia competencia2 = new Competencia();
+        competencia2.setCompetenciaTipo(compTipo2);
+        competencia2.setDescricao("Sou top em java - read 2"+userNew.getId());
+        competenciaService.save(competencia2);
+
+        Perfil admin_perfil = userNew.getPerfil();
+        admin_perfil.setNome("perfil1");
+        admin_perfil.setBio("Bio - admin_perfil"+userNew.getId());
+        admin_perfil.setSexo(Sexo.M);
+
+        Perfil comum_perfil = userNew.getPerfil();
+        comum_perfil.setNome("perfil2");
+        comum_perfil.setBio("Bio - comum_perfil"+userNew.getId());
+        comum_perfil.setSexo(Sexo.M);
+
+        Collection<Competencia> competencias = new ArrayList<Competencia>();
+        competencias.add(competencia1);
+        competencias.add(competencia2);
+        admin_perfil.setCompetencias(competencias);
+        comum_perfil.setCompetencias(competencias);
+
+        competenciaService.save(competencia1);
+        competenciaService.save(competencia2);
+
+
+        assertTrue(competenciaService.findAll().size() >= 2);
+
     }
 }
