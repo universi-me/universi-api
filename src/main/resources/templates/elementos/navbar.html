@@ -24,7 +24,7 @@
 
                     <li class="nav-item"
                         th:if="${session != null && session.usuario != null && #strings.equals(session.usuario.autoridade, 'ROLE_ADMIN')}">
-                        <a th:class="'nav-link bi bi-tools ' + ${#strings.equals(enderecoAtual, '/admin')?'active':''}" aria-current="page" href="/admin"> Área Administrativa</a>
+                        <a th:class="'nav-link bi bi-tools ' + ${#strings.startsWith(enderecoAtual, '/admin')?'active':''}" aria-current="page" href="/admin"> Área Administrativa</a>
                     </li>
                     <li class="nav-item">
                         <a th:class="'nav-link bi bi-people-fill ' + ${#strings.equals(enderecoAtual, '/grupos')?'active':''}" aria-current="page" href="/grupos"> Grupos</a>

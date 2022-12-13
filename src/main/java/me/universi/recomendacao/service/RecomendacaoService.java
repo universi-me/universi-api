@@ -65,18 +65,13 @@ public class RecomendacaoService {
             throw new RecomendacaoInvalidaException("A competência da recomendação não foi escolhida");
         }return true;
     }
-    public boolean validarDescricao(String descricao) throws RecomendacaoInvalidaException {
-        if(descricao.isEmpty() || descricao == null){
-            throw new RecomendacaoInvalidaException("A destrição da recomendação não é válida");
-        }return true;
-    }
     public void update(Recomendacao recomendacao) throws RecomendacaoInvalidaException {
         if(this.validar(recomendacao)){
             recomendacaoRepository.saveAndFlush(recomendacao);
         }
     }
     private boolean validar(Recomendacao recomendacao) throws RecomendacaoInvalidaException {
-        if(!validarPerfilOrigem(recomendacao) || !validarPerfilDestino(recomendacao) || !validarDescricao(recomendacao.getDescricao()) || !validarCompetenciaValida(recomendacao)){
+        if(!validarPerfilOrigem(recomendacao) || !validarPerfilDestino(recomendacao) || !validarCompetenciaValida(recomendacao)){
             return false;
         }return true;
     }
