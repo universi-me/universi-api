@@ -7,6 +7,7 @@ import me.universi.perfil.entities.Perfil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,5 +52,8 @@ public class CompetenciaService {
             return false;
         }
         return false;
+    }
+    public void deleteAll(Collection<Competencia> competencias){
+        competenciaRepository.deleteAll(competencias);
     }
 }
