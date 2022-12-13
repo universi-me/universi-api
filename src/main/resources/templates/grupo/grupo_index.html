@@ -26,6 +26,13 @@
                         <img th:src="${grupo.imagem==null?'https://i.imgur.com/SfAl1Vb.png':grupo.imagem}" class="card-img-top" alt="Grupo" referrerpolicy="no-referrer">
                         <div class="card-body">
                             <h5 class="card-title text-center" th:text="${grupo.nome}">Nome do Grupo</h5>
+
+                            <div class="text-center" th:unless="${grupo == null || !grupo.podeEntrar}">
+                                <br/>
+                                <ul class="list-group">
+                                    <button class="list-group-item bi bi-box-arrow-in-right" onclick="entrarNoGrupoNow(this.id)" style="color: #3AC153;" th:id="${grupo.getId()}"> Entrar</button>
+                                </ul>
+                            </div>
                         </div>
                         <div class="card-header card-footer text-center">Descrição</div>
                         <div class="card-body">
@@ -75,6 +82,18 @@
         </div>
 
     </div>
+
+    <script>
+    function entrarNoGrupoNow(grupoId) {
+        entrarNoGrupo(grupoId, function addCallback(jsonResponse) {
+            if(jsonResponse.sucess) {
+                setTimeout(function () {
+                    location.reload();
+                }, tempoDelayParaRedirecionar);
+            }
+        });
+    }
+    </script>
 
 </div>
 

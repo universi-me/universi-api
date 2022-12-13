@@ -90,6 +90,13 @@
                         grupo.</label>
                 </div>
                 <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="podeEntrar"
+                           name="podeEntrar"
+                           th:checked="${flagPage!='flagCriar' && grupo.podeEntrar} ? true : false">
+                    <label class="form-check-label" for="podeEntrar">Permitir entrada de participantes neste
+                        grupo.</label>
+                </div>
+                <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" role="switch" id="grupoPublico"
                            name="grupoPublico"
                            th:checked="${flagPage!='flagCriar' && grupo.grupoPublico} ? true : false">
