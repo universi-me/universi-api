@@ -23,7 +23,7 @@
                     <div th:replace="elementos/listagens/recomendacao :: recomendacao"></div>
                 </div>
 
-                
+
             </div>
         </div>
     </div>
@@ -56,34 +56,11 @@
             <div class="row">
                 <h6 th:if="${perfil.getCompetencias().empty}"> Sem Competências </h6>
 
-                <div class="col-sm-4" th:unless="${perfil.getCompetencias().empty}"
-                     th:each="competenciaNow : ${perfil.getCompetencias()}">
-                    <div class="card" style="width:100%; margin-bottom:17px">
-
-                        <!-- Start Cartão da competência -->
-                        <div class="card-body">
-
-                            <!-- Título -->
-                            <h6 class="card-title text-center" th:text="${competenciaNow.competenciaTipo.nome}">Nome da
-                                competência</h6>
-
-                            <!-- Nível -->
-                            <h6 class="card-title text-center"
-                                th:text="${'('+ (competenciaNow.getNivel() == null ? 'Nenhuma Experiência' : competenciaNow.getNivel().label) + ')'}">
-                                nível da competência
-                            </h6>
-
-                            <br>
-
-                            <!-- Descrição -->
-                            <p style="text-align:center" th:text="${competenciaNow.getDescricao()}">Descrição</p>
-
-
-                        </div>
-                        <!-- End Cartão da competência -->
-
-                    </div>
+                <div th:with="listaCompetencias = ${perfil.getCompetencias()}">
+                    <div th:replace="elementos/listagens/competencias :: competencias"></div>
                 </div>
+
+
             </div>
         </div>
 

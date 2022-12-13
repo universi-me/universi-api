@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+
+<div th:fragment="competencias">
+
+    <div class="col-sm-4" th:unless="${listaCompetencias == null}" th:each="competenciaNow : ${listaCompetencias}">
+        <div class="card" style="width:100%; margin-bottom:17px">
+
+            <!-- Start Cartão da competência -->
+            <div class="card-body">
+
+                <!-- Título -->
+                <h6 class="card-title text-center" th:text="${competenciaNow.competenciaTipo.nome}">Nome da
+                    competência</h6>
+
+                <!-- Nível -->
+                <h6 class="card-title text-center"
+                    th:text="${'('+ (competenciaNow.getNivel() == null ? 'Nenhuma Experiência' : competenciaNow.getNivel().label) + ')'}">
+                    nível da competência
+                </h6>
+
+                <br>
+
+                <!-- Descrição -->
+                <p style="text-align:center" th:text="${competenciaNow.getDescricao()}">Descrição</p>
+
+
+            </div>
+
+            <ul class="list-group list-group-flush" style="text-align: center;">
+                <li class="list-group-item" th:unless="${modoEditar == null}">
+                    <button onclick="editarCompetenciaNow(this.id);"
+                            class="btn btn-warning" th:id="${competenciaNow.getId()}">Editar</button>
+                </li>
+                <li class="list-group-item" th:unless="${modoEditar == null}">
+                    <button onclick="removerCompetenciaNow(this.id);"
+                            class="btn btn-danger" th:id="${competenciaNow.getId()}">Remover</button>
+                </li>
+            </ul>
+            <!-- End Cartão da competência -->
+
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html>
