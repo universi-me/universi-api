@@ -82,11 +82,6 @@ public class RecomendacaoController {
                 throw new RecomendacaoInvalidaException("Parametro destino é nulo.");
             }
 
-            String descricao = (String)body.get("descricao");
-            if(descricao == null) {
-                throw new RecomendacaoInvalidaException("Parametro descricao é nulo.");
-            }
-
             String competenciaTipoId = (String)body.get("competenciatipoId");
             if(competenciaTipoId == null) {
                 throw new RecomendacaoInvalidaException("Parametro competenciaTipoId é nulo.");
@@ -111,16 +106,21 @@ public class RecomendacaoController {
                 throw new RecomendacaoInvalidaException("Competencia não encontrada.");
             }
 
-            Recomendacao recomendacoNew = new Recomendacao();
+            String descricao = (String)body.get("descricao");
 
+            Recomendacao recomendacoNew = new Recomendacao();
             recomendacoNew.setDestino(perfilDestino);
             recomendacoNew.setOrigem(perfilOrigem);
-            recomendacoNew.setDescricao(descricao);
             recomendacoNew.setCompetenciaTipo(compT);
+
+            if(descricao != null && descricao.length() > 0) {
+                recomendacoNew.setDescricao(descricao);
+            }
 
             recomendacaoService.save(recomendacoNew);
 
-            resposta.mensagem = "Recomendacao criada.";
+            resposta.mensagem = "A sua recomendação foi feita.";
+            resposta.enderecoParaRedirecionar = "/p/" + perfilDestino.getUsuario().getUsername();
             resposta.sucess = true;
             return resposta;
 
