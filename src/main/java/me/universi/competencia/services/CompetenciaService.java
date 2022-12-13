@@ -36,6 +36,8 @@ public class CompetenciaService {
         return competenciaRepository.findAll();
     }
 
+    public void update(Competencia competencia){ competenciaRepository.saveAndFlush(competencia); }
+
     public boolean perfilTemCompetencia(Perfil perfil, Competencia competencia) {
         try {
             if(perfil.getCompetencias() != null) {
