@@ -29,10 +29,10 @@ import java.util.Map;
 @Controller
 public class PerfilController {
     @Autowired
-    private UsuarioService usuarioService;
+    public UsuarioService usuarioService;
 
     @Autowired
-    private PerfilService perfilService;
+    public PerfilService perfilService;
 
     @Autowired
     public GrupoService grupoService;
