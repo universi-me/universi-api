@@ -82,7 +82,16 @@ function configurarUploadDeImagemComCrop() {
         $('#cropModalCenter').modal('hide');
         cropper.getCroppedCanvas().toBlob((blob) => {
               var imageFile = new File([blob], "image.jpeg", {type: "image/jpeg",lastModified: new Date(0)});
-              uploadDaImagem(imageFile);
+              // comprimir imagem
+              new Compressor(imageFile, {
+                  quality: 0.5,
+                  success(result) {
+                      uploadDaImagem(result);
+                  },
+                  error(err) {
+                      alert("Ocorreu um erro ao comprimir a imagem.", 'warning');
+                  },
+              });
         });
     });
     //<!-- Crop Image End -->
