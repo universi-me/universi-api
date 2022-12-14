@@ -26,12 +26,11 @@
 		<intercept-url pattern="/img/**" access="permitAll"/>
 		<intercept-url pattern="/favicon.ico" access="permitAll"/>
 
-		<!-- Test rules -->
+		<!-- Admin rules -->
 		<intercept-url pattern="/admin/**" access="hasRole('ADMIN')"/>
-		<intercept-url pattern="/user" access="hasRole('USER')"/>
 
-		<!-- Perimitir acesso ao H2-console sem login -->
-		<intercept-url pattern="/h2-console/**" access="permitAll"/>
+		<!-- Perimitir acesso ao H2-console -->
+		<intercept-url pattern="/h2-console/**" access="hasRole('ADMIN')"/>
 		
 		<intercept-url pattern="/**" access="isAuthenticated()"/>
 
