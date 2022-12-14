@@ -84,7 +84,7 @@ function configurarUploadDeImagemComCrop() {
               var imageFile = new File([blob], "image.jpeg", {type: "image/jpeg",lastModified: new Date(0)});
               // comprimir imagem
               new Compressor(imageFile, {
-                  quality: 0.5,
+                  quality: 0.6,
                   success(result) {
                       uploadDaImagem(result);
                   },
