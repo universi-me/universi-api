@@ -151,6 +151,8 @@ public class GrupoController {
 
             Boolean podeCriarGrupo = (Boolean)body.get("podeCriarGrupo");
             Boolean grupoPublico = (Boolean)body.get("grupoPublico");
+            Boolean podeEntrar = (Boolean)body.get("podeEntrar");
+
 
             Grupo grupoPai = grupoIdPai==null?null:grupoService.findFirstById(Long.valueOf(grupoIdPai));
 
@@ -173,6 +175,9 @@ public class GrupoController {
                 }
                 if(grupoPublico != null) {
                     grupoNew.setGrupoPublico(grupoPublico);
+                }
+                if(podeEntrar != null) {
+                    grupoNew.setPodeEntrar(podeEntrar);
                 }
                 if((grupoRoot != null && grupoRoot) && usuarioService.isContaAdmin(usuario)) {
                     grupoNew.setGrupoRoot(true);
@@ -212,6 +217,7 @@ public class GrupoController {
 
             Boolean podeCriarGrupo = (Boolean)body.get("podeCriarGrupo");
             Boolean grupoPublico = (Boolean)body.get("grupoPublico");
+            Boolean podeEntrar = (Boolean)body.get("podeEntrar");
 
             Usuario usuario = (Usuario) session.getAttribute("usuario");
             Grupo grupoEdit = grupoService.findFirstById(Long.valueOf(grupoId));
@@ -235,6 +241,10 @@ public class GrupoController {
                 if(grupoPublico != null) {
                     grupoEdit.setGrupoPublico(grupoPublico);
                 }
+                if(podeEntrar != null) {
+                    grupoEdit.setPodeEntrar(podeEntrar);
+                }
+
 
                 grupoService.save(grupoEdit);
 
@@ -244,6 +254,46 @@ public class GrupoController {
             }
 
             throw new GrupoException("Falha ao editar grupo");
+
+        } catch (Exception e) {
+            resposta.mensagem = e.getMessage();
+            return resposta;
+        }
+    }
+
+    @ResponseBody
+    @PostMapping(value = "/grupo/participante/entrar", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public Object grupo_participante_entrar(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+        Resposta resposta = new Resposta();
+        try {
+
+            String grupoId = (String)body.get("grupoId");
+            if(grupoId == null) {
+                throw new GrupoException("Parametro grupoId é nulo.");
+            }
+
+            Usuario usuario = (Usuario) session.getAttribute("usuario");
+
+            Grupo grupoEdit = grupoService.findFirstById(Long.valueOf(grupoId));
+            if(grupoEdit == null) {
+                throw new GrupoException("Grupo não encontrado.");
+            }
+
+            if(!grupoEdit.isPodeEntrar()) {
+                throw new GrupoException("Grupo não permite entrada de paticipantes.");
+            }
+
+            if(grupoEdit.isPodeEntrar() || grupoService.verificarPermissaoParaGrupo(grupoEdit, usuario)) {
+                if(grupoService.adicionarParticipante(grupoEdit, usuario.getPerfil())) {
+                    resposta.sucess = true;
+                    resposta.mensagem = "Você entrou no Grupo.";
+                    return resposta;
+                } else {
+                    throw new GrupoException("Você já esta neste Grupo.");
+                }
+            }
+
+            throw new GrupoException("Falha ao adicionar participante ao grupo");
 
         } catch (Exception e) {
             resposta.mensagem = e.getMessage();

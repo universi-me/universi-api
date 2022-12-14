@@ -18,6 +18,12 @@ function removerParticipanteDoGrupo(grupoId, participante, callback) {
    }
    api_request('/grupo/participante/remover', bodyValores, callback);
 }
+function entrarNoGrupo(grupoId, callback) {
+   var bodyValores = {
+      grupoId: grupoId,
+   }
+   api_request('/grupo/participante/entrar', bodyValores, callback);
+}
 function removerSubGrupo(grupoId, grupoIdRemover, callback) {
    var bodyValores = {
       grupoId: grupoId,

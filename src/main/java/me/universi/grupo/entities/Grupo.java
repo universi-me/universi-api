@@ -67,6 +67,12 @@ public class Grupo {
     @Column(name = "podeCriarGrupo")
     public boolean podeCriarGrupo;
 
+    @Column(name = "podeEntrar")
+    public boolean podeEntrar;
+
+    @Column(name = "podeAddParticipante")
+    public boolean podeAddParticipante;
+
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "data_de_criacao")
@@ -188,6 +194,22 @@ public class Grupo {
 
     public void setGrupoPublico(boolean grupoPublico) {
         this.grupoPublico = grupoPublico;
+    }
+
+    public boolean isPodeEntrar() {
+        return podeEntrar;
+    }
+
+    public void setPodeEntrar(boolean podeEntrar) {
+        this.podeEntrar = podeEntrar;
+    }
+
+    public boolean isPodeAddParticipante() {
+        return podeAddParticipante;
+    }
+
+    public void setPodeAddParticipante(boolean podeAddParticipante) {
+        this.podeAddParticipante = podeAddParticipante;
     }
 
     @Override
