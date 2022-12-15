@@ -7,6 +7,7 @@ public enum TipoLink {
     TWITTER("Twitter", "twitter"),
     WORDPRESS("Wordpress", "wordpress"),
     TELEGRAM("Telegram", "telegram"),
+    INSTAGRAM("Instagram", "instagram"),
     REDDIT("Reddit", "reddit"),
     LINKEDIN("LinkedIn", "linkedin"),
     DISCORD("Discord", "discord"),

@@ -65,11 +65,11 @@
         </div>
 
         <!-- Start Editar competências -->
-        <a th:unless="${!usuarioService.usuarioDonoDaSessao(perfil.usuario)}" class="card-footer text-center"
+        <a th:unless="${!usuarioService.usuarioDonoDaSessao(perfil.usuario)}" class="card-footer text-center bi bi-list-ul"
            style="background-color:#B4FFC2;
             text-decoration: none;
             cursor: pointer" th:href="'/p/' +${perfil.getUsuario().getUsername()} + '/competencias'">
-            Gerenciar Minhas Competências
+             Gerenciar Minhas Competências
         </a>
         <!-- End Editar competências -->
 

@@ -47,8 +47,8 @@
                         </div>
 
                         <ul class="list-group list-group-flush" th:unless="${perfil == null || #strings.endsWith(#httpServletRequest.requestURI, '/editar') || !usuarioService.usuarioDonoDaSessao(perfil.usuario)}">
-                            <a th:href="'/p/' +${perfil.getUsuario().getUsername()} + '/links'" class="list-group-item" style="background-color:#B4FFC2;text-decoration: none;">Gerenciar Links</a>
-                            <a th:href="'/p/' +${perfil.getUsuario().getUsername()} + '/editar'" class="list-group-item" style="background-color:#B4FFC2;text-decoration: none;">Editar Perfil</a>
+                            <a th:href="'/p/' +${perfil.getUsuario().getUsername()} + '/links'" class="list-group-item text-center bi bi-link" style="background-color:#B4FFC2;text-decoration: none;"> Gerenciar Links</a>
+                            <a th:href="'/p/' +${perfil.getUsuario().getUsername()} + '/editar'" class="list-group-item text-center bi bi-pencil-square" style="background-color:#B4FFC2;text-decoration: none;"> Editar Perfil</a>
                         </ul>
                     </div>
                 </div>

@@ -302,6 +302,38 @@ public class GrupoController {
     }
 
     @ResponseBody
+    @PostMapping(value = "/grupo/participante/sair", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public Object grupo_participante_sair(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+        Resposta resposta = new Resposta();
+        try {
+
+            String grupoId = (String)body.get("grupoId");
+            if(grupoId == null) {
+                throw new GrupoException("Parametro grupoId é nulo.");
+            }
+
+            Usuario usuario = (Usuario) session.getAttribute("usuario");
+
+            Grupo grupoEdit = grupoService.findFirstById(Long.valueOf(grupoId));
+            if(grupoEdit == null) {
+                throw new GrupoException("Grupo não encontrado.");
+            }
+
+            if(grupoService.removerParticipante(grupoEdit, usuario.getPerfil())) {
+                resposta.sucess = true;
+                resposta.mensagem = "Você saiu do Grupo.";
+                return resposta;
+            } else {
+                throw new GrupoException("Você não está neste Grupo.");
+            }
+
+        } catch (Exception e) {
+            resposta.mensagem = e.getMessage();
+            return resposta;
+        }
+    }
+
+    @ResponseBody
     @PostMapping(value = "/grupo/participante/adicionar", consumes = MediaType.APPLICATION_JSON_VALUE)
     public Object grupo_participante_adicionar(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
         Resposta resposta = new Resposta();
