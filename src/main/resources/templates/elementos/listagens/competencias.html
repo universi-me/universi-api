@@ -15,12 +15,12 @@
 
             <div class="flex">
                 <b class="item-author text-color" data-abc="true" th:text="${competenciaNow.competenciaTipo.nome}">Competecia</b>
-                <div class="item-except text-muted text-sm h-1x"
+                <div class="item-except text-muted text-sm"
                      th:text="${'('+ (competenciaNow.getNivel() == null ? 'Nenhuma Experiência' : competenciaNow.getNivel().label) + ')'}">
                     Nível
                 </div>
             </div>
-            <div class="no-wrap">
+            <div style="max-width:55%;float:right;">
                 <div class="item-date text-muted text-sm d-none d-md-block" th:text="${competenciaNow.getDescricao()}">
                     Descrição
                 </div>
