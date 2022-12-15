@@ -4,7 +4,7 @@
 <head th:fragment="head(title)">
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-compatible" content="IE=edge">
-    <meta id="vp" name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=0.4">
 
     <!-- CSS only -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"
@@ -27,34 +27,10 @@
     <link rel="stylesheet" href="/css/style.css">
     <script src="/js/main.js"></script>
 
-    <script>
-        window.onload = function() {
-            if (screen.width < 700) {
-                var mvp = document.getElementById('vp');
-                mvp.setAttribute('content','user-scalable=no,width=700');
-            }
-        }
-    </script>
-
     <title th:text="|${title==null?'Universi.me':title}|">Universi.me</title>
 </head>
 
 <body>
-<div class="container px-3 mx-auto">
-    <div th:replace="elementos/navbar :: navbar"></div>
-
-    <center>
-        <div>Index template.</div>
-        <br/>
-        <p>Conta Admin<br/>admin:admin</p>
-        <br/>
-        <p>H2-console Resetar base de dados<br>1. Comando:<br/>DROP ALL OBJECTS<br><br> 2. Reiniciar o serviço.</p>
-        </br>
-        <br/>
-        <p><a href="/popular">Popular base de dados</a></p>
-    </center>
-
-    <div th:replace="elementos/footer :: footer"></div>
-</div>
 </body>
+
 </html>

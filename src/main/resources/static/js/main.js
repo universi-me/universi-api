@@ -24,6 +24,12 @@ function entrarNoGrupo(grupoId, callback) {
    }
    api_request('/grupo/participante/entrar', bodyValores, callback);
 }
+function sairNoGrupo(grupoId, callback) {
+   var bodyValores = {
+      grupoId: grupoId,
+   }
+   api_request('/grupo/participante/sair', bodyValores, callback);
+}
 function removerSubGrupo(grupoId, grupoIdRemover, callback) {
    var bodyValores = {
       grupoId: grupoId,

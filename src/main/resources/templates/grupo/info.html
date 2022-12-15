@@ -23,9 +23,9 @@
 
             </div>
         </div>
-        <a th:unless="${!grupoService.temPermissaoParaGrupo(grupo, session.usuario)}" class="card-footer text-center"
+        <a th:unless="${!grupoService.temPermissaoParaGrupo(grupo, session.usuario)}" class="card-footer text-center bi bi-person-gear"
            th:href="${grupoDiretorio} + '/participantes'"
-           style="background-color:#B4FFC2;text-decoration: none;">Gerenciar
+           style="background-color:#B4FFC2;text-decoration: none;"> Gerenciar
             Participantes
         </a>
     </div>
@@ -45,8 +45,8 @@
             </div>
         </div>
         <a th:unless="${(!grupo.podeCriarGrupo && (!grupoService.temPermissaoParaGrupo(grupo, session.usuario)))}"
-           class="card-footer text-center" th:href="${grupoDiretorio} + '/grupos'"
-           style="background-color:#B4FFC2;text-decoration: none;">Gerenciar Subgrupos
+           class="card-footer text-center bi bi-people-fill" th:href="${grupoDiretorio} + '/grupos'"
+           style="background-color:#B4FFC2;text-decoration: none;"> Gerenciar Subgrupos
         </a>
     </div>
 </div>
