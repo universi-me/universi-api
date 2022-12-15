@@ -111,6 +111,10 @@ public class UsuarioController {
         Resposta resposta = new Resposta();
         try {
 
+            if(!Boolean.parseBoolean(env.getProperty("REGISTRAR_SE_ATIVADO"))) {
+                throw new UsuarioException("Registrar-se está desativado!");
+            }
+
             String nome = (String)body.get("username");
 
             // email somenta parte antes do @
