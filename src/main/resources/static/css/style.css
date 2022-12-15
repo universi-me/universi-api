@@ -42,9 +42,9 @@ body{
 .list-item.block .list-content {
     padding: 1rem
 }
-.w-40 {
-    width: 40px!important;
-    height: 40px!important
+.w-50 {
+    width: 50px!important;
+    height: 50px!important
 }
 .gd-primary {
     color: #fff;
