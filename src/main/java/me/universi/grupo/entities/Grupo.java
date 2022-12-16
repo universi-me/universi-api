@@ -25,7 +25,7 @@ public class Grupo {
     @Column(name = "nome")
     public String nome;
 
-    @Column(name = "descricao")
+    @Column(name = "descricao", columnDefinition = "TEXT")
     public String descricao;
 
     @Column(name = "imagem")
