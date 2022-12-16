@@ -24,7 +24,7 @@ public class Competencia {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_profile")
     private Perfil perfil;
-    @Column(name = "descricao")
+    @Column(name = "descricao", columnDefinition = "TEXT")
     private String descricao;
     @Enumerated(EnumType.STRING)
     @Column(name = "nivel")
