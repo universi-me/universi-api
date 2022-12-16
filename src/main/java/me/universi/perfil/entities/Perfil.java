@@ -28,7 +28,7 @@ public class Perfil {
     private String sobrenome;
     @Column(name = "imagem")
     private String imagem;
-    @Column(name = "bio")
+    @Column(name = "bio", columnDefinition = "TEXT")
     private String bio;
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "id_link")

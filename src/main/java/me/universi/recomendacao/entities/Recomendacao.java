@@ -22,7 +22,7 @@ public class Recomendacao {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_competenciatipo")
     private CompetenciaTipo competenciaTipo;
-    @Column(name = "descricao")
+    @Column(name = "descricao", columnDefinition = "TEXT")
     private String descricao;
 
     @CreationTimestamp
