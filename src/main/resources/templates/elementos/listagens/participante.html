@@ -14,27 +14,33 @@
              th:each="i : ${#numbers.sequence(listaParticipantes.size() - 1, 0, -1)}"
              th:with="participanteNow = ${listaParticipantes[i]}">
             
-            <div>
+            <a th:href="@{/p/{path}(path=${participanteNow.usuario.getUsername()})}" style="float:left;">
                 <img th:src="${participanteNow.imagem==null?'https://i.imgur.com/vUBrCxr.png':participanteNow.imagem}"
                      class="w-50 img-thumbnail" alt="..." referrerpolicy="no-referrer" />
-            </div>
+            </a>
+
             <div class="flex">
-                <span
+                <span class="item-author text-color" data-abc="true"
                         th:text="${participanteNow.getNome()==null?participanteNow.usuario.getUsername():participanteNow.getNome()}">Nome do participante</span><span
                     th:unless="${participanteNow.getNome()==null || participanteNow.usuario.isEmail_verificado() == false}">   <img
                     src="https://i.imgur.com/w3aKauq.png" width="22"/></span>
-            </div>
-            <div class="no-wrap">
-                <div class="item-date text-muted text-sm d-none d-md-block"></div>
-            </div>
-            <div>
 
+                <div class="item-except text-muted text-sm">
+                    <span class="bi bi-hand-thumbs-up" th:text="' '+${participanteNow.getRecomendacoesRecebidas().size()}">Participantes</span>
+                </div>
+            </div>
+
+            <div>
+                <div class="item-date text-muted text-sm d-none d-md-block">
+                </div>
+            </div>
+
+            <div>
                 <a th:href="@{/p/{path}(path=${participanteNow.usuario.getUsername()})}"
                    class="btn btn-primary">Ver Perfil</a>
                 <button th:unless="${modoEditar == null}" th:attr="onclick=|removerParticipante('${grupo.getId()}','${participanteNow.usuario.getUsername()}');|"
                         href="#" class="btn btn-danger bi bi-trash"> Remover
                 </button>
-
             </div>
         </div>
     </div>

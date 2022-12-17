@@ -12,10 +12,11 @@
         <div class="list-item" th:unless="${listaRecomendacoes == null}"
              th:each="i : ${#numbers.sequence(listaRecomendacoes.size() - 1, 0, -1)}"
              th:with="recomendacaoNow = ${listaRecomendacoes[i]}">
-            <div style="float:left;">
+
+            <a th:href="@{/p/{path}(path=${recomendacaoNow.origem.usuario.getUsername()})}" style="float:left;">
                 <img th:src="${(recomendacaoNow.origem==null || recomendacaoNow.origem.imagem==null)?'https://i.imgur.com/vUBrCxr.png':recomendacaoNow.origem.imagem}"
-                     class="w-50 img-thumbnail" alt="..." referrerpolicy="no-referrer" width="50" height="50">
-            </div>
+                     class="w-50 img-thumbnail" alt="..." referrerpolicy="no-referrer" />
+            </a>
 
             <div class="flex" style="width:30%;float:left;">
                 <span class="item-author text-color" data-abc="true" th:text="${recomendacaoNow.origem.getNome()==null?recomendacaoNow.origem.usuario.getUsername():recomendacaoNow.origem.getNome()}">Nome do participante</span><span

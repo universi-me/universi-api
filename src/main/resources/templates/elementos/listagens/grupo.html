@@ -12,16 +12,21 @@
     <div class="list list-row card" id="sortable" data-sortable-id="0" aria-dropeffect="move">
         <div class="list-item" th:unless="${listaGrupo == null}" th:each="grupoNow : ${listaGrupo}"
              th:if="${!(grupoNow.grupoRoot == false && @grupoService.findGrupoPaiDoGrupo(grupoNow.getId()) == null)}">
-            <div>
+
+            <a th:href="${@grupoService.diretorioParaGrupo(grupoNow)}" style="float:left;">
                 <img th:src="${grupoNow.imagem==null?'https://i.imgur.com/SfAl1Vb.png':grupoNow.imagem}"
-                     class="w-50 img-thumbnail" alt="..." referrerpolicy="no-referrer" />
-            </div>
+                     class="w-50 img-thumbnail" alt="..." referrerpolicy="no-referrer"/>
+            </a>
+
             <div class="flex">
                 <span class="item-author text-color" data-abc="true" th:text="${grupoNow.nome}">Nome do Grupo</span>
-                <div class="item-except text-muted text-sm h-1x" th:text="${grupoNow.tipo.label}">Tipo de Grupo</div>
+                <div class="item-except text-muted text-sm">
+                    <span th:text="${grupoNow.tipo.label}">Tipo</span>
+                </div>
             </div>
             <div class="no-wrap">
-                <div class="item-date text-muted text-sm d-none d-md-block"></div>
+                <div class="item-date text-muted text-sm d-none d-md-block">
+                </div>
             </div>
             <div>
 
