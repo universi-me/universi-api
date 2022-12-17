@@ -49,9 +49,6 @@ public class PesquisarController {
 
         if(term != null && term.length() > 0) {
 
-            // remover acentos
-            term = Normalizer.normalize(term, Normalizer.Form.NFKD).replaceAll("\\p{M}", "");
-
             if(searchUsuario) {
                 Collection<Perfil> perfilSearch = perfilService.findTop5ByNomeContainingIgnoreCase(term);
                 for (Perfil perfNow : perfilSearch) {
