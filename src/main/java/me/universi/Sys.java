@@ -12,8 +12,10 @@ import me.universi.usuario.enums.Autoridade;
 import me.universi.usuario.services.UsuarioService;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.ExitCodeGenerator;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.stereotype.Controller;
@@ -42,11 +44,19 @@ public class Sys {
     public RecomendacaoService recomendacaoService;
     @Autowired
     public LinkService linkService;
+    @Autowired
+    private ApplicationContext context;
 
 
     public static void main(String [] args) {
         System.out.println("H2 ativo na http://localhost:8080/h2-console");
         SpringApplication.run(Sys.class, args);
+    }
+
+    @GetMapping("/exit")
+    public void exitApp() {
+        int exitCode = SpringApplication.exit(context, (ExitCodeGenerator) () -> 0);
+        System.exit(exitCode);
     }
 
     @GetMapping("/")

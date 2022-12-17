@@ -28,6 +28,7 @@
 
 		<!-- Admin rules -->
 		<intercept-url pattern="/admin/**" access="hasRole('ADMIN')"/>
+		<intercept-url pattern="/exit" access="hasRole('ADMIN')"/>
 
 		<!-- Perimitir acesso ao H2-console -->
 		<intercept-url pattern="/h2-console/**" access="hasRole('ADMIN')"/>
