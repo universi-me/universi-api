@@ -18,16 +18,25 @@
 
             <div class="row gutters">
 
-                <div class="col" style="width:20%;max-width:210px;min-width:150px;padding-right: 10px;" th:unless="${perfil == null || (usuarioService.usuarioPrecisaDePerfil(perfil.usuario) && #strings.endsWith(#httpServletRequest.requestURI, '/editar'))}">
+                <div class="col" style="width:20%;max-width:210px;min-width:150px;padding-right: 10px;"
+                     th:unless="${perfil == null || (usuarioService.usuarioPrecisaDePerfil(perfil.usuario) && #strings.endsWith(#httpServletRequest.requestURI, '/editar'))}">
                     <div class="card" style="width: 100%;">
-                        <img th:src="${(perfil==null || perfil.imagem==null)?'https://i.imgur.com/vUBrCxr.png':perfil.imagem}" class="card-img-top" alt="Perfil" referrerpolicy="no-referrer">
+                        <img th:src="${(perfil==null || perfil.imagem==null)?'https://i.imgur.com/vUBrCxr.png':perfil.imagem}"
+                             class="card-img-top" alt="Perfil" referrerpolicy="no-referrer">
                         <div class="card-body">
-                            <h5 class="card-title text-center"><span th:text="${(perfil==null || perfil.getNome()==null)?perfil.usuario.nome:perfil.nome}">Nome do Perfil</span><span th:unless="${perfil==null || perfil.nome==null || perfil.usuario.isEmail_verificado() == false}">   <img src="https://i.imgur.com/w3aKauq.png" width="22" /></span></h5>
+                            <h5 class="card-title text-center">
+                                <span th:with="participantePerfil = ${perfil}">
+                                    <span th:replace="perfil/nome :: nome"></span>
+                                </span>
+                            </h5>
 
-                            <div class="text-center" th:unless="${perfil == null || usuarioService.usuarioDonoDaSessao(perfil.usuario)}">
+                            <div class="text-center"
+                                 th:unless="${perfil == null || usuarioService.usuarioDonoDaSessao(perfil.usuario)}">
                                 <br/>
                                 <ul class="list-group">
-                                    <a class="list-group-item bi bi-hand-thumbs-up" th:href="'/recomendar/'+${perfil.usuario.getUsername()}" style="color: #15be56;"> Recomendar</a>
+                                    <a class="list-group-item bi bi-hand-thumbs-up"
+                                       th:href="'/recomendar/'+${perfil.usuario.getUsername()}" style="color: #15be56;">
+                                        Recomendar</a>
                                 </ul>
                             </div>
 
@@ -41,14 +50,22 @@
                             <div class="card-header card-footer text-center">Link's</div>
                             <div class="card-body">
                                 <ul class="list-group">
-                                    <a th:class="${'list-group-item bi-' + linkNow.tipo.bootstrapIconName}" th:each="linkNow : ${perfil.getLinks()}" th:href="${linkNow.url}" th:text="${' ' + ((linkNow.nome != null)?linkNow.nome:linkNow.tipo.label)}" target="_blank">Link</a>
+                                    <a th:class="${'list-group-item bi-' + linkNow.tipo.bootstrapIconName}"
+                                       th:each="linkNow : ${perfil.getLinks()}" th:href="${linkNow.url}"
+                                       th:text="${' ' + ((linkNow.nome != null)?linkNow.nome:linkNow.tipo.label)}"
+                                       target="_blank">Link</a>
                                 </ul>
                             </div>
                         </div>
 
-                        <ul class="list-group list-group-flush" th:unless="${perfil == null || #strings.endsWith(#httpServletRequest.requestURI, '/editar') || !usuarioService.usuarioDonoDaSessao(perfil.usuario)}">
-                            <a th:href="'/p/' +${perfil.getUsuario().getUsername()} + '/links'" class="list-group-item text-center bi bi-link" style="background-color:#B4FFC2;text-decoration: none;"> Gerenciar Links</a>
-                            <a th:href="'/p/' +${perfil.getUsuario().getUsername()} + '/editar'" class="list-group-item text-center bi bi-pencil-square" style="background-color:#B4FFC2;text-decoration: none;"> Editar Perfil</a>
+                        <ul class="list-group list-group-flush"
+                            th:unless="${perfil == null || #strings.endsWith(#httpServletRequest.requestURI, '/editar') || !usuarioService.usuarioDonoDaSessao(perfil.usuario)}">
+                            <a th:href="'/p/' +${perfil.getUsuario().getUsername()} + '/links'"
+                               class="list-group-item text-center bi bi-link"
+                               style="background-color:#B4FFC2;text-decoration: none;"> Gerenciar Links</a>
+                            <a th:href="'/p/' +${perfil.getUsuario().getUsername()} + '/editar'"
+                               class="list-group-item text-center bi bi-pencil-square"
+                               style="background-color:#B4FFC2;text-decoration: none;"> Editar Perfil</a>
                         </ul>
                     </div>
                 </div>
@@ -58,16 +75,16 @@
 
                     <div th:switch="${flagPage==null?'info':flagPage}">
                         <div th:case="'flagEditar'">
-                            <div th:replace="perfil/editar :: editar" />
+                            <div th:replace="perfil/editar :: editar"/>
                         </div>
                         <div th:case="'flagCompetencias'">
-                            <div th:replace="perfil/competencias :: competencias" />
+                            <div th:replace="perfil/competencias :: competencias"/>
                         </div>
                         <div th:case="'flagLinks'">
-                            <div th:replace="perfil/links :: links" />
+                            <div th:replace="perfil/links :: links"/>
                         </div>
                         <div th:case="'info'">
-                            <div th:replace="perfil/info :: info" />
+                            <div th:replace="perfil/info :: info"/>
                         </div>
                     </div>
 
@@ -81,6 +98,7 @@
 
     <script th:if="${session.usuario.perfil==null || session.usuario.perfil.getNome()==null}">
         alert("Complete o seu cadastro para começar a usar o Universi.me !", 'warning');
+
     </script>
 
 </div>

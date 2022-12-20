@@ -19,9 +19,10 @@
             </a>
 
             <div class="flex" style="width:30%;float:left;">
-                <span class="item-author text-color" data-abc="true" th:text="${recomendacaoNow.origem.getNome()==null?recomendacaoNow.origem.usuario.getUsername():recomendacaoNow.origem.getNome()}">Nome do participante</span><span
-                    th:unless="${recomendacaoNow.origem.getNome()==null || recomendacaoNow.origem.usuario.isEmail_verificado() == false}">   <img
-                    src="https://i.imgur.com/w3aKauq.png" width="22"/></span>
+                <span th:with="participantePerfil = ${recomendacaoNow.origem}">
+                    <span th:replace="perfil/nome :: nome"></span>
+                </span>
+
                 <div class="item-except text-muted text-sm" th:unless="${recomendacaoNow.competenciaTipo==null}">
                     <p th:unless="${recomendacaoNow.competenciaTipo==null}">Recomendou pela competência: <b
                         th:text="${recomendacaoNow.competenciaTipo.nome}"></b></p>
