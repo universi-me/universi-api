@@ -499,6 +499,47 @@ public class GrupoController {
         }
     }
 
+    @RequestMapping("/grupo/deletar")
+    @ResponseBody
+    public Object grupo_deletar(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+        Resposta resposta = new Resposta();
+        try {
+
+            String grupoId = (String)body.get("grupoId");
+            if(grupoId == null) {
+                throw new GrupoException("Parametro grupoId é nulo.");
+            }
+
+            Grupo grupo = grupoService.findFirstById(Long.valueOf(grupoId));
+            if(grupo == null) {
+                throw new GrupoException("Grupo não encontrado.");
+            }
+
+            Usuario usuario = (Usuario) session.getAttribute("usuario");
+
+            if(grupoService.verificarPermissaoParaGrupo(grupo, usuario)) {
+
+                resposta.enderecoParaRedirecionar = "/grupos";
+                Long paiId = grupoService.findGrupoPaiDoGrupo(grupo.getId());
+                if(paiId != null) {
+                    resposta.enderecoParaRedirecionar = grupoService.diretorioParaGrupo(paiId);
+                }
+
+                grupoService.delete(grupo);
+
+                resposta.mensagem = "Grupo deletado com exito.";
+                resposta.sucess = true;
+                return resposta;
+            }
+
+            throw new GrupoException("Erro ao executar operação.");
+
+        } catch (Exception e) {
+            resposta.mensagem = e.getMessage();
+            return resposta;
+        }
+    }
+
     @ResponseBody
     @RequestMapping(value = "/grupo/obter", consumes = MediaType.APPLICATION_JSON_VALUE)
     public Object obter_grupo(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
