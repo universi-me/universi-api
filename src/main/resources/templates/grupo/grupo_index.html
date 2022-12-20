@@ -64,10 +64,9 @@
                         </ul>
                         <div class="card-header card-footer text-center">Administrador</div>
                         <div class="card-body">
-                            <a class="card-text" th:href="@{/p/{path}(path=${grupo.admin.usuario.getUsername()})}"
-                               th:text="${grupo.admin.nome==null?grupo.admin.usuario.getUsername():grupo.admin.nome}"
-                               th:unless="${grupo.admin == null}">Nome do
-                                Administrador</a>
+                            <span th:with="participantePerfil = ${grupo.admin}">
+                                <span th:replace="perfil/nome :: nome"></span>
+                            </span>
                         </div>
                         <a class="card-footer text-center bi bi-pencil-square"
                            th:unless="${#strings.endsWith(#httpServletRequest.requestURI, '/editar') || !grupoService.temPermissaoParaGrupo(grupo, session.usuario)}"
