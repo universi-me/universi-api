@@ -34,13 +34,15 @@
 
             <script>
                 function removerGrupo(grupoId, grupoIdRemover) {
-                    removerSubGrupo(grupoId, grupoIdRemover, function removidoCallback(jsonResponse) {
-                        if(jsonResponse.sucess) {
-                            setTimeout(function () {
-                                location.reload();
-                            }, tempoDelayParaRedirecionar);
-                        }
-                    });
+                    if (confirm("Remover Grupo?") == true) {
+                        removerSubGrupo(grupoId, grupoIdRemover, function removidoCallback(jsonResponse) {
+                            if(jsonResponse.sucess) {
+                                setTimeout(function () {
+                                    location.reload();
+                                }, tempoDelayParaRedirecionar);
+                            }
+                        });
+                    }
                 }
             </script>
 

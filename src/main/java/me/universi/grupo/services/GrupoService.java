@@ -120,6 +120,7 @@ public class GrupoService {
             grupoArr.remove(sub);
             grupo.setSubGrupos(grupoArr);
             this.save(grupo);
+            this.delete(sub);
         }
     }
 
@@ -237,6 +238,26 @@ public class GrupoService {
     }
 
     public void delete(Grupo grupo) {
+
+        if(grupo.participantes != null) {
+            grupo.participantes.clear();
+        }
+
+        if(grupo.subGrupos != null) {
+            for(Grupo gNow : grupo.subGrupos) {
+                this.delete(gNow);
+            }
+        }
+
+        Long paiId = this.findGrupoPaiDoGrupo(grupo.getId());
+        if(paiId != null) {
+            Grupo gPai = findFirstById(paiId);
+            if(gPai.subGrupos != null) {
+                gPai.subGrupos.remove(grupo);
+                grupoRepository.save(gPai);
+            }
+        }
+
         grupoRepository.delete(grupo);
     }
 

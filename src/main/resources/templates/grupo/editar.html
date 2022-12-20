@@ -110,6 +110,11 @@
                            name="grupoRoot1" checked disabled>
                     <label class="form-check-label" for="grupoRoot1">Grupo Master (Pai de todos os Subgrupos)</label>
                 </div>
+                <p align="left" th:unless="${grupo == null || !@grupoService.temPermissaoParaGrupo(grupo, session.usuario)}">
+                    <br/>
+                    <button class="btn btn-danger bi bi-trash3" type="button" id="exitBt" onclick="deletarGrupo(this.id)" th:id="${grupo.getId()}" th:text="${(' Remover '+ nomeGrupo)}"> Remover</button>
+                </p>
+
                 <p align="right">
                     <button type="submit" class="btn btn-primary bi bi-database-fill-check" th:text="${(flagPage=='flagEditar')?' Salvar Alterações':(' Criar '+ nomeGrupo)}">Salvar</button>
                 </p>
@@ -143,6 +148,21 @@
                             }, tempoDelayParaRedirecionar);
                         }
                     });
+                }
+
+                function deletarGrupo(idGrupoRem) {
+                    if (confirm("Remover Grupo?") == true) {
+                        var bodyValores = {
+                            grupoId: idGrupoRem,
+                        }
+                        api_request('/grupo/deletar', bodyValores, function respostaCallback(jsonResponse) {
+                            if(jsonResponse.sucess) {
+                                setTimeout(function () {
+                                    openSubUrl();
+                                }, tempoDelayParaRedirecionar);
+                            }
+                        });
+                    }
                 }
 
             </script>
