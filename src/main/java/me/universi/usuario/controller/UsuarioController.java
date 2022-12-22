@@ -44,12 +44,11 @@ public class UsuarioController {
     public GrupoService grupoService;
     @Autowired
     public CompetenciaTipoService competenciaTipoService;
-
     @Autowired
     private Environment env;
 
     @GetMapping("/login")
-    public String login(HttpServletRequest request, HttpSession session) {
+    public String login() {
         if(usuarioService.usuarioEstaLogado()) {
             return "redirect:"+usuarioService.obterUrlAoLogar();
         }
@@ -57,12 +56,12 @@ public class UsuarioController {
     }
 
     @GetMapping("/entrar")
-    public String entrar(HttpServletRequest request, HttpSession session) {
+    public String entrar() {
         return "redirect:"+usuarioService.obterUrlAoLogar();
     }
 
     @GetMapping("/registrar")
-    public String registrar(HttpSession session) {
+    public String registrar() {
         if(usuarioService.usuarioEstaLogado()) {
             return "redirect:"+usuarioService.obterUrlAoLogar();
         }
@@ -70,7 +69,7 @@ public class UsuarioController {
     }
 
     @GetMapping("/admin/**")
-    public String admin_handle(HttpServletRequest request, HttpServletResponse response, HttpSession session, ModelMap map) {
+    public String admin_handle(HttpServletRequest request, ModelMap map) {
         try {
 
             // obter diretorio caminho url
@@ -107,7 +106,7 @@ public class UsuarioController {
 
     @ResponseBody
     @PostMapping(value = "/registrar", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Object registrarUsuarioJson(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public Object registrarUsuarioJson(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
@@ -164,7 +163,7 @@ public class UsuarioController {
 
     @ResponseBody
     @PostMapping(value = "/conta/editar", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Object conta_editar(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public Object conta_editar(@RequestBody Map<String, Object> body, HttpSession session) {
         Resposta resposta = new Resposta();
         try {
 
@@ -175,7 +174,7 @@ public class UsuarioController {
 
             String senha = (String)body.get("senha");
 
-            Usuario usuario = (Usuario) session.getAttribute("usuario");
+            Usuario usuario = usuarioService.obterUsuarioNaSessao();
 
             // se logado com google não checkar senha
             boolean logadoComGoogle = (session.getAttribute("loginViaGoogle") != null);
@@ -203,7 +202,7 @@ public class UsuarioController {
 
     @ResponseBody
     @PostMapping(value = "/admin/conta/editar", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Object admin_conta_editar(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public Object admin_conta_editar(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
@@ -274,7 +273,7 @@ public class UsuarioController {
 
     @ResponseBody
     @PostMapping(value = "/login/google", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Object conta_google(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public Object conta_google(@RequestBody Map<String, Object> body, HttpServletRequest request) {
         Resposta resposta = new Resposta();
         try {
 
