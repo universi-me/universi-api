@@ -74,6 +74,22 @@
         <!-- End Editar competências -->
 
     </div>
+
+    <script>
+        function removerRecomendacao(idRecomendacao) {
+            var bodyValores = {
+                id: idRecomendacao,
+            }
+            api_request('/recomendacao/remover', bodyValores, function removerCallback(jsonResponse) {
+                if(jsonResponse.sucess) {
+                    setTimeout(function () {
+                        window.location.reload();
+                    }, tempoDelayParaRedirecionar);
+                }
+            });
+        }
+    </script>
+
 </div>
 
 

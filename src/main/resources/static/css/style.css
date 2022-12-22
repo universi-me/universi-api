@@ -44,7 +44,8 @@ body{
 }
 .w-50 {
     width: 60px!important;
-    height: 60px!important
+    height: 60px!important;
+    min-width: 60px!important;
 }
 .gd-primary {
     color: #fff;
