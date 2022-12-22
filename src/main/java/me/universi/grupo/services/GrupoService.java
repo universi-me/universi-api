@@ -238,6 +238,10 @@ public class GrupoService {
     }
 
     public void delete(Grupo grupo) {
+        this.delete_recursive(grupo, false);
+    }
+
+    private void delete_recursive(Grupo grupo, boolean insideRecursive) {
 
         if(grupo.participantes != null) {
             grupo.participantes.clear();
@@ -245,16 +249,19 @@ public class GrupoService {
 
         if(grupo.subGrupos != null) {
             for(Grupo gNow : grupo.subGrupos) {
-                this.delete(gNow);
+                this.delete_recursive(gNow, true);
             }
         }
 
-        Long paiId = this.findGrupoPaiDoGrupo(grupo.getId());
-        if(paiId != null) {
-            Grupo gPai = findFirstById(paiId);
-            if(gPai.subGrupos != null) {
-                gPai.subGrupos.remove(grupo);
-                grupoRepository.save(gPai);
+        // não executar quando estiver na recursao, conflita na remoção dos subgrupos acima.
+        if(!insideRecursive) {
+            Long paiId = this.findGrupoPaiDoGrupo(grupo.getId());
+            if (paiId != null) {
+                Grupo gPai = findFirstById(paiId);
+                if (gPai.subGrupos != null) {
+                    gPai.subGrupos.remove(grupo);
+                    grupoRepository.save(gPai);
+                }
             }
         }
 
