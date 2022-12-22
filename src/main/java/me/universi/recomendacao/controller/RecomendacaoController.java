@@ -5,6 +5,7 @@ import me.universi.api.entities.Resposta;
 import me.universi.competencia.entities.CompetenciaTipo;
 import me.universi.competencia.services.CompetenciaService;
 import me.universi.competencia.services.CompetenciaTipoService;
+import me.universi.grupo.exceptions.GrupoException;
 import me.universi.perfil.entities.Perfil;
 import me.universi.perfil.services.PerfilService;
 import me.universi.recomendacao.entities.Recomendacao;
@@ -136,22 +137,44 @@ public class RecomendacaoController {
         Resposta resposta = new Resposta();
         try {
 
-            Long id = (Long)Long.valueOf((String)body.get("id"));
-            String descricao = (String)body.get("descricao");
-
-            //TODO - CRIAR VALIDAÇÃO DE PARÂMETROS
-            Recomendacao recomendacao = recomendacaoService.findFirstById(id);
-            if(recomendacao != null) {
-                recomendacao.setDescricao(descricao);
-                recomendacaoService.update(recomendacao);
-
-                resposta.mensagem = "Recomendacao atualizada: " + recomendacao.toString();
-                resposta.sucess = true;
-                return resposta;
+            String id = (String)body.get("id");
+            if(id == null) {
+                throw new GrupoException("Parametro id é nulo.");
             }
 
-            resposta.mensagem = "Recomendação não encontrada";
+            String descricao = (String)body.get("descricao");
+
+            String competenciaTipoId = (String)body.get("competenciatipoId");
+
+            Recomendacao recomendacao = recomendacaoService.findFirstById(Long.valueOf(id));
+            if(recomendacao == null) {
+                throw new GrupoException("Recomendação não encontrada.");
+            }
+
+            Usuario usuario = (Usuario) session.getAttribute("usuario");
+
+            if(usuario.getPerfil().getId() != recomendacao.getOrigem().getId()) {
+                throw new GrupoException("Você não tem permissão para editar esta Recomendação.");
+            }
+
+            if(descricao != null && descricao.length() > 0) {
+                recomendacao.setDescricao(descricao);
+            }
+
+            if(competenciaTipoId != null && competenciaTipoId.length() > 0) {
+                CompetenciaTipo compT = competenciaTipoService.findFirstById(Long.valueOf(competenciaTipoId));
+                if(compT == null) {
+                    throw new RecomendacaoInvalidaException("Competencia não encontrada.");
+                }
+                recomendacao.setCompetenciaTipo(compT);
+            }
+
+            recomendacaoService.update(recomendacao);
+
+            resposta.mensagem = "Recomendacao atualizada";
+            resposta.sucess = true;
             return resposta;
+
         } catch (Exception e) {
             resposta.mensagem = e.getMessage();
             return resposta;
@@ -164,24 +187,32 @@ public class RecomendacaoController {
         Resposta resposta = new Resposta();
         try {
 
-            Long id = (Long)Long.valueOf((String)body.get("id"));
-
-            Recomendacao recomendacao = recomendacaoService.findFirstById(id);
-            if (recomendacao != null) {
-                recomendacaoService.delete(recomendacao);
-
-                resposta.mensagem = "Recomendação Removida: " + recomendacao.toString();
-                resposta.sucess = true;
-                return resposta;
+            String id = (String)body.get("id");
+            if(id == null) {
+                throw new GrupoException("Parametro id é nulo.");
             }
-        } catch (EntityNotFoundException e) {
-            resposta.mensagem = "Recomendação não encontrada";
+
+            Recomendacao recomendacao = recomendacaoService.findFirstById(Long.valueOf(id));
+            if(recomendacao == null) {
+                throw new GrupoException("Recomendação não encontrada.");
+            }
+
+            Usuario usuario = (Usuario) session.getAttribute("usuario");
+
+            if(usuario.getPerfil().getId() != recomendacao.getOrigem().getId()) {
+                throw new GrupoException("Você não tem permissão para remover esta Recomendação.");
+            }
+
+            recomendacaoService.delete(recomendacao);
+
+            resposta.mensagem = "Recomendação removida.";
+            resposta.sucess = true;
             return resposta;
+
         } catch (Exception e) {
             resposta.mensagem = e.getMessage();
             return resposta;
         }
-        return "Falha ao remover";
     }
 
     @PostMapping(value = "/recomendacao/obter", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -190,18 +221,20 @@ public class RecomendacaoController {
         Resposta resposta = new Resposta();
         try {
 
-            Long id = (Long)Long.valueOf((String)body.get("id"));
-
-            Recomendacao recomendacao = recomendacaoService.findFirstById(id);
-            if(recomendacao != null){
-                resposta.conteudo.put("recomendacao", recomendacao);
-
-                resposta.mensagem = "Operação realizada com exito.";
-                resposta.sucess = true;
-                return resposta;
+            String id = (String)body.get("id");
+            if(id == null) {
+                throw new GrupoException("Parametro id é nulo.");
             }
 
-            resposta.mensagem = "Recomedação não encontrada.";
+            Recomendacao recomendacao = recomendacaoService.findFirstById(Long.valueOf(id));
+            if(recomendacao == null) {
+                throw new GrupoException("Recomendação não encontrada.");
+            }
+
+            resposta.conteudo.put("recomendacao", recomendacao);
+
+            resposta.mensagem = "Operação realizada com exito.";
+            resposta.sucess = true;
             return resposta;
 
         } catch (Exception e) {

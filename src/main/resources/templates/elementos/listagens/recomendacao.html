@@ -34,6 +34,13 @@
                     <p class="card-text" th:text="${recomendacaoNow.getDescricao()}">Descrição da Recomendação</p>
                 </div>
             </div>
+
+            <div th:unless="${!@usuarioService.usuarioDonoDaSessao(recomendacaoNow.origem.usuario)}">
+
+                <button th:onclick="removerRecomendacao(this.id)" th:id="${recomendacaoNow.getId()}" href="#" class="btn btn-danger bi bi-trash"> Remover</button>
+
+            </div>
+
         </div>
     </div>
 </div>

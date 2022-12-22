@@ -218,6 +218,7 @@ const alert = (message, type) => {
     const areaDeAlertas = document.getElementById('areaDeAlertas');
     if(areaDeAlertas) {
         areaDeAlertas.append(wrapper);
+        window.scrollTo(0, 0);
     }
 }
 
