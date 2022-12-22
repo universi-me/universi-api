@@ -36,11 +36,11 @@ public class CompetenciaController {
 
     @PostMapping(value = "/competencia/criar", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Object create(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public Object create(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
-            Usuario usuario = (Usuario) session.getAttribute("usuario");
+            Usuario usuario = usuarioService.obterUsuarioNaSessao();
 
             String competenciaTipoId = (String)body.get("competenciatipoId");
             if(competenciaTipoId == null) {
@@ -82,7 +82,7 @@ public class CompetenciaController {
 
     @PostMapping(value = "/competencia/atualizar", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Object update(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public Object update(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
@@ -102,7 +102,7 @@ public class CompetenciaController {
                 throw new CompetenciaException("Competência não encontrada.");
             }
 
-            Usuario usuario = (Usuario) session.getAttribute("usuario");
+            Usuario usuario = usuarioService.obterUsuarioNaSessao();
 
             Perfil perfil = usuario.getPerfil();
 
@@ -138,7 +138,7 @@ public class CompetenciaController {
 
     @PostMapping(value = "/competencia/remover", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Object remove(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public Object remove(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
@@ -152,7 +152,7 @@ public class CompetenciaController {
                 throw new CompetenciaException("Competência não encontrada.");
             }
 
-            Usuario usuario = (Usuario) session.getAttribute("usuario");
+            Usuario usuario = usuarioService.obterUsuarioNaSessao();
 
             Perfil perfil = usuario.getPerfil();
 
@@ -174,7 +174,7 @@ public class CompetenciaController {
 
     @PostMapping(value = "/competencia/obter", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Object get(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public Object get(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
@@ -201,7 +201,7 @@ public class CompetenciaController {
 
     @PostMapping(value = "/competencia/listar", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Object getlist(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public Object getlist(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 

@@ -45,14 +45,14 @@ public class RecomendacaoController {
     public CompetenciaTipoService competenciaTipoService;
 
     @GetMapping("/recomendar")
-    public String recomendacao(HttpServletRequest request, HttpServletResponse response, HttpSession session, ModelMap map) {
+    public String recomendacao(ModelMap map) {
         return "recomendacao/recomendacao_index";
     }
 
     @GetMapping("/recomendar/{usuario}")
-    public String recomendar_usuario(HttpServletRequest request, HttpServletResponse response, HttpSession session, ModelMap map, @PathVariable("usuario") String usernameDestino) {
+    public String recomendar_usuario(ModelMap map, @PathVariable("usuario") String usernameDestino) {
         try {
-            Usuario usuario = (Usuario) session.getAttribute("usuario");
+            Usuario usuario = usuarioService.obterUsuarioNaSessao();
 
             Usuario usuarioDestino = (Usuario) usuarioService.loadUserByUsername(usernameDestino);
             map.put("usuarioDestino", usuarioDestino);
@@ -69,7 +69,7 @@ public class RecomendacaoController {
 
     @PostMapping(value = "/recomendacao/criar", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Object create(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public Object create(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
@@ -133,7 +133,7 @@ public class RecomendacaoController {
 
     @PostMapping(value = "/recomendacao/atualizar", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Object atualizar(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public Object atualizar(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
@@ -151,7 +151,7 @@ public class RecomendacaoController {
                 throw new GrupoException("Recomendação não encontrada.");
             }
 
-            Usuario usuario = (Usuario) session.getAttribute("usuario");
+            Usuario usuario = usuarioService.obterUsuarioNaSessao();
 
             if(usuario.getPerfil().getId() != recomendacao.getOrigem().getId()) {
                 throw new GrupoException("Você não tem permissão para editar esta Recomendação.");
@@ -183,7 +183,7 @@ public class RecomendacaoController {
 
     @PostMapping(value = "/recomendacao/remover", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Object remove(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public Object remove(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
@@ -197,7 +197,7 @@ public class RecomendacaoController {
                 throw new GrupoException("Recomendação não encontrada.");
             }
 
-            Usuario usuario = (Usuario) session.getAttribute("usuario");
+            Usuario usuario = usuarioService.obterUsuarioNaSessao();
 
             if(usuario.getPerfil().getId() != recomendacao.getOrigem().getId()) {
                 throw new GrupoException("Você não tem permissão para remover esta Recomendação.");
@@ -217,7 +217,7 @@ public class RecomendacaoController {
 
     @PostMapping(value = "/recomendacao/obter", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Object get(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public Object get(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
@@ -245,7 +245,7 @@ public class RecomendacaoController {
 
     @PostMapping(value = "/recomendacao/listar", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Object getlist(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public Object getlist(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 

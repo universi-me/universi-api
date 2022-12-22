@@ -7,6 +7,7 @@ import me.universi.link.exceptions.LinkException;
 import me.universi.link.services.LinkService;
 import me.universi.perfil.entities.Perfil;
 import me.universi.usuario.entities.Usuario;
+import me.universi.usuario.services.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -22,14 +23,16 @@ import java.util.Map;
 public class LinkController {
     @Autowired
     public LinkService linkService;
+    @Autowired
+    public UsuarioService usuarioService;
 
     @PostMapping(value = "/link/criar", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Object create(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public Object create(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
-            Usuario usuario = (Usuario) session.getAttribute("usuario");
+            Usuario usuario = usuarioService.obterUsuarioNaSessao();
 
             String url = (String)body.get("url");
             if(url == null) {
@@ -68,7 +71,7 @@ public class LinkController {
 
     @PostMapping(value = "/link/remover", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Object remove(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public Object remove(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
@@ -82,7 +85,7 @@ public class LinkController {
                 throw new LinkException("Link não encontrada.");
             }
 
-            Usuario usuario = (Usuario) session.getAttribute("usuario");
+            Usuario usuario = usuarioService.obterUsuarioNaSessao();
 
             Perfil perfil = usuario.getPerfil();
 
@@ -104,7 +107,7 @@ public class LinkController {
 
     @PostMapping(value = "/link/atualizar", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Object update(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public Object update(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
@@ -122,7 +125,7 @@ public class LinkController {
                 throw new LinkException("Link não encontrada.");
             }
 
-            Usuario usuario = (Usuario) session.getAttribute("usuario");
+            Usuario usuario = usuarioService.obterUsuarioNaSessao();
 
             Perfil perfil = usuario.getPerfil();
 
@@ -154,7 +157,7 @@ public class LinkController {
 
     @PostMapping(value = "/link/obter", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Object get(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public Object get(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 

@@ -141,13 +141,9 @@ public class UsuarioService implements UserDetailsService {
     }
 
     public boolean usuarioDonoDaSessao(Usuario usuario) {
-        ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
-        HttpSession session = attr.getRequest().getSession(true);
-        if(session != null && usuario != null) {
-            Usuario usuarioSession = (Usuario) session.getAttribute("usuario");
-            if(usuarioSession != null) {
-                return (usuarioSession.getId() == usuario.getId());
-            }
+        Usuario usuarioSession = obterUsuarioNaSessao();
+        if(usuarioSession != null) {
+            return (usuarioSession.getId() == usuario.getId());
         }
         return false;
     }
@@ -158,16 +154,24 @@ public class UsuarioService implements UserDetailsService {
     }
 
     public void atualizarUsuarioNaSessao() {
+        Usuario usuarioSession = obterUsuarioNaSessao();
+        if(usuarioSession != null) {
+            Usuario usuarioAtualizado = (Usuario) findFirstById(usuarioSession.getId());
+            if(usuarioAtualizado != null) {
+                configurarSessaoParaUsuario(usuarioAtualizado);
+            }
+        }
+    }
+
+    public Usuario obterUsuarioNaSessao() {
         HttpSession session = obterSessaoAtual();
         if(session != null) {
             Usuario usuarioSession = (Usuario) session.getAttribute("usuario");
             if(usuarioSession != null) {
-                Usuario usuarioAtualizado = (Usuario) findFirstById(usuarioSession.getId());
-                if(usuarioAtualizado != null) {
-                    session.setAttribute("usuario", usuarioAtualizado);
-                }
+                return usuarioSession;
             }
         }
+        return null;
     }
 
     public void configurarSessaoParaUsuario(Usuario usuario) {
@@ -230,20 +234,18 @@ public class UsuarioService implements UserDetailsService {
 
     // url de redirecionamento ao logar
     public String obterUrlAoLogar() {
-        HttpSession session = obterSessaoAtual();
 
-        if(session != null) {
-            Usuario usuarioSession = (Usuario) session.getAttribute("usuario");
-            if (usuarioSession != null) {
-                if(usuarioPrecisaDePerfil(usuarioSession)) {
-                    return "/p/" + usuarioSession.getUsername() + "/editar";
-                } else {
-                    // ao logar mandar para o seu perfil
-                    return "/p/" + usuarioSession.getUsername();
-                }
+        Usuario usuarioSession = obterUsuarioNaSessao();
+        if (usuarioSession != null) {
+            if(usuarioPrecisaDePerfil(usuarioSession)) {
+                return "/p/" + usuarioSession.getUsername() + "/editar";
+            } else {
+                // ao logar mandar para o seu perfil
+                return "/p/" + usuarioSession.getUsername();
             }
         }
 
+        HttpSession session = obterSessaoAtual();
         SavedRequest lastRequestSaved = (SavedRequest)session.getAttribute("SPRING_SECURITY_SAVED_REQUEST");
         if(lastRequestSaved != null) {
             // retornar para ultima pagina que usuario clicou

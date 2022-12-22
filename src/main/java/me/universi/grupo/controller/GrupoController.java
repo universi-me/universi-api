@@ -31,9 +31,9 @@ public class GrupoController {
 
     // mapaear tudo exceto, /css, /js, /img, /favicon.ico, comflita com static resources do Thymeleaf
     @GetMapping(value = {"{url:(?!css$|js$|img$|favicon.ico$).*}/**"})
-    public String grupo_handler(HttpServletRequest request, HttpServletResponse response, HttpSession session, ModelMap map) {
+    public String grupo_handler(HttpServletRequest request, HttpServletResponse response, ModelMap map) {
         try {
-            Usuario usuario = (Usuario)session.getAttribute("usuario");
+            Usuario usuario = usuarioService.obterUsuarioNaSessao();
 
             if(usuarioService.usuarioPrecisaDePerfil(usuario)) {
                 return "redirect:/p/"+ usuario.getUsername() +"/editar";
@@ -101,7 +101,7 @@ public class GrupoController {
     }
 
     @GetMapping("/grupos")
-    public String grupos_handler(HttpServletRequest request, HttpServletResponse response, HttpSession session, ModelMap map) {
+    public String grupos_handler(ModelMap map) {
 
         map.addAttribute("grupoService", grupoService);
 
@@ -111,10 +111,10 @@ public class GrupoController {
 
     @ResponseBody
     @RequestMapping(value = "/grupo/criar", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Object grupo_criar(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public Object grupo_criar(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
-            Usuario usuario = (Usuario) session.getAttribute("usuario");
+            Usuario usuario = usuarioService.obterUsuarioNaSessao();
 
             Boolean grupoRoot = (Boolean)body.get("grupoRoot");
 
@@ -201,7 +201,7 @@ public class GrupoController {
 
     @ResponseBody
     @RequestMapping(value = "/grupo/editar", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Object grupo_editar(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public Object grupo_editar(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
@@ -219,17 +219,21 @@ public class GrupoController {
             Boolean grupoPublico = (Boolean)body.get("grupoPublico");
             Boolean podeEntrar = (Boolean)body.get("podeEntrar");
 
-            Usuario usuario = (Usuario) session.getAttribute("usuario");
             Grupo grupoEdit = grupoService.findFirstById(Long.valueOf(grupoId));
+            if(grupoEdit == null) {
+                throw new GrupoException("Grupo não encontrado.");
+            }
+
+            Usuario usuario = usuarioService.obterUsuarioNaSessao();
 
             if(grupoService.verificarPermissaoParaGrupo(grupoEdit, usuario)) {
-                if(nome != null) {
+                if(nome != null && nome.length() > 0) {
                     grupoEdit.setNome(nome);
                 }
-                if(descricao != null) {
+                if(descricao != null && descricao.length() > 0) {
                     grupoEdit.setDescricao(descricao);
                 }
-                if(tipo != null) {
+                if(tipo != null && tipo.length() > 0) {
                     grupoEdit.setTipo(GrupoTipo.valueOf(tipo));
                 }
                 if(imagem != null && imagem.length()>0) {
@@ -263,7 +267,7 @@ public class GrupoController {
 
     @ResponseBody
     @PostMapping(value = "/grupo/participante/entrar", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Object grupo_participante_entrar(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public Object grupo_participante_entrar(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
@@ -272,7 +276,7 @@ public class GrupoController {
                 throw new GrupoException("Parametro grupoId é nulo.");
             }
 
-            Usuario usuario = (Usuario) session.getAttribute("usuario");
+            Usuario usuario = usuarioService.obterUsuarioNaSessao();
 
             Grupo grupoEdit = grupoService.findFirstById(Long.valueOf(grupoId));
             if(grupoEdit == null) {
@@ -303,7 +307,7 @@ public class GrupoController {
 
     @ResponseBody
     @PostMapping(value = "/grupo/participante/sair", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Object grupo_participante_sair(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public Object grupo_participante_sair(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
@@ -312,7 +316,7 @@ public class GrupoController {
                 throw new GrupoException("Parametro grupoId é nulo.");
             }
 
-            Usuario usuario = (Usuario) session.getAttribute("usuario");
+            Usuario usuario = usuarioService.obterUsuarioNaSessao();
 
             Grupo grupoEdit = grupoService.findFirstById(Long.valueOf(grupoId));
             if(grupoEdit == null) {
@@ -335,7 +339,7 @@ public class GrupoController {
 
     @ResponseBody
     @PostMapping(value = "/grupo/participante/adicionar", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Object grupo_participante_adicionar(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public Object grupo_participante_adicionar(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
@@ -349,7 +353,7 @@ public class GrupoController {
                 throw new GrupoException("Parametro participante é nulo.");
             }
 
-            Usuario usuario = (Usuario) session.getAttribute("usuario");
+            Usuario usuario = usuarioService.obterUsuarioNaSessao();
 
             Usuario participanteUser = null;
             if(participante != null && participante.length() > 0) {
@@ -382,7 +386,7 @@ public class GrupoController {
 
     @ResponseBody
     @PostMapping(value = "/grupo/participante/remover", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Object grupo_participante_remover(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public Object grupo_participante_remover(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
@@ -396,7 +400,7 @@ public class GrupoController {
                 throw new GrupoException("Parametro participante é nulo.");
             }
 
-            Usuario usuario = (Usuario) session.getAttribute("usuario");
+            Usuario usuario = usuarioService.obterUsuarioNaSessao();
 
             Usuario participanteUser = null;
             if(participante != null && participante.length() > 0) {
@@ -429,7 +433,7 @@ public class GrupoController {
 
     @ResponseBody
     @PostMapping(value = "/grupo/participante/listar", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Object grupo_participante_listar(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public Object grupo_participante_listar(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
@@ -457,7 +461,7 @@ public class GrupoController {
 
     @RequestMapping("/grupo/remover")
     @ResponseBody
-    public Object grupo_remove(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public Object grupo_remove(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
@@ -481,7 +485,7 @@ public class GrupoController {
                 throw new GrupoException("Subgrupo não encontrado.");
             }
 
-            Usuario usuario = (Usuario) session.getAttribute("usuario");
+            Usuario usuario = usuarioService.obterUsuarioNaSessao();
 
             if(grupoService.verificarPermissaoParaGrupo(grupo, usuario)) {
                 grupoService.removerSubgrupo(grupo, grupoRemover);
@@ -501,7 +505,7 @@ public class GrupoController {
 
     @RequestMapping("/grupo/deletar")
     @ResponseBody
-    public Object grupo_deletar(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public Object grupo_deletar(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
@@ -515,7 +519,7 @@ public class GrupoController {
                 throw new GrupoException("Grupo não encontrado.");
             }
 
-            Usuario usuario = (Usuario) session.getAttribute("usuario");
+            Usuario usuario = usuarioService.obterUsuarioNaSessao();
 
             if(grupoService.verificarPermissaoParaGrupo(grupo, usuario)) {
 
@@ -542,7 +546,7 @@ public class GrupoController {
 
     @ResponseBody
     @RequestMapping(value = "/grupo/obter", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Object obter_grupo(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public Object obter_grupo(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
@@ -570,7 +574,7 @@ public class GrupoController {
 
     @ResponseBody
     @PostMapping(value = "/grupo/listar", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Object listar_subgrupo(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public Object listar_subgrupo(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 

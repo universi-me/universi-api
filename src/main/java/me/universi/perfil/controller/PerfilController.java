@@ -40,9 +40,9 @@ public class PerfilController {
     public CompetenciaTipoService competenciaTipoService;
 
     @GetMapping("/p/**")
-    public String perfil_handler(HttpServletRequest request, HttpServletResponse response, HttpSession session, ModelMap map) {
+    public String perfil_handler(HttpServletRequest request, HttpServletResponse response, ModelMap map) {
         try {
-            Usuario usuario = (Usuario)session.getAttribute("usuario");
+            Usuario usuario = usuarioService.obterUsuarioNaSessao();
 
             String requestPathSt = request.getRequestURI().toLowerCase();
 
@@ -105,7 +105,7 @@ public class PerfilController {
 
     @ResponseBody
     @RequestMapping(value = "/perfil/editar", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Object perfil_editar(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public Object perfil_editar(@RequestBody Map<String, Object> body) {
 
         Resposta resposta = new Resposta(); // default
 
@@ -129,7 +129,7 @@ public class PerfilController {
 
             if(!usuarioService.usuarioDonoDaSessao(perfilAtual.getUsuario())) {
 
-                Usuario usuarioSession = (Usuario)session.getAttribute("usuario");
+                Usuario usuarioSession = usuarioService.obterUsuarioNaSessao();
                 if(!usuarioService.isContaAdmin(usuarioSession)) {
                     throw new PerfilException("Você não tem permissão para editar este perfil.");
                 }
