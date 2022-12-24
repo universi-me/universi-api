@@ -6,6 +6,21 @@ body{
     background-repeat: repeat-y;
 }
 
+.onlineLogo {
+  height: 10px;
+  width: 10px;
+  background-color: #66ff33;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.offlineLogo {
+  height: 10px;
+  width: 10px;
+  background-color: #bbb;
+  border-radius: 50%;
+  display: inline-block;
+}
 
 /* Estilo para lista */
 .card {

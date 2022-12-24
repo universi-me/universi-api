@@ -13,6 +13,8 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.session.SessionInformation;
+import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -36,9 +38,10 @@ public class UsuarioService implements UserDetailsService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private PerfilService perfilService;
-
     @Autowired
     private RoleHierarchyImpl roleHierarchy;
+    @Autowired
+    private SessionRegistry sessionRegistry;
 
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<Usuario> usuario = userRepository.findFirstByNome(username);
@@ -253,6 +256,36 @@ public class UsuarioService implements UserDetailsService {
         }
 
         return "/";
+    }
+
+    // logout usuario remotamente
+    public void logoutUsername(String username) {
+        for (Object principal: sessionRegistry.getAllPrincipals()) {
+            if (principal instanceof UserDetails) {
+                String usernameNow = ((UserDetails) principal).getUsername();
+                if(usernameNow.equals(username))  {
+                    for(SessionInformation sInfo : sessionRegistry.getAllSessions(principal, true)) {
+                        sInfo.expireNow();
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    // ver se o username tem alguma sassao ativa
+    public boolean isUsernameOnline(String username) {
+        for (Object principal: sessionRegistry.getAllPrincipals()) {
+            if (principal instanceof UserDetails) {
+                String usernameNow = ((UserDetails) principal).getUsername();
+                if(usernameNow.equals(username))  {
+                    for(SessionInformation sInfo : sessionRegistry.getAllSessions(principal, false)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
 }

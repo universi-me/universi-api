@@ -11,6 +11,7 @@
 <span th:fragment="nome" class="item-author text-color"
       data-abc="true">
     <a th:href="@{/p/{path}(path=${participantePerfil.usuario.getUsername()})}" style="color: inherit;text-decoration: inherit;">
+        <span th:if="${@usuarioService.isUsernameOnline(participantePerfil.usuario.getUsername())}" class="onlineLogo"></span>
     <span th:text="${participantePerfil.getNome()==null?participantePerfil.usuario.getUsername():participantePerfil.getNome()}">Nome do participante</span> <span
         th:unless="${participantePerfil.getNome()==null || participantePerfil.usuario.isEmail_verificado() == false}"
         class="bi bi-patch-check-fill" style="color: rgb(56, 179, 255);"></span>

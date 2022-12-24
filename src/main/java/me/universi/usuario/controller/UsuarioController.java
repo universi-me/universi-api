@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -22,10 +21,13 @@ import me.universi.usuario.services.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
+import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
@@ -46,6 +48,8 @@ public class UsuarioController {
     public CompetenciaTipoService competenciaTipoService;
     @Autowired
     private Environment env;
+    @Autowired
+    AuthenticationManager authenticationManager;
 
     @GetMapping("/login")
     public String login() {
@@ -260,8 +264,11 @@ public class UsuarioController {
 
             usuarioService.save(userEdit);
 
+            // force logout
+            usuarioService.logoutUsername(usernameOld);
+
             resposta.sucess = true;
-            resposta.mensagem = "As Alterações foram salvas com sucesso.";
+            resposta.mensagem = "As Alterações foram salvas com sucesso, A sessão do usuário foi finalizada.";
 
             return resposta;
 
@@ -289,6 +296,8 @@ public class UsuarioController {
                     .build();
 
             GoogleIdToken idToken = verifier.verify(idTokenString);
+
+            HttpSession sessionReq = usuarioService.obterSessaoAtual();
 
             if (idToken != null) {
                 Payload payload = idToken.getPayload();
@@ -336,25 +345,25 @@ public class UsuarioController {
 
                         perfilService.save(perfil);
 
+                        sessionReq.setAttribute("novoUsuario", true);
+
                     } else {
                         throw new UsuarioException("Usúario \""+newUsername+"\" já existe.");
                     }
                 }
 
                 if(usuario != null) {
-                    // Forçar o ligin já que p usuário entrou com a conta google.
+                    
+                    // Forçar o login já que q usuário entrou com a conta google.
+                    PreAuthenticatedAuthenticationToken preAuthenticatedAuthenticationToken = new PreAuthenticatedAuthenticationToken(usuario, usuario.getUsername(), AuthorityUtils.createAuthorityList(usuario.getAutoridade().name()));
+                    preAuthenticatedAuthenticationToken.setDetails(new WebAuthenticationDetails(request));
+                    preAuthenticatedAuthenticationToken.setAuthenticated(false);
 
-                    // verificar se algum parametro da conta impede o login, já que estamos forçando o login sem springsecurity
-                    if(usuario.isConta_bloqueada()) {
-                        throw new UsuarioException("Conta de Usuário Bloqueada.");
-                    } else if(!usuario.isEnabled()) {
-                        throw new UsuarioException("Conta de Usuário Desabilitada.");
-                    }
+                    Authentication authentication = authenticationManager.authenticate(preAuthenticatedAuthenticationToken);
 
-                    HttpSession sessionReq = request.getSession(true);
-
-                    Authentication authentication = new UsernamePasswordAuthenticationToken(usuario, null, AuthorityUtils.createAuthorityList(usuario.getAutoridade().name()));
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    SecurityContext securityContext = SecurityContextHolder.getContext();
+                    securityContext.setAuthentication(authentication);
+                    sessionReq.setAttribute("SPRING_SECURITY_CONTEXT", securityContext);
 
                     if(!usuario.isEmail_verificado()) { // ativar selo de verificado na conta
                         usuario.setEmail_verificado(true);
