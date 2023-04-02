@@ -22,8 +22,8 @@ public class ImagemController {
     @Autowired
     private Environment env;
 
-    @PostMapping("/imagem/upload")
-    public Object upload_de_imagem(@RequestParam("imagem") MultipartFile imagem) {
+    @PostMapping(value = "/imagem/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Resposta upload_de_imagem(@RequestParam("imagem") MultipartFile imagem) {
         Resposta resposta = new Resposta();
         try {
             // verificar o modo de salvamento da imagem no enviroment
@@ -45,8 +45,8 @@ public class ImagemController {
         }
     }
 
-    @ResponseBody
     @GetMapping(value = "/img/imagem/{imagem}.jpg", produces = MediaType.IMAGE_JPEG_VALUE)
+    @ResponseBody
     public ResponseEntity<InputStreamResource> obterImageEmDisco(HttpServletResponse response, @PathVariable("imagem") String nomeImagem) {
         try {
 

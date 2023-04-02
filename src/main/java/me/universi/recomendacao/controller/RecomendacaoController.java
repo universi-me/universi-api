@@ -20,10 +20,6 @@ import org.springframework.web.bind.annotation.*;
 import me.universi.recomendacao.service.RecomendacaoService;
 
 
-import javax.persistence.EntityNotFoundException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.util.List;
 import java.util.Map;
 
@@ -67,9 +63,9 @@ public class RecomendacaoController {
         return "recomendacao/recomendacao_index";
     }
 
-    @PostMapping(value = "/recomendacao/criar", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/recomendacao/criar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Object create(@RequestBody Map<String, Object> body) {
+    public Resposta create(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
@@ -131,9 +127,9 @@ public class RecomendacaoController {
         }
     }
 
-    @PostMapping(value = "/recomendacao/atualizar", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/recomendacao/atualizar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Object atualizar(@RequestBody Map<String, Object> body) {
+    public Resposta atualizar(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
@@ -181,9 +177,9 @@ public class RecomendacaoController {
         }
     }
 
-    @PostMapping(value = "/recomendacao/remover", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/recomendacao/remover", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Object remove(@RequestBody Map<String, Object> body) {
+    public Resposta remove(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
@@ -215,9 +211,9 @@ public class RecomendacaoController {
         }
     }
 
-    @PostMapping(value = "/recomendacao/obter", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/recomendacao/obter", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Object get(@RequestBody Map<String, Object> body) {
+    public Resposta get(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
@@ -243,9 +239,9 @@ public class RecomendacaoController {
         }
     }
 
-    @PostMapping(value = "/recomendacao/listar", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/recomendacao/listar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Object getlist(@RequestBody Map<String, Object> body) {
+    public Resposta getlist(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 

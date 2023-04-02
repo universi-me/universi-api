@@ -21,9 +21,9 @@ public class CompetenciaTipoController {
     @Autowired
     public CompetenciaTipoService competenciaTipoService;
 
-    @PostMapping(value = "/admin/competenciatipo/criar", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/admin/competenciatipo/criar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Object create(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public Resposta create(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
         Resposta resposta = new Resposta();
         try {
 
@@ -51,9 +51,9 @@ public class CompetenciaTipoController {
         }
     }
 
-    @PostMapping(value = "/admin/competenciatipo/atualizar", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/admin/competenciatipo/atualizar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Object update(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public Resposta update(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
         Resposta resposta = new Resposta();
         try {
 
@@ -89,9 +89,9 @@ public class CompetenciaTipoController {
         }
     }
 
-    @PostMapping(value = "/admin/competenciatipo/remover", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/admin/competenciatipo/remover", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Object remove(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public Resposta remove(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
         Resposta resposta = new Resposta();
         try {
 
@@ -117,9 +117,9 @@ public class CompetenciaTipoController {
         }
     }
 
-    @PostMapping(value = "/admin/competenciatipo/obter", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/admin/competenciatipo/obter", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Object get(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public Resposta get(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
         Resposta resposta = new Resposta();
         try {
 
@@ -144,9 +144,9 @@ public class CompetenciaTipoController {
         }
     }
 
-    @PostMapping(value = "/admin/competenciatipo/listar", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/admin/competenciatipo/listar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Object getlist(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public Resposta getlist(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
         Resposta resposta = new Resposta();
         try {
 

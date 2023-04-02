@@ -26,9 +26,9 @@ public class LinkController {
     @Autowired
     public UsuarioService usuarioService;
 
-    @PostMapping(value = "/link/criar", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/link/criar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Object create(@RequestBody Map<String, Object> body) {
+    public Resposta create(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
@@ -69,9 +69,9 @@ public class LinkController {
         }
     }
 
-    @PostMapping(value = "/link/remover", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/link/remover", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Object remove(@RequestBody Map<String, Object> body) {
+    public Resposta remove(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
@@ -105,9 +105,9 @@ public class LinkController {
         }
     }
 
-    @PostMapping(value = "/link/atualizar", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/link/atualizar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Object update(@RequestBody Map<String, Object> body) {
+    public Resposta update(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
@@ -155,9 +155,9 @@ public class LinkController {
         }
     }
 
-    @PostMapping(value = "/link/obter", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/link/obter", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Object get(@RequestBody Map<String, Object> body) {
+    public Resposta get(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 

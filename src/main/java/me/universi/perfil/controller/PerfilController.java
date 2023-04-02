@@ -15,10 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -103,9 +100,9 @@ public class PerfilController {
         return "perfil/perfil_index";
     }
 
+    @PostMapping(value = "/perfil/editar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    @RequestMapping(value = "/perfil/editar", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Object perfil_editar(@RequestBody Map<String, Object> body) {
+    public Resposta perfil_editar(@RequestBody Map<String, Object> body) {
 
         Resposta resposta = new Resposta(); // default
 

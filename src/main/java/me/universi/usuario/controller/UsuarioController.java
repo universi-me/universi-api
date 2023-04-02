@@ -108,9 +108,9 @@ public class UsuarioController {
         return "usuario/admin/admin_index";
     }
 
+    @PostMapping(value = "/registrar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    @PostMapping(value = "/registrar", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Object registrarUsuarioJson(@RequestBody Map<String, Object> body) {
+    public Resposta registrarUsuarioJson(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
@@ -165,9 +165,9 @@ public class UsuarioController {
         return "usuario/conta";
     }
 
+    @PostMapping(value = "/conta/editar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    @PostMapping(value = "/conta/editar", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Object conta_editar(@RequestBody Map<String, Object> body, HttpSession session) {
+    public Resposta conta_editar(@RequestBody Map<String, Object> body, HttpSession session) {
         Resposta resposta = new Resposta();
         try {
 
@@ -204,9 +204,9 @@ public class UsuarioController {
         }
     }
 
+    @PostMapping(value = "/admin/conta/editar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    @PostMapping(value = "/admin/conta/editar", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Object admin_conta_editar(@RequestBody Map<String, Object> body) {
+    public Resposta admin_conta_editar(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
@@ -278,9 +278,9 @@ public class UsuarioController {
         }
     }
 
+    @PostMapping(value = "/login/google", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    @PostMapping(value = "/login/google", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Object conta_google(@RequestBody Map<String, Object> body, HttpServletRequest request) {
+    public Resposta conta_google(@RequestBody Map<String, Object> body, HttpServletRequest request) {
         Resposta resposta = new Resposta();
         try {
 
