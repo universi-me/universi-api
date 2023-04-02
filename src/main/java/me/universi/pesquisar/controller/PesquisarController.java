@@ -1,5 +1,6 @@
 package me.universi.pesquisar.controller;
 
+import me.universi.api.entities.Resposta;
 import me.universi.grupo.entities.Grupo;
 import me.universi.grupo.services.GrupoService;
 import me.universi.perfil.entities.Perfil;
@@ -7,9 +8,7 @@ import me.universi.perfil.services.PerfilService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -27,9 +26,9 @@ public class PesquisarController {
     @Autowired
     public GrupoService grupoService;
 
+    @PostMapping(value = "/pesquisar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    @RequestMapping(value = "/pesquisar", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Object perfil_pesquisar(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public ArrayList<Object> perfil_pesquisar(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
 
         // retorno dos resultados
         ArrayList<Object> resultsBusca = new ArrayList<>();

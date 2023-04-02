@@ -1,5 +1,9 @@
 package me.universi;
 
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.info.License;
 import me.universi.competencia.services.CompetenciaService;
 import me.universi.competencia.services.CompetenciaTipoService;
 import me.universi.grupo.services.GrupoService;
@@ -12,6 +16,7 @@ import me.universi.usuario.enums.Autoridade;
 import me.universi.usuario.services.UsuarioService;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ExitCodeGenerator;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -84,5 +89,13 @@ public class Sys {
                 }
             }
         };
+    }
+
+    @Bean
+    public OpenAPI customOpenAPI(@Value("${springdoc.version}") String appVersion) {
+        return new OpenAPI()
+                .components(new Components())
+                .info(new Info().title("Universi.me API").version(appVersion)
+                        .license(new License().name("Apache 2.0").url("http://springdoc.org")));
     }
 }

@@ -2,8 +2,6 @@ package me.universi.competencia.controller;
 
 import java.util.List;
 import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 import me.universi.api.entities.Resposta;
 import me.universi.competencia.entities.Competencia;
@@ -34,9 +32,9 @@ public class CompetenciaController {
     @Autowired
     public UsuarioService usuarioService;
 
-    @PostMapping(value = "/competencia/criar", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/competencia/criar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Object create(@RequestBody Map<String, Object> body) {
+    public Resposta create(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
@@ -80,9 +78,9 @@ public class CompetenciaController {
         }
     }
 
-    @PostMapping(value = "/competencia/atualizar", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/competencia/atualizar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Object update(@RequestBody Map<String, Object> body) {
+    public Resposta update(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
@@ -136,9 +134,9 @@ public class CompetenciaController {
         }
     }
 
-    @PostMapping(value = "/competencia/remover", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/competencia/remover", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Object remove(@RequestBody Map<String, Object> body) {
+    public Resposta remove(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
@@ -172,9 +170,9 @@ public class CompetenciaController {
         }
     }
 
-    @PostMapping(value = "/competencia/obter", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/competencia/obter", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Object get(@RequestBody Map<String, Object> body) {
+    public Resposta get(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
@@ -199,9 +197,9 @@ public class CompetenciaController {
         }
     }
 
-    @PostMapping(value = "/competencia/listar", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/competencia/listar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Object getlist(@RequestBody Map<String, Object> body) {
+    public Resposta getlist(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 

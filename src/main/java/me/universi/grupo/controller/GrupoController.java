@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
@@ -29,8 +28,8 @@ public class GrupoController {
     @Autowired
     public UsuarioService usuarioService;
 
-    // mapaear tudo exceto, /css, /js, /img, /favicon.ico, comflita com static resources do Thymeleaf
-    @GetMapping(value = {"{url:(?!css$|js$|img$|favicon.ico$).*}/**"})
+    // mapaear tudo exceto, /css, /js, /img, /favicon.ico, comflita com static resources do Thymeleaf e Swagger-ui
+    @GetMapping(value = {"{url:(?!css$|js$|img$|favicon.ico$|swagger-ui$).*}/**"})
     public String grupo_handler(HttpServletRequest request, HttpServletResponse response, ModelMap map) {
         try {
             Usuario usuario = usuarioService.obterUsuarioNaSessao();
@@ -109,9 +108,9 @@ public class GrupoController {
     }
 
 
+    @PostMapping(value = "/grupo/criar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    @RequestMapping(value = "/grupo/criar", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Object grupo_criar(@RequestBody Map<String, Object> body) {
+    public Resposta grupo_criar(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
             Usuario usuario = usuarioService.obterUsuarioNaSessao();
@@ -199,9 +198,9 @@ public class GrupoController {
         }
     }
 
+    @PostMapping(value = "/grupo/editar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    @RequestMapping(value = "/grupo/editar", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Object grupo_editar(@RequestBody Map<String, Object> body) {
+    public Resposta grupo_editar(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
@@ -265,9 +264,9 @@ public class GrupoController {
         }
     }
 
+    @PostMapping(value = "/grupo/participante/entrar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    @PostMapping(value = "/grupo/participante/entrar", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Object grupo_participante_entrar(@RequestBody Map<String, Object> body) {
+    public Resposta grupo_participante_entrar(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
@@ -305,9 +304,9 @@ public class GrupoController {
         }
     }
 
+    @PostMapping(value = "/grupo/participante/sair", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    @PostMapping(value = "/grupo/participante/sair", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Object grupo_participante_sair(@RequestBody Map<String, Object> body) {
+    public Resposta grupo_participante_sair(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
@@ -337,9 +336,9 @@ public class GrupoController {
         }
     }
 
+    @PostMapping(value = "/grupo/participante/adicionar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    @PostMapping(value = "/grupo/participante/adicionar", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Object grupo_participante_adicionar(@RequestBody Map<String, Object> body) {
+    public Resposta grupo_participante_adicionar(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
@@ -384,9 +383,9 @@ public class GrupoController {
         }
     }
 
+    @PostMapping(value = "/grupo/participante/remover", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    @PostMapping(value = "/grupo/participante/remover", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Object grupo_participante_remover(@RequestBody Map<String, Object> body) {
+    public Resposta grupo_participante_remover(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
@@ -431,9 +430,9 @@ public class GrupoController {
         }
     }
 
+    @PostMapping(value = "/grupo/participante/listar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    @PostMapping(value = "/grupo/participante/listar", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Object grupo_participante_listar(@RequestBody Map<String, Object> body) {
+    public Resposta grupo_participante_listar(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
@@ -459,9 +458,9 @@ public class GrupoController {
         }
     }
 
-    @RequestMapping("/grupo/remover")
+    @PostMapping(value = "/grupo/remover", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Object grupo_remove(@RequestBody Map<String, Object> body) {
+    public Resposta grupo_remove(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
@@ -503,9 +502,9 @@ public class GrupoController {
         }
     }
 
-    @RequestMapping("/grupo/deletar")
+    @PostMapping(value = "/grupo/deletar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Object grupo_deletar(@RequestBody Map<String, Object> body) {
+    public Resposta grupo_deletar(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
@@ -544,9 +543,9 @@ public class GrupoController {
         }
     }
 
+    @PostMapping(value = "/grupo/obter", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    @RequestMapping(value = "/grupo/obter", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Object obter_grupo(@RequestBody Map<String, Object> body) {
+    public Resposta obter_grupo(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
@@ -572,9 +571,9 @@ public class GrupoController {
         }
     }
 
+    @PostMapping(value = "/grupo/listar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    @PostMapping(value = "/grupo/listar", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Object listar_subgrupo(@RequestBody Map<String, Object> body) {
+    public Resposta listar_subgrupo(@RequestBody Map<String, Object> body) {
         Resposta resposta = new Resposta();
         try {
 
