@@ -106,7 +106,7 @@
     <beans:bean id="methodSecurityExpressionHandler" class="org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler">
         <beans:property name="roleHierarchy" ref="roleHierarchy"/>
     </beans:bean>
-    <beans:bean id="defaultWebSecurityExpressionHandler" class="org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler">
+    <beans:bean id="defaultWebSecurityExpressionHandler" class="org.springframework.security.web.access.expression.DefaultHttpSecurityExpressionHandler">
         <beans:property name="roleHierarchy" ref="roleHierarchy"/>
     </beans:bean>
     <beans:bean id="accessDecisionManager" class="org.springframework.security.access.vote.AffirmativeBased">

@@ -36,19 +36,19 @@
 
                 <div class="col" style="width:60%;">
 
-                    <div th:if="${#strings.equals(#httpServletRequest.requestURI, '/admin')}">
+                    <div th:if="${#strings.equals(@usuarioService.obterUrlAtual(), '/admin')}">
                         <div th:replace="usuario/admin/info :: info" />
                     </div>
 
-                    <div th:if="${#strings.startsWith(#httpServletRequest.requestURI, '/admin/conta')}">
+                    <div th:if="${#strings.startsWith(@usuarioService.obterUrlAtual(), '/admin/conta')}">
                         <div th:replace="usuario/admin/editar_usuario :: editar" />
                     </div>
 
-                    <div th:if="${#strings.startsWith(#httpServletRequest.requestURI, '/admin/competencia')}">
+                    <div th:if="${#strings.startsWith(@usuarioService.obterUrlAtual(), '/admin/competencia')}">
                         <div th:replace="usuario/admin/competenciaTipo :: competenciaTipo" />
                     </div>
 
-                    <div th:if="${#strings.startsWith(#httpServletRequest.requestURI, '/admin/grupo')}" th:with="flagPage=${'flagCriar'}">
+                    <div th:if="${#strings.startsWith(@usuarioService.obterUrlAtual(), '/admin/grupo')}" th:with="flagPage=${'flagCriar'}">
                         <div th:with="flagGrupoMaster = true">
                             <div th:replace="grupo/editar :: editar" />
                         </div>

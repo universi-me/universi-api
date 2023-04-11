@@ -156,6 +156,11 @@ public class UsuarioService implements UserDetailsService {
         return attr.getRequest().getSession(true);
     }
 
+    public String obterUrlAtual() {
+        ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+        return attr.getRequest().getRequestURI();
+    }
+
     public void atualizarUsuarioNaSessao() {
         Usuario usuarioSession = obterUsuarioNaSessao();
         if(usuarioSession != null) {
