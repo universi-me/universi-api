@@ -7,12 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class CreateSubjectImpl  implements CreateSubject{
+public class CreateSubjectServiceImpl implements CreateSubjectService {
 
     private final SubjectRepository subjectRepository;
 
     @Autowired
-    public CreateSubjectImpl(SubjectRepository subjectRepository) {
+    public CreateSubjectServiceImpl(SubjectRepository subjectRepository) {
         this.subjectRepository = subjectRepository;
     }
 
