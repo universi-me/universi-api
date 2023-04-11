@@ -3,6 +3,7 @@ package me.universi.usuario.services;
 import me.universi.api.entities.Resposta;
 import me.universi.usuario.entities.Usuario;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.DefaultRedirectStrategy;
@@ -23,6 +24,8 @@ import java.security.Principal;
 public class AutenticacaoValidaHandler extends SavedRequestAwareAuthenticationSuccessHandler {
     @Autowired
     private UsuarioService usuarioService;
+    @Autowired
+    AuthenticationManager authenticationManager;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws ServletException, IOException {
@@ -36,7 +39,7 @@ public class AutenticacaoValidaHandler extends SavedRequestAwareAuthenticationSu
         }
         if(username != null) {
             Usuario usuario = (Usuario) usuarioService.loadUserByUsername(username);
-            usuarioService.configurarSessaoParaUsuario(usuario);
+            usuarioService.configurarSessaoParaUsuario(usuario, authenticationManager);
         }
 
         if ("application/json".equals(request.getHeader("Content-Type"))) { // request foi via JSON

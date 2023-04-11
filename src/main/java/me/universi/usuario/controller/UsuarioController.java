@@ -353,17 +353,6 @@ public class UsuarioController {
                 }
 
                 if(usuario != null) {
-                    
-                    // Forçar o login já que q usuário entrou com a conta google.
-                    PreAuthenticatedAuthenticationToken preAuthenticatedAuthenticationToken = new PreAuthenticatedAuthenticationToken(usuario, usuario.getUsername(), AuthorityUtils.createAuthorityList(usuario.getAutoridade().name()));
-                    preAuthenticatedAuthenticationToken.setDetails(new WebAuthenticationDetails(request));
-                    preAuthenticatedAuthenticationToken.setAuthenticated(false);
-
-                    Authentication authentication = authenticationManager.authenticate(preAuthenticatedAuthenticationToken);
-
-                    SecurityContext securityContext = SecurityContextHolder.getContext();
-                    securityContext.setAuthentication(authentication);
-                    sessionReq.setAttribute("SPRING_SECURITY_CONTEXT", securityContext);
 
                     if(!usuario.isEmail_verificado()) { // ativar selo de verificado na conta
                         usuario.setEmail_verificado(true);
@@ -372,7 +361,7 @@ public class UsuarioController {
 
                     sessionReq.setAttribute("loginViaGoogle", true);
 
-                    usuarioService.configurarSessaoParaUsuario(usuario);
+                    usuarioService.configurarSessaoParaUsuario(usuario, authenticationManager);
 
                     resposta.sucess = true;
                     resposta.enderecoParaRedirecionar = usuarioService.obterUrlAoLogar();

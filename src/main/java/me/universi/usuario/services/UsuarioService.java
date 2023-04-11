@@ -1,5 +1,6 @@
 package me.universi.usuario.services;
 
+import jakarta.servlet.http.HttpServletRequest;
 import me.universi.perfil.entities.Perfil;
 import me.universi.perfil.services.PerfilService;
 import me.universi.usuario.entities.Usuario;
@@ -9,9 +10,13 @@ import me.universi.usuario.repositories.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.session.SessionInformation;
 import org.springframework.security.core.session.SessionRegistry;
@@ -19,12 +24,16 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
+import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import jakarta.servlet.http.HttpSession;
+
+import java.net.http.HttpRequest;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -166,7 +175,7 @@ public class UsuarioService implements UserDetailsService {
         if(usuarioSession != null) {
             Usuario usuarioAtualizado = (Usuario) findFirstById(usuarioSession.getId());
             if(usuarioAtualizado != null) {
-                configurarSessaoParaUsuario(usuarioAtualizado);
+                configurarSessaoParaUsuario(usuarioAtualizado, null);
             }
         }
     }
@@ -182,13 +191,26 @@ public class UsuarioService implements UserDetailsService {
         return null;
     }
 
-    public void configurarSessaoParaUsuario(Usuario usuario) {
+    public void configurarSessaoParaUsuario(Usuario usuario, AuthenticationManager authenticationManager) {
         HttpSession session = obterSessaoAtual();
         // Set session inatividade do usuario em 10min
         session.setMaxInactiveInterval(10 * 60);
 
         // Salvar usuario na sessao
         session.setAttribute("usuario", usuario);
+
+        // Configurar autenticação
+        if(authenticationManager != null) {
+            ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+            HttpServletRequest request = attr.getRequest();
+            PreAuthenticatedAuthenticationToken preAuthenticatedAuthenticationToken = new PreAuthenticatedAuthenticationToken(usuario, usuario.getUsername(), AuthorityUtils.createAuthorityList(usuario.getAutoridade().name()));
+            preAuthenticatedAuthenticationToken.setDetails(new WebAuthenticationDetails(request));
+            preAuthenticatedAuthenticationToken.setAuthenticated(false);
+            Authentication authentication = authenticationManager.authenticate(preAuthenticatedAuthenticationToken);
+            SecurityContext securityContext = SecurityContextHolder.getContext();
+            securityContext.setAuthentication(authentication);
+            session.setAttribute("SPRING_SECURITY_CONTEXT", securityContext);
+        }
     }
 
     public boolean usuarioEstaLogado() {
