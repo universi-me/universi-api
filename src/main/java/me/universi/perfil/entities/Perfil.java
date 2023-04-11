@@ -8,7 +8,7 @@ import me.universi.usuario.entities.Usuario;
 import me.universi.grupo.entities.Grupo;
 import org.hibernate.annotations.CreationTimestamp;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.Collection;
 import java.util.Date;
 

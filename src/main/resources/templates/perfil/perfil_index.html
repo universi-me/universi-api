@@ -19,7 +19,7 @@
             <div class="row gutters">
 
                 <div class="col" style="width:20%;max-width:210px;min-width:150px;padding-right: 10px;"
-                     th:unless="${perfil == null || (usuarioService.usuarioPrecisaDePerfil(perfil.usuario) && #strings.endsWith(#httpServletRequest.requestURI, '/editar'))}">
+                     th:unless="${perfil == null || (usuarioService.usuarioPrecisaDePerfil(perfil.usuario) && #strings.endsWith(@usuarioService.obterUrlAtual(), '/editar'))}">
                     <div class="card" style="width: 100%;">
                         <img th:src="${(perfil==null || perfil.imagem==null)?'https://i.imgur.com/vUBrCxr.png':perfil.imagem}"
                              class="card-img-top" alt="Perfil" referrerpolicy="no-referrer">
@@ -59,7 +59,7 @@
                         </div>
 
                         <ul class="list-group list-group-flush"
-                            th:unless="${perfil == null || #strings.endsWith(#httpServletRequest.requestURI, '/editar') || !usuarioService.usuarioDonoDaSessao(perfil.usuario)}">
+                            th:unless="${perfil == null || #strings.endsWith(@usuarioService.obterUrlAtual(), '/editar') || !usuarioService.usuarioDonoDaSessao(perfil.usuario)}">
                             <a th:href="'/p/' +${perfil.getUsuario().getUsername()} + '/links'"
                                class="list-group-item text-center bi bi-link"
                                style="background-color:#B4FFC2;text-decoration: none;"> Gerenciar Links</a>

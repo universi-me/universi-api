@@ -69,7 +69,7 @@
                             </span>
                         </div>
                         <a class="card-footer text-center bi bi-pencil-square"
-                           th:unless="${#strings.endsWith(#httpServletRequest.requestURI, '/editar') || !grupoService.temPermissaoParaGrupo(grupo, session.usuario)}"
+                           th:unless="${#strings.endsWith(@usuarioService.obterUrlAtual(), '/editar') || !grupoService.temPermissaoParaGrupo(grupo, session.usuario)}"
                            th:href="${grupoDiretorio} + '/editar'"
                            style="background-color:#B4FFC2;text-decoration: none;"> Editar Grupo
                         </a>

@@ -4,7 +4,7 @@ import me.universi.competencia.entities.CompetenciaTipo;
 import me.universi.perfil.entities.Perfil;
 import org.hibernate.annotations.CreationTimestamp;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.Date;
 
 @Entity(name = "recomendacao")
