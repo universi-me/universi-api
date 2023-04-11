@@ -2,7 +2,7 @@ package me.universi.competencia.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity(name = "competenciatipo")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})

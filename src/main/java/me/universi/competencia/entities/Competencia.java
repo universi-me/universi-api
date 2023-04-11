@@ -5,7 +5,7 @@ import me.universi.competencia.enums.Nivel;
 import me.universi.perfil.entities.Perfil;
 import org.hibernate.annotations.CreationTimestamp;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.Date;
 
 @Entity(name = "competencia")

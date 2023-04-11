@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import me.universi.link.enums.TipoLink;
 import me.universi.perfil.entities.Perfil;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity(name = "link")
 public class Link {
