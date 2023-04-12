@@ -9,7 +9,7 @@ import me.universi.perfil.entities.Perfil;
 import me.universi.perfil.enums.Sexo;
 import me.universi.perfil.services.PerfilService;
 import me.universi.recomendacao.service.RecomendacaoService;
-import me.universi.usuario.entities.Usuario;
+import me.universi.usuario.entities.User;
 import me.universi.usuario.services.UsuarioService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +42,7 @@ public class CompetenciaTest {
     @Test
     void create() {
         String nome = "competenciaTest";
-        Usuario userNew = new Usuario(nome, nome+"@email.com", usuarioService.codificarSenha("senha"));
+        User userNew = new User(nome, nome+"@email.com", usuarioService.codificarSenha("senha"));
         try {
             usuarioService.createUser(userNew);
         } catch (Exception e) {
@@ -95,7 +95,7 @@ public class CompetenciaTest {
     @Test
     void update(){
         String nome = "competenciaTestUpdate";
-        Usuario userNew = new Usuario(nome, nome+"@email.com", usuarioService.codificarSenha("senha"));
+        User userNew = new User(nome, nome+"@email.com", usuarioService.codificarSenha("senha"));
         try {
             usuarioService.createUser(userNew);
         } catch (Exception e) {
@@ -154,7 +154,7 @@ public class CompetenciaTest {
     @Test
     void delete(){
         String nome = "competenciaTestDelete";
-        Usuario userNew = new Usuario(nome, nome+"@email.com", usuarioService.codificarSenha("senha"));
+        User userNew = new User(nome, nome+"@email.com", usuarioService.codificarSenha("senha"));
         try {
             usuarioService.createUser(userNew);
         } catch (Exception e) {
@@ -214,7 +214,7 @@ public class CompetenciaTest {
     @Test
     void read(){
         String nome = "competenciaTestread";
-        Usuario userNew = new Usuario(nome, nome+"@email.com", usuarioService.codificarSenha("senha"));
+        User userNew = new User(nome, nome+"@email.com", usuarioService.codificarSenha("senha"));
         try {
             usuarioService.createUser(userNew);
         } catch (Exception e) {

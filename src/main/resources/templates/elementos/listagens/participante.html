@@ -14,7 +14,7 @@
              th:each="i : ${#numbers.sequence(listaParticipantes.size() - 1, 0, -1)}"
              th:with="participanteNow = ${listaParticipantes[i]}">
 
-            <a th:href="@{/p/{path}(path=${participanteNow.usuario.getUsername()})}" style="float:left;">
+            <a th:href="@{/p/{path}(path=${participanteNow.user.getUsername()})}" style="float:left;">
                 <img th:src="${participanteNow.imagem==null?'https://i.imgur.com/vUBrCxr.png':participanteNow.imagem}"
                      class="w-50 img-thumbnail" alt="..." referrerpolicy="no-referrer"/>
             </a>
@@ -36,10 +36,10 @@
             </div>
 
             <div>
-                <a th:href="@{/p/{path}(path=${participanteNow.usuario.getUsername()})}"
+                <a th:href="@{/p/{path}(path=${participanteNow.user.getUsername()})}"
                    class="btn btn-primary">Ver Perfil</a>
                 <button th:unless="${modoEditar == null}"
-                        th:attr="onclick=|removerParticipante('${grupo.getId()}','${participanteNow.usuario.getUsername()}');|"
+                        th:attr="onclick=|removerParticipante('${grupo.getId()}','${participanteNow.user.getUsername()}');|"
                         href="#" class="btn btn-danger bi bi-trash"> Remover
                 </button>
             </div>

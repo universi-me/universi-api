@@ -110,7 +110,7 @@
                            name="grupoRoot1" checked disabled>
                     <label class="form-check-label" for="grupoRoot1">Grupo Master (Pai de todos os Subgrupos)</label>
                 </div>
-                <p align="left" th:unless="${grupo == null || !@grupoService.temPermissaoParaGrupo(grupo, session.usuario)}">
+                <p align="left" th:unless="${grupo == null || !@grupoService.temPermissaoParaGrupo(grupo, session.user)}">
                     <br/>
                     <button class="btn btn-danger bi bi-trash3" type="button" id="exitBt" onclick="deletarGrupo(this.id)" th:id="${grupo.getId()}" th:text="${(' Remover '+ nomeGrupo)}"> Remover</button>
                 </p>

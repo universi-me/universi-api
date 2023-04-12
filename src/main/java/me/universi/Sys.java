@@ -10,7 +10,7 @@ import me.universi.grupo.services.GrupoService;
 import me.universi.link.services.LinkService;
 import me.universi.perfil.services.PerfilService;
 import me.universi.recomendacao.service.RecomendacaoService;
-import me.universi.usuario.entities.Usuario;
+import me.universi.usuario.entities.User;
 
 import me.universi.usuario.enums.Autoridade;
 import me.universi.usuario.services.UsuarioService;
@@ -79,7 +79,7 @@ public class Sys {
             // Criar usuario Admin padrão, obs: alterar senha depois.
             if(!usuarioService.usernameExiste("admin")) {
                 System.out.println("Criando usuário: admin:admin");
-                Usuario userAdmin = new Usuario("admin", null, usuarioService.codificarSenha("admin"));
+                User userAdmin = new User("admin", null, usuarioService.codificarSenha("admin"));
                 try {
                     usuarioService.createUser(userAdmin);
                     userAdmin.setAutoridade(Autoridade.ROLE_ADMIN);

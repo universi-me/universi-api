@@ -45,7 +45,7 @@
                         document.querySelector('#addParticipante').userid = ui.item.id;
                         $("#addParticipanteBt").click();
                     }
-                }, ['usuario']);
+                }, ['user']);
 
                 function removerParticipante(grupoId, participante) {
                     removerParticipanteDoGrupo(grupoId, participante, function removidoCallback(jsonResponse) {

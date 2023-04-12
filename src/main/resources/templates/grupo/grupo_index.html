@@ -30,7 +30,7 @@
                             <h5 class="card-title text-center" th:text="${grupo.nome}">Nome do Grupo</h5>
 
                             <div class="text-center" th:unless="${grupo == null}">
-                                <div th:with="isParticipante = ${@grupoService.obterParticipanteNoGrupo(grupo, session.usuario.perfil.id)}">
+                                <div th:with="isParticipante = ${@grupoService.obterParticipanteNoGrupo(grupo, session.user.perfil.id)}">
                                     <div th:unless="${!grupo.podeEntrar}" th:if="${isParticipante == null}">
                                         <br/>
                                         <ul class="list-group">
@@ -69,7 +69,7 @@
                             </span>
                         </div>
                         <a class="card-footer text-center bi bi-pencil-square"
-                           th:unless="${#strings.endsWith(@usuarioService.obterUrlAtual(), '/editar') || !grupoService.temPermissaoParaGrupo(grupo, session.usuario)}"
+                           th:unless="${#strings.endsWith(@usuarioService.obterUrlAtual(), '/editar') || !grupoService.temPermissaoParaGrupo(grupo, session.user)}"
                            th:href="${grupoDiretorio} + '/editar'"
                            style="background-color:#B4FFC2;text-decoration: none;"> Editar Grupo
                         </a>

@@ -16,20 +16,20 @@
    <div class="form-group">
       <label for="username" class="col-sm-3 col-form-label">Usuário</label>
       <div class="mb-3">
-         <input type="text" readonly disabled class="form-control" id="username" th:placeholder="${session.usuario.nome}">
+         <input type="text" readonly disabled class="form-control" id="username" th:placeholder="${session.user.nome}">
       </div>
    </div>
    <div class="form-group">
-      <label for="email" class="col-sm-3 col-form-label">E-mail <span th:unless="${session.usuario.isEmail_verificado() == false}" class="bi bi-patch-check-fill" style="color: rgb(56, 179, 255);"></span></label>
+      <label for="email" class="col-sm-3 col-form-label">E-mail <span th:unless="${session.user.isEmail_verificado() == false}" class="bi bi-patch-check-fill" style="color: rgb(56, 179, 255);"></span></label>
       <div class="mb-3">
-         <input type="text" readonly disabled class="form-control" id="email" th:placeholder="${session.usuario.email}">
-         <div id="emailHelp" class="form-text" th:if="${session.usuario.isEmail_verificado() == false}">Autentique-se com sua conta DCX para obter o selo de conta verificada.</div>
+         <input type="text" readonly disabled class="form-control" id="email" th:placeholder="${session.user.email}">
+         <div id="emailHelp" class="form-text" th:if="${session.user.isEmail_verificado() == false}">Autentique-se com sua conta DCX para obter o selo de conta verificada.</div>
       </div>
    </div>
       <div class="form-group">
          <label for="nivel" class="col-sm-3 col-form-label">Nível de Conta</label>
          <div class="mb-3">
-            <input type="text" readonly disabled class="form-control" id="nivel" th:placeholder="${session.usuario.autoridade.label}">
+            <input type="text" readonly disabled class="form-control" id="nivel" th:placeholder="${session.user.autoridade.label}">
          </div>
       </div>
 <br/><br/>
@@ -55,7 +55,7 @@
    <br/>
    <p align="right"><button type="submit" class="btn btn-primary bi bi-database-fill-check"> Alterar Senha</button></p>
 </form>
-      <script th:if="${session.usuario.senha==null}">
+      <script th:if="${session.user.senha==null}">
         alert("Parece que você ainda não tem uma senha, crie uma senha para entrar com o seu login.", 'warning');
     </script>
 <script>

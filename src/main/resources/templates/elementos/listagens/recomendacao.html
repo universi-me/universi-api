@@ -13,7 +13,7 @@
              th:each="i : ${#numbers.sequence(listaRecomendacoes.size() - 1, 0, -1)}"
              th:with="recomendacaoNow = ${listaRecomendacoes[i]}">
 
-            <a th:href="@{/p/{path}(path=${recomendacaoNow.origem.usuario.getUsername()})}" style="float:left;">
+            <a th:href="@{/p/{path}(path=${recomendacaoNow.origem.user.getUsername()})}" style="float:left;">
                 <img th:src="${(recomendacaoNow.origem==null || recomendacaoNow.origem.imagem==null)?'https://i.imgur.com/vUBrCxr.png':recomendacaoNow.origem.imagem}"
                      class="w-50 img-thumbnail" alt="..." referrerpolicy="no-referrer" />
             </a>
@@ -35,7 +35,7 @@
                 </div>
             </div>
 
-            <div th:unless="${!@usuarioService.usuarioDonoDaSessao(recomendacaoNow.origem.usuario)}">
+            <div th:unless="${!@usuarioService.usuarioDonoDaSessao(recomendacaoNow.origem.user)}">
 
                 <button th:onclick="removerRecomendacao(this.id)" th:id="${recomendacaoNow.getId()}" href="#" class="btn btn-danger bi bi-trash"> Remover</button>
 

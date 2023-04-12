@@ -9,7 +9,7 @@ import me.universi.perfil.entities.Perfil;
 import me.universi.perfil.enums.Sexo;
 import me.universi.perfil.exceptions.PerfilException;
 import me.universi.perfil.services.PerfilService;
-import me.universi.usuario.entities.Usuario;
+import me.universi.usuario.entities.User;
 import me.universi.usuario.services.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
+
 import java.util.Arrays;
 import java.util.Map;
 
@@ -39,7 +39,7 @@ public class PerfilController {
     @GetMapping("/p/**")
     public String perfil_handler(HttpServletRequest request, HttpServletResponse response, ModelMap map) {
         try {
-            Usuario usuario = usuarioService.obterUsuarioNaSessao();
+            User user = usuarioService.obterUsuarioNaSessao();
 
             String requestPathSt = request.getRequestURI().toLowerCase();
 
@@ -47,8 +47,8 @@ public class PerfilController {
             boolean flagCompetencias = requestPathSt.endsWith("/competencias");
             boolean flagLinks = requestPathSt.endsWith("/links");
 
-            if(!flagEditar && usuarioService.usuarioPrecisaDePerfil(usuario)) {
-                return "redirect:/p/"+ usuario.getUsername() +"/editar";
+            if(!flagEditar && usuarioService.usuarioPrecisaDePerfil(user)) {
+                return "redirect:/p/"+ user.getUsername() +"/editar";
             }
 
             String[] nicknameArr = requestPathSt.split("/");
@@ -57,15 +57,15 @@ public class PerfilController {
                 nicknameArr = Arrays.copyOf(nicknameArr, nicknameArr.length - 1);
             }
 
-            Usuario usuarioPerfil = null;
+            User userPerfil = null;
             if (nicknameArr.length == 3) {
                 String usuarioSt = nicknameArr[nicknameArr.length - 1];
-                usuarioPerfil = (Usuario) usuarioService.loadUserByUsername(usuarioSt);
+                userPerfil = (User) usuarioService.loadUserByUsername(usuarioSt);
             }
 
-            if(usuarioPerfil != null) {
+            if(userPerfil != null) {
 
-                Perfil perfil = usuarioPerfil.getPerfil();
+                Perfil perfil = userPerfil.getPerfil();
 
                 if (perfil == null) {
                     throw new PerfilException("Usuário não possui um perfil.");
@@ -126,8 +126,8 @@ public class PerfilController {
 
             if(!usuarioService.usuarioDonoDaSessao(perfilAtual.getUsuario())) {
 
-                Usuario usuarioSession = usuarioService.obterUsuarioNaSessao();
-                if(!usuarioService.isContaAdmin(usuarioSession)) {
+                User userSession = usuarioService.obterUsuarioNaSessao();
+                if(!usuarioService.isContaAdmin(userSession)) {
                     throw new PerfilException("Você não tem permissão para editar este perfil.");
                 }
             }

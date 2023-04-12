@@ -2,20 +2,16 @@ package me.universi;
 
 import me.universi.competencia.entities.Competencia;
 import me.universi.competencia.services.CompetenciaService;
-import me.universi.grupo.entities.Grupo;
-import me.universi.grupo.enums.GrupoTipo;
-import me.universi.grupo.exceptions.GrupoException;
 import me.universi.grupo.services.GrupoService;
 import me.universi.perfil.entities.Perfil;
 import me.universi.perfil.enums.Sexo;
 import me.universi.perfil.services.PerfilService;
 import me.universi.recomendacao.service.RecomendacaoService;
-import me.universi.usuario.entities.Usuario;
+import me.universi.usuario.entities.User;
 import me.universi.usuario.services.UsuarioService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -76,7 +72,7 @@ public class PerfilTest {
     }
 
     public Perfil perfil(String nome) {
-        Usuario userNew = new Usuario(nome, nome+"@email.com", usuarioService.codificarSenha("senha"));
+        User userNew = new User(nome, nome+"@email.com", usuarioService.codificarSenha("senha"));
         try {
             usuarioService.createUser(userNew);
         } catch (Exception e) {

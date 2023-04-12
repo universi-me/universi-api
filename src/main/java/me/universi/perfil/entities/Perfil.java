@@ -4,7 +4,7 @@ import me.universi.competencia.entities.Competencia;
 import me.universi.link.entities.Link;
 import me.universi.perfil.enums.Sexo;
 import me.universi.recomendacao.entities.Recomendacao;
-import me.universi.usuario.entities.Usuario;
+import me.universi.usuario.entities.User;
 import me.universi.grupo.entities.Grupo;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -21,7 +21,7 @@ public class Perfil {
     private Long id;
 
     @OneToOne
-    private Usuario usuario;
+    private User user;
     @Column(name = "nome")
     private String nome;
     @Column(name = "sobrenome")
@@ -57,9 +57,9 @@ public class Perfil {
     @Column(name = "data_de_criacao")
     private Date dataDeCriacao;
 
-    public Perfil(Long id, Usuario usuario, String bio, Link link, Collection<Competencia> competencias, Collection<Grupo> grupos, Collection<Link> links) {
+    public Perfil(Long id, User user, String bio, Link link, Collection<Competencia> competencias, Collection<Grupo> grupos, Collection<Link> links) {
         this.id = id;
-        this.usuario = usuario;
+        this.user = user;
         this.bio = bio;
         this.link = link;
         this.competencias = competencias;
@@ -75,12 +75,12 @@ public class Perfil {
         return id;
     }
 
-    public Usuario getUsuario() {
-        return usuario;
+    public User getUsuario() {
+        return user;
     }
 
-    public void setUsuario(Usuario usuario) {
-        this.usuario = usuario;
+    public void setUsuario(User user) {
+        this.user = user;
     }
 
     public String getBio() {

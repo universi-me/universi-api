@@ -6,7 +6,7 @@ import me.universi.link.enums.TipoLink;
 import me.universi.link.exceptions.LinkException;
 import me.universi.link.services.LinkService;
 import me.universi.perfil.entities.Perfil;
-import me.universi.usuario.entities.Usuario;
+import me.universi.usuario.entities.User;
 import me.universi.usuario.services.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -15,8 +15,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import java.util.Map;
 
 @Controller
@@ -32,7 +30,7 @@ public class LinkController {
         Resposta resposta = new Resposta();
         try {
 
-            Usuario usuario = usuarioService.obterUsuarioNaSessao();
+            User user = usuarioService.obterUsuarioNaSessao();
 
             String url = (String)body.get("url");
             if(url == null) {
@@ -54,7 +52,7 @@ public class LinkController {
             }
 
 
-            Perfil perfil = usuario.getPerfil();
+            Perfil perfil = user.getPerfil();
             linkNew.setPerfil(perfil);
 
             linkService.save(linkNew);
@@ -85,9 +83,9 @@ public class LinkController {
                 throw new LinkException("Link não encontrada.");
             }
 
-            Usuario usuario = usuarioService.obterUsuarioNaSessao();
+            User user = usuarioService.obterUsuarioNaSessao();
 
-            Perfil perfil = usuario.getPerfil();
+            Perfil perfil = user.getPerfil();
 
             if(link.getPerfil().getId() != perfil.getId()) {
                 throw new LinkException("Você não tem permissão para editar este Link.");
@@ -125,9 +123,9 @@ public class LinkController {
                 throw new LinkException("Link não encontrada.");
             }
 
-            Usuario usuario = usuarioService.obterUsuarioNaSessao();
+            User user = usuarioService.obterUsuarioNaSessao();
 
-            Perfil perfil = usuario.getPerfil();
+            Perfil perfil = user.getPerfil();
 
             if(link.getPerfil().getId() != perfil.getId()) {
                 throw new LinkException("Você não tem permissão para editar este Link.");
