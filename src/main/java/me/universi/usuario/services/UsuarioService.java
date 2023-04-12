@@ -3,7 +3,7 @@ package me.universi.usuario.services;
 import jakarta.servlet.http.HttpServletRequest;
 import me.universi.perfil.entities.Perfil;
 import me.universi.perfil.services.PerfilService;
-import me.universi.usuario.entities.Usuario;
+import me.universi.usuario.entities.User;
 import me.universi.usuario.enums.Autoridade;
 import me.universi.usuario.exceptions.UsuarioException;
 import me.universi.usuario.repositories.UsuarioRepository;
@@ -33,7 +33,6 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import jakarta.servlet.http.HttpSession;
 
-import java.net.http.HttpRequest;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -53,7 +52,7 @@ public class UsuarioService implements UserDetailsService {
     private SessionRegistry sessionRegistry;
 
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<Usuario> usuario = userRepository.findFirstByNome(username);
+        Optional<User> usuario = userRepository.findFirstByNome(username);
         if (usuario.isPresent()) {
             return usuario.get();
         }
@@ -68,7 +67,7 @@ public class UsuarioService implements UserDetailsService {
     }
 
     public UserDetails findFirstByEmail(String email) throws UsuarioException {
-        Optional<Usuario> usuario = userRepository.findFirstByEmail(email);
+        Optional<User> usuario = userRepository.findFirstByEmail(email);
         if (usuario.isPresent()) {
             return usuario.get();
         }
@@ -76,19 +75,19 @@ public class UsuarioService implements UserDetailsService {
     }
 
     public UserDetails findFirstById(Long id) {
-        Optional<Usuario> usuario = userRepository.findFirstById(id);
+        Optional<User> usuario = userRepository.findFirstById(id);
         if (usuario.isPresent()) {
             return usuario.get();
         }
         return null;
     }
 
-    public void createUser(Usuario user) throws UsuarioException {
+    public void createUser(User user) throws UsuarioException {
         if (user==null) {
             throw new UsuarioException("Usuario está vazio!");
         }
         user.setAutoridade(Autoridade.ROLE_USER);
-        userRepository.saveAndFlush((Usuario)user);
+        userRepository.saveAndFlush((User)user);
 
         Perfil userPerfil = new Perfil();
         userPerfil.setUsuario(user);
@@ -144,18 +143,18 @@ public class UsuarioService implements UserDetailsService {
         return matcher.find();
     }
 
-    public boolean senhaValida(Usuario usuario, String senha) {
-        return passwordEncoder.matches(senha, usuario.getPassword());
+    public boolean senhaValida(User user, String senha) {
+        return passwordEncoder.matches(senha, user.getPassword());
     }
 
-    public void save(Usuario usuario) {
-        userRepository.saveAndFlush(usuario);
+    public void save(User user) {
+        userRepository.saveAndFlush(user);
     }
 
-    public boolean usuarioDonoDaSessao(Usuario usuario) {
-        Usuario usuarioSession = obterUsuarioNaSessao();
-        if(usuarioSession != null) {
-            return (usuarioSession.getId() == usuario.getId());
+    public boolean usuarioDonoDaSessao(User user) {
+        User userSession = obterUsuarioNaSessao();
+        if(userSession != null) {
+            return (userSession.getId() == user.getId());
         }
         return false;
     }
@@ -171,39 +170,39 @@ public class UsuarioService implements UserDetailsService {
     }
 
     public void atualizarUsuarioNaSessao() {
-        Usuario usuarioSession = obterUsuarioNaSessao();
-        if(usuarioSession != null) {
-            Usuario usuarioAtualizado = (Usuario) findFirstById(usuarioSession.getId());
-            if(usuarioAtualizado != null) {
-                configurarSessaoParaUsuario(usuarioAtualizado, null);
+        User userSession = obterUsuarioNaSessao();
+        if(userSession != null) {
+            User userAtualizado = (User) findFirstById(userSession.getId());
+            if(userAtualizado != null) {
+                configurarSessaoParaUsuario(userAtualizado, null);
             }
         }
     }
 
-    public Usuario obterUsuarioNaSessao() {
+    public User obterUsuarioNaSessao() {
         HttpSession session = obterSessaoAtual();
         if(session != null) {
-            Usuario usuarioSession = (Usuario) session.getAttribute("usuario");
-            if(usuarioSession != null) {
-                return usuarioSession;
+            User userSession = (User) session.getAttribute("usuario");
+            if(userSession != null) {
+                return userSession;
             }
         }
         return null;
     }
 
-    public void configurarSessaoParaUsuario(Usuario usuario, AuthenticationManager authenticationManager) {
+    public void configurarSessaoParaUsuario(User user, AuthenticationManager authenticationManager) {
         HttpSession session = obterSessaoAtual();
         // Set session inatividade do usuario em 10min
         session.setMaxInactiveInterval(10 * 60);
 
         // Salvar usuario na sessao
-        session.setAttribute("usuario", usuario);
+        session.setAttribute("usuario", user);
 
         // Configurar autenticação
         if(authenticationManager != null) {
             ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
             HttpServletRequest request = attr.getRequest();
-            PreAuthenticatedAuthenticationToken preAuthenticatedAuthenticationToken = new PreAuthenticatedAuthenticationToken(usuario, usuario.getUsername(), AuthorityUtils.createAuthorityList(usuario.getAutoridade().name()));
+            PreAuthenticatedAuthenticationToken preAuthenticatedAuthenticationToken = new PreAuthenticatedAuthenticationToken(user, user.getUsername(), AuthorityUtils.createAuthorityList(user.getAutoridade().name()));
             preAuthenticatedAuthenticationToken.setDetails(new WebAuthenticationDetails(request));
             preAuthenticatedAuthenticationToken.setAuthenticated(false);
             Authentication authentication = authenticationManager.authenticate(preAuthenticatedAuthenticationToken);
@@ -225,25 +224,25 @@ public class UsuarioService implements UserDetailsService {
     }
 
     // verifica se usuario possui a autoridade seguindo a hierarquia do springsecurity
-    public boolean usuarioTemAutoridade(Usuario usuario, Autoridade autoridade) {
-        Collection<? extends GrantedAuthority> reachableRoles = roleHierarchy.getReachableGrantedAuthorities(usuario.getAuthorities());
+    public boolean usuarioTemAutoridade(User user, Autoridade autoridade) {
+        Collection<? extends GrantedAuthority> reachableRoles = roleHierarchy.getReachableGrantedAuthorities(user.getAuthorities());
         if (reachableRoles.contains(new SimpleGrantedAuthority(autoridade.toString()))) {
             return true;
         }
         return false;
     }
 
-    public boolean isContaAdmin(Usuario usuarioSession) {
+    public boolean isContaAdmin(User userSession) {
         try {
-            return usuarioTemAutoridade(usuarioSession, Autoridade.ROLE_ADMIN);
+            return usuarioTemAutoridade(userSession, Autoridade.ROLE_ADMIN);
         } catch (Exception e) {
             return false;
         }
     }
 
-    public boolean usuarioPrecisaDePerfil(Usuario usuario) {
+    public boolean usuarioPrecisaDePerfil(User user) {
         try {
-            if((usuario.getPerfil()==null || usuario.getPerfil().getNome()==null) && !isContaAdmin(usuario)) {
+            if((user.getPerfil()==null || user.getPerfil().getNome()==null) && !isContaAdmin(user)) {
                 return true;
             }
             return false;
@@ -265,13 +264,13 @@ public class UsuarioService implements UserDetailsService {
     // url de redirecionamento ao logar
     public String obterUrlAoLogar() {
 
-        Usuario usuarioSession = obterUsuarioNaSessao();
-        if (usuarioSession != null) {
-            if(usuarioPrecisaDePerfil(usuarioSession)) {
-                return "/p/" + usuarioSession.getUsername() + "/editar";
+        User userSession = obterUsuarioNaSessao();
+        if (userSession != null) {
+            if(usuarioPrecisaDePerfil(userSession)) {
+                return "/p/" + userSession.getUsername() + "/editar";
             } else {
                 // ao logar mandar para o seu perfil
-                return "/p/" + usuarioSession.getUsername();
+                return "/p/" + userSession.getUsername();
             }
         }
 

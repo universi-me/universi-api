@@ -12,7 +12,7 @@ import me.universi.competencia.services.CompetenciaService;
 import me.universi.competencia.services.CompetenciaTipoService;
 import me.universi.perfil.entities.Perfil;
 import me.universi.perfil.services.PerfilService;
-import me.universi.usuario.entities.Usuario;
+import me.universi.usuario.entities.User;
 import me.universi.usuario.services.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -38,7 +38,7 @@ public class CompetenciaController {
         Resposta resposta = new Resposta();
         try {
 
-            Usuario usuario = usuarioService.obterUsuarioNaSessao();
+            User user = usuarioService.obterUsuarioNaSessao();
 
             String competenciaTipoId = (String)body.get("competenciatipoId");
             if(competenciaTipoId == null) {
@@ -61,7 +61,7 @@ public class CompetenciaController {
             }
 
             Competencia competenciaNew = new Competencia();
-            competenciaNew.setPerfil(usuario.getPerfil());
+            competenciaNew.setPerfil(user.getPerfil());
             competenciaNew.setCompetenciaTipo(compT);
             competenciaNew.setDescricao(descricao);
             competenciaNew.setNivel(Nivel.valueOf(nivel));
@@ -100,9 +100,9 @@ public class CompetenciaController {
                 throw new CompetenciaException("Competência não encontrada.");
             }
 
-            Usuario usuario = usuarioService.obterUsuarioNaSessao();
+            User user = usuarioService.obterUsuarioNaSessao();
 
-            Perfil perfil = usuario.getPerfil();
+            Perfil perfil = user.getPerfil();
 
             if(comp.getPerfil().getId() != perfil.getId()) {
                 throw new CompetenciaException("Você não tem permissão para editar esta Competêcia.");
@@ -150,9 +150,9 @@ public class CompetenciaController {
                 throw new CompetenciaException("Competência não encontrada.");
             }
 
-            Usuario usuario = usuarioService.obterUsuarioNaSessao();
+            User user = usuarioService.obterUsuarioNaSessao();
 
-            Perfil perfil = usuario.getPerfil();
+            Perfil perfil = user.getPerfil();
 
             if(comp.getPerfil().getId() != perfil.getId()) {
                 throw new CompetenciaException("Você não tem permissão para editar esta Competêcia.");

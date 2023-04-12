@@ -14,7 +14,7 @@ import me.universi.grupo.enums.GrupoTipo;
 import me.universi.grupo.services.GrupoService;
 import me.universi.perfil.entities.Perfil;
 import me.universi.perfil.services.PerfilService;
-import me.universi.usuario.entities.Usuario;
+import me.universi.usuario.entities.User;
 import me.universi.usuario.enums.Autoridade;
 import me.universi.usuario.exceptions.UsuarioException;
 import me.universi.usuario.services.UsuarioService;
@@ -22,12 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.WebAuthenticationDetails;
-import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
@@ -92,7 +86,7 @@ public class UsuarioController {
                     map.addAttribute("tiposAutoridades", Autoridade.values());
 
                     String usuario = componentesArr[componentesArr.length - 1];
-                    Usuario userGet = (Usuario) usuarioService.loadUserByUsername(usuario);
+                    User userGet = (User) usuarioService.loadUserByUsername(usuario);
                     map.put("usuario", userGet);
                 }
 
@@ -142,7 +136,7 @@ public class UsuarioController {
                 throw new UsuarioException("Email \""+email+"\" já esta cadastrado!");
             }
 
-            Usuario user = new Usuario();
+            User user = new User();
             user.setNome(nome);
             // exclusivo para dcx
             user.setEmail(email + "@dcx.ufpb.br");
@@ -178,15 +172,15 @@ public class UsuarioController {
 
             String senha = (String)body.get("senha");
 
-            Usuario usuario = usuarioService.obterUsuarioNaSessao();
+            User user = usuarioService.obterUsuarioNaSessao();
 
             // se logado com google não checkar senha
             boolean logadoComGoogle = (session.getAttribute("loginViaGoogle") != null);
 
-            if (logadoComGoogle || usuarioService.senhaValida(usuario, senha)) {
-                usuario.setSenha(usuarioService.codificarSenha(password));
-                usuario.setCredenciais_expiradas(false);
-                usuarioService.save(usuario);
+            if (logadoComGoogle || usuarioService.senhaValida(user, senha)) {
+                user.setSenha(usuarioService.codificarSenha(password));
+                user.setCredenciais_expiradas(false);
+                usuarioService.save(user);
 
                 usuarioService.atualizarUsuarioNaSessao();
 
@@ -226,7 +220,7 @@ public class UsuarioController {
             Boolean credenciaisExpiradas = (Boolean)body.get("credenciaisExpiradas");
             Boolean usuarioExpirado = (Boolean)body.get("usuarioExpirado");
 
-            Usuario userEdit = (Usuario) usuarioService.findFirstById(Long.valueOf(usuarioId));
+            User userEdit = (User) usuarioService.findFirstById(Long.valueOf(usuarioId));
             if(userEdit == null) {
                 throw new UsuarioException("Usuário não encontrado.");
             }
@@ -312,10 +306,10 @@ public class UsuarioController {
                 //String familyName = (String) payload.get("family_name");
                 //String givenName = (String) payload.get("given_name");
 
-                Usuario usuario = null;
+                User user = null;
 
                 try {
-                    usuario = (Usuario) usuarioService.findFirstByEmail(email);
+                    user = (User) usuarioService.findFirstByEmail(email);
                 } catch (UsuarioException  e) {
                     // Registrar Usuário com conta DCX, com informações seguras do payload
 
@@ -323,12 +317,12 @@ public class UsuarioController {
                     String newUsername = ((String)email.split("@")[0]).trim();
                     if(!usuarioService.usernameExiste(newUsername)) {
 
-                        usuario = new Usuario();
-                        usuario.setNome(newUsername);
-                        usuario.setEmail(email.trim());
-                        usuarioService.createUser(usuario);
+                        user = new User();
+                        user.setNome(newUsername);
+                        user.setEmail(email.trim());
+                        usuarioService.createUser(user);
 
-                        Perfil perfil = usuario.getPerfil();
+                        Perfil perfil = user.getPerfil();
 
                         if(name != null) {
                             if(name.contains(" ")) { // se tiver espaço, extrair nome e sobrenome
@@ -352,16 +346,16 @@ public class UsuarioController {
                     }
                 }
 
-                if(usuario != null) {
+                if(user != null) {
 
-                    if(!usuario.isEmail_verificado()) { // ativar selo de verificado na conta
-                        usuario.setEmail_verificado(true);
-                        usuarioService.save(usuario);
+                    if(!user.isEmail_verificado()) { // ativar selo de verificado na conta
+                        user.setEmail_verificado(true);
+                        usuarioService.save(user);
                     }
 
                     sessionReq.setAttribute("loginViaGoogle", true);
 
-                    usuarioService.configurarSessaoParaUsuario(usuario, authenticationManager);
+                    usuarioService.configurarSessaoParaUsuario(user, authenticationManager);
 
                     resposta.sucess = true;
                     resposta.enderecoParaRedirecionar = usuarioService.obterUrlAoLogar();

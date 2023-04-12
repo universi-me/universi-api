@@ -13,7 +13,7 @@
         <div class="card-header text-center">Gerenciar Conta de Usuário</div>
         <div class="card-body">
 
-            <div class="row" th:if="${usuario==null}">
+            <div class="row" th:if="${user==null}">
 
                 <div class="input-group mb-3" style="max-width:400px;margin: 0 auto;">
                     <input type="text" class="form-control" placeholder="Nome / Usuário / E-mail" aria-label="Usuário / E-mail"
@@ -25,15 +25,15 @@
 
             </div>
 
-            <form onsubmit="editarContaDeUsuarioNow();return false;" th:unless="${usuario==null}">
-                <input type="hidden" name="usuarioId" id="hiddenField" th:value="${usuario.getId()}"/>
+            <form onsubmit="editarContaDeUsuarioNow();return false;" th:unless="${user==null}">
+                <input type="hidden" name="usuarioId" id="hiddenField" th:value="${user.getId()}"/>
                 <div class="mb-3">
                     <label for="username" class="form-label">Usuário</label>
-                    <input type="text" class="form-control" id="username" name="username" th:value="${usuario.nome}">
+                    <input type="text" class="form-control" id="username" name="username" th:value="${user.nome}">
                 </div>
                 <div class="mb-3">
                     <label for="email" class="form-label">E-mail</label>
-                    <input type="text" class="form-control" id="email" name="email" th:value="${usuario.email}">
+                    <input type="text" class="form-control" id="email" name="email" th:value="${user.email}">
                 </div>
                 <div class="mb-3">
                     <label for="senha" class="form-label">Senha</label>
@@ -43,37 +43,37 @@
                     <label for="nivelConta" class="form-label">Nível de Conta</label>
                     <select id="nivelConta" name="nivelConta" class="form-select">
                         <option th:each="tipoNow : ${tiposAutoridades}" th:value="${tipoNow}" th:text="${tipoNow.label}"
-                                th:selected="${tipoNow} == ${usuario.autoridade} ? true : false"></option>
+                                th:selected="${tipoNow} == ${user.autoridade} ? true : false"></option>
                     </select>
                 </div>
                 <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" role="switch" id="emailVerificado"
                            name="emailVerificado"
-                           th:checked="${usuario.isEmail_verificado()} ? true : false">
+                           th:checked="${user.isEmail_verificado()} ? true : false">
                     <label class="form-check-label" for="emailVerificado">E-mail verificado</label>
                 </div>
                 <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" role="switch" id="contaBloqueada"
                            name="contaBloqueada"
-                           th:checked="${usuario.isConta_bloqueada()} ? true : false">
+                           th:checked="${user.isConta_bloqueada()} ? true : false">
                     <label class="form-check-label" for="contaBloqueada">Conta Bloqueada</label>
                 </div>
                 <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" role="switch" id="contaInativa"
                            name="contaInativa"
-                           th:checked="${usuario.isInativo()} ? true : false">
+                           th:checked="${user.isInativo()} ? true : false">
                     <label class="form-check-label" for="contaInativa">Conta Inativa</label>
                 </div>
                 <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" role="switch" id="credenciaisExpiradas"
                            name="credenciaisExpiradas"
-                           th:checked="${usuario.isCredenciais_expiradas()} ? true : false">
+                           th:checked="${user.isCredenciais_expiradas()} ? true : false">
                     <label class="form-check-label" for="credenciaisExpiradas">Credenciais Expiradas</label>
                 </div>
                 <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" role="switch" id="usuarioExpirado"
                            name="usuarioExpirado"
-                           th:checked="${usuario.isUsuario_expirado()} ? true : false">
+                           th:checked="${user.isUsuario_expirado()} ? true : false">
                     <label class="form-check-label" for="usuarioExpirado">Usuário Expirado</label>
                 </div>
 

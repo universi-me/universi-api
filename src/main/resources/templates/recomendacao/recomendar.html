@@ -16,18 +16,18 @@
 
             <h6 class="text-center">
                 Fazer recomendação de
-                <span th:with="participantePerfil = ${session.usuario.perfil}">
+                <span th:with="participantePerfil = ${session.user.perfil}">
                     <span th:replace="perfil/nome :: nome"></span>
                 </span>
                  para
-                <span th:with="participantePerfil = ${usuarioDestino.perfil}">
+                <span th:with="participantePerfil = ${userDestino.perfil}">
                     <span th:replace="perfil/nome :: nome"></span>
                 </span>
             </h6>
 
             <form onsubmit="sendForm(this.id, '/recomendacao/criar', null);return false;" oninput="validar();" id="formCriarRecomendacao">
-                <input type="hidden" name="origem" id="origem" th:value="${session.usuario.perfil.getId()}"/>
-                <input type="hidden" name="destino" id="destino" th:value="${usuarioDestino.perfil.getId()}"/>
+                <input type="hidden" name="origem" id="origem" th:value="${session.user.perfil.getId()}"/>
+                <input type="hidden" name="destino" id="destino" th:value="${userDestino.perfil.getId()}"/>
                 <div class="mb-3">
                     <label for="competenciatipoId" class="form-label">* Competência</label>
                     <select id="competenciatipoId" name="competenciatipoId" class="form-select" value="">

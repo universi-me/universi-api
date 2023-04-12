@@ -10,7 +10,7 @@ import me.universi.perfil.entities.Perfil;
 import me.universi.perfil.services.PerfilService;
 import me.universi.recomendacao.entities.Recomendacao;
 import me.universi.recomendacao.exceptions.RecomendacaoInvalidaException;
-import me.universi.usuario.entities.Usuario;
+import me.universi.usuario.entities.User;
 import me.universi.usuario.services.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -48,10 +48,10 @@ public class RecomendacaoController {
     @GetMapping("/recomendar/{usuario}")
     public String recomendar_usuario(ModelMap map, @PathVariable("usuario") String usernameDestino) {
         try {
-            Usuario usuario = usuarioService.obterUsuarioNaSessao();
+            User user = usuarioService.obterUsuarioNaSessao();
 
-            Usuario usuarioDestino = (Usuario) usuarioService.loadUserByUsername(usernameDestino);
-            map.put("usuarioDestino", usuarioDestino);
+            User userDestino = (User) usuarioService.loadUserByUsername(usernameDestino);
+            map.put("usuarioDestino", userDestino);
 
             map.put("competenciaTipoService", competenciaTipoService);
 
@@ -147,9 +147,9 @@ public class RecomendacaoController {
                 throw new GrupoException("Recomendação não encontrada.");
             }
 
-            Usuario usuario = usuarioService.obterUsuarioNaSessao();
+            User user = usuarioService.obterUsuarioNaSessao();
 
-            if(usuario.getPerfil().getId() != recomendacao.getOrigem().getId()) {
+            if(user.getPerfil().getId() != recomendacao.getOrigem().getId()) {
                 throw new GrupoException("Você não tem permissão para editar esta Recomendação.");
             }
 
@@ -193,9 +193,9 @@ public class RecomendacaoController {
                 throw new GrupoException("Recomendação não encontrada.");
             }
 
-            Usuario usuario = usuarioService.obterUsuarioNaSessao();
+            User user = usuarioService.obterUsuarioNaSessao();
 
-            if(usuario.getPerfil().getId() != recomendacao.getOrigem().getId()) {
+            if(user.getPerfil().getId() != recomendacao.getOrigem().getId()) {
                 throw new GrupoException("Você não tem permissão para remover esta Recomendação.");
             }
 

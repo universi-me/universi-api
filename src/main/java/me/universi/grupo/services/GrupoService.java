@@ -4,7 +4,7 @@ import me.universi.grupo.entities.Grupo;
 import me.universi.grupo.exceptions.GrupoException;
 import me.universi.grupo.repositories.GrupoRepository;
 import me.universi.perfil.entities.Perfil;
-import me.universi.usuario.entities.Usuario;
+import me.universi.usuario.entities.User;
 import me.universi.usuario.services.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -69,21 +69,21 @@ public class GrupoService {
         }
     }
 
-    public boolean verificarPermissaoParaGrupo(Grupo grupo, Usuario usuario) throws GrupoException {
+    public boolean verificarPermissaoParaGrupo(Grupo grupo, User user) throws GrupoException {
 
         if (grupo == null) {
             throw new GrupoException("Grupo não encontrado.");
         }
 
-        if (usuario == null) {
+        if (user == null) {
             throw new GrupoException("Usuário não encontrado.");
         }
 
-        Perfil perfil = usuario.getPerfil();
-        if (usuarioService.usuarioPrecisaDePerfil(usuario)) {
+        Perfil perfil = user.getPerfil();
+        if (usuarioService.usuarioPrecisaDePerfil(user)) {
             throw new GrupoException("Você precisa criar um Perfil.");
         } else if(perfil.getId()!=0 && grupo.getAdmin().getId() != perfil.getId()) {
-            if(!usuarioService.isContaAdmin(usuario)) {
+            if(!usuarioService.isContaAdmin(user)) {
                 throw new GrupoException("Apenas administradores podem editar seus grupos!");
             }
         }
@@ -91,9 +91,9 @@ public class GrupoService {
         return true;
     }
 
-    public boolean temPermissaoParaGrupo(Grupo grupo, Usuario usuario) {
+    public boolean temPermissaoParaGrupo(Grupo grupo, User user) {
         try {
-            return verificarPermissaoParaGrupo(grupo, usuario);
+            return verificarPermissaoParaGrupo(grupo, user);
         } catch (Exception e) {
             return false;
         }

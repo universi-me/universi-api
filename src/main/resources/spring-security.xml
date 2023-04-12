@@ -50,7 +50,7 @@
         </headers>
     </http>
 
-    <beans:bean id="customUsernamePasswordAuthenticationFilter" class="me.universi.usuario.services.CustomUsernamePasswordAuthenticationFilter">
+    <beans:bean id="customUsernamePasswordAuthenticationFilter" class="me.universi.user.services.CustomUsernamePasswordAuthenticationFilter">
 		<beans:property name="sessionAuthenticationStrategy" ref="sas"/>
         <beans:property name="authenticationManager" ref="authenticationManager"/>
         <beans:property name="authenticationSuccessHandler" ref="autenticacaoValidaHandler"/>
@@ -93,8 +93,8 @@
         <authentication-provider ref="authenticationProvider"/>
     </authentication-manager>
 
-    <beans:bean id="autenticacaofalhaHandler" class="me.universi.usuario.services.AutenticacaoFalhaHandler"/>
-    <beans:bean id="autenticacaoValidaHandler" class="me.universi.usuario.services.AutenticacaoValidaHandler"/>
+    <beans:bean id="autenticacaofalhaHandler" class="me.universi.user.services.AutenticacaoFalhaHandler"/>
+    <beans:bean id="autenticacaoValidaHandler" class="me.universi.user.services.AutenticacaoValidaHandler"/>
 
     <beans:bean id="roleHierarchy" class="org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl">
         <beans:property name="hierarchy">
@@ -124,7 +124,7 @@
 
     <beans:bean class="org.springframework.security.web.session.HttpSessionEventPublisher"/>
 
-    <beans:bean id="SecurityUserDetailsService" class="me.universi.usuario.services.UsuarioService"/>
+    <beans:bean id="SecurityUserDetailsService" class="me.universi.user.services.UsuarioService"/>
     <beans:bean id="encoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
 
     <beans:bean id="authenticationProvider" class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
@@ -132,7 +132,7 @@
         <beans:property name="userDetailsService" ref="SecurityUserDetailsService"/>
     </beans:bean>
 
-    <beans:bean id="authUser" class="me.universi.usuario.services.PreAuthUsuarioService"/>
+    <beans:bean id="authUser" class="me.universi.user.services.PreAuthUsuarioService"/>
 
     <beans:bean id="preAuthenticatedAuthenticationProvider" class="org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider">
         <beans:property name="preAuthenticatedUserDetailsService" ref="authUser" />

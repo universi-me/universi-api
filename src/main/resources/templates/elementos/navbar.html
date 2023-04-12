@@ -23,7 +23,7 @@
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0" th:if="${@usuarioService.usuarioEstaLogado()}">
 
                     <li class="nav-item"
-                        th:if="${session != null && session.usuario != null && #strings.equals(session.usuario.autoridade, 'ROLE_ADMIN')}">
+                        th:if="${session != null && session.user != null && #strings.equals(session.user.autoridade, 'ROLE_ADMIN')}">
                         <a th:class="'nav-link bi bi-tools ' + ${#strings.startsWith(enderecoAtual, '/admin')?'active':''}" aria-current="page" href="/admin"> Área Administrativa</a>
                     </li>
                     <li class="nav-item">
@@ -39,7 +39,7 @@
                         </form>
                     </li>
                     <li class="nav-item">
-                        <div th:text="'Olá, '+${(session.usuario.perfil==null || session.usuario.perfil.nome==null)?session.usuario.getUsername():session.usuario.perfil.nome}"
+                        <div th:text="'Olá, '+${(session.user.perfil==null || session.user.perfil.nome==null)?session.user.getUsername():session.user.perfil.nome}"
                              style="padding-right: 10px;">Olá, Nome!
                         </div>
                     </li>
@@ -50,7 +50,7 @@
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
                            aria-expanded="false">
                             <img
-                                    th:src="${(session.usuario.perfil==null || session.usuario.perfil.imagem==null)?'https://i.imgur.com/vUBrCxr.png':session.usuario.perfil.imagem}"
+                                    th:src="${(session.user.perfil==null || session.user.perfil.imagem==null)?'https://i.imgur.com/vUBrCxr.png':session.user.perfil.imagem}"
                                     class="rounded-circle"
                                     height="40"
                                     width="40"
@@ -60,7 +60,7 @@
                             />
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item bi bi-person-lines-fill" th:href="@{/p/{path}(path=${session.usuario.nome})}"> Meu
+                            <li><a class="dropdown-item bi bi-person-lines-fill" th:href="@{/p/{path}(path=${session.user.nome})}"> Meu
                                 Perfil</a></li>
                             <li><a class="dropdown-item bi bi-gear" href="/conta"> Minha Conta</a></li>
                             <li>
@@ -90,7 +90,7 @@
         if(ui.item && ui.item.url) {
           window.location.href = ui.item.url;
         }
-      }, ['usuario', 'grupo']);
+      }, ['user', 'grupo']);
     </script>
 
 </div>

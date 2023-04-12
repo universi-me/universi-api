@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 @Entity(name = "usuario")
-public class Usuario implements UserDetails {
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,7 +31,7 @@ public class Usuario implements UserDetails {
     private String senha;
 
     @JsonIgnore
-    @OneToOne(mappedBy = "usuario")
+    @OneToOne(mappedBy = "user")
     private Perfil perfil;
 
     @JsonIgnore
@@ -59,13 +59,13 @@ public class Usuario implements UserDetails {
     @Column(name = "autoridade")
     private Autoridade autoridade;
 
-    public Usuario(String name, String email, String password){
+    public User(String name, String email, String password){
         this.nome = name;
         this.email = email;
         this.senha = password;
     }
 
-    public Usuario() {
+    public User() {
 
     }
 
