@@ -4,6 +4,7 @@ about: Sugira uma ideia para este projeto
 title: "[FEAT]"
 labels: enhancement, feature
 assignees: ''
+projects: 'Task List'
 
 ---
 
