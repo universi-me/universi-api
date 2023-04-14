@@ -4,7 +4,7 @@ package me.universi.recomendacao.controller;
 import me.universi.api.entities.Response;
 import me.universi.competencia.entities.CompetenceType;
 import me.universi.competencia.services.CompetenceService;
-import me.universi.competencia.services.CompetenciaTipoService;
+import me.universi.competencia.services.CompetenceTypeService;
 import me.universi.grupo.exceptions.GrupoException;
 import me.universi.perfil.entities.Perfil;
 import me.universi.perfil.services.PerfilService;
@@ -37,7 +37,7 @@ public class RecomendacaoController {
     public PerfilService perfilService;
 
     @Autowired
-    public CompetenciaTipoService competenciaTipoService;
+    public CompetenceTypeService competenciaTipoService;
 
     @PostMapping(value = "/recomendacao/criar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody

@@ -8,7 +8,7 @@ import jakarta.servlet.http.HttpSession;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import me.universi.api.entities.Response;
-import me.universi.competencia.services.CompetenciaTipoService;
+import me.universi.competencia.services.CompetenceTypeService;
 import me.universi.grupo.services.GrupoService;
 import me.universi.perfil.entities.Perfil;
 import me.universi.perfil.services.PerfilService;
@@ -36,7 +36,7 @@ public class UsuarioController {
     @Autowired
     public GrupoService grupoService;
     @Autowired
-    public CompetenciaTipoService competenciaTipoService;
+    public CompetenceTypeService competenciaTipoService;
     @Autowired
     private Environment env;
     @Autowired

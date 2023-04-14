@@ -9,7 +9,7 @@ import me.universi.competencia.entities.CompetenceType;
 import me.universi.competencia.enums.Level;
 import me.universi.competencia.exceptions.CompetenceException;
 import me.universi.competencia.services.CompetenceService;
-import me.universi.competencia.services.CompetenciaTipoService;
+import me.universi.competencia.services.CompetenceTypeService;
 import me.universi.perfil.entities.Perfil;
 import me.universi.perfil.services.PerfilService;
 import me.universi.user.entities.User;
@@ -24,7 +24,7 @@ public class CompetenciaController {
     @Autowired
     public CompetenceService competenciaService;
     @Autowired
-    public CompetenciaTipoService competenciaTipoService;
+    public CompetenceTypeService competenciaTipoService;
 
     @Autowired
     public PerfilService perfilService;

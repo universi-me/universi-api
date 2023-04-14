@@ -9,5 +9,5 @@ import java.util.Optional;
 @Repository
 public interface CompetenceTypeRepository extends JpaRepository<CompetenceType, Long> {
     Optional<CompetenceType> findFirstById(Long id);
-    Optional<CompetenceType> findFirstByNome(String nome);
+    Optional<CompetenceType> findFirstByName(String name);
 }

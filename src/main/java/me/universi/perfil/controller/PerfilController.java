@@ -2,7 +2,7 @@ package me.universi.perfil.controller;
 
 import me.universi.api.entities.Response;
 import me.universi.competencia.enums.Level;
-import me.universi.competencia.services.CompetenciaTipoService;
+import me.universi.competencia.services.CompetenceTypeService;
 import me.universi.grupo.services.GrupoService;
 import me.universi.perfil.entities.Perfil;
 import me.universi.perfil.enums.Sexo;
@@ -29,7 +29,7 @@ public class PerfilController {
     @Autowired
     public GrupoService grupoService;
     @Autowired
-    public CompetenciaTipoService competenciaTipoService;
+    public CompetenceTypeService competenciaTipoService;
 
     @PostMapping(value = "/perfil/editar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody

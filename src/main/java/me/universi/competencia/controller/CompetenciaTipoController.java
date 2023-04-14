@@ -3,7 +3,7 @@ package me.universi.competencia.controller;
 import me.universi.api.entities.Response;
 import me.universi.competencia.entities.CompetenceType;
 import me.universi.competencia.exceptions.CompetenceException;
-import me.universi.competencia.services.CompetenciaTipoService;
+import me.universi.competencia.services.CompetenceTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -19,7 +19,7 @@ import java.util.Map;
 @Controller
 public class CompetenciaTipoController {
     @Autowired
-    public CompetenciaTipoService competenciaTipoService;
+    public CompetenceTypeService competenciaTipoService;
 
     @PostMapping(value = "/admin/competenciatipo/criar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
@@ -32,7 +32,7 @@ public class CompetenciaTipoController {
                 throw new CompetenceException("Parametro nome é nulo.");
             }
 
-            if(competenciaTipoService.findFirstByNome(nome) != null) {
+            if(competenciaTipoService.findFirstByName(nome) != null) {
                 throw new CompetenceException("Tipo de competência já existe.");
             }
 
@@ -69,7 +69,7 @@ public class CompetenciaTipoController {
                 throw new CompetenceException("Competência não encontrada.");
             }
 
-            if(competenciaTipoService.findFirstByNome(nome) != null) {
+            if(competenciaTipoService.findFirstByName(nome) != null) {
                 throw new CompetenceException("Tipo de competência já existe.");
             }
 
