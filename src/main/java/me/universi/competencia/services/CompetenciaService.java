@@ -2,7 +2,7 @@ package me.universi.competencia.services;
 
 import me.universi.competencia.entities.Competence;
 import me.universi.competencia.entities.CompetenceType;
-import me.universi.competencia.repositories.CompetenciaRepository;
+import me.universi.competencia.repositories.CompetenceRepository;
 import me.universi.perfil.entities.Perfil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,7 +14,7 @@ import java.util.Optional;
 @Service
 public class CompetenciaService {
     @Autowired
-    private CompetenciaRepository competenciaRepository;
+    private CompetenceRepository competenciaRepository;
 
     public Competence findFirstById(Long id) {
         Optional<Competence> competenciaOptional = competenciaRepository.findFirstById(id);
