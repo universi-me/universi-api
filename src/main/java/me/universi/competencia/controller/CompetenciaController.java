@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import me.universi.api.entities.Response;
-import me.universi.competencia.entities.Competencia;
+import me.universi.competencia.entities.Competence;
 import me.universi.competencia.entities.CompetenciaTipo;
 import me.universi.competencia.enums.Nivel;
 import me.universi.competencia.exceptions.CompetenciaException;
@@ -60,11 +60,11 @@ public class CompetenciaController {
                 throw new CompetenciaException("Tipo de Competência não encontrado.");
             }
 
-            Competencia competenciaNew = new Competencia();
-            competenciaNew.setPerfil(user.getPerfil());
-            competenciaNew.setCompetenciaTipo(compT);
-            competenciaNew.setDescricao(descricao);
-            competenciaNew.setNivel(Nivel.valueOf(nivel));
+            Competence competenciaNew = new Competence();
+            competenciaNew.setProfile(user.getPerfil());
+            competenciaNew.setCompetenceType(compT);
+            competenciaNew.setDescription(descricao);
+            competenciaNew.setLevel(Nivel.valueOf(nivel));
 
             competenciaService.save(competenciaNew);
 
@@ -95,7 +95,7 @@ public class CompetenciaController {
 
 
 
-            Competencia comp = competenciaService.findFirstById(Long.valueOf(id));
+            Competence comp = competenciaService.findFirstById(Long.valueOf(id));
             if (comp == null) {
                 throw new CompetenciaException("Competência não encontrada.");
             }
@@ -104,7 +104,7 @@ public class CompetenciaController {
 
             Perfil perfil = user.getPerfil();
 
-            if(comp.getPerfil().getId() != perfil.getId()) {
+            if(comp.getProfile().getId() != perfil.getId()) {
                 throw new CompetenciaException("Você não tem permissão para editar esta Competêcia.");
             }
 
@@ -113,13 +113,13 @@ public class CompetenciaController {
                 if(compT == null) {
                     throw new CompetenciaException("Tipo de Competência não encontrado.");
                 }
-                comp.setCompetenciaTipo(compT);
+                comp.setCompetenceType(compT);
             }
             if (descricao != null) {
-                comp.setDescricao(descricao);
+                comp.setDescription(descricao);
             }
             if (nivel != null) {
-                comp.setNivel(Nivel.valueOf(nivel));
+                comp.setLevel(Nivel.valueOf(nivel));
             }
 
             competenciaService.save(comp);
@@ -145,7 +145,7 @@ public class CompetenciaController {
                 throw new CompetenciaException("Parametro competenciaId é nulo.");
             }
 
-            Competencia comp = competenciaService.findFirstById(Long.valueOf(id));
+            Competence comp = competenciaService.findFirstById(Long.valueOf(id));
             if (comp == null) {
                 throw new CompetenciaException("Competência não encontrada.");
             }
@@ -154,7 +154,7 @@ public class CompetenciaController {
 
             Perfil perfil = user.getPerfil();
 
-            if(comp.getPerfil().getId() != perfil.getId()) {
+            if(comp.getProfile().getId() != perfil.getId()) {
                 throw new CompetenciaException("Você não tem permissão para editar esta Competêcia.");
             }
 
@@ -181,7 +181,7 @@ public class CompetenciaController {
                 throw new CompetenciaException("Parametro competenciaId é nulo.");
             }
 
-            Competencia comp = competenciaService.findFirstById(Long.valueOf(id));
+            Competence comp = competenciaService.findFirstById(Long.valueOf(id));
             if (comp == null) {
                 throw new CompetenciaException("Competencia não encontrada.");
             }
@@ -203,7 +203,7 @@ public class CompetenciaController {
         Response resposta = new Response();
         try {
 
-            List<Competencia> comps = competenciaService.findAll();
+            List<Competence> comps = competenciaService.findAll();
 
             resposta.body.put("lista", comps);
 

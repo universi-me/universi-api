@@ -1,6 +1,6 @@
 package me.universi.competencia.services;
 
-import me.universi.competencia.entities.Competencia;
+import me.universi.competencia.entities.Competence;
 import me.universi.competencia.entities.CompetenciaTipo;
 import me.universi.competencia.repositories.CompetenciaRepository;
 import me.universi.perfil.entities.Perfil;
@@ -16,8 +16,8 @@ public class CompetenciaService {
     @Autowired
     private CompetenciaRepository competenciaRepository;
 
-    public Competencia findFirstById(Long id) {
-        Optional<Competencia> competenciaOptional = competenciaRepository.findFirstById(id);
+    public Competence findFirstById(Long id) {
+        Optional<Competence> competenciaOptional = competenciaRepository.findFirstById(id);
         if(competenciaOptional.isPresent()){
             return competenciaOptional.get();
         }else{
@@ -25,24 +25,24 @@ public class CompetenciaService {
         }
     }
 
-    public void save(Competencia competencia) {
+    public void save(Competence competencia) {
         competenciaRepository.saveAndFlush(competencia);
     }
 
-    public void delete(Competencia competencia) {
+    public void delete(Competence competencia) {
         competenciaRepository.delete(competencia);
     }
 
-    public List<Competencia> findAll() {
+    public List<Competence> findAll() {
         return competenciaRepository.findAll();
     }
 
-    public void update(Competencia competencia){ competenciaRepository.saveAndFlush(competencia); }
+    public void update(Competence competencia){ competenciaRepository.saveAndFlush(competencia); }
 
-    public boolean perfilTemCompetencia(Perfil perfil, Competencia competencia) {
+    public boolean perfilTemCompetencia(Perfil perfil, Competence competencia) {
         try {
             if(perfil.getCompetencias() != null) {
-                for(Competencia compNow : perfil.getCompetencias()) {
+                for(Competence compNow : perfil.getCompetencias()) {
                     if(competencia.getId() == compNow.getId()) {
                         return true;
                     }
@@ -53,7 +53,7 @@ public class CompetenciaService {
         }
         return false;
     }
-    public void deleteAll(Collection<Competencia> competencias){
+    public void deleteAll(Collection<Competence> competencias){
         competenciaRepository.deleteAll(competencias);
     }
 }

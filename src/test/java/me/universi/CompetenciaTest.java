@@ -1,6 +1,6 @@
 package me.universi;
 
-import me.universi.competencia.entities.Competencia;
+import me.universi.competencia.entities.Competence;
 import me.universi.competencia.entities.CompetenciaTipo;
 import me.universi.competencia.repositories.CompetenciaTipoRepository;
 import me.universi.competencia.services.CompetenciaService;
@@ -57,14 +57,14 @@ public class CompetenciaTest {
         competenciaTipoRepository.save(compTipo1);
         competenciaTipoRepository.save(compTipo2);
 
-        Competencia competencia1 = new Competencia();
-        competencia1.setCompetenciaTipo(compTipo1);
-        competencia1.setDescricao("Sou top em java - teste 1"+userNew.getId());
+        Competence competencia1 = new Competence();
+        competencia1.setCompetenceType(compTipo1);
+        competencia1.setDescription("Sou top em java - teste 1"+userNew.getId());
         competenciaService.save(competencia1);
 
-        Competencia competencia2 = new Competencia();
-        competencia2.setCompetenciaTipo(compTipo2);
-        competencia2.setDescricao("Sou top em java - teste 2"+userNew.getId());
+        Competence competencia2 = new Competence();
+        competencia2.setCompetenceType(compTipo2);
+        competencia2.setDescription("Sou top em java - teste 2"+userNew.getId());
         competenciaService.save(competencia2);
 
         Perfil admin_perfil = userNew.getPerfil();
@@ -77,7 +77,7 @@ public class CompetenciaTest {
         comum_perfil.setBio("Bio - comum_perfil"+userNew.getId());
         comum_perfil.setSexo(Sexo.M);
 
-        Collection<Competencia> competencias = new ArrayList<Competencia>();
+        Collection<Competence> competencias = new ArrayList<Competence>();
         competencias.add(competencia1);
         competencias.add(competencia2);
         admin_perfil.setCompetencias(competencias);
@@ -110,14 +110,14 @@ public class CompetenciaTest {
         competenciaTipoRepository.save(compTipo1);
         competenciaTipoRepository.save(compTipo2);
 
-        Competencia competencia1 = new Competencia();
-        competencia1.setCompetenciaTipo(compTipo1);
-        competencia1.setDescricao("Sou top em java - update 1"+userNew.getId());
+        Competence competencia1 = new Competence();
+        competencia1.setCompetenceType(compTipo1);
+        competencia1.setDescription("Sou top em java - update 1"+userNew.getId());
         competenciaService.save(competencia1);
 
-        Competencia competencia2 = new Competencia();
-        competencia2.setCompetenciaTipo(compTipo2);
-        competencia2.setDescricao("Sou top em java - update 2"+userNew.getId());
+        Competence competencia2 = new Competence();
+        competencia2.setCompetenceType(compTipo2);
+        competencia2.setDescription("Sou top em java - update 2"+userNew.getId());
         competenciaService.save(competencia2);
 
         Perfil admin_perfil = userNew.getPerfil();
@@ -130,7 +130,7 @@ public class CompetenciaTest {
         comum_perfil.setBio("Bio - comum_perfil"+userNew.getId());
         comum_perfil.setSexo(Sexo.M);
 
-        Collection<Competencia> competencias = new ArrayList<Competencia>();
+        Collection<Competence> competencias = new ArrayList<Competence>();
         competencias.add(competencia1);
         competencias.add(competencia2);
         admin_perfil.setCompetencias(competencias);
@@ -139,8 +139,8 @@ public class CompetenciaTest {
         competenciaService.save(competencia1);
         competenciaService.save(competencia2);
 
-        competencia1.setDescricao("alterando descrição1");
-        competencia2.setDescricao("alterando descrição2");
+        competencia1.setDescription("alterando descrição1");
+        competencia2.setDescription("alterando descrição2");
 
         competenciaService.update(competencia1);
         competenciaService.update(competencia2);
@@ -148,8 +148,8 @@ public class CompetenciaTest {
         perfilService.update(admin_perfil);
         perfilService.update(comum_perfil);
 
-        assertEquals(competencia1.getDescricao(), competenciaService.findFirstById(competencia1.getId()).getDescricao());
-        assertEquals(competencia2.getDescricao(), competenciaService.findFirstById(competencia2.getId()).getDescricao());
+        assertEquals(competencia1.getDescription(), competenciaService.findFirstById(competencia1.getId()).getDescription());
+        assertEquals(competencia2.getDescription(), competenciaService.findFirstById(competencia2.getId()).getDescription());
     }
     @Test
     void delete(){
@@ -169,14 +169,14 @@ public class CompetenciaTest {
         competenciaTipoRepository.save(compTipo1);
         competenciaTipoRepository.save(compTipo2);
 
-        Competencia competencia1 = new Competencia();
-        competencia1.setCompetenciaTipo(compTipo1);
-        competencia1.setDescricao("Sou top em java - delete 1"+userNew.getId());
+        Competence competencia1 = new Competence();
+        competencia1.setCompetenceType(compTipo1);
+        competencia1.setDescription("Sou top em java - delete 1"+userNew.getId());
         competenciaService.save(competencia1);
 
-        Competencia competencia2 = new Competencia();
-        competencia2.setCompetenciaTipo(compTipo2);
-        competencia2.setDescricao("Sou top em java - delete 2"+userNew.getId());
+        Competence competencia2 = new Competence();
+        competencia2.setCompetenceType(compTipo2);
+        competencia2.setDescription("Sou top em java - delete 2"+userNew.getId());
         competenciaService.save(competencia2);
 
         Perfil admin_perfil = userNew.getPerfil();
@@ -189,7 +189,7 @@ public class CompetenciaTest {
         comum_perfil.setBio("Bio - comum_perfil"+userNew.getId());
         comum_perfil.setSexo(Sexo.M);
 
-        Collection<Competencia> competencias = new ArrayList<Competencia>();
+        Collection<Competence> competencias = new ArrayList<Competence>();
         competencias.add(competencia1);
         competencias.add(competencia2);
         admin_perfil.setCompetencias(competencias);
@@ -198,8 +198,8 @@ public class CompetenciaTest {
         competenciaService.save(competencia1);
         competenciaService.save(competencia2);
 
-        competencia1.setDescricao("alterando descrição1");
-        competencia2.setDescricao("alterando descrição2");
+        competencia1.setDescription("alterando descrição1");
+        competencia2.setDescription("alterando descrição2");
 
         perfilService.update(admin_perfil);
         perfilService.update(comum_perfil);
@@ -229,14 +229,14 @@ public class CompetenciaTest {
         competenciaTipoRepository.save(compTipo1);
         competenciaTipoRepository.save(compTipo2);
 
-        Competencia competencia1 = new Competencia();
-        competencia1.setCompetenciaTipo(compTipo1);
-        competencia1.setDescricao("Sou top em java - read 1"+userNew.getId());
+        Competence competencia1 = new Competence();
+        competencia1.setCompetenceType(compTipo1);
+        competencia1.setDescription("Sou top em java - read 1"+userNew.getId());
         competenciaService.save(competencia1);
 
-        Competencia competencia2 = new Competencia();
-        competencia2.setCompetenciaTipo(compTipo2);
-        competencia2.setDescricao("Sou top em java - read 2"+userNew.getId());
+        Competence competencia2 = new Competence();
+        competencia2.setCompetenceType(compTipo2);
+        competencia2.setDescription("Sou top em java - read 2"+userNew.getId());
         competenciaService.save(competencia2);
 
         Perfil admin_perfil = userNew.getPerfil();
@@ -249,7 +249,7 @@ public class CompetenciaTest {
         comum_perfil.setBio("Bio - comum_perfil"+userNew.getId());
         comum_perfil.setSexo(Sexo.M);
 
-        Collection<Competencia> competencias = new ArrayList<Competencia>();
+        Collection<Competence> competencias = new ArrayList<Competence>();
         competencias.add(competencia1);
         competencias.add(competencia2);
         admin_perfil.setCompetencias(competencias);

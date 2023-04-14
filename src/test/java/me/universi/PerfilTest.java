@@ -1,6 +1,6 @@
 package me.universi;
 
-import me.universi.competencia.entities.Competencia;
+import me.universi.competencia.entities.Competence;
 import me.universi.competencia.services.CompetenciaService;
 import me.universi.grupo.services.GrupoService;
 import me.universi.perfil.entities.Perfil;
@@ -81,14 +81,14 @@ public class PerfilTest {
 
         userNew.setNome(userNew.getNome());
 
-        Competencia competenciaNew = new Competencia();
+        Competence competenciaNew = new Competence();
         //competenciaNew.setNome("Java - admin"+userNew.getId());
-        competenciaNew.setDescricao("Sou top em java - admin"+userNew.getId());
+        competenciaNew.setDescription("Sou top em java - admin"+userNew.getId());
         competenciaService.save(competenciaNew);
 
-        Competencia competenciaNew1 = new Competencia();
+        Competence competenciaNew1 = new Competence();
         //competenciaNew1.setNome("Java - admin 1"+userNew.getId());
-        competenciaNew1.setDescricao("Sou top em java - admin 1"+userNew.getId());
+        competenciaNew1.setDescription("Sou top em java - admin 1"+userNew.getId());
         competenciaService.save(competenciaNew1);
 
         Perfil admin_perfil = userNew.getPerfil();
@@ -96,7 +96,7 @@ public class PerfilTest {
         admin_perfil.setBio("Bio - admin_perfil"+userNew.getId());
         admin_perfil.setSexo(Sexo.M);
 
-        Collection<Competencia> competencias = new ArrayList<Competencia>();
+        Collection<Competence> competencias = new ArrayList<Competence>();
         competencias.add(competenciaNew);
         competencias.add(competenciaNew1);
         admin_perfil.setCompetencias(competencias);

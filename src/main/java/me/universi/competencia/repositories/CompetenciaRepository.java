@@ -1,12 +1,12 @@
 package me.universi.competencia.repositories;
 
-import me.universi.competencia.entities.Competencia;
+import me.universi.competencia.entities.Competence;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
-public interface CompetenciaRepository extends JpaRepository<Competencia, Long> {
-    Optional<Competencia> findFirstById(Long id);
+public interface CompetenciaRepository extends JpaRepository<Competence, Long> {
+    Optional<Competence> findFirstById(Long id);
 }
