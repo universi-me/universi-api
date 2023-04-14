@@ -1,7 +1,7 @@
 package me.universi.imagem.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import me.universi.api.entities.Resposta;
+import me.universi.api.entities.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.InputStreamResource;
@@ -23,24 +23,24 @@ public class ImagemController {
     private Environment env;
 
     @PostMapping(value = "/imagem/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Resposta upload_de_imagem(@RequestParam("imagem") MultipartFile imagem) {
-        Resposta resposta = new Resposta();
+    public Response upload_de_imagem(@RequestParam("imagem") MultipartFile imagem) {
+        Response resposta = new Response();
         try {
             // verificar o modo de salvamento da imagem no enviroment
             String link = (Boolean.parseBoolean(env.getProperty("SALVAR_IMAGEM_EM_DISCO")))?salvarImagemEmDisco(imagem):uploadImagemImgur(imagem);
 
             // retornar link da imagem remoto ou local.
             if(link != null) {
-                resposta.conteudo.put("link", link.toString());
-                resposta.sucess = true;
+                resposta.body.put("link", link.toString());
+                resposta.success = true;
                 return resposta;
             }
 
-            resposta.mensagem = "Falha ao salvar imagem.";
+            resposta.message = "Falha ao salvar imagem.";
             return resposta;
 
         } catch (Exception e) {
-            resposta.mensagem = e.getMessage();
+            resposta.message = e.getMessage();
             return resposta;
         }
     }

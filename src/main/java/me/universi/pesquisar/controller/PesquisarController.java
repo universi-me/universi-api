@@ -1,6 +1,6 @@
 package me.universi.pesquisar.controller;
 
-import me.universi.api.entities.Resposta;
+import me.universi.api.entities.Response;
 import me.universi.grupo.entities.Grupo;
 import me.universi.grupo.services.GrupoService;
 import me.universi.perfil.entities.Perfil;

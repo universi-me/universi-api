@@ -1,6 +1,6 @@
 package me.universi.usuario.services;
 
-import me.universi.api.entities.Resposta;
+import me.universi.api.entities.Response;
 import me.universi.usuario.entities.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -43,11 +43,11 @@ public class AutenticacaoValidaHandler extends SavedRequestAwareAuthenticationSu
 
         if ("application/json".equals(request.getHeader("Content-Type"))) { // request foi via JSON
 
-            Resposta resposta = new Resposta();
-            resposta.sucess = true;
-            resposta.mensagem = "Usuário Logado com sucesso.";
+            Response resposta = new Response();
+            resposta.success = true;
+            resposta.message = "Usuário Logado com sucesso.";
 
-            resposta.enderecoParaRedirecionar = usuarioService.obterUrlAoLogar();
+            resposta.redirectTo = usuarioService.obterUrlAoLogar();
 
             response.setHeader("Content-Type", "application/json; charset=utf-8");
             response.getWriter().print(resposta.toString());

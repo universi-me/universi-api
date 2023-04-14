@@ -1,7 +1,7 @@
 package me.universi.recomendacao.controller;
 
 
-import me.universi.api.entities.Resposta;
+import me.universi.api.entities.Response;
 import me.universi.competencia.entities.CompetenciaTipo;
 import me.universi.competencia.services.CompetenciaService;
 import me.universi.competencia.services.CompetenciaTipoService;
@@ -65,8 +65,8 @@ public class RecomendacaoController {
 
     @PostMapping(value = "/recomendacao/criar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Resposta create(@RequestBody Map<String, Object> body) {
-        Resposta resposta = new Resposta();
+    public Response create(@RequestBody Map<String, Object> body) {
+        Response resposta = new Response();
         try {
 
             String origem = (String)body.get("origem");
@@ -116,21 +116,21 @@ public class RecomendacaoController {
 
             recomendacaoService.save(recomendacoNew);
 
-            resposta.mensagem = "A sua recomendação foi feita.";
-            resposta.enderecoParaRedirecionar = "/p/" + perfilDestino.getUsuario().getUsername();
-            resposta.sucess = true;
+            resposta.message = "A sua recomendação foi feita.";
+            resposta.redirectTo = "/p/" + perfilDestino.getUsuario().getUsername();
+            resposta.success = true;
             return resposta;
 
         } catch (Exception e) {
-            resposta.mensagem = e.getMessage();
+            resposta.message = e.getMessage();
             return resposta;
         }
     }
 
     @PostMapping(value = "/recomendacao/atualizar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Resposta atualizar(@RequestBody Map<String, Object> body) {
-        Resposta resposta = new Resposta();
+    public Response atualizar(@RequestBody Map<String, Object> body) {
+        Response resposta = new Response();
         try {
 
             String id = (String)body.get("id");
@@ -167,20 +167,20 @@ public class RecomendacaoController {
 
             recomendacaoService.update(recomendacao);
 
-            resposta.mensagem = "Recomendacao atualizada";
-            resposta.sucess = true;
+            resposta.message = "Recomendacao atualizada";
+            resposta.success = true;
             return resposta;
 
         } catch (Exception e) {
-            resposta.mensagem = e.getMessage();
+            resposta.message = e.getMessage();
             return resposta;
         }
     }
 
     @PostMapping(value = "/recomendacao/remover", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Resposta remove(@RequestBody Map<String, Object> body) {
-        Resposta resposta = new Resposta();
+    public Response remove(@RequestBody Map<String, Object> body) {
+        Response resposta = new Response();
         try {
 
             String id = (String)body.get("id");
@@ -201,20 +201,20 @@ public class RecomendacaoController {
 
             recomendacaoService.delete(recomendacao);
 
-            resposta.mensagem = "Recomendação removida.";
-            resposta.sucess = true;
+            resposta.message = "Recomendação removida.";
+            resposta.success = true;
             return resposta;
 
         } catch (Exception e) {
-            resposta.mensagem = e.getMessage();
+            resposta.message = e.getMessage();
             return resposta;
         }
     }
 
     @PostMapping(value = "/recomendacao/obter", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Resposta get(@RequestBody Map<String, Object> body) {
-        Resposta resposta = new Resposta();
+    public Response get(@RequestBody Map<String, Object> body) {
+        Response resposta = new Response();
         try {
 
             String id = (String)body.get("id");
@@ -227,34 +227,34 @@ public class RecomendacaoController {
                 throw new GrupoException("Recomendação não encontrada.");
             }
 
-            resposta.conteudo.put("recomendacao", recomendacao);
+            resposta.body.put("recomendacao", recomendacao);
 
-            resposta.mensagem = "Operação realizada com exito.";
-            resposta.sucess = true;
+            resposta.message = "Operação realizada com exito.";
+            resposta.success = true;
             return resposta;
 
         } catch (Exception e) {
-            resposta.mensagem = e.getMessage();
+            resposta.message = e.getMessage();
             return resposta;
         }
     }
 
     @PostMapping(value = "/recomendacao/listar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Resposta getlist(@RequestBody Map<String, Object> body) {
-        Resposta resposta = new Resposta();
+    public Response getlist(@RequestBody Map<String, Object> body) {
+        Response resposta = new Response();
         try {
 
             List<Recomendacao> recs = recomendacaoService.findAll();
 
-            resposta.conteudo.put("lista", recs);
+            resposta.body.put("lista", recs);
 
-            resposta.mensagem = "Operação realizada com exito.";
-            resposta.sucess = true;
+            resposta.message = "Operação realizada com exito.";
+            resposta.success = true;
             return resposta;
 
         } catch (Exception e) {
-            resposta.mensagem = e.getMessage();
+            resposta.message = e.getMessage();
             return resposta;
         }
     }

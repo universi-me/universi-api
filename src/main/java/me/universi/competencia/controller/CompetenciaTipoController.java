@@ -1,6 +1,6 @@
 package me.universi.competencia.controller;
 
-import me.universi.api.entities.Resposta;
+import me.universi.api.entities.Response;
 import me.universi.competencia.entities.CompetenciaTipo;
 import me.universi.competencia.exceptions.CompetenciaException;
 import me.universi.competencia.services.CompetenciaTipoService;
@@ -23,8 +23,8 @@ public class CompetenciaTipoController {
 
     @PostMapping(value = "/admin/competenciatipo/criar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Resposta create(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
-        Resposta resposta = new Resposta();
+    public Response create(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+        Response resposta = new Response();
         try {
 
             String nome = (String)body.get("nome");
@@ -41,20 +41,20 @@ public class CompetenciaTipoController {
 
             competenciaTipoService.save(competenciaNew);
 
-            resposta.mensagem = "Competência Criada";
-            resposta.sucess = true;
+            resposta.message = "Competência Criada";
+            resposta.success = true;
             return resposta;
 
         } catch (Exception e) {
-            resposta.mensagem = e.getMessage();
+            resposta.message = e.getMessage();
             return resposta;
         }
     }
 
     @PostMapping(value = "/admin/competenciatipo/atualizar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Resposta update(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
-        Resposta resposta = new Resposta();
+    public Response update(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+        Response resposta = new Response();
         try {
 
             String id = (String)body.get("competenciatipoId");
@@ -79,20 +79,20 @@ public class CompetenciaTipoController {
 
             competenciaTipoService.save(comp);
 
-            resposta.mensagem = "Competência atualizada";
-            resposta.sucess = true;
+            resposta.message = "Competência atualizada";
+            resposta.success = true;
             return resposta;
 
         } catch (Exception e) {
-            resposta.mensagem = e.getMessage();
+            resposta.message = e.getMessage();
             return resposta;
         }
     }
 
     @PostMapping(value = "/admin/competenciatipo/remover", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Resposta remove(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
-        Resposta resposta = new Resposta();
+    public Response remove(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+        Response resposta = new Response();
         try {
 
             String id = (String)body.get("competenciatipoId");
@@ -107,20 +107,20 @@ public class CompetenciaTipoController {
 
             competenciaTipoService.delete(comp);
 
-            resposta.mensagem = "Competência removida";
-            resposta.sucess = true;
+            resposta.message = "Competência removida";
+            resposta.success = true;
             return resposta;
 
         } catch (Exception e) {
-            resposta.mensagem = e.getMessage();
+            resposta.message = e.getMessage();
             return resposta;
         }
     }
 
     @PostMapping(value = "/admin/competenciatipo/obter", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Resposta get(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
-        Resposta resposta = new Resposta();
+    public Response get(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+        Response resposta = new Response();
         try {
 
             String id = (String)body.get("competenciatipoId");
@@ -133,33 +133,33 @@ public class CompetenciaTipoController {
                 throw new CompetenciaException("Competencia não encontrada.");
             }
 
-            resposta.conteudo.put("competenciaTipo", comp);
+            resposta.body.put("competenciaTipo", comp);
 
-            resposta.sucess = true;
+            resposta.success = true;
             return resposta;
 
         } catch (Exception e) {
-            resposta.mensagem = e.getMessage();
+            resposta.message = e.getMessage();
             return resposta;
         }
     }
 
     @PostMapping(value = "/admin/competenciatipo/listar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Resposta getlist(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
-        Resposta resposta = new Resposta();
+    public Response getlist(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+        Response resposta = new Response();
         try {
 
             List<CompetenciaTipo> comps = competenciaTipoService.findAll();
 
-            resposta.conteudo.put("lista", comps);
+            resposta.body.put("lista", comps);
 
-            resposta.mensagem = "Operação realizada com exito.";
-            resposta.sucess = true;
+            resposta.message = "Operação realizada com exito.";
+            resposta.success = true;
             return resposta;
 
         } catch (Exception e) {
-            resposta.mensagem = e.getMessage();
+            resposta.message = e.getMessage();
             return resposta;
         }
     }

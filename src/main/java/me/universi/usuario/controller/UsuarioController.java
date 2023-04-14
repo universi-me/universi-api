@@ -8,7 +8,7 @@ import jakarta.servlet.http.HttpSession;
 
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
-import me.universi.api.entities.Resposta;
+import me.universi.api.entities.Response;
 import me.universi.competencia.services.CompetenciaTipoService;
 import me.universi.grupo.enums.GrupoTipo;
 import me.universi.grupo.services.GrupoService;
@@ -104,8 +104,8 @@ public class UsuarioController {
 
     @PostMapping(value = "/registrar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Resposta registrarUsuarioJson(@RequestBody Map<String, Object> body) {
-        Resposta resposta = new Resposta();
+    public Response registrarUsuarioJson(@RequestBody Map<String, Object> body) {
+        Response resposta = new Response();
         try {
 
             if(!Boolean.parseBoolean(env.getProperty("REGISTRAR_SE_ATIVADO"))) {
@@ -144,12 +144,12 @@ public class UsuarioController {
 
             usuarioService.createUser(user);
 
-            resposta.sucess = true;
-            resposta.mensagem = "Usuário registrado com sucesso, efetue o login para completar o cadastro.";
+            resposta.success = true;
+            resposta.message = "Usuário registrado com sucesso, efetue o login para completar o cadastro.";
             return resposta;
 
         } catch (Exception e) {
-            resposta.mensagem = e.getMessage();
+            resposta.message = e.getMessage();
             return resposta;
         }
     }
@@ -161,8 +161,8 @@ public class UsuarioController {
 
     @PostMapping(value = "/conta/editar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Resposta conta_editar(@RequestBody Map<String, Object> body, HttpSession session) {
-        Resposta resposta = new Resposta();
+    public Response conta_editar(@RequestBody Map<String, Object> body, HttpSession session) {
+        Response resposta = new Response();
         try {
 
             String password = (String)body.get("password");
@@ -184,24 +184,24 @@ public class UsuarioController {
 
                 usuarioService.atualizarUsuarioNaSessao();
 
-                resposta.sucess = true;
-                resposta.mensagem = "As Alterações foram salvas com sucesso.";
+                resposta.success = true;
+                resposta.message = "As Alterações foram salvas com sucesso.";
 
                 return resposta;
             }
 
-            resposta.mensagem = "Credenciais Invalidas!";
+            resposta.message = "Credenciais Invalidas!";
             return resposta;
         }catch (Exception e) {
-            resposta.mensagem = e.getMessage();
+            resposta.message = e.getMessage();
             return resposta;
         }
     }
 
     @PostMapping(value = "/admin/conta/editar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Resposta admin_conta_editar(@RequestBody Map<String, Object> body) {
-        Resposta resposta = new Resposta();
+    public Response admin_conta_editar(@RequestBody Map<String, Object> body) {
+        Response resposta = new Response();
         try {
 
             String usuarioId = (String)body.get("usuarioId");
@@ -261,21 +261,21 @@ public class UsuarioController {
             // force logout
             usuarioService.logoutUsername(usernameOld);
 
-            resposta.sucess = true;
-            resposta.mensagem = "As Alterações foram salvas com sucesso, A sessão do usuário foi finalizada.";
+            resposta.success = true;
+            resposta.message = "As Alterações foram salvas com sucesso, A sessão do usuário foi finalizada.";
 
             return resposta;
 
         }catch (Exception e) {
-            resposta.mensagem = e.getMessage();
+            resposta.message = e.getMessage();
             return resposta;
         }
     }
 
     @PostMapping(value = "/login/google", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Resposta conta_google(@RequestBody Map<String, Object> body, HttpServletRequest request) {
-        Resposta resposta = new Resposta();
+    public Response conta_google(@RequestBody Map<String, Object> body, HttpServletRequest request) {
+        Response resposta = new Response();
         try {
 
             String idTokenString = (String)body.get("token");
@@ -357,9 +357,9 @@ public class UsuarioController {
 
                     usuarioService.configurarSessaoParaUsuario(user, authenticationManager);
 
-                    resposta.sucess = true;
-                    resposta.enderecoParaRedirecionar = usuarioService.obterUrlAoLogar();
-                    resposta.mensagem = "Usuário Logado com sucesso.";
+                    resposta.success = true;
+                    resposta.redirectTo = usuarioService.obterUrlAoLogar();
+                    resposta.message = "Usuário Logado com sucesso.";
                     return resposta;
                 }
 
@@ -367,11 +367,11 @@ public class UsuarioController {
                 throw new UsuarioException("Token de Autenticação é Inválida.");
             }
 
-            resposta.mensagem = "Falha ao fazer login com Google.";
+            resposta.message = "Falha ao fazer login com Google.";
             return resposta;
 
         }catch (Exception e) {
-            resposta.mensagem = e.getMessage();
+            resposta.message = e.getMessage();
             return resposta;
         }
     }

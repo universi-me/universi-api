@@ -1,6 +1,6 @@
 package me.universi.usuario.services;
 
-import me.universi.api.entities.Resposta;
+import me.universi.api.entities.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
@@ -22,10 +22,10 @@ public class AutenticacaoFalhaHandler extends SimpleUrlAuthenticationFailureHand
 
         if ("application/json".equals(request.getHeader("Content-Type"))) {
 
-            Resposta resposta = new Resposta();
+            Response resposta = new Response();
 
-            resposta.sucess = false;
-            resposta.mensagem = usuarioService.erroSpringSecurityMemsagem(exception);
+            resposta.success = false;
+            resposta.message = usuarioService.erroSpringSecurityMemsagem(exception);
 
             response.setHeader("Content-Type", "application/json; charset=utf-8");
             response.getWriter().print(resposta.toString());

@@ -1,6 +1,6 @@
 package me.universi.perfil.controller;
 
-import me.universi.api.entities.Resposta;
+import me.universi.api.entities.Response;
 import me.universi.competencia.enums.Nivel;
 import me.universi.competencia.services.CompetenciaTipoService;
 import me.universi.grupo.services.GrupoService;
@@ -102,9 +102,9 @@ public class PerfilController {
 
     @PostMapping(value = "/perfil/editar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Resposta perfil_editar(@RequestBody Map<String, Object> body) {
+    public Response perfil_editar(@RequestBody Map<String, Object> body) {
 
-        Resposta resposta = new Resposta(); // default
+        Response resposta = new Response(); // default
 
         try {
 
@@ -152,11 +152,11 @@ public class PerfilController {
 
             usuarioService.atualizarUsuarioNaSessao();
 
-            resposta.mensagem = "As Alterações foram salvas com sucesso.";
-            resposta.sucess = true;
+            resposta.message = "As Alterações foram salvas com sucesso.";
+            resposta.success = true;
 
         } catch (Exception e) {
-            resposta.mensagem = e.getMessage();
+            resposta.message = e.getMessage();
         }
 
         return resposta;
