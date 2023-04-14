@@ -1,7 +1,7 @@
 package me.universi.competencia.services;
 
 import me.universi.competencia.entities.CompetenceType;
-import me.universi.competencia.repositories.CompetenciaTipoRepository;
+import me.universi.competencia.repositories.CompetenceTypeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +11,7 @@ import java.util.Optional;
 @Service
 public class CompetenciaTipoService {
     @Autowired
-    private CompetenciaTipoRepository competenciaTipoRepository;
+    private CompetenceTypeRepository competenciaTipoRepository;
 
     public CompetenceType findFirstById(Long id) {
         Optional<CompetenceType> competenciaTipoOptional = competenciaTipoRepository.findFirstById(id);

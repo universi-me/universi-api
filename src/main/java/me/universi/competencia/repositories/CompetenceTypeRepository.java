@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface CompetenciaTipoRepository extends JpaRepository<CompetenceType, Long> {
+public interface CompetenceTypeRepository extends JpaRepository<CompetenceType, Long> {
     Optional<CompetenceType> findFirstById(Long id);
     Optional<CompetenceType> findFirstByNome(String nome);
 }

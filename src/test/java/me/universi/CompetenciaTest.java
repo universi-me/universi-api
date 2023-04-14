@@ -2,7 +2,7 @@ package me.universi;
 
 import me.universi.competencia.entities.Competence;
 import me.universi.competencia.entities.CompetenceType;
-import me.universi.competencia.repositories.CompetenciaTipoRepository;
+import me.universi.competencia.repositories.CompetenceTypeRepository;
 import me.universi.competencia.services.CompetenciaService;
 import me.universi.grupo.services.GrupoService;
 import me.universi.perfil.entities.Perfil;
@@ -38,7 +38,7 @@ public class CompetenciaTest {
     UsuarioService usuarioService;
 
     @Autowired
-    CompetenciaTipoRepository competenciaTipoRepository;
+    CompetenceTypeRepository competenciaTipoRepository;
     @Test
     void create() {
         String nome = "competenciaTest";
