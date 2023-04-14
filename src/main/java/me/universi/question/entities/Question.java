@@ -7,7 +7,7 @@ import jakarta.persistence.OneToOne;
 import me.universi.feedback.entities.Feedback;
 import me.universi.question.dto.QuestionDTO;
 import me.universi.question.dto.QuestionCreateDTO;
-import me.universi.usuario.entities.User;
+import me.universi.user.entities.User;
 import org.hibernate.Hibernate;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

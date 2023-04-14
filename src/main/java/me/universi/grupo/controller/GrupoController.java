@@ -6,18 +6,14 @@ import me.universi.grupo.enums.GrupoTipo;
 import me.universi.grupo.exceptions.GrupoException;
 import me.universi.grupo.services.GrupoService;
 
-import me.universi.usuario.entities.User;
-import me.universi.usuario.services.UsuarioService;
+import me.universi.user.entities.User;
+import me.universi.user.services.UsuarioService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
@@ -27,86 +23,6 @@ public class GrupoController {
     public GrupoService grupoService;
     @Autowired
     public UsuarioService usuarioService;
-
-    // mapaear tudo exceto, /css, /js, /img, /favicon.ico, comflita com static resources do Thymeleaf e Swagger-ui
-    @GetMapping(value = {"{url:(?!css$|js$|img$|favicon.ico$|swagger-ui$).*}/**"})
-    public String grupo_handler(HttpServletRequest request, HttpServletResponse response, ModelMap map) {
-        try {
-            User user = usuarioService.obterUsuarioNaSessao();
-
-            if(usuarioService.usuarioPrecisaDePerfil(user)) {
-                return "redirect:/p/"+ user.getUsername() +"/editar";
-            }
-
-            // obter diretorio caminho url
-            String requestPathSt = request.getRequestURI().toLowerCase();
-
-            boolean flagEditar = requestPathSt.endsWith("/editar");
-            boolean flagCriar = requestPathSt.endsWith("/criar");
-            boolean flagEdicao = flagEditar | flagCriar;
-            boolean flagParticipantesListar = requestPathSt.endsWith("/participantes");
-            boolean flagGruposListar = requestPathSt.endsWith("/grupos");
-
-            String[] nicknameArr = requestPathSt.split("/");
-
-            if(flagEdicao || flagParticipantesListar || flagGruposListar) {
-                // remover ultimo componente no caminho, flags
-                nicknameArr = Arrays.copyOf(nicknameArr, nicknameArr.length - 1);
-            }
-
-            Grupo grupoRoot = null;
-            Grupo grupoAtual = null;
-
-            // obter grupo pai, nickname unico e que pode ser acessado diretamente pela url
-            grupoRoot = grupoService.findFirstByGrupoRootAndNickname(true, nicknameArr[1]);
-            if(grupoRoot != null) {
-                // verificar se o caminho é valido para o grupo, a partir do grupo pai
-                grupoAtual = grupoService.parentescoCheckGrupo(grupoRoot, nicknameArr);
-            }
-
-            if(grupoAtual != null) {
-                map.addAttribute("grupoService", grupoService);
-                map.addAttribute("usuarioService", usuarioService);
-                map.addAttribute("grupo", grupoAtual);
-                map.addAttribute("grupoDiretorio", grupoService.diretorioParaGrupo(grupoAtual.getId()));
-            } else {
-                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                throw new GrupoException("Grupo não foi encontrado!");
-            }
-
-            if(flagEdicao) { // flags para determinar o tipo da página
-
-                // verficar permissao de edição do grupo
-                //grupoService.verificarPermissaoParaGrupo(grupoAtual, usuario);
-
-                map.addAttribute("tiposGrupo", GrupoTipo.values());
-                map.addAttribute("grupoSubDiretorio", String.join("/", Arrays.copyOf(nicknameArr, nicknameArr.length - 1)));
-
-                if(flagEditar) {
-                    map.addAttribute("flagPage", "flagEditar");
-                } else if(flagCriar) {
-                    map.addAttribute("flagPage", "flagCriar");
-                }
-            } else if(flagParticipantesListar) {
-                map.addAttribute("flagPage", "flagParticipantesListar");
-            } else if(flagGruposListar) {
-                map.addAttribute("flagPage", "flagGruposListar");
-            }
-
-        } catch (Exception e){
-            map.put("error", "Grupo: " + e.getMessage());
-        }
-        return "grupo/grupo_index";
-    }
-
-    @GetMapping("/grupos")
-    public String grupos_handler(ModelMap map) {
-
-        map.addAttribute("grupoService", grupoService);
-
-        return "grupo/publicos";
-    }
-
 
     @PostMapping(value = "/grupo/criar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody

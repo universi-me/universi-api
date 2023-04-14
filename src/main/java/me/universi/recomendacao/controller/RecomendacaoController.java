@@ -10,12 +10,11 @@ import me.universi.perfil.entities.Perfil;
 import me.universi.perfil.services.PerfilService;
 import me.universi.recomendacao.entities.Recomendacao;
 import me.universi.recomendacao.exceptions.RecomendacaoInvalidaException;
-import me.universi.usuario.entities.User;
-import me.universi.usuario.services.UsuarioService;
+import me.universi.user.entities.User;
+import me.universi.user.services.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 import me.universi.recomendacao.service.RecomendacaoService;
 
@@ -39,29 +38,6 @@ public class RecomendacaoController {
 
     @Autowired
     public CompetenciaTipoService competenciaTipoService;
-
-    @GetMapping("/recomendar")
-    public String recomendacao(ModelMap map) {
-        return "recomendacao/recomendacao_index";
-    }
-
-    @GetMapping("/recomendar/{usuario}")
-    public String recomendar_usuario(ModelMap map, @PathVariable("usuario") String usernameDestino) {
-        try {
-            User user = usuarioService.obterUsuarioNaSessao();
-
-            User userDestino = (User) usuarioService.loadUserByUsername(usernameDestino);
-            map.put("usuarioDestino", userDestino);
-
-            map.put("competenciaTipoService", competenciaTipoService);
-
-            map.put("flagPage", "flagRecomendar");
-
-        } catch (Exception e) {
-            map.put("error", "Recomendação: " + e.getMessage());
-        }
-        return "recomendacao/recomendacao_index";
-    }
 
     @PostMapping(value = "/recomendacao/criar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
