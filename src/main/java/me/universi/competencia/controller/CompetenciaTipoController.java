@@ -2,7 +2,7 @@ package me.universi.competencia.controller;
 
 import me.universi.api.entities.Response;
 import me.universi.competencia.entities.CompetenceType;
-import me.universi.competencia.exceptions.CompetenciaException;
+import me.universi.competencia.exceptions.CompetenceException;
 import me.universi.competencia.services.CompetenciaTipoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -29,11 +29,11 @@ public class CompetenciaTipoController {
 
             String nome = (String)body.get("nome");
             if(nome == null) {
-                throw new CompetenciaException("Parametro nome é nulo.");
+                throw new CompetenceException("Parametro nome é nulo.");
             }
 
             if(competenciaTipoService.findFirstByNome(nome) != null) {
-                throw new CompetenciaException("Tipo de competência já existe.");
+                throw new CompetenceException("Tipo de competência já existe.");
             }
 
             CompetenceType competenciaNew = new CompetenceType();
@@ -59,18 +59,18 @@ public class CompetenciaTipoController {
 
             String id = (String)body.get("competenciatipoId");
             if(id == null) {
-                throw new CompetenciaException("Parametro competenciatipoId é nulo.");
+                throw new CompetenceException("Parametro competenciatipoId é nulo.");
             }
 
             String nome = (String)body.get("nome");
 
             CompetenceType comp = competenciaTipoService.findFirstById(Long.valueOf(id));
             if (comp == null) {
-                throw new CompetenciaException("Competência não encontrada.");
+                throw new CompetenceException("Competência não encontrada.");
             }
 
             if(competenciaTipoService.findFirstByNome(nome) != null) {
-                throw new CompetenciaException("Tipo de competência já existe.");
+                throw new CompetenceException("Tipo de competência já existe.");
             }
 
             if(nome != null) {
@@ -97,12 +97,12 @@ public class CompetenciaTipoController {
 
             String id = (String)body.get("competenciatipoId");
             if(id == null) {
-                throw new CompetenciaException("Parametro competenciatipoId é nulo.");
+                throw new CompetenceException("Parametro competenciatipoId é nulo.");
             }
 
             CompetenceType comp = competenciaTipoService.findFirstById(Long.valueOf(id));
             if (comp == null) {
-                throw new CompetenciaException("Competência não encontrada.");
+                throw new CompetenceException("Competência não encontrada.");
             }
 
             competenciaTipoService.delete(comp);
@@ -125,12 +125,12 @@ public class CompetenciaTipoController {
 
             String id = (String)body.get("competenciatipoId");
             if(id == null) {
-                throw new CompetenciaException("Parametro competenciatipoId é nulo.");
+                throw new CompetenceException("Parametro competenciatipoId é nulo.");
             }
 
             CompetenceType comp = competenciaTipoService.findFirstById(Long.valueOf(id));
             if (comp == null) {
-                throw new CompetenciaException("Competencia não encontrada.");
+                throw new CompetenceException("Competencia não encontrada.");
             }
 
             resposta.body.put("competenciaTipo", comp);

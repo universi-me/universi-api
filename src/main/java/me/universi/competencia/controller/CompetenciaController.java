@@ -7,7 +7,7 @@ import me.universi.api.entities.Response;
 import me.universi.competencia.entities.Competence;
 import me.universi.competencia.entities.CompetenceType;
 import me.universi.competencia.enums.Level;
-import me.universi.competencia.exceptions.CompetenciaException;
+import me.universi.competencia.exceptions.CompetenceException;
 import me.universi.competencia.services.CompetenciaService;
 import me.universi.competencia.services.CompetenciaTipoService;
 import me.universi.perfil.entities.Perfil;
@@ -42,22 +42,22 @@ public class CompetenciaController {
 
             String competenciaTipoId = (String)body.get("competenciatipoId");
             if(competenciaTipoId == null) {
-                throw new CompetenciaException("Parametro competenciatipoId é nulo.");
+                throw new CompetenceException("Parametro competenciatipoId é nulo.");
             }
 
             String descricao = (String)body.get("descricao");
             if(descricao == null) {
-                throw new CompetenciaException("Parametro descricao é nulo.");
+                throw new CompetenceException("Parametro descricao é nulo.");
             }
 
             String nivel = (String)body.get("nivel");
             if(nivel == null) {
-                throw new CompetenciaException("Parametro nivel é nulo.");
+                throw new CompetenceException("Parametro nivel é nulo.");
             }
 
             CompetenceType compT = competenciaTipoService.findFirstById(Long.valueOf(competenciaTipoId));
             if(compT == null) {
-                throw new CompetenciaException("Tipo de Competência não encontrado.");
+                throw new CompetenceException("Tipo de Competência não encontrado.");
             }
 
             Competence competenciaNew = new Competence();
@@ -86,7 +86,7 @@ public class CompetenciaController {
 
             String id = (String)body.get("competenciaId");
             if(id == null) {
-                throw new CompetenciaException("Parametro competenciaId é nulo.");
+                throw new CompetenceException("Parametro competenciaId é nulo.");
             }
 
             String competenciaTipoId = (String)body.get("competenciaTipoId");
@@ -97,7 +97,7 @@ public class CompetenciaController {
 
             Competence comp = competenciaService.findFirstById(Long.valueOf(id));
             if (comp == null) {
-                throw new CompetenciaException("Competência não encontrada.");
+                throw new CompetenceException("Competência não encontrada.");
             }
 
             User user = usuarioService.obterUsuarioNaSessao();
@@ -105,13 +105,13 @@ public class CompetenciaController {
             Perfil perfil = user.getPerfil();
 
             if(comp.getProfile().getId() != perfil.getId()) {
-                throw new CompetenciaException("Você não tem permissão para editar esta Competêcia.");
+                throw new CompetenceException("Você não tem permissão para editar esta Competêcia.");
             }
 
             if(competenciaTipoId != null && competenciaTipoId.length()>0) {
                 CompetenceType compT = competenciaTipoService.findFirstById(Long.valueOf(competenciaTipoId));
                 if(compT == null) {
-                    throw new CompetenciaException("Tipo de Competência não encontrado.");
+                    throw new CompetenceException("Tipo de Competência não encontrado.");
                 }
                 comp.setCompetenceType(compT);
             }
@@ -142,12 +142,12 @@ public class CompetenciaController {
 
             String id = (String)body.get("competenciaId");
             if(id == null) {
-                throw new CompetenciaException("Parametro competenciaId é nulo.");
+                throw new CompetenceException("Parametro competenciaId é nulo.");
             }
 
             Competence comp = competenciaService.findFirstById(Long.valueOf(id));
             if (comp == null) {
-                throw new CompetenciaException("Competência não encontrada.");
+                throw new CompetenceException("Competência não encontrada.");
             }
 
             User user = usuarioService.obterUsuarioNaSessao();
@@ -155,7 +155,7 @@ public class CompetenciaController {
             Perfil perfil = user.getPerfil();
 
             if(comp.getProfile().getId() != perfil.getId()) {
-                throw new CompetenciaException("Você não tem permissão para editar esta Competêcia.");
+                throw new CompetenceException("Você não tem permissão para editar esta Competêcia.");
             }
 
             competenciaService.delete(comp);
@@ -178,12 +178,12 @@ public class CompetenciaController {
 
             String id = (String)body.get("competenciaId");
             if(id == null) {
-                throw new CompetenciaException("Parametro competenciaId é nulo.");
+                throw new CompetenceException("Parametro competenciaId é nulo.");
             }
 
             Competence comp = competenciaService.findFirstById(Long.valueOf(id));
             if (comp == null) {
-                throw new CompetenciaException("Competencia não encontrada.");
+                throw new CompetenceException("Competencia não encontrada.");
             }
 
             resposta.body.put("competencia", comp);

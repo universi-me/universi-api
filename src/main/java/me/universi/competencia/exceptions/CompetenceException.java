@@ -1,9 +1,9 @@
 package me.universi.competencia.exceptions;
 
-public class CompetenciaException extends Exception {
+public class CompetenceException extends Exception {
 
     // Exception para competência
-    public CompetenciaException(String m) {
+    public CompetenceException(String m) {
         super(m);
     }
 }
