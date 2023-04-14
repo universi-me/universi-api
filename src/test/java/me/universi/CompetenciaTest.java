@@ -3,7 +3,7 @@ package me.universi;
 import me.universi.competencia.entities.Competence;
 import me.universi.competencia.entities.CompetenceType;
 import me.universi.competencia.repositories.CompetenceTypeRepository;
-import me.universi.competencia.services.CompetenciaService;
+import me.universi.competencia.services.CompetenceService;
 import me.universi.grupo.services.GrupoService;
 import me.universi.perfil.entities.Perfil;
 import me.universi.perfil.enums.Sexo;
@@ -29,7 +29,7 @@ public class CompetenciaTest {
     @Autowired
     GrupoService grupoService;
     @Autowired
-    CompetenciaService competenciaService;
+    CompetenceService competenciaService;
     @Autowired
     RecomendacaoService recomendacaoService;
     @Autowired

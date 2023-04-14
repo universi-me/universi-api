@@ -3,7 +3,7 @@ package me.universi.recomendacao.controller;
 
 import me.universi.api.entities.Response;
 import me.universi.competencia.entities.CompetenceType;
-import me.universi.competencia.services.CompetenciaService;
+import me.universi.competencia.services.CompetenceService;
 import me.universi.competencia.services.CompetenciaTipoService;
 import me.universi.grupo.exceptions.GrupoException;
 import me.universi.perfil.entities.Perfil;
@@ -28,7 +28,7 @@ public class RecomendacaoController {
     public RecomendacaoService recomendacaoService;
 
     @Autowired
-    public CompetenciaService competenciaService;
+    public CompetenceService competenciaService;
 
     @Autowired
     public UsuarioService usuarioService;

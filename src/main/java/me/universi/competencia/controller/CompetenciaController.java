@@ -8,7 +8,7 @@ import me.universi.competencia.entities.Competence;
 import me.universi.competencia.entities.CompetenceType;
 import me.universi.competencia.enums.Level;
 import me.universi.competencia.exceptions.CompetenceException;
-import me.universi.competencia.services.CompetenciaService;
+import me.universi.competencia.services.CompetenceService;
 import me.universi.competencia.services.CompetenciaTipoService;
 import me.universi.perfil.entities.Perfil;
 import me.universi.perfil.services.PerfilService;
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 public class CompetenciaController {
     @Autowired
-    public CompetenciaService competenciaService;
+    public CompetenceService competenciaService;
     @Autowired
     public CompetenciaTipoService competenciaTipoService;
 
