@@ -1,6 +1,7 @@
 package me.universi.usuario.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import me.universi.indicators.entities.Indicators;
 import me.universi.perfil.entities.Perfil;
 import me.universi.usuario.enums.Autoridade;
 import org.springframework.security.core.GrantedAuthority;
@@ -58,6 +59,10 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     @Column(name = "autoridade")
     private Autoridade autoridade;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "indicators_id", referencedColumnName = "id")
+    private Indicators indicators;
 
     public User(String name, String email, String password){
         this.nome = name;
@@ -195,6 +200,14 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return !this.inativo;
+    }
+
+    public Indicators getIndicators() {
+        return indicators;
+    }
+
+    public void setIndicators(Indicators indicators) {
+        this.indicators = indicators;
     }
 
     @Override
