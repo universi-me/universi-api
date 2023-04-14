@@ -20,68 +20,68 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
-public class CompetenciaController {
+public class CompetenceController {
     @Autowired
-    public CompetenceService competenciaService;
+    public CompetenceService competenceService;
     @Autowired
-    public CompetenceTypeService competenciaTipoService;
+    public CompetenceTypeService competenceTypeService;
 
     @Autowired
-    public PerfilService perfilService;
+    public PerfilService profileService;
 
     @Autowired
-    public UsuarioService usuarioService;
+    public UsuarioService userService;
 
     @PostMapping(value = "/competencia/criar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response create(@RequestBody Map<String, Object> body) {
-        Response resposta = new Response();
+        Response response = new Response();
         try {
 
-            User user = usuarioService.obterUsuarioNaSessao();
+            User user = userService.obterUsuarioNaSessao();
 
-            String competenciaTipoId = (String)body.get("competenciatipoId");
-            if(competenciaTipoId == null) {
+            String competenceTypeId = (String)body.get("competenciatipoId");
+            if(competenceTypeId == null) {
                 throw new CompetenceException("Parametro competenciatipoId é nulo.");
             }
 
-            String descricao = (String)body.get("descricao");
-            if(descricao == null) {
+            String description = (String)body.get("descricao");
+            if(description == null) {
                 throw new CompetenceException("Parametro descricao é nulo.");
             }
 
-            String nivel = (String)body.get("nivel");
-            if(nivel == null) {
+            String level = (String)body.get("nivel");
+            if(level == null) {
                 throw new CompetenceException("Parametro nivel é nulo.");
             }
 
-            CompetenceType compT = competenciaTipoService.findFirstById(Long.valueOf(competenciaTipoId));
+            CompetenceType compT = competenceTypeService.findFirstById(Long.valueOf(competenceTypeId));
             if(compT == null) {
                 throw new CompetenceException("Tipo de Competência não encontrado.");
             }
 
-            Competence competenciaNew = new Competence();
-            competenciaNew.setProfile(user.getPerfil());
-            competenciaNew.setCompetenceType(compT);
-            competenciaNew.setDescription(descricao);
-            competenciaNew.setLevel(Level.valueOf(nivel));
+            Competence newCompetence = new Competence();
+            newCompetence.setProfile(user.getPerfil());
+            newCompetence.setCompetenceType(compT);
+            newCompetence.setDescription(description);
+            newCompetence.setLevel(Level.valueOf(level));
 
-            competenciaService.save(competenciaNew);
+            competenceService.save(newCompetence);
 
-            resposta.message = "Competência Criada";
-            resposta.success = true;
-            return resposta;
+            response.message = "Competência Criada";
+            response.success = true;
+            return response;
 
         } catch (Exception e) {
-            resposta.message = e.getMessage();
-            return resposta;
+            response.message = e.getMessage();
+            return response;
         }
     }
 
     @PostMapping(value = "/competencia/atualizar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response update(@RequestBody Map<String, Object> body) {
-        Response resposta = new Response();
+        Response response = new Response();
         try {
 
             String id = (String)body.get("competenciaId");
@@ -89,55 +89,55 @@ public class CompetenciaController {
                 throw new CompetenceException("Parametro competenciaId é nulo.");
             }
 
-            String competenciaTipoId = (String)body.get("competenciaTipoId");
-            String descricao = (String)body.get("descricao");
-            String nivel = (String)body.get("nivel");
+            String competenceTypeId = (String)body.get("competenciaTipoId");
+            String description = (String)body.get("descricao");
+            String level = (String)body.get("nivel");
 
 
 
-            Competence comp = competenciaService.findFirstById(Long.valueOf(id));
-            if (comp == null) {
+            Competence competence = competenceService.findFirstById(Long.valueOf(id));
+            if (competence == null) {
                 throw new CompetenceException("Competência não encontrada.");
             }
 
-            User user = usuarioService.obterUsuarioNaSessao();
+            User user = userService.obterUsuarioNaSessao();
 
-            Perfil perfil = user.getPerfil();
+            Perfil profile = user.getPerfil();
 
-            if(comp.getProfile().getId() != perfil.getId()) {
+            if(competence.getProfile().getId() != profile.getId()) {
                 throw new CompetenceException("Você não tem permissão para editar esta Competêcia.");
             }
 
-            if(competenciaTipoId != null && competenciaTipoId.length()>0) {
-                CompetenceType compT = competenciaTipoService.findFirstById(Long.valueOf(competenciaTipoId));
+            if(competenceTypeId != null && competenceTypeId.length()>0) {
+                CompetenceType compT = competenceTypeService.findFirstById(Long.valueOf(competenceTypeId));
                 if(compT == null) {
                     throw new CompetenceException("Tipo de Competência não encontrado.");
                 }
-                comp.setCompetenceType(compT);
+                competence.setCompetenceType(compT);
             }
-            if (descricao != null) {
-                comp.setDescription(descricao);
+            if (description != null) {
+                competence.setDescription(description);
             }
-            if (nivel != null) {
-                comp.setLevel(Level.valueOf(nivel));
+            if (level != null) {
+                competence.setLevel(Level.valueOf(level));
             }
 
-            competenciaService.save(comp);
+            competenceService.save(competence);
 
-            resposta.message = "Competência atualizada";
-            resposta.success = true;
-            return resposta;
+            response.message = "Competência atualizada";
+            response.success = true;
+            return response;
 
         } catch (Exception e) {
-            resposta.message = e.getMessage();
-            return resposta;
+            response.message = e.getMessage();
+            return response;
         }
     }
 
     @PostMapping(value = "/competencia/remover", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response remove(@RequestBody Map<String, Object> body) {
-        Response resposta = new Response();
+        Response response = new Response();
         try {
 
             String id = (String)body.get("competenciaId");
@@ -145,35 +145,35 @@ public class CompetenciaController {
                 throw new CompetenceException("Parametro competenciaId é nulo.");
             }
 
-            Competence comp = competenciaService.findFirstById(Long.valueOf(id));
-            if (comp == null) {
+            Competence competence = competenceService.findFirstById(Long.valueOf(id));
+            if (competence == null) {
                 throw new CompetenceException("Competência não encontrada.");
             }
 
-            User user = usuarioService.obterUsuarioNaSessao();
+            User user = userService.obterUsuarioNaSessao();
 
-            Perfil perfil = user.getPerfil();
+            Perfil profile = user.getPerfil();
 
-            if(comp.getProfile().getId() != perfil.getId()) {
+            if(competence.getProfile().getId() != profile.getId()) {
                 throw new CompetenceException("Você não tem permissão para editar esta Competêcia.");
             }
 
-            competenciaService.delete(comp);
+            competenceService.delete(competence);
 
-            resposta.message = "Competência removida";
-            resposta.success = true;
-            return resposta;
+            response.message = "Competência removida";
+            response.success = true;
+            return response;
 
         } catch (Exception e) {
-            resposta.message = e.getMessage();
-            return resposta;
+            response.message = e.getMessage();
+            return response;
         }
     }
 
     @PostMapping(value = "/competencia/obter", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response get(@RequestBody Map<String, Object> body) {
-        Response resposta = new Response();
+        Response response = new Response();
         try {
 
             String id = (String)body.get("competenciaId");
@@ -181,39 +181,39 @@ public class CompetenciaController {
                 throw new CompetenceException("Parametro competenciaId é nulo.");
             }
 
-            Competence comp = competenciaService.findFirstById(Long.valueOf(id));
-            if (comp == null) {
+            Competence competence = competenceService.findFirstById(Long.valueOf(id));
+            if (competence == null) {
                 throw new CompetenceException("Competencia não encontrada.");
             }
 
-            resposta.body.put("competencia", comp);
+            response.body.put("competencia", competence);
 
-            resposta.success = true;
-            return resposta;
+            response.success = true;
+            return response;
 
         } catch (Exception e) {
-            resposta.message = e.getMessage();
-            return resposta;
+            response.message = e.getMessage();
+            return response;
         }
     }
 
     @PostMapping(value = "/competencia/listar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Response getlist(@RequestBody Map<String, Object> body) {
-        Response resposta = new Response();
+    public Response findAll(@RequestBody Map<String, Object> body) {
+        Response response = new Response();
         try {
 
-            List<Competence> comps = competenciaService.findAll();
+            List<Competence> competences = competenceService.findAll();
 
-            resposta.body.put("lista", comps);
+            response.body.put("lista", competences);
 
-            resposta.message = "Operação realizada com exito.";
-            resposta.success = true;
-            return resposta;
+            response.message = "Operação realizada com exito.";
+            response.success = true;
+            return response;
 
         } catch (Exception e) {
-            resposta.message = e.getMessage();
-            return resposta;
+            response.message = e.getMessage();
+            return response;
         }
     }
 
