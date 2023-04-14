@@ -6,7 +6,7 @@ import java.util.Map;
 import me.universi.api.entities.Response;
 import me.universi.competencia.entities.Competence;
 import me.universi.competencia.entities.CompetenceType;
-import me.universi.competencia.enums.Nivel;
+import me.universi.competencia.enums.Level;
 import me.universi.competencia.exceptions.CompetenciaException;
 import me.universi.competencia.services.CompetenciaService;
 import me.universi.competencia.services.CompetenciaTipoService;
@@ -64,7 +64,7 @@ public class CompetenciaController {
             competenciaNew.setProfile(user.getPerfil());
             competenciaNew.setCompetenceType(compT);
             competenciaNew.setDescription(descricao);
-            competenciaNew.setLevel(Nivel.valueOf(nivel));
+            competenciaNew.setLevel(Level.valueOf(nivel));
 
             competenciaService.save(competenciaNew);
 
@@ -119,7 +119,7 @@ public class CompetenciaController {
                 comp.setDescription(descricao);
             }
             if (nivel != null) {
-                comp.setLevel(Nivel.valueOf(nivel));
+                comp.setLevel(Level.valueOf(nivel));
             }
 
             competenciaService.save(comp);

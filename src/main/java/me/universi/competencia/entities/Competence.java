@@ -1,7 +1,7 @@
 package me.universi.competencia.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import me.universi.competencia.enums.Nivel;
+import me.universi.competencia.enums.Level;
 import me.universi.perfil.entities.Perfil;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -30,7 +30,7 @@ public class Competence {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "nivel")
-    private Nivel level;
+    private Level level;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
@@ -40,7 +40,7 @@ public class Competence {
     public Competence() {
     }
 
-    public Competence(String description, Nivel level) {
+    public Competence(String description, Level level) {
         this.description = description;
         this.level = level;
     }
@@ -57,9 +57,9 @@ public class Competence {
         this.description = description;
     }
 
-    public Nivel getLevel() { return level; }
+    public Level getLevel() { return level; }
 
-    public void setLevel(Nivel level) { this.level = level; }
+    public void setLevel(Level level) { this.level = level; }
 
     public Date getCreatedAt() {
         return createdAt;

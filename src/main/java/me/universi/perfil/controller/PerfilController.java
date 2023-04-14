@@ -1,7 +1,7 @@
 package me.universi.perfil.controller;
 
 import me.universi.api.entities.Response;
-import me.universi.competencia.enums.Nivel;
+import me.universi.competencia.enums.Level;
 import me.universi.competencia.services.CompetenciaTipoService;
 import me.universi.grupo.services.GrupoService;
 import me.universi.perfil.entities.Perfil;
