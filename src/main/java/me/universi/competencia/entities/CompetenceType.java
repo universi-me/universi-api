@@ -6,25 +6,25 @@ import jakarta.persistence.*;
 
 @Entity(name = "competenciatipo")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-public class CompetenciaTipo {
+public class CompetenceType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_competenciatipo")
     private Long id;
 
     @Column(name = "nome", unique=true)
-    private String nome;
+    private String name;
 
     public Long getId() {
         return id;
     }
 
-    public String getNome() {
-        return nome;
+    public String getName() {
+        return name;
     }
 
-    public void setNome(String nome) {
-        this.nome = nome;
+    public void setName(String nome) {
+        this.name = nome;
     }
 
 }

@@ -1,7 +1,7 @@
 package me.universi.competencia.services;
 
 import me.universi.competencia.entities.Competence;
-import me.universi.competencia.entities.CompetenciaTipo;
+import me.universi.competencia.entities.CompetenceType;
 import me.universi.competencia.repositories.CompetenciaRepository;
 import me.universi.perfil.entities.Perfil;
 import org.springframework.beans.factory.annotation.Autowired;

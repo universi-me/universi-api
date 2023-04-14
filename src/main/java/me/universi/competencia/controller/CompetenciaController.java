@@ -5,7 +5,7 @@ import java.util.Map;
 
 import me.universi.api.entities.Response;
 import me.universi.competencia.entities.Competence;
-import me.universi.competencia.entities.CompetenciaTipo;
+import me.universi.competencia.entities.CompetenceType;
 import me.universi.competencia.enums.Nivel;
 import me.universi.competencia.exceptions.CompetenciaException;
 import me.universi.competencia.services.CompetenciaService;
@@ -55,7 +55,7 @@ public class CompetenciaController {
                 throw new CompetenciaException("Parametro nivel é nulo.");
             }
 
-            CompetenciaTipo compT = competenciaTipoService.findFirstById(Long.valueOf(competenciaTipoId));
+            CompetenceType compT = competenciaTipoService.findFirstById(Long.valueOf(competenciaTipoId));
             if(compT == null) {
                 throw new CompetenciaException("Tipo de Competência não encontrado.");
             }
@@ -109,7 +109,7 @@ public class CompetenciaController {
             }
 
             if(competenciaTipoId != null && competenciaTipoId.length()>0) {
-                CompetenciaTipo compT = competenciaTipoService.findFirstById(Long.valueOf(competenciaTipoId));
+                CompetenceType compT = competenciaTipoService.findFirstById(Long.valueOf(competenciaTipoId));
                 if(compT == null) {
                     throw new CompetenciaException("Tipo de Competência não encontrado.");
                 }

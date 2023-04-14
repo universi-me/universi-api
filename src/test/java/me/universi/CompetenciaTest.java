@@ -1,7 +1,7 @@
 package me.universi;
 
 import me.universi.competencia.entities.Competence;
-import me.universi.competencia.entities.CompetenciaTipo;
+import me.universi.competencia.entities.CompetenceType;
 import me.universi.competencia.repositories.CompetenciaTipoRepository;
 import me.universi.competencia.services.CompetenciaService;
 import me.universi.grupo.services.GrupoService;
@@ -50,10 +50,10 @@ public class CompetenciaTest {
         }
         userNew.setNome(userNew.getNome());
 
-        CompetenciaTipo compTipo1 = new CompetenciaTipo();
-        compTipo1.setNome("testetipo1"+userNew.getId());
-        CompetenciaTipo compTipo2 = new CompetenciaTipo();
-        compTipo2.setNome("testetipo2"+userNew.getId());
+        CompetenceType compTipo1 = new CompetenceType();
+        compTipo1.setName("testetipo1"+userNew.getId());
+        CompetenceType compTipo2 = new CompetenceType();
+        compTipo2.setName("testetipo2"+userNew.getId());
         competenciaTipoRepository.save(compTipo1);
         competenciaTipoRepository.save(compTipo2);
 
@@ -103,10 +103,10 @@ public class CompetenciaTest {
         }
         userNew.setNome(userNew.getNome());
 
-        CompetenciaTipo compTipo1 = new CompetenciaTipo();
-        compTipo1.setNome("testeupdatetipo1"+userNew.getId());
-        CompetenciaTipo compTipo2 = new CompetenciaTipo();
-        compTipo2.setNome("testeupdatetipo2"+userNew.getId());
+        CompetenceType compTipo1 = new CompetenceType();
+        compTipo1.setName("testeupdatetipo1"+userNew.getId());
+        CompetenceType compTipo2 = new CompetenceType();
+        compTipo2.setName("testeupdatetipo2"+userNew.getId());
         competenciaTipoRepository.save(compTipo1);
         competenciaTipoRepository.save(compTipo2);
 
@@ -162,10 +162,10 @@ public class CompetenciaTest {
         }
         userNew.setNome(userNew.getNome());
 
-        CompetenciaTipo compTipo1 = new CompetenciaTipo();
-        compTipo1.setNome("testedeletetipo1"+userNew.getId());
-        CompetenciaTipo compTipo2 = new CompetenciaTipo();
-        compTipo2.setNome("testedeletetipo2"+userNew.getId());
+        CompetenceType compTipo1 = new CompetenceType();
+        compTipo1.setName("testedeletetipo1"+userNew.getId());
+        CompetenceType compTipo2 = new CompetenceType();
+        compTipo2.setName("testedeletetipo2"+userNew.getId());
         competenciaTipoRepository.save(compTipo1);
         competenciaTipoRepository.save(compTipo2);
 
@@ -222,10 +222,10 @@ public class CompetenciaTest {
         }
         userNew.setNome(userNew.getNome());
 
-        CompetenciaTipo compTipo1 = new CompetenciaTipo();
-        compTipo1.setNome("testereadtipo1"+userNew.getId());
-        CompetenciaTipo compTipo2 = new CompetenciaTipo();
-        compTipo2.setNome("testereadtipo2"+userNew.getId());
+        CompetenceType compTipo1 = new CompetenceType();
+        compTipo1.setName("testereadtipo1"+userNew.getId());
+        CompetenceType compTipo2 = new CompetenceType();
+        compTipo2.setName("testereadtipo2"+userNew.getId());
         competenciaTipoRepository.save(compTipo1);
         competenciaTipoRepository.save(compTipo2);
 

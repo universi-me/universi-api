@@ -18,7 +18,7 @@ public class Competence {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_competenciatipo")
-    private CompetenciaTipo competenceType;
+    private CompetenceType competenceType;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
@@ -69,11 +69,11 @@ public class Competence {
         this.createdAt = createdAt;
     }
 
-    public CompetenciaTipo getCompetenceType() {
+    public CompetenceType getCompetenceType() {
         return competenceType;
     }
 
-    public void setCompetenceType(CompetenciaTipo competenceType) {
+    public void setCompetenceType(CompetenceType competenceType) {
         this.competenceType = competenceType;
     }
 

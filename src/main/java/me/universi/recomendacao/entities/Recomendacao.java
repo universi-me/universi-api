@@ -1,6 +1,6 @@
 package me.universi.recomendacao.entities;
 
-import me.universi.competencia.entities.CompetenciaTipo;
+import me.universi.competencia.entities.CompetenceType;
 import me.universi.perfil.entities.Perfil;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -21,7 +21,7 @@ public class Recomendacao {
     private Perfil destino;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_competenciatipo")
-    private CompetenciaTipo competenciaTipo;
+    private CompetenceType competenciaTipo;
     @Column(name = "descricao", columnDefinition = "TEXT")
     private String descricao;
 
@@ -30,7 +30,7 @@ public class Recomendacao {
     @Column(name = "data_de_criacao")
     private Date dataDeCriacao;
 
-    public Recomendacao(Perfil origem, Perfil destino, CompetenciaTipo competencia, String descricao) {
+    public Recomendacao(Perfil origem, Perfil destino, CompetenceType competencia, String descricao) {
         this.origem = origem;
         this.destino = destino;
         this.competenciaTipo = competencia;
@@ -58,11 +58,11 @@ public class Recomendacao {
         this.destino = destino;
     }
 
-    public CompetenciaTipo getCompetenciaTipo() {
+    public CompetenceType getCompetenciaTipo() {
         return competenciaTipo;
     }
 
-    public void setCompetenciaTipo(CompetenciaTipo competenciaTipo) {
+    public void setCompetenciaTipo(CompetenceType competenciaTipo) {
         this.competenciaTipo = competenciaTipo;
     }
 

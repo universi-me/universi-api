@@ -2,7 +2,7 @@ package me.universi.recomendacao.controller;
 
 
 import me.universi.api.entities.Response;
-import me.universi.competencia.entities.CompetenciaTipo;
+import me.universi.competencia.entities.CompetenceType;
 import me.universi.competencia.services.CompetenciaService;
 import me.universi.competencia.services.CompetenciaTipoService;
 import me.universi.grupo.exceptions.GrupoException;
@@ -98,7 +98,7 @@ public class RecomendacaoController {
                 throw new RecomendacaoInvalidaException("Você não pode recomendar-se.");
             }
 
-            CompetenciaTipo compT = competenciaTipoService.findFirstById(Long.valueOf(competenciaTipoId));
+            CompetenceType compT = competenciaTipoService.findFirstById(Long.valueOf(competenciaTipoId));
             if(compT == null) {
                 throw new RecomendacaoInvalidaException("Competencia não encontrada.");
             }
@@ -158,7 +158,7 @@ public class RecomendacaoController {
             }
 
             if(competenciaTipoId != null && competenciaTipoId.length() > 0) {
-                CompetenciaTipo compT = competenciaTipoService.findFirstById(Long.valueOf(competenciaTipoId));
+                CompetenceType compT = competenciaTipoService.findFirstById(Long.valueOf(competenciaTipoId));
                 if(compT == null) {
                     throw new RecomendacaoInvalidaException("Competencia não encontrada.");
                 }
