@@ -5,9 +5,9 @@ import me.universi.feedback.entities.Feedback;
 import me.universi.question.QuestionRepository;
 import me.universi.question.dto.QuestionCreateDTO;
 import me.universi.question.entities.Question;
-import me.universi.usuario.entities.User;
-import me.universi.usuario.exceptions.UserNotFoundException;
-import me.universi.usuario.repositories.UsuarioRepository;
+import me.universi.user.entities.User;
+import me.universi.user.exceptions.UserNotFoundException;
+import me.universi.user.repositories.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -4,7 +4,7 @@ import me.universi.competencia.entities.Competencia;
 import me.universi.link.entities.Link;
 import me.universi.perfil.enums.Sexo;
 import me.universi.recomendacao.entities.Recomendacao;
-import me.universi.usuario.entities.User;
+import me.universi.user.entities.User;
 import me.universi.grupo.entities.Grupo;
 import org.hibernate.annotations.CreationTimestamp;
 

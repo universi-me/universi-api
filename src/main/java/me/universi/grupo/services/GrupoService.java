@@ -4,8 +4,8 @@ import me.universi.grupo.entities.Grupo;
 import me.universi.grupo.exceptions.GrupoException;
 import me.universi.grupo.repositories.GrupoRepository;
 import me.universi.perfil.entities.Perfil;
-import me.universi.usuario.entities.User;
-import me.universi.usuario.services.UsuarioService;
+import me.universi.user.entities.User;
+import me.universi.user.services.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
