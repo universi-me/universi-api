@@ -17,44 +17,44 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
-public class CompetenciaTipoController {
+public class CompetenceTypeController {
     @Autowired
-    public CompetenceTypeService competenciaTipoService;
+    public CompetenceTypeService competenceTypeService;
 
     @PostMapping(value = "/admin/competenciatipo/criar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response create(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
-        Response resposta = new Response();
+        Response response = new Response();
         try {
 
-            String nome = (String)body.get("nome");
-            if(nome == null) {
+            String name = (String)body.get("nome");
+            if(name == null) {
                 throw new CompetenceException("Parametro nome é nulo.");
             }
 
-            if(competenciaTipoService.findFirstByName(nome) != null) {
+            if(competenceTypeService.findFirstByName(name) != null) {
                 throw new CompetenceException("Tipo de competência já existe.");
             }
 
-            CompetenceType competenciaNew = new CompetenceType();
-            competenciaNew.setName(nome);
+            CompetenceType newCompetence = new CompetenceType();
+            newCompetence.setName(name);
 
-            competenciaTipoService.save(competenciaNew);
+            competenceTypeService.save(newCompetence);
 
-            resposta.message = "Competência Criada";
-            resposta.success = true;
-            return resposta;
+            response.message = "Competência Criada";
+            response.success = true;
+            return response;
 
         } catch (Exception e) {
-            resposta.message = e.getMessage();
-            return resposta;
+            response.message = e.getMessage();
+            return response;
         }
     }
 
     @PostMapping(value = "/admin/competenciatipo/atualizar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response update(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
-        Response resposta = new Response();
+        Response response = new Response();
         try {
 
             String id = (String)body.get("competenciatipoId");
@@ -62,37 +62,37 @@ public class CompetenciaTipoController {
                 throw new CompetenceException("Parametro competenciatipoId é nulo.");
             }
 
-            String nome = (String)body.get("nome");
+            String name = (String)body.get("nome");
 
-            CompetenceType comp = competenciaTipoService.findFirstById(Long.valueOf(id));
-            if (comp == null) {
+            CompetenceType competenceType = competenceTypeService.findFirstById(Long.valueOf(id));
+            if (competenceType == null) {
                 throw new CompetenceException("Competência não encontrada.");
             }
 
-            if(competenciaTipoService.findFirstByName(nome) != null) {
+            if(competenceTypeService.findFirstByName(name) != null) {
                 throw new CompetenceException("Tipo de competência já existe.");
             }
 
-            if(nome != null) {
-                comp.setName(nome);
+            if(name != null) {
+                competenceType.setName(name);
             }
 
-            competenciaTipoService.save(comp);
+            competenceTypeService.save(competenceType);
 
-            resposta.message = "Competência atualizada";
-            resposta.success = true;
-            return resposta;
+            response.message = "Competência atualizada";
+            response.success = true;
+            return response;
 
         } catch (Exception e) {
-            resposta.message = e.getMessage();
-            return resposta;
+            response.message = e.getMessage();
+            return response;
         }
     }
 
     @PostMapping(value = "/admin/competenciatipo/remover", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response remove(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
-        Response resposta = new Response();
+        Response response = new Response();
         try {
 
             String id = (String)body.get("competenciatipoId");
@@ -100,27 +100,27 @@ public class CompetenciaTipoController {
                 throw new CompetenceException("Parametro competenciatipoId é nulo.");
             }
 
-            CompetenceType comp = competenciaTipoService.findFirstById(Long.valueOf(id));
-            if (comp == null) {
+            CompetenceType competenceType = competenceTypeService.findFirstById(Long.valueOf(id));
+            if (competenceType == null) {
                 throw new CompetenceException("Competência não encontrada.");
             }
 
-            competenciaTipoService.delete(comp);
+            competenceTypeService.delete(competenceType);
 
-            resposta.message = "Competência removida";
-            resposta.success = true;
-            return resposta;
+            response.message = "Competência removida";
+            response.success = true;
+            return response;
 
         } catch (Exception e) {
-            resposta.message = e.getMessage();
-            return resposta;
+            response.message = e.getMessage();
+            return response;
         }
     }
 
     @PostMapping(value = "/admin/competenciatipo/obter", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response get(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
-        Response resposta = new Response();
+        Response response = new Response();
         try {
 
             String id = (String)body.get("competenciatipoId");
@@ -128,39 +128,39 @@ public class CompetenciaTipoController {
                 throw new CompetenceException("Parametro competenciatipoId é nulo.");
             }
 
-            CompetenceType comp = competenciaTipoService.findFirstById(Long.valueOf(id));
-            if (comp == null) {
+            CompetenceType competenceType = competenceTypeService.findFirstById(Long.valueOf(id));
+            if (competenceType == null) {
                 throw new CompetenceException("Competencia não encontrada.");
             }
 
-            resposta.body.put("competenciaTipo", comp);
+            response.body.put("competenciaTipo", competenceType);
 
-            resposta.success = true;
-            return resposta;
+            response.success = true;
+            return response;
 
         } catch (Exception e) {
-            resposta.message = e.getMessage();
-            return resposta;
+            response.message = e.getMessage();
+            return response;
         }
     }
 
     @PostMapping(value = "/admin/competenciatipo/listar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Response getlist(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
-        Response resposta = new Response();
+    public Response findAll(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+        Response response = new Response();
         try {
 
-            List<CompetenceType> comps = competenciaTipoService.findAll();
+            List<CompetenceType> competences = competenceTypeService.findAll();
 
-            resposta.body.put("lista", comps);
+            response.body.put("lista", competences);
 
-            resposta.message = "Operação realizada com exito.";
-            resposta.success = true;
-            return resposta;
+            response.message = "Operação realizada com exito.";
+            response.success = true;
+            return response;
 
         } catch (Exception e) {
-            resposta.message = e.getMessage();
-            return resposta;
+            response.message = e.getMessage();
+            return response;
         }
     }
 }
