@@ -5,7 +5,7 @@ import me.universi.link.entities.Link;
 import me.universi.perfil.enums.Sexo;
 import me.universi.recomendacao.entities.Recomendacao;
 import me.universi.user.entities.User;
-import me.universi.grupo.entities.Grupo;
+import me.universi.grupo.entities.Group;
 import org.hibernate.annotations.CreationTimestamp;
 
 import jakarta.persistence.*;
@@ -41,7 +41,7 @@ public class Perfil {
             joinColumns = { @JoinColumn(name = "id_perfil") },
             inverseJoinColumns = { @JoinColumn(name = "id_grupo") }
     )
-    private Collection<Grupo> grupos;
+    private Collection<Group> grupos;
     @OneToMany(mappedBy = "perfil")
     private Collection<Link> links;
     @Column(name = "sexo")
@@ -57,7 +57,7 @@ public class Perfil {
     @Column(name = "data_de_criacao")
     private Date dataDeCriacao;
 
-    public Perfil(Long id, User user, String bio, Link link, Collection<Competence> competencias, Collection<Grupo> grupos, Collection<Link> links) {
+    public Perfil(Long id, User user, String bio, Link link, Collection<Competence> competencias, Collection<Group> grupos, Collection<Link> links) {
         this.id = id;
         this.user = user;
         this.bio = bio;
@@ -107,11 +107,11 @@ public class Perfil {
         this.competencias = competencias;
     }
 
-    public Collection<Grupo> getGrupos() {
+    public Collection<Group> getGrupos() {
         return grupos;
     }
 
-    public void setGrupos(Collection<Grupo> grupos) {
+    public void setGrupos(Collection<Group> grupos) {
         this.grupos = grupos;
     }
 

@@ -1,6 +1,6 @@
 package me.universi.grupo.services;
 
-import me.universi.grupo.entities.Grupo;
+import me.universi.grupo.entities.Group;
 import me.universi.grupo.exceptions.GrupoException;
 import me.universi.grupo.repositories.GrupoRepository;
 import me.universi.perfil.entities.Perfil;
@@ -20,8 +20,8 @@ public class GrupoService {
     @Autowired
     private GrupoRepository grupoRepository;
 
-    public Grupo findFirstById(Long id) {
-        Optional<Grupo> grupoOptional = grupoRepository.findFirstById(id);
+    public Group findFirstById(Long id) {
+        Optional<Group> grupoOptional = grupoRepository.findFirstById(id);
         if(grupoOptional.isPresent()){
             return grupoOptional.get();
         }else{
@@ -38,8 +38,8 @@ public class GrupoService {
         }
     }
 
-    public Grupo findFirstByNickname(String nickname) {
-        Optional<Grupo> grupoOptional = grupoRepository.findFirstByNickname(nickname);
+    public Group findFirstByNickname(String nickname) {
+        Optional<Group> grupoOptional = grupoRepository.findFirstByNickname(nickname);
         if(grupoOptional.isPresent()){
             return grupoOptional.get();
         }else{
@@ -47,8 +47,8 @@ public class GrupoService {
         }
     }
 
-    public Grupo findFirstByGrupoRootAndNickname(boolean grupoRoot, String nickname) {
-        Optional<Grupo> grupoOptional = grupoRepository.findFirstByGrupoRootAndNickname(grupoRoot, nickname);
+    public Group findFirstByGrupoRootAndNickname(boolean grupoRoot, String nickname) {
+        Optional<Group> grupoOptional = grupoRepository.findFirstByGrupoRootAndNickname(grupoRoot, nickname);
         if(grupoOptional.isPresent()){
             return grupoOptional.get();
         }else{
@@ -56,8 +56,8 @@ public class GrupoService {
         }
     }
 
-    public List<Grupo> findByGrupoPublico(boolean grupoPublico) {
-        List<Grupo> grupoOptional = grupoRepository.findByGrupoPublico(grupoPublico);
+    public List<Group> findByGrupoPublico(boolean grupoPublico) {
+        List<Group> grupoOptional = grupoRepository.findByGrupoPublico(grupoPublico);
         return grupoOptional;
     }
 
@@ -69,7 +69,7 @@ public class GrupoService {
         }
     }
 
-    public boolean verificarPermissaoParaGrupo(Grupo grupo, User user) throws GrupoException {
+    public boolean verificarPermissaoParaGrupo(Group grupo, User user) throws GrupoException {
 
         if (grupo == null) {
             throw new GrupoException("Grupo não encontrado.");
@@ -91,7 +91,7 @@ public class GrupoService {
         return true;
     }
 
-    public boolean temPermissaoParaGrupo(Grupo grupo, User user) {
+    public boolean temPermissaoParaGrupo(Group grupo, User user) {
         try {
             return verificarPermissaoParaGrupo(grupo, user);
         } catch (Exception e) {
@@ -99,71 +99,71 @@ public class GrupoService {
         }
     }
 
-    public void adicionarSubgrupo(Grupo grupo, Grupo sub) {
-        Collection<Grupo> grupoArr = grupo.getSubGrupos();
+    public void adicionarSubgrupo(Group grupo, Group sub) {
+        Collection<Group> grupoArr = grupo.getSubGroups();
         if(grupoArr == null) {
-            grupoArr = new ArrayList<Grupo>();
+            grupoArr = new ArrayList<Group>();
         }
         if(!grupoArr.contains(sub)) {
             grupoArr.add(sub);
-            grupo.setSubGrupos(grupoArr);
+            grupo.setSubGroups(grupoArr);
             this.save(grupo);
         }
     }
 
-    public void removerSubgrupo(Grupo grupo, Grupo sub) {
-        Collection<Grupo> grupoArr = grupo.getSubGrupos();
+    public void removerSubgrupo(Group grupo, Group sub) {
+        Collection<Group> grupoArr = grupo.getSubGroups();
         if(grupoArr == null) {
-            grupoArr = new ArrayList<Grupo>();
+            grupoArr = new ArrayList<Group>();
         }
         if(grupoArr.contains(sub)) {
             grupoArr.remove(sub);
-            grupo.setSubGrupos(grupoArr);
+            grupo.setSubGroups(grupoArr);
             this.save(grupo);
             this.delete(sub);
         }
     }
 
-    public boolean adicionarParticipante(Grupo grupo, Perfil perfil) throws GrupoException {
+    public boolean adicionarParticipante(Group grupo, Perfil perfil) throws GrupoException {
         if(perfil == null) {
             throw new GrupoException("Parametro Perfil é nulo.");
         }
-        Collection<Perfil> participantesArr = grupo.getParticipantes();
+        Collection<Perfil> participantesArr = grupo.getParticipants();
         if(participantesArr == null) {
             participantesArr = new ArrayList<Perfil>();
         }
         Perfil participante = obterParticipanteNoGrupo(grupo, perfil.getId());
         if(participante == null) {
             participantesArr.add(perfil);
-            grupo.setParticipantes(participantesArr);
+            grupo.setParticipants(participantesArr);
             this.save(grupo);
             return true;
         }
         return false;
     }
 
-    public boolean removerParticipante(Grupo grupo, Perfil perfil) throws GrupoException {
+    public boolean removerParticipante(Group grupo, Perfil perfil) throws GrupoException {
         if(perfil == null) {
             throw new GrupoException("Parametro Perfil é nulo.");
         }
-        Collection<Perfil> participantesArr = grupo.getParticipantes();
+        Collection<Perfil> participantesArr = grupo.getParticipants();
         if(participantesArr == null) {
             participantesArr = new ArrayList<Perfil>();
         }
         Perfil participante = obterParticipanteNoGrupo(grupo, perfil.getId());
         if(participante != null) {
             participantesArr.remove(participante);
-            grupo.setParticipantes(participantesArr);
+            grupo.setParticipants(participantesArr);
             this.save(grupo);
             return true;
         }
         return false;
     }
 
-    public Perfil obterParticipanteNoGrupo(Grupo grupo, Long idParticipante)
+    public Perfil obterParticipanteNoGrupo(Group grupo, Long idParticipante)
     {
-        if(idParticipante != null && grupo.getParticipantes() != null) {
-            for (Perfil participanteNow : grupo.getParticipantes()) {
+        if(idParticipante != null && grupo.getParticipants() != null) {
+            for (Perfil participanteNow : grupo.getParticipants()) {
                 if (participanteNow.getId() == idParticipante) {
                     return participanteNow;
                 }
@@ -172,7 +172,7 @@ public class GrupoService {
         return null;
     }
 
-    public boolean nicknameDisponivelParaGrupo(Grupo grupo, String nickname) {
+    public boolean nicknameDisponivelParaGrupo(Group grupo, String nickname) {
         boolean disponivel = true;
         try {
             String nicknameLower = nickname.toLowerCase();
@@ -208,7 +208,7 @@ public class GrupoService {
             }
 
             if(disponivel) {
-                for (Grupo grupoNow : grupo.getSubGrupos()) {
+                for (Group grupoNow : grupo.getSubGroups()) {
                     if (grupoNow.nickname.toLowerCase().equals(nicknameLower)) {
                         disponivel = false;
                         break;
@@ -233,22 +233,22 @@ public class GrupoService {
         return matcher.find();
     }
 
-    public void save(Grupo grupo) {
+    public void save(Group grupo) {
         grupoRepository.saveAndFlush(grupo);
     }
 
-    public void delete(Grupo grupo) {
+    public void delete(Group grupo) {
         this.delete_recursive(grupo, false);
     }
 
-    private void delete_recursive(Grupo grupo, boolean insideRecursive) {
+    private void delete_recursive(Group grupo, boolean insideRecursive) {
 
-        if(grupo.participantes != null) {
-            grupo.participantes.clear();
+        if(grupo.participants != null) {
+            grupo.participants.clear();
         }
 
-        if(grupo.subGrupos != null) {
-            for(Grupo gNow : grupo.subGrupos) {
+        if(grupo.subGroups != null) {
+            for(Group gNow : grupo.subGroups) {
                 this.delete_recursive(gNow, true);
             }
         }
@@ -257,9 +257,9 @@ public class GrupoService {
         if(!insideRecursive) {
             Long paiId = this.findGrupoPaiDoGrupo(grupo.getId());
             if (paiId != null) {
-                Grupo gPai = findFirstById(paiId);
-                if (gPai.subGrupos != null) {
-                    gPai.subGrupos.remove(grupo);
+                Group gPai = findFirstById(paiId);
+                if (gPai.subGroups != null) {
+                    gPai.subGroups.remove(grupo);
                     grupoRepository.save(gPai);
                 }
             }
@@ -268,17 +268,17 @@ public class GrupoService {
         grupoRepository.delete(grupo);
     }
 
-    public List<Grupo> findAll() {
+    public List<Group> findAll() {
         return grupoRepository.findAll();
     }
 
     // verifica se o usuario está acessando a url do grupo corretamente, apartir do grupo root/master ate seu subgrupo
-    public Grupo parentescoCheckGrupo(Grupo grupoRoot, String[] sequenciaNickArr) {
-        Grupo finalGrupo = null;
+    public Group parentescoCheckGrupo(Group grupoRoot, String[] sequenciaNickArr) {
+        Group finalGrupo = null;
 
         boolean parenteCkeckFalhou = false;
         try {
-            Grupo grupoInsta = grupoRoot;
+            Group grupoInsta = grupoRoot;
             for (int i = 0; i < sequenciaNickArr.length; i++) {
                 String nicknameNow = sequenciaNickArr[i];
                 if (nicknameNow == null || nicknameNow.length() == 0) {
@@ -288,8 +288,8 @@ public class GrupoService {
                     // ignorar o primeiro, ja verificou antes
                     continue;
                 }
-                Grupo sub = null;
-                for (Grupo grupoNow : grupoInsta.subGrupos) {
+                Group sub = null;
+                for (Group grupoNow : grupoInsta.subGroups) {
                     if (nicknameNow.equals(grupoNow.nickname.toLowerCase())) {
                         sub = grupoNow;
                         break;
@@ -315,7 +315,7 @@ public class GrupoService {
     // retornar url do grupo a partir do id do grupo
     public String diretorioParaGrupo(Long grupoId) {
         ArrayList<String> nickArr = new ArrayList<String>();
-        Grupo grupoCurr = findFirstById(grupoId);
+        Group grupoCurr = findFirstById(grupoId);
         while(grupoCurr != null) {
             nickArr.add(grupoCurr.nickname);
             grupoCurr = findFirstById(findGrupoPaiDoGrupo(grupoCurr.getId()));
@@ -325,5 +325,5 @@ public class GrupoService {
     }
 
     // pesquisar os 5 primeiros contendo a string maiusculo ou minusculo
-    public Collection<Grupo> findTop5ByNomeContainingIgnoreCase(String nome){ return grupoRepository.findTop5ByNomeContainingIgnoreCase(nome); }
+    public Collection<Group> findTop5ByNomeContainingIgnoreCase(String nome){ return grupoRepository.findTop5ByNomeContainingIgnoreCase(nome); }
 }

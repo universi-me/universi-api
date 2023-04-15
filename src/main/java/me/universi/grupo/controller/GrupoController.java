@@ -1,7 +1,7 @@
 package me.universi.grupo.controller;
 
 import me.universi.api.entities.Response;
-import me.universi.grupo.entities.Grupo;
+import me.universi.grupo.entities.Group;
 import me.universi.grupo.enums.GrupoTipo;
 import me.universi.grupo.exceptions.GrupoException;
 import me.universi.grupo.services.GrupoService;
@@ -69,33 +69,33 @@ public class GrupoController {
             Boolean podeEntrar = (Boolean)body.get("podeEntrar");
 
 
-            Grupo grupoPai = grupoIdPai==null?null:grupoService.findFirstById(Long.valueOf(grupoIdPai));
+            Group grupoPai = grupoIdPai==null?null:grupoService.findFirstById(Long.valueOf(grupoIdPai));
 
             if(grupoPai!=null && !grupoService.nicknameDisponivelParaGrupo(grupoPai, nickname)) {
                 throw new GrupoException("Este Nickname não está disponível para este grupo.");
             }
 
-            if((grupoRoot != null && grupoRoot && usuarioService.isContaAdmin(user)) || ((grupoPai !=null && grupoPai.podeCriarGrupo) || grupoService.verificarPermissaoParaGrupo(grupoPai, user))) {
-                Grupo grupoNew = new Grupo();
+            if((grupoRoot != null && grupoRoot && usuarioService.isContaAdmin(user)) || ((grupoPai !=null && grupoPai.canCreateGroup) || grupoService.verificarPermissaoParaGrupo(grupoPai, user))) {
+                Group grupoNew = new Group();
                 grupoNew.setNickname(nickname);
-                grupoNew.setNome(nome);
+                grupoNew.setName(nome);
                 if(imagem != null && imagem.length()>0) {
-                    grupoNew.setImagem(imagem);
+                    grupoNew.setImage(imagem);
                 }
-                grupoNew.setDescricao(descricao);
-                grupoNew.setTipo(GrupoTipo.valueOf(tipo));
+                grupoNew.setDescription(descricao);
+                grupoNew.setType(GrupoTipo.valueOf(tipo));
                 grupoNew.setAdmin(user.getPerfil());
                 if(podeCriarGrupo != null) {
-                    grupoNew.setPodeCriarGrupo(podeCriarGrupo);
+                    grupoNew.setCanCreateGroup(podeCriarGrupo);
                 }
                 if(grupoPublico != null) {
-                    grupoNew.setGrupoPublico(grupoPublico);
+                    grupoNew.setPublicGroup(grupoPublico);
                 }
                 if(podeEntrar != null) {
-                    grupoNew.setPodeEntrar(podeEntrar);
+                    grupoNew.setCanEnter(podeEntrar);
                 }
                 if((grupoRoot != null && grupoRoot) && usuarioService.isContaAdmin(user)) {
-                    grupoNew.setGrupoRoot(true);
+                    grupoNew.setRootGroup(true);
                     grupoService.save(grupoNew);
                 } else {
                     grupoService.adicionarSubgrupo(grupoPai, grupoNew);
@@ -134,7 +134,7 @@ public class GrupoController {
             Boolean grupoPublico = (Boolean)body.get("grupoPublico");
             Boolean podeEntrar = (Boolean)body.get("podeEntrar");
 
-            Grupo grupoEdit = grupoService.findFirstById(Long.valueOf(grupoId));
+            Group grupoEdit = grupoService.findFirstById(Long.valueOf(grupoId));
             if(grupoEdit == null) {
                 throw new GrupoException("Grupo não encontrado.");
             }
@@ -143,25 +143,25 @@ public class GrupoController {
 
             if(grupoService.verificarPermissaoParaGrupo(grupoEdit, user)) {
                 if(nome != null && nome.length() > 0) {
-                    grupoEdit.setNome(nome);
+                    grupoEdit.setName(nome);
                 }
                 if(descricao != null && descricao.length() > 0) {
-                    grupoEdit.setDescricao(descricao);
+                    grupoEdit.setDescription(descricao);
                 }
                 if(tipo != null && tipo.length() > 0) {
-                    grupoEdit.setTipo(GrupoTipo.valueOf(tipo));
+                    grupoEdit.setType(GrupoTipo.valueOf(tipo));
                 }
                 if(imagem != null && imagem.length()>0) {
-                    grupoEdit.setImagem(imagem);
+                    grupoEdit.setImage(imagem);
                 }
                 if(podeCriarGrupo != null) {
-                    grupoEdit.setPodeCriarGrupo(podeCriarGrupo);
+                    grupoEdit.setCanCreateGroup(podeCriarGrupo);
                 }
                 if(grupoPublico != null) {
-                    grupoEdit.setGrupoPublico(grupoPublico);
+                    grupoEdit.setPublicGroup(grupoPublico);
                 }
                 if(podeEntrar != null) {
-                    grupoEdit.setPodeEntrar(podeEntrar);
+                    grupoEdit.setCanEnter(podeEntrar);
                 }
 
 
@@ -193,16 +193,16 @@ public class GrupoController {
 
             User user = usuarioService.obterUsuarioNaSessao();
 
-            Grupo grupoEdit = grupoService.findFirstById(Long.valueOf(grupoId));
+            Group grupoEdit = grupoService.findFirstById(Long.valueOf(grupoId));
             if(grupoEdit == null) {
                 throw new GrupoException("Grupo não encontrado.");
             }
 
-            if(!grupoEdit.isPodeEntrar()) {
+            if(!grupoEdit.isCanEnter()) {
                 throw new GrupoException("Grupo não permite entrada de paticipantes.");
             }
 
-            if(grupoEdit.isPodeEntrar() || grupoService.verificarPermissaoParaGrupo(grupoEdit, user)) {
+            if(grupoEdit.isCanEnter() || grupoService.verificarPermissaoParaGrupo(grupoEdit, user)) {
                 if(grupoService.adicionarParticipante(grupoEdit, user.getPerfil())) {
                     resposta.success = true;
                     resposta.message = "Você entrou no Grupo.";
@@ -233,7 +233,7 @@ public class GrupoController {
 
             User user = usuarioService.obterUsuarioNaSessao();
 
-            Grupo grupoEdit = grupoService.findFirstById(Long.valueOf(grupoId));
+            Group grupoEdit = grupoService.findFirstById(Long.valueOf(grupoId));
             if(grupoEdit == null) {
                 throw new GrupoException("Grupo não encontrado.");
             }
@@ -279,7 +279,7 @@ public class GrupoController {
                 }
             }
 
-            Grupo grupoEdit = grupoService.findFirstById(Long.valueOf(grupoId));
+            Group grupoEdit = grupoService.findFirstById(Long.valueOf(grupoId));
 
             if(participanteUser != null && grupoService.verificarPermissaoParaGrupo(grupoEdit, user)) {
                 if(grupoService.adicionarParticipante(grupoEdit, participanteUser.getPerfil())) {
@@ -326,7 +326,7 @@ public class GrupoController {
                 }
             }
 
-            Grupo grupoEdit = grupoService.findFirstById(Long.valueOf(grupoId));
+            Group grupoEdit = grupoService.findFirstById(Long.valueOf(grupoId));
 
             if(participanteUser != null && grupoService.verificarPermissaoParaGrupo(grupoEdit, user)) {
                 if(grupoService.removerParticipante(grupoEdit, participanteUser.getPerfil())) {
@@ -357,10 +357,10 @@ public class GrupoController {
                 throw new GrupoException("Parametro grupoId é nulo.");
             }
 
-            Grupo grupo = grupoService.findFirstById(Long.valueOf(grupoId));
+            Group grupo = grupoService.findFirstById(Long.valueOf(grupoId));
 
             if(grupo != null) {
-                resposta.body.put("participantes", grupo.getParticipantes());
+                resposta.body.put("participantes", grupo.getParticipants());
                 resposta.success = true;
                 resposta.message = "Operação realizada com exito.";
                 return resposta;
@@ -390,12 +390,12 @@ public class GrupoController {
                 throw new GrupoException("Parametro grupoIdRemover é nulo.");
             }
 
-            Grupo grupo = grupoService.findFirstById(Long.valueOf(grupoId));
+            Group grupo = grupoService.findFirstById(Long.valueOf(grupoId));
             if(grupo == null) {
                 throw new GrupoException("Grupo não encontrado.");
             }
 
-            Grupo grupoRemover = grupoService.findFirstById(Long.valueOf(grupoIdRemover));
+            Group grupoRemover = grupoService.findFirstById(Long.valueOf(grupoIdRemover));
             if(grupoRemover == null) {
                 throw new GrupoException("Subgrupo não encontrado.");
             }
@@ -429,7 +429,7 @@ public class GrupoController {
                 throw new GrupoException("Parametro grupoId é nulo.");
             }
 
-            Grupo grupo = grupoService.findFirstById(Long.valueOf(grupoId));
+            Group grupo = grupoService.findFirstById(Long.valueOf(grupoId));
             if(grupo == null) {
                 throw new GrupoException("Grupo não encontrado.");
             }
@@ -470,7 +470,7 @@ public class GrupoController {
                 throw new GrupoException("Parametro grupoId é nulo.");
             }
 
-            Grupo grupo = grupoService.findFirstById(Long.valueOf(grupoId));
+            Group grupo = grupoService.findFirstById(Long.valueOf(grupoId));
             if(grupo != null) {
                 resposta.body.put("grupo", grupo);
 
@@ -498,9 +498,9 @@ public class GrupoController {
                 throw new GrupoException("Parametro grupoId é nulo.");
             }
 
-            Grupo grupo = grupoService.findFirstById(Long.valueOf(grupoId));
+            Group grupo = grupoService.findFirstById(Long.valueOf(grupoId));
             if(grupo != null) {
-                Collection<Grupo> listaSubgrupos = grupo.getSubGrupos();
+                Collection<Group> listaSubgrupos = grupo.getSubGroups();
                 resposta.body.put("subgrupos", listaSubgrupos);
 
                 resposta.message = "Operação Realizada com exito.";

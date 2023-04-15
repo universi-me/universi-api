@@ -1,7 +1,7 @@
 package me.universi.pesquisar.controller;
 
 import me.universi.api.entities.Response;
-import me.universi.grupo.entities.Grupo;
+import me.universi.grupo.entities.Group;
 import me.universi.grupo.services.GrupoService;
 import me.universi.perfil.entities.Perfil;
 import me.universi.perfil.services.PerfilService;
@@ -61,12 +61,12 @@ public class PesquisarController {
                 }
             }
             if(searchGrupo) {
-                Collection<Grupo> grupoSearch = grupoService.findTop5ByNomeContainingIgnoreCase(term);
-                for (Grupo grupoNow : grupoSearch) {
+                Collection<Group> grupoSearch = grupoService.findTop5ByNomeContainingIgnoreCase(term);
+                for (Group grupoNow : grupoSearch) {
                     HashMap<String, Object> grupoDic = new HashMap<>();
-                    grupoDic.put("value", grupoNow.getNome());
+                    grupoDic.put("value", grupoNow.getName());
                     grupoDic.put("id", grupoNow.getNickname());
-                    grupoDic.put("img", grupoNow.getImagem() == null ? "https://i.imgur.com/SfAl1Vb.png" : grupoNow.getImagem());
+                    grupoDic.put("img", grupoNow.getImage() == null ? "https://i.imgur.com/SfAl1Vb.png" : grupoNow.getImage());
                     grupoDic.put("url", grupoService.diretorioParaGrupo(grupoNow.getId()));
                     grupoDic.put("tipo", "grupo");
                     resultsBusca.add(grupoDic);
