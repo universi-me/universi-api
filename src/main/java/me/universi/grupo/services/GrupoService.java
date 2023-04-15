@@ -2,7 +2,7 @@ package me.universi.grupo.services;
 
 import me.universi.grupo.entities.Group;
 import me.universi.grupo.exceptions.GroupException;
-import me.universi.grupo.repositories.GrupoRepository;
+import me.universi.grupo.repositories.GroupRepository;
 import me.universi.perfil.entities.Perfil;
 import me.universi.user.entities.User;
 import me.universi.user.services.UsuarioService;
@@ -18,7 +18,7 @@ public class GrupoService {
     @Autowired
     private UsuarioService usuarioService;
     @Autowired
-    private GrupoRepository grupoRepository;
+    private GroupRepository grupoRepository;
 
     public Group findFirstById(Long id) {
         Optional<Group> grupoOptional = grupoRepository.findFirstById(id);
@@ -30,7 +30,7 @@ public class GrupoService {
     }
 
     public Long findGrupoPaiDoGrupo(Long id) {
-        Optional<Long> grupoOptional = grupoRepository.findGrupoIdPaiDoGrupoId(id);
+        Optional<Long> grupoOptional = grupoRepository.findParentGroupId(id);
         if(grupoOptional.isPresent()){
             return grupoOptional.get();
         }else{
@@ -48,7 +48,7 @@ public class GrupoService {
     }
 
     public Group findFirstByGrupoRootAndNickname(boolean grupoRoot, String nickname) {
-        Optional<Group> grupoOptional = grupoRepository.findFirstByGrupoRootAndNickname(grupoRoot, nickname);
+        Optional<Group> grupoOptional = grupoRepository.findFirstByRootGroupAndNickname(grupoRoot, nickname);
         if(grupoOptional.isPresent()){
             return grupoOptional.get();
         }else{
@@ -57,7 +57,7 @@ public class GrupoService {
     }
 
     public List<Group> findByGrupoPublico(boolean grupoPublico) {
-        List<Group> grupoOptional = grupoRepository.findByGrupoPublico(grupoPublico);
+        List<Group> grupoOptional = grupoRepository.findByPublicGroup(grupoPublico);
         return grupoOptional;
     }
 
@@ -325,5 +325,5 @@ public class GrupoService {
     }
 
     // pesquisar os 5 primeiros contendo a string maiusculo ou minusculo
-    public Collection<Group> findTop5ByNomeContainingIgnoreCase(String nome){ return grupoRepository.findTop5ByNomeContainingIgnoreCase(nome); }
+    public Collection<Group> findTop5ByNomeContainingIgnoreCase(String nome){ return grupoRepository.findTop5ByNameContainingIgnoreCase(nome); }
 }

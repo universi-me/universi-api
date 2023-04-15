@@ -11,12 +11,12 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface GrupoRepository extends JpaRepository<Group, Long> {
+public interface GroupRepository extends JpaRepository<Group, Long> {
     Optional<Group> findFirstById(Long id);
     Optional<Group> findFirstByNickname(String nickname);
-    Optional<Group> findFirstByGrupoRootAndNickname(boolean grupoRoot, String nickname);
-    List<Group> findByGrupoPublico(boolean grupoPublico);
-    @Query(value = "SELECT ID_GRUPO FROM GRUPO_GRUPO WHERE ID_SUBGRUPO = :IDGrupo LIMIT 1", nativeQuery = true)
-    Optional<Long> findGrupoIdPaiDoGrupoId(@Param("IDGrupo") Long id);
-    Collection<Group> findTop5ByNomeContainingIgnoreCase(String nome);
+    Optional<Group> findFirstByRootGroupAndNickname(boolean rootGroup, String nickname);
+    List<Group> findByPublicGroup(boolean grupoPublico);
+    @Query(value = "SELECT ID_GRUPO FROM GRUPO_GRUPO WHERE ID_SUBGRUPO = :GroupId LIMIT 1", nativeQuery = true)
+    Optional<Long> findParentGroupId(@Param("GroupId") Long id);
+    Collection<Group> findTop5ByNameContainingIgnoreCase(String nome);
 }
