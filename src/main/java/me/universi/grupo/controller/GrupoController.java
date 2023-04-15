@@ -2,7 +2,7 @@ package me.universi.grupo.controller;
 
 import me.universi.api.entities.Response;
 import me.universi.grupo.entities.Group;
-import me.universi.grupo.enums.GrupoTipo;
+import me.universi.grupo.enums.GroupType;
 import me.universi.grupo.exceptions.GrupoException;
 import me.universi.grupo.services.GrupoService;
 
@@ -83,7 +83,7 @@ public class GrupoController {
                     grupoNew.setImage(imagem);
                 }
                 grupoNew.setDescription(descricao);
-                grupoNew.setType(GrupoTipo.valueOf(tipo));
+                grupoNew.setType(GroupType.valueOf(tipo));
                 grupoNew.setAdmin(user.getPerfil());
                 if(podeCriarGrupo != null) {
                     grupoNew.setCanCreateGroup(podeCriarGrupo);
@@ -149,7 +149,7 @@ public class GrupoController {
                     grupoEdit.setDescription(descricao);
                 }
                 if(tipo != null && tipo.length() > 0) {
-                    grupoEdit.setType(GrupoTipo.valueOf(tipo));
+                    grupoEdit.setType(GroupType.valueOf(tipo));
                 }
                 if(imagem != null && imagem.length()>0) {
                     grupoEdit.setImage(imagem);

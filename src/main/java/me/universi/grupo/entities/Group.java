@@ -3,7 +3,7 @@ package me.universi.grupo.entities;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import me.universi.grupo.enums.GrupoTipo;
+import me.universi.grupo.enums.GroupType;
 import me.universi.perfil.entities.Perfil;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -57,7 +57,7 @@ public class Group {
 
     @Column(name = "tipo")
     @Enumerated(EnumType.STRING)
-    public GrupoTipo type;
+    public GroupType type;
 
     /** The group's ability to be accessed directly through the URL (parent of all groups) */
     @Column(name = "gruporoot")
@@ -84,7 +84,7 @@ public class Group {
     public Group() {
     }
 
-    public Group(String nickname, String name, String description, Perfil admin, Collection<Perfil> participants, GrupoTipo type, Collection<Group> subGroups, boolean rootGroup, boolean canCreateGroup) {
+    public Group(String nickname, String name, String description, Perfil admin, Collection<Perfil> participants, GroupType type, Collection<Group> subGroups, boolean rootGroup, boolean canCreateGroup) {
         this.nickname = nickname;
         this.name = name;
         this.description = description;
@@ -132,11 +132,11 @@ public class Group {
         this.participants = participants;
     }
 
-    public GrupoTipo getType() {
+    public GroupType getType() {
         return type;
     }
 
-    public void setType(GrupoTipo type) {
+    public void setType(GroupType type) {
         this.type = type;
     }
     
