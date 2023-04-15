@@ -1,7 +1,7 @@
 package me.universi.grupo.services;
 
 import me.universi.grupo.entities.Group;
-import me.universi.grupo.exceptions.GrupoException;
+import me.universi.grupo.exceptions.GroupException;
 import me.universi.grupo.repositories.GrupoRepository;
 import me.universi.perfil.entities.Perfil;
 import me.universi.user.entities.User;
@@ -69,22 +69,22 @@ public class GrupoService {
         }
     }
 
-    public boolean verificarPermissaoParaGrupo(Group grupo, User user) throws GrupoException {
+    public boolean verificarPermissaoParaGrupo(Group grupo, User user) throws GroupException {
 
         if (grupo == null) {
-            throw new GrupoException("Grupo não encontrado.");
+            throw new GroupException("Grupo não encontrado.");
         }
 
         if (user == null) {
-            throw new GrupoException("Usuário não encontrado.");
+            throw new GroupException("Usuário não encontrado.");
         }
 
         Perfil perfil = user.getPerfil();
         if (usuarioService.usuarioPrecisaDePerfil(user)) {
-            throw new GrupoException("Você precisa criar um Perfil.");
+            throw new GroupException("Você precisa criar um Perfil.");
         } else if(perfil.getId()!=0 && grupo.getAdmin().getId() != perfil.getId()) {
             if(!usuarioService.isContaAdmin(user)) {
-                throw new GrupoException("Apenas administradores podem editar seus grupos!");
+                throw new GroupException("Apenas administradores podem editar seus grupos!");
             }
         }
 
@@ -124,9 +124,9 @@ public class GrupoService {
         }
     }
 
-    public boolean adicionarParticipante(Group grupo, Perfil perfil) throws GrupoException {
+    public boolean adicionarParticipante(Group grupo, Perfil perfil) throws GroupException {
         if(perfil == null) {
-            throw new GrupoException("Parametro Perfil é nulo.");
+            throw new GroupException("Parametro Perfil é nulo.");
         }
         Collection<Perfil> participantesArr = grupo.getParticipants();
         if(participantesArr == null) {
@@ -142,9 +142,9 @@ public class GrupoService {
         return false;
     }
 
-    public boolean removerParticipante(Group grupo, Perfil perfil) throws GrupoException {
+    public boolean removerParticipante(Group grupo, Perfil perfil) throws GroupException {
         if(perfil == null) {
-            throw new GrupoException("Parametro Perfil é nulo.");
+            throw new GroupException("Parametro Perfil é nulo.");
         }
         Collection<Perfil> participantesArr = grupo.getParticipants();
         if(participantesArr == null) {

@@ -3,7 +3,7 @@ package me.universi.grupo.controller;
 import me.universi.api.entities.Response;
 import me.universi.grupo.entities.Group;
 import me.universi.grupo.enums.GroupType;
-import me.universi.grupo.exceptions.GrupoException;
+import me.universi.grupo.exceptions.GroupException;
 import me.universi.grupo.services.GrupoService;
 
 import me.universi.user.entities.User;
@@ -36,32 +36,32 @@ public class GrupoController {
             String grupoIdPai = (String)body.get("grupoId");
             if(grupoIdPai == null) {
                 if(!(grupoRoot != null && usuarioService.isContaAdmin(user))) {
-                    throw new GrupoException("Parametro grupoId é nulo.");
+                    throw new GroupException("Parametro grupoId é nulo.");
                 }
             } else if(grupoIdPai.length() > 0 && (grupoRoot!=null && grupoRoot)) {
-                throw new GrupoException("Você não pode criar Grupo Master em Subgrupos.");
+                throw new GroupException("Você não pode criar Grupo Master em Subgrupos.");
             }
 
             String nickname = (String)body.get("nickname");
             if(nickname == null) {
-                throw new GrupoException("Parametro nickname é nulo.");
+                throw new GroupException("Parametro nickname é nulo.");
             }
 
             String nome = (String)body.get("nome");
             if(nome == null) {
-                throw new GrupoException("Parametro nome é nulo.");
+                throw new GroupException("Parametro nome é nulo.");
             }
 
             String imagem = (String)body.get("imagemUrl");
 
             String descricao = (String)body.get("descricao");
             if(descricao == null) {
-                throw new GrupoException("Parametro descricao é nulo.");
+                throw new GroupException("Parametro descricao é nulo.");
             }
 
             String tipo = (String)body.get("tipo");
             if(tipo == null) {
-                throw new GrupoException("Parametro tipo é nulo.");
+                throw new GroupException("Parametro tipo é nulo.");
             }
 
             Boolean podeCriarGrupo = (Boolean)body.get("podeCriarGrupo");
@@ -72,7 +72,7 @@ public class GrupoController {
             Group grupoPai = grupoIdPai==null?null:grupoService.findFirstById(Long.valueOf(grupoIdPai));
 
             if(grupoPai!=null && !grupoService.nicknameDisponivelParaGrupo(grupoPai, nickname)) {
-                throw new GrupoException("Este Nickname não está disponível para este grupo.");
+                throw new GroupException("Este Nickname não está disponível para este grupo.");
             }
 
             if((grupoRoot != null && grupoRoot && usuarioService.isContaAdmin(user)) || ((grupoPai !=null && grupoPai.canCreateGroup) || grupoService.verificarPermissaoParaGrupo(grupoPai, user))) {
@@ -106,7 +106,7 @@ public class GrupoController {
                 return resposta;
             }
 
-            throw new GrupoException("Apenas Administradores podem criar subgrupos.");
+            throw new GroupException("Apenas Administradores podem criar subgrupos.");
 
         } catch (Exception e) {
             resposta.message = e.getMessage();
@@ -122,7 +122,7 @@ public class GrupoController {
 
             String grupoId = (String)body.get("grupoId");
             if(grupoId == null) {
-                throw new GrupoException("Parametro grupoId é nulo.");
+                throw new GroupException("Parametro grupoId é nulo.");
             }
 
             String nome = (String)body.get("nome");
@@ -136,7 +136,7 @@ public class GrupoController {
 
             Group grupoEdit = grupoService.findFirstById(Long.valueOf(grupoId));
             if(grupoEdit == null) {
-                throw new GrupoException("Grupo não encontrado.");
+                throw new GroupException("Grupo não encontrado.");
             }
 
             User user = usuarioService.obterUsuarioNaSessao();
@@ -172,7 +172,7 @@ public class GrupoController {
                 return resposta;
             }
 
-            throw new GrupoException("Falha ao editar grupo");
+            throw new GroupException("Falha ao editar grupo");
 
         } catch (Exception e) {
             resposta.message = e.getMessage();
@@ -188,18 +188,18 @@ public class GrupoController {
 
             String grupoId = (String)body.get("grupoId");
             if(grupoId == null) {
-                throw new GrupoException("Parametro grupoId é nulo.");
+                throw new GroupException("Parametro grupoId é nulo.");
             }
 
             User user = usuarioService.obterUsuarioNaSessao();
 
             Group grupoEdit = grupoService.findFirstById(Long.valueOf(grupoId));
             if(grupoEdit == null) {
-                throw new GrupoException("Grupo não encontrado.");
+                throw new GroupException("Grupo não encontrado.");
             }
 
             if(!grupoEdit.isCanEnter()) {
-                throw new GrupoException("Grupo não permite entrada de paticipantes.");
+                throw new GroupException("Grupo não permite entrada de paticipantes.");
             }
 
             if(grupoEdit.isCanEnter() || grupoService.verificarPermissaoParaGrupo(grupoEdit, user)) {
@@ -208,11 +208,11 @@ public class GrupoController {
                     resposta.message = "Você entrou no Grupo.";
                     return resposta;
                 } else {
-                    throw new GrupoException("Você já esta neste Grupo.");
+                    throw new GroupException("Você já esta neste Grupo.");
                 }
             }
 
-            throw new GrupoException("Falha ao adicionar participante ao grupo");
+            throw new GroupException("Falha ao adicionar participante ao grupo");
 
         } catch (Exception e) {
             resposta.message = e.getMessage();
@@ -228,14 +228,14 @@ public class GrupoController {
 
             String grupoId = (String)body.get("grupoId");
             if(grupoId == null) {
-                throw new GrupoException("Parametro grupoId é nulo.");
+                throw new GroupException("Parametro grupoId é nulo.");
             }
 
             User user = usuarioService.obterUsuarioNaSessao();
 
             Group grupoEdit = grupoService.findFirstById(Long.valueOf(grupoId));
             if(grupoEdit == null) {
-                throw new GrupoException("Grupo não encontrado.");
+                throw new GroupException("Grupo não encontrado.");
             }
 
             if(grupoService.removerParticipante(grupoEdit, user.getPerfil())) {
@@ -243,7 +243,7 @@ public class GrupoController {
                 resposta.message = "Você saiu do Grupo.";
                 return resposta;
             } else {
-                throw new GrupoException("Você não está neste Grupo.");
+                throw new GroupException("Você não está neste Grupo.");
             }
 
         } catch (Exception e) {
@@ -260,12 +260,12 @@ public class GrupoController {
 
             String grupoId = (String)body.get("grupoId");
             if(grupoId == null) {
-                throw new GrupoException("Parametro grupoId é nulo.");
+                throw new GroupException("Parametro grupoId é nulo.");
             }
 
             String participante = (String)body.get("participante");
             if(participante == null) {
-                throw new GrupoException("Parametro participante é nulo.");
+                throw new GroupException("Parametro participante é nulo.");
             }
 
             User user = usuarioService.obterUsuarioNaSessao();
@@ -287,11 +287,11 @@ public class GrupoController {
                     resposta.message = "Participante adicionado com sucesso.";
                     return resposta;
                 } else {
-                    throw new GrupoException("Participante já esta neste Grupo.");
+                    throw new GroupException("Participante já esta neste Grupo.");
                 }
             }
 
-            throw new GrupoException("Falha ao adicionar participante ao grupo");
+            throw new GroupException("Falha ao adicionar participante ao grupo");
 
         } catch (Exception e) {
             resposta.message = e.getMessage();
@@ -307,12 +307,12 @@ public class GrupoController {
 
             String grupoId = (String)body.get("grupoId");
             if(grupoId == null) {
-                throw new GrupoException("Parametro grupoId é nulo.");
+                throw new GroupException("Parametro grupoId é nulo.");
             }
 
             String participante = (String)body.get("participante");
             if(participante == null) {
-                throw new GrupoException("Parametro participante é nulo.");
+                throw new GroupException("Parametro participante é nulo.");
             }
 
             User user = usuarioService.obterUsuarioNaSessao();
@@ -334,11 +334,11 @@ public class GrupoController {
                     resposta.message = "Participante removido com sucesso.";
                     return resposta;
                 } else {
-                    throw new GrupoException("Participante não faz parte deste Grupo.");
+                    throw new GroupException("Participante não faz parte deste Grupo.");
                 }
             }
 
-            throw new GrupoException("Falha ao adicionar participante ao grupo");
+            throw new GroupException("Falha ao adicionar participante ao grupo");
 
         } catch (Exception e) {
             resposta.message = e.getMessage();
@@ -354,7 +354,7 @@ public class GrupoController {
 
             String grupoId = (String)body.get("grupoId");
             if(grupoId == null) {
-                throw new GrupoException("Parametro grupoId é nulo.");
+                throw new GroupException("Parametro grupoId é nulo.");
             }
 
             Group grupo = grupoService.findFirstById(Long.valueOf(grupoId));
@@ -366,7 +366,7 @@ public class GrupoController {
                 return resposta;
             }
 
-            throw new GrupoException("Falha ao listar participante ao grupo");
+            throw new GroupException("Falha ao listar participante ao grupo");
 
         } catch (Exception e) {
             resposta.message = e.getMessage();
@@ -382,22 +382,22 @@ public class GrupoController {
 
             String grupoId = (String)body.get("grupoId");
             if(grupoId == null) {
-                throw new GrupoException("Parametro grupoId é nulo.");
+                throw new GroupException("Parametro grupoId é nulo.");
             }
 
             String grupoIdRemover = (String)body.get("grupoIdRemover");
             if(grupoIdRemover == null) {
-                throw new GrupoException("Parametro grupoIdRemover é nulo.");
+                throw new GroupException("Parametro grupoIdRemover é nulo.");
             }
 
             Group grupo = grupoService.findFirstById(Long.valueOf(grupoId));
             if(grupo == null) {
-                throw new GrupoException("Grupo não encontrado.");
+                throw new GroupException("Grupo não encontrado.");
             }
 
             Group grupoRemover = grupoService.findFirstById(Long.valueOf(grupoIdRemover));
             if(grupoRemover == null) {
-                throw new GrupoException("Subgrupo não encontrado.");
+                throw new GroupException("Subgrupo não encontrado.");
             }
 
             User user = usuarioService.obterUsuarioNaSessao();
@@ -410,7 +410,7 @@ public class GrupoController {
                 return resposta;
             }
 
-            throw new GrupoException("Erro ao executar operação.");
+            throw new GroupException("Erro ao executar operação.");
 
         } catch (Exception e) {
             resposta.message = e.getMessage();
@@ -426,12 +426,12 @@ public class GrupoController {
 
             String grupoId = (String)body.get("grupoId");
             if(grupoId == null) {
-                throw new GrupoException("Parametro grupoId é nulo.");
+                throw new GroupException("Parametro grupoId é nulo.");
             }
 
             Group grupo = grupoService.findFirstById(Long.valueOf(grupoId));
             if(grupo == null) {
-                throw new GrupoException("Grupo não encontrado.");
+                throw new GroupException("Grupo não encontrado.");
             }
 
             User user = usuarioService.obterUsuarioNaSessao();
@@ -451,7 +451,7 @@ public class GrupoController {
                 return resposta;
             }
 
-            throw new GrupoException("Erro ao executar operação.");
+            throw new GroupException("Erro ao executar operação.");
 
         } catch (Exception e) {
             resposta.message = e.getMessage();
@@ -467,7 +467,7 @@ public class GrupoController {
 
             String grupoId = (String)body.get("grupoId");
             if(grupoId == null) {
-                throw new GrupoException("Parametro grupoId é nulo.");
+                throw new GroupException("Parametro grupoId é nulo.");
             }
 
             Group grupo = grupoService.findFirstById(Long.valueOf(grupoId));
@@ -479,7 +479,7 @@ public class GrupoController {
                 return resposta;
             }
 
-            throw new GrupoException("Falha ao obter grupo.");
+            throw new GroupException("Falha ao obter grupo.");
 
         } catch (Exception e) {
             resposta.message = e.getMessage();
@@ -495,7 +495,7 @@ public class GrupoController {
 
             String grupoId = (String)body.get("grupoId");
             if(grupoId == null) {
-                throw new GrupoException("Parametro grupoId é nulo.");
+                throw new GroupException("Parametro grupoId é nulo.");
             }
 
             Group grupo = grupoService.findFirstById(Long.valueOf(grupoId));
@@ -508,7 +508,7 @@ public class GrupoController {
                 return resposta;
             }
 
-            throw new GrupoException("Falha ao listar grupo.");
+            throw new GroupException("Falha ao listar grupo.");
 
         } catch (Exception e) {
             resposta.message = e.getMessage();

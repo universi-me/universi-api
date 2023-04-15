@@ -5,7 +5,7 @@ import me.universi.api.entities.Response;
 import me.universi.competencia.entities.CompetenceType;
 import me.universi.competencia.services.CompetenceService;
 import me.universi.competencia.services.CompetenceTypeService;
-import me.universi.grupo.exceptions.GrupoException;
+import me.universi.grupo.exceptions.GroupException;
 import me.universi.perfil.entities.Perfil;
 import me.universi.perfil.services.PerfilService;
 import me.universi.recomendacao.entities.Recomendacao;
@@ -111,7 +111,7 @@ public class RecomendacaoController {
 
             String id = (String)body.get("id");
             if(id == null) {
-                throw new GrupoException("Parametro id é nulo.");
+                throw new GroupException("Parametro id é nulo.");
             }
 
             String descricao = (String)body.get("descricao");
@@ -120,13 +120,13 @@ public class RecomendacaoController {
 
             Recomendacao recomendacao = recomendacaoService.findFirstById(Long.valueOf(id));
             if(recomendacao == null) {
-                throw new GrupoException("Recomendação não encontrada.");
+                throw new GroupException("Recomendação não encontrada.");
             }
 
             User user = usuarioService.obterUsuarioNaSessao();
 
             if(user.getPerfil().getId() != recomendacao.getOrigem().getId()) {
-                throw new GrupoException("Você não tem permissão para editar esta Recomendação.");
+                throw new GroupException("Você não tem permissão para editar esta Recomendação.");
             }
 
             if(descricao != null && descricao.length() > 0) {
@@ -161,18 +161,18 @@ public class RecomendacaoController {
 
             String id = (String)body.get("id");
             if(id == null) {
-                throw new GrupoException("Parametro id é nulo.");
+                throw new GroupException("Parametro id é nulo.");
             }
 
             Recomendacao recomendacao = recomendacaoService.findFirstById(Long.valueOf(id));
             if(recomendacao == null) {
-                throw new GrupoException("Recomendação não encontrada.");
+                throw new GroupException("Recomendação não encontrada.");
             }
 
             User user = usuarioService.obterUsuarioNaSessao();
 
             if(user.getPerfil().getId() != recomendacao.getOrigem().getId()) {
-                throw new GrupoException("Você não tem permissão para remover esta Recomendação.");
+                throw new GroupException("Você não tem permissão para remover esta Recomendação.");
             }
 
             recomendacaoService.delete(recomendacao);
@@ -195,12 +195,12 @@ public class RecomendacaoController {
 
             String id = (String)body.get("id");
             if(id == null) {
-                throw new GrupoException("Parametro id é nulo.");
+                throw new GroupException("Parametro id é nulo.");
             }
 
             Recomendacao recomendacao = recomendacaoService.findFirstById(Long.valueOf(id));
             if(recomendacao == null) {
-                throw new GrupoException("Recomendação não encontrada.");
+                throw new GroupException("Recomendação não encontrada.");
             }
 
             resposta.body.put("recomendacao", recomendacao);
