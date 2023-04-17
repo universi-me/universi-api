@@ -1,7 +1,7 @@
 package me.universi.perfil.services;
 
-import me.universi.competencia.entities.Competencia;
-import me.universi.competencia.services.CompetenciaService;
+import me.universi.competencia.entities.Competence;
+import me.universi.competencia.services.CompetenceService;
 import me.universi.perfil.entities.Perfil;
 import me.universi.perfil.repositories.PerfilRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,7 @@ public class PerfilService {
     @Autowired
     private PerfilRepository perfilRepository;
     @Autowired
-    public CompetenciaService competenciaService;
+    public CompetenceService competenciaService;
 
     // Retorna um Perfil passando o id
     public Perfil findFirstById(Long id) {

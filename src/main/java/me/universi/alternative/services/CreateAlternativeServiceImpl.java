@@ -7,9 +7,9 @@ import me.universi.alternative.entities.Alternative;
 import me.universi.question.QuestionRepository;
 import me.universi.question.entities.Question;
 import me.universi.question.exceptions.QuestionNotfoundException;
-import me.universi.usuario.entities.User;
-import me.universi.usuario.exceptions.UserNotFoundException;
-import me.universi.usuario.repositories.UsuarioRepository;
+import me.universi.user.entities.User;
+import me.universi.user.exceptions.UserNotFoundException;
+import me.universi.user.repositories.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

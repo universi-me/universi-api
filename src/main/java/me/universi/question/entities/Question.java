@@ -1,30 +1,28 @@
 package me.universi.question.entities;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+import me.universi.feedback.entities.Feedback;
+import me.universi.question.dto.QuestionDTO;
+import me.universi.question.dto.QuestionCreateDTO;
+import me.universi.user.entities.User;
+import org.hibernate.Hibernate;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import me.universi.alternative.entities.Alternative;
-import me.universi.feedback.entities.Feedback;
-import me.universi.question.dto.QuestionCreateDTO;
-import me.universi.question.dto.QuestionDTO;
-import me.universi.usuario.entities.User;
-import org.hibernate.Hibernate;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 
 @Entity
-public class Question extends Alternative implements Serializable {
+public class Question implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 4044714151661426179L;

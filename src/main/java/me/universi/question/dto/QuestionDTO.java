@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import me.universi.feedback.entities.Feedback;
 import me.universi.question.entities.Question;
-import me.universi.usuario.entities.User;
+import me.universi.user.entities.User;
 
 import java.io.Serial;
 import java.io.Serializable;

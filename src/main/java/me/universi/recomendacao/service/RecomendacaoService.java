@@ -1,6 +1,6 @@
 package me.universi.recomendacao.service;
 
-import me.universi.competencia.entities.Competencia;
+import me.universi.competencia.entities.Competence;
 import me.universi.recomendacao.entities.Recomendacao;
 import me.universi.recomendacao.exceptions.RecomendacaoInvalidaException;
 import me.universi.recomendacao.repositories.RecomendacaoRepository;

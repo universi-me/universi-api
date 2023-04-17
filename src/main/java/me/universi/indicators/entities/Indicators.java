@@ -11,7 +11,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.validation.constraints.NotNull;
 import me.universi.achievement.entities.Achievement;
-import me.universi.usuario.entities.User;
+import me.universi.user.entities.User;
 
 import java.io.Serial;
 import java.io.Serializable;
