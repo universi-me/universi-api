@@ -4,7 +4,7 @@ import me.universi.api.entities.Response;
 import me.universi.grupo.entities.Group;
 import me.universi.grupo.enums.GroupType;
 import me.universi.grupo.exceptions.GroupException;
-import me.universi.grupo.services.GrupoService;
+import me.universi.grupo.services.GroupService;
 
 import me.universi.user.entities.User;
 import me.universi.user.services.UsuarioService;
@@ -20,7 +20,7 @@ import java.util.Map;
 @Controller
 public class GrupoController {
     @Autowired
-    public GrupoService grupoService;
+    public GroupService grupoService;
     @Autowired
     public UsuarioService usuarioService;
 
@@ -71,11 +71,11 @@ public class GrupoController {
 
             Group grupoPai = grupoIdPai==null?null:grupoService.findFirstById(Long.valueOf(grupoIdPai));
 
-            if(grupoPai!=null && !grupoService.nicknameDisponivelParaGrupo(grupoPai, nickname)) {
+            if(grupoPai!=null && !grupoService.isNicknameAvailableForGroup(grupoPai, nickname)) {
                 throw new GroupException("Este Nickname não está disponível para este grupo.");
             }
 
-            if((grupoRoot != null && grupoRoot && usuarioService.isContaAdmin(user)) || ((grupoPai !=null && grupoPai.canCreateGroup) || grupoService.verificarPermissaoParaGrupo(grupoPai, user))) {
+            if((grupoRoot != null && grupoRoot && usuarioService.isContaAdmin(user)) || ((grupoPai !=null && grupoPai.canCreateGroup) || grupoService.verifyPermissionToEditGroup(grupoPai, user))) {
                 Group grupoNew = new Group();
                 grupoNew.setNickname(nickname);
                 grupoNew.setName(nome);
@@ -98,7 +98,7 @@ public class GrupoController {
                     grupoNew.setRootGroup(true);
                     grupoService.save(grupoNew);
                 } else {
-                    grupoService.adicionarSubgrupo(grupoPai, grupoNew);
+                    grupoService.addSubGroup(grupoPai, grupoNew);
                 }
 
                 resposta.message = "Grupo criado com sucesso.";
@@ -141,7 +141,7 @@ public class GrupoController {
 
             User user = usuarioService.obterUsuarioNaSessao();
 
-            if(grupoService.verificarPermissaoParaGrupo(grupoEdit, user)) {
+            if(grupoService.verifyPermissionToEditGroup(grupoEdit, user)) {
                 if(nome != null && nome.length() > 0) {
                     grupoEdit.setName(nome);
                 }
@@ -202,8 +202,8 @@ public class GrupoController {
                 throw new GroupException("Grupo não permite entrada de paticipantes.");
             }
 
-            if(grupoEdit.isCanEnter() || grupoService.verificarPermissaoParaGrupo(grupoEdit, user)) {
-                if(grupoService.adicionarParticipante(grupoEdit, user.getPerfil())) {
+            if(grupoEdit.isCanEnter() || grupoService.verifyPermissionToEditGroup(grupoEdit, user)) {
+                if(grupoService.addParticipantToGroup(grupoEdit, user.getPerfil())) {
                     resposta.success = true;
                     resposta.message = "Você entrou no Grupo.";
                     return resposta;
@@ -238,7 +238,7 @@ public class GrupoController {
                 throw new GroupException("Grupo não encontrado.");
             }
 
-            if(grupoService.removerParticipante(grupoEdit, user.getPerfil())) {
+            if(grupoService.removeParticipantFromGroup(grupoEdit, user.getPerfil())) {
                 resposta.success = true;
                 resposta.message = "Você saiu do Grupo.";
                 return resposta;
@@ -281,8 +281,8 @@ public class GrupoController {
 
             Group grupoEdit = grupoService.findFirstById(Long.valueOf(grupoId));
 
-            if(participanteUser != null && grupoService.verificarPermissaoParaGrupo(grupoEdit, user)) {
-                if(grupoService.adicionarParticipante(grupoEdit, participanteUser.getPerfil())) {
+            if(participanteUser != null && grupoService.verifyPermissionToEditGroup(grupoEdit, user)) {
+                if(grupoService.addParticipantToGroup(grupoEdit, participanteUser.getPerfil())) {
                     resposta.success = true;
                     resposta.message = "Participante adicionado com sucesso.";
                     return resposta;
@@ -328,8 +328,8 @@ public class GrupoController {
 
             Group grupoEdit = grupoService.findFirstById(Long.valueOf(grupoId));
 
-            if(participanteUser != null && grupoService.verificarPermissaoParaGrupo(grupoEdit, user)) {
-                if(grupoService.removerParticipante(grupoEdit, participanteUser.getPerfil())) {
+            if(participanteUser != null && grupoService.verifyPermissionToEditGroup(grupoEdit, user)) {
+                if(grupoService.removeParticipantFromGroup(grupoEdit, participanteUser.getPerfil())) {
                     resposta.success = true;
                     resposta.message = "Participante removido com sucesso.";
                     return resposta;
@@ -402,8 +402,8 @@ public class GrupoController {
 
             User user = usuarioService.obterUsuarioNaSessao();
 
-            if(grupoService.verificarPermissaoParaGrupo(grupo, user)) {
-                grupoService.removerSubgrupo(grupo, grupoRemover);
+            if(grupoService.verifyPermissionToEditGroup(grupo, user)) {
+                grupoService.removeSubGroup(grupo, grupoRemover);
 
                 resposta.message = "Grupo removido com exito.";
                 resposta.success = true;
@@ -436,12 +436,12 @@ public class GrupoController {
 
             User user = usuarioService.obterUsuarioNaSessao();
 
-            if(grupoService.verificarPermissaoParaGrupo(grupo, user)) {
+            if(grupoService.verifyPermissionToEditGroup(grupo, user)) {
 
                 resposta.redirectTo = "/grupos";
-                Long paiId = grupoService.findGrupoPaiDoGrupo(grupo.getId());
+                Long paiId = grupoService.findParentGroupId(grupo.getId());
                 if(paiId != null) {
-                    resposta.redirectTo = grupoService.diretorioParaGrupo(paiId);
+                    resposta.redirectTo = grupoService.getGroupPath(paiId);
                 }
 
                 grupoService.delete(grupo);

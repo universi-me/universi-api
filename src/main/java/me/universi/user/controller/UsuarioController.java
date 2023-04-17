@@ -9,7 +9,7 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import me.universi.api.entities.Response;
 import me.universi.competencia.services.CompetenceTypeService;
-import me.universi.grupo.services.GrupoService;
+import me.universi.grupo.services.GroupService;
 import me.universi.perfil.entities.Perfil;
 import me.universi.perfil.services.PerfilService;
 import me.universi.user.entities.User;
@@ -34,7 +34,7 @@ public class UsuarioController {
     @Autowired
     public PerfilService perfilService;
     @Autowired
-    public GrupoService grupoService;
+    public GroupService grupoService;
     @Autowired
     public CompetenceTypeService competenciaTipoService;
     @Autowired

@@ -2,7 +2,7 @@ package me.universi;
 
 import me.universi.competencia.entities.Competence;
 import me.universi.competencia.services.CompetenceService;
-import me.universi.grupo.services.GrupoService;
+import me.universi.grupo.services.GroupService;
 import me.universi.perfil.entities.Perfil;
 import me.universi.perfil.enums.Sexo;
 import me.universi.perfil.services.PerfilService;
@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class PerfilTest {
 
     @Autowired
-    GrupoService grupoService;
+    GroupService grupoService;
     @Autowired
     CompetenceService competenciaService;
 

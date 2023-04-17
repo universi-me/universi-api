@@ -3,7 +3,7 @@ package me.universi.perfil.controller;
 import me.universi.api.entities.Response;
 import me.universi.competencia.enums.Level;
 import me.universi.competencia.services.CompetenceTypeService;
-import me.universi.grupo.services.GrupoService;
+import me.universi.grupo.services.GroupService;
 import me.universi.perfil.entities.Perfil;
 import me.universi.perfil.enums.Sexo;
 import me.universi.perfil.exceptions.PerfilException;
@@ -27,7 +27,7 @@ public class PerfilController {
     public PerfilService perfilService;
 
     @Autowired
-    public GrupoService grupoService;
+    public GroupService grupoService;
     @Autowired
     public CompetenceTypeService competenciaTipoService;
 
