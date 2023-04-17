@@ -2,18 +2,17 @@ package me.universi.simulated.services;
 
 import me.universi.simulated.dto.AnswerDTO;
 import me.universi.simulated.dto.SimulatedAnswersDTO;
-import me.universi.usuario.entities.User;
-import me.universi.usuario.exceptions.UserNotFoundException;
-import me.universi.usuario.repositories.UsuarioRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
 @Service
 public class ValuerSimulatedServiceImpl implements ValuerSimulatedService{
+    @Override
+    public SimulatedAnswersDTO simulatedAnswers(Long userId, List<AnswerDTO> answers) {
+        return null;
+    }
 
   /*  private final IndicatorsRepository indicatorsRepository;
     private final UsuarioRepository userRepository;

@@ -1,26 +1,21 @@
 package me.universi.perfil.controller;
 
-import me.universi.api.entities.Resposta;
-import me.universi.competencia.enums.Nivel;
-import me.universi.competencia.services.CompetenciaTipoService;
-import me.universi.grupo.services.GrupoService;
-import me.universi.link.enums.TipoLink;
+import me.universi.api.entities.Response;
+import me.universi.competencia.enums.Level;
+import me.universi.competencia.services.CompetenceTypeService;
+import me.universi.grupo.services.GroupService;
 import me.universi.perfil.entities.Perfil;
 import me.universi.perfil.enums.Sexo;
 import me.universi.perfil.exceptions.PerfilException;
 import me.universi.perfil.services.PerfilService;
-import me.universi.usuario.entities.User;
-import me.universi.usuario.services.UsuarioService;
+import me.universi.user.entities.User;
+import me.universi.user.services.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 
-import java.util.Arrays;
 import java.util.Map;
 
 @Controller
@@ -32,79 +27,15 @@ public class PerfilController {
     public PerfilService perfilService;
 
     @Autowired
-    public GrupoService grupoService;
+    public GroupService grupoService;
     @Autowired
-    public CompetenciaTipoService competenciaTipoService;
-
-    @GetMapping("/p/**")
-    public String perfil_handler(HttpServletRequest request, HttpServletResponse response, ModelMap map) {
-        try {
-            User user = usuarioService.obterUsuarioNaSessao();
-
-            String requestPathSt = request.getRequestURI().toLowerCase();
-
-            boolean flagEditar = requestPathSt.endsWith("/editar");
-            boolean flagCompetencias = requestPathSt.endsWith("/competencias");
-            boolean flagLinks = requestPathSt.endsWith("/links");
-
-            if(!flagEditar && usuarioService.usuarioPrecisaDePerfil(user)) {
-                return "redirect:/p/"+ user.getUsername() +"/editar";
-            }
-
-            String[] nicknameArr = requestPathSt.split("/");
-
-            if (flagEditar || flagCompetencias || flagLinks) {
-                nicknameArr = Arrays.copyOf(nicknameArr, nicknameArr.length - 1);
-            }
-
-            User userPerfil = null;
-            if (nicknameArr.length == 3) {
-                String usuarioSt = nicknameArr[nicknameArr.length - 1];
-                userPerfil = (User) usuarioService.loadUserByUsername(usuarioSt);
-            }
-
-            if(userPerfil != null) {
-
-                Perfil perfil = userPerfil.getPerfil();
-
-                if (perfil == null) {
-                    throw new PerfilException("Usuário não possui um perfil.");
-                }
-
-                map.put("perfil", perfil);
-                map.put("grupoService", grupoService);
-                map.put("usuarioService", usuarioService);
-                map.put("competenciaTipoService", competenciaTipoService);
-
-
-                if(flagEditar) {
-                    map.addAttribute("sexoTipo", Sexo.values());
-                    map.put("flagPage", "flagEditar");
-                } else if(flagCompetencias) {
-                    map.addAttribute("nivelTipo", Nivel.values());
-                    map.put("flagPage", "flagCompetencias");
-                } else if(flagLinks) {
-                    map.addAttribute("tipoLinks", TipoLink.values());
-                    map.put("flagPage", "flagLinks");
-                }
-
-                return "perfil/perfil_index";
-            }
-
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            throw new PerfilException("Perfil Não Encontrado.");
-
-        } catch (Exception e) {
-            map.put("error", "Perfil: " + e.getMessage());
-        }
-        return "perfil/perfil_index";
-    }
+    public CompetenceTypeService competenciaTipoService;
 
     @PostMapping(value = "/perfil/editar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Resposta perfil_editar(@RequestBody Map<String, Object> body) {
+    public Response perfil_editar(@RequestBody Map<String, Object> body) {
 
-        Resposta resposta = new Resposta(); // default
+        Response resposta = new Response(); // default
 
         try {
 
@@ -152,11 +83,11 @@ public class PerfilController {
 
             usuarioService.atualizarUsuarioNaSessao();
 
-            resposta.mensagem = "As Alterações foram salvas com sucesso.";
-            resposta.sucess = true;
+            resposta.message = "As Alterações foram salvas com sucesso.";
+            resposta.success = true;
 
         } catch (Exception e) {
-            resposta.mensagem = e.getMessage();
+            resposta.message = e.getMessage();
         }
 
         return resposta;

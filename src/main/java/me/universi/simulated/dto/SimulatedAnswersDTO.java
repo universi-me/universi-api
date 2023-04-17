@@ -2,21 +2,12 @@ package me.universi.simulated.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder(builderClassName = "Builder")
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 public class SimulatedAnswersDTO implements Serializable {
@@ -28,4 +19,28 @@ public class SimulatedAnswersDTO implements Serializable {
 
     private float score;
 
+    public SimulatedAnswersDTO() {
+
+    }
+
+    public SimulatedAnswersDTO(List<AnswerDTO> answers, float score) {
+        this.answers = answers;
+        this.score = score;
+    }
+
+    public List<AnswerDTO> getAnswers() {
+        return answers;
+    }
+
+    public void setAnswers(List<AnswerDTO> answers) {
+        this.answers = answers;
+    }
+
+    public float getScore() {
+        return score;
+    }
+
+    public void setScore(float score) {
+        this.score = score;
+    }
 }

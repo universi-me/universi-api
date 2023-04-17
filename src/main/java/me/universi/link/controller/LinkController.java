@@ -1,13 +1,13 @@
 package me.universi.link.controller;
 
-import me.universi.api.entities.Resposta;
+import me.universi.api.entities.Response;
 import me.universi.link.entities.Link;
 import me.universi.link.enums.TipoLink;
 import me.universi.link.exceptions.LinkException;
 import me.universi.link.services.LinkService;
 import me.universi.perfil.entities.Perfil;
-import me.universi.usuario.entities.User;
-import me.universi.usuario.services.UsuarioService;
+import me.universi.user.entities.User;
+import me.universi.user.services.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -26,8 +26,8 @@ public class LinkController {
 
     @PostMapping(value = "/link/criar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Resposta create(@RequestBody Map<String, Object> body) {
-        Resposta resposta = new Resposta();
+    public Response create(@RequestBody Map<String, Object> body) {
+        Response resposta = new Response();
         try {
 
             User user = usuarioService.obterUsuarioNaSessao();
@@ -57,20 +57,20 @@ public class LinkController {
 
             linkService.save(linkNew);
 
-            resposta.mensagem = "Link Criado";
-            resposta.sucess = true;
+            resposta.message = "Link Criado";
+            resposta.success = true;
             return resposta;
 
         } catch (Exception e) {
-            resposta.mensagem = e.getMessage();
+            resposta.message = e.getMessage();
             return resposta;
         }
     }
 
     @PostMapping(value = "/link/remover", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Resposta remove(@RequestBody Map<String, Object> body) {
-        Resposta resposta = new Resposta();
+    public Response remove(@RequestBody Map<String, Object> body) {
+        Response resposta = new Response();
         try {
 
             String id = (String)body.get("linkId");
@@ -93,20 +93,20 @@ public class LinkController {
 
             linkService.delete(link);
 
-            resposta.mensagem = "Link removido";
-            resposta.sucess = true;
+            resposta.message = "Link removido";
+            resposta.success = true;
             return resposta;
 
         } catch (Exception e) {
-            resposta.mensagem = e.getMessage();
+            resposta.message = e.getMessage();
             return resposta;
         }
     }
 
     @PostMapping(value = "/link/atualizar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Resposta update(@RequestBody Map<String, Object> body) {
-        Resposta resposta = new Resposta();
+    public Response update(@RequestBody Map<String, Object> body) {
+        Response resposta = new Response();
         try {
 
             String id = (String)body.get("linkId");
@@ -143,20 +143,20 @@ public class LinkController {
 
             linkService.save(link);
 
-            resposta.mensagem = "Link atualizado";
-            resposta.sucess = true;
+            resposta.message = "Link atualizado";
+            resposta.success = true;
             return resposta;
 
         } catch (Exception e) {
-            resposta.mensagem = e.getMessage();
+            resposta.message = e.getMessage();
             return resposta;
         }
     }
 
     @PostMapping(value = "/link/obter", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Resposta get(@RequestBody Map<String, Object> body) {
-        Resposta resposta = new Resposta();
+    public Response get(@RequestBody Map<String, Object> body) {
+        Response resposta = new Response();
         try {
 
             String id = (String)body.get("linkId");
@@ -169,13 +169,13 @@ public class LinkController {
                 throw new LinkException("Link não encontrada.");
             }
 
-            resposta.conteudo.put("link", link);
+            resposta.body.put("link", link);
 
-            resposta.sucess = true;
+            resposta.success = true;
             return resposta;
 
         } catch (Exception e) {
-            resposta.mensagem = e.getMessage();
+            resposta.message = e.getMessage();
             return resposta;
         }
     }
