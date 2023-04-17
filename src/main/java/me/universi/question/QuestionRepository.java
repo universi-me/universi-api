@@ -14,4 +14,6 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
     List<Question> findAllRandonAndLimited(int amount);
 
     void deleteById(Long questionId);
+
+    Question findById(long id);
 }

@@ -1,10 +1,12 @@
-package me.universi.simulated;
+package me.universi.exercise;
 
-import me.universi.simulated.dto.AnswerDTO;
-import me.universi.simulated.dto.QuestionWithAlternativesDTO;
+import me.universi.exercise.dto.AnswerDTO;
+import me.universi.exercise.dto.QuestionWithAlternativesDTO;
+import me.universi.exercise.dto.ExerciseAnswersDTO;
+import me.universi.exercise.services.GetExerciseService;
+import me.universi.exercise.services.ValuerExerciseService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,18 +23,18 @@ import java.util.List;
 @RequestMapping(value = "/api/user/{userId}/simulated")
 public class SimulatedController {
 
-    public final GetSimulatedService getSimulatedService;
-    public final ValuerSimulatedService valuerSimulatedService;
+    public GetExerciseService getExerciseService;
+    public ValuerExerciseService valuerExerciseService;
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<QuestionWithAlternativesDTO> listQuestionsWithAlternatives(@PathVariable Long userId, @RequestParam int amount){
-        return getSimulatedService.getQuestionsWithAlternatives(amount);
+        return getExerciseService.getQuestionsWithAlternatives(amount);
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public SimulatedAnswersDTO calculateSimulated(@PathVariable Long userId,@Valid @RequestBody List<AnswerDTO> answers){
-        return valuerSimulatedService.simulatedAnswers(userId, answers);
+    public ExerciseAnswersDTO calculateSimulated(@PathVariable Long userId, @Valid @RequestBody List<AnswerDTO> answers){
+        return valuerExerciseService.simulatedAnswers(userId, answers);
     }
 }

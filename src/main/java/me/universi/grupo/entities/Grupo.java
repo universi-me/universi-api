@@ -3,6 +3,7 @@ package me.universi.grupo.entities;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import me.universi.exercise.entities.Exercise;
 import me.universi.grupo.enums.GrupoTipo;
 import me.universi.perfil.entities.Perfil;
 import org.hibernate.annotations.CreationTimestamp;
@@ -80,6 +81,9 @@ public class Grupo {
 
     @Column(name = "publico")
     public boolean grupoPublico;
+
+    @OneToOne
+    private Exercise exercise;
 
     public Grupo() {
     }

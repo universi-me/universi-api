@@ -1,4 +1,4 @@
-package me.universi.simulated.dto;
+package me.universi.exercise.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
