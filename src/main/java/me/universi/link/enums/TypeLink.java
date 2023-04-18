@@ -1,6 +1,6 @@
 package me.universi.link.enums;
 
-public enum TipoLink {
+public enum TypeLink {
     LINK("Link", "link-45deg"),
     GITHUB("GitHub", "github"),
     GIT("Git", "git"),
@@ -26,7 +26,7 @@ public enum TipoLink {
     // bootstrap icon nome, do Bootstrap Icons
     public final String bootstrapIconName;
 
-    private TipoLink(String label, String bootstrapIconName) {
+    private TypeLink(String label, String bootstrapIconName) {
         this.label = label;
         this.bootstrapIconName = bootstrapIconName;
     }

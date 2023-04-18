@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import me.universi.grupo.enums.GroupType;
-import me.universi.perfil.entities.Perfil;
+import me.universi.perfil.entities.Profile;
 import org.hibernate.annotations.CreationTimestamp;
 
 import jakarta.persistence.*;
@@ -33,7 +33,7 @@ public class Group {
 
     @ManyToOne
     @JoinColumn(name="id_profile")
-    public Perfil admin;
+    public Profile admin;
 
     @ManyToMany(cascade = { CascadeType.ALL })
     @JoinTable(
@@ -41,9 +41,9 @@ public class Group {
             joinColumns = { @JoinColumn(name = "id_grupo") },
             inverseJoinColumns = { @JoinColumn(name =  "id_perfil") }
     )
-    @JsonIdentityInfo(generator= ObjectIdGenerators.PropertyGenerator.class, property="id", scope = Perfil.class)
+    @JsonIdentityInfo(generator= ObjectIdGenerators.PropertyGenerator.class, property="id", scope = Profile.class)
     @JsonIdentityReference(alwaysAsId = true)
-    public Collection<Perfil> participants;
+    public Collection<Profile> participants;
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
     @JoinTable(
@@ -84,7 +84,7 @@ public class Group {
     public Group() {
     }
 
-    public Group(String nickname, String name, String description, Perfil admin, Collection<Perfil> participants, GroupType type, Collection<Group> subGroups, boolean rootGroup, boolean canCreateGroup) {
+    public Group(String nickname, String name, String description, Profile admin, Collection<Profile> participants, GroupType type, Collection<Group> subGroups, boolean rootGroup, boolean canCreateGroup) {
         this.nickname = nickname;
         this.name = name;
         this.description = description;
@@ -116,19 +116,19 @@ public class Group {
         this.description = description;
     }
 
-    public Perfil getAdmin() {
+    public Profile getAdmin() {
         return admin;
     }
 
-    public void setAdmin(Perfil admin) {
+    public void setAdmin(Profile admin) {
         this.admin = admin;
     }
 
-    public Collection<Perfil> getParticipants() {
+    public Collection<Profile> getParticipants() {
         return participants;
     }
 
-    public void setParticipants(Collection<Perfil> participants) {
+    public void setParticipants(Collection<Profile> participants) {
         this.participants = participants;
     }
 

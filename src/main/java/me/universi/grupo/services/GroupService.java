@@ -3,7 +3,7 @@ package me.universi.grupo.services;
 import me.universi.grupo.entities.Group;
 import me.universi.grupo.exceptions.GroupException;
 import me.universi.grupo.repositories.GroupRepository;
-import me.universi.perfil.entities.Perfil;
+import me.universi.perfil.entities.Profile;
 import me.universi.user.entities.User;
 import me.universi.user.services.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,7 +79,7 @@ public class GroupService {
             throw new GroupException("Usuário não encontrado.");
         }
 
-        Perfil profile = user.getPerfil();
+        Profile profile = user.getProfile();
         if (userService.usuarioPrecisaDePerfil(user)) {
             throw new GroupException("Você precisa criar um Perfil.");
         } else if(profile.getId()!=0 && group.getAdmin().getId() != profile.getId()) {
@@ -124,15 +124,15 @@ public class GroupService {
         }
     }
 
-    public boolean addParticipantToGroup(Group group, Perfil profile) throws GroupException {
+    public boolean addParticipantToGroup(Group group, Profile profile) throws GroupException {
         if(profile == null) {
             throw new GroupException("Parametro Perfil é nulo.");
         }
-        Collection<Perfil> groupParticipants = group.getParticipants();
+        Collection<Profile> groupParticipants = group.getParticipants();
         if(groupParticipants == null) {
             groupParticipants = new ArrayList<>();
         }
-        Perfil participant = getParticipantInGroup(group, profile.getId());
+        Profile participant = getParticipantInGroup(group, profile.getId());
         if(participant == null) {
             groupParticipants.add(profile);
             group.setParticipants(groupParticipants);
@@ -142,15 +142,15 @@ public class GroupService {
         return false;
     }
 
-    public boolean removeParticipantFromGroup(Group group, Perfil profile) throws GroupException {
+    public boolean removeParticipantFromGroup(Group group, Profile profile) throws GroupException {
         if(profile == null) {
             throw new GroupException("Parametro Perfil é nulo.");
         }
-        Collection<Perfil> groupParticipants = group.getParticipants();
+        Collection<Profile> groupParticipants = group.getParticipants();
         if(groupParticipants == null) {
             groupParticipants = new ArrayList<>();
         }
-        Perfil participant = getParticipantInGroup(group, profile.getId());
+        Profile participant = getParticipantInGroup(group, profile.getId());
         if(participant != null) {
             groupParticipants.remove(participant);
             group.setParticipants(groupParticipants);
@@ -160,9 +160,9 @@ public class GroupService {
         return false;
     }
 
-    public Perfil getParticipantInGroup(Group group, Long participantId) {
+    public Profile getParticipantInGroup(Group group, Long participantId) {
         if(participantId != null && group.getParticipants() != null) {
-            for (Perfil participantNow : group.getParticipants()) {
+            for (Profile participantNow : group.getParticipants()) {
                 if (participantNow.getId() == participantId) {
                     return participantNow;
                 }

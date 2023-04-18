@@ -10,10 +10,10 @@ import com.google.api.client.json.gson.GsonFactory;
 import me.universi.api.entities.Response;
 import me.universi.competencia.services.CompetenceTypeService;
 import me.universi.grupo.services.GroupService;
-import me.universi.perfil.entities.Perfil;
+import me.universi.perfil.entities.Profile;
 import me.universi.perfil.services.PerfilService;
 import me.universi.user.entities.User;
-import me.universi.user.enums.Autoridade;
+import me.universi.user.enums.Authority;
 import me.universi.user.exceptions.UsuarioException;
 import me.universi.user.services.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,10 +78,10 @@ public class UsuarioController {
             }
 
             User user = new User();
-            user.setNome(nome);
+            user.setName(nome);
             // exclusivo para dcx
             user.setEmail(email + "@dcx.ufpb.br");
-            user.setSenha(usuarioService.codificarSenha(senha));
+            user.setPassword(usuarioService.codificarSenha(senha));
 
             usuarioService.createUser(user);
 
@@ -115,8 +115,8 @@ public class UsuarioController {
             boolean logadoComGoogle = (session.getAttribute("loginViaGoogle") != null);
 
             if (logadoComGoogle || usuarioService.senhaValida(user, senha)) {
-                user.setSenha(usuarioService.codificarSenha(password));
-                user.setCredenciais_expiradas(false);
+                user.setPassword(usuarioService.codificarSenha(password));
+                user.setExpired_credentials(false);
                 usuarioService.save(user);
 
                 usuarioService.atualizarUsuarioNaSessao();
@@ -165,32 +165,32 @@ public class UsuarioController {
             String usernameOld = userEdit.getUsername();
 
             if(username != null && username.length()>0) {
-                userEdit.setNome(username);
+                userEdit.setName(username);
             }
             if(email != null && email.length()>0) {
                 userEdit.setEmail(email);
             }
             if(senha != null && senha.length()>0) {
-                userEdit.setSenha(usuarioService.codificarSenha(senha));
+                userEdit.setPassword(usuarioService.codificarSenha(senha));
             }
             if(nivelConta != null && nivelConta.length()>0) {
-                userEdit.setAutoridade(Autoridade.valueOf(nivelConta));
+                userEdit.setAuthority(Authority.valueOf(nivelConta));
             }
 
             if(emailVerificado != null) {
-                userEdit.setEmail_verificado(emailVerificado);
+                userEdit.setEmail_verified(emailVerificado);
             }
             if(contaBloqueada != null) {
-                userEdit.setConta_bloqueada(contaBloqueada);
+                userEdit.setBlocked_account(contaBloqueada);
             }
             if(contaInativa != null) {
-                userEdit.setInativo(contaInativa);
+                userEdit.setInactive(contaInativa);
             }
             if(credenciaisExpiradas != null) {
-                userEdit.setCredenciais_expiradas(credenciaisExpiradas);
+                userEdit.setExpired_credentials(credenciaisExpiradas);
             }
             if(usuarioExpirado != null) {
-                userEdit.setUsuario_expirado(usuarioExpirado);
+                userEdit.setExpired_user(usuarioExpirado);
             }
 
             usuarioService.save(userEdit);
@@ -255,26 +255,26 @@ public class UsuarioController {
                     if(!usuarioService.usernameExiste(newUsername)) {
 
                         user = new User();
-                        user.setNome(newUsername);
+                        user.setName(newUsername);
                         user.setEmail(email.trim());
                         usuarioService.createUser(user);
 
-                        Perfil perfil = user.getPerfil();
+                        Profile profile = user.getProfile();
 
                         if(name != null) {
                             if(name.contains(" ")) { // se tiver espaço, extrair nome e sobrenome
                                 String[] nameArr = name.split(" ");
-                                perfil.setNome(((String)nameArr[0]).trim());
-                                perfil.setSobrenome(name.substring(nameArr[0].length()).trim());
+                                profile.setFirstname(((String)nameArr[0]).trim());
+                                profile.setLastname(name.substring(nameArr[0].length()).trim());
                             } else {
-                                perfil.setNome(name.trim());
+                                profile.setFirstname(name.trim());
                             }
                         }
                         if(pictureUrl != null) {
-                            perfil.setImagem(pictureUrl.trim());
+                            profile.setImage(pictureUrl.trim());
                         }
 
-                        perfilService.save(perfil);
+                        perfilService.save(profile);
 
                         sessionReq.setAttribute("novoUsuario", true);
 
@@ -285,8 +285,8 @@ public class UsuarioController {
 
                 if(user != null) {
 
-                    if(!user.isEmail_verificado()) { // ativar selo de verificado na conta
-                        user.setEmail_verificado(true);
+                    if(!user.isEmail_verified()) { // ativar selo de verificado na conta
+                        user.setEmail_verified(true);
                         usuarioService.save(user);
                     }
 

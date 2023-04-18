@@ -3,8 +3,8 @@ package me.universi;
 import me.universi.competencia.entities.Competence;
 import me.universi.competencia.services.CompetenceService;
 import me.universi.grupo.services.GroupService;
-import me.universi.perfil.entities.Perfil;
-import me.universi.perfil.enums.Sexo;
+import me.universi.perfil.entities.Profile;
+import me.universi.perfil.enums.Gender;
 import me.universi.perfil.services.PerfilService;
 import me.universi.recomendacao.service.RecomendacaoService;
 import me.universi.user.entities.User;
@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-public class PerfilTest {
+public class ProfileTest {
 
     @Autowired
     GroupService grupoService;
@@ -39,24 +39,24 @@ public class PerfilTest {
 
     @Test
     void create() {
-        Perfil perfil = perfil("testeCreate");
-        assertEquals("testeCreate", perfil.getNome());
+        Profile profile = perfil("testeCreate");
+        assertEquals("testeCreate", profile.getFirstname());
     }
     @Test
     void update(){
-        Perfil perfil = perfil("testeUpdate");
-        assertEquals("testeUpdate", perfil.getNome());
+        Profile profile = perfil("testeUpdate");
+        assertEquals("testeUpdate", profile.getFirstname());
 
-        perfil.setNome("nomeAtualizado");
-        perfilService.update(perfil);
-        assertEquals("nomeAtualizado", perfil.getNome());
+        profile.setFirstname("nomeAtualizado");
+        perfilService.update(profile);
+        assertEquals("nomeAtualizado", profile.getFirstname());
     }
     @Test
     void delete(){
-        Perfil perfil = perfil("testeDelete");
-        Long id = perfil.getId();
-        assertEquals(perfil.getId(), perfilService.findFirstById(id).getId());
-        perfilService.delete(perfil);
+        Profile profile = perfil("testeDelete");
+        Long id = profile.getId();
+        assertEquals(profile.getId(), perfilService.findFirstById(id).getId());
+        perfilService.delete(profile);
         assertEquals(null,perfilService.findFirstById(id));
     }
     @Test
@@ -64,14 +64,14 @@ public class PerfilTest {
         perfilService.deleteAll();
         assertEquals(0,perfilService.findAll().size());
         for (int i = 0; i < 10; i++) {
-            Perfil perfil = perfil("nome"+i);
+            Profile profile = perfil("nome"+i);
         }
-        Collection<Perfil> perfis = perfilService.findAll();
+        Collection<Profile> perfis = perfilService.findAll();
         assertEquals(10, perfis.size());
 
     }
 
-    public Perfil perfil(String nome) {
+    public Profile perfil(String nome) {
         User userNew = new User(nome, nome+"@email.com", usuarioService.codificarSenha("senha"));
         try {
             usuarioService.createUser(userNew);
@@ -79,7 +79,7 @@ public class PerfilTest {
             throw new RuntimeException(e);
         }
 
-        userNew.setNome(userNew.getNome());
+        userNew.setName(userNew.getName());
 
         Competence competenciaNew = new Competence();
         //competenciaNew.setNome("Java - admin"+userNew.getId());
@@ -91,16 +91,16 @@ public class PerfilTest {
         competenciaNew1.setDescription("Sou top em java - admin 1"+userNew.getId());
         competenciaService.save(competenciaNew1);
 
-        Perfil admin_perfil = userNew.getPerfil();
-        admin_perfil.setNome(nome);
-        admin_perfil.setBio("Bio - admin_perfil"+userNew.getId());
-        admin_perfil.setSexo(Sexo.M);
+        Profile admin_profile = userNew.getProfile();
+        admin_profile.setFirstname(nome);
+        admin_profile.setBio("Bio - admin_perfil"+userNew.getId());
+        admin_profile.setSexo(Gender.M);
 
         Collection<Competence> competencias = new ArrayList<Competence>();
         competencias.add(competenciaNew);
         competencias.add(competenciaNew1);
-        admin_perfil.setCompetencias(competencias);
+        admin_profile.setCompetences(competencias);
 
-        return admin_perfil;
+        return admin_profile;
     }
 }

@@ -1,12 +1,13 @@
 package me.universi.perfil.enums;
 
-public enum Sexo {
-    M("Masculino"),
-    F("Feminino");
+public enum Gender {
+    M("Masculine"),
+    F("Feminine"),
+    O("Other");
 
     public final String label;
 
-    private Sexo(String label) {
+    Gender(String label) {
         this.label = label;
     }
 }

@@ -51,7 +51,7 @@
     </http>
 
     <beans:bean id="customUsernamePasswordAuthenticationFilter" class="me.universi.user.services.CustomUsernamePasswordAuthenticationFilter">
-		<beans:property name="sessionAuthenticationStrategy" ref="sas"/>
+        <beans:property name="sessionAuthenticationStrategy" ref="sas"/>
         <beans:property name="authenticationManager" ref="authenticationManager"/>
         <beans:property name="authenticationSuccessHandler" ref="autenticacaoValidaHandler"/>
         <beans:property name="authenticationFailureHandler" ref="autenticacaofalhaHandler"/>

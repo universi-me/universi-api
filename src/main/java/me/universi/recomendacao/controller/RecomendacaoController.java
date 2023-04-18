@@ -6,9 +6,9 @@ import me.universi.competencia.entities.CompetenceType;
 import me.universi.competencia.services.CompetenceService;
 import me.universi.competencia.services.CompetenceTypeService;
 import me.universi.grupo.exceptions.GroupException;
-import me.universi.perfil.entities.Perfil;
+import me.universi.perfil.entities.Profile;
 import me.universi.perfil.services.PerfilService;
-import me.universi.recomendacao.entities.Recomendacao;
+import me.universi.recomendacao.entities.Recommendation;
 import me.universi.recomendacao.exceptions.RecomendacaoInvalidaException;
 import me.universi.user.entities.User;
 import me.universi.user.services.UsuarioService;
@@ -60,17 +60,17 @@ public class RecomendacaoController {
                 throw new RecomendacaoInvalidaException("Parametro competenciaTipoId é nulo.");
             }
 
-            Perfil perfilOrigem = perfilService.findFirstById(Long.valueOf(origem));
-            if(perfilOrigem == null) {
+            Profile profileOrigem = perfilService.findFirstById(Long.valueOf(origem));
+            if(profileOrigem == null) {
                 throw new RecomendacaoInvalidaException("Perfil origem não encontrado.");
             }
 
-            Perfil perfilDestino = perfilService.findFirstById(Long.valueOf(destino));
-            if(perfilDestino == null) {
+            Profile profileDestino = perfilService.findFirstById(Long.valueOf(destino));
+            if(profileDestino == null) {
                 throw new RecomendacaoInvalidaException("Perfil destino não encontrado.");
             }
 
-            if(perfilOrigem.getId() == perfilDestino.getId()) {
+            if(profileOrigem.getId() == profileDestino.getId()) {
                 throw new RecomendacaoInvalidaException("Você não pode recomendar-se.");
             }
 
@@ -81,19 +81,19 @@ public class RecomendacaoController {
 
             String descricao = (String)body.get("descricao");
 
-            Recomendacao recomendacoNew = new Recomendacao();
-            recomendacoNew.setDestino(perfilDestino);
-            recomendacoNew.setOrigem(perfilOrigem);
-            recomendacoNew.setCompetenciaTipo(compT);
+            Recommendation recomendacoNew = new Recommendation();
+            recomendacoNew.setDestiny(profileDestino);
+            recomendacoNew.setOrigin(profileOrigem);
+            recomendacoNew.setCompetenceType(compT);
 
             if(descricao != null && descricao.length() > 0) {
-                recomendacoNew.setDescricao(descricao);
+                recomendacoNew.setDescription(descricao);
             }
 
             recomendacaoService.save(recomendacoNew);
 
             resposta.message = "A sua recomendação foi feita.";
-            resposta.redirectTo = "/p/" + perfilDestino.getUsuario().getUsername();
+            resposta.redirectTo = "/p/" + profileDestino.getUsuario().getUsername();
             resposta.success = true;
             return resposta;
 
@@ -118,19 +118,19 @@ public class RecomendacaoController {
 
             String competenciaTipoId = (String)body.get("competenciatipoId");
 
-            Recomendacao recomendacao = recomendacaoService.findFirstById(Long.valueOf(id));
-            if(recomendacao == null) {
+            Recommendation recommendation = recomendacaoService.findFirstById(Long.valueOf(id));
+            if(recommendation == null) {
                 throw new GroupException("Recomendação não encontrada.");
             }
 
             User user = usuarioService.obterUsuarioNaSessao();
 
-            if(user.getPerfil().getId() != recomendacao.getOrigem().getId()) {
+            if(user.getProfile().getId() != recommendation.getOrigin().getId()) {
                 throw new GroupException("Você não tem permissão para editar esta Recomendação.");
             }
 
             if(descricao != null && descricao.length() > 0) {
-                recomendacao.setDescricao(descricao);
+                recommendation.setDescription(descricao);
             }
 
             if(competenciaTipoId != null && competenciaTipoId.length() > 0) {
@@ -138,10 +138,10 @@ public class RecomendacaoController {
                 if(compT == null) {
                     throw new RecomendacaoInvalidaException("Competencia não encontrada.");
                 }
-                recomendacao.setCompetenciaTipo(compT);
+                recommendation.setCompetenceType(compT);
             }
 
-            recomendacaoService.update(recomendacao);
+            recomendacaoService.update(recommendation);
 
             resposta.message = "Recomendacao atualizada";
             resposta.success = true;
@@ -164,18 +164,18 @@ public class RecomendacaoController {
                 throw new GroupException("Parametro id é nulo.");
             }
 
-            Recomendacao recomendacao = recomendacaoService.findFirstById(Long.valueOf(id));
-            if(recomendacao == null) {
+            Recommendation recommendation = recomendacaoService.findFirstById(Long.valueOf(id));
+            if(recommendation == null) {
                 throw new GroupException("Recomendação não encontrada.");
             }
 
             User user = usuarioService.obterUsuarioNaSessao();
 
-            if(user.getPerfil().getId() != recomendacao.getOrigem().getId()) {
+            if(user.getProfile().getId() != recommendation.getOrigin().getId()) {
                 throw new GroupException("Você não tem permissão para remover esta Recomendação.");
             }
 
-            recomendacaoService.delete(recomendacao);
+            recomendacaoService.delete(recommendation);
 
             resposta.message = "Recomendação removida.";
             resposta.success = true;
@@ -198,12 +198,12 @@ public class RecomendacaoController {
                 throw new GroupException("Parametro id é nulo.");
             }
 
-            Recomendacao recomendacao = recomendacaoService.findFirstById(Long.valueOf(id));
-            if(recomendacao == null) {
+            Recommendation recommendation = recomendacaoService.findFirstById(Long.valueOf(id));
+            if(recommendation == null) {
                 throw new GroupException("Recomendação não encontrada.");
             }
 
-            resposta.body.put("recomendacao", recomendacao);
+            resposta.body.put("recomendacao", recommendation);
 
             resposta.message = "Operação realizada com exito.";
             resposta.success = true;
@@ -221,7 +221,7 @@ public class RecomendacaoController {
         Response resposta = new Response();
         try {
 
-            List<Recomendacao> recs = recomendacaoService.findAll();
+            List<Recommendation> recs = recomendacaoService.findAll();
 
             resposta.body.put("lista", recs);
 

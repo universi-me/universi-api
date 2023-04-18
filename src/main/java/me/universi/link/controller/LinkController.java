@@ -2,10 +2,10 @@ package me.universi.link.controller;
 
 import me.universi.api.entities.Response;
 import me.universi.link.entities.Link;
-import me.universi.link.enums.TipoLink;
+import me.universi.link.enums.TypeLink;
 import me.universi.link.exceptions.LinkException;
 import me.universi.link.services.LinkService;
-import me.universi.perfil.entities.Perfil;
+import me.universi.perfil.entities.Profile;
 import me.universi.user.entities.User;
 import me.universi.user.services.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,15 +45,15 @@ public class LinkController {
             String nome = (String)body.get("nome");
 
             Link linkNew = new Link();
-            linkNew.setTipo(TipoLink.valueOf(tipo));
+            linkNew.setTypeLink(TypeLink.valueOf(tipo));
             linkNew.setUrl(url);
             if(nome != null) {
-                linkNew.setNome((nome.length()>0)?nome:null);
+                linkNew.setName((nome.length()>0)?nome:null);
             }
 
 
-            Perfil perfil = user.getPerfil();
-            linkNew.setPerfil(perfil);
+            Profile profile = user.getProfile();
+            linkNew.setPerfil(profile);
 
             linkService.save(linkNew);
 
@@ -85,9 +85,9 @@ public class LinkController {
 
             User user = usuarioService.obterUsuarioNaSessao();
 
-            Perfil perfil = user.getPerfil();
+            Profile profile = user.getProfile();
 
-            if(link.getPerfil().getId() != perfil.getId()) {
+            if(link.getPerfil().getId() != profile.getId()) {
                 throw new LinkException("Você não tem permissão para editar este Link.");
             }
 
@@ -125,9 +125,9 @@ public class LinkController {
 
             User user = usuarioService.obterUsuarioNaSessao();
 
-            Perfil perfil = user.getPerfil();
+            Profile profile = user.getProfile();
 
-            if(link.getPerfil().getId() != perfil.getId()) {
+            if(link.getPerfil().getId() != profile.getId()) {
                 throw new LinkException("Você não tem permissão para editar este Link.");
             }
 
@@ -135,10 +135,10 @@ public class LinkController {
                 link.setUrl(url);
             }
             if (tipo != null) {
-                link.setTipo(TipoLink.valueOf(tipo));
+                link.setTypeLink(TypeLink.valueOf(tipo));
             }
             if(nome != null) {
-                link.setNome((nome.length()>0)?nome:null);
+                link.setName((nome.length()>0)?nome:null);
             }
 
             linkService.save(link);

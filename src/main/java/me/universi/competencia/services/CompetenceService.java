@@ -1,9 +1,8 @@
 package me.universi.competencia.services;
 
 import me.universi.competencia.entities.Competence;
-import me.universi.competencia.entities.CompetenceType;
 import me.universi.competencia.repositories.CompetenceRepository;
-import me.universi.perfil.entities.Perfil;
+import me.universi.perfil.entities.Profile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,10 +38,10 @@ public class CompetenceService {
 
     public void update(Competence competence){ competenceRepository.saveAndFlush(competence); }
 
-    public boolean profileHasCompetence(Perfil profile, Competence competence) {
+    public boolean profileHasCompetence(Profile profile, Competence competence) {
         try {
-            if(profile.getCompetencias() != null) {
-                for(Competence compNow : profile.getCompetencias()) {
+            if(profile.getCompetences() != null) {
+                for(Competence compNow : profile.getCompetences()) {
                     if(competence.getId() == compNow.getId()) {
                         return true;
                     }

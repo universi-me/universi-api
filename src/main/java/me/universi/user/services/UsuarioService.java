@@ -1,10 +1,10 @@
 package me.universi.user.services;
 
 import jakarta.servlet.http.HttpServletRequest;
-import me.universi.perfil.entities.Perfil;
+import me.universi.perfil.entities.Profile;
 import me.universi.perfil.services.PerfilService;
 import me.universi.user.entities.User;
-import me.universi.user.enums.Autoridade;
+import me.universi.user.enums.Authority;
 import me.universi.user.exceptions.UsuarioException;
 import me.universi.user.repositories.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,13 +86,13 @@ public class UsuarioService implements UserDetailsService {
         if (user==null) {
             throw new UsuarioException("Usuario está vazio!");
         }
-        user.setAutoridade(Autoridade.ROLE_USER);
+        user.setAuthority(Authority.ROLE_USER);
         userRepository.saveAndFlush((User)user);
 
-        Perfil userPerfil = new Perfil();
-        userPerfil.setUsuario(user);
-        perfilService.save(userPerfil);
-        user.setPerfil(userPerfil);
+        Profile userProfile = new Profile();
+        userProfile.setUsuario(user);
+        perfilService.save(userProfile);
+        user.setProfile(userProfile);
     }
 
     public long count() {
@@ -202,7 +202,7 @@ public class UsuarioService implements UserDetailsService {
         if(authenticationManager != null) {
             ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
             HttpServletRequest request = attr.getRequest();
-            PreAuthenticatedAuthenticationToken preAuthenticatedAuthenticationToken = new PreAuthenticatedAuthenticationToken(user, user.getUsername(), AuthorityUtils.createAuthorityList(user.getAutoridade().name()));
+            PreAuthenticatedAuthenticationToken preAuthenticatedAuthenticationToken = new PreAuthenticatedAuthenticationToken(user, user.getUsername(), AuthorityUtils.createAuthorityList(user.getAuthority().name()));
             preAuthenticatedAuthenticationToken.setDetails(new WebAuthenticationDetails(request));
             preAuthenticatedAuthenticationToken.setAuthenticated(false);
             Authentication authentication = authenticationManager.authenticate(preAuthenticatedAuthenticationToken);
@@ -224,9 +224,9 @@ public class UsuarioService implements UserDetailsService {
     }
 
     // verifica se usuario possui a autoridade seguindo a hierarquia do springsecurity
-    public boolean usuarioTemAutoridade(User user, Autoridade autoridade) {
+    public boolean usuarioTemAutoridade(User user, Authority authority) {
         Collection<? extends GrantedAuthority> reachableRoles = roleHierarchy.getReachableGrantedAuthorities(user.getAuthorities());
-        if (reachableRoles.contains(new SimpleGrantedAuthority(autoridade.toString()))) {
+        if (reachableRoles.contains(new SimpleGrantedAuthority(authority.toString()))) {
             return true;
         }
         return false;
@@ -234,7 +234,7 @@ public class UsuarioService implements UserDetailsService {
 
     public boolean isContaAdmin(User userSession) {
         try {
-            return usuarioTemAutoridade(userSession, Autoridade.ROLE_ADMIN);
+            return usuarioTemAutoridade(userSession, Authority.ROLE_ADMIN);
         } catch (Exception e) {
             return false;
         }
@@ -242,7 +242,7 @@ public class UsuarioService implements UserDetailsService {
 
     public boolean usuarioPrecisaDePerfil(User user) {
         try {
-            if((user.getPerfil()==null || user.getPerfil().getNome()==null) && !isContaAdmin(user)) {
+            if((user.getProfile()==null || user.getProfile().getFirstname()==null) && !isContaAdmin(user)) {
                 return true;
             }
             return false;

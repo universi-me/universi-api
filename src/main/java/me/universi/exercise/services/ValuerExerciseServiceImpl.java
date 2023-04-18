@@ -4,9 +4,9 @@ import me.universi.exercise.dto.AnswerDTO;
 import me.universi.exercise.dto.ExerciseAnswersDTO;
 import me.universi.indicators.IndicatorsRepository;
 import me.universi.indicators.entities.Indicators;
-import me.universi.usuario.entities.User;
-import me.universi.usuario.exceptions.UserNotFoundException;
-import me.universi.usuario.repositories.UsuarioRepository;
+import me.universi.user.entities.User;
+import me.universi.user.exceptions.UserNotFoundException;
+import me.universi.user.repositories.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
