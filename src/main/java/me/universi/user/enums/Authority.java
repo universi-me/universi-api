@@ -6,14 +6,14 @@ package me.universi.user.enums;
     Ao editar, atualizar roleHierarchy em spring-security.xml
 */
 
-public enum Autoridade {
-    ROLE_USER("Usuário"),
-    ROLE_DEV("Desenvolvedor"),
-    ROLE_ADMIN("Administrador");
+public enum Authority {
+    ROLE_USER("User"),
+    ROLE_DEV("Developer"),
+    ROLE_ADMIN("Admin");
 
     public final String label;
 
-    private Autoridade(String label) {
+    Authority(String label) {
         this.label = label;
     }
 }

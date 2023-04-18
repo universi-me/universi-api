@@ -6,7 +6,7 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 import me.universi.user.entities.User;
 
-import me.universi.user.enums.Autoridade;
+import me.universi.user.enums.Authority;
 import me.universi.user.services.UsuarioService;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +58,7 @@ public class Sys {
                 User userAdmin = new User("admin", null, usuarioService.codificarSenha("admin"));
                 try {
                     usuarioService.createUser(userAdmin);
-                    userAdmin.setAutoridade(Autoridade.ROLE_ADMIN);
+                    userAdmin.setAuthority(Authority.ROLE_ADMIN);
                     usuarioService.save(userAdmin);
                 } catch (Exception e) {
                     throw new RuntimeException(e);

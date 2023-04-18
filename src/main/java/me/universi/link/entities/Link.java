@@ -1,8 +1,8 @@
 package me.universi.link.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import me.universi.link.enums.TipoLink;
-import me.universi.perfil.entities.Perfil;
+import me.universi.link.enums.TypeLink;
+import me.universi.perfil.entities.Profile;
 
 import jakarta.persistence.*;
 
@@ -12,33 +12,33 @@ public class Link {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_link")
     private long id;
-    @Column(name = "tipo")
+    @Column(name = "type_link")
     @Enumerated(EnumType.STRING)
-    private TipoLink tipo;
+    private TypeLink typeLink;
     @Column(name = "url")
     private String url;
 
-    @Column(name = "nome")
-    private String nome;
+    @Column(name = "name")
+    private String name;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_perfil")
-    private Perfil perfil;
+    @JoinColumn(name = "id_profile")
+    private Profile profile;
 
-    public Link(TipoLink tipo, String url){
-        this.tipo = tipo;
+    public Link(TypeLink typeLink, String url){
+        this.typeLink = typeLink;
         this.url = url;
     }
 
     public Link() {}
 
-    public TipoLink getTipo() {
-        return tipo;
+    public TypeLink getTypeLink() {
+        return typeLink;
     }
 
-    public void setTipo(TipoLink tipo) {
-        this.tipo = tipo;
+    public void setTypeLink(TypeLink typeLink) {
+        this.typeLink = typeLink;
     }
 
     public String getUrl() {
@@ -53,19 +53,19 @@ public class Link {
         return id;
     }
 
-    public Perfil getPerfil() {
-        return perfil;
+    public Profile getPerfil() {
+        return profile;
     }
 
-    public void setPerfil(Perfil perfil) {
-        this.perfil = perfil;
+    public void setPerfil(Profile profile) {
+        this.profile = profile;
     }
 
-    public String getNome() {
-        return nome;
+    public String getName() {
+        return name;
     }
 
-    public void setNome(String nome) {
-        this.nome = nome;
+    public void setName(String name) {
+        this.name = name;
     }
 }

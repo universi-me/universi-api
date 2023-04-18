@@ -1,11 +1,10 @@
 package me.universi.perfil.controller;
 
 import me.universi.api.entities.Response;
-import me.universi.competencia.enums.Level;
 import me.universi.competencia.services.CompetenceTypeService;
 import me.universi.grupo.services.GroupService;
-import me.universi.perfil.entities.Perfil;
-import me.universi.perfil.enums.Sexo;
+import me.universi.perfil.entities.Profile;
+import me.universi.perfil.enums.Gender;
 import me.universi.perfil.exceptions.PerfilException;
 import me.universi.perfil.services.PerfilService;
 import me.universi.user.entities.User;
@@ -50,12 +49,12 @@ public class PerfilController {
             String bio          = (String)body.get("bio");
             String sexo         = (String)body.get("sexo");
 
-            Perfil perfilAtual = perfilService.findFirstById(perfilId);
-            if(perfilAtual == null) {
+            Profile profileAtual = perfilService.findFirstById(perfilId);
+            if(profileAtual == null) {
                 throw new PerfilException("Perfil não encontrado.");
             }
 
-            if(!usuarioService.usuarioDonoDaSessao(perfilAtual.getUsuario())) {
+            if(!usuarioService.usuarioDonoDaSessao(profileAtual.getUsuario())) {
 
                 User userSession = usuarioService.obterUsuarioNaSessao();
                 if(!usuarioService.isContaAdmin(userSession)) {
@@ -64,22 +63,22 @@ public class PerfilController {
             }
 
             if(nome != null) {
-                perfilAtual.setNome(nome);
+                profileAtual.setFirstname(nome);
             }
             if(sobrenome != null) {
-                perfilAtual.setSobrenome(sobrenome);
+                profileAtual.setLastname(sobrenome);
             }
             if(imagem != null && imagem.length()>0) {
-                perfilAtual.setImagem(imagem);
+                profileAtual.setImage(imagem);
             }
             if(bio != null) {
-                perfilAtual.setBio(bio);
+                profileAtual.setBio(bio);
             }
             if(sexo != null) {
-                perfilAtual.setSexo(Sexo.valueOf(sexo));
+                profileAtual.setSexo(Gender.valueOf(sexo));
             }
 
-            perfilService.save(perfilAtual);
+            perfilService.save(profileAtual);
 
             usuarioService.atualizarUsuarioNaSessao();
 

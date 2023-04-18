@@ -10,7 +10,7 @@ import me.universi.competencia.enums.Level;
 import me.universi.competencia.exceptions.CompetenceException;
 import me.universi.competencia.services.CompetenceService;
 import me.universi.competencia.services.CompetenceTypeService;
-import me.universi.perfil.entities.Perfil;
+import me.universi.perfil.entities.Profile;
 import me.universi.perfil.services.PerfilService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UsuarioService;
@@ -61,7 +61,7 @@ public class CompetenceController {
             }
 
             Competence newCompetence = new Competence();
-            newCompetence.setProfile(user.getPerfil());
+            newCompetence.setProfile(user.getProfile());
             newCompetence.setCompetenceType(compT);
             newCompetence.setDescription(description);
             newCompetence.setLevel(Level.valueOf(level));
@@ -102,7 +102,7 @@ public class CompetenceController {
 
             User user = userService.obterUsuarioNaSessao();
 
-            Perfil profile = user.getPerfil();
+            Profile profile = user.getProfile();
 
             if(competence.getProfile().getId() != profile.getId()) {
                 throw new CompetenceException("Você não tem permissão para editar esta Competêcia.");
@@ -152,7 +152,7 @@ public class CompetenceController {
 
             User user = userService.obterUsuarioNaSessao();
 
-            Perfil profile = user.getPerfil();
+            Profile profile = user.getProfile();
 
             if(competence.getProfile().getId() != profile.getId()) {
                 throw new CompetenceException("Você não tem permissão para editar esta Competêcia.");

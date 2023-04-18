@@ -1,9 +1,8 @@
 package me.universi.pesquisar.controller;
 
-import me.universi.api.entities.Response;
 import me.universi.grupo.entities.Group;
 import me.universi.grupo.services.GroupService;
-import me.universi.perfil.entities.Perfil;
+import me.universi.perfil.entities.Profile;
 import me.universi.perfil.services.PerfilService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -12,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import java.text.Normalizer;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -49,12 +48,12 @@ public class PesquisarController {
         if(term != null && term.length() > 0) {
 
             if(searchUsuario) {
-                Collection<Perfil> perfilSearch = perfilService.findTop5ByNomeContainingIgnoreCase(term);
-                for (Perfil perfNow : perfilSearch) {
+                Collection<Profile> profileSearches = perfilService.findTop5ByNomeContainingIgnoreCase(term);
+                for (Profile perfNow : profileSearches) {
                     HashMap<String, Object> perfilDic = new HashMap<>();
-                    perfilDic.put("value", perfNow.getNome());
+                    perfilDic.put("value", perfNow.getFirstname());
                     perfilDic.put("id", perfNow.getUsuario().getUsername());
-                    perfilDic.put("img", perfNow.getImagem() == null ? "https://i.imgur.com/vUBrCxr.png" : perfNow.getImagem());
+                    perfilDic.put("img", perfNow.getImage() == null ? "https://i.imgur.com/vUBrCxr.png" : perfNow.getImage());
                     perfilDic.put("url", "/p/" + perfNow.getUsuario().getUsername());
                     perfilDic.put("tipo", "perfil");
                     resultsBusca.add(perfilDic);

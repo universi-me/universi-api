@@ -1,14 +1,23 @@
 package me.universi.user.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import me.universi.indicators.entities.Indicators;
-import me.universi.perfil.entities.Perfil;
-import me.universi.user.enums.Autoridade;
+import me.universi.perfil.entities.Profile;
+import me.universi.user.enums.Authority;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import jakarta.persistence.*;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -20,54 +29,54 @@ public class User implements UserDetails {
     @Column(name = "id_usuario")
     private Long id;
 
-    @Column(name = "nome")
-    private String nome;
+    @Column(name = "name")
+    private String name;
 
     @JsonIgnore
     @Column(name = "email")
     private String email;
 
     @JsonIgnore
-    @Column(name = "senha")
-    private String senha;
+    @Column(name = "password")
+    private String password;
 
     @JsonIgnore
     @OneToOne(mappedBy = "user")
-    private Perfil perfil;
+    private Profile profile;
 
     @JsonIgnore
-    @Column(name = "email_verificado")
-    private boolean email_verificado;
+    @Column(name = "email_verified")
+    private boolean email_verified;
 
     @JsonIgnore
-    @Column(name = "usuario_expirado")
-    private boolean usuario_expirado;
+    @Column(name = "expired_user")
+    private boolean expired_user;
 
     @JsonIgnore
-    @Column(name = "conta_bloqueada")
-    private boolean conta_bloqueada;
+    @Column(name = "blocked_account")
+    private boolean blocked_account;
 
     @JsonIgnore
-    @Column(name = "credenciais_expiradas")
-    private boolean credenciais_expiradas;
+    @Column(name = "expired_credentials")
+    private boolean expired_credentials;
 
     @JsonIgnore
-    @Column(name = "inativo")
-    private boolean inativo;
+    @Column(name = "inactive")
+    private boolean inactive;
 
     @JsonIgnore
     @Enumerated(EnumType.STRING)
-    @Column(name = "autoridade")
-    private Autoridade autoridade;
+    @Column(name = "authority")
+    private Authority authority;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "indicators_id", referencedColumnName = "id")
     private Indicators indicators;
 
     public User(String name, String email, String password){
-        this.nome = name;
+        this.name = name;
         this.email = email;
-        this.senha = password;
+        this.password = password;
     }
 
     public User() {
@@ -78,12 +87,12 @@ public class User implements UserDetails {
         return id;
     }
 
-    public String getNome() {
-        return nome;
+    public String getName() {
+        return name;
     }
 
-    public void setNome(String nome) {
-        this.nome = nome;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getEmail() {
@@ -94,112 +103,108 @@ public class User implements UserDetails {
         this.email = email;
     }
 
-    public String getSenha() {
-        return senha;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
-    public void setSenha(String senha) {
-        this.senha = senha;
+    public Profile getProfile() {
+        return profile;
     }
 
-    public Perfil getPerfil() {
-        return perfil;
+    public void setProfile(Profile profile) {
+        this.profile = profile;
     }
 
-    public void setPerfil(Perfil perfil) {
-        this.perfil = perfil;
+    public void setAuthority(Authority authority) {
+        this.authority = authority;
     }
 
-    public boolean isEmail_verificado() {
-        return email_verificado;
+    public boolean isEmail_verified() {
+        return email_verified;
     }
 
-    public void setEmail_verificado(boolean email_verificado) {
-        this.email_verificado = email_verificado;
+    public void setEmail_verified(boolean email_verified) {
+        this.email_verified = email_verified;
     }
 
-    public boolean isUsuario_expirado() {
-        return usuario_expirado;
+    public boolean isExpired_user() {
+        return expired_user;
     }
 
-    public void setUsuario_expirado(boolean usuario_expirado) {
-        this.usuario_expirado = usuario_expirado;
+    public void setExpired_user(boolean expired_user) {
+        this.expired_user = expired_user;
     }
 
-    public boolean isConta_bloqueada() {
-        return conta_bloqueada;
+    public boolean isBlocked_account() {
+        return blocked_account;
     }
 
-    public void setConta_bloqueada(boolean conta_bloqueada) {
-        this.conta_bloqueada = conta_bloqueada;
+    public void setBlocked_account(boolean blocked_account) {
+        this.blocked_account = blocked_account;
     }
 
-    public boolean isCredenciais_expiradas() {
-        return credenciais_expiradas;
+    public boolean isExpired_credentials() {
+        return expired_credentials;
     }
 
-    public void setCredenciais_expiradas(boolean credenciais_expiradas) {
-        this.credenciais_expiradas = credenciais_expiradas;
+    public void setExpired_credentials(boolean expired_credentials) {
+        this.expired_credentials = expired_credentials;
     }
 
-    public boolean isInativo() {
-        return inativo;
+    public boolean isInactive() {
+        return inactive;
     }
 
-    public void setInativo(boolean inativo) {
-        this.inativo = inativo;
-    }
-
-    public Autoridade getAutoridade() {
-        return autoridade;
-    }
-
-    public void setAutoridade(Autoridade autoridade) {
-        this.autoridade = autoridade;
+    public void setInactive(boolean inactive) {
+        this.inactive = inactive;
     }
 
     @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        if(this.autoridade != null) {
-            return Arrays.asList(new SimpleGrantedAuthority(this.autoridade.toString()));
+        if(this.authority != null) {
+            return Arrays.asList(new SimpleGrantedAuthority(this.authority.toString()));
         }
         return null;
+    }
+
+    public Authority getAuthority() {
+        return authority;
     }
 
     @JsonIgnore
     @Override
     public String getPassword() {
-        return this.senha;
+        return this.password;
     }
 
     @JsonIgnore
     @Override
     public String getUsername() {
-        return this.nome;
+        return this.name;
     }
 
     @JsonIgnore
     @Override
     public boolean isAccountNonExpired() {
-        return !this.usuario_expirado;
+        return !this.expired_user;
     }
 
     @JsonIgnore
     @Override
     public boolean isAccountNonLocked() {
-        return !this.conta_bloqueada;
+        return !this.blocked_account;
     }
 
     @JsonIgnore
     @Override
     public boolean isCredentialsNonExpired() {
-        return !this.credenciais_expiradas;
+        return !this.expired_credentials;
     }
     @JsonIgnore
     @Override
     public boolean isEnabled() {
-        return !this.inativo;
+        return !this.inactive;
     }
 
     public Indicators getIndicators() {

@@ -84,7 +84,7 @@ public class GrupoController {
                 }
                 grupoNew.setDescription(descricao);
                 grupoNew.setType(GroupType.valueOf(tipo));
-                grupoNew.setAdmin(user.getPerfil());
+                grupoNew.setAdmin(user.getProfile());
                 if(podeCriarGrupo != null) {
                     grupoNew.setCanCreateGroup(podeCriarGrupo);
                 }
@@ -203,7 +203,7 @@ public class GrupoController {
             }
 
             if(grupoEdit.isCanEnter() || grupoService.verifyPermissionToEditGroup(grupoEdit, user)) {
-                if(grupoService.addParticipantToGroup(grupoEdit, user.getPerfil())) {
+                if(grupoService.addParticipantToGroup(grupoEdit, user.getProfile())) {
                     resposta.success = true;
                     resposta.message = "Você entrou no Grupo.";
                     return resposta;
@@ -238,7 +238,7 @@ public class GrupoController {
                 throw new GroupException("Grupo não encontrado.");
             }
 
-            if(grupoService.removeParticipantFromGroup(grupoEdit, user.getPerfil())) {
+            if(grupoService.removeParticipantFromGroup(grupoEdit, user.getProfile())) {
                 resposta.success = true;
                 resposta.message = "Você saiu do Grupo.";
                 return resposta;
@@ -282,7 +282,7 @@ public class GrupoController {
             Group grupoEdit = grupoService.findFirstById(Long.valueOf(grupoId));
 
             if(participanteUser != null && grupoService.verifyPermissionToEditGroup(grupoEdit, user)) {
-                if(grupoService.addParticipantToGroup(grupoEdit, participanteUser.getPerfil())) {
+                if(grupoService.addParticipantToGroup(grupoEdit, participanteUser.getProfile())) {
                     resposta.success = true;
                     resposta.message = "Participante adicionado com sucesso.";
                     return resposta;
@@ -329,7 +329,7 @@ public class GrupoController {
             Group grupoEdit = grupoService.findFirstById(Long.valueOf(grupoId));
 
             if(participanteUser != null && grupoService.verifyPermissionToEditGroup(grupoEdit, user)) {
-                if(grupoService.removeParticipantFromGroup(grupoEdit, participanteUser.getPerfil())) {
+                if(grupoService.removeParticipantFromGroup(grupoEdit, participanteUser.getProfile())) {
                     resposta.success = true;
                     resposta.message = "Participante removido com sucesso.";
                     return resposta;

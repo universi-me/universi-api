@@ -5,8 +5,8 @@ import me.universi.competencia.entities.CompetenceType;
 import me.universi.competencia.repositories.CompetenceTypeRepository;
 import me.universi.competencia.services.CompetenceService;
 import me.universi.grupo.services.GroupService;
-import me.universi.perfil.entities.Perfil;
-import me.universi.perfil.enums.Sexo;
+import me.universi.perfil.entities.Profile;
+import me.universi.perfil.enums.Gender;
 import me.universi.perfil.services.PerfilService;
 import me.universi.recomendacao.service.RecomendacaoService;
 import me.universi.user.entities.User;
@@ -48,7 +48,7 @@ public class CompetenciaTest {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        userNew.setNome(userNew.getNome());
+        userNew.setName(userNew.getName());
 
         CompetenceType compTipo1 = new CompetenceType();
         compTipo1.setName("testetipo1"+userNew.getId());
@@ -67,27 +67,27 @@ public class CompetenciaTest {
         competencia2.setDescription("Sou top em java - teste 2"+userNew.getId());
         competenciaService.save(competencia2);
 
-        Perfil admin_perfil = userNew.getPerfil();
-        admin_perfil.setNome("perfil1");
-        admin_perfil.setBio("Bio - admin_perfil"+userNew.getId());
-        admin_perfil.setSexo(Sexo.M);
+        Profile admin_profile = userNew.getProfile();
+        admin_profile.setFirstname("perfil1");
+        admin_profile.setBio("Bio - admin_perfil"+userNew.getId());
+        admin_profile.setSexo(Gender.M);
 
-        Perfil comum_perfil = userNew.getPerfil();
-        comum_perfil.setNome("perfil2");
-        comum_perfil.setBio("Bio - comum_perfil"+userNew.getId());
-        comum_perfil.setSexo(Sexo.M);
+        Profile comum_profile = userNew.getProfile();
+        comum_profile.setFirstname("perfil2");
+        comum_profile.setBio("Bio - comum_perfil"+userNew.getId());
+        comum_profile.setSexo(Gender.M);
 
         Collection<Competence> competencias = new ArrayList<Competence>();
         competencias.add(competencia1);
         competencias.add(competencia2);
-        admin_perfil.setCompetencias(competencias);
-        comum_perfil.setCompetencias(competencias);
+        admin_profile.setCompetences(competencias);
+        comum_profile.setCompetences(competencias);
 
         competenciaService.save(competencia1);
         competenciaService.save(competencia2);
 
-        perfilService.update(admin_perfil);
-        perfilService.update(comum_perfil);
+        perfilService.update(admin_profile);
+        perfilService.update(comum_profile);
 
         assertEquals(competencia1.getId(), competenciaService.findFirstById(competencia1.getId()).getId());
         assertEquals(competencia2.getId(), competenciaService.findFirstById(competencia2.getId()).getId());
@@ -101,7 +101,7 @@ public class CompetenciaTest {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        userNew.setNome(userNew.getNome());
+        userNew.setName(userNew.getName());
 
         CompetenceType compTipo1 = new CompetenceType();
         compTipo1.setName("testeupdatetipo1"+userNew.getId());
@@ -120,21 +120,21 @@ public class CompetenciaTest {
         competencia2.setDescription("Sou top em java - update 2"+userNew.getId());
         competenciaService.save(competencia2);
 
-        Perfil admin_perfil = userNew.getPerfil();
-        admin_perfil.setNome("perfil1");
-        admin_perfil.setBio("Bio - admin_perfil"+userNew.getId());
-        admin_perfil.setSexo(Sexo.M);
+        Profile admin_profile = userNew.getProfile();
+        admin_profile.setFirstname("perfil1");
+        admin_profile.setBio("Bio - admin_perfil"+userNew.getId());
+        admin_profile.setSexo(Gender.M);
 
-        Perfil comum_perfil = userNew.getPerfil();
-        comum_perfil.setNome("perfil2");
-        comum_perfil.setBio("Bio - comum_perfil"+userNew.getId());
-        comum_perfil.setSexo(Sexo.M);
+        Profile comum_profile = userNew.getProfile();
+        comum_profile.setFirstname("perfil2");
+        comum_profile.setBio("Bio - comum_perfil"+userNew.getId());
+        comum_profile.setSexo(Gender.M);
 
         Collection<Competence> competencias = new ArrayList<Competence>();
         competencias.add(competencia1);
         competencias.add(competencia2);
-        admin_perfil.setCompetencias(competencias);
-        comum_perfil.setCompetencias(competencias);
+        admin_profile.setCompetences(competencias);
+        comum_profile.setCompetences(competencias);
 
         competenciaService.save(competencia1);
         competenciaService.save(competencia2);
@@ -145,8 +145,8 @@ public class CompetenciaTest {
         competenciaService.update(competencia1);
         competenciaService.update(competencia2);
 
-        perfilService.update(admin_perfil);
-        perfilService.update(comum_perfil);
+        perfilService.update(admin_profile);
+        perfilService.update(comum_profile);
 
         assertEquals(competencia1.getDescription(), competenciaService.findFirstById(competencia1.getId()).getDescription());
         assertEquals(competencia2.getDescription(), competenciaService.findFirstById(competencia2.getId()).getDescription());
@@ -160,7 +160,7 @@ public class CompetenciaTest {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        userNew.setNome(userNew.getNome());
+        userNew.setName(userNew.getName());
 
         CompetenceType compTipo1 = new CompetenceType();
         compTipo1.setName("testedeletetipo1"+userNew.getId());
@@ -179,21 +179,21 @@ public class CompetenciaTest {
         competencia2.setDescription("Sou top em java - delete 2"+userNew.getId());
         competenciaService.save(competencia2);
 
-        Perfil admin_perfil = userNew.getPerfil();
-        admin_perfil.setNome("perfil1");
-        admin_perfil.setBio("Bio - admin_perfil"+userNew.getId());
-        admin_perfil.setSexo(Sexo.M);
+        Profile admin_profile = userNew.getProfile();
+        admin_profile.setFirstname("perfil1");
+        admin_profile.setBio("Bio - admin_perfil"+userNew.getId());
+        admin_profile.setSexo(Gender.M);
 
-        Perfil comum_perfil = userNew.getPerfil();
-        comum_perfil.setNome("perfil2");
-        comum_perfil.setBio("Bio - comum_perfil"+userNew.getId());
-        comum_perfil.setSexo(Sexo.M);
+        Profile comum_profile = userNew.getProfile();
+        comum_profile.setFirstname("perfil2");
+        comum_profile.setBio("Bio - comum_perfil"+userNew.getId());
+        comum_profile.setSexo(Gender.M);
 
         Collection<Competence> competencias = new ArrayList<Competence>();
         competencias.add(competencia1);
         competencias.add(competencia2);
-        admin_perfil.setCompetencias(competencias);
-        comum_perfil.setCompetencias(competencias);
+        admin_profile.setCompetences(competencias);
+        comum_profile.setCompetences(competencias);
 
         competenciaService.save(competencia1);
         competenciaService.save(competencia2);
@@ -201,8 +201,8 @@ public class CompetenciaTest {
         competencia1.setDescription("alterando descrição1");
         competencia2.setDescription("alterando descrição2");
 
-        perfilService.update(admin_perfil);
-        perfilService.update(comum_perfil);
+        perfilService.update(admin_profile);
+        perfilService.update(comum_profile);
 
         competenciaService.deleteAll(competencias);
 
@@ -220,7 +220,7 @@ public class CompetenciaTest {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        userNew.setNome(userNew.getNome());
+        userNew.setName(userNew.getName());
 
         CompetenceType compTipo1 = new CompetenceType();
         compTipo1.setName("testereadtipo1"+userNew.getId());
@@ -239,21 +239,21 @@ public class CompetenciaTest {
         competencia2.setDescription("Sou top em java - read 2"+userNew.getId());
         competenciaService.save(competencia2);
 
-        Perfil admin_perfil = userNew.getPerfil();
-        admin_perfil.setNome("perfil1");
-        admin_perfil.setBio("Bio - admin_perfil"+userNew.getId());
-        admin_perfil.setSexo(Sexo.M);
+        Profile admin_profile = userNew.getProfile();
+        admin_profile.setFirstname("perfil1");
+        admin_profile.setBio("Bio - admin_perfil"+userNew.getId());
+        admin_profile.setSexo(Gender.M);
 
-        Perfil comum_perfil = userNew.getPerfil();
-        comum_perfil.setNome("perfil2");
-        comum_perfil.setBio("Bio - comum_perfil"+userNew.getId());
-        comum_perfil.setSexo(Sexo.M);
+        Profile comum_profile = userNew.getProfile();
+        comum_profile.setFirstname("perfil2");
+        comum_profile.setBio("Bio - comum_perfil"+userNew.getId());
+        comum_profile.setSexo(Gender.M);
 
         Collection<Competence> competencias = new ArrayList<Competence>();
         competencias.add(competencia1);
         competencias.add(competencia2);
-        admin_perfil.setCompetencias(competencias);
-        comum_perfil.setCompetencias(competencias);
+        admin_profile.setCompetences(competencias);
+        comum_profile.setCompetences(competencias);
 
         competenciaService.save(competencia1);
         competenciaService.save(competencia2);
