@@ -11,7 +11,7 @@
         http://www.springframework.org/schema/security/spring-security.xsd">
 
 
-    <http use-expressions="true" auto-config="true">
+    <http use-expressions="true" auto-config="true" entry-point-ref="restAuthenticationEntryPoint">
         <expression-handler ref="defaultWebSecurityExpressionHandler"/>
         <csrf disabled="true"/>
 
@@ -38,6 +38,8 @@
 
         <form-login login-page="/login" authentication-failure-url="/login" authentication-success-handler-ref="autenticacaoValidaHandler"/>
         <logout logout-success-url="/login" invalidate-session="true" />
+
+        <access-denied-handler ref="customAccessDeniedHandler"/>
 
 
         <!-- Corrigir H2-console -->
@@ -122,6 +124,9 @@
 
     <beans:bean id="userService" class="me.universi.user.services.UsuarioService"/>
     <beans:bean id="encoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
+
+    <beans:bean name="customAccessDeniedHandler" class="me.universi.user.services.CustomAccessDeniedHandler"/>
+    <beans:bean name="restAuthenticationEntryPoint" class="me.universi.user.services.RestAuthenticationEntryPoint"/>
 
     <beans:bean id="authenticationProvider" class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
         <beans:property name="passwordEncoder" ref="encoder"/>
