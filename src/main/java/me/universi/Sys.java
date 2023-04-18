@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @SpringBootApplication
 @ImportResource({"classpath:spring-security.xml"})
@@ -45,6 +46,7 @@ public class Sys {
     }
 
     @GetMapping("/")
+    @ResponseBody
     String index(HttpServletRequest request, HttpSession session) {
         return "Universi.me API";
     }

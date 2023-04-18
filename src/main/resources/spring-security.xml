@@ -16,14 +16,10 @@
         <csrf disabled="true"/>
 
         <intercept-url pattern="/" access="permitAll"/>
-        <intercept-url pattern="/equipe" access="permitAll"/>
         <intercept-url pattern="/login" access="permitAll"/>
         <intercept-url pattern="/login/google" access="permitAll"/>
         <intercept-url pattern="/registrar" access="permitAll"/>
 
-        <intercept-url pattern="/css/**" access="permitAll"/>
-        <intercept-url pattern="/js/**" access="permitAll"/>
-        <intercept-url pattern="/img/**" access="permitAll"/>
         <intercept-url pattern="/favicon.ico" access="permitAll"/>
 
         <!-- Admin rules -->
@@ -40,8 +36,8 @@
 
         <session-management session-authentication-strategy-ref="sas"/>
 
-        <form-login login-page="/login" authentication-failure-url="/login?error" authentication-success-handler-ref="autenticacaoValidaHandler"/>
-        <logout logout-success-url="/login?logout" invalidate-session="true" />
+        <form-login login-page="/login" authentication-failure-url="/login" authentication-success-handler-ref="autenticacaoValidaHandler"/>
+        <logout logout-success-url="/login" invalidate-session="true" />
 
 
         <!-- Corrigir H2-console -->
@@ -54,7 +50,7 @@
 		<beans:property name="sessionAuthenticationStrategy" ref="sas"/>
         <beans:property name="authenticationManager" ref="authenticationManager"/>
         <beans:property name="authenticationSuccessHandler" ref="autenticacaoValidaHandler"/>
-        <beans:property name="authenticationFailureHandler" ref="autenticacaofalhaHandler"/>
+        <beans:property name="authenticationFailureHandler" ref="autenticacaoFalhaHandler"/>
         <beans:property name="filterProcessesUrl" value="/login.js"/>
         <beans:property name="usernameParameter" value="username"/>
         <beans:property name="passwordParameter" value="password"/>
@@ -93,7 +89,7 @@
         <authentication-provider ref="authenticationProvider"/>
     </authentication-manager>
 
-    <beans:bean id="autenticacaofalhaHandler" class="me.universi.user.services.AutenticacaoFalhaHandler"/>
+    <beans:bean id="autenticacaoFalhaHandler" class="me.universi.user.services.AutenticacaoFalhaHandler"/>
     <beans:bean id="autenticacaoValidaHandler" class="me.universi.user.services.AutenticacaoValidaHandler"/>
 
     <beans:bean id="roleHierarchy" class="org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl">
@@ -124,12 +120,12 @@
 
     <beans:bean class="org.springframework.security.web.session.HttpSessionEventPublisher"/>
 
-    <beans:bean id="SecurityUserDetailsService" class="me.universi.user.services.UsuarioService"/>
+    <beans:bean id="userService" class="me.universi.user.services.UsuarioService"/>
     <beans:bean id="encoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
 
     <beans:bean id="authenticationProvider" class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
         <beans:property name="passwordEncoder" ref="encoder"/>
-        <beans:property name="userDetailsService" ref="SecurityUserDetailsService"/>
+        <beans:property name="userDetailsService" ref="userService"/>
     </beans:bean>
 
     <beans:bean id="authUser" class="me.universi.user.services.PreAuthUsuarioService"/>

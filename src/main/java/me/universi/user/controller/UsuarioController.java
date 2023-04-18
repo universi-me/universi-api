@@ -42,6 +42,27 @@ public class UsuarioController {
     @Autowired
     AuthenticationManager authenticationManager;
 
+    @GetMapping("/login")
+    @ResponseBody
+    public Response login(HttpServletRequest request, HttpSession session) {
+        Response response = new Response();
+        try {
+
+            if(usuarioService.usuarioEstaLogado()) {
+                response.success = true;
+                response.message = "Usuário está logado.";
+                return response;
+            }
+
+            response.success = false;
+            response.message = "Usuário não esta logado.";
+            return response;
+
+        }catch (Exception e) {
+            response.message = e.getMessage();
+            return response;
+        }
+    }
 
     @PostMapping(value = "/registrar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
