@@ -8,5 +8,5 @@ import java.util.Optional;
 
 public interface PerfilRepository extends JpaRepository<Profile, Long> {
     Optional<Profile> findFirstById(Long id);
-    Collection<Profile> findTop5ByNomeContainingIgnoreCase(String nome);
+    Collection<Profile> findTop5ByFirstnameContainingIgnoreCase(String firstName);
 }

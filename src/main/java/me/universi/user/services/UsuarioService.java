@@ -52,7 +52,7 @@ public class UsuarioService implements UserDetailsService {
     private SessionRegistry sessionRegistry;
 
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<User> usuario = userRepository.findFirstByNome(username);
+        Optional<User> usuario = userRepository.findFirstByName(username);
         if (usuario.isPresent()) {
             return usuario.get();
         }
