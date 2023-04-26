@@ -40,19 +40,27 @@ import java.util.regex.Pattern;
 
 @Service
 public class UsuarioService implements UserDetailsService {
+    private final UsuarioRepository userRepository;
+
+    private final PasswordEncoder passwordEncoder;
+
+    private final PerfilService perfilService;
+
+    private final RoleHierarchyImpl roleHierarchy;
+
+    private final SessionRegistry sessionRegistry;
+
     @Autowired
-    private UsuarioRepository userRepository;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Autowired
-    private PerfilService perfilService;
-    @Autowired
-    private RoleHierarchyImpl roleHierarchy;
-    @Autowired
-    private SessionRegistry sessionRegistry;
+    public UsuarioService(UsuarioRepository userRepository, PasswordEncoder passwordEncoder, PerfilService perfilService, RoleHierarchyImpl roleHierarchy, SessionRegistry sessionRegistry) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.perfilService = perfilService;
+        this.roleHierarchy = roleHierarchy;
+        this.sessionRegistry = sessionRegistry;
+    }
 
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<User> usuario = userRepository.findFirstByNome(username);
+        Optional<User> usuario = userRepository.findFirstByName(username);
         if (usuario.isPresent()) {
             return usuario.get();
         }
