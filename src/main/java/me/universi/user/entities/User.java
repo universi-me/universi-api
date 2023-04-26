@@ -11,6 +11,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.SequenceGenerator;
 import me.universi.indicators.entities.Indicators;
 import me.universi.perfil.entities.Profile;
 import me.universi.user.enums.Authority;
@@ -21,12 +22,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Arrays;
 import java.util.Collection;
 
-@Entity(name = "usuario")
+@Entity(name = "system_user")
 public class User implements UserDetails {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_usuario")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_generator")
+    @SequenceGenerator(name = "user_generator", sequenceName = "user_sequence", allocationSize = 1)
+    @Column(name = "user_id")
     private Long id;
 
     @Column(name = "name")

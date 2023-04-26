@@ -11,24 +11,24 @@ import jakarta.persistence.*;
 import java.util.Collection;
 import java.util.Date;
 
-@Entity(name = "Grupo")
+@Entity(name = "system_group")
 public class Group {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_grupo")
+    @Column(name = "id_group")
     public Long id;
     
     @Column(name = "nickname")
     public String nickname;
 
-    @Column(name = "nome")
+    @Column(name = "name")
     public String name;
 
-    @Column(name = "descricao", columnDefinition = "TEXT")
+    @Column(name = "description", columnDefinition = "TEXT")
     public String description;
 
-    @Column(name = "imagem")
+    @Column(name = "image")
     public String image;
 
     @ManyToOne
@@ -37,9 +37,9 @@ public class Group {
 
     @ManyToMany(cascade = { CascadeType.ALL })
     @JoinTable(
-            name = "perfil_grupo",
-            joinColumns = { @JoinColumn(name = "id_grupo") },
-            inverseJoinColumns = { @JoinColumn(name =  "id_perfil") }
+            name = "profile_group",
+            joinColumns = { @JoinColumn(name = "id_group") },
+            inverseJoinColumns = { @JoinColumn(name =  "id_profile") }
     )
     @JsonIdentityInfo(generator= ObjectIdGenerators.PropertyGenerator.class, property="id", scope = Profile.class)
     @JsonIdentityReference(alwaysAsId = true)
@@ -47,38 +47,38 @@ public class Group {
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
     @JoinTable(
-            name = "grupo_grupo",
-            joinColumns = { @JoinColumn(name = "id_grupo", referencedColumnName = "id_grupo") },
-            inverseJoinColumns = { @JoinColumn(name = "id_subgrupo", referencedColumnName = "id_grupo") }
+            name = "group_group",
+            joinColumns = { @JoinColumn(name = "id_group", referencedColumnName = "id_group") },
+            inverseJoinColumns = { @JoinColumn(name = "id_subgroup", referencedColumnName = "id_group") }
     )
     @JsonIdentityInfo(generator= ObjectIdGenerators.PropertyGenerator.class, property="id", scope = Group.class)
     @JsonIdentityReference(alwaysAsId = true)
     public Collection<Group> subGroups;
 
-    @Column(name = "tipo")
+    @Column(name = "type")
     @Enumerated(EnumType.STRING)
     public GroupType type;
 
     /** The group's ability to be accessed directly through the URL (parent of all groups) */
-    @Column(name = "gruporoot")
+    @Column(name = "group_root")
     public boolean rootGroup;
 
     /** Can create subGroups */
-    @Column(name = "podeCriarGrupo")
+    @Column(name = "can_create_group")
     public boolean canCreateGroup;
 
-    @Column(name = "podeEntrar")
+    @Column(name = "can_enter")
     public boolean canEnter;
 
-    @Column(name = "podeAddParticipante")
+    @Column(name = "can_add_participant")
     public boolean canAddParticipant;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "data_de_criacao")
+    @Column(name = "created_at")
     private Date createdAt;
 
-    @Column(name = "publico")
+    @Column(name = "public_group")
     public boolean publicGroup;
 
     public Group() {
