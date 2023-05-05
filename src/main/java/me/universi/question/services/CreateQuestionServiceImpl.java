@@ -7,7 +7,7 @@ import me.universi.question.dto.QuestionCreateDTO;
 import me.universi.question.entities.Question;
 import me.universi.user.entities.User;
 import me.universi.user.exceptions.UserNotFoundException;
-import me.universi.user.repositories.UsuarioRepository;
+import me.universi.user.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,11 +15,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class CreateQuestionServiceImpl implements CreateQuestionService {
     private final QuestionRepository questionRepository;
-    private final UsuarioRepository userRepository;
+    private final UserRepository userRepository;
     private final FeedbackRepository feedbackRepository;
 
     @Autowired
-    public CreateQuestionServiceImpl(QuestionRepository questionRepository, UsuarioRepository userRepository, FeedbackRepository feedbackRepository) {
+    public CreateQuestionServiceImpl(QuestionRepository questionRepository, UserRepository userRepository, FeedbackRepository feedbackRepository) {
         this.questionRepository = questionRepository;
         this.userRepository = userRepository;
         this.feedbackRepository = feedbackRepository;

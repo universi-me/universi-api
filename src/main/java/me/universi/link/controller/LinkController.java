@@ -7,7 +7,7 @@ import me.universi.link.exceptions.LinkException;
 import me.universi.link.services.LinkService;
 import me.universi.perfil.entities.Profile;
 import me.universi.user.entities.User;
-import me.universi.user.services.UsuarioService;
+import me.universi.user.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -22,7 +22,7 @@ public class LinkController {
     @Autowired
     public LinkService linkService;
     @Autowired
-    public UsuarioService usuarioService;
+    public UserService userService;
 
     @PostMapping(value = "/link/criar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
@@ -30,7 +30,7 @@ public class LinkController {
         Response resposta = new Response();
         try {
 
-            User user = usuarioService.obterUsuarioNaSessao();
+            User user = userService.obterUsuarioNaSessao();
 
             String url = (String)body.get("url");
             if(url == null) {
@@ -83,7 +83,7 @@ public class LinkController {
                 throw new LinkException("Link não encontrada.");
             }
 
-            User user = usuarioService.obterUsuarioNaSessao();
+            User user = userService.obterUsuarioNaSessao();
 
             Profile profile = user.getProfile();
 
@@ -123,7 +123,7 @@ public class LinkController {
                 throw new LinkException("Link não encontrada.");
             }
 
-            User user = usuarioService.obterUsuarioNaSessao();
+            User user = userService.obterUsuarioNaSessao();
 
             Profile profile = user.getProfile();
 

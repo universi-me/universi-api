@@ -6,7 +6,7 @@ import me.universi.indicators.IndicatorsRepository;
 import me.universi.indicators.entities.Indicators;
 import me.universi.user.entities.User;
 import me.universi.user.exceptions.UserNotFoundException;
-import me.universi.user.repositories.UsuarioRepository;
+import me.universi.user.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,10 +18,10 @@ import java.util.List;
 public class ValuerExerciseServiceImpl implements ValuerExerciseService {
 
     private final IndicatorsRepository indicatorsRepository;
-    private final UsuarioRepository userRepository;
+    private final UserRepository userRepository;
 
     @Autowired
-    public ValuerExerciseServiceImpl(IndicatorsRepository indicatorsRepository, UsuarioRepository userRepository) {
+    public ValuerExerciseServiceImpl(IndicatorsRepository indicatorsRepository, UserRepository userRepository) {
         this.indicatorsRepository = indicatorsRepository;
         this.userRepository = userRepository;
     }

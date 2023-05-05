@@ -5,7 +5,7 @@ import me.universi.grupo.exceptions.GroupException;
 import me.universi.grupo.repositories.GroupRepository;
 import me.universi.perfil.entities.Profile;
 import me.universi.user.entities.User;
-import me.universi.user.services.UsuarioService;
+import me.universi.user.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
 @Service
 public class GroupService {
     @Autowired
-    private UsuarioService userService;
+    private UserService userService;
     @Autowired
     private GroupRepository groupRepository;
 

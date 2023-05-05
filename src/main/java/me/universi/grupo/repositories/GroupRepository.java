@@ -16,7 +16,9 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
     Optional<Group> findFirstByNickname(String nickname);
     Optional<Group> findFirstByRootGroupAndNickname(boolean rootGroup, String nickname);
     List<Group> findByPublicGroup(boolean grupoPublico);
-    @Query(value = "SELECT ID_GRUPO FROM GRUPO_GRUPO WHERE ID_SUBGRUPO = :GroupId LIMIT 1", nativeQuery = true)
+    @Query(value = "SELECT id_group FROM subgroup WHERE id_subgroup = :GroupId LIMIT 1", nativeQuery = true)
     Optional<Long> findParentGroupId(@Param("GroupId") Long id);
     Collection<Group> findTop5ByNameContainingIgnoreCase(String nome);
+
+    Optional<Group> findByIdAndAdminId(Long groupId, Long profileId);
 }

@@ -24,11 +24,11 @@ public class Competence {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_competencia")
+    @Column(name = "id_competence")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_competenciatipo")
+    @JoinColumn(name = "id_competence_type")
     private CompetenceType competenceType;
 
     @JsonIgnore

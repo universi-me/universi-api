@@ -13,7 +13,7 @@ import me.universi.competencia.services.CompetenceTypeService;
 import me.universi.perfil.entities.Profile;
 import me.universi.perfil.services.PerfilService;
 import me.universi.user.entities.User;
-import me.universi.user.services.UsuarioService;
+import me.universi.user.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -30,7 +30,7 @@ public class CompetenceController {
     public PerfilService profileService;
 
     @Autowired
-    public UsuarioService userService;
+    public UserService userService;
 
     @PostMapping(value = "/competencia/criar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody

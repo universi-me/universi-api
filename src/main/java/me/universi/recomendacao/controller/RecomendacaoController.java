@@ -11,7 +11,7 @@ import me.universi.perfil.services.PerfilService;
 import me.universi.recomendacao.entities.Recommendation;
 import me.universi.recomendacao.exceptions.RecomendacaoInvalidaException;
 import me.universi.user.entities.User;
-import me.universi.user.services.UsuarioService;
+import me.universi.user.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -31,7 +31,7 @@ public class RecomendacaoController {
     public CompetenceService competenciaService;
 
     @Autowired
-    public UsuarioService usuarioService;
+    public UserService userService;
 
     @Autowired
     public PerfilService perfilService;
@@ -123,7 +123,7 @@ public class RecomendacaoController {
                 throw new GroupException("Recomendação não encontrada.");
             }
 
-            User user = usuarioService.obterUsuarioNaSessao();
+            User user = userService.obterUsuarioNaSessao();
 
             if(user.getProfile().getId() != recommendation.getOrigin().getId()) {
                 throw new GroupException("Você não tem permissão para editar esta Recomendação.");
@@ -169,7 +169,7 @@ public class RecomendacaoController {
                 throw new GroupException("Recomendação não encontrada.");
             }
 
-            User user = usuarioService.obterUsuarioNaSessao();
+            User user = userService.obterUsuarioNaSessao();
 
             if(user.getProfile().getId() != recommendation.getOrigin().getId()) {
                 throw new GroupException("Você não tem permissão para remover esta Recomendação.");
