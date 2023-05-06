@@ -8,7 +8,7 @@ import me.universi.perfil.enums.Gender;
 import me.universi.perfil.exceptions.PerfilException;
 import me.universi.perfil.services.PerfilService;
 import me.universi.user.entities.User;
-import me.universi.user.services.UsuarioService;
+import me.universi.user.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -20,7 +20,7 @@ import java.util.Map;
 @Controller
 public class PerfilController {
     @Autowired
-    public UsuarioService usuarioService;
+    public UserService userService;
 
     @Autowired
     public PerfilService perfilService;
@@ -54,10 +54,10 @@ public class PerfilController {
                 throw new PerfilException("Perfil não encontrado.");
             }
 
-            if(!usuarioService.usuarioDonoDaSessao(profileAtual.getUsuario())) {
+            if(!userService.usuarioDonoDaSessao(profileAtual.getUsuario())) {
 
-                User userSession = usuarioService.obterUsuarioNaSessao();
-                if(!usuarioService.isContaAdmin(userSession)) {
+                User userSession = userService.obterUsuarioNaSessao();
+                if(!userService.isContaAdmin(userSession)) {
                     throw new PerfilException("Você não tem permissão para editar este perfil.");
                 }
             }
@@ -80,7 +80,7 @@ public class PerfilController {
 
             perfilService.save(profileAtual);
 
-            usuarioService.atualizarUsuarioNaSessao();
+            userService.atualizarUsuarioNaSessao();
 
             resposta.message = "As Alterações foram salvas com sucesso.";
             resposta.success = true;

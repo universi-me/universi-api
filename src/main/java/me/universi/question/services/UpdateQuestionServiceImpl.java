@@ -6,7 +6,7 @@ import me.universi.question.entities.Question;
 import me.universi.question.exceptions.QuestionNotfoundException;
 import me.universi.user.entities.User;
 import me.universi.user.exceptions.UserNotFoundException;
-import me.universi.user.repositories.UsuarioRepository;
+import me.universi.user.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,10 +15,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class UpdateQuestionServiceImpl implements UpdateQuestionService {
     private final QuestionRepository questionRepository;
-    private final UsuarioRepository userRepository;
+    private final UserRepository userRepository;
 
     @Autowired
-    public UpdateQuestionServiceImpl(QuestionRepository questionRepository, UsuarioRepository userRepository) {
+    public UpdateQuestionServiceImpl(QuestionRepository questionRepository, UserRepository userRepository) {
         this.questionRepository = questionRepository;
         this.userRepository = userRepository;
     }

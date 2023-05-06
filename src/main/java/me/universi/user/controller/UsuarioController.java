@@ -15,7 +15,7 @@ import me.universi.perfil.services.PerfilService;
 import me.universi.user.entities.User;
 import me.universi.user.enums.Authority;
 import me.universi.user.exceptions.UsuarioException;
-import me.universi.user.services.UsuarioService;
+import me.universi.user.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.MediaType;
@@ -30,7 +30,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 @Controller
 public class UsuarioController {
     @Autowired
-    public UsuarioService usuarioService;
+    public UserService userService;
     @Autowired
     public PerfilService perfilService;
     @Autowired
@@ -48,7 +48,7 @@ public class UsuarioController {
         Response response = new Response();
         try {
 
-            if(usuarioService.usuarioEstaLogado()) {
+            if(userService.usuarioEstaLogado()) {
                 response.success = true;
                 response.message = "Usuário está logado.";
                 return response;
@@ -81,20 +81,20 @@ public class UsuarioController {
 
             String senha = (String)body.get("password");
 
-            if (nome==null || nome.length()==0 || !usuarioService.usuarioRegex(nome)) {
+            if (nome==null || nome.length()==0 || !userService.usuarioRegex(nome)) {
                 throw new UsuarioException("Verifique o campo Usuário!");
             }
-            if (email==null || email.length()==0 || !usuarioService.emailRegex(email + "@dcx.ufpb.br")) {
+            if (email==null || email.length()==0 || !userService.emailRegex(email + "@dcx.ufpb.br")) {
                 throw new UsuarioException("Verifique o campo Email!");
             }
             if (senha==null || senha.length()==0) {
                 throw new UsuarioException("Verifique o campo Senha!");
             }
 
-            if(usuarioService.usernameExiste(nome)) {
+            if(userService.usernameExiste(nome)) {
                 throw new UsuarioException("Usuário \""+nome+"\" já esta cadastrado!");
             }
-            if(usuarioService.emailExiste(email)) {
+            if(userService.emailExiste(email)) {
                 throw new UsuarioException("Email \""+email+"\" já esta cadastrado!");
             }
 
@@ -102,9 +102,9 @@ public class UsuarioController {
             user.setName(nome);
             // exclusivo para dcx
             user.setEmail(email + "@dcx.ufpb.br");
-            user.setPassword(usuarioService.codificarSenha(senha));
+            user.setPassword(userService.codificarSenha(senha));
 
-            usuarioService.createUser(user);
+            userService.createUser(user);
 
             resposta.success = true;
             resposta.message = "Usuário registrado com sucesso, efetue o login para completar o cadastro.";
@@ -130,17 +130,17 @@ public class UsuarioController {
 
             String senha = (String)body.get("senha");
 
-            User user = usuarioService.obterUsuarioNaSessao();
+            User user = userService.obterUsuarioNaSessao();
 
             // se logado com google não checkar senha
             boolean logadoComGoogle = (session.getAttribute("loginViaGoogle") != null);
 
-            if (logadoComGoogle || usuarioService.senhaValida(user, senha)) {
-                user.setPassword(usuarioService.codificarSenha(password));
+            if (logadoComGoogle || userService.senhaValida(user, senha)) {
+                user.setPassword(userService.codificarSenha(password));
                 user.setExpired_credentials(false);
-                usuarioService.save(user);
+                userService.save(user);
 
-                usuarioService.atualizarUsuarioNaSessao();
+                userService.atualizarUsuarioNaSessao();
 
                 resposta.success = true;
                 resposta.message = "As Alterações foram salvas com sucesso.";
@@ -178,7 +178,7 @@ public class UsuarioController {
             Boolean credenciaisExpiradas = (Boolean)body.get("credenciaisExpiradas");
             Boolean usuarioExpirado = (Boolean)body.get("usuarioExpirado");
 
-            User userEdit = (User) usuarioService.findFirstById(Long.valueOf(usuarioId));
+            User userEdit = (User) userService.findFirstById(Long.valueOf(usuarioId));
             if(userEdit == null) {
                 throw new UsuarioException("Usuário não encontrado.");
             }
@@ -192,7 +192,7 @@ public class UsuarioController {
                 userEdit.setEmail(email);
             }
             if(senha != null && senha.length()>0) {
-                userEdit.setPassword(usuarioService.codificarSenha(senha));
+                userEdit.setPassword(userService.codificarSenha(senha));
             }
             if(nivelConta != null && nivelConta.length()>0) {
                 userEdit.setAuthority(Authority.valueOf(nivelConta));
@@ -214,10 +214,10 @@ public class UsuarioController {
                 userEdit.setExpired_user(usuarioExpirado);
             }
 
-            usuarioService.save(userEdit);
+            userService.save(userEdit);
 
             // force logout
-            usuarioService.logoutUsername(usernameOld);
+            userService.logoutUsername(usernameOld);
 
             resposta.success = true;
             resposta.message = "As Alterações foram salvas com sucesso, A sessão do usuário foi finalizada.";
@@ -249,7 +249,7 @@ public class UsuarioController {
 
             GoogleIdToken idToken = verifier.verify(idTokenString);
 
-            HttpSession sessionReq = usuarioService.obterSessaoAtual();
+            HttpSession sessionReq = userService.obterSessaoAtual();
 
             if (idToken != null) {
                 Payload payload = idToken.getPayload();
@@ -267,18 +267,18 @@ public class UsuarioController {
                 User user = null;
 
                 try {
-                    user = (User) usuarioService.findFirstByEmail(email);
+                    user = (User) userService.findFirstByEmail(email);
                 } catch (UsuarioException  e) {
                     // Registrar Usuário com conta DCX, com informações seguras do payload
 
                     // criar username a partir do email DCX
                     String newUsername = ((String)email.split("@")[0]).trim();
-                    if(!usuarioService.usernameExiste(newUsername)) {
+                    if(!userService.usernameExiste(newUsername)) {
 
                         user = new User();
                         user.setName(newUsername);
                         user.setEmail(email.trim());
-                        usuarioService.createUser(user);
+                        userService.createUser(user);
 
                         Profile profile = user.getProfile();
 
@@ -308,15 +308,15 @@ public class UsuarioController {
 
                     if(!user.isEmail_verified()) { // ativar selo de verificado na conta
                         user.setEmail_verified(true);
-                        usuarioService.save(user);
+                        userService.save(user);
                     }
 
                     sessionReq.setAttribute("loginViaGoogle", true);
 
-                    usuarioService.configurarSessaoParaUsuario(user, authenticationManager);
+                    userService.configurarSessaoParaUsuario(user, authenticationManager);
 
                     resposta.success = true;
-                    resposta.redirectTo = usuarioService.obterUrlAoLogar();
+                    resposta.redirectTo = userService.obterUrlAoLogar();
                     resposta.message = "Usuário Logado com sucesso.";
                     return resposta;
                 }

@@ -1,112 +1,104 @@
-package me.universi.grupo.entities;
+package me.universi.grupo.DTO;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import me.universi.grupo.entities.Group;
 import me.universi.grupo.enums.GroupType;
 import me.universi.perfil.entities.Profile;
-import org.hibernate.annotations.CreationTimestamp;
 
-import jakarta.persistence.*;
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 
-@Entity(name = "system_group")
-public class Group {
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_ABSENT)
+public class GroupDTO implements Serializable {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_group")
+    @Serial
+    private static final long serialVersionUID = 2192157095656137102L;
+
     public Long id;
-    
-    @Column(name = "nickname")
+
     public String nickname;
 
-    @Column(name = "name")
     public String name;
 
-    @Column(name = "description", columnDefinition = "TEXT")
     public String description;
 
-    @Column(name = "image")
     public String image;
 
-    @ManyToOne
-    @JoinColumn(name="id_profile")
     public Profile admin;
 
-    @ManyToMany(cascade = { CascadeType.ALL })
-    @JoinTable(
-            name = "profile_group",
-            joinColumns = { @JoinColumn(name = "id_group") },
-            inverseJoinColumns = { @JoinColumn(name =  "id_profile") }
-    )
+
     @JsonIdentityInfo(generator= ObjectIdGenerators.PropertyGenerator.class, property="id", scope = Profile.class)
     @JsonIdentityReference(alwaysAsId = true)
     public Collection<Profile> participants;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
-    @JoinTable(
-            name = "subgroup",
-            joinColumns = { @JoinColumn(name = "id_group", referencedColumnName = "id_group") },
-            inverseJoinColumns = { @JoinColumn(name = "id_subgroup", referencedColumnName = "id_group") }
-    )
     @JsonIdentityInfo(generator= ObjectIdGenerators.PropertyGenerator.class, property="id", scope = Group.class)
     @JsonIdentityReference(alwaysAsId = true)
     public Collection<Group> subGroups;
 
-    @Column(name = "type")
     @Enumerated(EnumType.STRING)
     public GroupType type;
 
     /** The group's ability to be accessed directly through the URL (parent of all groups) */
-    @Column(name = "group_root")
     public boolean rootGroup;
 
     /** Can create subGroups */
-    @Column(name = "can_create_group")
     public boolean canCreateGroup;
 
-    @Column(name = "can_enter")
     public boolean canEnter;
 
-    @Column(name = "can_add_participant")
     public boolean canAddParticipant;
 
-    @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created_at")
     private Date createdAt;
 
-    @Column(name = "public_group")
     public boolean publicGroup;
 
-    public Group() {
-    }
-
-    public Group(String nickname, String name, String description, Profile admin, Collection<Profile> participants, GroupType type, Collection<Group> subGroups, boolean rootGroup, boolean canCreateGroup) {
+    public GroupDTO(Long id, String nickname, String name, String description, String image, Profile admin, Collection<Profile> participants, Collection<Group> subGroups, GroupType type, boolean rootGroup, boolean canCreateGroup, boolean canEnter, boolean canAddParticipant, Date createdAt, boolean publicGroup) {
+        this.id = id;
         this.nickname = nickname;
         this.name = name;
         this.description = description;
+        this.image = image;
         this.admin = admin;
         this.participants = participants;
-        this.type = type;
         this.subGroups = subGroups;
+        this.type = type;
         this.rootGroup = rootGroup;
         this.canCreateGroup = canCreateGroup;
+        this.canEnter = canEnter;
+        this.canAddParticipant = canAddParticipant;
+        this.createdAt = createdAt;
+        this.publicGroup = publicGroup;
     }
 
-    public Group(String nickname, String name, String description, Profile admin, GroupType type, Date createdAt) {
-        this.nickname = nickname;
-        this.name = name;
-        this.description = description;
-        this.admin = admin;
-        this.type = type;
-        this.createdAt = createdAt;
+    public GroupDTO() {
     }
 
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getNickname() {
+        return nickname;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
     }
 
     public String getName() {
@@ -125,6 +117,14 @@ public class Group {
         this.description = description;
     }
 
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
+
     public Profile getAdmin() {
         return admin;
     }
@@ -141,28 +141,20 @@ public class Group {
         this.participants = participants;
     }
 
-    public GroupType getType() {
-        return type;
-    }
-
-    public void setType(GroupType type) {
-        this.type = type;
-    }
-    
-    public String getNickname() {
-        return nickname;
-    }
-
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
-    }
-
     public Collection<Group> getSubGroups() {
         return subGroups;
     }
 
     public void setSubGroups(Collection<Group> subGroups) {
         this.subGroups = subGroups;
+    }
+
+    public GroupType getType() {
+        return type;
+    }
+
+    public void setType(GroupType type) {
+        this.type = type;
     }
 
     public boolean isRootGroup() {
@@ -181,30 +173,6 @@ public class Group {
         this.canCreateGroup = canCreateGroup;
     }
 
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
-    }
-
-    public Date getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public boolean isPublicGroup() {
-        return publicGroup;
-    }
-
-    public void setPublicGroup(boolean publicGroup) {
-        this.publicGroup = publicGroup;
-    }
-
     public boolean isCanEnter() {
         return canEnter;
     }
@@ -221,8 +189,19 @@ public class Group {
         this.canAddParticipant = canAddParticipant;
     }
 
-    @Override
-    public String toString() {
-        return "Grupo [id=\""+this.id+"\", nome=\""+this.name+"\", descricao=\""+this.description+"\"]";
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public boolean isPublicGroup() {
+        return publicGroup;
+    }
+
+    public void setPublicGroup(boolean publicGroup) {
+        this.publicGroup = publicGroup;
     }
 }

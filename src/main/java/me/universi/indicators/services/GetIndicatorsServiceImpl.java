@@ -4,18 +4,18 @@ import me.universi.indicators.IndicatorsRepository;
 import me.universi.indicators.entities.Indicators;
 import me.universi.user.entities.User;
 import me.universi.user.exceptions.UserNotFoundException;
-import me.universi.user.repositories.UsuarioRepository;
+import me.universi.user.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class GetIndicatorsServiceImpl implements GetIndicatorsService {
 
-    private final UsuarioRepository userRepository;
+    private final UserRepository userRepository;
     private final IndicatorsRepository indicatorsRepository;
 
     @Autowired
-    public GetIndicatorsServiceImpl(UsuarioRepository userRepository, IndicatorsRepository indicatorsRepository) {
+    public GetIndicatorsServiceImpl(UserRepository userRepository, IndicatorsRepository indicatorsRepository) {
         this.userRepository = userRepository;
         this.indicatorsRepository = indicatorsRepository;
     }

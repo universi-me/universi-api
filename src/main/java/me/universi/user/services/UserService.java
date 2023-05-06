@@ -6,7 +6,7 @@ import me.universi.perfil.services.PerfilService;
 import me.universi.user.entities.User;
 import me.universi.user.enums.Authority;
 import me.universi.user.exceptions.UsuarioException;
-import me.universi.user.repositories.UsuarioRepository;
+import me.universi.user.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -39,8 +39,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
-public class UsuarioService implements UserDetailsService {
-    private final UsuarioRepository userRepository;
+public class UserService implements UserDetailsService {
+    private final UserRepository userRepository;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -50,8 +50,7 @@ public class UsuarioService implements UserDetailsService {
 
     private final SessionRegistry sessionRegistry;
 
-    @Autowired
-    public UsuarioService(UsuarioRepository userRepository, PasswordEncoder passwordEncoder, PerfilService perfilService, RoleHierarchyImpl roleHierarchy, SessionRegistry sessionRegistry) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, PerfilService perfilService, RoleHierarchyImpl roleHierarchy, SessionRegistry sessionRegistry) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.perfilService = perfilService;

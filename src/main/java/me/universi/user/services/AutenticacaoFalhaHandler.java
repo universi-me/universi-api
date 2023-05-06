@@ -16,7 +16,7 @@ import java.io.IOException;
 
 public class AutenticacaoFalhaHandler extends SimpleUrlAuthenticationFailureHandler {
     @Autowired
-    private UsuarioService usuarioService;
+    private UserService userService;
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
 
@@ -25,7 +25,7 @@ public class AutenticacaoFalhaHandler extends SimpleUrlAuthenticationFailureHand
             Response resposta = new Response();
 
             resposta.success = false;
-            resposta.message = usuarioService.erroSpringSecurityMemsagem(exception);
+            resposta.message = userService.erroSpringSecurityMemsagem(exception);
 
             response.setHeader("Content-Type", "application/json; charset=utf-8");
             response.getWriter().print(resposta.toString());

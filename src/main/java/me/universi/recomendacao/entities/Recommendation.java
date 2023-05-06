@@ -7,20 +7,20 @@ import org.hibernate.annotations.CreationTimestamp;
 import jakarta.persistence.*;
 import java.util.Date;
 
-@Entity(name = "recomendacao")
+@Entity(name = "recommendation")
 public class Recommendation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_recomendacao")
+    @Column(name = "id_recommendation")
     private Long id;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "origem")
+    @JoinColumn(name = "origin")
     private Profile origin;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "destiny")
     private Profile destiny;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_competenciatipo")
+    @JoinColumn(name = "id_competence_type")
     private CompetenceType competenceType;
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;

@@ -22,7 +22,7 @@ import java.security.Principal;
  */
 public class AutenticacaoValidaHandler extends SavedRequestAwareAuthenticationSuccessHandler {
     @Autowired
-    private UsuarioService usuarioService;
+    private UserService userService;
     @Autowired
     AuthenticationManager authenticationManager;
 
@@ -37,8 +37,8 @@ public class AutenticacaoValidaHandler extends SavedRequestAwareAuthenticationSu
             username = ((UserDetails) authentication.getPrincipal()).getUsername();
         }
         if(username != null) {
-            User user = (User) usuarioService.loadUserByUsername(username);
-            usuarioService.configurarSessaoParaUsuario(user, authenticationManager);
+            User user = (User) userService.loadUserByUsername(username);
+            userService.configurarSessaoParaUsuario(user, authenticationManager);
         }
 
         if ("application/json".equals(request.getHeader("Content-Type"))) { // request foi via JSON
@@ -47,7 +47,7 @@ public class AutenticacaoValidaHandler extends SavedRequestAwareAuthenticationSu
             resposta.success = true;
             resposta.message = "Usuário Logado com sucesso.";
 
-            resposta.redirectTo = usuarioService.obterUrlAoLogar();
+            resposta.redirectTo = userService.obterUrlAoLogar();
 
             response.setHeader("Content-Type", "application/json; charset=utf-8");
             response.getWriter().print(resposta.toString());
@@ -56,7 +56,7 @@ public class AutenticacaoValidaHandler extends SavedRequestAwareAuthenticationSu
         } else {
 
             RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
-            redirectStrategy.sendRedirect(request, response, usuarioService.obterUrlAoLogar());
+            redirectStrategy.sendRedirect(request, response, userService.obterUrlAoLogar());
             //super.onAuthenticationSuccess(request, response, authentication);
 
         }

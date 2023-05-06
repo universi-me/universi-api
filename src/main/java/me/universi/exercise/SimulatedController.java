@@ -1,8 +1,11 @@
 package me.universi.exercise;
 
 import me.universi.exercise.dto.AnswerDTO;
+import me.universi.exercise.dto.ExerciseCreateDTO;
 import me.universi.exercise.dto.QuestionWithAlternativesDTO;
 import me.universi.exercise.dto.ExerciseAnswersDTO;
+import me.universi.exercise.entities.Exercise;
+import me.universi.exercise.services.CreateExerciseService;
 import me.universi.exercise.services.GetExerciseService;
 import me.universi.exercise.services.ValuerExerciseService;
 import org.springframework.http.HttpStatus;
@@ -20,11 +23,19 @@ import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/api/user/{userId}/simulated")
+@RequestMapping(value = "/api/user/")
 public class SimulatedController {
 
-    public GetExerciseService getExerciseService;
-    public ValuerExerciseService valuerExerciseService;
+    public final GetExerciseService getExerciseService;
+    public final ValuerExerciseService valuerExerciseService;
+
+    private final CreateExerciseService createExerciseService;
+
+    public SimulatedController(GetExerciseService getExerciseService, ValuerExerciseService valuerExerciseService, CreateExerciseService createExerciseService) {
+        this.getExerciseService = getExerciseService;
+        this.valuerExerciseService = valuerExerciseService;
+        this.createExerciseService = createExerciseService;
+    }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
@@ -36,5 +47,12 @@ public class SimulatedController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public ExerciseAnswersDTO calculateSimulated(@PathVariable Long userId, @Valid @RequestBody List<AnswerDTO> answers){
         return valuerExerciseService.simulatedAnswers(userId, answers);
+    }
+
+    @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping(value = "group/{groupId}/exercise", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Exercise createExercise(@PathVariable Long groupId, @RequestBody  @Valid ExerciseCreateDTO exerciseCreateDTO){
+
+        return  this.createExerciseService.createExercise(groupId, exerciseCreateDTO);
     }
 }

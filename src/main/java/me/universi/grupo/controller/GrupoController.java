@@ -7,7 +7,7 @@ import me.universi.grupo.exceptions.GroupException;
 import me.universi.grupo.services.GroupService;
 
 import me.universi.user.entities.User;
-import me.universi.user.services.UsuarioService;
+import me.universi.user.services.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -22,20 +22,20 @@ public class GrupoController {
     @Autowired
     public GroupService grupoService;
     @Autowired
-    public UsuarioService usuarioService;
+    public UserService userService;
 
     @PostMapping(value = "/grupo/criar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response grupo_criar(@RequestBody Map<String, Object> body) {
         Response resposta = new Response();
         try {
-            User user = usuarioService.obterUsuarioNaSessao();
+            User user = userService.obterUsuarioNaSessao();
 
             Boolean grupoRoot = (Boolean)body.get("grupoRoot");
 
             String grupoIdPai = (String)body.get("grupoId");
             if(grupoIdPai == null) {
-                if(!(grupoRoot != null && usuarioService.isContaAdmin(user))) {
+                if(!(grupoRoot != null && userService.isContaAdmin(user))) {
                     throw new GroupException("Parametro grupoId é nulo.");
                 }
             } else if(grupoIdPai.length() > 0 && (grupoRoot!=null && grupoRoot)) {
@@ -75,7 +75,7 @@ public class GrupoController {
                 throw new GroupException("Este Nickname não está disponível para este grupo.");
             }
 
-            if((grupoRoot != null && grupoRoot && usuarioService.isContaAdmin(user)) || ((grupoPai !=null && grupoPai.canCreateGroup) || grupoService.verifyPermissionToEditGroup(grupoPai, user))) {
+            if((grupoRoot != null && grupoRoot && userService.isContaAdmin(user)) || ((grupoPai !=null && grupoPai.canCreateGroup) || grupoService.verifyPermissionToEditGroup(grupoPai, user))) {
                 Group grupoNew = new Group();
                 grupoNew.setNickname(nickname);
                 grupoNew.setName(nome);
@@ -94,7 +94,7 @@ public class GrupoController {
                 if(podeEntrar != null) {
                     grupoNew.setCanEnter(podeEntrar);
                 }
-                if((grupoRoot != null && grupoRoot) && usuarioService.isContaAdmin(user)) {
+                if((grupoRoot != null && grupoRoot) && userService.isContaAdmin(user)) {
                     grupoNew.setRootGroup(true);
                     grupoService.save(grupoNew);
                 } else {
@@ -139,7 +139,7 @@ public class GrupoController {
                 throw new GroupException("Grupo não encontrado.");
             }
 
-            User user = usuarioService.obterUsuarioNaSessao();
+            User user = userService.obterUsuarioNaSessao();
 
             if(grupoService.verifyPermissionToEditGroup(grupoEdit, user)) {
                 if(nome != null && nome.length() > 0) {
@@ -191,7 +191,7 @@ public class GrupoController {
                 throw new GroupException("Parametro grupoId é nulo.");
             }
 
-            User user = usuarioService.obterUsuarioNaSessao();
+            User user = userService.obterUsuarioNaSessao();
 
             Group grupoEdit = grupoService.findFirstById(Long.valueOf(grupoId));
             if(grupoEdit == null) {
@@ -231,7 +231,7 @@ public class GrupoController {
                 throw new GroupException("Parametro grupoId é nulo.");
             }
 
-            User user = usuarioService.obterUsuarioNaSessao();
+            User user = userService.obterUsuarioNaSessao();
 
             Group grupoEdit = grupoService.findFirstById(Long.valueOf(grupoId));
             if(grupoEdit == null) {
@@ -268,14 +268,14 @@ public class GrupoController {
                 throw new GroupException("Parametro participante é nulo.");
             }
 
-            User user = usuarioService.obterUsuarioNaSessao();
+            User user = userService.obterUsuarioNaSessao();
 
             User participanteUser = null;
             if(participante != null && participante.length() > 0) {
                 if (participante.contains("@")) {
-                    participanteUser = (User) usuarioService.findFirstByEmail(participante);
+                    participanteUser = (User) userService.findFirstByEmail(participante);
                 } else {
-                    participanteUser = (User) usuarioService.loadUserByUsername(participante);
+                    participanteUser = (User) userService.loadUserByUsername(participante);
                 }
             }
 
@@ -315,14 +315,14 @@ public class GrupoController {
                 throw new GroupException("Parametro participante é nulo.");
             }
 
-            User user = usuarioService.obterUsuarioNaSessao();
+            User user = userService.obterUsuarioNaSessao();
 
             User participanteUser = null;
             if(participante != null && participante.length() > 0) {
                 if (participante.contains("@")) {
-                    participanteUser = (User) usuarioService.findFirstByEmail(participante);
+                    participanteUser = (User) userService.findFirstByEmail(participante);
                 } else {
-                    participanteUser = (User) usuarioService.loadUserByUsername(participante);
+                    participanteUser = (User) userService.loadUserByUsername(participante);
                 }
             }
 
@@ -400,7 +400,7 @@ public class GrupoController {
                 throw new GroupException("Subgrupo não encontrado.");
             }
 
-            User user = usuarioService.obterUsuarioNaSessao();
+            User user = userService.obterUsuarioNaSessao();
 
             if(grupoService.verifyPermissionToEditGroup(grupo, user)) {
                 grupoService.removeSubGroup(grupo, grupoRemover);
@@ -434,7 +434,7 @@ public class GrupoController {
                 throw new GroupException("Grupo não encontrado.");
             }
 
-            User user = usuarioService.obterUsuarioNaSessao();
+            User user = userService.obterUsuarioNaSessao();
 
             if(grupoService.verifyPermissionToEditGroup(grupo, user)) {
 

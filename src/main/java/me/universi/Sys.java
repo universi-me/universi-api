@@ -7,7 +7,7 @@ import io.swagger.v3.oas.models.info.License;
 import me.universi.user.entities.User;
 
 import me.universi.user.enums.Authority;
-import me.universi.user.services.UsuarioService;
+import me.universi.user.services.UserService;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class Sys {
 
     @Autowired
-    public UsuarioService usuarioService;
+    public UserService userService;
     @Autowired
     private ApplicationContext context;
 
@@ -55,13 +55,13 @@ public class Sys {
     InitializingBean sendDatabase() {
         return () -> {
             // Criar usuario Admin padrão, obs: alterar senha depois.
-            if(!usuarioService.usernameExiste("admin")) {
+            if(!userService.usernameExiste("admin")) {
                 System.out.println("Criando usuário: admin:admin");
-                User userAdmin = new User("admin", null, usuarioService.codificarSenha("admin"));
+                User userAdmin = new User("admin", null, userService.codificarSenha("admin"));
                 try {
-                    usuarioService.createUser(userAdmin);
+                    userService.createUser(userAdmin);
                     userAdmin.setAuthority(Authority.ROLE_ADMIN);
-                    usuarioService.save(userAdmin);
+                    userService.save(userAdmin);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
