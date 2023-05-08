@@ -19,16 +19,22 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/api/user/{userId}/question/{questionId}/alternative/")
+@RequestMapping(value = "/api/group/{groupId}/exercise/{exerciseId}/question/{questionId}/alternative")
 public class AlternativeController {
-    private CreateAlternativeService createAlternativeService;
-    private GetAlternativeService getAlternativeService;
-    private ListAlternativeService listAlternativeService;
+    private final CreateAlternativeService createAlternativeService;
+    private final GetAlternativeService getAlternativeService;
+    private final ListAlternativeService listAlternativeService;
+
+    public AlternativeController(CreateAlternativeService createAlternativeService, GetAlternativeService getAlternativeService, ListAlternativeService listAlternativeService) {
+        this.createAlternativeService = createAlternativeService;
+        this.getAlternativeService = getAlternativeService;
+        this.listAlternativeService = listAlternativeService;
+    }
 
     @ResponseStatus(code = HttpStatus.CREATED)
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Alternative createAlternative(@Valid @RequestBody AlternativeCreateDTO alternativeCreateDTO, @PathVariable Long userId, @PathVariable Long questionId){
-        return createAlternativeService.createAlternative(userId, questionId, alternativeCreateDTO);
+    public Alternative createAlternative(@Valid @RequestBody AlternativeCreateDTO alternativeCreateDTO, @PathVariable Long groupId, @PathVariable Long exerciseId, @PathVariable Long questionId){
+        return createAlternativeService.createAlternative(groupId, exerciseId, questionId, alternativeCreateDTO);
     }
 
     @ResponseStatus(code = HttpStatus.OK)

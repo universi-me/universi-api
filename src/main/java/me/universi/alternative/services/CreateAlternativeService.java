@@ -5,5 +5,5 @@ import me.universi.alternative.entities.Alternative;
 
 @FunctionalInterface
 public interface CreateAlternativeService {
-    Alternative createAlternative(Long userId, Long questionId, AlternativeCreateDTO alternative);
+    Alternative createAlternative(Long groupId, Long exerciseId, Long questionId, AlternativeCreateDTO alternative);
 }

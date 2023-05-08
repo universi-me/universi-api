@@ -3,14 +3,13 @@ package me.universi.exercise.services;
 import me.universi.exercise.ExerciseRepository;
 import me.universi.exercise.dto.ExerciseCreateDTO;
 import me.universi.exercise.entities.Exercise;
-import me.universi.grupo.entities.Group;
-import me.universi.grupo.exceptions.GroupNotFoundException;
-import me.universi.grupo.repositories.GroupRepository;
+import me.universi.group.entities.Group;
+import me.universi.group.exceptions.GroupNotFoundException;
+import me.universi.group.repositories.GroupRepository;
 import me.universi.user.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
+import util.ExerciseUtil;
 
 @Service
 public class CreateExerciseServiceImpl implements CreateExerciseService{
@@ -34,6 +33,7 @@ public class CreateExerciseServiceImpl implements CreateExerciseService{
                 groupId,
                 idProfile
         ).orElseThrow(GroupNotFoundException::new);
+        ExerciseUtil.checkPermissionExercise(this.userService.obterUsuarioNaSessao(), group);
 
         exercise.setGroup(group);
         return this.exerciseRepository.save(Exercise.from(exercise));

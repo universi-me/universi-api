@@ -13,7 +13,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import me.universi.indicators.entities.Indicators;
-import me.universi.perfil.entities.Profile;
+import me.universi.profile.entities.Profile;
 import me.universi.user.enums.Authority;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

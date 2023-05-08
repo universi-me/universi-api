@@ -1,9 +1,9 @@
 package me.universi.pesquisar.controller;
 
-import me.universi.grupo.entities.Group;
-import me.universi.grupo.services.GroupService;
-import me.universi.perfil.entities.Profile;
-import me.universi.perfil.services.PerfilService;
+import me.universi.group.entities.Group;
+import me.universi.group.services.GroupService;
+import me.universi.profile.entities.Profile;
+import me.universi.profile.services.PerfilService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;

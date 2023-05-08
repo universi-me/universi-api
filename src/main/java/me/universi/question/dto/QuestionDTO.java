@@ -6,12 +6,14 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import me.universi.exercise.entities.Exercise;
 import me.universi.feedback.entities.Feedback;
 import me.universi.question.entities.Question;
 import me.universi.user.entities.User;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
@@ -31,11 +33,15 @@ public class QuestionDTO implements Serializable {
 
     private Feedback feedback;
 
-    public QuestionDTO(Long id, String title, User userCreate, Feedback feedback) {
+    private List<Exercise> exercises;
+
+
+    public QuestionDTO(Long id, String title, User userCreate, Feedback feedback, List<Exercise> exercises) {
         this.id = id;
         this.title = title;
         this.userCreate = userCreate;
         this.feedback = feedback;
+        this.exercises = exercises;
     }
 
     public static QuestionDTO from (Question question){
@@ -43,7 +49,8 @@ public class QuestionDTO implements Serializable {
                 question.getId(),
                 question.getTitle(),
                 question.getUserCreate(),
-                question.getFeedback());
+                question.getFeedback(),
+                question.getExercises());
     }
 
     public Long getId() {
@@ -76,6 +83,14 @@ public class QuestionDTO implements Serializable {
 
     public void setFeedback(Feedback feedback) {
         this.feedback = feedback;
+    }
+
+    public List<Exercise> getExercises() {
+        return exercises;
+    }
+
+    public void setExercises(List<Exercise> exercises) {
+        this.exercises = exercises;
     }
 }
 
