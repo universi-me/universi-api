@@ -8,10 +8,10 @@ import jakarta.servlet.http.HttpSession;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import me.universi.api.entities.Response;
-import me.universi.competencia.services.CompetenceTypeService;
-import me.universi.grupo.services.GroupService;
-import me.universi.perfil.entities.Profile;
-import me.universi.perfil.services.PerfilService;
+import me.universi.competence.services.CompetenceTypeService;
+import me.universi.group.services.GroupService;
+import me.universi.profile.entities.Profile;
+import me.universi.profile.services.PerfilService;
 import me.universi.user.entities.User;
 import me.universi.user.enums.Authority;
 import me.universi.user.exceptions.UsuarioException;
@@ -28,7 +28,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 
 @Controller
-public class UsuarioController {
+public class UserController {
     @Autowired
     public UserService userService;
     @Autowired
