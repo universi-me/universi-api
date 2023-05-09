@@ -19,4 +19,6 @@ public interface AlternativeRepository extends JpaRepository<Alternative, Long> 
     @Query(value = "select * from alternative where question_id in (?1) and correct is true", nativeQuery = true)
     List<Alternative> findAllByQuestionIdAndCorrectIsTrue(List<Long> questionIds);
 
+    Integer countAlternativeByQuestionId(Long questionId);
+
 }

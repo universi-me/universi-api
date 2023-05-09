@@ -2,7 +2,7 @@ package me.universi.link.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import me.universi.link.enums.TypeLink;
-import me.universi.perfil.entities.Profile;
+import me.universi.profile.entities.Profile;
 
 import jakarta.persistence.*;
 

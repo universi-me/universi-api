@@ -1,24 +1,29 @@
 package me.universi.question.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.CascadeType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
-import me.universi.feedback.entities.Feedback;
-import me.universi.question.dto.QuestionDTO;
-import me.universi.question.dto.QuestionCreateDTO;
-import me.universi.user.entities.User;
-import org.hibernate.Hibernate;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import me.universi.exercise.entities.Exercise;
+import me.universi.feedback.entities.Feedback;
+import me.universi.question.dto.QuestionCreateDTO;
+import me.universi.question.dto.QuestionDTO;
+import me.universi.user.entities.User;
+import org.hibernate.Hibernate;
+
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -46,14 +51,19 @@ public class Question implements Serializable {
     @JoinColumn(name = "feedback_id")
     private Feedback feedback;
 
+    @ManyToMany(mappedBy = "questions", cascade = CascadeType.REFRESH)
+    @JsonBackReference
+    private List<Exercise> exercises;
+
     public Question() {
     }
 
-    public Question(Long id, String title, User userCreate, Feedback feedback) {
+    public Question(Long id, String title, User userCreate, Feedback feedback, List<Exercise> exercises) {
         this.id = id;
         this.title = title;
         this.userCreate = userCreate;
         this.feedback = feedback;
+        this.exercises = exercises;
     }
 
     public Question(String title, User userCreate, Feedback feedback) {
@@ -67,7 +77,8 @@ public class Question implements Serializable {
                 questionDTO.getId(),
                 questionDTO.getTitle(),
                 questionDTO.getUserCreate(),
-                questionDTO.getFeedback());
+                questionDTO.getFeedback(),
+                questionDTO.getExercises());
     }
 
     public static Question from(QuestionCreateDTO questionDTO) {
@@ -79,6 +90,14 @@ public class Question implements Serializable {
 
     public Long getId() {
         return id;
+    }
+
+    public List<Exercise> getExercises() {
+        return exercises;
+    }
+
+    public void setExercises(List<Exercise> exercises) {
+        this.exercises = exercises;
     }
 
     public void setId(Long id) {

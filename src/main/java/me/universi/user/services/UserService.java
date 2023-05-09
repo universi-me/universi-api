@@ -1,13 +1,12 @@
 package me.universi.user.services;
 
 import jakarta.servlet.http.HttpServletRequest;
-import me.universi.perfil.entities.Profile;
-import me.universi.perfil.services.PerfilService;
+import me.universi.profile.entities.Profile;
+import me.universi.profile.services.PerfilService;
 import me.universi.user.entities.User;
 import me.universi.user.enums.Authority;
 import me.universi.user.exceptions.UsuarioException;
 import me.universi.user.repositories.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;

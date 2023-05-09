@@ -5,7 +5,7 @@ import me.universi.link.entities.Link;
 import me.universi.link.enums.TypeLink;
 import me.universi.link.exceptions.LinkException;
 import me.universi.link.services.LinkService;
-import me.universi.perfil.entities.Profile;
+import me.universi.profile.entities.Profile;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
