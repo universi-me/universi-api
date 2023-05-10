@@ -1,14 +1,30 @@
 package me.universi.profile.entities;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import me.universi.competence.entities.Competence;
+import me.universi.group.entities.Group;
 import me.universi.link.entities.Link;
 import me.universi.profile.enums.Gender;
 import me.universi.recommendation.entities.Recommendation;
 import me.universi.user.entities.User;
-import me.universi.group.entities.Group;
 import org.hibernate.annotations.CreationTimestamp;
 
-import jakarta.persistence.*;
 import java.util.Collection;
 import java.util.Date;
 
@@ -16,7 +32,8 @@ import java.util.Date;
 public class Profile {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "profile_generator")
+    @SequenceGenerator(name = "profile_generator", sequenceName = "profile_sequence", allocationSize = 1)
     @Column(name = "id_profile")
     private Long id;
 

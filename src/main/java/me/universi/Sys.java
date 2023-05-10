@@ -51,23 +51,23 @@ public class Sys {
         return "Universi.me API";
     }
 
-    @Bean
-    InitializingBean sendDatabase() {
-        return () -> {
-            // Criar usuario Admin padrão, obs: alterar senha depois.
-            if(!userService.usernameExiste("admin")) {
-                System.out.println("Criando usuário: admin:admin");
-                User userAdmin = new User("admin", null, userService.codificarSenha("admin"));
-                try {
-                    userService.createUser(userAdmin);
-                    userAdmin.setAuthority(Authority.ROLE_ADMIN);
-                    userService.save(userAdmin);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        };
-    }
+//    @Bean
+//    InitializingBean sendDatabase() {
+//        return () -> {
+//            // Criar usuario Admin padrão, obs: alterar senha depois.
+//            if(!userService.usernameExiste("admin")) {
+//                System.out.println("Criando usuário: admin:admin");
+//                User userAdmin = new User("admin", null, userService.codificarSenha("admin"));
+//                try {
+//                    userService.createUser(userAdmin);
+//                    userAdmin.setAuthority(Authority.ROLE_ADMIN);
+//                    userService.save(userAdmin);
+//                } catch (Exception e) {
+//                    throw new RuntimeException(e);
+//                }
+//            }
+//        };
+//    }
 
     @Bean
     public OpenAPI customOpenAPI(@Value("${springdoc.version}") String appVersion) {

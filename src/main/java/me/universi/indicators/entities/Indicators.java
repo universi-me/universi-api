@@ -1,6 +1,8 @@
 package me.universi.indicators.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -31,14 +33,12 @@ public class Indicators implements Serializable {
     @NotNull
     private Long score;
 
-    @ManyToMany
-    @JoinTable(name="indicators_achievement", joinColumns=
-            {@JoinColumn(name="indicators_id")}, inverseJoinColumns=
-            {@JoinColumn(name="achievement_id")})
+    @ManyToMany(fetch = FetchType.EAGER, mappedBy = "indicators")
     private Set<Achievement> achievements;
 
     @OneToOne
     @JoinColumn(name = "user_id")
+    @JsonIgnore
     private User user;
 
     public Indicators(Long score, Set<Achievement> achievements, User user) {

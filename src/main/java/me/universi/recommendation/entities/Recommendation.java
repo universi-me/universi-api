@@ -10,7 +10,8 @@ import java.util.Date;
 @Entity(name = "recommendation")
 public class Recommendation {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "recommendation_generator")
+    @SequenceGenerator(name = "recommendation_generator", sequenceName = "recommendation_sequence", allocationSize = 1)
     @Column(name = "id_recommendation")
     private Long id;
     @ManyToOne(fetch = FetchType.LAZY)
