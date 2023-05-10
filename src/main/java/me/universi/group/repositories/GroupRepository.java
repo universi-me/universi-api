@@ -23,4 +23,6 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
     Optional<Group> findByIdAndAdminId(Long groupId, Long profileId);
 
     Boolean existsByIdAndAdminId(Long groupId, Long adminId);
+
+    Boolean existsByIdAndParticipantsId(Long groupId, Long profileId);
 }

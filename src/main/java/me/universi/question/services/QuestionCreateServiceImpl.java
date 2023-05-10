@@ -14,11 +14,10 @@ import me.universi.question.QuestionRepository;
 import me.universi.question.dto.QuestionCreateDTO;
 import me.universi.question.entities.Question;
 import me.universi.user.entities.User;
-import me.universi.user.exceptions.UnauthorizedException;
 import me.universi.user.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import util.ExerciseUtil;
+import me.universi.util.ExerciseUtil;
 
 
 @Service
@@ -33,7 +32,7 @@ public class QuestionCreateServiceImpl implements QuestionCreateService {
     private final GroupRepository groupRepository;
 
     @Autowired
-    public QuestionCreateServiceImpl(QuestionRepository questionRepository, FeedbackRepository feedbackRepository, ListQuestionsWithAlternativesService listQuestionsWithAlternativesService, ExerciseRepository exerciseRepository, ExerciseGetService exerciseGetService, GroupService groupService, UserService userService, GroupRepository groupRepository) {
+    public QuestionCreateServiceImpl(QuestionRepository questionRepository, FeedbackRepository feedbackRepository, ExerciseRepository exerciseRepository, ExerciseGetService exerciseGetService, GroupService groupService, UserService userService, GroupRepository groupRepository) {
         this.questionRepository = questionRepository;
         this.feedbackRepository = feedbackRepository;
         this.exerciseRepository = exerciseRepository;

@@ -9,7 +9,7 @@ import me.universi.group.repositories.GroupRepository;
 import me.universi.user.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import util.ExerciseUtil;
+import me.universi.util.ExerciseUtil;
 
 @Service
 public class CreateExerciseServiceImpl implements CreateExerciseService{

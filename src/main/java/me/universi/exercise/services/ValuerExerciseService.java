@@ -8,5 +8,5 @@ import java.util.List;
 
 @FunctionalInterface
 public interface ValuerExerciseService {
-    ExerciseAnswersDTO simulatedAnswers(Long userId, List<AnswerDTO> answers);
+    ExerciseAnswersDTO exercisesAnswers(Long groupId, Long exerciseId, List<AnswerDTO> answers);
 }

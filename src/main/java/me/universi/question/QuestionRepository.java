@@ -11,8 +11,10 @@ import java.util.Optional;
 @Repository
 public interface QuestionRepository extends JpaRepository<Question, Long> {
 
-    @Query(value = "select * from Question order by random() limit ?1 ",nativeQuery = true)
-    List<Question> findAllRandonAndLimited(int amount);
+    @Query(value = "select q.* from question q " +
+            "join exercise_question eq on q.id = eq.question_id and eq.exercise_id = ?1 " +
+            "order by random() limit ?2 ",nativeQuery = true)
+    List<Question> findAllRandonAndLimited(Long exerciseId, int amount);
 
     void deleteById(Long questionId);
 

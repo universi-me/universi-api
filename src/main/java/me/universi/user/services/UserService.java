@@ -7,6 +7,7 @@ import me.universi.user.entities.User;
 import me.universi.user.enums.Authority;
 import me.universi.user.exceptions.UsuarioException;
 import me.universi.user.repositories.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -49,6 +50,7 @@ public class UserService implements UserDetailsService {
 
     private final SessionRegistry sessionRegistry;
 
+    @Autowired
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, PerfilService perfilService, RoleHierarchyImpl roleHierarchy, SessionRegistry sessionRegistry) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
