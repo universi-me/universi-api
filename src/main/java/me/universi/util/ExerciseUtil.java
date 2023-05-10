@@ -1,4 +1,4 @@
-package util;
+package me.universi.util;
 
 import me.universi.group.entities.Group;
 import me.universi.user.entities.User;

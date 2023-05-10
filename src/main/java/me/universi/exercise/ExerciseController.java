@@ -23,7 +23,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/api/user/")
+@RequestMapping(value = "/api/group/{groupId}/exercise")
 public class ExerciseController {
 
     public final ListQuestionsWithAlternativesService listQuestionsWithAlternativesService;
@@ -37,20 +37,20 @@ public class ExerciseController {
         this.createExerciseService = createExerciseService;
     }
 
-    @GetMapping
+    @GetMapping(value = "/{exerciseId}")
     @ResponseStatus(HttpStatus.OK)
-    public List<QuestionWithAlternativesDTO> listQuestionsWithAlternatives(@PathVariable Long userId, @RequestParam int amount){
-        return listQuestionsWithAlternativesService.getQuestionsWithAlternatives(amount);
+    public List<QuestionWithAlternativesDTO> listQuestionsWithAlternatives(@PathVariable Long groupId, @PathVariable Long exerciseId,  @RequestParam int amount){
+        return listQuestionsWithAlternativesService.getQuestionsWithAlternatives(groupId, exerciseId, amount);
     }
 
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/{exerciseId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public ExerciseAnswersDTO calculateSimulated(@PathVariable Long userId, @Valid @RequestBody List<AnswerDTO> answers){
-        return valuerExerciseService.simulatedAnswers(userId, answers);
+    public ExerciseAnswersDTO calculateExercise(@PathVariable Long groupId, @PathVariable Long exerciseId, @Valid @RequestBody List<AnswerDTO> answers){
+        return valuerExerciseService.exercisesAnswers(groupId, exerciseId, answers);
     }
 
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping(value = "group/{groupId}/exercise", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Exercise createExercise(@PathVariable Long groupId, @RequestBody  @Valid ExerciseCreateDTO exerciseCreateDTO){
 
         return  this.createExerciseService.createExercise(groupId, exerciseCreateDTO);

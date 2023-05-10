@@ -7,5 +7,5 @@ import java.util.List;
 
 @FunctionalInterface
 public interface ListQuestionsWithAlternativesService {
-    List<QuestionWithAlternativesDTO> getQuestionsWithAlternatives(int amount);
+    List<QuestionWithAlternativesDTO> getQuestionsWithAlternatives(Long groupId, Long exerciseId, int amount);
 }
