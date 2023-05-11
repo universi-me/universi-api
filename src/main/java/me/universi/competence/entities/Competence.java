@@ -11,6 +11,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import me.universi.competence.enums.Level;
@@ -23,7 +24,8 @@ import java.util.Date;
 public class Competence {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "competence_generator")
+    @SequenceGenerator(name = "competence_generator", sequenceName = "competence_sequence", allocationSize = 1)
     @Column(name = "id_competence")
     private Long id;
 

@@ -9,9 +9,10 @@ import jakarta.persistence.*;
 @Entity(name = "link")
 public class Link {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "link_generator")
+    @SequenceGenerator(name = "link_generator", sequenceName = "link_sequence", allocationSize = 1)
     @Column(name = "id_link")
-    private long id;
+    private Long id;
     @Column(name = "type_link")
     @Enumerated(EnumType.STRING)
     private TypeLink typeLink;
