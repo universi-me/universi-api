@@ -4,5 +4,5 @@ import me.universi.indicators.entities.Indicators;
 
 @FunctionalInterface
 public interface GetIndicatorsService {
-    Indicators getIndicators(Long userId);
+    Indicators getIndicators();
 }

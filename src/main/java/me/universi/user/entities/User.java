@@ -1,5 +1,6 @@
 package me.universi.user.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -73,6 +74,7 @@ public class User implements UserDetails {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "indicators_id", referencedColumnName = "id")
+    @JsonBackReference
     private Indicators indicators;
 
     public User(String name, String email, String password){

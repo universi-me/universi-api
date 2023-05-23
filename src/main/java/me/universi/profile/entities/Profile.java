@@ -187,4 +187,32 @@ public class Profile {
     public void setCreationDate(Date creationDate) {
         this.creationDate = creationDate;
     }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public Gender getGender() {
+        return gender;
+    }
+
+    public void setGender(Gender gender) {
+        this.gender = gender;
+    }
+
+    public void setRecomendacoesFeitas(Collection<Recommendation> recomendacoesFeitas) {
+        this.recomendacoesFeitas = recomendacoesFeitas;
+    }
+
+    public void setRecomendacoesRecebidas(Collection<Recommendation> recomendacoesRecebidas) {
+        this.recomendacoesRecebidas = recomendacoesRecebidas;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 }

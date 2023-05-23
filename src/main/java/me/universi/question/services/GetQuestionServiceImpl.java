@@ -4,6 +4,8 @@ import me.universi.group.entities.Group;
 import me.universi.group.exceptions.GroupNotFoundException;
 import me.universi.group.repositories.GroupRepository;
 import me.universi.question.QuestionRepository;
+import me.universi.question.entities.Question;
+import me.universi.question.exceptions.QuestionNotfoundException;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import me.universi.util.ExerciseUtil;
@@ -12,25 +14,26 @@ import org.springframework.stereotype.Service;
 
 
 @Service
-public class DeleteQuestionServiceImpl implements DeleteQuestionService {
+public class GetQuestionServiceImpl implements GetQuestionService {
     private final QuestionRepository questionRepository;
     private final UserService userService;
     private final GroupRepository groupRepository;
 
     @Autowired
-    public DeleteQuestionServiceImpl(QuestionRepository questionRepository, UserService userService, GroupRepository groupRepository) {
+    public GetQuestionServiceImpl(QuestionRepository questionRepository, UserService userService, GroupRepository groupRepository) {
         this.questionRepository = questionRepository;
         this.userService = userService;
         this.groupRepository = groupRepository;
     }
 
     @Override
-    public void deleteQuestion(Long groupId, Long exerciseId, Long questionId) {
+    public Question getQuestion(Long groupId, Long exerciseId, Long questionId) {
         User user = this.userService.obterUsuarioNaSessao();
-        Group group = this.groupRepository.findByIdAndAdminId(groupId, user.getProfile().getId()).orElseThrow(GroupNotFoundException::new);
+        Group group = this.groupRepository.findByIdAndAdminId(groupId,user.getProfile().getId()).orElseThrow(GroupNotFoundException::new);
 
-        ExerciseUtil.checkPermissionExercise(user, group);
+        ExerciseUtil.checkPermissionExercise(user,group);
 
-        questionRepository.deleteById(questionId);
+        return  questionRepository.findByIdAndExercisesId(questionId,exerciseId).orElseThrow(QuestionNotfoundException::new);
     }
+
 }
