@@ -2,45 +2,59 @@ package me.universi.curriculum.controller;
 
 import me.universi.curriculum.entities.Curriculum;
 import me.universi.curriculum.services.CurriculumService;
-import me.universi.profile.services.PerfilService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Optional;
 
-@Controller
+@RestController
+@RequestMapping(value = "/api/curriculum")
 public class CurriculumController {
 
-    @Autowired
     public CurriculumService curriculumService;
 
-    @Autowired
-    public PerfilService perfilService;
 
-    @PostMapping(value = "/curriculum", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseStatus(HttpStatus.CREATED)
-    public Curriculum createCurriculum(@RequestBody Curriculum curriculum){
-        return  curriculumService.save(curriculum);
+    public CurriculumController(CurriculumService curriculumService){
+        this.curriculumService = curriculumService;
     }
 
-    @GetMapping(value = "/curriculum")
+    @PostMapping(value = "/create")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Curriculum createCurriculum(@RequestBody Curriculum newCurriculum) throws Exception{
+        return  curriculumService.save(newCurriculum);
+    }
+
+    @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<Curriculum> getAllCurriculum(){
+    public List<Curriculum> getAllCurriculum() throws Exception{
         return curriculumService.findAll();
     }
 
-    @GetMapping(value = "/curriculum/{id}")
+    @GetMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.OK)
     public Optional<Curriculum> getCurriculum(@PathVariable Long id){
         return curriculumService.findById(id);
     }
 
+    @PutMapping(value = "/update/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public Curriculum update(@RequestBody Curriculum newCurriculum, @PathVariable Long id) throws Exception {
+        return curriculumService.update(newCurriculum, id);
+    }
+
+    @DeleteMapping(value = "/delete/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public void delete(@PathVariable Long id){
+        curriculumService.delete(id);
+    }
 }

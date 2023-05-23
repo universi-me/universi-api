@@ -50,7 +50,7 @@ public class Curriculum {
         return id;
     }
 
-    public Profile getProfile() {
+   public Profile getProfile() {
         return profile;
     }
 
