@@ -5,5 +5,5 @@ import me.universi.alternative.entities.Alternative;
 
 @FunctionalInterface
 public interface GetAlternativeService {
-    Alternative getAlternative(Long userId, Long questionId, Long id);
+    Alternative getAlternative(Long groupId, Long questionId, Long id);
 }

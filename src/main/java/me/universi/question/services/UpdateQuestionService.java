@@ -6,5 +6,5 @@ import me.universi.question.entities.Question;
 
 @FunctionalInterface
 public interface UpdateQuestionService {
-    Question updateQuestion(Long userId, Long questionId, QuestionUpdateDTO questionUpdateDto);
+    Question updateQuestion(Long exerciseId, Long groupId, Long questionId, QuestionUpdateDTO questionUpdateDto);
 }

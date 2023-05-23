@@ -6,5 +6,5 @@ import java.util.List;
 
 @FunctionalInterface
 public interface GetRakingScoreService {
-    List<Indicators> getRankingIndicators(Long userId);
+    List<Indicators> getRankingIndicators();
 }

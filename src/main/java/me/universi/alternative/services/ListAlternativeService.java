@@ -8,5 +8,5 @@ import java.util.List;
 
 @FunctionalInterface
 public interface ListAlternativeService {
-    List<Alternative> listAlternative(Long userId, Long questionId);
+    List<Alternative> listAlternative(Long groupId, Long exerciseId, Long questionId);
 }

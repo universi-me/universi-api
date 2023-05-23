@@ -2,6 +2,7 @@ package me.universi.exercise.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -49,6 +50,9 @@ public class Exercise implements Serializable {
     @JoinColumn(name = "group_id")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private Group group;
+
+    @Column(columnDefinition = "boolean default false")
+    private boolean inactivate;
 
     public Exercise() {
     }
@@ -101,6 +105,14 @@ public class Exercise implements Serializable {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public boolean isInactivate() {
+        return inactivate;
+    }
+
+    public void setInactivate(boolean inactivate) {
+        this.inactivate = inactivate;
     }
 
     @Override

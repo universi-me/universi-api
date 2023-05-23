@@ -18,9 +18,9 @@ public class GetRankingScoreServiceImpl implements GetRakingScoreService {
     }
 
     @Override
-    public List<Indicators> getRankingIndicators(Long userId) {
-        indicatorsRepository.findAllByOrderByScoreDesc();
+    public List<Indicators> getRankingIndicators() {
+        List<Indicators> indicators = this.indicatorsRepository.findAllByOrderByScoreDesc();
         //Todo
-        return null;
+        return indicators;
     }
 }

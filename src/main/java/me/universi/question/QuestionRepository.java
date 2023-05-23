@@ -21,4 +21,6 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
     Question findById(long id);
 
     Optional<Question> findByIdAndExercisesId(Long questionId, Long exercisesId);
+
+    List<Question> findAllByExercisesIdAndExercisesInactivateIsFalse(Long exerciseId);
 }

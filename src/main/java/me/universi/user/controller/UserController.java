@@ -28,6 +28,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 
 @Controller
+@RequestMapping(value = "/api")
 public class UserController {
     @Autowired
     public UserService userService;
