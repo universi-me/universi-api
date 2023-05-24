@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,7 +27,7 @@ public class CurriculumController {
         this.curriculumService = curriculumService;
     }
 
-    @PostMapping(value = "/create")
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Curriculum createCurriculum(@RequestBody Curriculum newCurriculum) throws Exception{
         return  curriculumService.save(newCurriculum);
@@ -46,13 +45,13 @@ public class CurriculumController {
         return curriculumService.findById(id);
     }
 
-    @PutMapping(value = "/update/{id}")
+    @PutMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.OK)
     public Curriculum update(@RequestBody Curriculum newCurriculum, @PathVariable Long id) throws Exception {
         return curriculumService.update(newCurriculum, id);
     }
 
-    @DeleteMapping(value = "/delete/{id}")
+    @DeleteMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.OK)
     public void delete(@PathVariable Long id){
         curriculumService.delete(id);
