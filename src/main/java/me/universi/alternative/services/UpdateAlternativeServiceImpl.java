@@ -31,7 +31,7 @@ public class UpdateAlternativeServiceImpl implements UpdateAlternativeService {
 
     @Override
     public Alternative updateAlternative(Long groupId, Long exerciseId, Long questionId, Long alternativeId, AlternativeUpdateDTO alternativeUpdateDTO) {
-        User user = this.userService.obterUsuarioNaSessao();
+        User user = this.userService.getUserInSession();
         Group group = this.groupRepository.findByIdAndAdminId(groupId, user.getProfile().getId())
                 .orElseThrow(GroupDefinitionException::new);
         ExerciseUtil.checkPermissionExercise(user, group);

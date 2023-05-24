@@ -30,7 +30,7 @@ public class LinkController {
         Response resposta = new Response();
         try {
 
-            User user = userService.obterUsuarioNaSessao();
+            User user = userService.getUserInSession();
 
             String url = (String)body.get("url");
             if(url == null) {
@@ -83,7 +83,7 @@ public class LinkController {
                 throw new LinkException("Link não encontrada.");
             }
 
-            User user = userService.obterUsuarioNaSessao();
+            User user = userService.getUserInSession();
 
             Profile profile = user.getProfile();
 
@@ -123,7 +123,7 @@ public class LinkController {
                 throw new LinkException("Link não encontrada.");
             }
 
-            User user = userService.obterUsuarioNaSessao();
+            User user = userService.getUserInSession();
 
             Profile profile = user.getProfile();
 

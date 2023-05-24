@@ -123,7 +123,7 @@ public class RecomendacaoController {
                 throw new GroupException("Recomendação não encontrada.");
             }
 
-            User user = userService.obterUsuarioNaSessao();
+            User user = userService.getUserInSession();
 
             if(user.getProfile().getId() != recommendation.getOrigin().getId()) {
                 throw new GroupException("Você não tem permissão para editar esta Recomendação.");
@@ -169,7 +169,7 @@ public class RecomendacaoController {
                 throw new GroupException("Recomendação não encontrada.");
             }
 
-            User user = userService.obterUsuarioNaSessao();
+            User user = userService.getUserInSession();
 
             if(user.getProfile().getId() != recommendation.getOrigin().getId()) {
                 throw new GroupException("Você não tem permissão para remover esta Recomendação.");

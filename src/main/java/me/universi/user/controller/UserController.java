@@ -131,7 +131,7 @@ public class UserController {
 
             String senha = (String)body.get("senha");
 
-            User user = userService.obterUsuarioNaSessao();
+            User user = userService.getUserInSession();
 
             // se logado com google não checkar senha
             boolean logadoComGoogle = (session.getAttribute("loginViaGoogle") != null);

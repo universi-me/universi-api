@@ -26,7 +26,7 @@ public class CurriculumService {
 
     public Curriculum save(Curriculum curriculum) throws Exception{
         try {
-            User user = userService.obterUsuarioNaSessao();
+            User user = userService.getUserInSession();
             curriculum.setProfile(user.getProfile());
             return curriculumRepository.saveAndFlush(curriculum);
 
@@ -54,7 +54,7 @@ public class CurriculumService {
             return curriculumRepository.saveAndFlush(curriculum);
         }).orElseGet(()->{
             try {
-                User user = userService.obterUsuarioNaSessao();
+                User user = userService.getUserInSession();
                 newCurriculum.setProfile(user.getProfile());
                 return curriculumRepository.saveAndFlush(newCurriculum);
             }catch (Exception e){

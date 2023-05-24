@@ -26,7 +26,7 @@ public class DeleteAlternativeServiceImpl implements DeleteAlternativeService {
     }
 
     public void deleteAlternative(Long groupId,Long exerciseId, Long questionId, Long alternativeId){
-       User user = this.userService.obterUsuarioNaSessao();
+       User user = this.userService.getUserInSession();
        Group group = this.groupRepository.findByIdAndAdminId(groupId, user.getProfile().getId()).orElseThrow(GroupNotFoundException::new);
 
        this.alternativeRepository.findAlternativeByIdAndQuestionIdAndQuestionUserCreateId(alternativeId, questionId, user.getId())

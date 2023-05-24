@@ -26,7 +26,7 @@ public class GetExerciseServiceServiceImpl implements GetExerciseService {
     }
 
     public Exercise getExercise(Long groupId, Long exerciseId) {
-        User user = this.userService.obterUsuarioNaSessao();
+        User user = this.userService.getUserInSession();
         Group group = this.groupRepository.findByIdAndAdminId(groupId, user.getProfile().getId())
                 .orElseThrow(GroupNotFoundException::new);
 

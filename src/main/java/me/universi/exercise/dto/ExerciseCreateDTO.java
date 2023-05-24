@@ -23,8 +23,8 @@ public class ExerciseCreateDTO implements Serializable {
 
     private Group group;
 
-    @NotNull
-    @NotBlank
+    @NotNull(message = "title not null")
+    @NotBlank(message = "title not blank")
     private String title;
 
     public ExerciseCreateDTO(List<Question> questions, Group group) {

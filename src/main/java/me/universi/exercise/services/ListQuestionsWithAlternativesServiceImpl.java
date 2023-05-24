@@ -36,7 +36,7 @@ public class ListQuestionsWithAlternativesServiceImpl implements ListQuestionsWi
     @Override
     public List<QuestionWithAlternativesDTO> getQuestionsWithAlternatives(Long groupId, Long exerciseId, int amount) {
 
-        User user = this.userService.obterUsuarioNaSessao();
+        User user = this.userService.getUserInSession();
         Group group = this.groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
         Boolean isParticipant = this.groupRepository.existsByIdAndParticipantsId(groupId, user.getProfile().getId());
 

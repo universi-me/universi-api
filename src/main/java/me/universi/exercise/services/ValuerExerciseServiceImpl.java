@@ -33,7 +33,7 @@ public class ValuerExerciseServiceImpl implements ValuerExerciseService {
     //Responsável por receber as respostas e verificar se estão corretas
     @Override
     public ExerciseAnswersDTO exercisesAnswers(Long groupId, Long exerciseid, List<AnswerDTO> answers) {
-        User user = this.userService.obterUsuarioNaSessao();
+        User user = this.userService.getUserInSession();
         Exercise exercise = this.exerciseRepository.findByIdAndGroupId(exerciseid, groupId).orElseThrow(ExerciseNotFoundException::new);
         Indicators indicators = this.indicatorsRepository.findByUserId(user.getId());
 

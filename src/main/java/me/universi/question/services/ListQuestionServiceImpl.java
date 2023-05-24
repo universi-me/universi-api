@@ -29,7 +29,7 @@ public class ListQuestionServiceImpl implements ListQuestionService {
 
     @Override
     public List<Question> listQuestion(Long groupId, Long exerciseId) {
-        User user = this.userService.obterUsuarioNaSessao();
+        User user = this.userService.getUserInSession();
         Group group = this.groupRepository.findByIdAndAdminId(groupId,user.getProfile().getId()).orElseThrow(GroupNotFoundException::new);
 
         ExerciseUtil.checkPermissionExercise(user,group);
