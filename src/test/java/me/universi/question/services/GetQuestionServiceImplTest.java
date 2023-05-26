@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import profile.builder.ProfileBuilder;
+import me.universi.builder.ProfileBuilder;
 
 import java.util.Optional;
 

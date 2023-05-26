@@ -13,13 +13,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class GetExerciseServiceServiceImpl implements GetExerciseService {
+public class GetExerciseServiceImpl implements GetExerciseService {
     private final ExerciseRepository exerciseRepository;
     private final UserService userService;
     private final GroupRepository groupRepository;
 
     @Autowired
-    public GetExerciseServiceServiceImpl(ExerciseRepository exerciseRepository, UserService userService, GroupRepository groupRepository) {
+    public GetExerciseServiceImpl(ExerciseRepository exerciseRepository, UserService userService, GroupRepository groupRepository) {
         this.exerciseRepository = exerciseRepository;
         this.userService = userService;
         this.groupRepository = groupRepository;

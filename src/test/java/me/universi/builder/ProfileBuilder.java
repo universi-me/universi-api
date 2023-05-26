@@ -1,4 +1,4 @@
-package profile.builder;
+package me.universi.builder;
 
 import me.universi.profile.entities.Profile;
 import me.universi.profile.enums.Gender;

@@ -1,5 +1,6 @@
 package me.universi.exercise.service;
 
+import me.universi.builder.ProfileBuilder;
 import me.universi.exercise.ExerciseRepository;
 import me.universi.exercise.builder.ExerciseBuilder;
 import me.universi.exercise.dto.ExerciseCreateDTO;
@@ -10,7 +11,6 @@ import me.universi.group.entities.Group;
 import me.universi.group.exceptions.GroupNotFoundException;
 import me.universi.group.repositories.GroupRepository;
 import me.universi.profile.entities.Profile;
-import me.universi.question.exceptions.QuestionNotfoundException;
 import me.universi.user.UserBuilder;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
@@ -19,11 +19,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import profile.builder.ProfileBuilder;
-
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -32,7 +29,6 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 
 @Tag("service")

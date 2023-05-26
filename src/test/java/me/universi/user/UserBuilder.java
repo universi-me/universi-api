@@ -2,7 +2,7 @@ package me.universi.user;
 
 import me.universi.profile.entities.Profile;
 import me.universi.user.entities.User;
-import profile.builder.ProfileBuilder;
+import me.universi.builder.ProfileBuilder;
 
 public class UserBuilder {
 

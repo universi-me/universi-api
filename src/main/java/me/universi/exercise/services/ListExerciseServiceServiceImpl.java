@@ -18,6 +18,9 @@ public class ListExerciseServiceServiceImpl implements ListExerciseService {
 
     @Override
     public List<Exercise> listExercise(Long groupId) {
+
+        // to do
+        //!important apenas admin pode listra este método
         return this.exerciseRepository.findAllByGroupIdAndInactivateIsFalse(groupId);
     }
 }
