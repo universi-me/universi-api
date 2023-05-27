@@ -1,0 +1,35 @@
+version: '3.7'
+services:
+  postgres:
+    container_name: postgresql
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: universime
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    volumes:
+      - postgresql:/var/lib/postgresql/data
+    networks:
+      - postgresql
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: api
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/universime
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+volumes:
+  postgresql:
+networks:
+  postgresql:
+    driver: bridge

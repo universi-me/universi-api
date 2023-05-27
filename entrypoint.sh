@@ -1,0 +1,1 @@
+java -jar -XX:MaxRAMPercentage=80.0 /app.jar

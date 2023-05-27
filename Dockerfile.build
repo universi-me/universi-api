@@ -1,0 +1,7 @@
+FROM azul/zulu-openjdk-alpine:17-latest
+
+WORKDIR /app
+
+ADD build-entrypoint.sh build-entrypoint.sh
+CMD ["build-entrypoint.sh"]
+ENTRYPOINT ["sh"]
