@@ -32,7 +32,7 @@ public class UpdateQuestionServiceImpl implements UpdateQuestionService {
     @Override
     @Transactional
     public Question updateQuestion(Long exerciseId, Long groupId, Long questionId, QuestionUpdateDTO questionUpdateDto) {
-        User user = this.userService.obterUsuarioNaSessao();
+        User user = this.userService.getUserInSession();
         Group group = this.groupRepository.findByIdAndAdminId(groupId,user.getProfile().getId()).orElseThrow(GroupNotFoundException::new);
 
         ExerciseUtil.checkPermissionExercise(user,group);

@@ -22,7 +22,7 @@ public class GetAlternativeServiceImpl implements GetAlternativeService {
     }
 
     public Alternative getAlternative(Long groupId, Long questionId, Long alternativeId){
-       User user = this.userService.obterUsuarioNaSessao();
+       User user = this.userService.getUserInSession();
 
         return alternativeRepository.findAlternativeByIdAndQuestionIdAndQuestionUserCreateId(alternativeId, questionId, user.getId())
                 .orElseThrow(AlternativeNotFoundException::new);

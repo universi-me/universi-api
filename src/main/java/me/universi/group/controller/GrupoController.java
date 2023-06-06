@@ -29,7 +29,7 @@ public class GrupoController {
     public Response grupo_criar(@RequestBody Map<String, Object> body) {
         Response resposta = new Response();
         try {
-            User user = userService.obterUsuarioNaSessao();
+            User user = userService.getUserInSession();
 
             Boolean grupoRoot = (Boolean)body.get("grupoRoot");
 
@@ -139,7 +139,7 @@ public class GrupoController {
                 throw new GroupException("Grupo não encontrado.");
             }
 
-            User user = userService.obterUsuarioNaSessao();
+            User user = userService.getUserInSession();
 
             if(grupoService.verifyPermissionToEditGroup(grupoEdit, user)) {
                 if(nome != null && nome.length() > 0) {
@@ -191,7 +191,7 @@ public class GrupoController {
                 throw new GroupException("Parametro grupoId é nulo.");
             }
 
-            User user = userService.obterUsuarioNaSessao();
+            User user = userService.getUserInSession();
 
             Group grupoEdit = grupoService.findFirstById(Long.valueOf(grupoId));
             if(grupoEdit == null) {
@@ -231,7 +231,7 @@ public class GrupoController {
                 throw new GroupException("Parametro grupoId é nulo.");
             }
 
-            User user = userService.obterUsuarioNaSessao();
+            User user = userService.getUserInSession();
 
             Group grupoEdit = grupoService.findFirstById(Long.valueOf(grupoId));
             if(grupoEdit == null) {
@@ -268,7 +268,7 @@ public class GrupoController {
                 throw new GroupException("Parametro participante é nulo.");
             }
 
-            User user = userService.obterUsuarioNaSessao();
+            User user = userService.getUserInSession();
 
             User participanteUser = null;
             if(participante != null && participante.length() > 0) {
@@ -315,7 +315,7 @@ public class GrupoController {
                 throw new GroupException("Parametro participante é nulo.");
             }
 
-            User user = userService.obterUsuarioNaSessao();
+            User user = userService.getUserInSession();
 
             User participanteUser = null;
             if(participante != null && participante.length() > 0) {
@@ -400,7 +400,7 @@ public class GrupoController {
                 throw new GroupException("Subgrupo não encontrado.");
             }
 
-            User user = userService.obterUsuarioNaSessao();
+            User user = userService.getUserInSession();
 
             if(grupoService.verifyPermissionToEditGroup(grupo, user)) {
                 grupoService.removeSubGroup(grupo, grupoRemover);
@@ -434,7 +434,7 @@ public class GrupoController {
                 throw new GroupException("Grupo não encontrado.");
             }
 
-            User user = userService.obterUsuarioNaSessao();
+            User user = userService.getUserInSession();
 
             if(grupoService.verifyPermissionToEditGroup(grupo, user)) {
 

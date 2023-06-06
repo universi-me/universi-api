@@ -4,7 +4,6 @@ import jakarta.transaction.Transactional;
 import me.universi.exercise.ExerciseRepository;
 import me.universi.exercise.entities.Exercise;
 import me.universi.exercise.services.ExerciseGetService;
-import me.universi.exercise.services.ListQuestionsWithAlternativesService;
 import me.universi.feedback.FeedbackRepository;
 import me.universi.feedback.entities.Feedback;
 import me.universi.group.entities.Group;
@@ -45,10 +44,10 @@ public class QuestionCreateServiceImpl implements QuestionCreateService {
     @Transactional
     public Question createQuestion(Long groupId, Long exerciseId, QuestionCreateDTO questionCreateDTO){
 
-        User user = this.userService.obterUsuarioNaSessao();
+        User user = this.userService.getUserInSession();
         Group group = this.groupService.findFirstById(groupId);
 
-        ExerciseUtil.checkPermissionExercise(this.userService.obterUsuarioNaSessao(), group);
+        ExerciseUtil.checkPermissionExercise(this.userService.getUserInSession(), group);
 
         Exercise exercise = this.exerciseGetService.getExercise(exerciseId, group.getId());
         Feedback feedback = feedbackRepository.save(questionCreateDTO.getFeedback());

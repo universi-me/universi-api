@@ -34,7 +34,7 @@ public class CreateAlternativeServiceImpl implements CreateAlternativeService {
     }
 
     public Alternative createAlternative(Long groupId, Long exerciseId, Long questionId, AlternativeCreateDTO alternative){
-        User user = this.userService.obterUsuarioNaSessao();
+        User user = this.userService.getUserInSession();
         Boolean exerciseExist = this.exerciseRepository.existsByIdAndGroupAdminId(exerciseId, user.getProfile().getId());
          if (!exerciseExist){
              throw new UnauthorizedException();

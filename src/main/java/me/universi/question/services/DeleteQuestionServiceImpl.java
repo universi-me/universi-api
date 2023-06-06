@@ -26,7 +26,7 @@ public class DeleteQuestionServiceImpl implements DeleteQuestionService {
 
     @Override
     public void deleteQuestion(Long groupId, Long exerciseId, Long questionId) {
-        User user = this.userService.obterUsuarioNaSessao();
+        User user = this.userService.getUserInSession();
         Group group = this.groupRepository.findByIdAndAdminId(groupId, user.getProfile().getId()).orElseThrow(GroupNotFoundException::new);
 
         ExerciseUtil.checkPermissionExercise(user, group);

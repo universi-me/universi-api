@@ -30,20 +30,18 @@ public class DeleteExerciseServiceImpl implements DeleteExerciseService{
 
     @Override
     public void deleteExercise(Long groupId, Long exerciseId) {
-        User user = this.userService.obterUsuarioNaSessao();
+        User user = this.userService.getUserInSession();
         Group group = this.groupRepository.findByIdAndAdminId(groupId, user.getProfile().getId()).orElseThrow(GroupNotFoundException::new);
 
         ExerciseUtil.checkPermissionExercise(user, group);
 
         Exercise exercise = this.exerciseRepository.findByIdAndGroupId(exerciseId, groupId).orElseThrow(ExerciseNotFoundException::new);
 
-        if (exercise.getQuestions().size() <= MIN_AMOUNT_QUESTIONS_DELETE){
+        if (exercise.getQuestions() != null && exercise.getQuestions().size() <= MIN_AMOUNT_QUESTIONS_DELETE){
             this.exerciseRepository.delete(exercise);
-            System.err.println("deletou");
         }else {
             exercise.setInactivate(true);
             this.exerciseRepository.save(exercise);
-            System.err.println("desativou");
         }
     }
 }

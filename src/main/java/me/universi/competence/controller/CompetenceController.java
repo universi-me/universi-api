@@ -38,7 +38,7 @@ public class CompetenceController {
         Response response = new Response();
         try {
 
-            User user = userService.obterUsuarioNaSessao();
+            User user = userService.getUserInSession();
 
             String competenceTypeId = (String)body.get("competenciatipoId");
             if(competenceTypeId == null) {
@@ -100,7 +100,7 @@ public class CompetenceController {
                 throw new CompetenceException("Competência não encontrada.");
             }
 
-            User user = userService.obterUsuarioNaSessao();
+            User user = userService.getUserInSession();
 
             Profile profile = user.getProfile();
 
@@ -150,7 +150,7 @@ public class CompetenceController {
                 throw new CompetenceException("Competência não encontrada.");
             }
 
-            User user = userService.obterUsuarioNaSessao();
+            User user = userService.getUserInSession();
 
             Profile profile = user.getProfile();
 

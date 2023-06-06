@@ -160,7 +160,7 @@ public class UserService implements UserDetailsService {
     }
 
     public boolean usuarioDonoDaSessao(User user) {
-        User userSession = obterUsuarioNaSessao();
+        User userSession = getUserInSession();
         if(userSession != null) {
             return (userSession.getId() == user.getId());
         }
@@ -178,7 +178,7 @@ public class UserService implements UserDetailsService {
     }
 
     public void atualizarUsuarioNaSessao() {
-        User userSession = obterUsuarioNaSessao();
+        User userSession = getUserInSession();
         if(userSession != null) {
             User userAtualizado = (User) findFirstById(userSession.getId());
             if(userAtualizado != null) {
@@ -187,7 +187,7 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    public User obterUsuarioNaSessao() {
+    public User getUserInSession() {
         HttpSession session = obterSessaoAtual();
         if(session != null) {
             User userSession = (User) session.getAttribute("usuario");
@@ -272,7 +272,7 @@ public class UserService implements UserDetailsService {
     // url de redirecionamento ao logar
     public String obterUrlAoLogar() {
 
-        User userSession = obterUsuarioNaSessao();
+        User userSession = getUserInSession();
         if (userSession != null) {
             if(usuarioPrecisaDePerfil(userSession)) {
                 return "/p/" + userSession.getUsername() + "/editar";
