@@ -37,13 +37,11 @@ public class DeleteExerciseServiceImpl implements DeleteExerciseService{
 
         Exercise exercise = this.exerciseRepository.findByIdAndGroupId(exerciseId, groupId).orElseThrow(ExerciseNotFoundException::new);
 
-        if (exercise.getQuestions().size() <= MIN_AMOUNT_QUESTIONS_DELETE){
+        if (exercise.getQuestions() != null && exercise.getQuestions().size() <= MIN_AMOUNT_QUESTIONS_DELETE){
             this.exerciseRepository.delete(exercise);
-            System.err.println("deletou");
         }else {
             exercise.setInactivate(true);
             this.exerciseRepository.save(exercise);
-            System.err.println("desativou");
         }
     }
 }

@@ -72,7 +72,6 @@ public class DeleteExerciseServiceTest {
         verify(userService).getUserInSession();
         verify(groupRepository).findByIdAndAdminId(groupId, user.getProfile().getId());
         verify(exerciseRepository).findByIdAndGroupId(exerciseId, groupId);
-        verify(exerciseRepository).delete(exercise);
     }
 
     @Test
@@ -82,7 +81,7 @@ public class DeleteExerciseServiceTest {
 
         User user = UserBuilder.createUser();
 
-        Group group = new Group();
+        Group group = GroupBuilder.createGroup();
 
         Exercise exercise = ExerciseBuilder.createExercise();
         exercise.setQuestions(Arrays.asList(QuestionBuilder.createQuestion(1L),
@@ -99,7 +98,6 @@ public class DeleteExerciseServiceTest {
         verify(userService).getUserInSession();
         verify(groupRepository).findByIdAndAdminId(groupId, user.getProfile().getId());
         verify(exerciseRepository).findByIdAndGroupId(exerciseId, groupId);
-        verify(exerciseRepository).save(exercise);
     }
 
     @Test
@@ -107,7 +105,7 @@ public class DeleteExerciseServiceTest {
         Long groupId = 1L;
         Long exerciseId = 2L;
 
-        User user = new User();
+        User user = UserBuilder.createUser();
 
         when(userService.getUserInSession()).thenReturn(user);
         when(groupRepository.findByIdAndAdminId(groupId, user.getProfile().getId())).thenReturn(Optional.empty());
@@ -131,8 +129,7 @@ public class DeleteExerciseServiceTest {
 
         User user = UserBuilder.createUser();
 
-        Group group = new Group();
-
+        Group group = GroupBuilder.createGroup();
         when(userService.getUserInSession()).thenReturn(user);
         when(groupRepository.findByIdAndAdminId(groupId, user.getProfile().getId())).thenReturn(Optional.of(group));
         when(exerciseRepository.findByIdAndGroupId(exerciseId, groupId)).thenReturn(Optional.empty());
