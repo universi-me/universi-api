@@ -1,0 +1,1126 @@
+openapi: "3.0.3"
+info:
+  title: "universi_api API"
+  description: "universi_api API"
+  version: "1.0.0"
+servers:
+  - url: "https://localhost:8080"
+paths:
+  /api/group/{groupId}/exercise/{exerciseId}/questions:
+    get:
+      summary: "GET api/group/{groupId}/exercise/{exerciseId}/questions"
+      operationId: "listQuestionsWithAlternatives"
+      parameters:
+        - name: "groupId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+        - name: "exerciseId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+        - name: "amount"
+          in: "query"
+          required: true
+          schema:
+            type: "integer"
+            format: "int32"
+      responses:
+        "302":
+          description: "Found"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/QuestionWithAlternativesDTO"
+  /api/group/{groupId}/exercise/{exerciseId}:
+    post:
+      summary: "POST api/group/{groupId}/exercise/{exerciseId}"
+      operationId: "calculateExercise"
+      parameters:
+        - name: "groupId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+        - name: "exerciseId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: "array"
+              items:
+                $ref: "#/components/schemas/AnswerDTO"
+        required: true
+      responses:
+        "202":
+          description: "Accepted"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExerciseAnswersDTO"
+    get:
+      summary: "GET api/group/{groupId}/exercise/{exerciseId}"
+      operationId: "getExercise"
+      parameters:
+        - name: "groupId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+        - name: "exerciseId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+      responses:
+        "302":
+          description: "Found"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Exercise"
+    put:
+      summary: "PUT api/group/{groupId}/exercise/{exerciseId}"
+      operationId: "updateExercise"
+      parameters:
+        - name: "groupId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+        - name: "exerciseId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExerciseUpdateDTO"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Exercise"
+    delete:
+      summary: "DELETE api/group/{groupId}/exercise/{exerciseId}"
+      operationId: "deleteExercise"
+      parameters:
+        - name: "groupId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+        - name: "exerciseId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+      responses:
+        "200":
+          description: "OK"
+  /api/group/{groupId}/exercise:
+    post:
+      summary: "POST api/group/{groupId}/exercise"
+      operationId: "createExercise"
+      parameters:
+        - name: "groupId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExerciseCreateDTO"
+        required: true
+      responses:
+        "201":
+          description: "Created"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Exercise"
+    get:
+      summary: "GET api/group/{groupId}/exercise"
+      operationId: "listExercises"
+      parameters:
+        - name: "groupId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+      responses:
+        "302":
+          description: "Found"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Exercise"
+components:
+  schemas:
+    Achievement:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        icon:
+          type: "string"
+        title:
+          type: "string"
+        description:
+          type: "string"
+    Indicators:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        score:
+          type: "integer"
+          format: "int64"
+        achievements:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Achievement"
+        user:
+          $ref: "#/components/schemas/User"
+    User:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        name:
+          type: "string"
+        indicators:
+          $ref: "#/components/schemas/Indicators"
+    Feedback:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        link:
+          type: "string"
+        feedbackText:
+          type: "string"
+        question:
+          $ref: "#/components/schemas/Question"
+    Exercise:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        title:
+          type: "string"
+        questions:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Question"
+        inactivate:
+          type: "boolean"
+    Question:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        title:
+          type: "string"
+        userCreate:
+          $ref: "#/components/schemas/User"
+        feedback:
+          $ref: "#/components/schemas/Feedback"
+        exercises:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Exercise"
+    Alternative:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        title:
+          type: "string"
+        correct:
+          type: "boolean"
+        question:
+          $ref: "#/components/schemas/Question"
+    QuestionWithAlternativesDTO:
+      type: "object"
+      properties:
+        question:
+          $ref: "#/components/schemas/Question"
+        alternatives:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Alternative"
+    AnswerDTO:
+      type: "object"
+      properties:
+        question:
+          $ref: "#/components/schemas/Question"
+        alternativeSelected:
+          $ref: "#/components/schemas/Alternative"
+    ExerciseAnswersDTO:
+      type: "object"
+      properties:
+        answers:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/AnswerDTO"
+        score:
+          type: "number"
+          format: "float"
+    Link:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        typeLink:
+          type: "string"
+          enum:
+            - "LINK"
+            - "GITHUB"
+            - "GIT"
+            - "TWITTER"
+            - "WORDPRESS"
+            - "TELEGRAM"
+            - "INSTAGRAM"
+            - "REDDIT"
+            - "LINKEDIN"
+            - "DISCORD"
+            - "PAYPAL"
+            - "WHATSAPP"
+            - "TRELLO"
+            - "SLACK"
+            - "SPOTIFY"
+            - "YOUTUBE"
+            - "SKYPE"
+            - "STACK"
+            - "FACEBOOK"
+            - "label"
+            - "bootstrapIconName"
+        url:
+          type: "string"
+        name:
+          type: "string"
+    CompetenceType:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        name:
+          type: "string"
+    Competence:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        competenceType:
+          $ref: "#/components/schemas/CompetenceType"
+        description:
+          type: "string"
+        level:
+          type: "string"
+          enum:
+            - "NO_EXPERIENCE"
+            - "LITTLE_EXPERIENCE"
+            - "EXPERIENCED"
+            - "VERY_EXPERIENCED"
+            - "MASTER"
+            - "label"
+        creationDate:
+          type: "string"
+          format: "date-time"
+    Recommendation:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        origin:
+          $ref: "#/components/schemas/Profile"
+        destiny:
+          $ref: "#/components/schemas/Profile"
+        competenceType:
+          $ref: "#/components/schemas/CompetenceType"
+        description:
+          type: "string"
+        creationDate:
+          type: "string"
+          format: "date-time"
+    Profile:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        user:
+          $ref: "#/components/schemas/User"
+        firstname:
+          type: "string"
+        lastname:
+          type: "string"
+        image:
+          type: "string"
+        bio:
+          type: "string"
+        link:
+          $ref: "#/components/schemas/Link"
+        competences:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Competence"
+        groups:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Group"
+        links:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Link"
+        gender:
+          type: "string"
+          enum:
+            - "M"
+            - "F"
+            - "O"
+            - "label"
+        recomendacoesFeitas:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Recommendation"
+        recomendacoesRecebidas:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Recommendation"
+        creationDate:
+          type: "string"
+          format: "date-time"
+    Group:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        nickname:
+          type: "string"
+        name:
+          type: "string"
+        description:
+          type: "string"
+        image:
+          type: "string"
+        admin:
+          $ref: "#/components/schemas/Profile"
+        participants:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Profile"
+        subGroups:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Group"
+        type:
+          type: "string"
+          enum:
+            - "INSTITUTION"
+            - "CAMPUS"
+            - "COURSE"
+            - "PROJECT"
+            - "CLASSROOM"
+            - "MONITORIA"
+            - "LABORATORY"
+            - "ACADEMIC_CENTER"
+            - "DEPARTMENT"
+            - "STUDY_GROUP"
+            - "label"
+        rootGroup:
+          type: "boolean"
+        canCreateGroup:
+          type: "boolean"
+        canEnter:
+          type: "boolean"
+        canAddParticipant:
+          type: "boolean"
+        createdAt:
+          type: "string"
+          format: "date-time"
+        publicGroup:
+          type: "boolean"
+    ExerciseCreateDTO:
+      type: "object"
+      properties:
+        questions:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Question"
+        group:
+          $ref: "#/components/schemas/Group"
+        title:
+          type: "string"
+    ExerciseUpdateDTO:
+      type: "object"
+      properties:
+        title:
+          type: "string"
+  /api/group/{groupId}/exercise/{exerciseId}/question:
+    post:
+      summary: "POST api/group/{groupId}/exercise/{exerciseId}/question"
+      operationId: "createQuestion"
+      parameters:
+        - name: "groupId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+        - name: "exerciseId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuestionCreateDTO"
+        required: true
+      responses:
+        "201":
+          description: "Created"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Question"
+    get:
+      summary: "GET api/group/{groupId}/exercise/{exerciseId}/question"
+      operationId: "listQuestion"
+      parameters:
+        - name: "groupId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+        - name: "exerciseId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+      responses:
+        "302":
+          description: "Found"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Question"
+    /api/group/{groupId}/exercise/{exerciseId}/question/{idQuestion}:
+      put:
+        summary: "PUT api/group/{groupId}/exercise/{exerciseId}/question/{idQuestion}"
+        operationId: "updateQuestion"
+        parameters:
+          - name: "groupId"
+            in: "path"
+            required: true
+            schema:
+              type: "integer"
+              format: "int64"
+          - name: "exerciseId"
+            in: "path"
+            required: true
+            schema:
+              type: "integer"
+              format: "int64"
+          - name: "idQuestion"
+            in: "path"
+            required: true
+            schema:
+              type: "integer"
+              format: "int64"
+        requestBody:
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuestionUpdateDTO"
+          required: true
+        responses:
+          "200":
+            description: "OK"
+            content:
+              '*/*':
+                schema:
+                  $ref: "#/components/schemas/Question"
+    /api/group/{groupId}/exercise/{exerciseId}/question/{questionId}:
+      get:
+        summary: "GET api/group/{groupId}/exercise/{exerciseId}/question/{questionId}"
+        operationId: "getQuestion"
+        parameters:
+          - name: "groupId"
+            in: "path"
+            required: true
+            schema:
+              type: "integer"
+              format: "int64"
+          - name: "exerciseId"
+            in: "path"
+            required: true
+            schema:
+              type: "integer"
+              format: "int64"
+          - name: "questionId"
+            in: "path"
+            required: true
+            schema:
+              type: "integer"
+              format: "int64"
+        responses:
+          "302":
+            description: "Found"
+            content:
+              '*/*':
+                schema:
+                  $ref: "#/components/schemas/Question"
+      delete:
+        summary: "DELETE api/group/{groupId}/exercise/{exerciseId}/question/{questionId}"
+        operationId: "deleteQuestion"
+        parameters:
+          - name: "groupId"
+            in: "path"
+            required: true
+            schema:
+              type: "integer"
+              format: "int64"
+          - name: "exerciseId"
+            in: "path"
+            required: true
+            schema:
+              type: "integer"
+              format: "int64"
+          - name: "questionId"
+            in: "path"
+            required: true
+            schema:
+              type: "integer"
+              format: "int64"
+        responses:
+          "410":
+            description: "Gone"
+  components:
+    schemas:
+      Achievement:
+        type: "object"
+        properties:
+          id:
+            type: "integer"
+            format: "int64"
+          icon:
+            type: "string"
+          title:
+            type: "string"
+          description:
+            type: "string"
+      Indicators:
+        type: "object"
+        properties:
+          id:
+            type: "integer"
+            format: "int64"
+          score:
+            type: "integer"
+            format: "int64"
+          achievements:
+            type: "array"
+            items:
+              $ref: "#/components/schemas/Achievement"
+          user:
+            $ref: "#/components/schemas/User"
+      User:
+        type: "object"
+        properties:
+          id:
+            type: "integer"
+            format: "int64"
+          name:
+            type: "string"
+          indicators:
+            $ref: "#/components/schemas/Indicators"
+      Exercise:
+        type: "object"
+        properties:
+          id:
+            type: "integer"
+            format: "int64"
+          title:
+            type: "string"
+          questions:
+            type: "array"
+            items:
+              $ref: "#/components/schemas/Question"
+          inactivate:
+            type: "boolean"
+      Question:
+        type: "object"
+        properties:
+          id:
+            type: "integer"
+            format: "int64"
+          title:
+            type: "string"
+          userCreate:
+            $ref: "#/components/schemas/User"
+          feedback:
+            $ref: "#/components/schemas/Feedback"
+          exercises:
+            type: "array"
+            items:
+              $ref: "#/components/schemas/Exercise"
+      Feedback:
+        type: "object"
+        properties:
+          id:
+            type: "integer"
+            format: "int64"
+          link:
+            type: "string"
+          feedbackText:
+            type: "string"
+          question:
+            $ref: "#/components/schemas/Question"
+      QuestionCreateDTO:
+        type: "object"
+        properties:
+          title:
+            type: "string"
+          feedback:
+            $ref: "#/components/schemas/Feedback"
+          userCreate:
+            $ref: "#/components/schemas/User"
+      QuestionUpdateDTO:
+        type: "object"
+        properties:
+          title:
+            type: "string"
+          feedback:
+            $ref: "#/components/schemas/Feedback"
+  /api/user/indicators:
+    get:
+      summary: "GET api/user/indicators"
+      operationId: "getIndicators"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Indicators"
+    /api/user/ranking:
+      get:
+        summary: "GET api/user/ranking"
+        operationId: "getRanking"
+        responses:
+          "200":
+            description: "OK"
+            content:
+              '*/*':
+                schema:
+                  type: "array"
+                  items:
+                    $ref: "#/components/schemas/Indicators"
+  components:
+    schemas:
+      Achievement:
+        type: "object"
+        properties:
+          id:
+            type: "integer"
+            format: "int64"
+          icon:
+            type: "string"
+          title:
+            type: "string"
+          description:
+            type: "string"
+      User:
+        type: "object"
+        properties:
+          id:
+            type: "integer"
+            format: "int64"
+          name:
+            type: "string"
+          indicators:
+            $ref: "#/components/schemas/Indicators"
+      Indicators:
+        type: "object"
+        properties:
+          id:
+            type: "integer"
+            format: "int64"
+          score:
+            type: "integer"
+            format: "int64"
+          achievements:
+            type: "array"
+            items:
+              $ref: "#/components/schemas/Achievement"
+          user:
+            $ref: "#/components/schemas/User"
+
+  /api/group/{groupId}/exercise/{exerciseId}/question/{questionId}/alternative:
+    post:
+      summary: "POST api/group/{groupId}/exercise/{exerciseId}/question/{questionId}/alternative"
+      operationId: "createAlternative"
+      parameters:
+        - name: "groupId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+        - name: "exerciseId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+        - name: "questionId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AlternativeCreateDTO"
+        required: true
+      responses:
+        "201":
+          description: "Created"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Alternative"
+    get:
+      summary: "GET api/group/{groupId}/exercise/{exerciseId}/question/{questionId}/alternative"
+      operationId: "listAlternative"
+      parameters:
+        - name: "groupId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+        - name: "exerciseId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+        - name: "questionId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Alternative"
+    /api/group/{groupId}/exercise/{exerciseId}/question/{questionId}/alternative/{alternativeId}:
+      get:
+        summary: "GET api/group/{groupId}/exercise/{exerciseId}/question/{questionId}/alternative/{alternativeId}"
+        operationId: "getAlternative"
+        parameters:
+          - name: "groupId"
+            in: "path"
+            required: true
+            schema:
+              type: "integer"
+              format: "int64"
+          - name: "exerciseId"
+            in: "path"
+            required: true
+            schema:
+              type: "integer"
+              format: "int64"
+          - name: "questionId"
+            in: "path"
+            required: true
+            schema:
+              type: "integer"
+              format: "int64"
+          - name: "alternativeId"
+            in: "path"
+            required: true
+            schema:
+              type: "integer"
+              format: "int64"
+        responses:
+          "200":
+            description: "OK"
+            content:
+              '*/*':
+                schema:
+                  $ref: "#/components/schemas/Alternative"
+      put:
+        summary: "PUT api/group/{groupId}/exercise/{exerciseId}/question/{questionId}/alternative/{alternativeId}"
+        operationId: "updateAlternative"
+        parameters:
+          - name: "groupId"
+            in: "path"
+            required: true
+            schema:
+              type: "integer"
+              format: "int64"
+          - name: "exerciseId"
+            in: "path"
+            required: true
+            schema:
+              type: "integer"
+              format: "int64"
+          - name: "questionId"
+            in: "path"
+            required: true
+            schema:
+              type: "integer"
+              format: "int64"
+          - name: "alternativeId"
+            in: "path"
+            required: true
+            schema:
+              type: "integer"
+              format: "int64"
+        requestBody:
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AlternativeUpdateDTO"
+          required: true
+        responses:
+          "200":
+            description: "OK"
+            content:
+              '*/*':
+                schema:
+                  $ref: "#/components/schemas/Alternative"
+      delete:
+        summary: "DELETE api/group/{groupId}/exercise/{exerciseId}/question/{questionId}/alternative/{alternativeId}"
+        operationId: "deleteAlternative"
+        parameters:
+          - name: "groupId"
+            in: "path"
+            required: true
+            schema:
+              type: "integer"
+              format: "int64"
+          - name: "exerciseId"
+            in: "path"
+            required: true
+            schema:
+              type: "integer"
+              format: "int64"
+          - name: "questionId"
+            in: "path"
+            required: true
+            schema:
+              type: "integer"
+              format: "int64"
+          - name: "alternativeId"
+            in: "path"
+            required: true
+            schema:
+              type: "integer"
+              format: "int64"
+        responses:
+          "410":
+            description: "Gone"
+  components:
+    schemas:
+      Achievement:
+        type: "object"
+        properties:
+          id:
+            type: "integer"
+            format: "int64"
+          icon:
+            type: "string"
+          title:
+            type: "string"
+          description:
+            type: "string"
+      Indicators:
+        type: "object"
+        properties:
+          id:
+            type: "integer"
+            format: "int64"
+          score:
+            type: "integer"
+            format: "int64"
+          achievements:
+            type: "array"
+            items:
+              $ref: "#/components/schemas/Achievement"
+          user:
+            $ref: "#/components/schemas/User"
+      User:
+        type: "object"
+        properties:
+          id:
+            type: "integer"
+            format: "int64"
+          name:
+            type: "string"
+          indicators:
+            $ref: "#/components/schemas/Indicators"
+      Feedback:
+        type: "object"
+        properties:
+          id:
+            type: "integer"
+            format: "int64"
+          link:
+            type: "string"
+          feedbackText:
+            type: "string"
+          question:
+            $ref: "#/components/schemas/Question"
+      Exercise:
+        type: "object"
+        properties:
+          id:
+            type: "integer"
+            format: "int64"
+          title:
+            type: "string"
+          questions:
+            type: "array"
+            items:
+              $ref: "#/components/schemas/Question"
+          inactivate:
+            type: "boolean"
+      Question:
+        type: "object"
+        properties:
+          id:
+            type: "integer"
+            format: "int64"
+          title:
+            type: "string"
+          userCreate:
+            $ref: "#/components/schemas/User"
+          feedback:
+            $ref: "#/components/schemas/Feedback"
+          exercises:
+            type: "array"
+            items:
+              $ref: "#/components/schemas/Exercise"
+      AlternativeCreateDTO:
+        type: "object"
+        properties:
+          title:
+            type: "string"
+          correct:
+            type: "boolean"
+          question:
+            $ref: "#/components/schemas/Question"
+      Alternative:
+        type: "object"
+        properties:
+          id:
+            type: "integer"
+            format: "int64"
+          title:
+            type: "string"
+          correct:
+            type: "boolean"
+          question:
+            $ref: "#/components/schemas/Question"
+      AlternativeUpdateDTO:
+        type: "object"
+        properties:
+          title:
+            type: "string"
+          correct:
+            type: "boolean"
+  /login.js:
+      post:
+        tags:
+          - Autenticação
+        summary: Endpoint de Login
+        description: Autentica um usuário e retorna um token de acesso.
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        parameters:
+          - in: body
+            name: credentials
+            description: Credenciais do usuário
+            required: true
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+        responses:
+          200:
+            description: Sucesso
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+          400:
+            description: Requisição inválida
+          401:
+            description: Credenciais inválidas

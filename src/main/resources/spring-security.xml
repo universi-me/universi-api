@@ -19,6 +19,10 @@
         <intercept-url pattern="/login" access="permitAll"/>
         <intercept-url pattern="/login/google" access="permitAll"/>
         <intercept-url pattern="/registrar" access="permitAll"/>
+        <intercept-url pattern="/swagger-ui.html" access="permitAll()"/>
+        <intercept-url pattern="/swagger-ui/index.html" access="permitAll()"/>
+        <intercept-url pattern="/swagger-ui/**" access="permitAll()"/>
+        <intercept-url pattern="/api-docs/**" access="permitAll()"/>
 
         <intercept-url pattern="/favicon.ico" access="permitAll"/>
 
