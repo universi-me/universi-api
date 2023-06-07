@@ -28,7 +28,7 @@ public class GetQuestionServiceImpl implements GetQuestionService {
 
     @Override
     public Question getQuestion(Long groupId, Long exerciseId, Long questionId) {
-        User user = this.userService.obterUsuarioNaSessao();
+        User user = this.userService.getUserInSession();
         Group group = this.groupRepository.findByIdAndAdminId(groupId,user.getProfile().getId()).orElseThrow(GroupNotFoundException::new);
 
         ExerciseUtil.checkPermissionExercise(user,group);

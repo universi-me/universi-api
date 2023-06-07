@@ -12,4 +12,12 @@ public class QuestionBuilder {
         question.setFeedback(feedback);
         return question;
     }
+    public static Question createQuestion(Long id){
+        Question question = new Question();
+        question.setId(id);
+        question.setTitle("Question 1");
+        Feedback feedback = new Feedback("www.google.com","feedback test", question);
+        question.setFeedback(feedback);
+        return question;
+    }
 }

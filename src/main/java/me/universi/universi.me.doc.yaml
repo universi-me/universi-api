@@ -1,0 +1,1580 @@
+openapi: "3.0.3"
+info:
+  title: "universi_api API"
+  description: "universi_api API"
+  version: "1.0.0"
+servers:
+  - url: "https://localhost:8080/"
+paths:
+  /imagem/upload:
+    post:
+      summary: "POST imagem/upload"
+      operationId: "upload_de_imagem"
+      parameters:
+        - name: "imagem"
+          in: "query"
+          required: true
+          schema:
+            type: "string"
+            format: "binary"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+  /img/imagem/{imagem}.jpg:
+    get:
+      summary: "GET img/imagem/{imagem}.jpg"
+      operationId: "obterImageEmDisco"
+      parameters:
+        - name: "imagem"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            image/jpeg:
+              schema:
+                $ref: "#/components/schemas/ResponseEntity"
+  /api/user/{userId}/subject:
+    post:
+      summary: "POST api/user/{userId}/subject"
+      operationId: "createSubject"
+      parameters:
+        - name: "userId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Subject"
+        required: true
+      responses:
+        "201":
+          description: "Created"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subject"
+  /api/group/{groupId}/exercise/{exerciseId}:
+    put:
+      summary: "PUT api/group/{groupId}/exercise/{exerciseId}"
+      operationId: "updateExercise"
+      parameters:
+        - name: "groupId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+        - name: "exerciseId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExerciseUpdateDTO"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Exercise"
+    post:
+      summary: "POST api/group/{groupId}/exercise/{exerciseId}"
+      operationId: "calculateExercise"
+      parameters:
+        - name: "groupId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+        - name: "exerciseId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: "array"
+              items:
+                $ref: "#/components/schemas/AnswerDTO"
+        required: true
+      responses:
+        "202":
+          description: "Accepted"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExerciseAnswersDTO"
+    get:
+      summary: "GET api/group/{groupId}/exercise/{exerciseId}"
+      operationId: "getExercise"
+      parameters:
+        - name: "groupId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+        - name: "exerciseId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Exercise"
+  /api/group/{groupId}/exercise:
+    post:
+      summary: "POST api/group/{groupId}/exercise"
+      operationId: "createExercise"
+      parameters:
+        - name: "groupId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExerciseCreateDTO"
+        required: true
+      responses:
+        "201":
+          description: "Created"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Exercise"
+  /api/group/{groupId}/exercise/{exerciseId}/questions:
+    get:
+      summary: "GET api/group/{groupId}/exercise/{exerciseId}/questions"
+      operationId: "listQuestionsWithAlternatives"
+      parameters:
+        - name: "groupId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+        - name: "exerciseId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+        - name: "amount"
+          in: "query"
+          required: true
+          schema:
+            type: "integer"
+            format: "int32"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/QuestionWithAlternativesDTO"
+  /api/group/{groupId}/exercise/{exerciseId}/question/{idQuestion}:
+    put:
+      summary: "PUT api/group/{groupId}/exercise/{exerciseId}/question/{idQuestion}"
+      operationId: "updateQuestion"
+      parameters:
+        - name: "groupId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+        - name: "exerciseId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+        - name: "idQuestion"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuestionUpdateDTO"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Question"
+  /api/group/{groupId}/exercise/{exerciseId}/question:
+    post:
+      summary: "POST api/group/{groupId}/exercise/{exerciseId}/question"
+      operationId: "createQuestion"
+      parameters:
+        - name: "groupId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+        - name: "exerciseId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuestionCreateDTO"
+        required: true
+      responses:
+        "201":
+          description: "Created"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Question"
+  /api/group/{groupId}/exercise/{exerciseId}/question/{questionId}:
+    get:
+      summary: "GET api/group/{groupId}/exercise/{exerciseId}/question/{questionId}"
+      operationId: "getQuestion"
+      parameters:
+        - name: "groupId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+        - name: "exerciseId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+        - name: "questionId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Question"
+  /api/user/indicators:
+    get:
+      summary: "GET api/user/indicators"
+      operationId: "getIndicators"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Indicators"
+  /api/user/ranking:
+    get:
+      summary: "GET api/user/ranking"
+      operationId: "getRanking"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Indicators"
+  /api/group/{groupId}/exercise/{exerciseId}/question/{questionId}/alternative/{alternativeId}:
+    put:
+      summary: "PUT api/group/{groupId}/exercise/{exerciseId}/question/{questionId}/alternative/{alternativeId}"
+      operationId: "updateAlternative"
+      parameters:
+        - name: "groupId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+        - name: "exerciseId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+        - name: "questionId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+        - name: "alternativeId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AlternativeUpdateDTO"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Alternative"
+    get:
+      summary: "GET api/group/{groupId}/exercise/{exerciseId}/question/{questionId}/alternative/{alternativeId}"
+      operationId: "getAlternative"
+      parameters:
+        - name: "groupId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+        - name: "exerciseId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+        - name: "questionId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+        - name: "alternativeId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Alternative"
+  /api/group/{groupId}/exercise/{exerciseId}/question/{questionId}/alternative:
+    post:
+      summary: "POST api/group/{groupId}/exercise/{exerciseId}/question/{questionId}/alternative"
+      operationId: "createAlternative"
+      parameters:
+        - name: "groupId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+        - name: "exerciseId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+        - name: "questionId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AlternativeCreateDTO"
+        required: true
+      responses:
+        "201":
+          description: "Created"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Alternative"
+    get:
+      summary: "GET api/group/{groupId}/exercise/{exerciseId}/question/{questionId}/alternative"
+      operationId: "listAlternative"
+      parameters:
+        - name: "groupId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+        - name: "exerciseId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+        - name: "questionId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Alternative"
+  /exit:
+    get:
+      summary: "GET exit"
+      operationId: "exitApp"
+      responses:
+        "200":
+          description: "OK"
+  /:
+    get:
+      summary: "GET "
+      operationId: "index"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+  /link/criar:
+    post:
+      summary: "POST link/criar"
+      operationId: "create"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Map"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+  /link/remover:
+    post:
+      summary: "POST link/remover"
+      operationId: "remove"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Map"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+  /link/atualizar:
+    post:
+      summary: "POST link/atualizar"
+      operationId: "update"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Map"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+  /link/obter:
+    post:
+      summary: "POST link/obter"
+      operationId: "get"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Map"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+  /api/registrar:
+    post:
+      summary: "POST api/registrar"
+      operationId: "registrarUsuarioJson"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Map"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+  /api/conta/editar:
+    post:
+      summary: "POST api/conta/editar"
+      operationId: "conta_editar"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Map"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+  /api/admin/conta/editar:
+    post:
+      summary: "POST api/admin/conta/editar"
+      operationId: "admin_conta_editar"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Map"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+  /api/login/google:
+    post:
+      summary: "POST api/login/google"
+      operationId: "conta_google"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Map"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+  /api/login:
+    get:
+      summary: "GET api/login"
+      operationId: "login"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Response"
+  /grupo/criar:
+    post:
+      summary: "POST grupo/criar"
+      operationId: "grupo_criar"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Map"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+  /grupo/editar:
+    post:
+      summary: "POST grupo/editar"
+      operationId: "grupo_editar"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Map"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+  /grupo/participante/entrar:
+    post:
+      summary: "POST grupo/participante/entrar"
+      operationId: "grupo_participante_entrar"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Map"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+  /grupo/participante/sair:
+    post:
+      summary: "POST grupo/participante/sair"
+      operationId: "grupo_participante_sair"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Map"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+  /grupo/participante/adicionar:
+    post:
+      summary: "POST grupo/participante/adicionar"
+      operationId: "grupo_participante_adicionar"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Map"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+  /grupo/participante/remover:
+    post:
+      summary: "POST grupo/participante/remover"
+      operationId: "grupo_participante_remover"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Map"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+  /grupo/participante/listar:
+    post:
+      summary: "POST grupo/participante/listar"
+      operationId: "grupo_participante_listar"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Map"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+  /grupo/remover:
+    post:
+      summary: "POST grupo/remover"
+      operationId: "grupo_remove"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Map"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+  /grupo/deletar:
+    post:
+      summary: "POST grupo/deletar"
+      operationId: "grupo_deletar"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Map"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+  /grupo/obter:
+    post:
+      summary: "POST grupo/obter"
+      operationId: "obter_grupo"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Map"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+  /grupo/listar:
+    post:
+      summary: "POST grupo/listar"
+      operationId: "listar_subgrupo"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Map"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+  /perfil/editar:
+    post:
+      summary: "POST perfil/editar"
+      operationId: "perfil_editar"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Map"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+  /pesquisar:
+    post:
+      summary: "POST pesquisar"
+      operationId: "perfil_pesquisar"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Map"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArrayList"
+  /admin/competenciatipo/criar:
+    post:
+      summary: "POST admin/competenciatipo/criar"
+      operationId: "create"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Map"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+  /admin/competenciatipo/atualizar:
+    post:
+      summary: "POST admin/competenciatipo/atualizar"
+      operationId: "update"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Map"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+  /admin/competenciatipo/remover:
+    post:
+      summary: "POST admin/competenciatipo/remover"
+      operationId: "remove"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Map"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+  /admin/competenciatipo/obter:
+    post:
+      summary: "POST admin/competenciatipo/obter"
+      operationId: "get"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Map"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+  /admin/competenciatipo/listar:
+    post:
+      summary: "POST admin/competenciatipo/listar"
+      operationId: "findAll"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Map"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+  /competencia/criar:
+    post:
+      summary: "POST competencia/criar"
+      operationId: "create"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Map"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+  /competencia/atualizar:
+    post:
+      summary: "POST competencia/atualizar"
+      operationId: "update"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Map"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+  /competencia/remover:
+    post:
+      summary: "POST competencia/remover"
+      operationId: "remove"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Map"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+  /competencia/obter:
+    post:
+      summary: "POST competencia/obter"
+      operationId: "get"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Map"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+  /competencia/listar:
+    post:
+      summary: "POST competencia/listar"
+      operationId: "findAll"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Map"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+  /recomendacao/criar:
+    post:
+      summary: "POST recomendacao/criar"
+      operationId: "create"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Map"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+  /recomendacao/atualizar:
+    post:
+      summary: "POST recomendacao/atualizar"
+      operationId: "atualizar"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Map"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+  /recomendacao/remover:
+    post:
+      summary: "POST recomendacao/remover"
+      operationId: "remove"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Map"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+  /recomendacao/obter:
+    post:
+      summary: "POST recomendacao/obter"
+      operationId: "get"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Map"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+  /recomendacao/listar:
+    post:
+      summary: "POST recomendacao/listar"
+      operationId: "getlist"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Map"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+  /<unknown>:
+    get:
+      summary: "GET ${..}"
+      operationId: "error"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ResponseEntity"
+    put:
+      summary: "PUT ${..}"
+      operationId: "error"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ResponseEntity"
+    post:
+      summary: "POST ${..}"
+      operationId: "error"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ResponseEntity"
+    delete:
+      summary: "DELETE ${..}"
+      operationId: "error"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ResponseEntity"
+    options:
+      summary: "OPTIONS ${..}"
+      operationId: "error"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ResponseEntity"
+    head:
+      summary: "HEAD ${..}"
+      operationId: "error"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ResponseEntity"
+    patch:
+      summary: "PATCH ${..}"
+      operationId: "error"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ResponseEntity"
+    trace:
+      summary: "TRACE ${..}"
+      operationId: "error"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ResponseEntity"
+components:
+  schemas:
+    Map:
+      type: "object"
+      properties: { }
+    Response:
+      type: "object"
+      properties:
+        success:
+          type: "boolean"
+        message:
+          type: "string"
+        redirectTo:
+          type: "string"
+        body:
+          $ref: "#/components/schemas/Map"
+    HttpHeaders:
+      type: "object"
+      properties: { }
+    ResponseEntity:
+      type: "object"
+      properties:
+        headers:
+          $ref: "#/components/schemas/HttpHeaders"
+    Subject:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        subject:
+          type: "string"
+    ExerciseUpdateDTO:
+      type: "object"
+      properties:
+        title:
+          type: "string"
+    Achievement:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        icon:
+          type: "string"
+        title:
+          type: "string"
+        description:
+          type: "string"
+    Indicators:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        score:
+          type: "integer"
+          format: "int64"
+        achievements:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Achievement"
+        user:
+          $ref: "#/components/schemas/User"
+    User:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        name:
+          type: "string"
+        indicators:
+          $ref: "#/components/schemas/Indicators"
+    Feedback:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        link:
+          type: "string"
+        feedbackText:
+          type: "string"
+        question:
+          $ref: "#/components/schemas/Question"
+    Question:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        title:
+          type: "string"
+        userCreate:
+          $ref: "#/components/schemas/User"
+        feedback:
+          $ref: "#/components/schemas/Feedback"
+        exercises:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Exercise"
+    Exercise:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        title:
+          type: "string"
+        questions:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Question"
+    Alternative:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        title:
+          type: "string"
+        correct:
+          type: "boolean"
+        question:
+          $ref: "#/components/schemas/Question"
+    AnswerDTO:
+      type: "object"
+      properties:
+        question:
+          $ref: "#/components/schemas/Question"
+        alternativeSelected:
+          $ref: "#/components/schemas/Alternative"
+    ExerciseAnswersDTO:
+      type: "object"
+      properties:
+        answers:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/AnswerDTO"
+        score:
+          type: "number"
+          format: "float"
+    Link:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        typeLink:
+          type: "string"
+          enum:
+            - "LINK"
+            - "GITHUB"
+            - "GIT"
+            - "TWITTER"
+            - "WORDPRESS"
+            - "TELEGRAM"
+            - "INSTAGRAM"
+            - "REDDIT"
+            - "LINKEDIN"
+            - "DISCORD"
+            - "PAYPAL"
+            - "WHATSAPP"
+            - "TRELLO"
+            - "SLACK"
+            - "SPOTIFY"
+            - "YOUTUBE"
+            - "SKYPE"
+            - "STACK"
+            - "FACEBOOK"
+            - "label"
+            - "bootstrapIconName"
+        url:
+          type: "string"
+        name:
+          type: "string"
+    CompetenceType:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        name:
+          type: "string"
+    Competence:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        competenceType:
+          $ref: "#/components/schemas/CompetenceType"
+        description:
+          type: "string"
+        level:
+          type: "string"
+          enum:
+            - "NO_EXPERIENCE"
+            - "LITTLE_EXPERIENCE"
+            - "EXPERIENCED"
+            - "VERY_EXPERIENCED"
+            - "MASTER"
+            - "label"
+        creationDate:
+          type: "string"
+          format: "date-time"
+    Recommendation:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        origin:
+          $ref: "#/components/schemas/Profile"
+        destiny:
+          $ref: "#/components/schemas/Profile"
+        competenceType:
+          $ref: "#/components/schemas/CompetenceType"
+        description:
+          type: "string"
+        creationDate:
+          type: "string"
+          format: "date-time"
+    Profile:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        firstname:
+          type: "string"
+        lastname:
+          type: "string"
+        image:
+          type: "string"
+        bio:
+          type: "string"
+        link:
+          $ref: "#/components/schemas/Link"
+        competences:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Competence"
+        groups:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Group"
+        links:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Link"
+        recomendacoesFeitas:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Recommendation"
+        recomendacoesRecebidas:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Recommendation"
+        creationDate:
+          type: "string"
+          format: "date-time"
+    Group:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        nickname:
+          type: "string"
+        name:
+          type: "string"
+        description:
+          type: "string"
+        image:
+          type: "string"
+        admin:
+          $ref: "#/components/schemas/Profile"
+        participants:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Profile"
+        subGroups:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Group"
+        type:
+          type: "string"
+          enum:
+            - "INSTITUTION"
+            - "CAMPUS"
+            - "COURSE"
+            - "PROJECT"
+            - "CLASSROOM"
+            - "MONITORIA"
+            - "LABORATORY"
+            - "ACADEMIC_CENTER"
+            - "DEPARTMENT"
+            - "STUDY_GROUP"
+            - "label"
+        rootGroup:
+          type: "boolean"
+        canCreateGroup:
+          type: "boolean"
+        canEnter:
+          type: "boolean"
+        canAddParticipant:
+          type: "boolean"
+        createdAt:
+          type: "string"
+          format: "date-time"
+        publicGroup:
+          type: "boolean"
+    ExerciseCreateDTO:
+      type: "object"
+      properties:
+        questions:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Question"
+        group:
+          $ref: "#/components/schemas/Group"
+        title:
+          type: "string"
+    QuestionWithAlternativesDTO:
+      type: "object"
+      properties:
+        question:
+          $ref: "#/components/schemas/Question"
+        alternatives:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Alternative"
+    QuestionUpdateDTO:
+      type: "object"
+      properties:
+        title:
+          type: "string"
+        feedback:
+          $ref: "#/components/schemas/Feedback"
+    QuestionCreateDTO:
+      type: "object"
+      properties:
+        title:
+          type: "string"
+        feedback:
+          $ref: "#/components/schemas/Feedback"
+        userCreate:
+          $ref: "#/components/schemas/User"
+    AlternativeUpdateDTO:
+      type: "object"
+      properties:
+        title:
+          type: "string"
+        correct:
+          type: "boolean"
+    AlternativeCreateDTO:
+      type: "object"
+      properties:
+        title:
+          type: "string"
+        correct:
+          type: "boolean"
+        question:
+          $ref: "#/components/schemas/Question"
+    ArrayList:
+      type: "object"
+      properties: { }
+    Object:
+      type: "object"
+      properties: { }
+    ModelMap:
+      type: "object"
+      properties: { }
+    HttpStatusCode:
+      type: "object"
+      properties: { }
+    ModelAndView:
+      type: "object"
+      properties:
+        view:
+          $ref: "#/components/schemas/Object"
+        model:
+          $ref: "#/components/schemas/ModelMap"
+        status:
+          $ref: "#/components/schemas/HttpStatusCode"

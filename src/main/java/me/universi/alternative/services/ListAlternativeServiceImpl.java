@@ -22,7 +22,7 @@ public class ListAlternativeServiceImpl implements ListAlternativeService {
     }
 
     public List<Alternative> listAlternative(Long groupId, Long ExerciseId, Long questionId){
-        User user = this.userService.obterUsuarioNaSessao();
+        User user = this.userService.getUserInSession();
         // To do
         return alternativeRepository.findAllByQuestionIdAndQuestionUserCreateId(questionId, user.getId());
     }

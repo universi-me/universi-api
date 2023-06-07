@@ -28,12 +28,12 @@ public class CreateExerciseServiceImpl implements CreateExerciseService{
 
     @Override
     public Exercise createExercise(Long groupId, ExerciseCreateDTO exercise) {
-        Long idProfile =  this.userService.obterUsuarioNaSessao().getProfile().getId();
+        Long idProfile =  this.userService.getUserInSession().getProfile().getId();
         Group group = this.groupRepository.findByIdAndAdminId(
                 groupId,
                 idProfile
         ).orElseThrow(GroupNotFoundException::new);
-        ExerciseUtil.checkPermissionExercise(this.userService.obterUsuarioNaSessao(), group);
+        ExerciseUtil.checkPermissionExercise(this.userService.getUserInSession(), group);
 
         exercise.setGroup(group);
         return this.exerciseRepository.save(Exercise.from(exercise));

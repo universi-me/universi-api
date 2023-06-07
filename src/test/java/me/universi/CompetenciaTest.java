@@ -1,16 +1,16 @@
 package me.universi;
 
-import me.universi.competencia.entities.Competence;
-import me.universi.competencia.entities.CompetenceType;
-import me.universi.competencia.repositories.CompetenceTypeRepository;
-import me.universi.competencia.services.CompetenceService;
-import me.universi.grupo.services.GroupService;
-import me.universi.perfil.entities.Profile;
-import me.universi.perfil.enums.Gender;
-import me.universi.perfil.services.PerfilService;
-import me.universi.recomendacao.service.RecomendacaoService;
+import me.universi.competence.entities.Competence;
+import me.universi.competence.entities.CompetenceType;
+import me.universi.competence.repositories.CompetenceTypeRepository;
+import me.universi.competence.services.CompetenceService;
+import me.universi.group.services.GroupService;
+import me.universi.profile.entities.Profile;
+import me.universi.profile.enums.Gender;
+import me.universi.profile.services.PerfilService;
+import me.universi.recommendation.service.RecomendacaoService;
 import me.universi.user.entities.User;
-import me.universi.user.services.UsuarioService;
+import me.universi.user.services.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,16 +35,16 @@ public class CompetenciaTest {
     @Autowired
     PerfilService perfilService;
     @Autowired
-    UsuarioService usuarioService;
+    UserService userService;
 
     @Autowired
     CompetenceTypeRepository competenciaTipoRepository;
     @Test
     void create() {
         String nome = "competenciaTest";
-        User userNew = new User(nome, nome+"@email.com", usuarioService.codificarSenha("senha"));
+        User userNew = new User(nome, nome+"@email.com", userService.codificarSenha("senha"));
         try {
-            usuarioService.createUser(userNew);
+            userService.createUser(userNew);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -95,9 +95,9 @@ public class CompetenciaTest {
     @Test
     void update(){
         String nome = "competenciaTestUpdate";
-        User userNew = new User(nome, nome+"@email.com", usuarioService.codificarSenha("senha"));
+        User userNew = new User(nome, nome+"@email.com", userService.codificarSenha("senha"));
         try {
-            usuarioService.createUser(userNew);
+            userService.createUser(userNew);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -154,9 +154,9 @@ public class CompetenciaTest {
     @Test
     void delete(){
         String nome = "competenciaTestDelete";
-        User userNew = new User(nome, nome+"@email.com", usuarioService.codificarSenha("senha"));
+        User userNew = new User(nome, nome+"@email.com", userService.codificarSenha("senha"));
         try {
-            usuarioService.createUser(userNew);
+            userService.createUser(userNew);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -214,9 +214,9 @@ public class CompetenciaTest {
     @Test
     void read(){
         String nome = "competenciaTestread";
-        User userNew = new User(nome, nome+"@email.com", usuarioService.codificarSenha("senha"));
+        User userNew = new User(nome, nome+"@email.com", userService.codificarSenha("senha"));
         try {
-            usuarioService.createUser(userNew);
+            userService.createUser(userNew);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

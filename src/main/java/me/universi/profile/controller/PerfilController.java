@@ -56,7 +56,7 @@ public class PerfilController {
 
             if(!userService.usuarioDonoDaSessao(profileAtual.getUsuario())) {
 
-                User userSession = userService.obterUsuarioNaSessao();
+                User userSession = userService.getUserInSession();
                 if(!userService.isContaAdmin(userSession)) {
                     throw new PerfilException("Você não tem permissão para editar este perfil.");
                 }
