@@ -8,11 +8,11 @@ import me.universi.exercise.entities.Exercise;
 import me.universi.exercise.services.CreateExerciseServiceImpl;
 import me.universi.group.builder.GroupBuilder;
 import me.universi.group.entities.Group;
-import me.universi.group.exceptions.GroupNotFoundException;
 import me.universi.group.repositories.GroupRepository;
 import me.universi.profile.entities.Profile;
 import me.universi.user.UserBuilder;
 import me.universi.user.entities.User;
+import me.universi.user.exceptions.UnauthorizedException;
 import me.universi.user.services.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -79,11 +79,11 @@ public class CreateExerciseServiceTest {
     @DisplayName("Should return exception when logged in user is not group admin")
     void shouldThrowQuestionNotFoundException() {
         when(userService.getUserInSession()).thenReturn(UserBuilder.createUserSecondary());
-        when(groupRepository.findByIdAndAdminId(1L, 1L)).thenReturn(Optional.of(GroupBuilder.createGroup()));
+        when(groupRepository.findByIdAndAdminId(1L, 2L)).thenReturn(Optional.of(GroupBuilder.createGroup()));
 
         ExerciseCreateDTO exerciseDTO = new ExerciseCreateDTO("Exercise Test");
 
-        assertThrows(GroupNotFoundException.class,
+        assertThrows(UnauthorizedException.class,
                 () -> this.createExerciseService.createExercise(1L, exerciseDTO)
         );
     }
