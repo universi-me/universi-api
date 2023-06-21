@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: ${PROFILE_ACTIVE}
+    active: ${PROFILE_ACTIVE:dev}
   web:
     resources:
       cache:
@@ -8,7 +8,7 @@ spring:
 
 jwt:
   secret:
-    key: ${JWT_SECRET_KEY}
+    key: ${JWT_SECRET_KEY:test_key}
 
 # SERVER
 server:
