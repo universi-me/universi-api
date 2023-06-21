@@ -10,6 +10,17 @@ jwt:
   secret:
     key: ${JWT_SECRET_KEY:test_key}
 
+# DATABASE ENV VARIABLES
+database:
+  url: ${DB_URL:jdbc:postgresql://localhost:5432/universime}
+  username: ${DB_USER:postgres}
+  password: ${DB_PASS:postgres}
+  flyway:
+    url: ${DB_FLY_URL:jdbc:postgresql://localhost:5432/universime}
+    username: ${DB_FLY_USER:postgres}
+    password: ${DB_FLY_PASS:postgres}
+
+
 # SERVER
 server:
   port: 8080
@@ -40,6 +51,7 @@ IMGUR_CLIENT_ID: e4f58fc81daec99
 # LOGIN CONFIG
 REGISTRAR_SE_ATIVADO: false
 
+
 # TEST Profile
 ---
 spring:
@@ -51,7 +63,7 @@ spring:
     enabled: false
 
   datasource:
-    url: jdbc:h2:~/h2/universi-api;AUTO_SERVER=TRUE
+    url: jdbc:h2:~/test;AUTO_SERVER=TRUE
     driverClassName: org.h2.Driver
     username: sa
     password:
@@ -64,6 +76,7 @@ spring:
 
   # JPA
   jpa:
+    show-sql: true
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       ddl-auto: update
@@ -78,9 +91,9 @@ spring:
 
   # POSTGRES
   datasource:
-    url: jdbc:postgresql://localhost:5434/universime
-    username: postgres
-    password: postgres
+    url: ${database.url}
+    username: ${database.username}
+    password: ${database.password}
   #JPA
   jpa:
     hibernate:
@@ -96,9 +109,9 @@ spring:
     enabled: true
     baseline-on-migrate: true
     locations: classpath:db/migration
-    url: jdbc:postgresql://localhost:5434/universime
-    user: postgres
-    password: postgres
+    url: ${database.flyway.url}
+    user: ${database.flyway.username}
+    password: ${database.flyway.password}
   # H2 Console
   h2:
     console:
@@ -114,9 +127,9 @@ spring:
 
   # POSTGRES
   datasource:
-    url: jdbc:postgresql://localhost:5434/universime
-    username: postgres
-    password: postgres
+    url: ${database.url}
+    username: ${database.username}
+    password: ${database.password}
   #JPA
   jpa:
     hibernate:
@@ -132,9 +145,9 @@ spring:
     enabled: true
     baseline-on-migrate: true
     locations: classpath:db/migration
-    url: jdbc:postgresql://localhost:5434/universime
-    user: postgres
-    password: postgres
+    url: ${database.flyway.url}
+    user: ${database.flyway.username}
+    password: ${database.flyway.password}
   # H2 Console
   h2:
     console:
