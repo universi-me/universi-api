@@ -1,29 +1,25 @@
 spring:
   profiles:
-    active: ${PROFILE_ACTIVE:dev}
-  web:
-    resources:
-      cache:
-        period: 3600
+    active: ${API_PROFILE_ACTIVE:dev}
 
 jwt:
   secret:
-    key: ${JWT_SECRET_KEY:test_key}
+    key: ${API_JWT_SECRET_KEY:test_key}
 
 # DATABASE ENV VARIABLES
 database:
-  url: ${DB_URL:jdbc:postgresql://localhost:5432/universime}
-  username: ${DB_USER:postgres}
-  password: ${DB_PASS:postgres}
+  url: ${API_DB_URL:jdbc:postgresql://localhost:5432/universime}
+  username: ${API_DB_USER:postgres}
+  password: ${API_DB_PASS:postgres}
   flyway:
-    url: ${DB_FLY_URL:jdbc:postgresql://localhost:5432/universime}
-    username: ${DB_FLY_USER:postgres}
-    password: ${DB_FLY_PASS:postgres}
+    url: ${API_DB_FLY_URL:jdbc:postgresql://localhost:5432/universime}
+    username: ${API_DB_FLY_USER:postgres}
+    password: ${API_DB_FLY_PASS:postgres}
 
 
 # SERVER
 server:
-  port: ${SERVER_PORT:8080}
+  port: ${API_SERVER_PORT:8080}
   servlet:
     session:
       timeout: 43200
@@ -61,7 +57,6 @@ spring:
   # Flyway
   flyway:
     enabled: false
-
   datasource:
     url: jdbc:h2:mem:testdb
     driverClassName: org.h2.Driver
@@ -81,8 +76,12 @@ spring:
     format_sql: true
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
-      ddl-auto: none
-
+      ddl-auto: update
+logging:
+  level:
+    org:
+      springframework:
+        web: DEBUG
 
 # DEV Profile
 ---
@@ -126,7 +125,10 @@ spring:
   config:
     activate:
       on-profile: prod
-
+  web:
+    resources:
+      cache:
+        period: 3600
   # POSTGRES
   datasource:
     url: ${database.url}
