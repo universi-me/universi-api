@@ -23,7 +23,7 @@ database:
 
 # SERVER
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
   servlet:
     session:
       timeout: 43200
@@ -63,8 +63,9 @@ spring:
     enabled: false
 
   datasource:
-    url: jdbc:h2:~/test;AUTO_SERVER=TRUE
+    url: jdbc:h2:mem:testdb
     driverClassName: org.h2.Driver
+    continue-on-error: true
     username: sa
     password:
 
@@ -77,9 +78,10 @@ spring:
   # JPA
   jpa:
     show-sql: true
+    format_sql: true
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
 
 
 # DEV Profile
