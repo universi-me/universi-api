@@ -1,0 +1,158 @@
+spring:
+  profiles:
+    active: ${API_PROFILE_ACTIVE:dev}
+
+jwt:
+  secret:
+    key: ${API_JWT_SECRET_KEY:test_key}
+
+# DATABASE ENV VARIABLES
+database:
+  url: ${API_DB_URL:jdbc:postgresql://localhost:5432/universime}
+  username: ${API_DB_USER:postgres}
+  password: ${API_DB_PASS:postgres}
+  flyway:
+    url: ${API_DB_FLY_URL:jdbc:postgresql://localhost:5432/universime}
+    username: ${API_DB_FLY_USER:postgres}
+    password: ${API_DB_FLY_PASS:postgres}
+
+
+# SERVER
+server:
+  port: ${API_SERVER_PORT:8080}
+  servlet:
+    session:
+      timeout: 43200
+      persistent: false
+    multipart:
+      enabled: true
+      max-file-size: 200MB
+      max-request-size: 200MB
+
+
+# SPRINGDOC
+springdoc:
+  version: 1.0
+
+# GOOGLE API AUTH
+GOOGLE_CLIENT_ID: 110833050076-ib680ela4hfqr2c0lhc9h19snrsvltnd.apps.googleusercontent.com
+
+# IMAGEM CONFIG
+SALVAR_IMAGEM_EM_DISCO: false
+DIRETORIO_DA_IMAGEM: src/main/resources/static/img/imagem/
+
+# IMGUR API CLIENT-ID
+IMGUR_CLIENT_ID: e4f58fc81daec99
+
+# LOGIN CONFIG
+REGISTRAR_SE_ATIVADO: false
+
+
+# TEST Profile
+---
+spring:
+  config:
+    activate:
+      on-profile: test
+  # Flyway
+  flyway:
+    enabled: false
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driverClassName: org.h2.Driver
+    continue-on-error: true
+    username: sa
+    password:
+
+  # H2 Console
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  # JPA
+  jpa:
+    show-sql: true
+    format_sql: true
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+logging:
+  level:
+    org:
+      springframework:
+        web: DEBUG
+
+# DEV Profile
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  # POSTGRES
+  datasource:
+    url: ${database.url}
+    username: ${database.username}
+    password: ${database.password}
+  #JPA
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  # Flyway
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+    url: ${database.flyway.url}
+    user: ${database.flyway.username}
+    password: ${database.flyway.password}
+  # H2 Console
+  h2:
+    console:
+      enabled: false
+
+
+# PROD Profile
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+  web:
+    resources:
+      cache:
+        period: 3600
+  # POSTGRES
+  datasource:
+    url: ${database.url}
+    username: ${database.username}
+    password: ${database.password}
+  #JPA
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  # Flyway
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+    url: ${database.flyway.url}
+    user: ${database.flyway.username}
+    password: ${database.flyway.password}
+  # H2 Console
+  h2:
+    console:
+      enabled: false
