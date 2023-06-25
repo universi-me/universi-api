@@ -16,20 +16,21 @@
         <csrf disabled="true"/>
 
         <intercept-url pattern="/" access="permitAll"/>
-        <intercept-url pattern="/login" access="permitAll"/>
-        <intercept-url pattern="/login/google" access="permitAll"/>
-        <intercept-url pattern="/registrar" access="permitAll"/>
-
-        <intercept-url pattern="/favicon.ico" access="permitAll"/>
+        <intercept-url pattern="/api" access="permitAll"/>
+        <intercept-url pattern="/api/" access="permitAll"/>
+        <intercept-url pattern="/api/login" access="permitAll"/>
+        <intercept-url pattern="/api/login/google" access="permitAll"/>
+        <intercept-url pattern="/api/registrar" access="permitAll"/>
 
         <!-- Admin rules -->
-        <intercept-url pattern="/admin/**" access="hasRole('ADMIN')"/>
-        <intercept-url pattern="/exit" access="hasRole('ADMIN')"/>
+        <intercept-url pattern="/api/admin/**" access="hasRole('ADMIN')"/>
 
         <!-- Perimitir acesso ao H2-console -->
-        <intercept-url pattern="/h2-console/**" access="hasRole('ADMIN')"/>
+        <intercept-url pattern="/api/h2-console/**" access="('${spring.profiles.active}' == 'test')"/>
 
-        <intercept-url pattern="/**" access="isAuthenticated()"/>
+        <intercept-url pattern="/api/**" access="isAuthenticated()"/>
+
+        <intercept-url pattern="/**" access="permitAll"/>
 
         <custom-filter position="CONCURRENT_SESSION_FILTER" ref="concurrencyFilter" />
         <custom-filter ref="customUsernamePasswordAuthenticationFilter" after="FORM_LOGIN_FILTER"/>

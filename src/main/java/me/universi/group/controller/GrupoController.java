@@ -11,13 +11,13 @@ import me.universi.user.services.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
 import java.util.Map;
 
-@Controller
+@RestController
+@RequestMapping("/api")
 public class GrupoController {
     @Autowired
     public GroupService grupoService;

@@ -14,7 +14,6 @@ import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import me.universi.recommendation.service.RecomendacaoService;
 
@@ -22,7 +21,8 @@ import me.universi.recommendation.service.RecomendacaoService;
 import java.util.List;
 import java.util.Map;
 
-@Controller
+@RestController
+@RequestMapping("/api")
 public class RecomendacaoController {
     @Autowired
     public RecomendacaoService recomendacaoService;
