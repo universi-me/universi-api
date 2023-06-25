@@ -18,6 +18,7 @@ import java.net.URLConnection;
 import java.util.Map;
 
 @RestController
+@RequestMapping("/api")
 public class ImagemController {
     @Autowired
     private Environment env;
