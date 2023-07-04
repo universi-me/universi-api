@@ -34,6 +34,7 @@
 
         <custom-filter position="CONCURRENT_SESSION_FILTER" ref="concurrencyFilter" />
         <custom-filter ref="customUsernamePasswordAuthenticationFilter" after="FORM_LOGIN_FILTER"/>
+        <custom-filter ref="customCorsFiler" before="FORM_LOGIN_FILTER"/>
 
         <session-management session-authentication-strategy-ref="sas"/>
 
@@ -48,6 +49,8 @@
             <frame-options policy="SAMEORIGIN"/>
         </headers>
     </http>
+
+    <beans:bean id="customCorsFiler" class="me.universi.user.services.CustomCorsFiler"/>
 
     <beans:bean id="customUsernamePasswordAuthenticationFilter" class="me.universi.user.services.CustomUsernamePasswordAuthenticationFilter">
         <beans:property name="sessionAuthenticationStrategy" ref="sas"/>
