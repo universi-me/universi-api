@@ -15,6 +15,7 @@ import me.universi.profile.services.PerfilService;
 import me.universi.user.entities.User;
 import me.universi.user.enums.Authority;
 import me.universi.user.exceptions.UsuarioException;
+import me.universi.user.services.JWTService;
 import me.universi.user.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -41,6 +42,8 @@ public class UserController {
     private Environment env;
     @Autowired
     AuthenticationManager authenticationManager;
+    @Autowired
+    JWTService jwtService;
 
     @GetMapping("/login")
     @ResponseBody
@@ -233,7 +236,7 @@ public class UserController {
     @PostMapping(value = "/login/google", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response conta_google(@RequestBody Map<String, Object> body, HttpServletRequest request) {
-        Response resposta = new Response();
+        Response responseBuild = new Response();
         try {
 
             String idTokenString = (String)body.get("token");
@@ -315,22 +318,25 @@ public class UserController {
 
                     userService.configurarSessaoParaUsuario(user, authenticationManager);
 
-                    resposta.success = true;
-                    resposta.redirectTo = userService.obterUrlAoLogar();
-                    resposta.message = "Usuário Logado com sucesso.";
-                    return resposta;
+                    responseBuild.success = true;
+                    responseBuild.redirectTo = userService.obterUrlAoLogar();
+                    responseBuild.message = "Usuário Logado com sucesso.";
+
+                    responseBuild.token = jwtService.buildTokenForUser(user);
+
+                    return responseBuild;
                 }
 
             } else {
                 throw new UsuarioException("Token de Autenticação é Inválida.");
             }
 
-            resposta.message = "Falha ao fazer login com Google.";
-            return resposta;
+            responseBuild.message = "Falha ao fazer login com Google.";
+            return responseBuild;
 
         }catch (Exception e) {
-            resposta.message = e.getMessage();
-            return resposta;
+            responseBuild.message = e.getMessage();
+            return responseBuild;
         }
     }
 

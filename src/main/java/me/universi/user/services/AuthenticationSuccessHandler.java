@@ -20,37 +20,43 @@ import java.security.Principal;
 /*
     Classe para manipular quando o usuario efetuar o login
  */
-public class AutenticacaoValidaHandler extends SavedRequestAwareAuthenticationSuccessHandler {
+public class AuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
     @Autowired
     private UserService userService;
     @Autowired
     AuthenticationManager authenticationManager;
+    @Autowired
+    JWTService jwtService;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws ServletException, IOException {
         HttpSession session = request.getSession(true);
 
         String username = null;
+        User user = null;
+
         if (authentication.getPrincipal() instanceof Principal) {
             username = ((Principal) authentication.getPrincipal()).getName();
         } else {
             username = ((UserDetails) authentication.getPrincipal()).getUsername();
         }
         if(username != null) {
-            User user = (User) userService.loadUserByUsername(username);
+            user = (User) userService.loadUserByUsername(username);
             userService.configurarSessaoParaUsuario(user, authenticationManager);
         }
 
-        if ("application/json".equals(request.getHeader("Content-Type"))) { // request foi via JSON
+        if ("application/json".equals(request.getHeader("Content-Type"))) { // request via JSON
 
-            Response resposta = new Response();
-            resposta.success = true;
-            resposta.message = "Usuário Logado com sucesso.";
+            Response responseBuild = new Response();
+            responseBuild.success = true;
+            responseBuild.message = "Usuário Logado com sucesso.";
 
-            resposta.redirectTo = userService.obterUrlAoLogar();
+            responseBuild.redirectTo = userService.obterUrlAoLogar();
+
+            responseBuild.token = jwtService.buildTokenForUser(user);
 
             response.setHeader("Content-Type", "application/json; charset=utf-8");
-            response.getWriter().print(resposta.toString());
+            response.getWriter().print(responseBuild.toString());
             response.getWriter().flush();
 
         } else {

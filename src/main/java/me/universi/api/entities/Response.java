@@ -1,5 +1,6 @@
 package me.universi.api.entities;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -20,6 +21,9 @@ public class Response {
 
     /** URL path to redirect to after receiving this response */
     public String redirectTo;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public String token;
 
     /** Body of the response with any data */
     public Map body;

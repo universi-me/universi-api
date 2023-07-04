@@ -37,7 +37,7 @@
 
         <session-management session-authentication-strategy-ref="sas"/>
 
-        <form-login login-page="/login" authentication-failure-url="/login" authentication-success-handler-ref="autenticacaoValidaHandler"/>
+        <form-login login-page="/login" authentication-failure-url="/login" authentication-success-handler-ref="authenticationSuccessHandler"/>
         <logout logout-success-url="/login" invalidate-session="true" />
 
         <access-denied-handler ref="customAccessDeniedHandler"/>
@@ -52,9 +52,9 @@
     <beans:bean id="customUsernamePasswordAuthenticationFilter" class="me.universi.user.services.CustomUsernamePasswordAuthenticationFilter">
         <beans:property name="sessionAuthenticationStrategy" ref="sas"/>
         <beans:property name="authenticationManager" ref="authenticationManager"/>
-        <beans:property name="authenticationSuccessHandler" ref="autenticacaoValidaHandler"/>
+        <beans:property name="authenticationSuccessHandler" ref="authenticationSuccessHandler"/>
         <beans:property name="authenticationFailureHandler" ref="autenticacaoFalhaHandler"/>
-        <beans:property name="filterProcessesUrl" value="/login.js"/>
+        <beans:property name="filterProcessesUrl" value="/api/auth"/>
         <beans:property name="usernameParameter" value="username"/>
         <beans:property name="passwordParameter" value="password"/>
     </beans:bean>
@@ -93,7 +93,7 @@
     </authentication-manager>
 
     <beans:bean id="autenticacaoFalhaHandler" class="me.universi.user.services.AutenticacaoFalhaHandler"/>
-    <beans:bean id="autenticacaoValidaHandler" class="me.universi.user.services.AutenticacaoValidaHandler"/>
+    <beans:bean id="authenticationSuccessHandler" class="me.universi.user.services.AuthenticationSuccessHandler"/>
 
     <beans:bean id="roleHierarchy" class="org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl">
         <beans:property name="hierarchy">
