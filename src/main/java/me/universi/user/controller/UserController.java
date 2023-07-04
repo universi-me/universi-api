@@ -43,7 +43,7 @@ public class UserController {
     @Autowired
     AuthenticationManager authenticationManager;
     @Autowired
-    JWTService jwtService;
+    private JWTService jwtService;
 
     @GetMapping("/login")
     @ResponseBody
@@ -323,6 +323,8 @@ public class UserController {
                     responseBuild.message = "Usuário Logado com sucesso.";
 
                     responseBuild.token = jwtService.buildTokenForUser(user);
+
+                    responseBuild.body.put("user", user);
 
                     return responseBuild;
                 }

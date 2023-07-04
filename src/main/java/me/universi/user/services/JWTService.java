@@ -2,6 +2,7 @@ package me.universi.user.services;
 
 import io.jsonwebtoken.*;
 import me.universi.user.entities.User;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -14,15 +15,8 @@ import java.util.HashMap;
 public class JWTService {
     @Value("${jwt.secret.key}")
     private String SECRET_KEY;
-
-    //private HashMap<String, User> usersAllocRuntime = new HashMap<String, User>();
-
-    // Sheduled every day at 8:00 AM
-    //@Scheduled(cron = "0 8 * * *")
-    //public void cleanUpExpiredUsers() {
-    //    //System.out.println("Cleaning up expired users");
-    //    usersAllocRuntime = new HashMap<String, User>();
-    //}
+    @Autowired
+    private UserService userService;
 
     public String buildTokenForUser(User user) {
         String token = null;
@@ -32,7 +26,6 @@ public class JWTService {
                     .claim("user", user.getUsername())
                     .signWith(SignatureAlgorithm.HS512, SECRET_KEY.getBytes("UTF-8"))
                     .compact();
-            //usersAllocRuntime.put(user.getUsername(), user);
         } catch (Exception e) {
             token = null;
         }
@@ -50,13 +43,11 @@ public class JWTService {
         }
     };
 
-    //public User getUserFromToken(String token) throws Exception {
-    //
-    //    Jws<Claims> jws = Jwts.parser()
-    //            .setSigningKeyResolver(signingKeyResolver)
-    //            .parseClaimsJws(token);
-    //    String userName = (String)jws.getBody().get("user");
-    //
-    //    return usersAllocRuntime.get(userName);
-    //}
+    public User getUserFromToken(String token) throws Exception {
+        Jws<Claims> jws = Jwts.parser().setSigningKeyResolver(signingKeyResolver).parseClaimsJws(token);
+        // If integrity checks don't throw continue
+        String userName = (String) jws.getBody().get("user");
+        // TODO: CACHE USER, INSTEAD OF FIND IN DB
+        return (User) userService.loadUserByUsername(userName);
+    }
 }

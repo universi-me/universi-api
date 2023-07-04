@@ -33,8 +33,10 @@
         <intercept-url pattern="/**" access="permitAll"/>
 
         <custom-filter position="CONCURRENT_SESSION_FILTER" ref="concurrencyFilter" />
+        <custom-filter ref="customCorsFilter" before="CONCURRENT_SESSION_FILTER"/>
+        <custom-filter ref="jwtFilter" before="FORM_LOGIN_FILTER"/>
         <custom-filter ref="customUsernamePasswordAuthenticationFilter" after="FORM_LOGIN_FILTER"/>
-        <custom-filter ref="customCorsFiler" before="FORM_LOGIN_FILTER"/>
+
 
         <session-management session-authentication-strategy-ref="sas"/>
 
@@ -50,14 +52,16 @@
         </headers>
     </http>
 
-    <beans:bean id="customCorsFiler" class="me.universi.user.services.CustomCorsFiler"/>
+    <beans:bean id="jwtFilter" class="me.universi.user.services.JWTFilter"/>
+
+    <beans:bean id="customCorsFilter" class="me.universi.user.services.CustomCorsFilter"/>
 
     <beans:bean id="customUsernamePasswordAuthenticationFilter" class="me.universi.user.services.CustomUsernamePasswordAuthenticationFilter">
         <beans:property name="sessionAuthenticationStrategy" ref="sas"/>
         <beans:property name="authenticationManager" ref="authenticationManager"/>
         <beans:property name="authenticationSuccessHandler" ref="authenticationSuccessHandler"/>
         <beans:property name="authenticationFailureHandler" ref="autenticacaoFalhaHandler"/>
-        <beans:property name="filterProcessesUrl" value="/api/auth"/>
+        <beans:property name="filterProcessesUrl" value="/api/signin"/>
         <beans:property name="usernameParameter" value="username"/>
         <beans:property name="passwordParameter" value="password"/>
     </beans:bean>

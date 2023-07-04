@@ -26,11 +26,11 @@ public class Response {
     public String token;
 
     /** Body of the response with any data */
-    public Map body;
+    public HashMap<String, Object> body;
 
     public Response() {
         // Allocate map
-        body = new HashMap();
+        body = new HashMap<>();
     }
 
     @Override

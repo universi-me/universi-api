@@ -26,7 +26,7 @@ public class AuthenticationSuccessHandler extends SavedRequestAwareAuthenticatio
     @Autowired
     AuthenticationManager authenticationManager;
     @Autowired
-    JWTService jwtService;
+    private JWTService jwtService;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws ServletException, IOException {
@@ -54,6 +54,8 @@ public class AuthenticationSuccessHandler extends SavedRequestAwareAuthenticatio
             responseBuild.redirectTo = userService.obterUrlAoLogar();
 
             responseBuild.token = jwtService.buildTokenForUser(user);
+
+            responseBuild.body.put("user", user);
 
             response.setHeader("Content-Type", "application/json; charset=utf-8");
             response.getWriter().print(responseBuild.toString());

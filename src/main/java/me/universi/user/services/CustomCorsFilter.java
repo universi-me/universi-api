@@ -4,9 +4,9 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
-public class CustomCorsFiler extends CorsFilter {
+public class CustomCorsFilter extends CorsFilter {
 
-    public CustomCorsFiler() {
+    public CustomCorsFilter() {
         super(configurationSource());
     }
 
