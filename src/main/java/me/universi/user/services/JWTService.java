@@ -2,6 +2,7 @@ package me.universi.user.services;
 
 import io.jsonwebtoken.*;
 import me.universi.user.entities.User;
+import me.universi.user.exceptions.UsuarioException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -21,8 +22,10 @@ public class JWTService {
     public String buildTokenForUser(User user) {
         String token = null;
         try {
+            long timeNow = System.currentTimeMillis();
             token = Jwts.builder()
-                    .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 24h
+                    .setIssuedAt(new Date(timeNow))
+                    .setExpiration(new Date(timeNow + 86400000)) // 24h
                     .claim("user", user.getUsername())
                     .signWith(SignatureAlgorithm.HS512, SECRET_KEY.getBytes("UTF-8"))
                     .compact();
@@ -46,6 +49,10 @@ public class JWTService {
     public User getUserFromToken(String token) throws Exception {
         Jws<Claims> jws = Jwts.parser().setSigningKeyResolver(signingKeyResolver).parseClaimsJws(token);
         // If integrity checks don't throw continue
+        if(jws.getBody().getExpiration().before(new Date())) {
+            throw new UsuarioException("Token expired");
+        }
+
         String userName = (String) jws.getBody().get("user");
         // TODO: CACHE USER, INSTEAD OF FIND IN DB
         return (User) userService.loadUserByUsername(userName);
