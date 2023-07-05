@@ -27,7 +27,7 @@ public class VacancyService {
 
     public Vacancy save(Vacancy vacancy) throws Exception{
         try {
-            User user = userService.obterUsuarioNaSessao();
+            User user = userService.getUserInSession();
             vacancy.setProfile(user.getProfile());
             return vacancyRepository.saveAndFlush(vacancy);
         }catch (Exception e){
@@ -53,7 +53,7 @@ public class VacancyService {
             return vacancyRepository.saveAndFlush(vacancy);
         }).orElseGet(()->{
             try {
-                User user = userService.obterUsuarioNaSessao();
+                User user = userService.getUserInSession();
                 newVacancy.setProfile(user.getProfile());
                 return vacancyRepository.saveAndFlush(newVacancy);
             }catch (Exception e){
