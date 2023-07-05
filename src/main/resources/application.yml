@@ -33,6 +33,8 @@ server:
 # SPRINGDOC
 springdoc:
   version: 1.0
+  swagger-ui:
+    path: /api/swagger-ui.html
 
 # GOOGLE API AUTH
 GOOGLE_CLIENT_ID: 110833050076-ib680ela4hfqr2c0lhc9h19snrsvltnd.apps.googleusercontent.com
