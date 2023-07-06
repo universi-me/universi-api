@@ -21,7 +21,9 @@
         <intercept-url pattern="/api/login" access="permitAll"/>
         <intercept-url pattern="/api/login/google" access="permitAll"/>
         <intercept-url pattern="/api/registrar" access="permitAll"/>
+
         <intercept-url pattern="/api/swagger-ui/**" access="permitAll"/>
+        <intercept-url pattern="/api/swagger-ui**" access="permitAll"/>
 
         <!-- Admin rules -->
         <intercept-url pattern="/api/admin/**" access="hasRole('ADMIN')"/>
