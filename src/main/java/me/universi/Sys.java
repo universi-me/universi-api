@@ -39,16 +39,16 @@ public class Sys {
         SpringApplication.run(Sys.class, args);
     }
 
-    @GetMapping("/exit")
+    @GetMapping("/api/admin/exit")
     public void exitApp() {
         int exitCode = SpringApplication.exit(context, (ExitCodeGenerator) () -> 0);
         System.exit(exitCode);
     }
 
-    @GetMapping("/")
+    @GetMapping(value = {"/", "/api", "/api/",})
     @ResponseBody
-    String index(HttpServletRequest request, HttpSession session) {
-        return "Universi.me API";
+    String index(HttpServletRequest request, @Value("${spring.profiles.active}") String profile) {
+        return "Universi.me API – " + profile;
     }
 
 //    @Bean
