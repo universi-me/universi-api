@@ -50,6 +50,28 @@ public class UserController {
     @Autowired
     private JWTService jwtService;
 
+    @GetMapping("/account")
+    @ResponseBody
+    public Response account(HttpServletRequest request, HttpSession session) {
+        Response response = new Response();
+        try {
+
+            if(userService.usuarioEstaLogado()) {
+                response.success = true;
+                response.body.put("user", userService.getUserInSession());
+                return response;
+            }
+
+            response.success = false;
+            response.message = "Usuário não esta logado.";
+            return response;
+
+        }catch (Exception e) {
+            response.message = e.getMessage();
+            return response;
+        }
+    }
+
     @GetMapping("/login")
     @ResponseBody
     public Response login(HttpServletRequest request, HttpSession session) {
@@ -72,9 +94,9 @@ public class UserController {
         }
     }
 
-    @PostMapping(value = "/registrar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/signup", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Response registrarUsuarioJson(@RequestBody Map<String, Object> body) {
+    public Response signup(@RequestBody Map<String, Object> body) {
         Response resposta = new Response();
         try {
 
@@ -125,9 +147,9 @@ public class UserController {
     }
 
 
-    @PostMapping(value = "/conta/editar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/account/edit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Response conta_editar(@RequestBody Map<String, Object> body, HttpSession session) {
+    public Response account_edit(@RequestBody Map<String, Object> body, HttpSession session) {
         Response resposta = new Response();
         try {
 
@@ -164,7 +186,7 @@ public class UserController {
         }
     }
 
-    @PostMapping(value = "/admin/conta/editar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/admin/account/edit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response admin_conta_editar(@RequestBody Map<String, Object> body) {
         Response resposta = new Response();
