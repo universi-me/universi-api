@@ -24,7 +24,9 @@ public class JWTFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         String header = request.getHeader("Authorization");
-        if(header == null || !header.startsWith("Bearer ")) {
+        
+        // prefer check first if user is logged-in on session, else use JWT token to authenticate
+        if(header == null || !header.startsWith("Bearer ") || userService.usuarioEstaLogado()) {
             filterChain.doFilter(request, response);
             return;
         }
