@@ -50,7 +50,7 @@ public class UserController {
     @Autowired
     private JWTService jwtService;
 
-    @GetMapping("/account")
+    @GetMapping(value = "/account", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response account() {
         Response response = new Response();
@@ -93,52 +93,53 @@ public class UserController {
     @PostMapping(value = "/signup", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response signup(@RequestBody Map<String, Object> body) {
-        Response resposta = new Response();
+        Response response = new Response();
         try {
 
+            // check if register is enabled
             if(!Boolean.parseBoolean(env.getProperty("REGISTRAR_SE_ATIVADO"))) {
                 throw new UserException("Registrar-se está desativado!");
             }
 
-            String nome = (String)body.get("username");
+            String username = (String)body.get("username");
 
-            // email somenta parte antes do @
+            // email only part before @
             String email = (String)body.get("email");
 
-            String senha = (String)body.get("password");
+            String password = (String)body.get("password");
 
-            if (nome==null || nome.length()==0 || !userService.usernameRegex(nome)) {
+            if (username==null || username.length()==0 || !userService.usernameRegex(username)) {
                 throw new UserException("Verifique o campo Usuário!");
             }
             if (email==null || email.length()==0 || !userService.emailRegex(email + "@dcx.ufpb.br")) {
                 throw new UserException("Verifique o campo Email!");
             }
-            if (senha==null || senha.length()==0) {
+            if (password==null || password.length()==0) {
                 throw new UserException("Verifique o campo Senha!");
             }
 
-            if(userService.usernameExist(nome)) {
-                throw new UserException("Usuário \""+nome+"\" já esta cadastrado!");
+            if(userService.usernameExist(username)) {
+                throw new UserException("Usuário \""+username+"\" já esta cadastrado!");
             }
             if(userService.emailExist(email)) {
                 throw new UserException("Email \""+email+"\" já esta cadastrado!");
             }
 
             User user = new User();
-            user.setName(nome);
-            // exclusivo para dcx
+            user.setName(username);
+            // only for dcx
             user.setEmail(email + "@dcx.ufpb.br");
-            user.setPassword(userService.encodePassword(senha));
+            user.setPassword(userService.encodePassword(password));
 
             userService.createUser(user);
 
-            resposta.success = true;
-            resposta.message = "Usuário registrado com sucesso, efetue o login para completar o cadastro.";
-            return resposta;
+            response.success = true;
+            response.message = "Usuário registrado com sucesso, efetue o login para completar o cadastro.";
+            return response;
 
         } catch (Exception e) {
-            resposta.message = e.getMessage();
-            return resposta;
+            response.message = e.getMessage();
+            return response;
         }
     }
 
@@ -158,7 +159,7 @@ public class UserController {
 
             User user = userService.getUserInSession();
 
-            // se logado com google não checkar senha
+            // if logged with google don't check password
             HttpSession session = userService.getActiveSession();
             boolean logadoComGoogle = (session.getAttribute("loginViaGoogle") != null);
 
@@ -189,23 +190,23 @@ public class UserController {
         Response resposta = new Response();
         try {
 
-            String usuarioId = (String)body.get("usuarioId");
-            if(usuarioId == null) {
-                throw new UserException("Parametro usuarioId é nulo.");
+            String userId = (String)body.get("userId");
+            if(userId == null) {
+                throw new UserException("Parametro userId é nulo.");
             }
 
             String username = (String)body.get("username");
             String email = (String)body.get("email");
-            String senha = (String)body.get("senha");
-            String nivelConta = (String)body.get("nivelConta");
+            String password = (String)body.get("password");
+            String authorityLevel = (String)body.get("authorityLevel");
 
-            Boolean emailVerificado = (Boolean)body.get("emailVerificado");
-            Boolean contaBloqueada = (Boolean)body.get("contaBloqueada");
-            Boolean contaInativa = (Boolean)body.get("contaInativa");
-            Boolean credenciaisExpiradas = (Boolean)body.get("credenciaisExpiradas");
-            Boolean usuarioExpirado = (Boolean)body.get("usuarioExpirado");
+            Boolean emailVerified = (Boolean)body.get("emailVerified");
+            Boolean blockedAccount = (Boolean)body.get("blockedAccount");
+            Boolean inactiveAccount = (Boolean)body.get("inactiveAccount");
+            Boolean credentialsExpired = (Boolean)body.get("credentialsExpired");
+            Boolean expiredUser = (Boolean)body.get("expiredUser");
 
-            User userEdit = (User) userService.findFirstById(Long.valueOf(usuarioId));
+            User userEdit = (User) userService.findFirstById(Long.valueOf(userId));
             if(userEdit == null) {
                 throw new UserException("Usuário não encontrado.");
             }
@@ -213,32 +214,36 @@ public class UserController {
             String usernameOld = userEdit.getUsername();
 
             if(username != null && username.length()>0) {
-                userEdit.setName(username);
+                if(userService.usernameRegex(username)) {
+                    userEdit.setName(username);
+                } else {
+                    throw new UserException("username está com formato inválido!");
+                }
             }
             if(email != null && email.length()>0) {
                 userEdit.setEmail(email);
             }
-            if(senha != null && senha.length()>0) {
-                userEdit.setPassword(userService.encodePassword(senha));
+            if(password != null && password.length()>0) {
+                userEdit.setPassword(userService.encodePassword(password));
             }
-            if(nivelConta != null && nivelConta.length()>0) {
-                userEdit.setAuthority(Authority.valueOf(nivelConta));
+            if(authorityLevel != null && authorityLevel.length()>0) {
+                userEdit.setAuthority(Authority.valueOf(authorityLevel));
             }
 
-            if(emailVerificado != null) {
-                userEdit.setEmail_verified(emailVerificado);
+            if(emailVerified != null) {
+                userEdit.setEmail_verified(emailVerified);
             }
-            if(contaBloqueada != null) {
-                userEdit.setBlocked_account(contaBloqueada);
+            if(blockedAccount != null) {
+                userEdit.setBlocked_account(blockedAccount);
             }
-            if(contaInativa != null) {
-                userEdit.setInactive(contaInativa);
+            if(inactiveAccount != null) {
+                userEdit.setInactive(inactiveAccount);
             }
-            if(credenciaisExpiradas != null) {
-                userEdit.setExpired_credentials(credenciaisExpiradas);
+            if(credentialsExpired != null) {
+                userEdit.setExpired_credentials(credentialsExpired);
             }
-            if(usuarioExpirado != null) {
-                userEdit.setExpired_user(usuarioExpirado);
+            if(expiredUser != null) {
+                userEdit.setExpired_user(expiredUser);
             }
 
             userService.save(userEdit);
@@ -269,7 +274,7 @@ public class UserController {
                 throw new UserException("Parametro token é nulo.");
             }
 
-            // verificação de segurança com o payload
+            // check if payload is valid
             GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
                     .setAudience(Collections.singletonList(env.getProperty("GOOGLE_CLIENT_ID")))
                     .build();
@@ -296,9 +301,9 @@ public class UserController {
                 try {
                     user = (User) userService.findFirstByEmail(email);
                 } catch (UserException e) {
-                    // Registrar Usuário com conta DCX, com informações seguras do payload
+                    // register user with DCX account, with secure payload information
 
-                    // criar username a partir do email DCX
+                    // create username from email DCX
                     String newUsername = ((String)email.split("@")[0]).trim();
                     if(!userService.usernameExist(newUsername)) {
 
@@ -310,7 +315,8 @@ public class UserController {
                         Profile profile = user.getProfile();
 
                         if(name != null) {
-                            if(name.contains(" ")) { // se tiver espaço, extrair nome e sobrenome
+                            // if have space, extract first name and last name
+                            if(name.contains(" ")) {
                                 String[] nameArr = name.split(" ");
                                 profile.setFirstname(((String)nameArr[0]).trim());
                                 profile.setLastname(name.substring(nameArr[0].length()).trim());
@@ -332,8 +338,9 @@ public class UserController {
                 }
 
                 if(user != null) {
-
-                    if(!user.isEmail_verified()) { // ativar selo de verificado na conta
+                    
+                    // enable verified seal on account
+                    if(!user.isEmail_verified()) {
                         user.setEmail_verified(true);
                         userService.save(user);
                     }

@@ -11,6 +11,7 @@ import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,7 +35,30 @@ public class ProfileController {
     @Autowired
     public CompetenceTypeService competenciaTipoService;
 
-    @PostMapping(value = "/perfil/editar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/profile", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response profile() {
+        Response response = new Response(); // default
+        try {
+
+            User userSession = userService.getUserInSession();
+
+            Profile userProfile = userSession.getProfile();
+            if(userProfile == null) {
+                throw new PerfilException("Perfil não encontrado.");
+            }
+
+            response.body.put("profile", userProfile);
+            response.success = true;
+
+        } catch (Exception e) {
+            response.message = e.getMessage();
+        }
+
+        return response;
+    }
+
+    @PostMapping(value = "/profile/edit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response perfil_editar(@RequestBody Map<String, Object> body) {
 
@@ -42,38 +66,37 @@ public class ProfileController {
 
         try {
 
-            String perfilId = (String)body.get("perfilId");
-            if(perfilId == null) {
+            String profileId = (String)body.get("profileId");
+            if(profileId == null) {
                 throw new Exception("Parametro perfilId é nulo.");
             }
 
-            String nome         = (String)body.get("nome");
-            String sobrenome    = (String)body.get("sobrenome");
-            String imagem       = (String)body.get("imagemUrl");
+            String name         = (String)body.get("name");
+            String lastname    = (String)body.get("lastname");
+            String imageUrl       = (String)body.get("imageUrl");
             String bio          = (String)body.get("bio");
             String sexo         = (String)body.get("sexo");
 
-            Profile profileAtual = perfilService.findFirstById(perfilId);
+            Profile profileAtual = perfilService.findFirstById(profileId);
             if(profileAtual == null) {
                 throw new PerfilException("Perfil não encontrado.");
             }
 
             if(!userService.isSessionOfUser(profileAtual.getUsuario())) {
-
                 User userSession = userService.getUserInSession();
                 if(!userService.isUserAdmin(userSession)) {
                     throw new PerfilException("Você não tem permissão para editar este perfil.");
                 }
             }
 
-            if(nome != null) {
-                profileAtual.setFirstname(nome);
+            if(name != null) {
+                profileAtual.setFirstname(name);
             }
-            if(sobrenome != null) {
-                profileAtual.setLastname(sobrenome);
+            if(lastname != null) {
+                profileAtual.setLastname(lastname);
             }
-            if(imagem != null && imagem.length()>0) {
-                profileAtual.setImage(imagem);
+            if(imageUrl != null && imageUrl.length()>0) {
+                profileAtual.setImage(imageUrl);
             }
             if(bio != null) {
                 profileAtual.setBio(bio);
