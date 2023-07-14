@@ -2,7 +2,7 @@ package me.universi.user.services;
 
 import jakarta.servlet.http.HttpServletRequest;
 import me.universi.profile.entities.Profile;
-import me.universi.profile.services.PerfilService;
+import me.universi.profile.services.ProfileService;
 import me.universi.user.entities.User;
 import me.universi.user.enums.Authority;
 import me.universi.user.exceptions.UserException;
@@ -41,20 +41,16 @@ import java.util.regex.Pattern;
 @Service
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
-
     private final PasswordEncoder passwordEncoder;
-
-    private final PerfilService perfilService;
-
+    private final ProfileService profileService;
     private final RoleHierarchyImpl roleHierarchy;
-
     private final SessionRegistry sessionRegistry;
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, PerfilService perfilService, RoleHierarchyImpl roleHierarchy, SessionRegistry sessionRegistry) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, ProfileService profileService, RoleHierarchyImpl roleHierarchy, SessionRegistry sessionRegistry) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.perfilService = perfilService;
+        this.profileService = profileService;
         this.roleHierarchy = roleHierarchy;
         this.sessionRegistry = sessionRegistry;
     }
@@ -99,7 +95,7 @@ public class UserService implements UserDetailsService {
 
         Profile userProfile = new Profile();
         userProfile.setUsuario(user);
-        perfilService.save(userProfile);
+        profileService.save(userProfile);
         user.setProfile(userProfile);
     }
 

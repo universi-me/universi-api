@@ -60,7 +60,7 @@
         <beans:property name="sessionAuthenticationStrategy" ref="sas"/>
         <beans:property name="authenticationManager" ref="authenticationManager"/>
         <beans:property name="authenticationSuccessHandler" ref="authenticationSuccessHandler"/>
-        <beans:property name="authenticationFailureHandler" ref="autenticacaoFalhaHandler"/>
+        <beans:property name="authenticationFailureHandler" ref="authenticationFailedHandler"/>
         <beans:property name="filterProcessesUrl" value="/api/signin"/>
         <beans:property name="usernameParameter" value="username"/>
         <beans:property name="passwordParameter" value="password"/>
@@ -99,7 +99,7 @@
         <authentication-provider ref="authenticationProvider"/>
     </authentication-manager>
 
-    <beans:bean id="autenticacaoFalhaHandler" class="me.universi.user.services.AutenticacaoFalhaHandler"/>
+    <beans:bean id="authenticationFailedHandler" class="me.universi.user.services.AuthenticationFailedHandler"/>
     <beans:bean id="authenticationSuccessHandler" class="me.universi.user.services.AuthenticationSuccessHandler"/>
 
     <beans:bean id="roleHierarchy" class="org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl">

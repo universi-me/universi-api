@@ -7,7 +7,7 @@ import me.universi.competence.services.CompetenceService;
 import me.universi.group.services.GroupService;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.enums.Gender;
-import me.universi.profile.services.PerfilService;
+import me.universi.profile.services.ProfileService;
 import me.universi.recommendation.service.RecomendacaoService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
@@ -33,7 +33,7 @@ public class CompetenciaTest {
     @Autowired
     RecomendacaoService recomendacaoService;
     @Autowired
-    PerfilService perfilService;
+    ProfileService profileService;
     @Autowired
     UserService userService;
 
@@ -86,8 +86,8 @@ public class CompetenciaTest {
         competenciaService.save(competencia1);
         competenciaService.save(competencia2);
 
-        perfilService.update(admin_profile);
-        perfilService.update(comum_profile);
+        profileService.update(admin_profile);
+        profileService.update(comum_profile);
 
         assertEquals(competencia1.getId(), competenciaService.findFirstById(competencia1.getId()).getId());
         assertEquals(competencia2.getId(), competenciaService.findFirstById(competencia2.getId()).getId());
@@ -145,8 +145,8 @@ public class CompetenciaTest {
         competenciaService.update(competencia1);
         competenciaService.update(competencia2);
 
-        perfilService.update(admin_profile);
-        perfilService.update(comum_profile);
+        profileService.update(admin_profile);
+        profileService.update(comum_profile);
 
         assertEquals(competencia1.getDescription(), competenciaService.findFirstById(competencia1.getId()).getDescription());
         assertEquals(competencia2.getDescription(), competenciaService.findFirstById(competencia2.getId()).getDescription());
@@ -201,8 +201,8 @@ public class CompetenciaTest {
         competencia1.setDescription("alterando descrição1");
         competencia2.setDescription("alterando descrição2");
 
-        perfilService.update(admin_profile);
-        perfilService.update(comum_profile);
+        profileService.update(admin_profile);
+        profileService.update(comum_profile);
 
         competenciaService.deleteAll(competencias);
 

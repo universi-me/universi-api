@@ -11,7 +11,7 @@ import me.universi.competence.exceptions.CompetenceException;
 import me.universi.competence.services.CompetenceService;
 import me.universi.competence.services.CompetenceTypeService;
 import me.universi.profile.entities.Profile;
-import me.universi.profile.services.PerfilService;
+import me.universi.profile.services.ProfileService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ public class CompetenceController {
     public CompetenceTypeService competenceTypeService;
 
     @Autowired
-    public PerfilService profileService;
+    public ProfileService profileService;
 
     @Autowired
     public UserService userService;

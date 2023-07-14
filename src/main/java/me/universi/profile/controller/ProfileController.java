@@ -6,7 +6,7 @@ import me.universi.group.services.GroupService;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.enums.Gender;
 import me.universi.profile.exceptions.PerfilException;
-import me.universi.profile.services.PerfilService;
+import me.universi.profile.services.ProfileService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +28,7 @@ public class ProfileController {
     public UserService userService;
 
     @Autowired
-    public PerfilService perfilService;
+    public ProfileService profileService;
 
     @Autowired
     public GroupService grupoService;
@@ -77,7 +77,7 @@ public class ProfileController {
             String bio          = (String)body.get("bio");
             String sexo         = (String)body.get("sexo");
 
-            Profile profileAtual = perfilService.findFirstById(profileId);
+            Profile profileAtual = profileService.findFirstById(profileId);
             if(profileAtual == null) {
                 throw new PerfilException("Perfil não encontrado.");
             }
@@ -105,7 +105,7 @@ public class ProfileController {
                 profileAtual.setSexo(Gender.valueOf(sexo));
             }
 
-            perfilService.save(profileAtual);
+            profileService.save(profileAtual);
 
             userService.updateUserInSession();
 

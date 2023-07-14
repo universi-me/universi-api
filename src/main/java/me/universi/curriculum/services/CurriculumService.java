@@ -2,10 +2,9 @@ package me.universi.curriculum.services;
 
 import me.universi.curriculum.entities.Curriculum;
 import me.universi.curriculum.repositories.CurriculumRepository;
-import me.universi.profile.services.PerfilService;
+import me.universi.profile.services.ProfileService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,12 +14,12 @@ import java.util.Optional;
 public class CurriculumService {
 
     private CurriculumRepository curriculumRepository;
-    public PerfilService perfilService;
+    public ProfileService profileService;
     public UserService userService;
 
-    public CurriculumService(CurriculumRepository curriculumRepository, PerfilService perfilService, UserService userService){
+    public CurriculumService(CurriculumRepository curriculumRepository, ProfileService profileService, UserService userService){
         this.curriculumRepository = curriculumRepository;
-        this.perfilService = perfilService;
+        this.profileService = profileService;
         this.userService = userService;
     }
 

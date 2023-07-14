@@ -8,10 +8,8 @@ import jakarta.servlet.http.HttpSession;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import me.universi.api.entities.Response;
-import me.universi.competence.services.CompetenceTypeService;
-import me.universi.group.services.GroupService;
 import me.universi.profile.entities.Profile;
-import me.universi.profile.services.PerfilService;
+import me.universi.profile.services.ProfileService;
 import me.universi.user.entities.User;
 import me.universi.user.enums.Authority;
 import me.universi.user.exceptions.UserException;
@@ -35,20 +33,20 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 @RestController
 @RequestMapping(value = "/api")
 public class UserController {
+    private final UserService userService;
+    private final ProfileService profileService;
+    private final Environment environment;
+    private final AuthenticationManager authenticationManager;
+    private final JWTService jwtService;
+
     @Autowired
-    public UserService userService;
-    @Autowired
-    public PerfilService perfilService;
-    @Autowired
-    public GroupService grupoService;
-    @Autowired
-    public CompetenceTypeService competenciaTipoService;
-    @Autowired
-    private Environment env;
-    @Autowired
-    AuthenticationManager authenticationManager;
-    @Autowired
-    private JWTService jwtService;
+    public UserController(UserService userService, ProfileService profileService, Environment environment, AuthenticationManager authenticationManager, JWTService jwtService) {
+        this.userService = userService;
+        this.profileService = profileService;
+        this.environment = environment;
+        this.authenticationManager = authenticationManager;
+        this.jwtService = jwtService;
+    }
 
     @GetMapping(value = "/account", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
@@ -97,7 +95,7 @@ public class UserController {
         try {
 
             // check if register is enabled
-            if(!Boolean.parseBoolean(env.getProperty("REGISTRAR_SE_ATIVADO"))) {
+            if(!Boolean.parseBoolean(environment.getProperty("REGISTRAR_SE_ATIVADO"))) {
                 throw new UserException("Registrar-se está desativado!");
             }
 
@@ -276,7 +274,7 @@ public class UserController {
 
             // check if payload is valid
             GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
-                    .setAudience(Collections.singletonList(env.getProperty("GOOGLE_CLIENT_ID")))
+                    .setAudience(Collections.singletonList(environment.getProperty("GOOGLE_CLIENT_ID")))
                     .build();
 
             GoogleIdToken idToken = verifier.verify(idTokenString);
@@ -328,7 +326,7 @@ public class UserController {
                             profile.setImage(pictureUrl.trim());
                         }
 
-                        perfilService.save(profile);
+                        profileService.save(profile);
 
                         sessionReq.setAttribute("novoUsuario", true);
 

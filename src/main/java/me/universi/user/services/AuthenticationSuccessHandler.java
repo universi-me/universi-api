@@ -21,17 +21,19 @@ import java.security.Principal;
     Classe para manipular quando o usuario efetuar o login
  */
 public class AuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
+    private final UserService userService;
+    private final AuthenticationManager authenticationManager;
+    private final JWTService jwtService;
+
     @Autowired
-    private UserService userService;
-    @Autowired
-    AuthenticationManager authenticationManager;
-    @Autowired
-    private JWTService jwtService;
+    public AuthenticationSuccessHandler(UserService userService, AuthenticationManager authenticationManager, JWTService jwtService) {
+        this.userService = userService;
+        this.authenticationManager = authenticationManager;
+        this.jwtService = jwtService;
+    }
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws ServletException, IOException {
-        HttpSession session = request.getSession(true);
-
         String username = null;
         User user = null;
 

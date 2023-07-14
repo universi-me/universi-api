@@ -14,8 +14,12 @@ import java.util.Date;
 public class JWTService {
     @Value("${jwt.secret.key}")
     private String SECRET_KEY;
+    private final UserService userService;
+
     @Autowired
-    private UserService userService;
+    public JWTService(UserService userService) {
+        this.userService = userService;
+    }
 
     public String buildTokenForUser(User user) {
         String token = null;
