@@ -22,6 +22,7 @@ public class JWTService {
         try {
             long timeNow = System.currentTimeMillis();
             token = Jwts.builder()
+                    .setIssuer("universi.me")
                     .setIssuedAt(new Date(timeNow))
                     .setExpiration(new Date(timeNow + 86400000)) // 24h
                     .claim("user", user.getUsername())
