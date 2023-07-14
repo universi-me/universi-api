@@ -72,7 +72,7 @@ public class ProfileTest {
     }
 
     public Profile perfil(String nome) {
-        User userNew = new User(nome, nome+"@email.com", userService.codificarSenha("senha"));
+        User userNew = new User(nome, nome+"@email.com", userService.encodePassword("senha"));
         try {
             userService.createUser(userNew);
         } catch (Exception e) {

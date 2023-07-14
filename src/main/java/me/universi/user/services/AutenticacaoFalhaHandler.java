@@ -25,7 +25,7 @@ public class AutenticacaoFalhaHandler extends SimpleUrlAuthenticationFailureHand
             Response resposta = new Response();
 
             resposta.success = false;
-            resposta.message = userService.erroSpringSecurityMemsagem(exception);
+            resposta.message = userService.getLastSpringSecurityError(exception);
 
             response.setHeader("Content-Type", "application/json; charset=utf-8");
             response.getWriter().print(resposta.toString());

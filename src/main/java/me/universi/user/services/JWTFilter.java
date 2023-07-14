@@ -26,14 +26,14 @@ public class JWTFilter extends OncePerRequestFilter {
         String header = request.getHeader("Authorization");
         
         // prefer check first if user is logged-in on session, else use JWT token to authenticate
-        if(header == null || !header.startsWith("Bearer ") || userService.usuarioEstaLogado()) {
+        if(header == null || !header.startsWith("Bearer ") || userService.userIsLoggedIn()) {
             filterChain.doFilter(request, response);
             return;
         }
 
         try {
             User user = jwtService.getUserFromToken(header.replace("Bearer ", ""));
-            userService.configurarSessaoParaUsuario(user, authenticationManager);
+            userService.configureSessionForUser(user, authenticationManager);
         } catch (Exception e) {
             SecurityContextHolder.clearContext();
         }

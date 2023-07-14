@@ -80,10 +80,10 @@ public class GroupService {
         }
 
         Profile profile = user.getProfile();
-        if (userService.usuarioPrecisaDePerfil(user)) {
+        if (userService.userNeedAnProfile(user)) {
             throw new GroupException("Você precisa criar um Perfil.");
         } else if(profile.getId()!=0 && group.getAdmin().getId() != profile.getId()) {
-            if(!userService.isContaAdmin(user)) {
+            if(!userService.isUserAdmin(user)) {
                 throw new GroupException("Apenas administradores podem editar seus grupos!");
             }
         }

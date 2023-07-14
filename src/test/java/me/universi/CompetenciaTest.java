@@ -42,7 +42,7 @@ public class CompetenciaTest {
     @Test
     void create() {
         String nome = "competenciaTest";
-        User userNew = new User(nome, nome+"@email.com", userService.codificarSenha("senha"));
+        User userNew = new User(nome, nome+"@email.com", userService.encodePassword("senha"));
         try {
             userService.createUser(userNew);
         } catch (Exception e) {
@@ -95,7 +95,7 @@ public class CompetenciaTest {
     @Test
     void update(){
         String nome = "competenciaTestUpdate";
-        User userNew = new User(nome, nome+"@email.com", userService.codificarSenha("senha"));
+        User userNew = new User(nome, nome+"@email.com", userService.encodePassword("senha"));
         try {
             userService.createUser(userNew);
         } catch (Exception e) {
@@ -154,7 +154,7 @@ public class CompetenciaTest {
     @Test
     void delete(){
         String nome = "competenciaTestDelete";
-        User userNew = new User(nome, nome+"@email.com", userService.codificarSenha("senha"));
+        User userNew = new User(nome, nome+"@email.com", userService.encodePassword("senha"));
         try {
             userService.createUser(userNew);
         } catch (Exception e) {
@@ -214,7 +214,7 @@ public class CompetenciaTest {
     @Test
     void read(){
         String nome = "competenciaTestread";
-        User userNew = new User(nome, nome+"@email.com", userService.codificarSenha("senha"));
+        User userNew = new User(nome, nome+"@email.com", userService.encodePassword("senha"));
         try {
             userService.createUser(userNew);
         } catch (Exception e) {

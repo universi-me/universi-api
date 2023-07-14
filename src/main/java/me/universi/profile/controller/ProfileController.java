@@ -22,7 +22,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping(value = "/api")
-public class PerfilController {
+public class ProfileController {
     @Autowired
     public UserService userService;
 
@@ -58,10 +58,10 @@ public class PerfilController {
                 throw new PerfilException("Perfil não encontrado.");
             }
 
-            if(!userService.usuarioDonoDaSessao(profileAtual.getUsuario())) {
+            if(!userService.isSessionOfUser(profileAtual.getUsuario())) {
 
                 User userSession = userService.getUserInSession();
-                if(!userService.isContaAdmin(userSession)) {
+                if(!userService.isUserAdmin(userSession)) {
                     throw new PerfilException("Você não tem permissão para editar este perfil.");
                 }
             }
@@ -84,7 +84,7 @@ public class PerfilController {
 
             perfilService.save(profileAtual);
 
-            userService.atualizarUsuarioNaSessao();
+            userService.updateUserInSession();
 
             resposta.message = "As Alterações foram salvas com sucesso.";
             resposta.success = true;

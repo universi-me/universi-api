@@ -2,15 +2,13 @@ package me.universi.user.services;
 
 import io.jsonwebtoken.*;
 import me.universi.user.entities.User;
-import me.universi.user.exceptions.UsuarioException;
+import me.universi.user.exceptions.UserException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
-import java.util.HashMap;
 
 @Service
 public class JWTService {
@@ -50,7 +48,7 @@ public class JWTService {
         Jws<Claims> jws = Jwts.parser().setSigningKeyResolver(signingKeyResolver).parseClaimsJws(token);
         // If integrity checks don't throw continue
         if(jws.getBody().getExpiration().before(new Date())) {
-            throw new UsuarioException("Token expired");
+            throw new UserException("JWT Token Expired");
         }
 
         String userName = (String) jws.getBody().get("user");

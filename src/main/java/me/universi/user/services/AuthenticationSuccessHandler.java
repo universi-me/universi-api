@@ -42,7 +42,7 @@ public class AuthenticationSuccessHandler extends SavedRequestAwareAuthenticatio
         }
         if(username != null) {
             user = (User) userService.loadUserByUsername(username);
-            userService.configurarSessaoParaUsuario(user, authenticationManager);
+            userService.configureSessionForUser(user, authenticationManager);
         }
 
         if ("application/json".equals(request.getHeader("Content-Type"))) { // request via JSON
@@ -51,7 +51,7 @@ public class AuthenticationSuccessHandler extends SavedRequestAwareAuthenticatio
             responseBuild.success = true;
             responseBuild.message = "Usuário Logado com sucesso.";
 
-            responseBuild.redirectTo = userService.obterUrlAoLogar();
+            responseBuild.redirectTo = userService.getUrlWhenLogin();
 
             responseBuild.token = jwtService.buildTokenForUser(user);
 
@@ -64,7 +64,7 @@ public class AuthenticationSuccessHandler extends SavedRequestAwareAuthenticatio
         } else {
 
             RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
-            redirectStrategy.sendRedirect(request, response, userService.obterUrlAoLogar());
+            redirectStrategy.sendRedirect(request, response, userService.getUrlWhenLogin());
             //super.onAuthenticationSuccess(request, response, authentication);
 
         }
