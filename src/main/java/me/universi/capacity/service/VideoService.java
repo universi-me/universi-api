@@ -1,12 +1,13 @@
-package me.universi.capacitacao.service;
+package me.universi.capacity.service;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import me.universi.capacitacao.entidades.Video;
-import me.universi.capacitacao.repository.VideosRepository;
+
+import me.universi.capacity.entidades.Video;
+import me.universi.capacity.repository.VideosRepository;
 
 
 @Service
@@ -14,7 +15,7 @@ public class VideoService implements VideoServiceInterface{
     
     @Autowired
     VideosRepository videoRepo;
-
+    
     public List<Video> getAllVideo(){ 
         List<Video> videoList = new ArrayList<>();
         videoRepo.findAll().forEach( video -> videoList.add(video));

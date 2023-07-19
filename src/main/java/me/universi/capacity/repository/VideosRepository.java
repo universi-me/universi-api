@@ -1,8 +1,10 @@
-package me.universi.capacitacao.repository;
+package me.universi.capacity.repository;
 
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
-import me.universi.capacitacao.entidades.Video;
+import org.springframework.stereotype.Repository;
+
+import me.universi.capacity.entidades.Video;
 
 public interface VideosRepository extends JpaRepository<Video, Long> {
     List<Video> findByCategory(String category);

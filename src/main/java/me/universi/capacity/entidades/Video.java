@@ -1,4 +1,4 @@
-package me.universi.capacitacao.entidades;
+package me.universi.capacity.entidades;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
