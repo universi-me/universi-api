@@ -147,7 +147,6 @@ public class ProfileController {
             }
 
             response.body.put("profile", profileGet);
-            response.message = "As Alterações foram salvas com sucesso.";
             response.success = true;
 
         } catch (Exception e) {
