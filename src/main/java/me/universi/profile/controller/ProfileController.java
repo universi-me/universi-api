@@ -118,4 +118,42 @@ public class ProfileController {
 
         return resposta;
     }
+
+    @PostMapping(value = "/profile/get", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response profile_get(@RequestBody Map<String, Object> body) {
+        Response response = new Response(); // default
+        try {
+
+            // get profile by id or username
+            String profileId = (String)body.get("profileId");
+            String username = (String)body.get("username");
+
+            if(profileId == null && username == null) {
+                throw new Exception("Parametro perfilId ou username é nulo.");
+            }
+
+            Profile profileGet = null;
+
+            if(profileId != null) {
+                profileGet = profileService.findFirstById(profileId);
+            }
+            if(profileGet == null && username != null) {
+                profileGet = ((User)userService.loadUserByUsername(username)).getProfile();
+            }
+
+            if(profileGet == null) {
+                throw new PerfilException("Perfil não encontrado.");
+            }
+
+            response.body.put("profile", profileGet);
+            response.message = "As Alterações foram salvas com sucesso.";
+            response.success = true;
+
+        } catch (Exception e) {
+            response.message = e.getMessage();
+        }
+
+        return response;
+    }
 }
