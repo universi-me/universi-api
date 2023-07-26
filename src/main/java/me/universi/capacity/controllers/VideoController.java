@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import me.universi.capacity.entidades.Video;
+import me.universi.capacity.exceptions.VideoException;
 import me.universi.capacity.service.VideoService;
 
 
@@ -33,7 +34,7 @@ public class VideoController {
         return videoService.getAllVideo();
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/video/{id}")
     public ResponseEntity<Video> getVideoById(@PathVariable Long id) {
         Video video = videoService.getVideoById(id);
         if (video != null) {
@@ -44,18 +45,18 @@ public class VideoController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<Video> createVideo(@Valid @RequestBody Video video) {
+    public ResponseEntity<String> createVideo(@Valid @RequestBody Video video) throws VideoException {
         boolean result = videoService.saveOrUpdateVideo(video);
 
         if (result) {
-            return ResponseEntity.status(HttpStatus.CREATED).body(video);
+            return ResponseEntity.status(HttpStatus.CREATED).body("Sucesso!! Video adicionado.");
         } else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     @PutMapping("/edit/{id}")
-    public ResponseEntity<Video> updateVideo(@PathVariable Long id, @Valid @RequestBody Video video) {
+    public ResponseEntity<Video> updateVideo(@PathVariable Long id, @Valid @RequestBody Video video) throws VideoException {
         video.setId(id);
         boolean result = videoService.saveOrUpdateVideo(video);
 
@@ -77,25 +78,25 @@ public class VideoController {
         }
     }
 
-    @GetMapping("/play/{id}")
-    public ResponseEntity<String> playVideo(@PathVariable Long id) {
-        Video video = videoService.getVideoById(id);
-        if (video == null) {
-            return ResponseEntity.notFound().build();
-        }
+    // @GetMapping("/play/{id}")
+    // public ResponseEntity<String> playVideo(@PathVariable Long id) {
+    //     Video video = videoService.getVideoById(id);
+    //     if (video == null) {
+    //         return ResponseEntity.notFound().build();
+    //     }
 
-        return ResponseEntity.ok(video.getUrl());
-    }
+    //     return ResponseEntity.ok(video.getUrl());
+    // }
 
     @GetMapping("/categoria/{category}")
     public List<Video> listarVideosPorCategoria(@PathVariable String category) {
         return videoService.getVideosByCategory(category);
     }
 
-    @GetMapping("/home-capacitacao")
-    public String home() {
-        return "videoHome";
-    }
+    // @GetMapping("/home-capacitacao")
+    // public String home() {
+    //     return "videoHome";
+    // }
 
     @GetMapping("/playlist/{playlist}")
     public List<Video> listarVideosPlaylist(@PathVariable String playlist) {

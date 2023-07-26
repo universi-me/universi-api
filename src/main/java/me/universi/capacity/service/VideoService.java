@@ -1,12 +1,12 @@
 package me.universi.capacity.service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import me.universi.capacity.entidades.Video;
+import me.universi.capacity.exceptions.VideoException;
 import me.universi.capacity.repository.VideosRepository;
 
 
@@ -15,7 +15,7 @@ public class VideoService implements VideoServiceInterface{
     
     @Autowired
     VideosRepository videoRepo;
-    
+
     public List<Video> getAllVideo(){ 
         List<Video> videoList = new ArrayList<>();
         videoRepo.findAll().forEach( video -> videoList.add(video));
@@ -28,7 +28,17 @@ public class VideoService implements VideoServiceInterface{
         return videoRepo.findById(id).get();
     } //Lista os vídeos pelo ID
 
-    public boolean saveOrUpdateVideo(Video video) {
+    public boolean saveOrUpdateVideo(Video video) throws VideoException {
+        boolean titleExists = videoRepo.existsByTitle(video.getTitle());
+        boolean urlExists = videoRepo.existsByUrl(video.getUrl());
+        if (titleExists) {
+            throw new VideoException("Vídeo com título já existente.");
+        }
+
+        if (urlExists) {
+            throw new VideoException("Vídeo com url já existente.");
+        }
+
         Video updatedVideo = videoRepo.save(video);
 
         if (videoRepo.findById(updatedVideo.getId()) != null){
@@ -51,18 +61,6 @@ public class VideoService implements VideoServiceInterface{
     public List<Video> getVideosByCategory(String category) {
         return videoRepo.findByCategory(category);
     } //Listar vídeo por categoria
-
-    public List<Video> getVideosDestaqueByCategory(String category) {
-        List<Video> videos = videoRepo.getVideosByCategory(category);
-        List<Video> videosDestaque = new ArrayList<>();
-        Collections.shuffle(videos); // Embaralhar a lista de vídeos
-        for (Video video : videos) {
-            if (video.getRating() == 5 && videosDestaque.size() < 10) {
-                videosDestaque.add(video);
-            }
-        }
-        return videosDestaque;
-    }
 
     public List<Video> getVideosByPlaylist(String playlist) {
         return videoRepo.findByPlaylist(playlist);
