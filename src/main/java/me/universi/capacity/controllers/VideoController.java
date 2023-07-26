@@ -78,25 +78,10 @@ public class VideoController {
         }
     }
 
-    // @GetMapping("/play/{id}")
-    // public ResponseEntity<String> playVideo(@PathVariable Long id) {
-    //     Video video = videoService.getVideoById(id);
-    //     if (video == null) {
-    //         return ResponseEntity.notFound().build();
-    //     }
-
-    //     return ResponseEntity.ok(video.getUrl());
-    // }
-
     @GetMapping("/categoria/{category}")
     public List<Video> listarVideosPorCategoria(@PathVariable String category) {
         return videoService.getVideosByCategory(category);
     }
-
-    // @GetMapping("/home-capacitacao")
-    // public String home() {
-    //     return "videoHome";
-    // }
 
     @GetMapping("/playlist/{playlist}")
     public List<Video> listarVideosPlaylist(@PathVariable String playlist) {
