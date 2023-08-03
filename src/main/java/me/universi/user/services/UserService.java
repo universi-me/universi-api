@@ -2,10 +2,10 @@ package me.universi.user.services;
 
 import jakarta.servlet.http.HttpServletRequest;
 import me.universi.profile.entities.Profile;
-import me.universi.profile.services.PerfilService;
+import me.universi.profile.services.ProfileService;
 import me.universi.user.entities.User;
 import me.universi.user.enums.Authority;
-import me.universi.user.exceptions.UsuarioException;
+import me.universi.user.exceptions.UserException;
 import me.universi.user.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
@@ -41,20 +41,16 @@ import java.util.regex.Pattern;
 @Service
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
-
     private final PasswordEncoder passwordEncoder;
-
-    private final PerfilService perfilService;
-
+    private final ProfileService profileService;
     private final RoleHierarchyImpl roleHierarchy;
-
     private final SessionRegistry sessionRegistry;
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, PerfilService perfilService, RoleHierarchyImpl roleHierarchy, SessionRegistry sessionRegistry) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, ProfileService profileService, RoleHierarchyImpl roleHierarchy, SessionRegistry sessionRegistry) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.perfilService = perfilService;
+        this.profileService = profileService;
         this.roleHierarchy = roleHierarchy;
         this.sessionRegistry = sessionRegistry;
     }
@@ -67,19 +63,19 @@ public class UserService implements UserDetailsService {
         if(emailRegex(username)) {
             try {
                 return findFirstByEmail(username);
-            } catch (UsuarioException e) {
+            } catch (UserException e) {
                 throw new UsernameNotFoundException("Usuário não encontrado!");
             }
         }
         throw new UsernameNotFoundException("Usuário não encontrado!");
     }
 
-    public UserDetails findFirstByEmail(String email) throws UsuarioException {
+    public UserDetails findFirstByEmail(String email) throws UserException {
         Optional<User> usuario = userRepository.findFirstByEmail(email);
         if (usuario.isPresent()) {
             return usuario.get();
         }
-        throw new UsuarioException("Email de Usuário não encontrado!");
+        throw new UserException("Email de Usuário não encontrado!");
     }
 
     public UserDetails findFirstById(Long id) {
@@ -90,16 +86,16 @@ public class UserService implements UserDetailsService {
         return null;
     }
 
-    public void createUser(User user) throws UsuarioException {
+    public void createUser(User user) throws UserException {
         if (user==null) {
-            throw new UsuarioException("Usuario está vazio!");
+            throw new UserException("Usuario está vazio!");
         }
         user.setAuthority(Authority.ROLE_USER);
         userRepository.saveAndFlush((User)user);
 
         Profile userProfile = new Profile();
         userProfile.setUsuario(user);
-        perfilService.save(userProfile);
+        profileService.save(userProfile);
         user.setProfile(userProfile);
     }
 
@@ -111,11 +107,11 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    public String codificarSenha(String senha) {
+    public String encodePassword(String senha) {
         return passwordEncoder.encode(senha);
     }
 
-    public boolean usernameExiste(String username) {
+    public boolean usernameExist(String username) {
         try {
             if(loadUserByUsername(username) != null) {
                 return true;
@@ -126,7 +122,7 @@ public class UserService implements UserDetailsService {
         return false;
     }
 
-    public boolean emailExiste(String email) {
+    public boolean emailExist(String email) {
         try {
             if(findFirstByEmail(email) != null) {
                 return true;
@@ -137,7 +133,7 @@ public class UserService implements UserDetailsService {
         return false;
     }
 
-    public boolean usuarioRegex(String username) {
+    public boolean usernameRegex(String username) {
         String usuarioRegex = "^[a-z0-9_-]+$";
         Pattern emailPattern = Pattern.compile(usuarioRegex, Pattern.CASE_INSENSITIVE);
         Matcher matcher = emailPattern.matcher(username);
@@ -151,15 +147,15 @@ public class UserService implements UserDetailsService {
         return matcher.find();
     }
 
-    public boolean senhaValida(User user, String senha) {
-        return passwordEncoder.matches(senha, user.getPassword());
+    public boolean passwordValid(User user, String rawPassword) {
+        return passwordEncoder.matches(rawPassword, user.getPassword());
     }
 
     public void save(User user) {
         userRepository.saveAndFlush(user);
     }
 
-    public boolean usuarioDonoDaSessao(User user) {
+    public boolean isSessionOfUser(User user) {
         User userSession = getUserInSession();
         if(userSession != null) {
             return (userSession.getId() == user.getId());
@@ -167,28 +163,28 @@ public class UserService implements UserDetailsService {
         return false;
     }
 
-    public HttpSession obterSessaoAtual() {
+    public HttpSession getActiveSession() {
         ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
         return attr.getRequest().getSession(true);
     }
 
-    public String obterUrlAtual() {
+    public String getActiveUrl() {
         ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
         return attr.getRequest().getRequestURI();
     }
 
-    public void atualizarUsuarioNaSessao() {
+    public void updateUserInSession() {
         User userSession = getUserInSession();
         if(userSession != null) {
             User userAtualizado = (User) findFirstById(userSession.getId());
             if(userAtualizado != null) {
-                configurarSessaoParaUsuario(userAtualizado, null);
+                configureSessionForUser(userAtualizado, null);
             }
         }
     }
 
     public User getUserInSession() {
-        HttpSession session = obterSessaoAtual();
+        HttpSession session = getActiveSession();
         if(session != null) {
             User userSession = (User) session.getAttribute("usuario");
             if(userSession != null) {
@@ -198,15 +194,15 @@ public class UserService implements UserDetailsService {
         return null;
     }
 
-    public void configurarSessaoParaUsuario(User user, AuthenticationManager authenticationManager) {
-        HttpSession session = obterSessaoAtual();
-        // Set session inatividade do usuario em 10min
+    public void configureSessionForUser(User user, AuthenticationManager authenticationManager) {
+        HttpSession session = getActiveSession();
+        // set user session timeout to 10min
         session.setMaxInactiveInterval(10 * 60);
 
-        // Salvar usuario na sessao
+        // save user in session
         session.setAttribute("usuario", user);
 
-        // Configurar autenticação
+        // force authentication
         if(authenticationManager != null) {
             ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
             HttpServletRequest request = attr.getRequest();
@@ -220,7 +216,7 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    public boolean usuarioEstaLogado() {
+    public boolean userIsLoggedIn() {
         try {
             return SecurityContextHolder.getContext().getAuthentication() != null &&
                     SecurityContextHolder.getContext().getAuthentication().isAuthenticated() &&
@@ -231,8 +227,8 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    // verifica se usuario possui a autoridade seguindo a hierarquia do springsecurity
-    public boolean usuarioTemAutoridade(User user, Authority authority) {
+    // check if user has authority following springsecurity hierarchy
+    public boolean userHasAuthority(User user, Authority authority) {
         Collection<? extends GrantedAuthority> reachableRoles = roleHierarchy.getReachableGrantedAuthorities(user.getAuthorities());
         if (reachableRoles.contains(new SimpleGrantedAuthority(authority.toString()))) {
             return true;
@@ -240,17 +236,17 @@ public class UserService implements UserDetailsService {
         return false;
     }
 
-    public boolean isContaAdmin(User userSession) {
+    public boolean isUserAdmin(User userSession) {
         try {
-            return usuarioTemAutoridade(userSession, Authority.ROLE_ADMIN);
+            return userHasAuthority(userSession, Authority.ROLE_ADMIN);
         } catch (Exception e) {
             return false;
         }
     }
 
-    public boolean usuarioPrecisaDePerfil(User user) {
+    public boolean userNeedAnProfile(User user) {
         try {
-            if((user.getProfile()==null || user.getProfile().getFirstname()==null) && !isContaAdmin(user)) {
+            if((user.getProfile()==null || user.getProfile().getFirstname()==null) && !isUserAdmin(user)) {
                 return true;
             }
             return false;
@@ -259,7 +255,7 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    public String erroSpringSecurityMemsagem(Exception exception) {
+    public String getLastSpringSecurityError(Exception exception) {
         String error = null;
         if (exception instanceof BadCredentialsException) {
             error = "Credenciais Invalidas!";
@@ -269,30 +265,31 @@ public class UserService implements UserDetailsService {
         return error;
     }
 
-    // url de redirecionamento ao logar
-    public String obterUrlAoLogar() {
+    // url redirect when user login
+    public String getUrlWhenLogin() {
 
         User userSession = getUserInSession();
         if (userSession != null) {
-            if(usuarioPrecisaDePerfil(userSession)) {
+            if(userNeedAnProfile(userSession)) {
+                // go to user profile edit
                 return "/p/" + userSession.getUsername() + "/editar";
             } else {
-                // ao logar mandar para o seu perfil
+                // go to user profile
                 return "/p/" + userSession.getUsername();
             }
         }
 
-        HttpSession session = obterSessaoAtual();
+        HttpSession session = getActiveSession();
         SavedRequest lastRequestSaved = (SavedRequest)session.getAttribute("SPRING_SECURITY_SAVED_REQUEST");
         if(lastRequestSaved != null) {
-            // retornar para ultima pagina que usuario clicou
+            // return last request url user tried to access
             return lastRequestSaved.getRedirectUrl();
         }
 
         return "/";
     }
 
-    // logout usuario remotamente
+    // logout user remotely
     public void logoutUsername(String username) {
         for (Object principal: sessionRegistry.getAllPrincipals()) {
             if (principal instanceof UserDetails) {
@@ -307,7 +304,7 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    // ver se o username tem alguma sassao ativa
+    // check if user has active session
     public boolean isUsernameOnline(String username) {
         for (Object principal: sessionRegistry.getAllPrincipals()) {
             if (principal instanceof UserDetails) {

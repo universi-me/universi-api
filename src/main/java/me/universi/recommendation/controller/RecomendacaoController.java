@@ -7,7 +7,7 @@ import me.universi.competence.services.CompetenceService;
 import me.universi.competence.services.CompetenceTypeService;
 import me.universi.group.exceptions.GroupException;
 import me.universi.profile.entities.Profile;
-import me.universi.profile.services.PerfilService;
+import me.universi.profile.services.ProfileService;
 import me.universi.recommendation.entities.Recommendation;
 import me.universi.recommendation.exceptions.RecomendacaoInvalidaException;
 import me.universi.user.entities.User;
@@ -38,7 +38,7 @@ public class RecomendacaoController {
     public UserService userService;
 
     @Autowired
-    public PerfilService perfilService;
+    public ProfileService profileService;
 
     @Autowired
     public CompetenceTypeService competenciaTipoService;
@@ -64,12 +64,12 @@ public class RecomendacaoController {
                 throw new RecomendacaoInvalidaException("Parametro competenciaTipoId é nulo.");
             }
 
-            Profile profileOrigem = perfilService.findFirstById(Long.valueOf(origem));
+            Profile profileOrigem = profileService.findFirstById(Long.valueOf(origem));
             if(profileOrigem == null) {
                 throw new RecomendacaoInvalidaException("Perfil origem não encontrado.");
             }
 
-            Profile profileDestino = perfilService.findFirstById(Long.valueOf(destino));
+            Profile profileDestino = profileService.findFirstById(Long.valueOf(destino));
             if(profileDestino == null) {
                 throw new RecomendacaoInvalidaException("Perfil destino não encontrado.");
             }

@@ -3,7 +3,7 @@ package me.universi.pesquisar.controller;
 import me.universi.group.entities.Group;
 import me.universi.group.services.GroupService;
 import me.universi.profile.entities.Profile;
-import me.universi.profile.services.PerfilService;
+import me.universi.profile.services.ProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,7 +24,7 @@ import java.util.Map;
 @RequestMapping("/api")
 public class PesquisarController {
     @Autowired
-    private PerfilService perfilService;
+    private ProfileService profileService;
 
     @Autowired
     public GroupService grupoService;
@@ -52,7 +52,7 @@ public class PesquisarController {
         if(term != null && term.length() > 0) {
 
             if(searchUsuario) {
-                Collection<Profile> profileSearches = perfilService.findTop5ByNomeContainingIgnoreCase(term);
+                Collection<Profile> profileSearches = profileService.findTop5ByNameContainingIgnoreCase(term);
                 for (Profile perfNow : profileSearches) {
                     HashMap<String, Object> perfilDic = new HashMap<>();
                     perfilDic.put("value", perfNow.getFirstname());

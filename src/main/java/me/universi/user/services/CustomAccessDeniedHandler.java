@@ -11,9 +11,12 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import java.io.IOException;
 
 public class CustomAccessDeniedHandler implements AccessDeniedHandler {
+    private final UserService userService;
 
     @Autowired
-    private UserService userService;
+    public CustomAccessDeniedHandler(UserService userService) {
+        this.userService = userService;
+    }
 
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {

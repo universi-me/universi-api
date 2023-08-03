@@ -1,7 +1,6 @@
 package me.universi.vacancy.services;
 
-import me.universi.curriculum.entities.Curriculum;
-import me.universi.profile.services.PerfilService;
+import me.universi.profile.services.ProfileService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import me.universi.vacancy.entities.Vacancy;
@@ -16,12 +15,12 @@ public class VacancyService {
 
     private VacancyRepository vacancyRepository;
 
-    public PerfilService perfilService;
+    public ProfileService profileService;
     public UserService userService;
 
-    public VacancyService(VacancyRepository vacancyRepository, PerfilService perfilService, UserService userService){
+    public VacancyService(VacancyRepository vacancyRepository, ProfileService profileService, UserService userService){
         this.vacancyRepository = vacancyRepository;
-        this.perfilService = perfilService;
+        this.profileService = profileService;
         this.userService = userService;
     }
 

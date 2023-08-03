@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.Collection;
 
 @Service
-public class PerfilService {
+public class ProfileService {
 
     @Autowired
     private PerfilRepository perfilRepository;
@@ -42,6 +42,6 @@ public class PerfilService {
 
     public void deleteAll() { perfilRepository.deleteAll();}
 
-    // pesquisar os 5 primeiros contendo a string maiusculo ou minusculo
-    public Collection<Profile> findTop5ByNomeContainingIgnoreCase(String nome){ return perfilRepository.findTop5ByFirstnameContainingIgnoreCase(nome); }
+    // search the first 5 containing the string uppercase or lowercase
+    public Collection<Profile> findTop5ByNameContainingIgnoreCase(String nome){ return perfilRepository.findTop5ByFirstnameContainingIgnoreCase(nome); }
 }

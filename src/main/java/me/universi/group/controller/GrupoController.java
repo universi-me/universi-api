@@ -40,7 +40,7 @@ public class GrupoController {
 
             String grupoIdPai = (String)body.get("grupoId");
             if(grupoIdPai == null) {
-                if(!(grupoRoot != null && userService.isContaAdmin(user))) {
+                if(!(grupoRoot != null && userService.isUserAdmin(user))) {
                     throw new GroupException("Parametro grupoId é nulo.");
                 }
             } else if(grupoIdPai.length() > 0 && (grupoRoot!=null && grupoRoot)) {
@@ -80,7 +80,7 @@ public class GrupoController {
                 throw new GroupException("Este Nickname não está disponível para este grupo.");
             }
 
-            if((grupoRoot != null && grupoRoot && userService.isContaAdmin(user)) || ((grupoPai !=null && grupoPai.canCreateGroup) || grupoService.verifyPermissionToEditGroup(grupoPai, user))) {
+            if((grupoRoot != null && grupoRoot && userService.isUserAdmin(user)) || ((grupoPai !=null && grupoPai.canCreateGroup) || grupoService.verifyPermissionToEditGroup(grupoPai, user))) {
                 Group grupoNew = new Group();
                 grupoNew.setNickname(nickname);
                 grupoNew.setName(nome);
@@ -99,7 +99,7 @@ public class GrupoController {
                 if(podeEntrar != null) {
                     grupoNew.setCanEnter(podeEntrar);
                 }
-                if((grupoRoot != null && grupoRoot) && userService.isContaAdmin(user)) {
+                if((grupoRoot != null && grupoRoot) && userService.isUserAdmin(user)) {
                     grupoNew.setRootGroup(true);
                     grupoService.save(grupoNew);
                 } else {

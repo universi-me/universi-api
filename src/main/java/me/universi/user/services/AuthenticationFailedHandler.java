@@ -14,9 +14,14 @@ import java.io.IOException;
     Classe para manipular a falhas de login
  */
 
-public class AutenticacaoFalhaHandler extends SimpleUrlAuthenticationFailureHandler {
+public class AuthenticationFailedHandler extends SimpleUrlAuthenticationFailureHandler {
+    private final UserService userService;
+
     @Autowired
-    private UserService userService;
+    public AuthenticationFailedHandler(UserService userService) {
+        this.userService = userService;
+    }
+
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
 
@@ -25,7 +30,7 @@ public class AutenticacaoFalhaHandler extends SimpleUrlAuthenticationFailureHand
             Response resposta = new Response();
 
             resposta.success = false;
-            resposta.message = userService.erroSpringSecurityMemsagem(exception);
+            resposta.message = userService.getLastSpringSecurityError(exception);
 
             response.setHeader("Content-Type", "application/json; charset=utf-8");
             response.getWriter().print(resposta.toString());

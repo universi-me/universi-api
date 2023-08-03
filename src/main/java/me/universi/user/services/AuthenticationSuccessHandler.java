@@ -20,43 +20,53 @@ import java.security.Principal;
 /*
     Classe para manipular quando o usuario efetuar o login
  */
-public class AutenticacaoValidaHandler extends SavedRequestAwareAuthenticationSuccessHandler {
+public class AuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
+    private final UserService userService;
+    private final AuthenticationManager authenticationManager;
+    private final JWTService jwtService;
+
     @Autowired
-    private UserService userService;
-    @Autowired
-    AuthenticationManager authenticationManager;
+    public AuthenticationSuccessHandler(UserService userService, AuthenticationManager authenticationManager, JWTService jwtService) {
+        this.userService = userService;
+        this.authenticationManager = authenticationManager;
+        this.jwtService = jwtService;
+    }
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws ServletException, IOException {
-        HttpSession session = request.getSession(true);
-
         String username = null;
+        User user = null;
+
         if (authentication.getPrincipal() instanceof Principal) {
             username = ((Principal) authentication.getPrincipal()).getName();
         } else {
             username = ((UserDetails) authentication.getPrincipal()).getUsername();
         }
         if(username != null) {
-            User user = (User) userService.loadUserByUsername(username);
-            userService.configurarSessaoParaUsuario(user, authenticationManager);
+            user = (User) userService.loadUserByUsername(username);
+            userService.configureSessionForUser(user, authenticationManager);
         }
 
-        if ("application/json".equals(request.getHeader("Content-Type"))) { // request foi via JSON
+        if ("application/json".equals(request.getHeader("Content-Type"))) { // request via JSON
 
-            Response resposta = new Response();
-            resposta.success = true;
-            resposta.message = "Usuário Logado com sucesso.";
+            Response responseBuild = new Response();
+            responseBuild.success = true;
+            responseBuild.message = "Usuário Logado com sucesso.";
 
-            resposta.redirectTo = userService.obterUrlAoLogar();
+            responseBuild.redirectTo = userService.getUrlWhenLogin();
+
+            responseBuild.token = jwtService.buildTokenForUser(user);
+
+            responseBuild.body.put("user", user);
 
             response.setHeader("Content-Type", "application/json; charset=utf-8");
-            response.getWriter().print(resposta.toString());
+            response.getWriter().print(responseBuild.toString());
             response.getWriter().flush();
 
         } else {
 
             RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
-            redirectStrategy.sendRedirect(request, response, userService.obterUrlAoLogar());
+            redirectStrategy.sendRedirect(request, response, userService.getUrlWhenLogin());
             //super.onAuthenticationSuccess(request, response, authentication);
 
         }
