@@ -1,5 +1,8 @@
 package me.universi.profile.entities;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -58,6 +61,8 @@ public class Profile {
             joinColumns = { @JoinColumn(name = "id_profile") },
             inverseJoinColumns = { @JoinColumn(name = "id_group") }
     )
+    @JsonIdentityInfo(generator= ObjectIdGenerators.PropertyGenerator.class, property="id", scope = Group.class)
+    @JsonIdentityReference(alwaysAsId = true)
     private Collection<Group> groups;
     @OneToMany(mappedBy = "profile")
     private Collection<Link> links;
