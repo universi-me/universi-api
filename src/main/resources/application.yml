@@ -47,7 +47,7 @@ DIRETORIO_DA_IMAGEM: src/main/resources/static/img/imagem/
 IMGUR_CLIENT_ID: e4f58fc81daec99
 
 # LOGIN CONFIG
-REGISTRAR_SE_ATIVADO: false
+REGISTRAR_SE_ATIVADO: true
 
 
 # TEST Profile
