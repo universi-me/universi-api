@@ -94,7 +94,7 @@ public class UserService implements UserDetailsService {
         userRepository.saveAndFlush((User)user);
 
         Profile userProfile = new Profile();
-        userProfile.setUsuario(user);
+        userProfile.setUser(user);
         profileService.save(userProfile);
         user.setProfile(userProfile);
     }

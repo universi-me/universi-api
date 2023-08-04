@@ -56,9 +56,9 @@ public class PesquisarController {
                 for (Profile perfNow : profileSearches) {
                     HashMap<String, Object> perfilDic = new HashMap<>();
                     perfilDic.put("value", perfNow.getFirstname());
-                    perfilDic.put("id", perfNow.getUsuario().getUsername());
+                    perfilDic.put("id", perfNow.getUser().getUsername());
                     perfilDic.put("img", perfNow.getImage() == null ? "https://i.imgur.com/vUBrCxr.png" : perfNow.getImage());
-                    perfilDic.put("url", "/p/" + perfNow.getUsuario().getUsername());
+                    perfilDic.put("url", "/p/" + perfNow.getUser().getUsername());
                     perfilDic.put("tipo", "perfil");
                     resultsBusca.add(perfilDic);
                 }

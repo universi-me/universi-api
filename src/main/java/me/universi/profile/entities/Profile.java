@@ -2,6 +2,7 @@ package me.universi.profile.entities;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -50,9 +51,11 @@ public class Profile {
     private String image;
     @Column(name = "bio", columnDefinition = "TEXT")
     private String bio;
+    @JsonIgnore
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "id_link")
     private Link link;
+    @JsonIgnore
     @ManyToMany(mappedBy = "profile", fetch = FetchType.EAGER, cascade = { CascadeType.ALL })
     private Collection<Competence> competences;
     @ManyToMany(cascade = { CascadeType.ALL })
@@ -61,16 +64,18 @@ public class Profile {
             joinColumns = { @JoinColumn(name = "id_profile") },
             inverseJoinColumns = { @JoinColumn(name = "id_group") }
     )
-    @JsonIdentityInfo(generator= ObjectIdGenerators.PropertyGenerator.class, property="id", scope = Group.class)
-    @JsonIdentityReference(alwaysAsId = true)
+    @JsonIgnore
     private Collection<Group> groups;
+    @JsonIgnore
     @OneToMany(mappedBy = "profile")
     private Collection<Link> links;
     @Column(name = "gender")
     @Enumerated(EnumType.STRING)
     private Gender gender;
+    @JsonIgnore
     @OneToMany(mappedBy = "origin")
     private Collection<Recommendation> recomendacoesFeitas;
+    @JsonIgnore
     @OneToMany(mappedBy = "destiny")
     private Collection<Recommendation> recomendacoesRecebidas;
 
@@ -95,14 +100,6 @@ public class Profile {
 
     public Long getId() {
         return id;
-    }
-
-    public User getUsuario() {
-        return user;
-    }
-
-    public void setUsuario(User user) {
-        this.user = user;
     }
 
     public String getBio() {
@@ -167,14 +164,6 @@ public class Profile {
 
     public void setImage(String image) {
         this.image = image;
-    }
-
-    public Gender getSexo() {
-        return gender;
-    }
-
-    public void setSexo(Gender gender) {
-        this.gender = gender;
     }
 
     public Collection<Recommendation> getRecomendacoesFeitas() {

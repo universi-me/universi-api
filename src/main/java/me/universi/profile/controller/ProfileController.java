@@ -82,7 +82,7 @@ public class ProfileController {
                 throw new PerfilException("Perfil não encontrado.");
             }
 
-            if(!userService.isSessionOfUser(profileAtual.getUsuario())) {
+            if(!userService.isSessionOfUser(profileAtual.getUser())) {
                 User userSession = userService.getUserInSession();
                 if(!userService.isUserAdmin(userSession)) {
                     throw new PerfilException("Você não tem permissão para editar este perfil.");
@@ -102,7 +102,7 @@ public class ProfileController {
                 profileAtual.setBio(bio);
             }
             if(sexo != null) {
-                profileAtual.setSexo(Gender.valueOf(sexo));
+                profileAtual.setGender(Gender.valueOf(sexo));
             }
 
             profileService.save(profileAtual);
