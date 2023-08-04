@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.util.Map;
 
 @RestController
-@RequestMapping(value = "/api")
+@RequestMapping(value = "/api/profile")
 public class ProfileController {
     @Autowired
     public UserService userService;
@@ -35,7 +35,7 @@ public class ProfileController {
     @Autowired
     public CompetenceTypeService competenciaTipoService;
 
-    @GetMapping(value = "/profile", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response profile() {
         Response response = new Response(); // default
@@ -58,7 +58,7 @@ public class ProfileController {
         return response;
     }
 
-    @PostMapping(value = "/profile/edit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/edit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response perfil_editar(@RequestBody Map<String, Object> body) {
 
@@ -119,7 +119,7 @@ public class ProfileController {
         return resposta;
     }
 
-    @PostMapping(value = "/profile/get", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/get", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response profile_get(@RequestBody Map<String, Object> body) {
         Response response = new Response(); // default
@@ -147,6 +147,155 @@ public class ProfileController {
             }
 
             response.body.put("profile", profileGet);
+            response.success = true;
+
+        } catch (Exception e) {
+            response.message = e.getMessage();
+        }
+
+        return response;
+    }
+
+    @PostMapping(value = "/recomendations", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response profile_recomendations(@RequestBody Map<String, Object> body) {
+        Response response = new Response(); // default
+        try {
+
+            // get profile by id or username
+            String profileId = (String)body.get("profileId");
+            String username = (String)body.get("username");
+
+            if(profileId == null && username == null) {
+                throw new Exception("Parametro perfilId ou username é nulo.");
+            }
+
+            Profile profileGet = null;
+
+            if(profileId != null) {
+                profileGet = profileService.findFirstById(profileId);
+            }
+            if(profileGet == null && username != null) {
+                profileGet = ((User)userService.loadUserByUsername(username)).getProfile();
+            }
+
+            if(profileGet == null) {
+                throw new PerfilException("Perfil não encontrado.");
+            }
+
+            response.body.put("recomendationsSend", profileGet.getRecomendationsSend());
+            response.body.put("recomendationsReceived", profileGet.getRecomendationsReceived());
+            response.success = true;
+
+        } catch (Exception e) {
+            response.message = e.getMessage();
+        }
+
+        return response;
+    }
+
+    @PostMapping(value = "/groups", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response profile_groups(@RequestBody Map<String, Object> body) {
+        Response response = new Response(); // default
+        try {
+
+            // get profile by id or username
+            String profileId = (String)body.get("profileId");
+            String username = (String)body.get("username");
+
+            if(profileId == null && username == null) {
+                throw new Exception("Parametro perfilId ou username é nulo.");
+            }
+
+            Profile profileGet = null;
+
+            if(profileId != null) {
+                profileGet = profileService.findFirstById(profileId);
+            }
+            if(profileGet == null && username != null) {
+                profileGet = ((User)userService.loadUserByUsername(username)).getProfile();
+            }
+
+            if(profileGet == null) {
+                throw new PerfilException("Perfil não encontrado.");
+            }
+
+            response.body.put("groups", profileGet.getGroups());
+            response.success = true;
+
+        } catch (Exception e) {
+            response.message = e.getMessage();
+        }
+
+        return response;
+    }
+
+    @PostMapping(value = "/links", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response profile_links(@RequestBody Map<String, Object> body) {
+        Response response = new Response(); // default
+        try {
+
+            // get profile by id or username
+            String profileId = (String)body.get("profileId");
+            String username = (String)body.get("username");
+
+            if(profileId == null && username == null) {
+                throw new Exception("Parametro perfilId ou username é nulo.");
+            }
+
+            Profile profileGet = null;
+
+            if(profileId != null) {
+                profileGet = profileService.findFirstById(profileId);
+            }
+            if(profileGet == null && username != null) {
+                profileGet = ((User)userService.loadUserByUsername(username)).getProfile();
+            }
+
+            if(profileGet == null) {
+                throw new PerfilException("Perfil não encontrado.");
+            }
+
+            response.body.put("links", profileGet.getLinks());
+            response.success = true;
+
+        } catch (Exception e) {
+            response.message = e.getMessage();
+        }
+
+        return response;
+    }
+
+    @PostMapping(value = "/competences", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response profile_competences(@RequestBody Map<String, Object> body) {
+        Response response = new Response(); // default
+        try {
+
+            // get profile by id or username
+            String profileId = (String)body.get("profileId");
+            String username = (String)body.get("username");
+
+            if(profileId == null && username == null) {
+                throw new Exception("Parametro perfilId ou username é nulo.");
+            }
+
+            Profile profileGet = null;
+
+            if(profileId != null) {
+                profileGet = profileService.findFirstById(profileId);
+            }
+            if(profileGet == null && username != null) {
+                profileGet = ((User)userService.loadUserByUsername(username)).getProfile();
+            }
+
+            if(profileGet == null) {
+                throw new PerfilException("Perfil não encontrado.");
+            }
+
+            response.body.put("competences", profileGet.getCompetences());
             response.success = true;
 
         } catch (Exception e) {

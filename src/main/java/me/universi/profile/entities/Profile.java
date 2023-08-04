@@ -1,9 +1,6 @@
 package me.universi.profile.entities;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -74,10 +71,10 @@ public class Profile {
     private Gender gender;
     @JsonIgnore
     @OneToMany(mappedBy = "origin")
-    private Collection<Recommendation> recomendacoesFeitas;
+    private Collection<Recommendation> recomendationsSend;
     @JsonIgnore
     @OneToMany(mappedBy = "destiny")
-    private Collection<Recommendation> recomendacoesRecebidas;
+    private Collection<Recommendation> recomendationsReceived;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
@@ -166,12 +163,12 @@ public class Profile {
         this.image = image;
     }
 
-    public Collection<Recommendation> getRecomendacoesFeitas() {
-        return recomendacoesFeitas;
+    public Collection<Recommendation> getRecomendationsSend() {
+        return recomendationsSend;
     }
 
-    public Collection<Recommendation> getRecomendacoesRecebidas() {
-        return recomendacoesRecebidas;
+    public Collection<Recommendation> getRecomendationsReceived() {
+        return recomendationsReceived;
     }
 
     public Date getCreationDate() {
@@ -198,12 +195,12 @@ public class Profile {
         this.gender = gender;
     }
 
-    public void setRecomendacoesFeitas(Collection<Recommendation> recomendacoesFeitas) {
-        this.recomendacoesFeitas = recomendacoesFeitas;
+    public void setRecomendationsSend(Collection<Recommendation> recomendationsSend) {
+        this.recomendationsSend = recomendationsSend;
     }
 
-    public void setRecomendacoesRecebidas(Collection<Recommendation> recomendacoesRecebidas) {
-        this.recomendacoesRecebidas = recomendacoesRecebidas;
+    public void setRecomendationsReceived(Collection<Recommendation> recomendationsReceived) {
+        this.recomendationsReceived = recomendationsReceived;
     }
 
     public void setId(Long id) {
