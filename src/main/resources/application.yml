@@ -8,13 +8,16 @@ jwt:
 
 # DATABASE ENV VARIABLES
 database:
-  url: ${API_DB_URL:jdbc:postgresql://localhost:5432/universime}
+  name: ${API_DB_NAME:universime}
+  port: ${API_DB_PORT:5432}
+  domain: ${API_DB_DOMAIN:localhost}
+  url: ${API_DB_URL:jdbc:postgresql://${database.domain}:${database.port}/${database.name}}
   username: ${API_DB_USER:postgres}
   password: ${API_DB_PASS:postgres}
   flyway:
-    url: ${API_DB_FLY_URL:jdbc:postgresql://localhost:5432/universime}
-    username: ${API_DB_FLY_USER:postgres}
-    password: ${API_DB_FLY_PASS:postgres}
+    url: ${API_DB_FLY_URL:${database.url}}
+    username: ${API_DB_FLY_USER:${database.username}}
+    password: ${API_DB_FLY_PASS:${database.password}}
 
 
 # SERVER
