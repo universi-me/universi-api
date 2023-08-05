@@ -1,0 +1,43 @@
+version: '3.5'
+
+services:
+    universi-me:
+        container_name: universi-me
+        build:
+            context: .
+        restart: unless-stopped
+        networks:
+            - universi-me-network
+        ports:
+            - "8080:8080"
+        depends_on:
+            - universi-me-db
+        environment:
+            API_DB_URL: jdbc:postgresql://universi-me-db:5432/${API_DB_NAME}
+        env_file:
+            - .env
+
+    universi-me-db:
+        container_name: universi-me-postgres
+        image: postgres:12.3
+        restart: unless-stopped
+        networks:
+            - universi-me-network
+        ports:
+            - "5432:5432"
+        volumes:
+            - universi-me-postgres:/data/postgres
+        environment:
+            POSTGRES_USER: ${API_DB_USER}
+            POSTGRES_PASSWORD: ${API_DB_PASS}
+            POSTGRES_DB: ${API_DB_NAME}
+            PGDATA: /data/postgres
+        env_file:
+            - .env
+
+volumes:
+    universi-me-postgres:
+
+networks:
+    universi-me-network:
+        driver: bridge
