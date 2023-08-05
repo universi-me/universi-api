@@ -70,12 +70,12 @@ public class CompetenciaTest {
         Profile admin_profile = userNew.getProfile();
         admin_profile.setFirstname("perfil1");
         admin_profile.setBio("Bio - admin_perfil"+userNew.getId());
-        admin_profile.setSexo(Gender.M);
+        admin_profile.setGender(Gender.M);
 
         Profile comum_profile = userNew.getProfile();
         comum_profile.setFirstname("perfil2");
         comum_profile.setBio("Bio - comum_perfil"+userNew.getId());
-        comum_profile.setSexo(Gender.M);
+        comum_profile.setGender(Gender.M);
 
         Collection<Competence> competencias = new ArrayList<Competence>();
         competencias.add(competencia1);
@@ -123,12 +123,12 @@ public class CompetenciaTest {
         Profile admin_profile = userNew.getProfile();
         admin_profile.setFirstname("perfil1");
         admin_profile.setBio("Bio - admin_perfil"+userNew.getId());
-        admin_profile.setSexo(Gender.M);
+        admin_profile.setGender(Gender.M);
 
         Profile comum_profile = userNew.getProfile();
         comum_profile.setFirstname("perfil2");
         comum_profile.setBio("Bio - comum_perfil"+userNew.getId());
-        comum_profile.setSexo(Gender.M);
+        comum_profile.setGender(Gender.M);
 
         Collection<Competence> competencias = new ArrayList<Competence>();
         competencias.add(competencia1);
@@ -182,12 +182,12 @@ public class CompetenciaTest {
         Profile admin_profile = userNew.getProfile();
         admin_profile.setFirstname("perfil1");
         admin_profile.setBio("Bio - admin_perfil"+userNew.getId());
-        admin_profile.setSexo(Gender.M);
+        admin_profile.setGender(Gender.M);
 
         Profile comum_profile = userNew.getProfile();
         comum_profile.setFirstname("perfil2");
         comum_profile.setBio("Bio - comum_perfil"+userNew.getId());
-        comum_profile.setSexo(Gender.M);
+        comum_profile.setGender(Gender.M);
 
         Collection<Competence> competencias = new ArrayList<Competence>();
         competencias.add(competencia1);
@@ -242,12 +242,12 @@ public class CompetenciaTest {
         Profile admin_profile = userNew.getProfile();
         admin_profile.setFirstname("perfil1");
         admin_profile.setBio("Bio - admin_perfil"+userNew.getId());
-        admin_profile.setSexo(Gender.M);
+        admin_profile.setGender(Gender.M);
 
         Profile comum_profile = userNew.getProfile();
         comum_profile.setFirstname("perfil2");
         comum_profile.setBio("Bio - comum_perfil"+userNew.getId());
-        comum_profile.setSexo(Gender.M);
+        comum_profile.setGender(Gender.M);
 
         Collection<Competence> competencias = new ArrayList<Competence>();
         competencias.add(competencia1);
