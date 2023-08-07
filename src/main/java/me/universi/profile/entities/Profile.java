@@ -1,5 +1,6 @@
 package me.universi.profile.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -47,9 +48,11 @@ public class Profile {
     private String image;
     @Column(name = "bio", columnDefinition = "TEXT")
     private String bio;
+    @JsonIgnore
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "id_link")
     private Link link;
+    @JsonIgnore
     @ManyToMany(mappedBy = "profile", fetch = FetchType.EAGER, cascade = { CascadeType.ALL })
     private Collection<Competence> competences;
     @ManyToMany(cascade = { CascadeType.ALL })
@@ -58,16 +61,20 @@ public class Profile {
             joinColumns = { @JoinColumn(name = "id_profile") },
             inverseJoinColumns = { @JoinColumn(name = "id_group") }
     )
+    @JsonIgnore
     private Collection<Group> groups;
+    @JsonIgnore
     @OneToMany(mappedBy = "profile")
     private Collection<Link> links;
     @Column(name = "gender")
     @Enumerated(EnumType.STRING)
     private Gender gender;
+    @JsonIgnore
     @OneToMany(mappedBy = "origin")
-    private Collection<Recommendation> recomendacoesFeitas;
+    private Collection<Recommendation> recomendationsSend;
+    @JsonIgnore
     @OneToMany(mappedBy = "destiny")
-    private Collection<Recommendation> recomendacoesRecebidas;
+    private Collection<Recommendation> recomendationsReceived;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
@@ -90,14 +97,6 @@ public class Profile {
 
     public Long getId() {
         return id;
-    }
-
-    public User getUsuario() {
-        return user;
-    }
-
-    public void setUsuario(User user) {
-        this.user = user;
     }
 
     public String getBio() {
@@ -164,20 +163,12 @@ public class Profile {
         this.image = image;
     }
 
-    public Gender getSexo() {
-        return gender;
+    public Collection<Recommendation> getRecomendationsSend() {
+        return recomendationsSend;
     }
 
-    public void setSexo(Gender gender) {
-        this.gender = gender;
-    }
-
-    public Collection<Recommendation> getRecomendacoesFeitas() {
-        return recomendacoesFeitas;
-    }
-
-    public Collection<Recommendation> getRecomendacoesRecebidas() {
-        return recomendacoesRecebidas;
+    public Collection<Recommendation> getRecomendationsReceived() {
+        return recomendationsReceived;
     }
 
     public Date getCreationDate() {
@@ -204,12 +195,12 @@ public class Profile {
         this.gender = gender;
     }
 
-    public void setRecomendacoesFeitas(Collection<Recommendation> recomendacoesFeitas) {
-        this.recomendacoesFeitas = recomendacoesFeitas;
+    public void setRecomendationsSend(Collection<Recommendation> recomendationsSend) {
+        this.recomendationsSend = recomendationsSend;
     }
 
-    public void setRecomendacoesRecebidas(Collection<Recommendation> recomendacoesRecebidas) {
-        this.recomendacoesRecebidas = recomendacoesRecebidas;
+    public void setRecomendationsReceived(Collection<Recommendation> recomendationsReceived) {
+        this.recomendationsReceived = recomendationsReceived;
     }
 
     public void setId(Long id) {

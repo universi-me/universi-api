@@ -97,7 +97,7 @@ public class RecomendacaoController {
             recomendacaoService.save(recomendacoNew);
 
             resposta.message = "A sua recomendação foi feita.";
-            resposta.redirectTo = "/p/" + profileDestino.getUsuario().getUsername();
+            resposta.redirectTo = "/p/" + profileDestino.getUser().getUsername();
             resposta.success = true;
             return resposta;
 

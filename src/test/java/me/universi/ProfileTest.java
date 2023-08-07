@@ -94,7 +94,7 @@ public class ProfileTest {
         Profile admin_profile = userNew.getProfile();
         admin_profile.setFirstname(nome);
         admin_profile.setBio("Bio - admin_perfil"+userNew.getId());
-        admin_profile.setSexo(Gender.M);
+        admin_profile.setGender(Gender.M);
 
         Collection<Competence> competencias = new ArrayList<Competence>();
         competencias.add(competenciaNew);
