@@ -2,6 +2,7 @@ package me.universi.user.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,6 +17,7 @@ import jakarta.persistence.SequenceGenerator;
 import me.universi.indicators.entities.Indicators;
 import me.universi.profile.entities.Profile;
 import me.universi.user.enums.Authority;
+import me.universi.user.services.JsonEmailOwnerSessionFilter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -35,7 +37,7 @@ public class User implements UserDetails {
     @Column(name = "name")
     private String name;
 
-    //@JsonIgnore
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonEmailOwnerSessionFilter.class)
     @Column(name = "email")
     private String email;
 
