@@ -469,14 +469,23 @@ public class GrupoController {
         try {
 
             String groupId = (String)body.get("groupId");
-            if(groupId == null) {
-                throw new GroupException("Parâmetro groupId é nulo.");
+            String groupNickname = (String)body.get("nickname");
+
+            if(groupId == null && groupNickname == null) {
+                throw new GroupException("Parâmetro groupId e nickname são nulo.");
             }
 
-            Group group = groupService.findFirstById(Long.valueOf(groupId));
-            if(group != null) {
-                response.body.put("group", group);
+            Group group = null;
+            if(groupId != null) {
+                group = groupService.findFirstById(Long.valueOf(groupId));
+            }
 
+            else if (group == null && groupNickname != null) {
+                group = groupService.findFirstByNickname(groupNickname);
+            }
+
+            if (group != null) {
+                response.body.put("group", group);
                 response.message = "Operação Realizada com exito.";
                 response.success = true;
                 return response;
