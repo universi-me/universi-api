@@ -31,8 +31,8 @@ public class CompetenceTypeService {
         }
     }
 
-    public void save(CompetenceType competenceType) {
-        competenceTypeRepository.saveAndFlush(competenceType);
+    public CompetenceType save(CompetenceType competenceType) {
+        return competenceTypeRepository.saveAndFlush(competenceType);
     }
 
     public void delete(CompetenceType competenceType) {
@@ -41,5 +41,22 @@ public class CompetenceTypeService {
 
     public List<CompetenceType> findAll() {
         return competenceTypeRepository.findAll();
+    }
+
+    public CompetenceType update(CompetenceType newCompetenceType, Long id) throws Exception{
+        return competenceTypeRepository.findById(id).map(competenceType -> {
+            competenceType.setName(newCompetenceType.getName());
+            return competenceTypeRepository.saveAndFlush(competenceType);
+        }).orElseGet(()->{
+            try {
+                return competenceTypeRepository.saveAndFlush(newCompetenceType);
+            }catch (Exception e){
+                return null;
+            }
+        });
+    }
+
+    public void delete(Long id) {
+        competenceTypeRepository.deleteById(id);
     }
 }
