@@ -1,8 +1,6 @@
 package me.universi.group.entities;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIdentityReference;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -19,7 +17,10 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
+import me.universi.Sys;
 import me.universi.group.enums.GroupType;
+import me.universi.group.services.GroupService;
 import me.universi.profile.entities.Profile;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -57,8 +58,7 @@ public class Group {
             joinColumns = { @JoinColumn(name = "id_group") },
             inverseJoinColumns = { @JoinColumn(name =  "id_profile") }
     )
-    @JsonIdentityInfo(generator= ObjectIdGenerators.PropertyGenerator.class, property="id", scope = Profile.class)
-    @JsonIdentityReference(alwaysAsId = true)
+    @JsonIgnore
     public Collection<Profile> participants;
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
@@ -67,8 +67,7 @@ public class Group {
             joinColumns = { @JoinColumn(name = "id_group", referencedColumnName = "id_group") },
             inverseJoinColumns = { @JoinColumn(name = "id_subgroup", referencedColumnName = "id_group") }
     )
-    @JsonIdentityInfo(generator= ObjectIdGenerators.PropertyGenerator.class, property="id", scope = Group.class)
-    @JsonIdentityReference(alwaysAsId = true)
+    @JsonIgnore
     public Collection<Group> subGroups;
 
     @Column(name = "type")
@@ -239,6 +238,13 @@ public class Group {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    @Transient
+    public String getPath() {
+        // GroupService bean instance via context
+        GroupService groupService = Sys.context.getBean("groupService", GroupService.class);
+        return groupService.getGroupPath(this.id);
     }
 
     @Override
