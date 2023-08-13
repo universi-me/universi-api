@@ -74,6 +74,9 @@ public class GrupoController {
 
             Group parentGroup = groupIdParent==null?null:groupService.findFirstById(Long.valueOf(groupIdParent));
 
+            // support only lowercase nickname
+            nickname = nickname.toLowerCase();
+
             if(parentGroup!=null && !groupService.isNicknameAvailableForGroup(parentGroup, nickname)) {
                 throw new GroupException("Este Nickname não está disponível para este grupo.");
             }
@@ -469,24 +472,22 @@ public class GrupoController {
         try {
 
             String groupId = (String)body.get("groupId");
-            String groupNickname = (String)body.get("nickname");
+            String groupPath = (String)body.get("groupPath");
 
-            if(groupId == null && groupNickname == null) {
-                throw new GroupException("Parâmetro groupId e nickname são nulo.");
+            if(groupId == null && groupPath == null) {
+                throw new GroupException("Parâmetro groupId ou groupPath é nulo.");
             }
 
             Group group = null;
             if(groupId != null) {
                 group = groupService.findFirstById(Long.valueOf(groupId));
             }
-
-            else if (group == null && groupNickname != null) {
-                group = groupService.findFirstByNickname(groupNickname);
+            if (group == null && groupPath != null) {
+                group = groupService.getGroupFromPath(groupPath);
             }
 
             if (group != null) {
                 response.body.put("group", group);
-                response.message = "Operação Realizada com exito.";
                 response.success = true;
                 return response;
             }
