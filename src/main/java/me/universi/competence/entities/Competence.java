@@ -38,12 +38,26 @@ public class Competence {
     @JoinColumn(name = "id_profile")
     private Profile profile;
 
+    @Column(name = "title")
+    private String title;
+
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "level")
     private Level level;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "start_date")
+    private Date startDate;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "end_date")
+    private Date endDate;
+
+    @Column(name = "current_Date")
+    private Boolean currentDate;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
@@ -53,9 +67,24 @@ public class Competence {
     public Competence() {
     }
 
-    public Competence(String description, Level level) {
+
+
+    public Competence(CompetenceType competenceType, String description, String title, Level level, Date startDate, Date endDate) {
+        this.competenceType = competenceType;
         this.description = description;
+        this.title = title;
         this.level = level;
+        this.startDate = startDate;
+        this.endDate = endDate;
+    }
+
+    public Competence(CompetenceType competenceType, String description, String title, Level level, Date startDate, Boolean currentDate) {
+        this.competenceType = competenceType;
+        this.description = description;
+        this.title = title;
+        this.level = level;
+        this.startDate = startDate;
+        this.currentDate = currentDate;
     }
 
     public Long getId() {
@@ -97,4 +126,20 @@ public class Competence {
     public void setProfile(Profile profile) {
         this.profile = profile;
     }
+
+    public Date getStartDate() { return startDate; }
+
+    public void setStartDate(Date startDate) { this.startDate = startDate; }
+
+    public Date getEndDate() { return endDate; }
+
+    public void setEndDate(Date endDate) { this.endDate = endDate; }
+
+    public Boolean getCurrentDate() { return currentDate; }
+
+    public void setCurrentDate(Boolean currentDate) { this.currentDate = currentDate; }
+
+    public String getTitle() { return title; }
+
+    public void setTitle(String title) { this.title = title; }
 }

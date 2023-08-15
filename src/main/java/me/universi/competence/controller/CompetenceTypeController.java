@@ -5,6 +5,7 @@ import me.universi.competence.entities.CompetenceType;
 import me.universi.competence.exceptions.CompetenceException;
 import me.universi.competence.services.CompetenceTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,12 +14,42 @@ import jakarta.servlet.http.HttpSession;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/admin/CompetenceType")
 public class CompetenceTypeController {
     @Autowired
     public CompetenceTypeService competenceTypeService;
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public CompetenceType creteCompetencenType(@RequestBody CompetenceType newCompetenceType){
+        return competenceTypeService.save(newCompetenceType);
+    }
+
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    public List<CompetenceType> getAllCompetenceType() {
+        return competenceTypeService.findAll();
+    }
+
+    @GetMapping(value = "/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public CompetenceType getCompetenceTypeById(@PathVariable Long id) {
+        return competenceTypeService.findFirstById(id);
+    }
+
+
+    @PutMapping(value = "/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public CompetenceType update(@RequestBody CompetenceType newCompetenceType, @PathVariable Long id) throws Exception {
+        return competenceTypeService.update(newCompetenceType, id);
+    }
+
+    @DeleteMapping(value = "/{id}")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void delete(@PathVariable Long id){competenceTypeService.delete(id);}
 
     @PostMapping(value = "/admin/competencetype/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
