@@ -1,4 +1,5 @@
 ALTER TABLE competence
+    ADD COLUMN title VARCHAR(255),
 	ADD COLUMN start_date TIMESTAMP WITHOUT TIME zone,
 	ADD COLUMN end_date TIMESTAMP WITHOUT TIME zone,
 	ADD COLUMN "current_date" Boolean;
