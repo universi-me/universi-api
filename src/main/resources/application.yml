@@ -36,6 +36,8 @@ server:
 # SPRINGDOC
 springdoc:
   version: 1.0
+  api-docs:
+    path: /api/v3/api-docs
   swagger-ui:
     path: /api/swagger-ui.html
 

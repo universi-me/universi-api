@@ -47,8 +47,8 @@ public class GroupService {
         }
     }
 
-    public Group findFirstByRootGroupAndNickname(boolean rootGroup, String nickname) {
-        Optional<Group> optionalGroup = groupRepository.findFirstByRootGroupAndNickname(rootGroup, nickname);
+    public Group findFirstByRootGroupAndNicknameIgnoreCase(boolean rootGroup, String nickname) {
+        Optional<Group> optionalGroup = groupRepository.findFirstByRootGroupAndNicknameIgnoreCase(rootGroup, nickname);
         if(optionalGroup.isPresent()){
             return optionalGroup.get();
         }else{
@@ -320,7 +320,29 @@ public class GroupService {
             groupNow = findFirstById(findParentGroupId(groupNow.getId()));
         }
         Collections.reverse(nicknames);
-        return "/" + String.join("/", nicknames);
+        return "/" + String.join("/", nicknames).toLowerCase();
+    }
+
+    /** Get group from url path */
+    public Group getGroupFromPath(String path) {
+        try {
+            String pathSt = path.toLowerCase();
+            String[] nicknameArr = pathSt.split("/");
+
+            Group groupRoot = null;
+            Group groupActual = null;
+
+            // get group root, its nickname is unique in the system, it can be accessed direct
+            groupRoot = findFirstByRootGroupAndNicknameIgnoreCase(true, nicknameArr[1]);
+            if(groupRoot != null) {
+                // check if group path is valid and return that group
+                groupActual = getGroupFromNicknamePath(groupRoot, nicknameArr);
+            }
+            return groupActual;
+
+        } catch(Exception e) {
+            return null;
+        }
     }
 
     /** Searches the first 5 groups containing {@code name} ignoring case */

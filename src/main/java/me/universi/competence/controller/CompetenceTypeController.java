@@ -22,7 +22,6 @@ public class CompetenceTypeController {
     @Autowired
     public CompetenceTypeService competenceTypeService;
 
-
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public CompetenceType creteCompetencenType(@RequestBody CompetenceType newCompetenceType){
@@ -52,15 +51,15 @@ public class CompetenceTypeController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void delete(@PathVariable Long id){competenceTypeService.delete(id);}
 
-    @PostMapping(value = "/admin/competenciatipo/criar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/admin/competencetype/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response create(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
         Response response = new Response();
         try {
 
-            String name = (String)body.get("nome");
+            String name = (String)body.get("name");
             if(name == null) {
-                throw new CompetenceException("Parametro nome é nulo.");
+                throw new CompetenceException("Parâmetro nome é nulo.");
             }
 
             if(competenceTypeService.findFirstByName(name) != null) {
@@ -82,18 +81,18 @@ public class CompetenceTypeController {
         }
     }
 
-    @PostMapping(value = "/admin/competenciatipo/atualizar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/admin/competencetype/update", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response update(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
         Response response = new Response();
         try {
 
-            String id = (String)body.get("competenciatipoId");
+            String id = (String)body.get("competenceTypeId");
             if(id == null) {
-                throw new CompetenceException("Parametro competenciatipoId é nulo.");
+                throw new CompetenceException("Parâmetro competenceTypeId é nulo.");
             }
 
-            String name = (String)body.get("nome");
+            String name = (String)body.get("name");
 
             CompetenceType competenceType = competenceTypeService.findFirstById(Long.valueOf(id));
             if (competenceType == null) {
@@ -120,15 +119,15 @@ public class CompetenceTypeController {
         }
     }
 
-    @PostMapping(value = "/admin/competenciatipo/remover", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/admin/competencetype/remove", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response remove(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
         Response response = new Response();
         try {
 
-            String id = (String)body.get("competenciatipoId");
+            String id = (String)body.get("competenceTypeId");
             if(id == null) {
-                throw new CompetenceException("Parametro competenciatipoId é nulo.");
+                throw new CompetenceException("Parâmetro competenceTypeId é nulo.");
             }
 
             CompetenceType competenceType = competenceTypeService.findFirstById(Long.valueOf(id));
@@ -148,23 +147,23 @@ public class CompetenceTypeController {
         }
     }
 
-    @PostMapping(value = "/admin/competenciatipo/obter", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/competencetype/get", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response get(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
         Response response = new Response();
         try {
 
-            String id = (String)body.get("competenciatipoId");
+            String id = (String)body.get("competenceTypeId");
             if(id == null) {
-                throw new CompetenceException("Parametro competenciatipoId é nulo.");
+                throw new CompetenceException("Parâmetro competenceTypeId é nulo.");
             }
 
             CompetenceType competenceType = competenceTypeService.findFirstById(Long.valueOf(id));
             if (competenceType == null) {
-                throw new CompetenceException("Competencia não encontrada.");
+                throw new CompetenceException("Competência não encontrada.");
             }
 
-            response.body.put("competenciaTipo", competenceType);
+            response.body.put("competenceType", competenceType);
 
             response.success = true;
             return response;
@@ -175,7 +174,7 @@ public class CompetenceTypeController {
         }
     }
 
-    @PostMapping(value = "/admin/competenciatipo/listar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/competencetype/list", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response findAll(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
         Response response = new Response();
@@ -183,7 +182,7 @@ public class CompetenceTypeController {
 
             List<CompetenceType> competences = competenceTypeService.findAll();
 
-            response.body.put("lista", competences);
+            response.body.put("list", competences);
 
             response.message = "Operação realizada com exito.";
             response.success = true;
