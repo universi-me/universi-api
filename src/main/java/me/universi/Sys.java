@@ -31,12 +31,11 @@ public class Sys {
 
     @Autowired
     public UserService userService;
-    @Autowired
-    private ApplicationContext context;
+    public static ApplicationContext context;
 
 
     public static void main(String [] args) {
-        SpringApplication.run(Sys.class, args);
+        context = SpringApplication.run(Sys.class, args);
     }
 
     @GetMapping("/api/admin/exit")

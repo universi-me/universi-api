@@ -14,7 +14,7 @@ import java.util.Optional;
 public interface GroupRepository extends JpaRepository<Group, Long> {
     Optional<Group> findFirstById(Long id);
     Optional<Group> findFirstByNickname(String nickname);
-    Optional<Group> findFirstByRootGroupAndNickname(boolean rootGroup, String nickname);
+    Optional<Group> findFirstByRootGroupAndNicknameIgnoreCase(boolean rootGroup, String nickname);
     List<Group> findByPublicGroup(boolean grupoPublico);
     @Query(value = "SELECT id_group FROM subgroup WHERE id_subgroup = :GroupId LIMIT 1", nativeQuery = true)
     Optional<Long> findParentGroupId(@Param("GroupId") Long id);
