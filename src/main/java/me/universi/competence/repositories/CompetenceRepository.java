@@ -9,4 +9,6 @@ import java.util.Optional;
 @Repository
 public interface CompetenceRepository extends JpaRepository<Competence, Long> {
     Optional<Competence> findFirstById(Long id);
+
+    Optional<Competence> findById(Long id);
 }
