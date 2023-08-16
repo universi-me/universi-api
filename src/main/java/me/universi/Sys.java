@@ -29,6 +29,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class Sys {
 
+    @Value("${spring.profiles.active}")
+    private String PROFILE_ACTIVE;
     @Autowired
     public UserService userService;
     public static ApplicationContext context;
@@ -46,8 +48,8 @@ public class Sys {
 
     @GetMapping(value = {"/", "/api", "/api/",})
     @ResponseBody
-    String index(HttpServletRequest request, @Value("${spring.profiles.active}") String profile) {
-        return "Universi.me API – " + profile;
+    String index() {
+        return "Universi.me API – " + PROFILE_ACTIVE.toUpperCase();
     }
 
 //    @Bean
