@@ -17,31 +17,31 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/admin/CompetenceType")
+@RequestMapping("/api")
 public class CompetenceTypeController {
     @Autowired
     public CompetenceTypeService competenceTypeService;
 
-    @PostMapping
+    @PostMapping(value = "/admin/competencetype")
     @ResponseStatus(HttpStatus.CREATED)
     public CompetenceType creteCompetencenType(@RequestBody CompetenceType newCompetenceType){
         return competenceTypeService.save(newCompetenceType);
     }
 
-    @GetMapping
+    @GetMapping(value = "/competencetype")
     @ResponseStatus(HttpStatus.OK)
     public List<CompetenceType> getAllCompetenceType() {
         return competenceTypeService.findAll();
     }
 
-    @GetMapping(value = "/{id}")
+    @GetMapping(value = "/competencetype/{id}")
     @ResponseStatus(HttpStatus.OK)
     public CompetenceType getCompetenceTypeById(@PathVariable Long id) {
         return competenceTypeService.findFirstById(id);
     }
 
 
-    @PutMapping(value = "/{id}")
+    @PutMapping(value = "/admin/competencetype/{id}")
     @ResponseStatus(HttpStatus.OK)
     public CompetenceType update(@RequestBody CompetenceType newCompetenceType, @PathVariable Long id) throws Exception {
         return competenceTypeService.update(newCompetenceType, id);
@@ -183,8 +183,6 @@ public class CompetenceTypeController {
             List<CompetenceType> competences = competenceTypeService.findAll();
 
             response.body.put("list", competences);
-
-            response.message = "Operação realizada com exito.";
             response.success = true;
             return response;
 
