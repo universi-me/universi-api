@@ -89,6 +89,8 @@ public class UserService implements UserDetailsService {
     public void createUser(User user) throws UserException {
         if (user==null) {
             throw new UserException("Usuario está vazio!");
+        } else if (user.getUsername()==null) {
+            throw new UserException("username está vazio!");
         }
         user.setAuthority(Authority.ROLE_USER);
         userRepository.saveAndFlush((User)user);

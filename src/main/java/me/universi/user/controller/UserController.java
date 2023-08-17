@@ -95,7 +95,7 @@ public class UserController {
         try {
 
             // check if register is enabled
-            if(!Boolean.parseBoolean(environment.getProperty("REGISTRAR_SE_ATIVADO"))) {
+            if(!Boolean.parseBoolean(environment.getProperty("SIGNUP_ENABLED"))) {
                 throw new UserException("Registrar-se está desativado!");
             }
 
@@ -266,6 +266,10 @@ public class UserController {
         Response responseBuild = new Response();
         try {
 
+            if(!Boolean.parseBoolean(environment.getProperty("LOGIN_GOOGLE_ENABLED"))) {
+                throw new UserException("Login via Google desabilitado!");
+            }
+
             String idTokenString = (String)body.get("token");
 
             if(idTokenString==null) {
@@ -287,6 +291,9 @@ public class UserController {
                 //String userId = payload.getSubject();
 
                 String email = payload.getEmail();
+                if(email == null) {
+                    throw new UserException("Não foi possível obter Email.");
+                }
                 //boolean emailVerified = Boolean.valueOf(payload.getEmailVerified());
                 String name = (String) payload.get("name");
                 String pictureUrl = (String) payload.get("picture");
