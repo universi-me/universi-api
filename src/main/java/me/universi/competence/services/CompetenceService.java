@@ -17,8 +17,8 @@ import java.util.Optional;
 public class CompetenceService {
 
     private CompetenceRepository competenceRepository;
-    public ProfileService profileService;
-    public UserService userService;
+    private ProfileService profileService;
+    private UserService userService;
 
     public CompetenceService(CompetenceRepository competenceRepository, ProfileService profileService, UserService userService){
         this.competenceRepository = competenceRepository;
@@ -39,7 +39,6 @@ public class CompetenceService {
             User user = userService.getUserInSession();
             competence.setProfile(user.getProfile());
             return competenceRepository.saveAndFlush(competence);
-
         }catch(Exception e){
             e.printStackTrace();
             return null;
@@ -85,7 +84,7 @@ public class CompetenceService {
             competence.setLevel(newCompetence.getLevel());
             competence.setStartDate(newCompetence.getStartDate());
             competence.setEndDate(newCompetence.getEndDate());
-            competence.setCurrentDate(newCompetence.getCurrentDate());
+            competence.setPresentDate(newCompetence.getPresentDate());
             return competenceRepository.saveAndFlush(competence);
         }).orElseGet(()->{
             try {
