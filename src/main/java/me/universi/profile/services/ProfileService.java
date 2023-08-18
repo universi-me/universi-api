@@ -2,7 +2,10 @@ package me.universi.profile.services;
 
 import me.universi.competence.services.CompetenceService;
 import me.universi.profile.entities.Profile;
+import me.universi.profile.exceptions.ProfileException;
 import me.universi.profile.repositories.PerfilRepository;
+import me.universi.user.entities.User;
+import me.universi.user.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +17,7 @@ public class ProfileService {
     @Autowired
     private PerfilRepository perfilRepository;
     @Autowired
-    public CompetenceService competenciaService;
+    public CompetenceService competenceService;
 
     // Retorna um Perfil passando o id
     public Profile findFirstById(Long id) {
@@ -41,6 +44,34 @@ public class ProfileService {
     }
 
     public void deleteAll() { perfilRepository.deleteAll();}
+
+    public Profile getProfileByUserIdOrUsername(Object profileId, Object username) throws ProfileException {
+
+        if(profileId == null && username == null) {
+            throw new ProfileException("Parametro perfilId e username é nulo.");
+        }
+
+        Profile profileGet = null;
+
+        if(profileId != null) {
+            String profileIdString = String.valueOf(profileId);
+            if(profileIdString.length() > 0) {
+                profileGet = findFirstById(profileIdString);
+            }
+        }
+        if(profileGet == null && username != null) {
+            String usernameString = String.valueOf(username);
+            if(usernameString.length() > 0) {
+                profileGet = ((User)UserService.getInstance().loadUserByUsername(usernameString)).getProfile();
+            }
+        }
+
+        if(profileGet == null) {
+            throw new ProfileException("Perfil não encontrado.");
+        }
+
+        return profileGet;
+    }
 
     // search the first 5 containing the string uppercase or lowercase
     public Collection<Profile> findTop5ByNameContainingIgnoreCase(String nome){ return perfilRepository.findTop5ByFirstnameContainingIgnoreCase(nome); }

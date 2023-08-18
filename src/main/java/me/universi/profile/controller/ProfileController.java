@@ -1,11 +1,9 @@
 package me.universi.profile.controller;
 
 import me.universi.api.entities.Response;
-import me.universi.competence.services.CompetenceTypeService;
-import me.universi.group.services.GroupService;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.enums.Gender;
-import me.universi.profile.exceptions.PerfilException;
+import me.universi.profile.exceptions.ProfileException;
 import me.universi.profile.services.ProfileService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
@@ -18,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-
 import java.util.Map;
 
 @RestController
@@ -30,11 +27,6 @@ public class ProfileController {
     @Autowired
     public ProfileService profileService;
 
-    @Autowired
-    public GroupService grupoService;
-    @Autowired
-    public CompetenceTypeService competenciaTipoService;
-
     @GetMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response profile() {
@@ -45,7 +37,7 @@ public class ProfileController {
 
             Profile userProfile = userSession.getProfile();
             if(userProfile == null) {
-                throw new PerfilException("Perfil não encontrado.");
+                throw new ProfileException("Perfil não encontrado.");
             }
 
             response.body.put("profile", userProfile);
@@ -62,61 +54,60 @@ public class ProfileController {
     @ResponseBody
     public Response perfil_editar(@RequestBody Map<String, Object> body) {
 
-        Response resposta = new Response(); // default
+        Response response = new Response(); // default
 
         try {
 
-            String profileId = (String)body.get("profileId");
-            if(profileId == null) {
-                throw new Exception("Parametro perfilId é nulo.");
-            }
+            Profile profileGet = profileService.getProfileByUserIdOrUsername(body.get("profileId"), body.get("username"));
 
-            String name         = (String)body.get("name");
-            String lastname    = (String)body.get("lastname");
-            String imageUrl       = (String)body.get("imageUrl");
-            String bio          = (String)body.get("bio");
-            String sexo         = (String)body.get("sexo");
+            Object name      = body.get("name");
+            Object lastname  = body.get("lastname");
+            Object imageUrl  = body.get("imageUrl");
+            Object bio       = body.get("bio");
+            Object gender    = body.get("gender");
 
-            Profile profileAtual = profileService.findFirstById(profileId);
-            if(profileAtual == null) {
-                throw new PerfilException("Perfil não encontrado.");
-            }
-
-            if(!userService.isSessionOfUser(profileAtual.getUser())) {
+            if(!userService.isSessionOfUser(profileGet.getUser())) {
                 User userSession = userService.getUserInSession();
                 if(!userService.isUserAdmin(userSession)) {
-                    throw new PerfilException("Você não tem permissão para editar este perfil.");
+                    throw new ProfileException("Você não tem permissão para editar este perfil.");
                 }
             }
 
             if(name != null) {
-                profileAtual.setFirstname(name);
+                profileGet.setFirstname(String.valueOf(name));
             }
             if(lastname != null) {
-                profileAtual.setLastname(lastname);
+                profileGet.setLastname(String.valueOf(lastname));
             }
-            if(imageUrl != null && imageUrl.length()>0) {
-                profileAtual.setImage(imageUrl);
+            if(imageUrl != null) {
+                String imageUrlString = String.valueOf(imageUrl);
+                if(imageUrlString.length()>0) {
+                    profileGet.setImage(imageUrlString);
+                }
             }
             if(bio != null) {
-                profileAtual.setBio(bio);
+                profileGet.setBio(String.valueOf(bio));
             }
-            if(sexo != null) {
-                profileAtual.setGender(Gender.valueOf(sexo));
+            if(gender != null) {
+                String genderString = String.valueOf(gender);
+                if(genderString.length()>0) {
+                    profileGet.setGender(Gender.valueOf(genderString));
+                }
             }
 
-            profileService.save(profileAtual);
+            profileService.save(profileGet);
 
             userService.updateUserInSession();
 
-            resposta.message = "As Alterações foram salvas com sucesso.";
-            resposta.success = true;
+            response.message = "As Alterações foram salvas com sucesso.";
+            response.success = true;
+            response.redirectTo = "/profile/" + profileGet.getUser().getUsername();
 
         } catch (Exception e) {
-            resposta.message = e.getMessage();
+            response.message = e.getMessage();
         }
 
-        return resposta;
+        return response;
     }
 
     @PostMapping(value = "/get", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -125,26 +116,7 @@ public class ProfileController {
         Response response = new Response(); // default
         try {
 
-            // get profile by id or username
-            String profileId = (String)body.get("profileId");
-            String username = (String)body.get("username");
-
-            if(profileId == null && username == null) {
-                throw new Exception("Parametro perfilId ou username é nulo.");
-            }
-
-            Profile profileGet = null;
-
-            if(profileId != null) {
-                profileGet = profileService.findFirstById(profileId);
-            }
-            if(profileGet == null && username != null) {
-                profileGet = ((User)userService.loadUserByUsername(username)).getProfile();
-            }
-
-            if(profileGet == null) {
-                throw new PerfilException("Perfil não encontrado.");
-            }
+            Profile profileGet = profileService.getProfileByUserIdOrUsername(body.get("profileId"), body.get("username"));
 
             response.body.put("profile", profileGet);
             response.success = true;
@@ -162,26 +134,7 @@ public class ProfileController {
         Response response = new Response(); // default
         try {
 
-            // get profile by id or username
-            String profileId = (String)body.get("profileId");
-            String username = (String)body.get("username");
-
-            if(profileId == null && username == null) {
-                throw new Exception("Parametro perfilId ou username é nulo.");
-            }
-
-            Profile profileGet = null;
-
-            if(profileId != null) {
-                profileGet = profileService.findFirstById(profileId);
-            }
-            if(profileGet == null && username != null) {
-                profileGet = ((User)userService.loadUserByUsername(username)).getProfile();
-            }
-
-            if(profileGet == null) {
-                throw new PerfilException("Perfil não encontrado.");
-            }
+            Profile profileGet = profileService.getProfileByUserIdOrUsername(body.get("profileId"), body.get("username"));
 
             response.body.put("recomendationsSend", profileGet.getRecomendationsSend());
             response.body.put("recomendationsReceived", profileGet.getRecomendationsReceived());
@@ -200,26 +153,7 @@ public class ProfileController {
         Response response = new Response(); // default
         try {
 
-            // get profile by id or username
-            String profileId = (String)body.get("profileId");
-            String username = (String)body.get("username");
-
-            if(profileId == null && username == null) {
-                throw new Exception("Parametro perfilId ou username é nulo.");
-            }
-
-            Profile profileGet = null;
-
-            if(profileId != null) {
-                profileGet = profileService.findFirstById(profileId);
-            }
-            if(profileGet == null && username != null) {
-                profileGet = ((User)userService.loadUserByUsername(username)).getProfile();
-            }
-
-            if(profileGet == null) {
-                throw new PerfilException("Perfil não encontrado.");
-            }
+            Profile profileGet = profileService.getProfileByUserIdOrUsername(body.get("profileId"), body.get("username"));
 
             response.body.put("groups", profileGet.getGroups());
             response.success = true;
@@ -237,26 +171,7 @@ public class ProfileController {
         Response response = new Response(); // default
         try {
 
-            // get profile by id or username
-            String profileId = (String)body.get("profileId");
-            String username = (String)body.get("username");
-
-            if(profileId == null && username == null) {
-                throw new Exception("Parametro perfilId ou username é nulo.");
-            }
-
-            Profile profileGet = null;
-
-            if(profileId != null) {
-                profileGet = profileService.findFirstById(profileId);
-            }
-            if(profileGet == null && username != null) {
-                profileGet = ((User)userService.loadUserByUsername(username)).getProfile();
-            }
-
-            if(profileGet == null) {
-                throw new PerfilException("Perfil não encontrado.");
-            }
+            Profile profileGet = profileService.getProfileByUserIdOrUsername(body.get("profileId"), body.get("username"));
 
             response.body.put("links", profileGet.getLinks());
             response.success = true;
@@ -274,26 +189,7 @@ public class ProfileController {
         Response response = new Response(); // default
         try {
 
-            // get profile by id or username
-            String profileId = (String)body.get("profileId");
-            String username = (String)body.get("username");
-
-            if(profileId == null && username == null) {
-                throw new Exception("Parametro perfilId ou username é nulo.");
-            }
-
-            Profile profileGet = null;
-
-            if(profileId != null) {
-                profileGet = profileService.findFirstById(profileId);
-            }
-            if(profileGet == null && username != null) {
-                profileGet = ((User)userService.loadUserByUsername(username)).getProfile();
-            }
-
-            if(profileGet == null) {
-                throw new PerfilException("Perfil não encontrado.");
-            }
+            Profile profileGet = profileService.getProfileByUserIdOrUsername(body.get("profileId"), body.get("username"));
 
             response.body.put("competences", profileGet.getCompetences());
             response.success = true;
