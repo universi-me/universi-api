@@ -321,4 +321,18 @@ public class UserService implements UserDetailsService {
         return false;
     }
 
+    // logout user from current session
+    public void logout() {
+        try {
+            SecurityContextHolder.clearContext();
+            HttpSession session = getActiveSession();
+            session.invalidate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public String getUrlWhenLogout() {
+        return "/login";
+    }
 }
