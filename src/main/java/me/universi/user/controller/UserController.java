@@ -68,15 +68,17 @@ public class UserController {
         }
     }
 
-    @GetMapping("/login")
+    @GetMapping("/logout")
     @ResponseBody
-    public Response login() {
+    public Response logout() {
         Response response = new Response();
         try {
 
             if(userService.userIsLoggedIn()) {
+                userService.logout();
                 response.success = true;
-                response.message = "Usuário está logado.";
+                response.message = "Usuário deslogado com sucesso.";
+                response.redirectTo = userService.getUrlWhenLogout();
                 return response;
             }
 
