@@ -8,6 +8,8 @@ import me.universi.user.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 
 public class GetAlternativeServiceImpl implements GetAlternativeService {
@@ -21,10 +23,10 @@ public class GetAlternativeServiceImpl implements GetAlternativeService {
         this.userService = userService;
     }
 
-    public Alternative getAlternative(Long groupId, Long questionId, Long alternativeId){
+    public Alternative getAlternative(UUID groupId, UUID questionId, UUID alternativeId){
        User user = this.userService.getUserInSession();
 
-        return alternativeRepository.findAlternativeByIdAndQuestionIdAndQuestionUserCreateId(alternativeId, questionId, user.getId())
+        return alternativeRepository.findAlternativeByIdAndQuestionIdAndQuestionProfileCreateId(alternativeId, questionId, user.getId())
                 .orElseThrow(AlternativeNotFoundException::new);
     }
 }

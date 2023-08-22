@@ -9,6 +9,7 @@ import me.universi.feedback.entities.Feedback;
 import me.universi.group.entities.Group;
 import me.universi.group.repositories.GroupRepository;
 import me.universi.group.services.GroupService;
+import me.universi.profile.entities.Profile;
 import me.universi.question.QuestionRepository;
 import me.universi.question.dto.QuestionCreateDTO;
 import me.universi.question.entities.Question;
@@ -17,6 +18,8 @@ import me.universi.user.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import me.universi.util.ExerciseUtil;
+
+import java.util.UUID;
 
 
 @Service
@@ -42,9 +45,9 @@ public class QuestionCreateServiceImpl implements QuestionCreateService {
     }
 
     @Transactional
-    public Question createQuestion(Long groupId, Long exerciseId, QuestionCreateDTO questionCreateDTO){
+    public Question createQuestion(UUID groupId, UUID exerciseId, QuestionCreateDTO questionCreateDTO){
 
-        User user = this.userService.getUserInSession();
+        Profile user = this.userService.getUserInSession().getProfile();
         Group group = this.groupService.findFirstById(groupId);
 
         ExerciseUtil.checkPermissionExercise(this.userService.getUserInSession(), group);
@@ -52,7 +55,7 @@ public class QuestionCreateServiceImpl implements QuestionCreateService {
         Exercise exercise = this.exerciseGetService.getExercise(exerciseId, group.getId());
         Feedback feedback = feedbackRepository.save(questionCreateDTO.getFeedback());
 
-        questionCreateDTO.setUserCreate(user);
+        questionCreateDTO.setProfileCreate(user);
         questionCreateDTO.setFeedback(feedback);
 
         Question question = questionRepository.save(Question.from(questionCreateDTO));

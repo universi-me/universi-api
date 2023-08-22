@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class VacancyService {
@@ -34,7 +35,7 @@ public class VacancyService {
             return null;
         }
     }
-    public void delete(Long id) {
+    public void delete(UUID id) {
         vacancyRepository.deleteById(id);
     }
 
@@ -42,11 +43,15 @@ public class VacancyService {
         return vacancyRepository.findAll();
     }
 
-    public Optional<Vacancy> findById(Long id){
-        return vacancyRepository.findById(id);
+    public Optional<Vacancy> findFirstById(UUID id) {
+        return vacancyRepository.findFirstById(id);
     }
 
-    public Vacancy update(Vacancy newVacancy, Long id) throws Exception{
+    public Optional<Vacancy> findFirstById(String id) {
+        return findFirstById(UUID.fromString(id));
+    }
+
+    public Vacancy update(Vacancy newVacancy, UUID id) throws Exception{
         return vacancyRepository.findById(id).map(vacancy -> {
             vacancy.setDescription(newVacancy.getDescription());
             return vacancyRepository.saveAndFlush(vacancy);

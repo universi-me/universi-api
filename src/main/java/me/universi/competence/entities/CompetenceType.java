@@ -6,21 +6,23 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.SequenceGenerator;
+import jakarta.validation.constraints.NotNull;
+
+import java.util.UUID;
 
 @Entity(name = "competence_type")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class CompetenceType {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "competence_type_generator")
-    @SequenceGenerator(name = "competence_type_generator", sequenceName = "competence_type_sequence", allocationSize = 1)
-    @Column(name = "id_competence_type")
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id")
+    @NotNull
+    private UUID id;
 
     @Column(name = "name", unique=true)
     private String name;
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 

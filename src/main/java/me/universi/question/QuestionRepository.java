@@ -7,20 +7,21 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface QuestionRepository extends JpaRepository<Question, Long> {
+public interface QuestionRepository extends JpaRepository<Question, UUID> {
 
     @Query(value = "select q.* from question q " +
             "join exercise_question eq on q.id = eq.question_id and eq.exercise_id = ?1 " +
             "order by random() limit ?2 ",nativeQuery = true)
-    List<Question> findAllRandonAndLimited(Long exerciseId, int amount);
+    List<Question> findAllRandonAndLimited(UUID exerciseId, int amount);
 
-    void deleteById(Long questionId);
+    void deleteById(UUID questionId);
 
-    Question findById(long id);
+    Optional<Question> findFirstById(UUID id);
 
-    Optional<Question> findByIdAndExercisesId(Long questionId, Long exercisesId);
+    Optional<Question> findFirstByIdAndExercisesId(UUID questionId, UUID exercisesId);
 
-    List<Question> findAllByExercisesIdAndExercisesInactivateIsFalse(Long exerciseId);
+    List<Question> findAllByExercisesIdAndExercisesInactivateIsFalse(UUID exerciseId);
 }

@@ -14,6 +14,8 @@ import me.universi.util.ExerciseUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 public class UpdateExerciseServiceImpl implements UpdateExerciseService{
 
@@ -29,13 +31,13 @@ public class UpdateExerciseServiceImpl implements UpdateExerciseService{
     }
 
     @Override
-    public Exercise updateExercise(Long groupId, Long exerciseId, ExerciseUpdateDTO exerciseUpdateDTO) {
+    public Exercise updateExercise(UUID groupId, UUID exerciseId, ExerciseUpdateDTO exerciseUpdateDTO) {
         User user = this.userService.getUserInSession();
-        Group group = this.groupRepository.findByIdAndAdminId(groupId,user.getProfile().getId()).orElseThrow(GroupNotFoundException::new);
+        Group group = this.groupRepository.findFirstByIdAndAdminId(groupId,user.getProfile().getId()).orElseThrow(GroupNotFoundException::new);
 
         ExerciseUtil.checkPermissionExercise(user,group);
 
-        Exercise exercise = this.exerciseRepository.findByIdAndGroupId(exerciseId, groupId).orElseThrow(ExerciseNotFoundException::new);
+        Exercise exercise = this.exerciseRepository.findFirstByIdAndGroupId(exerciseId, groupId).orElseThrow(ExerciseNotFoundException::new);
         if (exercise.isInactivate()){
             throw new UnauthorizedException();
         }

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 
 @Service
@@ -32,14 +33,14 @@ public class ValuerExerciseServiceImpl implements ValuerExerciseService {
 
     //Responsável por receber as respostas e verificar se estão corretas
     @Override
-    public ExerciseAnswersDTO exercisesAnswers(Long groupId, Long exerciseid, List<AnswerDTO> answers) {
+    public ExerciseAnswersDTO exercisesAnswers(UUID groupId, UUID exerciseid, List<AnswerDTO> answers) {
         User user = this.userService.getUserInSession();
-        Exercise exercise = this.exerciseRepository.findByIdAndGroupId(exerciseid, groupId).orElseThrow(ExerciseNotFoundException::new);
-        Indicators indicators = this.indicatorsRepository.findByUserId(user.getId());
+        Exercise exercise = this.exerciseRepository.findFirstByIdAndGroupId(exerciseid, groupId).orElseThrow(ExerciseNotFoundException::new);
+        Indicators indicators = this.indicatorsRepository.findByProfileId(user.getId());
 
         long score = 0;
 
-        List<Long> ids = new ArrayList<>();
+        List<UUID> ids = new ArrayList<>();
         ExerciseAnswersDTO simulatedAnswersDTO = new ExerciseAnswersDTO();
         simulatedAnswersDTO.setAnswers(answers);
         for (AnswerDTO answerDTO : answers){

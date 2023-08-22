@@ -1,6 +1,6 @@
 package me.universi.achievement.entities;
 
-import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -8,7 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.CascadeType;
 import jakarta.validation.constraints.NotNull;
 import me.universi.indicators.entities.Indicators;
 
@@ -16,18 +16,20 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 
-@Entity
+@Entity(name = "achievement")
 public class Achievement implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 6323683588919800286L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "achievement_generator")
-    @SequenceGenerator(name = "achievement_generator", sequenceName = "achievement_sequence", allocationSize = 1)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id")
+    @NotNull
+    private UUID id;
 
     @NotNull
     private String icon;
@@ -44,7 +46,7 @@ public class Achievement implements Serializable {
             {@JoinColumn(name="achievement_id")})
     private Set<Indicators> indicators;
 
-    public Achievement(Long id, String icon, String title, String description) {
+    public Achievement(UUID id, String icon, String title, String description) {
         this.id = id;
         this.icon = icon;
         this.title = title;
@@ -60,11 +62,11 @@ public class Achievement implements Serializable {
         this.description = description;
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

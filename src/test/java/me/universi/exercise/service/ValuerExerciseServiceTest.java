@@ -25,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.any;
@@ -54,8 +55,11 @@ public class ValuerExerciseServiceTest {
 
     @Test
     public void testExercisesAnswers() {
-        Long groupId = 1L;
-        Long exerciseId = 2L;
+
+        UUID uuid_1 = UUID.fromString("47e2cc9e-69be-4482-bd90-1832ec403018");
+        UUID uuid_2 = UUID.fromString("626370e9-b1ff-4b2d-baf8-b6b8ba04f603");
+        UUID groupId = uuid_1;
+        UUID exerciseId = uuid_2;
 
         User user = UserBuilder.createUser();
 
@@ -70,29 +74,32 @@ public class ValuerExerciseServiceTest {
         answers.add(answer1);
 
         when(userService.getUserInSession()).thenReturn(user);
-        when(exerciseRepository.findByIdAndGroupId(exerciseId, groupId)).thenReturn(Optional.of(exercise));
-        when(indicatorsRepository.findByUserId(user.getId())).thenReturn(IndicatorsBuilder.createIndicators());
+        when(exerciseRepository.findFirstByIdAndGroupId(exerciseId, groupId)).thenReturn(Optional.of(exercise));
+        when(indicatorsRepository.findByProfileId(user.getId())).thenReturn(IndicatorsBuilder.createIndicators());
 
         ExerciseAnswersDTO result = valuerExerciseService.exercisesAnswers(groupId, exerciseId, answers);
 
         assertEquals(10, result.getScore());
         verify(userService).getUserInSession();
-        verify(exerciseRepository).findByIdAndGroupId(exerciseId, groupId);
-        verify(indicatorsRepository).findByUserId(user.getId());
+        verify(exerciseRepository).findFirstByIdAndGroupId(exerciseId, groupId);
+        verify(indicatorsRepository).findByProfileId(user.getId());
         verify(indicatorsRepository).save(any(Indicators.class));
     }
 
     @Test
     public void testExercisesAnswersExerciseNotFound() {
-        Long groupId = 1L;
-        Long exerciseId = 2L;
+
+        UUID uuid_1 = UUID.fromString("47e2cc9e-69be-4482-bd90-1832ec403018");
+        UUID uuid_2 = UUID.fromString("626370e9-b1ff-4b2d-baf8-b6b8ba04f603");
+        UUID groupId = uuid_1;
+        UUID exerciseId = uuid_2;
 
         User user = new User();
 
         List<AnswerDTO> answers = new ArrayList<>();
 
         when(userService.getUserInSession()).thenReturn(user);
-        when(exerciseRepository.findByIdAndGroupId(exerciseId, groupId)).thenReturn(Optional.empty());
+        when(exerciseRepository.findFirstByIdAndGroupId(exerciseId, groupId)).thenReturn(Optional.empty());
 
         try {
             valuerExerciseService.exercisesAnswers(groupId, exerciseId, answers);
@@ -101,8 +108,8 @@ public class ValuerExerciseServiceTest {
         }
 
         verify(userService).getUserInSession();
-        verify(exerciseRepository).findByIdAndGroupId(exerciseId, groupId);
-        verify(indicatorsRepository, never()).findByUserId(anyLong());
+        verify(exerciseRepository).findFirstByIdAndGroupId(exerciseId, groupId);
+        verify(indicatorsRepository, never()).findByProfileId(any(UUID.class));
         verify(indicatorsRepository, never()).save(any(Indicators.class));
     }
 }

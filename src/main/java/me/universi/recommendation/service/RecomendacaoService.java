@@ -8,13 +8,14 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class RecomendacaoService {
     @Autowired
     private RecomendacaoRepository recomendacaoRepository;
 
-    public Recommendation findFirstById(Long id) {
+    public Recommendation findFirstById(UUID id) {
         Optional <Recommendation> recomendacaoOptional = recomendacaoRepository.findFirstById(id);
         if(recomendacaoOptional.isPresent()){
             return recomendacaoOptional.get();
@@ -22,6 +23,11 @@ public class RecomendacaoService {
             return null;
         }
     }
+
+    public Recommendation findFirstById(String id) {
+        return findFirstById(UUID.fromString(id));
+    }
+
     public void save(Recommendation recommendation) throws RecomendacaoInvalidaException {
         if(this.validar(recommendation)){
             recomendacaoRepository.saveAndFlush(recommendation);

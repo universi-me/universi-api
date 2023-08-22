@@ -21,10 +21,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import profile.builder.ProfileBuilder;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -51,9 +53,10 @@ public class GetQuestionServiceImplTest {
     @Test
     @DisplayName("Must test get a question")
     public void testGetQuestion() {
-        Long groupId = 1L;
-        Long exerciseId = 1L;
-        Long questionId = 1L;
+        UUID uuid_1 = UUID.fromString("47e2cc9e-69be-4482-bd90-1832ec403018");
+        UUID groupId = uuid_1;
+        UUID exerciseId = uuid_1;
+        UUID questionId = uuid_1;
 
         User user = UserBuilder.createUser();
         Profile profile = ProfileBuilder.createProfile();
@@ -62,27 +65,28 @@ public class GetQuestionServiceImplTest {
         Group group = GroupBuilder.createGroup();
 
         when(userService.getUserInSession()).thenReturn(user);
-        when(groupRepository.findByIdAndAdminId(groupId, user.getProfile().getId())).thenReturn(Optional.of(group));
-        when(questionRepository.findByIdAndExercisesId(questionId, exerciseId)).thenReturn(Optional.of(QuestionBuilder.createQuestion()));
+        when(groupRepository.findFirstByIdAndAdminId(groupId, user.getProfile().getId())).thenReturn(Optional.of(group));
+        when(questionRepository.findFirstByIdAndExercisesId(questionId, exerciseId)).thenReturn(Optional.of(QuestionBuilder.createQuestion()));
 
         Question result = getQuestionService.getQuestion(groupId, exerciseId, questionId);
 
         assertEquals(QuestionBuilder.createQuestion(), result);
         verify(userService).getUserInSession();
-        verify(groupRepository).findByIdAndAdminId(groupId, user.getProfile().getId());
-        verify(questionRepository).findByIdAndExercisesId(questionId, exerciseId);
+        verify(groupRepository).findFirstByIdAndAdminId(groupId, user.getProfile().getId());
+        verify(questionRepository).findFirstByIdAndExercisesId(questionId, exerciseId);
     }
 
     @Test
     @DisplayName("Should throw exception when question is not found")
     void shouldThrowQuestionNotFoundException() {
-        when(this.questionRepository.findByIdAndExercisesId(anyLong(), anyLong()))
+        when(this.questionRepository.findFirstByIdAndExercisesId(any(UUID.class), any(UUID.class)))
                 .thenReturn(Optional.empty());
         when(userService.getUserInSession()).thenReturn(UserBuilder.createUser());
-        when(groupRepository.findByIdAndAdminId(anyLong(), anyLong())).thenReturn(Optional.of(GroupBuilder.createGroup()));
+        when(groupRepository.findFirstByIdAndAdminId(any(UUID.class), any(UUID.class))).thenReturn(Optional.of(GroupBuilder.createGroup()));
 
+        UUID uuid_1 = UUID.fromString("47e2cc9e-69be-4482-bd90-1832ec403018");
         assertThrows(QuestionNotfoundException.class,
-                () -> this.getQuestionService.getQuestion(1L, 1L, 1L)
+                () -> this.getQuestionService.getQuestion(uuid_1, uuid_1, uuid_1)
         );
     }
 }

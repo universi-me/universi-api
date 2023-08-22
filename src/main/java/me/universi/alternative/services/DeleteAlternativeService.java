@@ -1,7 +1,9 @@
 package me.universi.alternative.services;
 
 
+import java.util.UUID;
+
 @FunctionalInterface
 public interface DeleteAlternativeService {
-    void deleteAlternative(Long groupId, Long exerciseId, Long questionId, Long alternativeId);
+    void deleteAlternative(UUID groupId, UUID exerciseId, UUID questionId, UUID alternativeId);
 }

@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 
 @Service
 public class UpdateQuestionServiceImpl implements UpdateQuestionService {
@@ -31,13 +33,13 @@ public class UpdateQuestionServiceImpl implements UpdateQuestionService {
 
     @Override
     @Transactional
-    public Question updateQuestion(Long exerciseId, Long groupId, Long questionId, QuestionUpdateDTO questionUpdateDto) {
+    public Question updateQuestion(UUID exerciseId, UUID groupId, UUID questionId, QuestionUpdateDTO questionUpdateDto) {
         User user = this.userService.getUserInSession();
-        Group group = this.groupRepository.findByIdAndAdminId(groupId,user.getProfile().getId()).orElseThrow(GroupNotFoundException::new);
+        Group group = this.groupRepository.findFirstByIdAndAdminId(groupId,user.getProfile().getId()).orElseThrow(GroupNotFoundException::new);
 
         ExerciseUtil.checkPermissionExercise(user,group);
 
-        Question question = questionRepository.findByIdAndExercisesId(questionId,exerciseId).orElseThrow(QuestionNotfoundException::new);
+        Question question = questionRepository.findFirstByIdAndExercisesId(questionId,exerciseId).orElseThrow(QuestionNotfoundException::new);
         questionUpdate(question, questionUpdateDto);
 
         return questionRepository.save(question);

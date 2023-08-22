@@ -1,20 +1,24 @@
 package me.universi.link.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.validation.constraints.NotNull;
 import me.universi.link.enums.TypeLink;
 import me.universi.profile.entities.Profile;
 
 import jakarta.persistence.*;
 
+import java.util.UUID;
+
 @Entity(name = "link")
 public class Link {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "link_generator")
-    @SequenceGenerator(name = "link_generator", sequenceName = "link_sequence", allocationSize = 1)
-    @Column(name = "id_link")
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id")
+    @NotNull
+    private UUID id;
     @Column(name = "type_link")
     @Enumerated(EnumType.STRING)
+    @NotNull
     private TypeLink typeLink;
     @Column(name = "url")
     private String url;
@@ -24,7 +28,8 @@ public class Link {
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_profile")
+    @JoinColumn(name = "profile_id")
+    @NotNull
     private Profile profile;
 
     public Link(TypeLink typeLink, String url){
@@ -50,7 +55,7 @@ public class Link {
         this.url = url;
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 

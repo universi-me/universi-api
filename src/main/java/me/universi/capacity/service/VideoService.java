@@ -2,6 +2,8 @@ package me.universi.capacity.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,8 +26,8 @@ public class VideoService implements VideoServiceInterface{
     } //Lista todos os vídeos existentes
 
 
-    public Video getVideoById(Long id){
-        return videoRepo.findById(id).get();
+    public Video findFirstById(UUID id){
+        return videoRepo.findFirstById(id);
     } //Lista os vídeos pelo ID
 
     public boolean saveOrUpdateVideo(Video video) throws VideoException {
@@ -41,14 +43,14 @@ public class VideoService implements VideoServiceInterface{
 
         Video updatedVideo = videoRepo.save(video);
 
-        if (videoRepo.findById(updatedVideo.getId()) != null){
+        if (findFirstById(updatedVideo.getId()) != null){
             return true;
         }
 
         return false;
     } //Salvar o vídeo, ou se o ID já existir atualizar um vídeo
 
-    public boolean deleteVideo(Long id){
+    public boolean deleteVideo(UUID id){
         videoRepo.deleteById(id);
 
         if (videoRepo.findById(id) != null){

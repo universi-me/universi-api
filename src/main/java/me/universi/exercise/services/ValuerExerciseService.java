@@ -5,8 +5,9 @@ import me.universi.exercise.dto.AnswerDTO;
 import me.universi.exercise.dto.ExerciseAnswersDTO;
 
 import java.util.List;
+import java.util.UUID;
 
 @FunctionalInterface
 public interface ValuerExerciseService {
-    ExerciseAnswersDTO exercisesAnswers(Long groupId, Long exerciseId, List<AnswerDTO> answers);
+    ExerciseAnswersDTO exercisesAnswers(UUID groupId, UUID exerciseId, List<AnswerDTO> answers);
 }

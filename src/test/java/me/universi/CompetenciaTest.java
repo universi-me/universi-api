@@ -14,9 +14,11 @@ import me.universi.user.services.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -24,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
  *  Classe básica de teste, precisa de ajustes e limpeza do código
  */
 @SpringBootTest
+@ActiveProfiles("test")
 public class CompetenciaTest {
 
     @Autowired
@@ -43,6 +46,10 @@ public class CompetenciaTest {
     void create() throws Exception {
         String nome = "competenciaTest";
         User userNew = new User(nome, nome+"@email.com", userService.encodePassword("senha"));
+        Profile profile = new Profile();
+        profile.setGender(Gender.M);
+        profileService.save(profile);
+        userNew.setProfile(profile);
         try {
             userService.createUser(userNew);
         } catch (Exception e) {
@@ -58,11 +65,13 @@ public class CompetenciaTest {
         competenciaTipoRepository.save(compTipo2);
 
         Competence competencia1 = new Competence();
+        competencia1.setProfile(profile);
         competencia1.setCompetenceType(compTipo1);
         competencia1.setDescription("Sou top em java - teste 1"+userNew.getId());
         competenciaService.save(competencia1);
 
         Competence competencia2 = new Competence();
+        competencia2.setProfile(profile);
         competencia2.setCompetenceType(compTipo2);
         competencia2.setDescription("Sou top em java - teste 2"+userNew.getId());
         competenciaService.save(competencia2);
@@ -96,6 +105,10 @@ public class CompetenciaTest {
     void update() throws Exception {
         String nome = "competenciaTestUpdate";
         User userNew = new User(nome, nome+"@email.com", userService.encodePassword("senha"));
+        Profile profile = new Profile();
+        profile.setGender(Gender.M);
+        profileService.save(profile);
+        userNew.setProfile(profile);
         try {
             userService.createUser(userNew);
         } catch (Exception e) {
@@ -111,11 +124,13 @@ public class CompetenciaTest {
         competenciaTipoRepository.save(compTipo2);
 
         Competence competencia1 = new Competence();
+        competencia1.setProfile(profile);
         competencia1.setCompetenceType(compTipo1);
         competencia1.setDescription("Sou top em java - update 1"+userNew.getId());
         competenciaService.save(competencia1);
 
         Competence competencia2 = new Competence();
+        competencia2.setProfile(profile);
         competencia2.setCompetenceType(compTipo2);
         competencia2.setDescription("Sou top em java - update 2"+userNew.getId());
         competenciaService.save(competencia2);
@@ -155,6 +170,10 @@ public class CompetenciaTest {
     void delete() throws Exception {
         String nome = "competenciaTestDelete";
         User userNew = new User(nome, nome+"@email.com", userService.encodePassword("senha"));
+        Profile profile = new Profile();
+        profile.setGender(Gender.M);
+        profileService.save(profile);
+        userNew.setProfile(profile);
         try {
             userService.createUser(userNew);
         } catch (Exception e) {
@@ -170,11 +189,13 @@ public class CompetenciaTest {
         competenciaTipoRepository.save(compTipo2);
 
         Competence competencia1 = new Competence();
+        competencia1.setProfile(profile);
         competencia1.setCompetenceType(compTipo1);
         competencia1.setDescription("Sou top em java - delete 1"+userNew.getId());
         competenciaService.save(competencia1);
 
         Competence competencia2 = new Competence();
+        competencia2.setProfile(profile);
         competencia2.setCompetenceType(compTipo2);
         competencia2.setDescription("Sou top em java - delete 2"+userNew.getId());
         competenciaService.save(competencia2);
@@ -215,6 +236,10 @@ public class CompetenciaTest {
     void read() throws Exception {
         String nome = "competenciaTestread";
         User userNew = new User(nome, nome+"@email.com", userService.encodePassword("senha"));
+        Profile profile = new Profile();
+        profile.setGender(Gender.M);
+        profileService.save(profile);
+        userNew.setProfile(profile);
         try {
             userService.createUser(userNew);
         } catch (Exception e) {
@@ -230,11 +255,13 @@ public class CompetenciaTest {
         competenciaTipoRepository.save(compTipo2);
 
         Competence competencia1 = new Competence();
+        competencia1.setProfile(profile);
         competencia1.setCompetenceType(compTipo1);
         competencia1.setDescription("Sou top em java - read 1"+userNew.getId());
         competenciaService.save(competencia1);
 
         Competence competencia2 = new Competence();
+        competencia2.setProfile(profile);
         competencia2.setCompetenceType(compTipo2);
         competencia2.setDescription("Sou top em java - read 2"+userNew.getId());
         competenciaService.save(competencia2);

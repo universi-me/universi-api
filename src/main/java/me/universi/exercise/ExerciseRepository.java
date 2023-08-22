@@ -6,12 +6,13 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface ExerciseRepository extends JpaRepository<Exercise, Long> {
-    Optional<Exercise> findByIdAndGroupId(Long exerciseId, Long groupId);
+public interface ExerciseRepository extends JpaRepository<Exercise, UUID> {
+    Optional<Exercise> findFirstByIdAndGroupId(UUID exerciseId, UUID groupId);
 
-    Boolean existsByIdAndGroupAdminId(Long exerciseId, Long adminId);
+    Boolean existsByIdAndGroupAdminId(UUID exerciseId, UUID adminId);
 
-    List<Exercise> findAllByGroupIdAndInactivateIsFalse(Long groupId);
+    List<Exercise> findAllByGroupIdAndInactivateIsFalse(UUID groupId);
 }

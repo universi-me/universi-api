@@ -8,12 +8,15 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import me.universi.exercise.entities.Exercise;
 import me.universi.feedback.entities.Feedback;
+import me.universi.profile.entities.Profile;
 import me.universi.question.entities.Question;
 import me.universi.user.entities.User;
+import org.springframework.security.core.parameters.P;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
+import java.util.UUID;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
@@ -21,7 +24,7 @@ public class QuestionDTO implements Serializable {
 
     @Serial
     private static final long serialVersionUID = -4614619593410000375L;
-    private Long id;
+    private UUID id;
 
     @NotBlank(message = "title not blank")
     @NotNull(message = "title not null")
@@ -29,17 +32,17 @@ public class QuestionDTO implements Serializable {
     private String title;
 
     @NotNull(message = "user is mandatory")
-    private User userCreate;
+    private Profile profileCreate;
 
     private Feedback feedback;
 
     private List<Exercise> exercises;
 
 
-    public QuestionDTO(Long id, String title, User userCreate, Feedback feedback, List<Exercise> exercises) {
+    public QuestionDTO(UUID id, String title, Profile profileCreate, Feedback feedback, List<Exercise> exercises) {
         this.id = id;
         this.title = title;
-        this.userCreate = userCreate;
+        this.profileCreate = profileCreate;
         this.feedback = feedback;
         this.exercises = exercises;
     }
@@ -48,16 +51,16 @@ public class QuestionDTO implements Serializable {
         return new QuestionDTO(
                 question.getId(),
                 question.getTitle(),
-                question.getUserCreate(),
+                question.getProfileCreate(),
                 question.getFeedback(),
                 question.getExercises());
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -69,12 +72,12 @@ public class QuestionDTO implements Serializable {
         this.title = title;
     }
 
-    public User getUserCreate() {
-        return userCreate;
+    public Profile getProfileCreate() {
+        return profileCreate;
     }
 
-    public void setUserCreate(User userCreate) {
-        this.userCreate = userCreate;
+    public void setProfileCreate(Profile profileCreate) {
+        this.profileCreate = profileCreate;
     }
 
     public Feedback getFeedback() {

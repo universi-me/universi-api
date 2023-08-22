@@ -7,19 +7,24 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class CompetenceTypeService {
     @Autowired
     private CompetenceTypeRepository competenceTypeRepository;
 
-    public CompetenceType findFirstById(Long id) {
+    public CompetenceType findFirstById(UUID id) {
         Optional<CompetenceType> optionalCompetenceType = competenceTypeRepository.findFirstById(id);
         if(optionalCompetenceType.isPresent()){
             return optionalCompetenceType.get();
         }else{
             return null;
         }
+    }
+
+    public CompetenceType findFirstById(String id) {
+        return findFirstById(UUID.fromString(id));
     }
 
     public CompetenceType findFirstByName(String name) {
@@ -43,7 +48,7 @@ public class CompetenceTypeService {
         return competenceTypeRepository.findAll();
     }
 
-    public CompetenceType update(CompetenceType newCompetenceType, Long id) throws Exception{
+    public CompetenceType update(CompetenceType newCompetenceType, UUID id) throws Exception{
         return competenceTypeRepository.findById(id).map(competenceType -> {
             competenceType.setName(newCompetenceType.getName());
             return competenceTypeRepository.saveAndFlush(competenceType);
@@ -56,7 +61,7 @@ public class CompetenceTypeService {
         });
     }
 
-    public void delete(Long id) {
+    public void delete(UUID id) {
         competenceTypeRepository.deleteById(id);
     }
 }

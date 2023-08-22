@@ -1,32 +1,33 @@
 package me.universi.indicators.entities;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToOne;
-import jakarta.persistence.SequenceGenerator;
 import jakarta.validation.constraints.NotNull;
 import me.universi.achievement.entities.Achievement;
-import me.universi.user.entities.User;
+import me.universi.profile.entities.Profile;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Set;
+import java.util.UUID;
 
-@Entity
+@Entity(name = "indicators")
 public class Indicators implements Serializable {
 
     @Serial
     private static final long serialVersionUID = -4697933506834446148L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "indicators_generator")
-    @SequenceGenerator(name = "indicators_generator", sequenceName = "indicators_sequence", allocationSize = 1)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id")
+    @NotNull
+    private UUID id;
 
     @NotNull
     private Long score;
@@ -35,23 +36,22 @@ public class Indicators implements Serializable {
     private Set<Achievement> achievements;
 
     @OneToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    private Profile profile;
 
-    public Indicators(Long score, Set<Achievement> achievements, User user) {
+    public Indicators(Long score, Set<Achievement> achievements, Profile profile) {
         this.score = score;
         this.achievements = achievements;
-        this.user = user;
+        this.profile = profile;
     }
 
     public Indicators() {
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -71,11 +71,11 @@ public class Indicators implements Serializable {
         this.achievements = achievements;
     }
 
-    public User getUser() {
-        return user;
+    public Profile getProfile() {
+        return profile;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setProfile(Profile profile) {
+        this.profile = profile;
     }
 }

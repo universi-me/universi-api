@@ -12,11 +12,13 @@ import jakarta.persistence.TemporalType;
 import me.universi.group.entities.Group;
 import me.universi.group.enums.GroupType;
 import me.universi.profile.entities.Profile;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
+import java.util.UUID;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
@@ -25,7 +27,7 @@ public class GroupDTO implements Serializable {
     @Serial
     private static final long serialVersionUID = 2192157095656137102L;
 
-    public Long id;
+    public UUID id;
 
     public String nickname;
 
@@ -64,7 +66,7 @@ public class GroupDTO implements Serializable {
 
     public boolean publicGroup;
 
-    public GroupDTO(Long id, String nickname, String name, String description, String image, Profile admin, Collection<Profile> participants, Collection<Group> subGroups, GroupType type, boolean rootGroup, boolean canCreateGroup, boolean canEnter, boolean canAddParticipant, Date createdAt, boolean publicGroup) {
+    public GroupDTO(UUID id, String nickname, String name, String description, String image, Profile admin, Collection<Profile> participants, Collection<Group> subGroups, GroupType type, boolean rootGroup, boolean canCreateGroup, boolean canEnter, boolean canAddParticipant, Date createdAt, boolean publicGroup) {
         this.id = id;
         this.nickname = nickname;
         this.name = name;
@@ -85,11 +87,11 @@ public class GroupDTO implements Serializable {
     public GroupDTO() {
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

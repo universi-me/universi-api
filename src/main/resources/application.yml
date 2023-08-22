@@ -8,7 +8,7 @@ jwt:
 
 # DATABASE ENV VARIABLES
 database:
-  name: ${API_DB_NAME:universime}
+  name: ${API_DB_NAME:universime_api}
   port: ${API_DB_PORT:5432}
   domain: ${API_DB_DOMAIN:localhost}
   url: ${API_DB_URL:jdbc:postgresql://${database.domain}:${database.port}/${database.name}}
@@ -65,27 +65,40 @@ spring:
       on-profile: test
   # Flyway
   flyway:
-    enabled: false
+    enabled: true
+    init-sqls:
+      - CREATE ALIAS IF NOT EXISTS uuid_generate_v4 AS 'UUID ez_uuid() { return UUID.randomUUID(); }';
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+    url: jdbc:h2:mem:test;DATABASE_TO_UPPER=false;DB_CLOSE_DELAY=-1;
+    password:
+    user: sa
   datasource:
-    url: jdbc:h2:mem:testdb
+    url: jdbc:h2:mem:test;DATABASE_TO_UPPER=false;DB_CLOSE_DELAY=-1;
     driverClassName: org.h2.Driver
     continue-on-error: true
     username: sa
     password:
-
   # H2 Console
   h2:
     console:
       enabled: true
       path: /api/h2-console
-
   # JPA
   jpa:
     show-sql: true
     format_sql: true
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+        dialect: org.hibernate.dialect.H2Dialect
+        show_sql: true
+        format_sql: true
 logging:
   level:
     org:
@@ -117,6 +130,8 @@ spring:
   # Flyway
   flyway:
     enabled: true
+    init-sqls:
+      - CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
     baseline-on-migrate: true
     locations: classpath:db/migration
     url: ${database.flyway.url}
@@ -156,6 +171,8 @@ spring:
   # Flyway
   flyway:
     enabled: true
+    init-sqls:
+      - CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
     baseline-on-migrate: true
     locations: classpath:db/migration
     url: ${database.flyway.url}

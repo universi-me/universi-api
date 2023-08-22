@@ -1,34 +1,36 @@
 package me.universi.alternative.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import me.universi.alternative.dto.AlternativeCreateDTO;
 import me.universi.question.entities.Question;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Value;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.SequenceGenerator;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.UUID;
 
-@Entity
+@Entity(name = "alternative")
 public class Alternative implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1482176771595190928L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "alternative_generator")
-    @SequenceGenerator(name = "alternative_generator", sequenceName = "alternative_sequence", allocationSize = 1)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id")
+    @NotNull
+    private UUID id;
 
     @NotBlank(message = "title not blank")
     @NotNull(message = "title not null")
@@ -60,11 +62,11 @@ public class Alternative implements Serializable {
                 alternativeCreateDTO.getQuestion());
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

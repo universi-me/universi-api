@@ -9,20 +9,24 @@ import org.springframework.stereotype.Repository;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface GroupRepository extends JpaRepository<Group, Long> {
-    Optional<Group> findFirstById(Long id);
+public interface GroupRepository extends JpaRepository<Group, UUID> {
+    Optional<Group> findFirstById(UUID id);
     Optional<Group> findFirstByNickname(String nickname);
     Optional<Group> findFirstByRootGroupAndNicknameIgnoreCase(boolean rootGroup, String nickname);
     List<Group> findByPublicGroup(boolean grupoPublico);
-    @Query(value = "SELECT id_group FROM subgroup WHERE id_subgroup = :GroupId LIMIT 1", nativeQuery = true)
-    Optional<Long> findParentGroupId(@Param("GroupId") Long id);
+    @Query(value = "SELECT group_id FROM subgroup WHERE subgroup_id = :GroupId LIMIT 1", nativeQuery = true)
+    Optional<Object> findParentGroupId(@Param("GroupId") UUID id);
+
+    //Optional<UUID> findParentGroupId(UUID id);
+
     Collection<Group> findTop5ByNameContainingIgnoreCase(String nome);
 
-    Optional<Group> findByIdAndAdminId(Long groupId, Long profileId);
+    Optional<Group> findFirstByIdAndAdminId(UUID groupId, UUID profileId);
 
-    Boolean existsByIdAndAdminId(Long groupId, Long adminId);
+    Boolean existsByIdAndAdminId(UUID groupId, UUID adminId);
 
-    Boolean existsByIdAndParticipantsId(Long groupId, Long profileId);
+    Boolean existsByIdAndParticipantsId(UUID groupId, UUID profileId);
 }

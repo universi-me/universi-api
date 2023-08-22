@@ -6,11 +6,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.UUID;
 
 @Repository
-public interface IndicatorsRepository extends JpaRepository<Indicators, Long> {
+public interface IndicatorsRepository extends JpaRepository<Indicators, UUID> {
 
-    Indicators findByUserId(Long userId);
+    Indicators findByProfileId(UUID profileId);
 
     @Query(value = "select * from indicators order by score desc limit 10",nativeQuery = true)
     List<Indicators> findAllByOrderByScoreDesc();

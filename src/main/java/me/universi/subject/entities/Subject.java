@@ -5,22 +5,23 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.SequenceGenerator;
+import jakarta.validation.constraints.NotNull;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.UUID;
 
-@Entity
+@Entity(name = "subject")
 public class Subject implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 7301030877136239243L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "subject_generator")
-    @SequenceGenerator(name = "subject_generator", sequenceName = "subject_sequence", allocationSize = 1)
-    @Column(name = "id", nullable = false)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id")
+    @NotNull
+    private UUID id;
 
     private String subject;
 
@@ -32,7 +33,7 @@ public class Subject implements Serializable {
         this.subject = subject;
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 }

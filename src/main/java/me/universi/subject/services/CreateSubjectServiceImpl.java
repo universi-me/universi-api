@@ -17,7 +17,7 @@ public class CreateSubjectServiceImpl implements CreateSubjectService {
     }
 
     public Subject createSubject(Subject subject){
-        Subject subject1 = this.subjectRepository.findBySubject(subject.getSubject());
+        Subject subject1 = this.subjectRepository.findFirstBySubject(subject.getSubject());
 
         if (subject.getSubject().equals(subject1.getSubject())){
             throw new SubjectExistsException();

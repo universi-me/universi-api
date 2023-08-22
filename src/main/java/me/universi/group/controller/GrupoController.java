@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/group")
@@ -36,13 +37,17 @@ public class GrupoController {
             User user = userService.getUserInSession();
 
             Boolean groupRoot = (Boolean)body.get("groupRoot");
-            String groupIdParent = (String)body.get("groupId");
 
-            if(groupIdParent == null) {
+            String groupIdParent = (String)body.get("groupId");
+            String groupPathParent = (String)body.get("groupPath");
+
+            boolean hasGroupParent = groupIdParent != null || groupPathParent != null;
+
+            if(!hasGroupParent) {
                 if(!(groupRoot != null && userService.isUserAdmin(user))) {
                     throw new GroupException("Parâmetro groupId é nulo.");
                 }
-            } else if(groupIdParent.length() > 0 && (groupRoot!=null && groupRoot)) {
+            } else if(((groupIdParent != null && groupIdParent.length() > 0) || (groupPathParent != null && groupPathParent.length() > 0)) && (groupRoot!=null && groupRoot)) {
                 throw new GroupException("Você não pode criar Grupo Master em Subgrupos.");
             }
 
@@ -72,12 +77,12 @@ public class GrupoController {
             Boolean publicGroup = (Boolean)body.get("publicGroup");
             Boolean canEnter = (Boolean)body.get("canEnter");
 
-            Group parentGroup = groupIdParent==null?null:groupService.findFirstById(Long.valueOf(groupIdParent));
+            Group parentGroup = (groupIdParent==null && groupPathParent==null)?null:groupService.getGroupByGroupIdOrGroupPath(groupIdParent, groupPathParent);
 
             // support only lowercase nickname
             nickname = nickname.toLowerCase();
 
-            if(parentGroup!=null && !groupService.isNicknameAvailableForGroup(parentGroup, nickname)) {
+            if(!groupService.isNicknameAvailableForGroup(parentGroup, nickname)) {
                 throw new GroupException("Este Nickname não está disponível para este grupo.");
             }
 
@@ -127,9 +132,7 @@ public class GrupoController {
         try {
 
             String groupId = (String)body.get("groupId");
-            if(groupId == null) {
-                throw new GroupException("Parâmetro groupId é nulo.");
-            }
+            String groupPath = (String)body.get("groupPath");
 
             String name = (String)body.get("name");
             String description = (String)body.get("description");
@@ -140,10 +143,7 @@ public class GrupoController {
             Boolean publicGroup = (Boolean)body.get("publicGroup");
             Boolean canEnter = (Boolean)body.get("canEnter");
 
-            Group groupEdit = groupService.findFirstById(Long.valueOf(groupId));
-            if(groupEdit == null) {
-                throw new GroupException("Grupo não encontrado.");
-            }
+            Group groupEdit = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
 
             User user = userService.getUserInSession();
 
@@ -193,16 +193,11 @@ public class GrupoController {
         try {
 
             String groupId = (String)body.get("groupId");
-            if(groupId == null) {
-                throw new GroupException("Parâmetro groupId é nulo.");
-            }
+            String groupPath = (String)body.get("groupPath");
 
             User user = userService.getUserInSession();
 
-            Group groupEdit = groupService.findFirstById(Long.valueOf(groupId));
-            if(groupEdit == null) {
-                throw new GroupException("Grupo não encontrado.");
-            }
+            Group groupEdit = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
 
             if(!groupEdit.isCanEnter()) {
                 throw new GroupException("Grupo não permite entrada de participantes.");
@@ -233,16 +228,11 @@ public class GrupoController {
         try {
 
             String groupId = (String)body.get("groupId");
-            if(groupId == null) {
-                throw new GroupException("Parâmetro groupId é nulo.");
-            }
+            String groupPath = (String)body.get("groupPath");
 
             User user = userService.getUserInSession();
 
-            Group groupEdit = groupService.findFirstById(Long.valueOf(groupId));
-            if(groupEdit == null) {
-                throw new GroupException("Grupo não encontrado.");
-            }
+            Group groupEdit = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
 
             if(groupService.removeParticipantFromGroup(groupEdit, user.getProfile())) {
                 response.success = true;
@@ -265,9 +255,7 @@ public class GrupoController {
         try {
 
             String groupId = (String)body.get("groupId");
-            if(groupId == null) {
-                throw new GroupException("Parametro groupId é nulo.");
-            }
+            String groupPath = (String)body.get("groupPath");
 
             String participant = (String)body.get("participant");
             if(participant == null) {
@@ -285,7 +273,7 @@ public class GrupoController {
                 }
             }
 
-            Group groupEdit = groupService.findFirstById(Long.valueOf(groupId));
+            Group groupEdit = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
 
             if(participantUser != null && groupService.verifyPermissionToEditGroup(groupEdit, user)) {
                 if(groupService.addParticipantToGroup(groupEdit, participantUser.getProfile())) {
@@ -312,9 +300,7 @@ public class GrupoController {
         try {
 
             String groupId = (String)body.get("groupId");
-            if(groupId == null) {
-                throw new GroupException("Parâmetro groupId é nulo.");
-            }
+            String groupPath = (String)body.get("groupPath");
 
             String participant = (String)body.get("participant");
             if(participant == null) {
@@ -332,10 +318,10 @@ public class GrupoController {
                 }
             }
 
-            Group grupoEdit = groupService.findFirstById(Long.valueOf(groupId));
+            Group groupEdit = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
 
-            if(participantUser != null && groupService.verifyPermissionToEditGroup(grupoEdit, user)) {
-                if(groupService.removeParticipantFromGroup(grupoEdit, participantUser.getProfile())) {
+            if(participantUser != null && groupService.verifyPermissionToEditGroup(groupEdit, user)) {
+                if(groupService.removeParticipantFromGroup(groupEdit, participantUser.getProfile())) {
                     response.success = true;
                     response.message = "Participante removido com sucesso.";
                     return response;
@@ -359,16 +345,13 @@ public class GrupoController {
         try {
 
             String groupId = (String)body.get("groupId");
-            if(groupId == null) {
-                throw new GroupException("Parâmetro groupId é nulo.");
-            }
+            String groupPath = (String)body.get("groupPath");
 
-            Group group = groupService.findFirstById(Long.valueOf(groupId));
+            Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
 
             if(group != null) {
                 response.body.put("participants", group.getParticipants());
                 response.success = true;
-                response.message = "Operação realizada com exito.";
                 return response;
             }
 
@@ -387,21 +370,20 @@ public class GrupoController {
         try {
 
             String groupId = (String)body.get("groupId");
-            if(groupId == null) {
-                throw new GroupException("Parâmetro groupId é nulo.");
-            }
+            String groupPath = (String)body.get("groupPath");
+
+            Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
 
             String groupIdRemove = (String)body.get("groupIdRemove");
             if(groupIdRemove == null) {
                 throw new GroupException("Parâmetro groupIdRemove é nulo.");
             }
 
-            Group group = groupService.findFirstById(Long.valueOf(groupId));
             if(group == null) {
                 throw new GroupException("Grupo não encontrado.");
             }
 
-            Group groupRemove = groupService.findFirstById(Long.valueOf(groupIdRemove));
+            Group groupRemove = groupService.findFirstById(groupIdRemove);
             if(groupRemove == null) {
                 throw new GroupException("Subgrupo não encontrado.");
             }
@@ -431,21 +413,16 @@ public class GrupoController {
         try {
 
             String groupId = (String)body.get("groupId");
-            if(groupId == null) {
-                throw new GroupException("Parâmetro groupId é nulo.");
-            }
+            String groupPath = (String)body.get("groupPath");
 
-            Group group = groupService.findFirstById(Long.valueOf(groupId));
-            if(group == null) {
-                throw new GroupException("Grupo não encontrado.");
-            }
+            Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
 
             User user = userService.getUserInSession();
 
             if(groupService.verifyPermissionToEditGroup(group, user)) {
 
                 response.redirectTo = "/groups";
-                Long parentId = groupService.findParentGroupId(group.getId());
+                UUID parentId = groupService.findParentGroupId(group.getId());
                 if(parentId != null) {
                     response.redirectTo = groupService.getGroupPath(parentId);
                 }
@@ -474,17 +451,7 @@ public class GrupoController {
             String groupId = (String)body.get("groupId");
             String groupPath = (String)body.get("groupPath");
 
-            if(groupId == null && groupPath == null) {
-                throw new GroupException("Parâmetro groupId ou groupPath é nulo.");
-            }
-
-            Group group = null;
-            if(groupId != null) {
-                group = groupService.findFirstById(Long.valueOf(groupId));
-            }
-            if (group == null && groupPath != null) {
-                group = groupService.getGroupFromPath(groupPath);
-            }
+            Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
 
             if (group != null) {
                 response.body.put("group", group);
@@ -507,16 +474,13 @@ public class GrupoController {
         try {
 
             String groupId = (String)body.get("groupId");
-            if(groupId == null) {
-                throw new GroupException("Parâmetro groupId é nulo.");
-            }
+            String groupPath = (String)body.get("groupPath");
 
-            Group group = groupService.findFirstById(Long.valueOf(groupId));
+            Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
+
             if(group != null) {
                 Collection<Group> subgroupList = group.getSubGroups();
                 response.body.put("subgroups", subgroupList);
-
-                response.message = "Operação Realizada com exito.";
                 response.success = true;
                 return response;
             }

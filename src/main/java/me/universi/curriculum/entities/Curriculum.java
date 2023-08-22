@@ -9,22 +9,23 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
-import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import jakarta.validation.constraints.NotNull;
 import me.universi.profile.entities.Profile;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
+import java.util.UUID;
 
 @Entity(name="curriculum")
 public class Curriculum {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "curriculum_generator")
-    @SequenceGenerator(name = "curriculum_generator", sequenceName = "curriculum_sequence", allocationSize = 1)
-    @Column(name = "id_curriculum")
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id")
+    @NotNull
+    private UUID id;
 
     @JsonIgnore
     @OneToOne(fetch = FetchType.LAZY)
@@ -36,7 +37,7 @@ public class Curriculum {
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "creation_date")
+    @Column(name = "created_at")
     private Date creationDate;
 
     public Curriculum(){
@@ -46,7 +47,7 @@ public class Curriculum {
     public Curriculum(String description){
         this.description = description;
     }
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 

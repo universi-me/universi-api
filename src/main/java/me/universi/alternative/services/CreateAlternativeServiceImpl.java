@@ -15,6 +15,8 @@ import me.universi.user.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 public class CreateAlternativeServiceImpl implements CreateAlternativeService {
 
@@ -33,13 +35,13 @@ public class CreateAlternativeServiceImpl implements CreateAlternativeService {
         this.exerciseRepository = exerciseRepository;
     }
 
-    public Alternative createAlternative(Long groupId, Long exerciseId, Long questionId, AlternativeCreateDTO alternative){
+    public Alternative createAlternative(UUID groupId, UUID exerciseId, UUID questionId, AlternativeCreateDTO alternative){
         User user = this.userService.getUserInSession();
         Boolean exerciseExist = this.exerciseRepository.existsByIdAndGroupAdminId(exerciseId, user.getProfile().getId());
          if (!exerciseExist){
              throw new UnauthorizedException();
          }
-        Question question = questionRepository.findByIdAndExercisesId(questionId, exerciseId).orElseThrow(QuestionNotfoundException::new);
+        Question question = questionRepository.findFirstByIdAndExercisesId(questionId, exerciseId).orElseThrow(QuestionNotfoundException::new);
         Integer amountAlternatives = this.alternativeRepository.countAlternativeByQuestionId(questionId);
         if (amountAlternatives + 1 > MAX_ALTERNATIVES ){
             throw new MaxAlternativeException();

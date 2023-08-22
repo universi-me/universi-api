@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class ListQuestionsWithAlternativesServiceImpl implements ListQuestionsWithAlternativesService {
@@ -34,7 +35,7 @@ public class ListQuestionsWithAlternativesServiceImpl implements ListQuestionsWi
     }
 
     @Override
-    public List<QuestionWithAlternativesDTO> getQuestionsWithAlternatives(Long groupId, Long exerciseId, int amount) {
+    public List<QuestionWithAlternativesDTO> getQuestionsWithAlternatives(UUID groupId, UUID exerciseId, int amount) {
 
         User user = this.userService.getUserInSession();
         Group group = this.groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
@@ -46,7 +47,7 @@ public class ListQuestionsWithAlternativesServiceImpl implements ListQuestionsWi
         }
 
         List<Question> questions = questionRepository.findAllRandonAndLimited(exerciseId, amount);
-        List <Long> ids = questions.stream().map(Question::getId).toList();
+        List <UUID> ids = questions.stream().map(Question::getId).toList();
         List<Alternative> alternatives = alternativeRepository.findAllByQuestionWithAlternatives(ids);
 
         List<QuestionWithAlternativesDTO> questionWithAlternatives = new ArrayList<>();

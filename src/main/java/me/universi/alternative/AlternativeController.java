@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping(value = "/api/group/{groupId}/exercise/{exerciseId}/question/{questionId}/alternative")
@@ -42,17 +43,17 @@ public class AlternativeController {
 
     @ResponseStatus(code = HttpStatus.CREATED)
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Alternative createAlternative(@Valid @RequestBody AlternativeCreateDTO alternativeCreateDTO, @PathVariable Long groupId, @PathVariable Long exerciseId, @PathVariable Long questionId){
+    public Alternative createAlternative(@Valid @RequestBody AlternativeCreateDTO alternativeCreateDTO, @PathVariable UUID groupId, @PathVariable UUID exerciseId, @PathVariable UUID questionId){
         return createAlternativeService.createAlternative(groupId, exerciseId, questionId, alternativeCreateDTO);
     }
 
     @ResponseStatus(code = HttpStatus.OK)
     @GetMapping(value = "{alternativeId}")
     public Alternative getAlternative(
-            @PathVariable Long groupId,
-            @PathVariable Long exerciseId,
-            @PathVariable Long questionId,
-            @PathVariable Long alternativeId){
+            @PathVariable UUID groupId,
+            @PathVariable UUID exerciseId,
+            @PathVariable UUID questionId,
+            @PathVariable UUID alternativeId){
 
         return getAlternativeService.getAlternative(groupId, questionId, alternativeId);
     }
@@ -60,9 +61,9 @@ public class AlternativeController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
     public List<Alternative> listAlternative (
-            @PathVariable Long groupId,
-            @PathVariable Long exerciseId,
-            @PathVariable Long questionId){
+            @PathVariable UUID groupId,
+            @PathVariable UUID exerciseId,
+            @PathVariable UUID questionId){
 
         return listAlternativeService.listAlternative(groupId, exerciseId, questionId);
     }
@@ -70,10 +71,10 @@ public class AlternativeController {
     @ResponseStatus(value = HttpStatus.OK)
     @PutMapping(value = "/{alternativeId}")
     public Alternative updateAlternative(
-            @PathVariable Long groupId,
-            @PathVariable Long exerciseId,
-            @PathVariable Long questionId,
-            @PathVariable Long alternativeId,
+            @PathVariable UUID groupId,
+            @PathVariable UUID exerciseId,
+            @PathVariable UUID questionId,
+            @PathVariable UUID alternativeId,
             @RequestBody @Valid AlternativeUpdateDTO alternativeUpdateDTO
             ){
         return this.updateAlternativeService.updateAlternative(groupId, exerciseId, questionId, alternativeId, alternativeUpdateDTO);
@@ -81,10 +82,10 @@ public class AlternativeController {
 
     @DeleteMapping(value = "/{alternativeId}")
     @ResponseStatus(code = HttpStatus.GONE)
-    private void deleteAlternative(@PathVariable Long groupId,
-                                   @PathVariable Long exerciseId,
-                                   @PathVariable Long questionId,
-                                   @PathVariable Long alternativeId){
+    private void deleteAlternative(@PathVariable UUID groupId,
+                                   @PathVariable UUID exerciseId,
+                                   @PathVariable UUID questionId,
+                                   @PathVariable UUID alternativeId){
 
         this.deleteAlternativeService.deleteAlternative(groupId, exerciseId, questionId, alternativeId);
     }

@@ -1,44 +1,36 @@
 package me.universi.profile.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.SequenceGenerator;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import me.universi.Sys;
 import me.universi.competence.entities.Competence;
 import me.universi.group.entities.Group;
+import me.universi.group.services.GroupService;
+import me.universi.indicators.entities.Indicators;
 import me.universi.link.entities.Link;
 import me.universi.profile.enums.Gender;
 import me.universi.recommendation.entities.Recommendation;
 import me.universi.user.entities.User;
+import me.universi.user.services.UserService;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.UUID;
 
 @Entity(name = "profile")
 public class Profile {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "profile_generator")
-    @SequenceGenerator(name = "profile_generator", sequenceName = "profile_sequence", allocationSize = 1)
-    @Column(name = "id_profile")
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id")
+    @NotNull
+    private UUID id;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
     @Column(name = "name")
     private String firstname;
@@ -49,17 +41,13 @@ public class Profile {
     @Column(name = "bio", columnDefinition = "TEXT")
     private String bio;
     @JsonIgnore
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "id_link")
-    private Link link;
-    @JsonIgnore
     @ManyToMany(mappedBy = "profile", fetch = FetchType.EAGER, cascade = { CascadeType.ALL })
     private Collection<Competence> competences;
     @ManyToMany(cascade = { CascadeType.ALL })
     @JoinTable(
             name = "profile_group",
-            joinColumns = { @JoinColumn(name = "id_profile") },
-            inverseJoinColumns = { @JoinColumn(name = "id_group") }
+            joinColumns = { @JoinColumn(name = "profile_id") },
+            inverseJoinColumns = { @JoinColumn(name = "group_id") }
     )
     @JsonIgnore
     private Collection<Group> groups;
@@ -78,14 +66,17 @@ public class Profile {
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "creation_date")
+    @Column(name = "created_at")
     private Date creationDate;
 
-    public Profile(Long id, User user, String bio, Link link, Collection<Competence> competences, Collection<Group> groups, Collection<Link> links) {
+    @OneToOne(cascade = CascadeType.ALL)
+    @JsonBackReference
+    private Indicators indicators;
+
+    public Profile(UUID id, User user, String bio, Collection<Competence> competences, Collection<Group> groups, Collection<Link> links) {
         this.id = id;
         this.user = user;
         this.bio = bio;
-        this.link = link;
         this.competences = competences;
         this.groups = groups;
         this.links = links;
@@ -95,7 +86,7 @@ public class Profile {
 
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
@@ -105,14 +96,6 @@ public class Profile {
 
     public void setBio(String bio) {
         this.bio = bio;
-    }
-
-    public Link getLink() {
-        return link;
-    }
-
-    public void setLink(Link link) {
-        this.link = link;
     }
 
     public Collection<Competence> getCompetences() {
@@ -203,7 +186,26 @@ public class Profile {
         this.recomendationsReceived = recomendationsReceived;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
+    }
+
+    public Indicators getIndicators() {
+        return indicators;
+    }
+
+    public void setIndicators(Indicators indicators) {
+        this.indicators = indicators;
+    }
+
+    @Override
+    public String toString() {
+        return "\nProfile[" +
+                "id='" + id + '\'' +
+                ", user='" + user + '\'' +
+                ", firstname='" + firstname + '\'' +
+                ", lastname='" + lastname + '\'' +
+                ", image='" + image + '\'' +
+                ", bio='" + bio + "']\n";
     }
 }

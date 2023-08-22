@@ -11,31 +11,32 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import jakarta.validation.constraints.NotNull;
 import me.universi.competence.enums.Level;
 import me.universi.profile.entities.Profile;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
+import java.util.UUID;
 
 @Entity(name = "competence")
 public class Competence {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "competence_generator")
-    @SequenceGenerator(name = "competence_generator", sequenceName = "competence_sequence", allocationSize = 1)
-    @Column(name = "id_competence")
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id")
+    @NotNull
+    private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_competence_type")
+    @JoinColumn(name = "competence_type_id")
     private CompetenceType competenceType;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_profile")
+    @JoinColumn(name = "profile_id")
     private Profile profile;
 
     @Column(name = "title")
@@ -56,12 +57,12 @@ public class Competence {
     @Column(name = "end_date")
     private Date endDate;
 
-    @Column(name = "present_Date")
+    @Column(name = "present_date")
     private Boolean presentDate;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "creation_date")
+    @Column(name = "created_at")
     private Date creationDate;
 
     public Competence() {
@@ -87,7 +88,7 @@ public class Competence {
         this.presentDate = presentDate;
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 

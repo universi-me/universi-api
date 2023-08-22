@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping(value = "/api/group/{groupId}/exercise/{exerciseId}/question")
@@ -41,15 +42,15 @@ public class QuestionController {
 
     @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)
-    public Question createQuestion(@PathVariable Long groupId, @PathVariable Long exerciseId,@Valid @RequestBody QuestionCreateDTO questionCreateDTO){
+    public Question createQuestion(@PathVariable UUID groupId, @PathVariable UUID exerciseId, @Valid @RequestBody QuestionCreateDTO questionCreateDTO){
         return this.questionCreateService.createQuestion(groupId,exerciseId,questionCreateDTO);
     }
 
     @PutMapping(value = "/{idQuestion}")
     @ResponseStatus(value = HttpStatus.OK)
-    public Question updateQuestion(@PathVariable Long groupId,
-                                   @PathVariable Long exerciseId,
-                                   @PathVariable Long idQuestion,
+    public Question updateQuestion(@PathVariable UUID groupId,
+                                   @PathVariable UUID exerciseId,
+                                   @PathVariable UUID idQuestion,
                                    @RequestBody @Valid QuestionUpdateDTO questionUpdateDTO){
 
         return this.updateQuestionService.updateQuestion(exerciseId, groupId, idQuestion, questionUpdateDTO);
@@ -58,21 +59,21 @@ public class QuestionController {
 
     @GetMapping(value = "/{questionId}")
     @ResponseStatus(code = HttpStatus.FOUND)
-    public Question getQuestion(@PathVariable Long groupId,
-                                @PathVariable Long exerciseId,
-                                @PathVariable Long questionId){
+    public Question getQuestion(@PathVariable UUID groupId,
+                                @PathVariable UUID exerciseId,
+                                @PathVariable UUID questionId){
         return this.getQuestionService.getQuestion(groupId, exerciseId, questionId);
     }
 
     @DeleteMapping(value = "/{questionId}")
     @ResponseStatus(code = HttpStatus.GONE)
-    public void deleteQuestion(@PathVariable Long groupId, @PathVariable Long exerciseId, @PathVariable Long questionId){
+    public void deleteQuestion(@PathVariable UUID groupId, @PathVariable UUID exerciseId, @PathVariable UUID questionId){
         this.deleteQuestionService.deleteQuestion(groupId, exerciseId, questionId);
     }
 
     @GetMapping
     @ResponseStatus(code = HttpStatus.FOUND)
-    public List<Question> listQuestion(@PathVariable Long groupId, @PathVariable Long exerciseId){
+    public List<Question> listQuestion(@PathVariable UUID groupId, @PathVariable UUID exerciseId){
         return this.listQuestionService.listQuestion(groupId, exerciseId);
     }
 }

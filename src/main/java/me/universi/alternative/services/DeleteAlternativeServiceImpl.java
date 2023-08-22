@@ -10,6 +10,8 @@ import me.universi.user.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 
 public class DeleteAlternativeServiceImpl implements DeleteAlternativeService {
@@ -25,11 +27,11 @@ public class DeleteAlternativeServiceImpl implements DeleteAlternativeService {
         this.groupRepository = groupRepository;
     }
 
-    public void deleteAlternative(Long groupId,Long exerciseId, Long questionId, Long alternativeId){
+    public void deleteAlternative(UUID groupId, UUID exerciseId, UUID questionId, UUID alternativeId){
        User user = this.userService.getUserInSession();
-       Group group = this.groupRepository.findByIdAndAdminId(groupId, user.getProfile().getId()).orElseThrow(GroupNotFoundException::new);
+       Group group = this.groupRepository.findFirstByIdAndAdminId(groupId, user.getProfile().getId()).orElseThrow(GroupNotFoundException::new);
 
-       this.alternativeRepository.findAlternativeByIdAndQuestionIdAndQuestionUserCreateId(alternativeId, questionId, user.getId())
+       this.alternativeRepository.findAlternativeByIdAndQuestionIdAndQuestionProfileCreateId(alternativeId, questionId, user.getId())
                 .orElseThrow(AlternativeNotFoundException::new);
        this.alternativeRepository.deleteById(alternativeId);
     }

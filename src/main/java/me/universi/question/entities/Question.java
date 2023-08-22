@@ -1,7 +1,7 @@
 package me.universi.question.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -10,42 +10,44 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
-import jakarta.persistence.SequenceGenerator;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import jakarta.persistence.CascadeType;
 import me.universi.exercise.entities.Exercise;
 import me.universi.feedback.entities.Feedback;
+import me.universi.profile.entities.Profile;
 import me.universi.question.dto.QuestionCreateDTO;
 import me.universi.question.dto.QuestionDTO;
-import me.universi.user.entities.User;
 import org.hibernate.Hibernate;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
-@Entity
+@Entity(name = "question")
 public class Question implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 4044714151661426179L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "question_generator")
-    @SequenceGenerator(name = "question_generator", sequenceName = "question_sequence", allocationSize = 1)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id")
+    @NotNull
+    private UUID id;
 
     @NotBlank(message = "title not blank")
     @NotNull(message = "title not null")
     @Size(min = 15, max = 512)
     private String title;
 
-    @NotNull(message = "user is mandatory")
-    @JoinColumn(name = "user_create_id")
+    @NotNull(message = "Profile is mandatory")
+    @JoinColumn(name = "profile_id")
     @ManyToOne
-    private User userCreate;
+    private Profile profileCreate;
 
     @OneToOne(cascade= CascadeType.ALL)
     @JoinColumn(name = "feedback_id")
@@ -58,17 +60,17 @@ public class Question implements Serializable {
     public Question() {
     }
 
-    public Question(Long id, String title, User userCreate, Feedback feedback, List<Exercise> exercises) {
+    public Question(UUID id, String title, Profile profileCreate, Feedback feedback, List<Exercise> exercises) {
         this.id = id;
         this.title = title;
-        this.userCreate = userCreate;
+        this.profileCreate = profileCreate;
         this.feedback = feedback;
         this.exercises = exercises;
     }
 
-    public Question(String title, User userCreate, Feedback feedback) {
+    public Question(String title, Profile profileCreate, Feedback feedback) {
         this.title = title;
-        this.userCreate = userCreate;
+        this.profileCreate = profileCreate;
         this.feedback = feedback;
     }
 
@@ -76,7 +78,7 @@ public class Question implements Serializable {
         return new Question(
                 questionDTO.getId(),
                 questionDTO.getTitle(),
-                questionDTO.getUserCreate(),
+                questionDTO.getProfileCreate(),
                 questionDTO.getFeedback(),
                 questionDTO.getExercises());
     }
@@ -84,11 +86,11 @@ public class Question implements Serializable {
     public static Question from(QuestionCreateDTO questionDTO) {
         return new Question(
                 questionDTO.getTitle(),
-                questionDTO.getUserCreate(),
+                questionDTO.getProfileCreate(),
                 questionDTO.getFeedback());
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
@@ -100,7 +102,7 @@ public class Question implements Serializable {
         this.exercises = exercises;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -112,12 +114,12 @@ public class Question implements Serializable {
         this.title = title;
     }
 
-    public User getUserCreate() {
-        return userCreate;
+    public Profile getProfileCreate() {
+        return profileCreate;
     }
 
-    public void setUserCreate(User userCreate) {
-        this.userCreate = userCreate;
+    public void setProfileCreate(Profile profileCreate) {
+        this.profileCreate = profileCreate;
     }
 
     public Feedback getFeedback() {
