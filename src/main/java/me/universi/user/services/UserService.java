@@ -1,6 +1,7 @@
 package me.universi.user.services;
 
 import jakarta.servlet.http.HttpServletRequest;
+import me.universi.Sys;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
 import me.universi.user.entities.User;
@@ -55,6 +56,11 @@ public class UserService implements UserDetailsService {
         this.sessionRegistry = sessionRegistry;
     }
 
+    // UserService bean instance via context
+    public static UserService getInstance() {
+        return Sys.context.getBean("userService", UserService.class);
+    }
+
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<User> usuario = userRepository.findFirstByName(username);
         if (usuario.isPresent()) {
@@ -89,6 +95,8 @@ public class UserService implements UserDetailsService {
     public void createUser(User user) throws UserException {
         if (user==null) {
             throw new UserException("Usuario está vazio!");
+        } else if (user.getUsername()==null) {
+            throw new UserException("username está vazio!");
         }
         user.setAuthority(Authority.ROLE_USER);
         userRepository.saveAndFlush((User)user);
@@ -319,4 +327,18 @@ public class UserService implements UserDetailsService {
         return false;
     }
 
+    // logout user from current session
+    public void logout() {
+        try {
+            SecurityContextHolder.clearContext();
+            HttpSession session = getActiveSession();
+            session.invalidate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public String getUrlWhenLogout() {
+        return "/login";
+    }
 }

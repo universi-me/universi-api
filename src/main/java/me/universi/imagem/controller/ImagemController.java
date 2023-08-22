@@ -40,7 +40,7 @@ public class ImagemController {
         Response resposta = new Response();
         try {
             // verificar o modo de salvamento da imagem no enviroment
-            String link = (Boolean.parseBoolean(env.getProperty("SALVAR_IMAGEM_EM_DISCO")))?salvarImagemEmDisco(imagem):uploadImagemImgur(imagem);
+            String link = (Boolean.parseBoolean(env.getProperty("SAVE_IMAGE_LOCAL")))?salvarImagemEmDisco(imagem):uploadImagemImgur(imagem);
 
             // retornar link da imagem remoto ou local.
             if(link != null) {
@@ -67,7 +67,7 @@ public class ImagemController {
 
             if(!filename.contains("..") && !filename.contains("/")) {
                 // parse do arquivo imagem salva para saida url.
-                File initialFile = new File(env.getProperty("DIRETORIO_DA_IMAGEM"), filename);
+                File initialFile = new File(env.getProperty("PATH_IMAGE_SAVE"), filename);
                 InputStream targetStream = new FileInputStream(initialFile);
                 return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(new InputStreamResource(targetStream));
             }
@@ -83,7 +83,7 @@ public class ImagemController {
 
         String nomeDaImage = Long.toHexString(System.currentTimeMillis());
 
-        File imagemDir = new File(env.getProperty("DIRETORIO_DA_IMAGEM"));
+        File imagemDir = new File(env.getProperty("PATH_IMAGE_SAVE"));
         if (!imagemDir.exists()){
             imagemDir.mkdirs();
         }
