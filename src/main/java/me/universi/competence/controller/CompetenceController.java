@@ -22,7 +22,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/competence")
+@RequestMapping("/api")
 public class CompetenceController {
     @Autowired
     public CompetenceService competenceService;
@@ -35,31 +35,31 @@ public class CompetenceController {
     @Autowired
     public UserService userService;
 
-    @PostMapping
+    @PostMapping(value = "/competence")
     @ResponseStatus(HttpStatus.CREATED)
     public Competence createCompetence(@RequestBody Competence newCompetence) throws Exception {
         return  competenceService.save(newCompetence);
     }
 
-    @GetMapping
+    @GetMapping(value = "/competence")
     @ResponseStatus(HttpStatus.OK)
     public List<Competence> getAllCompetence(){
         return competenceService.findAll();
     }
 
-    @GetMapping(value = "/{id}")
+    @GetMapping(value = "/competence/{id}")
     @ResponseStatus(HttpStatus.OK)
     public Optional<Competence> getCompetence(@PathVariable Long id){
         return competenceService.findById(id);
     }
 
-    @PutMapping(value = "/{id}")
+    @PutMapping(value = "/competence/{id}")
     @ResponseStatus(HttpStatus.OK)
     public Competence updateCompetence(@RequestBody Competence newCompetence, @PathVariable Long id) throws Exception {
         return competenceService.update(newCompetence, id);
     }
 
-    @DeleteMapping(value = "/{id}")
+    @DeleteMapping(value = "/competence/{id}")
     @ResponseStatus(HttpStatus.OK)
     public void delete(@PathVariable Long id){
         competenceService.delete(id);

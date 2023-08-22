@@ -38,12 +38,12 @@ public class ProfileTest {
 
 
     @Test
-    void create() {
+    void create() throws Exception {
         Profile profile = perfil("testeCreate");
         assertEquals("testeCreate", profile.getFirstname());
     }
     @Test
-    void update(){
+    void update() throws Exception {
         Profile profile = perfil("testeUpdate");
         assertEquals("testeUpdate", profile.getFirstname());
 
@@ -52,7 +52,7 @@ public class ProfileTest {
         assertEquals("nomeAtualizado", profile.getFirstname());
     }
     @Test
-    void delete(){
+    void delete() throws Exception {
         Profile profile = perfil("testeDelete");
         Long id = profile.getId();
         assertEquals(profile.getId(), profileService.findFirstById(id).getId());
@@ -60,7 +60,7 @@ public class ProfileTest {
         assertEquals(null, profileService.findFirstById(id));
     }
     @Test
-    void read(){
+    void read() throws Exception {
         profileService.deleteAll();
         assertEquals(0, profileService.findAll().size());
         for (int i = 0; i < 10; i++) {
@@ -71,7 +71,7 @@ public class ProfileTest {
 
     }
 
-    public Profile perfil(String nome) {
+    public Profile perfil(String nome) throws Exception {
         User userNew = new User(nome, nome+"@email.com", userService.encodePassword("senha"));
         try {
             userService.createUser(userNew);

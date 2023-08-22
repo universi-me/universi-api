@@ -40,7 +40,7 @@ public class CompetenciaTest {
     @Autowired
     CompetenceTypeRepository competenciaTipoRepository;
     @Test
-    void create() {
+    void create() throws Exception {
         String nome = "competenciaTest";
         User userNew = new User(nome, nome+"@email.com", userService.encodePassword("senha"));
         try {
@@ -93,7 +93,7 @@ public class CompetenciaTest {
         assertEquals(competencia2.getId(), competenciaService.findFirstById(competencia2.getId()).getId());
     }
     @Test
-    void update(){
+    void update() throws Exception {
         String nome = "competenciaTestUpdate";
         User userNew = new User(nome, nome+"@email.com", userService.encodePassword("senha"));
         try {
@@ -152,7 +152,7 @@ public class CompetenciaTest {
         assertEquals(competencia2.getDescription(), competenciaService.findFirstById(competencia2.getId()).getDescription());
     }
     @Test
-    void delete(){
+    void delete() throws Exception {
         String nome = "competenciaTestDelete";
         User userNew = new User(nome, nome+"@email.com", userService.encodePassword("senha"));
         try {
@@ -212,7 +212,7 @@ public class CompetenciaTest {
         assertNull(competenciaService.findFirstById(competencia2.getId()));
     }
     @Test
-    void read(){
+    void read() throws Exception {
         String nome = "competenciaTestread";
         User userNew = new User(nome, nome+"@email.com", userService.encodePassword("senha"));
         try {
