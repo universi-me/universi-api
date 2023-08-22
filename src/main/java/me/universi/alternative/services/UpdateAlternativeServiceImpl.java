@@ -14,6 +14,8 @@ import me.universi.util.ExerciseUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 public class UpdateAlternativeServiceImpl implements UpdateAlternativeService {
 
@@ -30,13 +32,13 @@ public class UpdateAlternativeServiceImpl implements UpdateAlternativeService {
 
 
     @Override
-    public Alternative updateAlternative(Long groupId, Long exerciseId, Long questionId, Long alternativeId, AlternativeUpdateDTO alternativeUpdateDTO) {
+    public Alternative updateAlternative(UUID groupId, UUID exerciseId, UUID questionId, UUID alternativeId, AlternativeUpdateDTO alternativeUpdateDTO) {
         User user = this.userService.getUserInSession();
-        Group group = this.groupRepository.findByIdAndAdminId(groupId, user.getProfile().getId())
+        Group group = this.groupRepository.findFirstByIdAndAdminId(groupId, user.getProfile().getId())
                 .orElseThrow(GroupDefinitionException::new);
         ExerciseUtil.checkPermissionExercise(user, group);
 
-        Alternative alternative = this.alternativeRepository.findAlternativeByIdAndQuestionIdAndQuestionUserCreateId(
+        Alternative alternative = this.alternativeRepository.findAlternativeByIdAndQuestionIdAndQuestionProfileCreateId(
                 alternativeId,
                 questionId,
                 user.getId())

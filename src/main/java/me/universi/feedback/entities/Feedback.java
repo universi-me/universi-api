@@ -1,12 +1,12 @@
 package me.universi.feedback.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
-import jakarta.persistence.SequenceGenerator;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -17,17 +17,19 @@ import me.universi.feedback.dto.FeedbackCreateDTO;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.UUID;
 
-@Entity
+@Entity(name = "feedback")
 public class Feedback implements Serializable {
 
     @Serial
     private static final long serialVersionUID = -6370355453756629023L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "feedback_generator")
-    @SequenceGenerator(name = "feedback_generator", sequenceName = "feedback_sequence", allocationSize = 1)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id")
+    @NotNull
+    private UUID id;
 
     @NotNull
     @NotBlank
@@ -64,11 +66,11 @@ public class Feedback implements Serializable {
                 feedbackCreateDTO.getFeedbackText());
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

@@ -1,18 +1,16 @@
-CREATE SEQUENCE indicators_sequence
-    INCREMENT BY 1
-    START WITH 1
-    MAXVALUE 9223372036854775807
-    MINVALUE 1
-    NO CYCLE;
 
 create table indicators (
-                            id int8 NOT NULL DEFAULT nextval('indicators_sequence'),
-                            score int8 NOT NULL DEFAULT 0,
-                            user_id int8 NOT NULL,
+    id             UUID NOT NULL DEFAULT uuid_generate_v4(),
+    score          int8 NOT NULL DEFAULT 0,
+    profile_id     UUID,
 
-                            CONSTRAINT user_id_pk FOREIGN KEY (user_id) REFERENCES system_user(user_id),
-                            CONSTRAINT indicators_pkey PRIMARY KEY (id)
-
+    CONSTRAINT indicators_pkey PRIMARY KEY (id)
 );
 
-comment on table indicators is 'Nesta tabela estão presentes as pontuações dos usuários';
+ALTER TABLE indicators
+    ADD CONSTRAINT profile_id_pk FOREIGN KEY (profile_id) REFERENCES profile(id);
+
+ALTER TABLE profile
+    ADD CONSTRAINT FK_PROFILE_ON_INDICATORS FOREIGN KEY (indicators_id) REFERENCES indicators(id);
+
+comment on table indicators is 'Nesta tabela estão presentes as pontuações dos profiles';

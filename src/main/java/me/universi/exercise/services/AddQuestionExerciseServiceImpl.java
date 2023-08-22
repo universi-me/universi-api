@@ -9,6 +9,8 @@ import me.universi.question.exceptions.QuestionNotfoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 public class AddQuestionExerciseServiceImpl implements AddQuestionExerciseService{
 
@@ -22,9 +24,9 @@ public class AddQuestionExerciseServiceImpl implements AddQuestionExerciseServic
         this.questionRepository = questionRepository;
     }
 
-    public void addQuestion(Long exerciseId, Question question){
+    public void addQuestion(UUID exerciseId, Question question){
         Exercise exercise = this.exerciseRepository.findById(exerciseId).orElseThrow(ExerciseNotFoundException::new);
 
-        exercise.getQuestions().add(this.questionRepository.findById(question.getId()).orElseThrow(QuestionNotfoundException::new));
+        exercise.getQuestions().add(this.questionRepository.findFirstById(question.getId()).orElseThrow(QuestionNotfoundException::new));
     }
 }

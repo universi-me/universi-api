@@ -1,15 +1,20 @@
 package me.universi.group.services;
 
+import me.universi.Sys;
 import me.universi.group.entities.Group;
 import me.universi.group.exceptions.GroupException;
 import me.universi.group.repositories.GroupRepository;
 import me.universi.profile.entities.Profile;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
+import me.universi.util.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,7 +25,11 @@ public class GroupService {
     @Autowired
     private GroupRepository groupRepository;
 
-    public Group findFirstById(Long id) {
+    public static GroupService getInstance() {
+        return Sys.context.getBean("groupService", GroupService.class);
+    }
+
+    public Group findFirstById(UUID id) {
         Optional<Group> optionalGroup = groupRepository.findFirstById(id);
         if(optionalGroup.isPresent()){
             return optionalGroup.get();
@@ -29,31 +38,31 @@ public class GroupService {
         }
     }
 
-    public Long findParentGroupId(Long id) {
-        Optional<Long> optionalGroup = groupRepository.findParentGroupId(id);
-        if(optionalGroup.isPresent()){
-            return optionalGroup.get();
-        }else{
-            return null;
+    public Group findFirstById(String id) {
+        return findFirstById(UUID.fromString(id));
+    }
+
+    public UUID findParentGroupId(UUID id) {
+        Optional<Object> optionalGroup = groupRepository.findParentGroupId(id);
+        if(optionalGroup.isPresent()) {
+            Object object = optionalGroup.get();
+            if(object instanceof UUID) {
+                return (UUID)object;
+            } else if(object instanceof byte[]) {
+                return ConvertUtil.convertBytesToUUID((byte[])object);
+            }
         }
+        return null;
     }
 
     public Group findFirstByNickname(String nickname) {
         Optional<Group> optionalGroup = groupRepository.findFirstByNickname(nickname);
-        if(optionalGroup.isPresent()){
-            return optionalGroup.get();
-        }else{
-            return null;
-        }
+        return optionalGroup.orElse(null);
     }
 
     public Group findFirstByRootGroupAndNicknameIgnoreCase(boolean rootGroup, String nickname) {
         Optional<Group> optionalGroup = groupRepository.findFirstByRootGroupAndNicknameIgnoreCase(rootGroup, nickname);
-        if(optionalGroup.isPresent()){
-            return optionalGroup.get();
-        }else{
-            return null;
-        }
+        return optionalGroup.orElse(null);
     }
 
     public List<Group> findByPublicGroup(boolean publicGroup) {
@@ -82,7 +91,7 @@ public class GroupService {
         Profile profile = user.getProfile();
         if (userService.userNeedAnProfile(user)) {
             throw new GroupException("Você precisa criar um Perfil.");
-        } else if(profile.getId()!=0 && group.getAdmin().getId() != profile.getId()) {
+        } else if(group.getAdmin().getId() != profile.getId()) {
             if(!userService.isUserAdmin(user)) {
                 throw new GroupException("Apenas administradores podem editar seus grupos!");
             }
@@ -160,7 +169,7 @@ public class GroupService {
         return false;
     }
 
-    public Profile getParticipantInGroup(Group group, Long participantId) {
+    public Profile getParticipantInGroup(Group group, UUID participantId) {
         if(participantId != null && group.getParticipants() != null) {
             for (Profile participantNow : group.getParticipants()) {
                 if (participantNow.getId() == participantId) {
@@ -175,6 +184,10 @@ public class GroupService {
         boolean available = true;
         try {
             String nicknameLower = nickname.toLowerCase();
+
+            if(available) {
+                available = nicknameRegex(nickname);
+            }
 
             String[] reservedWords = new String[] {
                     "admin",
@@ -206,7 +219,7 @@ public class GroupService {
                 available = false;
             }
 
-            if(available) {
+            if(available && group != null) {
                 for (Group groupNow : group.getSubGroups()) {
                     if (groupNow.nickname.toLowerCase().equals(nicknameLower)) {
                         available = false;
@@ -215,8 +228,11 @@ public class GroupService {
                 }
             }
 
-            if(available) {
-                available = nicknameRegex(nickname);
+            if(available && group==null) {
+                Group groupRoot = findFirstByRootGroupAndNicknameIgnoreCase(true, nicknameLower);
+                if(groupRoot != null) {
+                    available = false;
+                }
             }
 
         }catch (Exception e) {
@@ -254,7 +270,7 @@ public class GroupService {
 
         // Don't execute if it's inside the recursion (conflicts with the deletion of above subgroups)
         if(!insideRecursion) {
-            Long parentGroupId = this.findParentGroupId(group.getId());
+            UUID parentGroupId = this.findParentGroupId(group.getId());
             if (parentGroupId != null) {
                 Group parentGroup = findFirstById(parentGroupId);
                 if (parentGroup.subGroups != null) {
@@ -283,7 +299,7 @@ public class GroupService {
                 if (nicknameNow == null || nicknameNow.length() == 0) {
                     continue;
                 }
-                if (i == 1) {
+                if (i == 0) {
                     // ignore the first, already verified
                     continue;
                 }
@@ -312,7 +328,7 @@ public class GroupService {
     }
 
     /** Generates the group URL from its id */
-    public String getGroupPath(Long groupId) {
+    public String getGroupPath(UUID groupId) {
         ArrayList<String> nicknames = new ArrayList<>();
         Group groupNow = findFirstById(groupId);
         while(groupNow != null) {
@@ -327,13 +343,17 @@ public class GroupService {
     public Group getGroupFromPath(String path) {
         try {
             String pathSt = path.toLowerCase();
-            String[] nicknameArr = pathSt.split("/");
+
+            String[] nicknameArr = Arrays.stream(pathSt.split("/"))
+                    .map(String::trim)
+                    .filter(Predicate.isEqual("").negate())
+                    .toArray(String[]::new);
 
             Group groupRoot = null;
             Group groupActual = null;
 
             // get group root, its nickname is unique in the system, it can be accessed direct
-            groupRoot = findFirstByRootGroupAndNicknameIgnoreCase(true, nicknameArr[1]);
+            groupRoot = findFirstByRootGroupAndNicknameIgnoreCase(true, nicknameArr[0]);
             if(groupRoot != null) {
                 // check if group path is valid and return that group
                 groupActual = getGroupFromNicknamePath(groupRoot, nicknameArr);
@@ -343,6 +363,27 @@ public class GroupService {
         } catch(Exception e) {
             return null;
         }
+    }
+
+    public Group getGroupByGroupIdOrGroupPath(String groupId, String groupPath) throws GroupException {
+
+        if(groupId == null && groupPath == null) {
+            throw new GroupException("Parâmetro groupId e groupPath é nulo.");
+        }
+
+        Group group = null;
+        if(groupId != null) {
+            group = findFirstById(groupId);
+        }
+        if (group == null && groupPath != null) {
+            group = getGroupFromPath(groupPath);
+        }
+
+        if(group == null) {
+            throw new GroupException("Grupo não encontrado.");
+        }
+
+        return group;
     }
 
     /** Searches the first 5 groups containing {@code name} ignoring case */

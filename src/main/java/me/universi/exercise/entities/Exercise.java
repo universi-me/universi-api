@@ -12,7 +12,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.SequenceGenerator;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import me.universi.exercise.dto.ExerciseCreateDTO;
@@ -23,17 +22,19 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
-@Entity
+@Entity(name = "exercise")
 public class Exercise implements Serializable {
 
     @Serial
     private static final long serialVersionUID = -408946581836369991L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "exercise_generator")
-    @SequenceGenerator(name = "exercise_generator", sequenceName = "exercise_sequence", allocationSize = 1)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id")
+    @NotNull
+    private UUID id;
 
     @NotNull
     @NotBlank
@@ -57,7 +58,7 @@ public class Exercise implements Serializable {
     public Exercise() {
     }
 
-    public Exercise(Long id, Group group, String title) {
+    public Exercise(UUID id, Group group, String title) {
         this.id = id;
         this.group = group;
         this.title = title;
@@ -75,11 +76,11 @@ public class Exercise implements Serializable {
         return exercise;
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

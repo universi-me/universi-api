@@ -1,6 +1,8 @@
 package me.universi.exercise.services;
 
+import java.util.UUID;
+
 @FunctionalInterface
 public interface DeleteExerciseService {
-    void deleteExercise(Long groupId, Long exerciseId);
+    void deleteExercise(UUID groupId, UUID exerciseId);
 }

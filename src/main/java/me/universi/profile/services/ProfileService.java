@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.UUID;
 
 @Service
 public class ProfileService {
@@ -18,13 +19,13 @@ public class ProfileService {
     private PerfilRepository perfilRepository;
 
     // Retorna um Perfil passando o id
-    public Profile findFirstById(Long id) {
+    public Profile findFirstById(UUID id) {
         return perfilRepository.findFirstById(id).orElse(null);
     }
 
     // Retorna um Perfil passando o id como string
     public Profile findFirstById(String id) {
-        return perfilRepository.findFirstById(Long.parseLong(id)).orElse(null);
+        return perfilRepository.findFirstById(UUID.fromString(id)).orElse(null);
     }
 
     public void save(Profile profile) {

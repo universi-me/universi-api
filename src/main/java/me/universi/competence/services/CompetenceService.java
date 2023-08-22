@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class CompetenceService {
@@ -25,7 +26,8 @@ public class CompetenceService {
         this.profileService = profileService;
         this.userService = userService;
     }
-    public Competence findFirstById(Long id) {
+
+    public Competence findFirstById(UUID id) {
         Optional<Competence> optionalCompetence = competenceRepository.findFirstById(id);
         if(optionalCompetence.isPresent()){
             return optionalCompetence.get();
@@ -34,17 +36,21 @@ public class CompetenceService {
         }
     }
 
-    public Competence save(Competence competence) throws Exception{
+    public Competence save(Competence competence) throws Exception {
         try {
             User user = userService.getUserInSession();
             competence.setProfile(user.getProfile());
             return competenceRepository.saveAndFlush(competence);
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
-
     }
+
+    public Competence findFirstById(String id) {
+        return findFirstById(UUID.fromString(id));
+    }
+
     public void delete(Competence competence) {
         competenceRepository.delete(competence);
     }
@@ -73,12 +79,8 @@ public class CompetenceService {
         competenceRepository.deleteAll(competences);
     }
 
-    public Optional<Competence> findById(Long id){
-        return competenceRepository.findById(id);
-    }
-
-    public Competence update(Competence newCompetence, Long id) throws Exception{
-        return competenceRepository.findById(id).map(competence -> {
+    public Competence update(Competence newCompetence, UUID id) throws Exception{
+        return competenceRepository.findFirstById(id).map(competence -> {
             competence.setTitle(newCompetence.getTitle());
             competence.setDescription(newCompetence.getDescription());
             competence.setLevel(newCompetence.getLevel());
@@ -95,7 +97,7 @@ public class CompetenceService {
         });
     }
 
-    public void delete(Long id) {
+    public void delete(UUID id) {
         competenceRepository.deleteById(id);
     }
 

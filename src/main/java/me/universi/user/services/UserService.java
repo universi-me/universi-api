@@ -35,7 +35,9 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import jakarta.servlet.http.HttpSession;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -84,12 +86,16 @@ public class UserService implements UserDetailsService {
         throw new UserException("Email de Usuário não encontrado!");
     }
 
-    public UserDetails findFirstById(Long id) {
-        Optional<User> usuario = userRepository.findFirstById(id);
-        if (usuario.isPresent()) {
-            return usuario.get();
+    public UserDetails findFirstById(UUID id) {
+        Optional<User> userGet = userRepository.findFirstById(id);
+        if (userGet.isPresent()) {
+            return userGet.get();
         }
         return null;
+    }
+
+    public UserDetails findFirstById(String id) {
+        return findFirstById(UUID.fromString(id));
     }
 
     public void createUser(User user) throws UserException {
@@ -99,12 +105,15 @@ public class UserService implements UserDetailsService {
             throw new UserException("username está vazio!");
         }
         user.setAuthority(Authority.ROLE_USER);
+
         userRepository.saveAndFlush((User)user);
 
-        Profile userProfile = new Profile();
-        userProfile.setUser(user);
-        profileService.save(userProfile);
-        user.setProfile(userProfile);
+        if(user.getProfile() == null) {
+            Profile userProfile = new Profile();
+            userProfile.setUser(user);
+            profileService.save(userProfile);
+            user.setProfile(userProfile);
+        }
     }
 
     public long count() {
@@ -164,11 +173,11 @@ public class UserService implements UserDetailsService {
     }
 
     public boolean isSessionOfUser(User user) {
-        User userSession = getUserInSession();
-        if(userSession != null) {
-            return (userSession.getId() == user.getId());
+        try {
+            return (user.getUsername() != null && Objects.equals(getUserInSession().getUsername(), user.getUsername()));
+        } catch (Exception e) {
+            return false;
         }
-        return false;
     }
 
     public HttpSession getActiveSession() {
@@ -266,7 +275,7 @@ public class UserService implements UserDetailsService {
     public String getLastSpringSecurityError(Exception exception) {
         String error = null;
         if (exception instanceof BadCredentialsException) {
-            error = "Credenciais Invalidas!";
+            error = "Email ou Senha Inválidos";
         } else if(exception != null) {
             error = exception.getLocalizedMessage();
         }
@@ -280,10 +289,10 @@ public class UserService implements UserDetailsService {
         if (userSession != null) {
             if(userNeedAnProfile(userSession)) {
                 // go to user profile edit
-                return "/p/" + userSession.getUsername() + "/editar";
+                return "/profile/" + userSession.getUsername() + "/editar";
             } else {
                 // go to user profile
-                return "/p/" + userSession.getUsername();
+                return "/profile/" + userSession.getUsername();
             }
         }
 

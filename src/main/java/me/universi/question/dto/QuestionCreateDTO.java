@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import me.universi.feedback.entities.Feedback;
+import me.universi.profile.entities.Profile;
 import me.universi.question.entities.Question;
 import me.universi.user.entities.User;
 
@@ -28,7 +29,7 @@ public class QuestionCreateDTO implements Serializable {
     @NotNull(message = "Feedback is mandatory!")
     private Feedback feedback;
 
-    private User userCreate;
+    private Profile profileCreate;
 
     public QuestionCreateDTO(String title, Feedback feedback) {
         this.title = title;
@@ -57,11 +58,11 @@ public class QuestionCreateDTO implements Serializable {
         this.feedback = feedback;
     }
 
-    public User getUserCreate() {
-        return userCreate;
+    public Profile getProfileCreate() {
+        return profileCreate;
     }
 
-    public void setUserCreate(User userCreate) {
-        this.userCreate = userCreate;
+    public void setProfileCreate(Profile profileCreate) {
+        this.profileCreate = profileCreate;
     }
 }

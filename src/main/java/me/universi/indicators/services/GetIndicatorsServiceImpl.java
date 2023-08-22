@@ -22,6 +22,6 @@ public class GetIndicatorsServiceImpl implements GetIndicatorsService {
     @Override
     public Indicators getIndicators() {
         User user = this.userService.getUserInSession();
-        return this.indicatorsRepository.findByUserId(user.getId());
+        return this.indicatorsRepository.findByProfileId(user.getId());
     }
 }

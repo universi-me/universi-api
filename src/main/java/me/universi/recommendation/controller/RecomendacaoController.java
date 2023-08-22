@@ -64,12 +64,12 @@ public class RecomendacaoController {
                 throw new RecomendacaoInvalidaException("Parametro competenciaTipoId é nulo.");
             }
 
-            Profile profileOrigem = profileService.findFirstById(Long.valueOf(origem));
+            Profile profileOrigem = profileService.findFirstById(origem);
             if(profileOrigem == null) {
                 throw new RecomendacaoInvalidaException("Perfil origem não encontrado.");
             }
 
-            Profile profileDestino = profileService.findFirstById(Long.valueOf(destino));
+            Profile profileDestino = profileService.findFirstById(destino);
             if(profileDestino == null) {
                 throw new RecomendacaoInvalidaException("Perfil destino não encontrado.");
             }
@@ -78,7 +78,7 @@ public class RecomendacaoController {
                 throw new RecomendacaoInvalidaException("Você não pode recomendar-se.");
             }
 
-            CompetenceType compT = competenciaTipoService.findFirstById(Long.valueOf(competenciaTipoId));
+            CompetenceType compT = competenciaTipoService.findFirstById(competenciaTipoId);
             if(compT == null) {
                 throw new RecomendacaoInvalidaException("Competencia não encontrada.");
             }
@@ -122,7 +122,7 @@ public class RecomendacaoController {
 
             String competenciaTipoId = (String)body.get("competenciatipoId");
 
-            Recommendation recommendation = recomendacaoService.findFirstById(Long.valueOf(id));
+            Recommendation recommendation = recomendacaoService.findFirstById(id);
             if(recommendation == null) {
                 throw new GroupException("Recomendação não encontrada.");
             }
@@ -138,7 +138,7 @@ public class RecomendacaoController {
             }
 
             if(competenciaTipoId != null && competenciaTipoId.length() > 0) {
-                CompetenceType compT = competenciaTipoService.findFirstById(Long.valueOf(competenciaTipoId));
+                CompetenceType compT = competenciaTipoService.findFirstById(competenciaTipoId);
                 if(compT == null) {
                     throw new RecomendacaoInvalidaException("Competencia não encontrada.");
                 }
@@ -168,7 +168,7 @@ public class RecomendacaoController {
                 throw new GroupException("Parametro id é nulo.");
             }
 
-            Recommendation recommendation = recomendacaoService.findFirstById(Long.valueOf(id));
+            Recommendation recommendation = recomendacaoService.findFirstById(id);
             if(recommendation == null) {
                 throw new GroupException("Recomendação não encontrada.");
             }
@@ -202,7 +202,7 @@ public class RecomendacaoController {
                 throw new GroupException("Parametro id é nulo.");
             }
 
-            Recommendation recommendation = recomendacaoService.findFirstById(Long.valueOf(id));
+            Recommendation recommendation = recomendacaoService.findFirstById(id);
             if(recommendation == null) {
                 throw new GroupException("Recomendação não encontrada.");
             }

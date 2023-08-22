@@ -1,40 +1,32 @@
 package me.universi.user.entities;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.SequenceGenerator;
-import me.universi.indicators.entities.Indicators;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import me.universi.profile.entities.Profile;
 import me.universi.user.enums.Authority;
 import me.universi.user.services.JsonEmailOwnerSessionFilter;
+import me.universi.user.services.UserService;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.UUID;
 
-@Entity(name = "system_user")
+@Entity(name = "system_users")
 public class User implements UserDetails {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_generator")
-    @SequenceGenerator(name = "user_generator", sequenceName = "user_sequence", allocationSize = 1)
-    @Column(name = "user_id")
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id")
+    @NotNull
+    private UUID id;
 
-    @Column(name = "name")
+    @Column(name = "username")
+    @NotNull
     private String name;
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonEmailOwnerSessionFilter.class)
@@ -46,38 +38,38 @@ public class User implements UserDetails {
     private String password;
 
     @JsonIgnore
-    @OneToOne(mappedBy = "user")
+    @OneToOne(mappedBy = "user", cascade = CascadeType.DETACH)
     private Profile profile;
 
     @JsonIgnore
     @Column(name = "email_verified")
+    @NotNull
     private boolean email_verified;
 
     @JsonIgnore
     @Column(name = "expired_user")
+    @NotNull
     private boolean expired_user;
 
     @JsonIgnore
     @Column(name = "blocked_account")
+    @NotNull
     private boolean blocked_account;
 
     @JsonIgnore
     @Column(name = "expired_credentials")
+    @NotNull
     private boolean expired_credentials;
 
     @JsonIgnore
     @Column(name = "inactive")
+    @NotNull
     private boolean inactive;
 
     @JsonIgnore
     @Enumerated(EnumType.STRING)
     @Column(name = "authority")
     private Authority authority;
-
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "indicators_id", referencedColumnName = "id")
-    @JsonBackReference
-    private Indicators indicators;
 
     public User(String name, String email, String password){
         this.name = name;
@@ -89,11 +81,11 @@ public class User implements UserDetails {
 
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -217,12 +209,9 @@ public class User implements UserDetails {
         return !this.inactive;
     }
 
-    public Indicators getIndicators() {
-        return indicators;
-    }
-
-    public void setIndicators(Indicators indicators) {
-        this.indicators = indicators;
+    @Transient
+    public boolean getOwnerOfSession() {
+        return UserService.getInstance().isSessionOfUser(this);
     }
 
     @Override

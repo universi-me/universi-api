@@ -22,10 +22,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -52,63 +52,74 @@ public class DeleteExerciseServiceTest {
 
     @Test
     public void testDeleteExerciseDelete() {
-        Long groupId = 1L;
-        Long exerciseId = 1L;
+
+        UUID uuid_1 = UUID.fromString("47e2cc9e-69be-4482-bd90-1832ec403018");
+        UUID groupId = uuid_1;
+        UUID exerciseId = uuid_1;
 
         User user = UserBuilder.createUser();
 
         Group group = GroupBuilder.createGroup();
-        group.setId(1L);
+        group.setId(uuid_1);
         group.setAdmin(user.getProfile());
 
         Exercise exercise = ExerciseBuilder.createExercise();
 
         when(userService.getUserInSession()).thenReturn(user);
-        when(groupRepository.findByIdAndAdminId(groupId, user.getProfile().getId())).thenReturn(Optional.of(group));
-        when(exerciseRepository.findByIdAndGroupId(exerciseId, groupId)).thenReturn(Optional.of(exercise));
+        when(groupRepository.findFirstByIdAndAdminId(groupId, user.getProfile().getId())).thenReturn(Optional.of(group));
+        when(exerciseRepository.findFirstByIdAndGroupId(exerciseId, groupId)).thenReturn(Optional.of(exercise));
 
         deleteExerciseService.deleteExercise(groupId, exerciseId);
 
         verify(userService).getUserInSession();
-        verify(groupRepository).findByIdAndAdminId(groupId, user.getProfile().getId());
-        verify(exerciseRepository).findByIdAndGroupId(exerciseId, groupId);
+        verify(groupRepository).findFirstByIdAndAdminId(groupId, user.getProfile().getId());
+        verify(exerciseRepository).findFirstByIdAndGroupId(exerciseId, groupId);
     }
 
     @Test
     public void testDeleteExerciseInactivate() {
-        Long groupId = 1L;
-        Long exerciseId = 2L;
+
+        UUID uuid_1 = UUID.fromString("47e2cc9e-69be-4482-bd90-1832ec403018");
+        UUID uuid_2 = UUID.fromString("626370e9-b1ff-4b2d-baf8-b6b8ba04f603");
+        UUID uuid_3 = UUID.fromString("1fade783-e4b9-4e22-87a0-e5ca2f3c51fd");
+        UUID uuid_4 = UUID.fromString("bdef7e08-e4c2-49f4-b446-3f252800229c");
+
+        UUID groupId = uuid_1;
+        UUID exerciseId = uuid_2;
 
         User user = UserBuilder.createUser();
 
         Group group = GroupBuilder.createGroup();
 
         Exercise exercise = ExerciseBuilder.createExercise();
-        exercise.setQuestions(Arrays.asList(QuestionBuilder.createQuestion(1L),
-                QuestionBuilder.createQuestion(2L),
-                QuestionBuilder.createQuestion(3L),
-                QuestionBuilder.createQuestion(4L)));
+        exercise.setQuestions(Arrays.asList(QuestionBuilder.createQuestion(uuid_1),
+                QuestionBuilder.createQuestion(uuid_2),
+                QuestionBuilder.createQuestion(uuid_3),
+                QuestionBuilder.createQuestion(uuid_4)));
 
         when(userService.getUserInSession()).thenReturn(user);
-        when(groupRepository.findByIdAndAdminId(groupId, user.getProfile().getId())).thenReturn(Optional.of(group));
-        when(exerciseRepository.findByIdAndGroupId(exerciseId, groupId)).thenReturn(Optional.of(exercise));
+        when(groupRepository.findFirstByIdAndAdminId(groupId, user.getProfile().getId())).thenReturn(Optional.of(group));
+        when(exerciseRepository.findFirstByIdAndGroupId(exerciseId, groupId)).thenReturn(Optional.of(exercise));
 
         deleteExerciseService.deleteExercise(groupId, exerciseId);
 
         verify(userService).getUserInSession();
-        verify(groupRepository).findByIdAndAdminId(groupId, user.getProfile().getId());
-        verify(exerciseRepository).findByIdAndGroupId(exerciseId, groupId);
+        verify(groupRepository).findFirstByIdAndAdminId(groupId, user.getProfile().getId());
+        verify(exerciseRepository).findFirstByIdAndGroupId(exerciseId, groupId);
     }
 
     @Test
     public void testDeleteExerciseGroupNotFound() {
-        Long groupId = 1L;
-        Long exerciseId = 2L;
+
+        UUID uuid_1 = UUID.fromString("47e2cc9e-69be-4482-bd90-1832ec403018");
+        UUID uuid_2 = UUID.fromString("626370e9-b1ff-4b2d-baf8-b6b8ba04f603");
+        UUID groupId = uuid_1;
+        UUID exerciseId = uuid_2;
 
         User user = UserBuilder.createUser();
 
         when(userService.getUserInSession()).thenReturn(user);
-        when(groupRepository.findByIdAndAdminId(groupId, user.getProfile().getId())).thenReturn(Optional.empty());
+        when(groupRepository.findFirstByIdAndAdminId(groupId, user.getProfile().getId())).thenReturn(Optional.empty());
 
         try {
             deleteExerciseService.deleteExercise(groupId, exerciseId);
@@ -117,22 +128,25 @@ public class DeleteExerciseServiceTest {
         }
 
         verify(userService).getUserInSession();
-        verify(groupRepository).findByIdAndAdminId(groupId, user.getProfile().getId());
-        verify(exerciseRepository, never()).findByIdAndGroupId(anyLong(), anyLong());
+        verify(groupRepository).findFirstByIdAndAdminId(groupId, user.getProfile().getId());
+        verify(exerciseRepository, never()).findFirstByIdAndGroupId(any(UUID.class), any(UUID.class));
         verify(exerciseRepository, never()).delete(any(Exercise.class));
     }
 
     @Test
     public void testDeleteExerciseExerciseNotFound() {
-        Long groupId = 1L;
-        Long exerciseId = 2L;
+
+        UUID uuid_1 = UUID.fromString("47e2cc9e-69be-4482-bd90-1832ec403018");
+        UUID uuid_2 = UUID.fromString("626370e9-b1ff-4b2d-baf8-b6b8ba04f603");
+        UUID groupId = uuid_1;
+        UUID exerciseId = uuid_2;
 
         User user = UserBuilder.createUser();
 
         Group group = GroupBuilder.createGroup();
         when(userService.getUserInSession()).thenReturn(user);
-        when(groupRepository.findByIdAndAdminId(groupId, user.getProfile().getId())).thenReturn(Optional.of(group));
-        when(exerciseRepository.findByIdAndGroupId(exerciseId, groupId)).thenReturn(Optional.empty());
+        when(groupRepository.findFirstByIdAndAdminId(groupId, user.getProfile().getId())).thenReturn(Optional.of(group));
+        when(exerciseRepository.findFirstByIdAndGroupId(exerciseId, groupId)).thenReturn(Optional.empty());
 
         try {
             deleteExerciseService.deleteExercise(groupId, exerciseId);
@@ -141,8 +155,8 @@ public class DeleteExerciseServiceTest {
         }
 
         verify(userService).getUserInSession();
-        verify(groupRepository).findByIdAndAdminId(groupId, user.getProfile().getId());
-        verify(exerciseRepository).findByIdAndGroupId(exerciseId, groupId);
+        verify(groupRepository).findFirstByIdAndAdminId(groupId, user.getProfile().getId());
+        verify(exerciseRepository).findFirstByIdAndGroupId(exerciseId, groupId);
         verify(exerciseRepository, never()).delete(any(Exercise.class));
     }
 }

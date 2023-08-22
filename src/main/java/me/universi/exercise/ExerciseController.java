@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping(value = "/api/group/{groupId}/exercise")
@@ -53,47 +54,47 @@ public class ExerciseController {
 
     @GetMapping(value = "/{exerciseId}/questions")
     @ResponseStatus(HttpStatus.FOUND)
-    public List<QuestionWithAlternativesDTO> listQuestionsWithAlternatives(@PathVariable Long groupId, @PathVariable Long exerciseId,  @RequestParam int amount){
+    public List<QuestionWithAlternativesDTO> listQuestionsWithAlternatives(@PathVariable UUID groupId, @PathVariable UUID exerciseId,  @RequestParam int amount){
         return listQuestionsWithAlternativesService.getQuestionsWithAlternatives(groupId, exerciseId, amount);
     }
 
     @PostMapping(value = "/{exerciseId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public ExerciseAnswersDTO calculateExercise(@PathVariable Long groupId, @PathVariable Long exerciseId, @Valid @RequestBody List<AnswerDTO> answers){
+    public ExerciseAnswersDTO calculateExercise(@PathVariable UUID groupId, @PathVariable UUID exerciseId, @Valid @RequestBody List<AnswerDTO> answers){
         return valuerExerciseService.exercisesAnswers(groupId, exerciseId, answers);
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Exercise createExercise(@PathVariable Long groupId, @RequestBody  @Valid ExerciseCreateDTO exerciseCreateDTO){
+    public Exercise createExercise(@PathVariable UUID groupId, @RequestBody  @Valid ExerciseCreateDTO exerciseCreateDTO){
 
         return  this.createExerciseService.createExercise(groupId, exerciseCreateDTO);
     }
 
     @GetMapping(value = "/{exerciseId}")
     @ResponseStatus(value = HttpStatus.FOUND)
-    public Exercise getExercise(@PathVariable Long groupId,
-                                @PathVariable Long exerciseId){
+    public Exercise getExercise(@PathVariable UUID groupId,
+                                @PathVariable UUID exerciseId){
         return this.getExerciseService.getExercise(groupId, exerciseId);
     }
 
     @PutMapping(value = "/{exerciseId}")
     @ResponseStatus(value = HttpStatus.OK)
-    public Exercise updateExercise(@PathVariable Long groupId,
-                                   @PathVariable Long exerciseId, @RequestBody @Valid ExerciseUpdateDTO exerciseUpdateDTO){
+    public Exercise updateExercise(@PathVariable UUID groupId,
+                                   @PathVariable UUID exerciseId, @RequestBody @Valid ExerciseUpdateDTO exerciseUpdateDTO){
         return this.updateExerciseService.updateExercise(groupId, exerciseId, exerciseUpdateDTO);
     }
 
     @DeleteMapping(value = "/{exerciseId}")
     @ResponseStatus(code = HttpStatus.OK)
-    public void deleteExercise(@PathVariable Long groupId,
-                               @PathVariable Long exerciseId){
+    public void deleteExercise(@PathVariable UUID groupId,
+                               @PathVariable UUID exerciseId){
         this.deleteExerciseService.deleteExercise(groupId, exerciseId);
     }
 
     @GetMapping
     @ResponseStatus(code = HttpStatus.FOUND)
-    public List<Exercise> listExercises(@PathVariable Long groupId){
+    public List<Exercise> listExercises(@PathVariable UUID groupId){
         return this.listExerciseService.listExercise(groupId);
     }
 }

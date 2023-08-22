@@ -14,11 +14,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
-import me.universi.Sys;
+import jakarta.validation.constraints.NotNull;
 import me.universi.group.enums.GroupType;
 import me.universi.group.services.GroupService;
 import me.universi.profile.entities.Profile;
@@ -26,17 +25,20 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.UUID;
+
 
 @Entity(name = "system_group")
 public class Group {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "group_generator")
-    @SequenceGenerator(name = "group_generator", sequenceName = "group_sequence", allocationSize = 1)
-    @Column(name = "id_group")
-    public Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id")
+    @NotNull
+    private UUID id;
     
     @Column(name = "nickname")
+    @NotNull
     public String nickname;
 
     @Column(name = "name")
@@ -49,14 +51,15 @@ public class Group {
     public String image;
 
     @ManyToOne
-    @JoinColumn(name="id_profile")
+    @JoinColumn(name="profile_id")
+    @NotNull
     public Profile admin;
 
     @ManyToMany(cascade = { CascadeType.ALL })
     @JoinTable(
             name = "profile_group",
-            joinColumns = { @JoinColumn(name = "id_group") },
-            inverseJoinColumns = { @JoinColumn(name =  "id_profile") }
+            joinColumns = { @JoinColumn(name = "group_id") },
+            inverseJoinColumns = { @JoinColumn(name =  "profile_id") }
     )
     @JsonIgnore
     public Collection<Profile> participants;
@@ -64,8 +67,8 @@ public class Group {
     @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
     @JoinTable(
             name = "subgroup",
-            joinColumns = { @JoinColumn(name = "id_group", referencedColumnName = "id_group") },
-            inverseJoinColumns = { @JoinColumn(name = "id_subgroup", referencedColumnName = "id_group") }
+            joinColumns = { @JoinColumn(name = "group_id", referencedColumnName = "id") },
+            inverseJoinColumns = { @JoinColumn(name = "subgroup_id", referencedColumnName = "id") }
     )
     @JsonIgnore
     public Collection<Group> subGroups;
@@ -76,16 +79,20 @@ public class Group {
 
     /** The group's ability to be accessed directly through the URL (parent of all groups) */
     @Column(name = "group_root")
+    @NotNull
     public boolean rootGroup;
 
     /** Can create subGroups */
     @Column(name = "can_create_group")
+    @NotNull
     public boolean canCreateGroup;
 
     @Column(name = "can_enter")
+    @NotNull
     public boolean canEnter;
 
     @Column(name = "can_add_participant")
+    @NotNull
     public boolean canAddParticipant;
 
     @CreationTimestamp
@@ -94,6 +101,7 @@ public class Group {
     private Date createdAt;
 
     @Column(name = "public_group")
+    @NotNull
     public boolean publicGroup;
 
     public Group() {
@@ -120,7 +128,7 @@ public class Group {
         this.createdAt = createdAt;
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
@@ -236,15 +244,13 @@ public class Group {
         this.canAddParticipant = canAddParticipant;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
     @Transient
     public String getPath() {
-        // GroupService bean instance via context
-        GroupService groupService = Sys.context.getBean("groupService", GroupService.class);
-        return groupService.getGroupPath(this.id);
+        return GroupService.getInstance().getGroupPath(this.id);
     }
 
     @Override

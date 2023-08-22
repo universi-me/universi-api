@@ -1,6 +1,8 @@
 package me.universi.question.services;
 
+import java.util.UUID;
+
 @FunctionalInterface
 public interface DeleteQuestionService {
-    void deleteQuestion(Long groupId, Long exerciseId, Long questionId);
+    void deleteQuestion(UUID groupId, UUID exerciseId, UUID questionId);
 }

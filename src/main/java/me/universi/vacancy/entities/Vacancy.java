@@ -9,26 +9,29 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
-import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import jakarta.validation.constraints.NotNull;
 import me.universi.profile.entities.Profile;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
+import java.util.UUID;
 
 @Entity(name="vacancy")
 public class Vacancy {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vacancy_generator")
-    @SequenceGenerator(name = "vacancy_generator", sequenceName = "vacancy_sequence", allocationSize = 1)
-    @Column(name = "id_vacancy")
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id")
+    @NotNull
+    private UUID id;
 
     @JsonIgnore
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_profile")
+    @JoinColumn(name = "id")
+    @PrimaryKeyJoinColumn(name = "profile_id")
     private Profile profile;
 
     @Column(name = "description", columnDefinition = "TEXT")
@@ -36,7 +39,7 @@ public class Vacancy {
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "creation_date")
+    @Column(name = "created_at")
     private Date creationDate;
 
     public Vacancy(){
@@ -46,7 +49,7 @@ public class Vacancy {
         this.description = description;
     }
 
-    public Long getId(){
+    public UUID getId(){
         return this.id;
     }
     public Profile getProfile(){

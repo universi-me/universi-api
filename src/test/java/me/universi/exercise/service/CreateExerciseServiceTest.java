@@ -23,10 +23,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import profile.builder.ProfileBuilder;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -57,7 +57,8 @@ public class CreateExerciseServiceTest {
     public void testCreateExercise() {
         ExerciseCreateDTO exerciseDTO = new ExerciseCreateDTO("Exercise Test");
 
-        Long groupId = 1L;
+        UUID uuid_1 = UUID.fromString("47e2cc9e-69be-4482-bd90-1832ec403018");
+        UUID groupId = uuid_1;
 
         User user = UserBuilder.createUser();
         Profile profile = ProfileBuilder.createProfile();
@@ -66,26 +67,30 @@ public class CreateExerciseServiceTest {
         Group group = GroupBuilder.createGroup();
 
         when(userService.getUserInSession()).thenReturn(user);
-        when(groupRepository.findByIdAndAdminId(groupId, user.getProfile().getId())).thenReturn(Optional.of(group));
+        when(groupRepository.findFirstByIdAndAdminId(groupId, user.getProfile().getId())).thenReturn(Optional.of(group));
         when(exerciseRepository.save(any(Exercise.class))).thenReturn(ExerciseBuilder.createExercise());
 
         Exercise result = createExerciseService.createExercise(groupId, exerciseDTO);
 
         assertEquals(ExerciseBuilder.createExercise(), result);
-        verify(groupRepository).findByIdAndAdminId(anyLong(), anyLong());
+        verify(groupRepository).findFirstByIdAndAdminId(any(UUID.class), any(UUID.class));
         verify(exerciseRepository).save(any(Exercise.class));
     }
 
     @Test
     @DisplayName("Should return exception when logged in user is not group admin")
     void shouldThrowQuestionNotFoundException() {
+
+        UUID uuid_1 = UUID.fromString("47e2cc9e-69be-4482-bd90-1832ec403018");
+        UUID uuid_2 = UUID.fromString("626370e9-b1ff-4b2d-baf8-b6b8ba04f603");
+
         when(userService.getUserInSession()).thenReturn(UserBuilder.createUserSecondary());
-        when(groupRepository.findByIdAndAdminId(1L, 2L)).thenReturn(Optional.of(GroupBuilder.createGroup()));
+        when(groupRepository.findFirstByIdAndAdminId(uuid_1, uuid_2)).thenReturn(Optional.of(GroupBuilder.createGroup()));
 
         ExerciseCreateDTO exerciseDTO = new ExerciseCreateDTO("Exercise Test");
 
         assertThrows(UnauthorizedException.class,
-                () -> this.createExerciseService.createExercise(1L, exerciseDTO)
+                () -> this.createExerciseService.createExercise(uuid_1, exerciseDTO)
         );
     }
 }

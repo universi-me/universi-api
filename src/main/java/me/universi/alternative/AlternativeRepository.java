@@ -7,18 +7,19 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface AlternativeRepository extends JpaRepository<Alternative, Long> {
-    Optional<Alternative> findAlternativeByIdAndQuestionIdAndQuestionUserCreateId(Long alternativeId, Long questionId, Long UserId);
-    List<Alternative>  findAllByQuestionIdAndQuestionUserCreateId(Long questionId, Long UserId);
+public interface AlternativeRepository extends JpaRepository<Alternative, UUID> {
+    Optional<Alternative> findAlternativeByIdAndQuestionIdAndQuestionProfileCreateId(UUID alternativeId, UUID questionId, UUID profileId);
+    List<Alternative>  findAllByQuestionIdAndQuestionProfileCreateId(UUID questionId, UUID profileId);
 
     @Query(value = "select * from alternative where question_id in ( ?1 ) order by question_id", nativeQuery = true)
-    List<Alternative> findAllByQuestionWithAlternatives(List<Long> ids);
+    List<Alternative> findAllByQuestionWithAlternatives(List<UUID> ids);
 
     @Query(value = "select * from alternative where question_id in (?1) and correct is true", nativeQuery = true)
-    List<Alternative> findAllByQuestionIdAndCorrectIsTrue(List<Long> questionIds);
+    List<Alternative> findAllByQuestionIdAndCorrectIsTrue(List<UUID> questionIds);
 
-    Integer countAlternativeByQuestionId(Long questionId);
+    Integer countAlternativeByQuestionId(UUID questionId);
 
 }

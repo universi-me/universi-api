@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping(value = "/api/vacancy")
@@ -40,19 +41,19 @@ public class VacancyController {
 
     @GetMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Optional<Vacancy> getVacancy(@PathVariable Long id){
-        return vacancyService.findById(id);
+    public Optional<Vacancy> getVacancy(@PathVariable UUID id){
+        return vacancyService.findFirstById(id);
     }
 
     @PutMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Vacancy update(@RequestBody Vacancy newCurriculum, @PathVariable Long id) throws Exception {
+    public Vacancy update(@RequestBody Vacancy newCurriculum, @PathVariable UUID id) throws Exception {
         return vacancyService.update(newCurriculum, id);
     }
 
     @DeleteMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public void delete(@PathVariable Long id){
+    public void delete(@PathVariable UUID id){
         vacancyService.delete(id);
     }
 

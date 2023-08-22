@@ -6,6 +6,8 @@ import me.universi.exercise.exception.ExerciseNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 public class ExerciseGetServiceImpl implements ExerciseGetService {
 
@@ -17,7 +19,7 @@ public class ExerciseGetServiceImpl implements ExerciseGetService {
     }
 
     @Override
-    public Exercise getExercise(Long exerciseId, Long groupId) {
-        return this.exerciseRepository.findByIdAndGroupId(exerciseId, groupId).orElseThrow(ExerciseNotFoundException::new);
+    public Exercise getExercise(UUID exerciseId, UUID groupId) {
+        return this.exerciseRepository.findFirstByIdAndGroupId(exerciseId, groupId).orElseThrow(ExerciseNotFoundException::new);
     }
 }

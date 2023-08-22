@@ -10,6 +10,7 @@ import me.universi.question.entities.Question;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
+import java.util.UUID;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
@@ -18,14 +19,14 @@ public class ExerciseDTO implements Serializable {
     @Serial
     private static final long serialVersionUID = -1249376902788845315L;
 
-    private Long id;
+    private UUID id;
 
     private List<Question> questions;
 
     @NotNull(message = "Group is mandatory")
     private Group group;
 
-    public ExerciseDTO(Long id, List<Question> questions, Group group) {
+    public ExerciseDTO(UUID id, List<Question> questions, Group group) {
         this.id = id;
         this.questions = questions;
         this.group = group;
@@ -43,11 +44,11 @@ public class ExerciseDTO implements Serializable {
         return new ExerciseDTO(exercise.getId(), exercise.getQuestions(), exercise.getGroup());
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

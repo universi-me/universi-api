@@ -3,6 +3,7 @@ package me.universi.competence.controller;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import me.universi.api.entities.Response;
 import me.universi.competence.entities.Competence;
@@ -49,19 +50,19 @@ public class CompetenceController {
 
     @GetMapping(value = "/competence/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Optional<Competence> getCompetence(@PathVariable Long id){
-        return competenceService.findById(id);
+    public Competence getCompetence(@PathVariable UUID id){
+        return competenceService.findFirstById(id);
     }
 
     @PutMapping(value = "/competence/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Competence updateCompetence(@RequestBody Competence newCompetence, @PathVariable Long id) throws Exception {
+    public Competence updateCompetence(@RequestBody Competence newCompetence, @PathVariable UUID id) throws Exception {
         return competenceService.update(newCompetence, id);
     }
 
     @DeleteMapping(value = "/competence/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public void delete(@PathVariable Long id){
+    public void delete(@PathVariable UUID id){
         competenceService.delete(id);
     }
 
@@ -88,7 +89,7 @@ public class CompetenceController {
                 throw new CompetenceException("Parametro nivel é nulo.");
             }
 
-            CompetenceType compT = competenceTypeService.findFirstById(Long.valueOf(competenceTypeId));
+            CompetenceType compT = competenceTypeService.findFirstById(competenceTypeId);
             if(compT == null) {
                 throw new CompetenceException("Tipo de Competência não encontrado.");
             }
@@ -128,7 +129,7 @@ public class CompetenceController {
 
 
 
-            Competence competence = competenceService.findFirstById(Long.valueOf(id));
+            Competence competence = competenceService.findFirstById(id);
             if (competence == null) {
                 throw new CompetenceException("Competência não encontrada.");
             }
@@ -142,7 +143,7 @@ public class CompetenceController {
             }
 
             if(competenceTypeId != null && competenceTypeId.length()>0) {
-                CompetenceType compT = competenceTypeService.findFirstById(Long.valueOf(competenceTypeId));
+                CompetenceType compT = competenceTypeService.findFirstById(competenceTypeId);
                 if(compT == null) {
                     throw new CompetenceException("Tipo de Competência não encontrado.");
                 }
@@ -178,7 +179,7 @@ public class CompetenceController {
                 throw new CompetenceException("Parametro competenciaId é nulo.");
             }
 
-            Competence competence = competenceService.findFirstById(Long.valueOf(id));
+            Competence competence = competenceService.findFirstById(id);
             if (competence == null) {
                 throw new CompetenceException("Competência não encontrada.");
             }
@@ -214,7 +215,7 @@ public class CompetenceController {
                 throw new CompetenceException("Parametro competenciaId é nulo.");
             }
 
-            Competence competence = competenceService.findFirstById(Long.valueOf(id));
+            Competence competence = competenceService.findFirstById(id);
             if (competence == null) {
                 throw new CompetenceException("Competencia não encontrada.");
             }

@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 
 @Service
@@ -28,9 +29,9 @@ public class ListQuestionServiceImpl implements ListQuestionService {
     }
 
     @Override
-    public List<Question> listQuestion(Long groupId, Long exerciseId) {
+    public List<Question> listQuestion(UUID groupId, UUID exerciseId) {
         User user = this.userService.getUserInSession();
-        Group group = this.groupRepository.findByIdAndAdminId(groupId,user.getProfile().getId()).orElseThrow(GroupNotFoundException::new);
+        Group group = this.groupRepository.findFirstByIdAndAdminId(groupId,user.getProfile().getId()).orElseThrow(GroupNotFoundException::new);
 
         ExerciseUtil.checkPermissionExercise(user,group);
 

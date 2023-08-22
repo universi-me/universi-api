@@ -2,6 +2,7 @@ package me.universi.capacity.controllers;
 
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -35,8 +36,8 @@ public class VideoController {
     }
 
     @GetMapping("/video/{id}")
-    public ResponseEntity<Video> getVideoById(@PathVariable Long id) {
-        Video video = videoService.getVideoById(id);
+    public ResponseEntity<Video> getVideoById(@PathVariable UUID id) {
+        Video video = videoService.findFirstById(id);
         if (video != null) {
             return ResponseEntity.ok(video);
         } else {
@@ -56,7 +57,7 @@ public class VideoController {
     }
 
     @PutMapping("/edit/{id}")
-    public ResponseEntity<Video> updateVideo(@PathVariable Long id, @Valid @RequestBody Video video) throws VideoException {
+    public ResponseEntity<Video> updateVideo(@PathVariable UUID id, @Valid @RequestBody Video video) throws VideoException {
         video.setId(id);
         boolean result = videoService.saveOrUpdateVideo(video);
 
@@ -68,7 +69,7 @@ public class VideoController {
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteVideo(@PathVariable Long id) {
+    public ResponseEntity<?> deleteVideo(@PathVariable UUID id) {
         boolean result = videoService.deleteVideo(id);
 
         if (result) {

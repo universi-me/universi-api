@@ -4,8 +4,10 @@ import me.universi.subject.entities.Subject;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-@Repository
-public interface SubjectRepository extends JpaRepository<Subject, Long>{
+import java.util.UUID;
 
-    Subject findBySubject(String subject);
+@Repository
+public interface SubjectRepository extends JpaRepository<Subject, UUID>{
+
+    Subject findFirstBySubject(String subject);
 }

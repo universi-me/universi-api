@@ -206,7 +206,7 @@ public class UserController {
             Boolean credentialsExpired = (Boolean)body.get("credentialsExpired");
             Boolean expiredUser = (Boolean)body.get("expiredUser");
 
-            User userEdit = (User) userService.findFirstById(Long.valueOf(userId));
+            User userEdit = (User) userService.findFirstById(userId);
             if(userEdit == null) {
                 throw new UserException("Usuário não encontrado.");
             }

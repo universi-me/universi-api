@@ -12,6 +12,8 @@ import me.universi.util.ExerciseUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 
 @Service
 public class GetQuestionServiceImpl implements GetQuestionService {
@@ -27,13 +29,13 @@ public class GetQuestionServiceImpl implements GetQuestionService {
     }
 
     @Override
-    public Question getQuestion(Long groupId, Long exerciseId, Long questionId) {
+    public Question getQuestion(UUID groupId, UUID exerciseId, UUID questionId) {
         User user = this.userService.getUserInSession();
-        Group group = this.groupRepository.findByIdAndAdminId(groupId,user.getProfile().getId()).orElseThrow(GroupNotFoundException::new);
+        Group group = this.groupRepository.findFirstByIdAndAdminId(groupId,user.getProfile().getId()).orElseThrow(GroupNotFoundException::new);
 
         ExerciseUtil.checkPermissionExercise(user,group);
 
-        return  questionRepository.findByIdAndExercisesId(questionId,exerciseId).orElseThrow(QuestionNotfoundException::new);
+        return  questionRepository.findFirstByIdAndExercisesId(questionId,exerciseId).orElseThrow(QuestionNotfoundException::new);
     }
 
 }

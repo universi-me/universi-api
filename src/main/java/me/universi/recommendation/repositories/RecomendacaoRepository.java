@@ -5,8 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface RecomendacaoRepository extends JpaRepository<Recommendation, Long> {
-    Optional<Recommendation> findFirstById(Long id);
+public interface RecomendacaoRepository extends JpaRepository<Recommendation, UUID> {
+    Optional<Recommendation> findFirstById(UUID id);
 }

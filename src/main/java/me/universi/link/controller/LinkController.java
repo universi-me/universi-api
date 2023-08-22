@@ -80,7 +80,7 @@ public class LinkController {
                 throw new LinkException("Parametro linkId é nulo.");
             }
 
-            Link link = linkService.findFirstById(Long.valueOf(id));
+            Link link = linkService.findFirstById(id);
             if (link == null) {
                 throw new LinkException("Link não encontrada.");
             }
@@ -120,7 +120,7 @@ public class LinkController {
             String tipo = (String)body.get("tipo");
             String nome = (String)body.get("nome");
 
-            Link link = linkService.findFirstById(Long.valueOf(id));
+            Link link = linkService.findFirstById(id);
             if (link == null) {
                 throw new LinkException("Link não encontrada.");
             }
@@ -166,7 +166,7 @@ public class LinkController {
                 throw new LinkException("Parametro linkId é nulo.");
             }
 
-            Link link = linkService.findFirstById(Long.valueOf(id));
+            Link link = linkService.findFirstById(id);
             if (link == null) {
                 throw new LinkException("Link não encontrada.");
             }

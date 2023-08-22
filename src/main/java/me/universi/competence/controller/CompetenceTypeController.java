@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpSession;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api")
@@ -36,20 +37,22 @@ public class CompetenceTypeController {
 
     @GetMapping(value = "/competencetype/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public CompetenceType getCompetenceTypeById(@PathVariable Long id) {
+    public CompetenceType getCompetenceTypeById(@PathVariable UUID id) {
         return competenceTypeService.findFirstById(id);
     }
 
 
     @PutMapping(value = "/admin/competencetype/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public CompetenceType update(@RequestBody CompetenceType newCompetenceType, @PathVariable Long id) throws Exception {
+    public CompetenceType update(@RequestBody CompetenceType newCompetenceType, @PathVariable UUID id) throws Exception {
         return competenceTypeService.update(newCompetenceType, id);
     }
 
     @DeleteMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public void delete(@PathVariable Long id){competenceTypeService.delete(id);}
+    public void delete(@PathVariable UUID id){
+        competenceTypeService.delete(id);
+    }
 
     @PostMapping(value = "/admin/competencetype/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
@@ -94,7 +97,7 @@ public class CompetenceTypeController {
 
             String name = (String)body.get("name");
 
-            CompetenceType competenceType = competenceTypeService.findFirstById(Long.valueOf(id));
+            CompetenceType competenceType = competenceTypeService.findFirstById(id);
             if (competenceType == null) {
                 throw new CompetenceException("Competência não encontrada.");
             }
@@ -130,7 +133,7 @@ public class CompetenceTypeController {
                 throw new CompetenceException("Parâmetro competenceTypeId é nulo.");
             }
 
-            CompetenceType competenceType = competenceTypeService.findFirstById(Long.valueOf(id));
+            CompetenceType competenceType = competenceTypeService.findFirstById(id);
             if (competenceType == null) {
                 throw new CompetenceException("Competência não encontrada.");
             }
@@ -158,7 +161,7 @@ public class CompetenceTypeController {
                 throw new CompetenceException("Parâmetro competenceTypeId é nulo.");
             }
 
-            CompetenceType competenceType = competenceTypeService.findFirstById(Long.valueOf(id));
+            CompetenceType competenceType = competenceTypeService.findFirstById(id);
             if (competenceType == null) {
                 throw new CompetenceException("Competência não encontrada.");
             }

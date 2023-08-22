@@ -10,6 +10,8 @@ import me.universi.util.ExerciseUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 
 @Service
 public class DeleteQuestionServiceImpl implements DeleteQuestionService {
@@ -25,9 +27,9 @@ public class DeleteQuestionServiceImpl implements DeleteQuestionService {
     }
 
     @Override
-    public void deleteQuestion(Long groupId, Long exerciseId, Long questionId) {
+    public void deleteQuestion(UUID groupId, UUID exerciseId, UUID questionId) {
         User user = this.userService.getUserInSession();
-        Group group = this.groupRepository.findByIdAndAdminId(groupId, user.getProfile().getId()).orElseThrow(GroupNotFoundException::new);
+        Group group = this.groupRepository.findFirstByIdAndAdminId(groupId, user.getProfile().getId()).orElseThrow(GroupNotFoundException::new);
 
         ExerciseUtil.checkPermissionExercise(user, group);
 

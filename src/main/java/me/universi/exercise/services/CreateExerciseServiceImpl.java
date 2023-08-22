@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import me.universi.util.ExerciseUtil;
 
+import java.util.UUID;
+
 @Service
 public class CreateExerciseServiceImpl implements CreateExerciseService{
 
@@ -27,9 +29,9 @@ public class CreateExerciseServiceImpl implements CreateExerciseService{
     }
 
     @Override
-    public Exercise createExercise(Long groupId, ExerciseCreateDTO exercise) {
-        Long idProfile =  this.userService.getUserInSession().getProfile().getId();
-        Group group = this.groupRepository.findByIdAndAdminId(
+    public Exercise createExercise(UUID groupId, ExerciseCreateDTO exercise) {
+        UUID idProfile =  this.userService.getUserInSession().getProfile().getId();
+        Group group = this.groupRepository.findFirstByIdAndAdminId(
                 groupId,
                 idProfile
         ).orElseThrow(GroupNotFoundException::new);

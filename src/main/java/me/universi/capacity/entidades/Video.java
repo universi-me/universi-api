@@ -1,24 +1,28 @@
 package me.universi.capacity.entidades;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
+import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-import jakarta.persistence.SequenceGenerator;
-import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import org.hibernate.annotations.CreationTimestamp;
 
-@Entity
-@Table(name="videos")
+import java.util.Date;
+import java.util.UUID;
+
+@Entity(name="video")
 public class Video {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "video_generator")
-    @SequenceGenerator(name = "video_generator", sequenceName = "video_sequence", allocationSize = 1)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id")
+    @NotNull
+    private UUID id;
     
     @Column(unique = true)
     @Size(max = 45)
@@ -43,6 +47,11 @@ public class Video {
     @Min(0)
     @Max(5)
     private Integer rating;
+
+    @CreationTimestamp
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "created_at")
+    private Date createdAt;
     
     // Construtores da Entidade Vídeo
     public Video() {
@@ -58,11 +67,11 @@ public class Video {
     }
 
     // Getters e Setters da Entidade Vídeo
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -113,5 +122,13 @@ public class Video {
 
     public void setRating(Integer rating) {
         this.rating = rating;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
     }
 }

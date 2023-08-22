@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class CurriculumService {
@@ -39,7 +40,7 @@ public class CurriculumService {
         }
 
     }
-    public void delete(Long id) {
+    public void delete(UUID id) {
         curriculumRepository.deleteById(id);
     }
 
@@ -47,11 +48,15 @@ public class CurriculumService {
         return curriculumRepository.findAll();
     }
 
-    public Optional<Curriculum> findById(Long id){
-        return curriculumRepository.findById(id);
+    public Optional<Curriculum> findFirstById(UUID id){
+        return curriculumRepository.findFirstById(id);
     }
 
-    public Curriculum update(Curriculum newCurriculum, Long id) throws Exception{
+    public Optional<Curriculum> findFirstById(String id){
+        return curriculumRepository.findFirstById(UUID.fromString(id));
+    }
+
+    public Curriculum update(Curriculum newCurriculum, UUID id) throws Exception{
         return curriculumRepository.findById(id).map(curriculum -> {
             curriculum.setDescription(newCurriculum.getDescription());
             return curriculumRepository.saveAndFlush(curriculum);
