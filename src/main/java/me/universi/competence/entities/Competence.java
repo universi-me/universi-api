@@ -56,8 +56,8 @@ public class Competence {
     @Column(name = "end_date")
     private Date endDate;
 
-    @Column(name = "current_Date")
-    private Boolean currentDate;
+    @Column(name = "present_Date")
+    private Boolean presentDate;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
@@ -78,13 +78,13 @@ public class Competence {
         this.endDate = endDate;
     }
 
-    public Competence(CompetenceType competenceType, String description, String title, Level level, Date startDate, Boolean currentDate) {
+    public Competence(CompetenceType competenceType, String description, String title, Level level, Date startDate, Boolean presentDate) {
         this.competenceType = competenceType;
         this.description = description;
         this.title = title;
         this.level = level;
         this.startDate = startDate;
-        this.currentDate = currentDate;
+        this.presentDate = presentDate;
     }
 
     public Long getId() {
@@ -135,9 +135,9 @@ public class Competence {
 
     public void setEndDate(Date endDate) { this.endDate = endDate; }
 
-    public Boolean getCurrentDate() { return currentDate; }
+    public Boolean getPresentDate() { return presentDate; }
 
-    public void setCurrentDate(Boolean currentDate) { this.currentDate = currentDate; }
+    public void setPresentDate(Boolean presentDate) { this.presentDate = presentDate; }
 
     public String getTitle() { return title; }
 

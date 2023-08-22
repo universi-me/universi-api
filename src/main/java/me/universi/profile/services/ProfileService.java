@@ -16,8 +16,6 @@ public class ProfileService {
 
     @Autowired
     private PerfilRepository perfilRepository;
-    @Autowired
-    public CompetenceService competenceService;
 
     // Retorna um Perfil passando o id
     public Profile findFirstById(Long id) {

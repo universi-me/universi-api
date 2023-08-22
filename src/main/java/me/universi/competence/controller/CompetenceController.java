@@ -2,6 +2,7 @@ package me.universi.competence.controller;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import me.universi.api.entities.Response;
 import me.universi.competence.entities.Competence;
@@ -10,11 +11,13 @@ import me.universi.competence.enums.Level;
 import me.universi.competence.exceptions.CompetenceException;
 import me.universi.competence.services.CompetenceService;
 import me.universi.competence.services.CompetenceTypeService;
+import me.universi.curriculum.entities.Curriculum;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,6 +34,36 @@ public class CompetenceController {
 
     @Autowired
     public UserService userService;
+
+    @PostMapping(value = "/competence")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Competence createCompetence(@RequestBody Competence newCompetence) throws Exception {
+        return  competenceService.save(newCompetence);
+    }
+
+    @GetMapping(value = "/competence")
+    @ResponseStatus(HttpStatus.OK)
+    public List<Competence> getAllCompetence(){
+        return competenceService.findAll();
+    }
+
+    @GetMapping(value = "/competence/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public Optional<Competence> getCompetence(@PathVariable Long id){
+        return competenceService.findById(id);
+    }
+
+    @PutMapping(value = "/competence/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public Competence updateCompetence(@RequestBody Competence newCompetence, @PathVariable Long id) throws Exception {
+        return competenceService.update(newCompetence, id);
+    }
+
+    @DeleteMapping(value = "/competence/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public void delete(@PathVariable Long id){
+        competenceService.delete(id);
+    }
 
     @PostMapping(value = "/competencia/criar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody

@@ -1,5 +1,6 @@
 package me.universi.curriculum.services;
 
+import me.universi.competence.services.CompetenceService;
 import me.universi.curriculum.entities.Curriculum;
 import me.universi.curriculum.repositories.CurriculumRepository;
 import me.universi.profile.services.ProfileService;
@@ -16,12 +17,15 @@ public class CurriculumService {
     private CurriculumRepository curriculumRepository;
     public ProfileService profileService;
     public UserService userService;
+    public CompetenceService competenceService;
 
-    public CurriculumService(CurriculumRepository curriculumRepository, ProfileService profileService, UserService userService){
+    public CurriculumService(CurriculumRepository curriculumRepository, ProfileService profileService, UserService userService, CompetenceService competenceService){
         this.curriculumRepository = curriculumRepository;
         this.profileService = profileService;
         this.userService = userService;
+        this.competenceService = competenceService;
     }
+
 
     public Curriculum save(Curriculum curriculum) throws Exception{
         try {
