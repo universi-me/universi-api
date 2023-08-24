@@ -1,48 +1,58 @@
 package me.universi.capacity.entidades;
 
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
-import jakarta.persistence.Entity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import org.hibernate.annotations.CreationTimestamp;
-
+import java.util.Collection;
 import java.util.Date;
 import java.util.UUID;
+import me.universi.profile.entities.Profile;
+import org.hibernate.annotations.CreationTimestamp;
 
 @Entity(name="video")
 public class Video {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id")
-    @NotNull
     private UUID id;
-    
-    @Column(unique = true)
-    @Size(max = 45)
+
+    @Column(name = "url")
+    @Size(max = 100)
     private String url;
     
-    @Column(unique = true)
+    @Column(name = "title")
     @Size(max = 100)
     private String title;
-    
-    @Column
+
+    @Column(name = "image")
+    @Size(max = 100)
+    private String image;
+
+    @Column(name = "description")
     @Size(max = 200)
     private String description;
 
-    @Column
-    private String category;
+    @OneToOne(cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "category_id", referencedColumnName = "id")
+    private VideoCategory category;
 
-    @Column
-    private String playlist;
+    @ManyToMany(mappedBy = "videos", cascade = CascadeType.ALL)
+    private Collection<VideoPlaylist> playlists;
     
-    @Column
+    @Column(name = "rating")
     @NotNull
     @Min(0)
     @Max(5)
@@ -52,21 +62,14 @@ public class Video {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at")
     private Date createdAt;
-    
-    // Construtores da Entidade Vídeo
+
+    @OneToOne(cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "profile_id", referencedColumnName = "id")
+    private Profile author;
+
     public Video() {
     }
 
-    public Video(String url, String title, String description, String category, Integer rating, String playlist) {
-        this.url = url;
-        this.title = title;
-        this.description = description;
-        this.category = category;
-        this.rating = rating;
-        this.playlist = playlist;
-    }
-
-    // Getters e Setters da Entidade Vídeo
     public UUID getId() {
         return id;
     }
@@ -87,6 +90,14 @@ public class Video {
         return title;
     }
 
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
+
     public void setTitle(String title) {
         this.title = title;
     }
@@ -99,21 +110,12 @@ public class Video {
         this.description = description;
     }
 
-    public String getcategory() {
+    public VideoCategory getCategory() {
         return category;
     }
-    
 
-    public void setcategory(String category) {
+    public void setCategory(VideoCategory category) {
         this.category = category;
-    }
-
-    public String getPlaylist() {
-        return playlist;
-    }
-
-    public void setPLaylist(String playlist) {
-        this.playlist = playlist;
     }
 
     public Integer getRating() {
@@ -131,4 +133,21 @@ public class Video {
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
     }
+
+    public Collection<VideoPlaylist> getPlaylists() {
+        return playlists;
+    }
+
+    public void setPlaylists(Collection<VideoPlaylist> playlist) {
+        this.playlists = playlist;
+    }
+
+    public Profile getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(Profile author) {
+        this.author = author;
+    }
+
 }

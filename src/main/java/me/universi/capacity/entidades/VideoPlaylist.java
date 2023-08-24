@@ -1,17 +1,22 @@
 package me.universi.capacity.entidades;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
-import jakarta.persistence.Entity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import me.universi.profile.entities.Profile;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Collection;
@@ -23,25 +28,30 @@ public class VideoPlaylist {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id")
-    @NotNull
     private UUID id;
 
     @Column
+    @Size(max = 100)
     private String name;
 
     @Column
+    @Size(max = 100)
     private String image;
 
     @Column
+    @Size(max = 200)
     private String description;
+
+    @OneToOne(cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "category_id", referencedColumnName = "id")
+    private VideoCategory category;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at")
     private Date createdAt;
 
-    @Column
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL)
     @JsonIgnore
     private Collection<Video> videos;
 
@@ -50,6 +60,10 @@ public class VideoPlaylist {
     @Min(0)
     @Max(5)
     private Integer rating;
+
+    @OneToOne(cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "profile_id", referencedColumnName = "id")
+    private Profile author;
 
     public VideoPlaylist() {
     }
@@ -86,6 +100,14 @@ public class VideoPlaylist {
         return this.description;
     }
 
+    public VideoCategory getCategory() {
+        return category;
+    }
+
+    public void setCategory(VideoCategory category) {
+        this.category = category;
+    }
+
     public Date getCreatedAt() {
         return createdAt;
     }
@@ -108,5 +130,13 @@ public class VideoPlaylist {
 
     public Integer getRating() {
         return this.rating;
+    }
+
+    public Profile getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(Profile author) {
+        this.author = author;
     }
 }
