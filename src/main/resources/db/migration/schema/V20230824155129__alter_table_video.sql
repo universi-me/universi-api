@@ -5,7 +5,7 @@ ALTER TABLE video
 	DROP COLUMN playlist;
 
 ALTER TABLE video
-    ALTER COLUMN "url" VARCHAR(100);
+    ALTER COLUMN "url" TYPE VARCHAR(100);
 
 ALTER TABLE video
 	ADD COLUMN "category_id" UUID;
