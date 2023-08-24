@@ -91,7 +91,7 @@ public class GroupService {
         Profile profile = user.getProfile();
         if (userService.userNeedAnProfile(user)) {
             throw new GroupException("Você precisa criar um Perfil.");
-        } else if(group.getAdmin().getId() != profile.getId()) {
+        } else if(!Objects.equals(group.getAdmin().getId(), profile.getId())) {
             if(!userService.isUserAdmin(user)) {
                 throw new GroupException("Apenas administradores podem editar seus grupos!");
             }
@@ -172,7 +172,7 @@ public class GroupService {
     public Profile getParticipantInGroup(Group group, UUID participantId) {
         if(participantId != null && group.getParticipants() != null) {
             for (Profile participantNow : group.getParticipants()) {
-                if (participantNow.getId() == participantId) {
+                if (Objects.equals(participantNow.getId(), participantId)) {
                     return participantNow;
                 }
             }

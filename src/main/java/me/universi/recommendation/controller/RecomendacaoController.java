@@ -24,6 +24,7 @@ import me.universi.recommendation.service.RecomendacaoService;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api")
@@ -49,11 +50,6 @@ public class RecomendacaoController {
         Response resposta = new Response();
         try {
 
-            String origem = (String)body.get("origem");
-            if(origem == null) {
-                throw new RecomendacaoInvalidaException("Parametro origem é nulo.");
-            }
-
             String destino = (String)body.get("destino");
             if(destino == null) {
                 throw new RecomendacaoInvalidaException("Parametro destino é nulo.");
@@ -64,17 +60,14 @@ public class RecomendacaoController {
                 throw new RecomendacaoInvalidaException("Parametro competenciaTipoId é nulo.");
             }
 
-            Profile profileOrigem = profileService.findFirstById(origem);
-            if(profileOrigem == null) {
-                throw new RecomendacaoInvalidaException("Perfil origem não encontrado.");
-            }
-
-            Profile profileDestino = profileService.findFirstById(destino);
-            if(profileDestino == null) {
+            Profile profileDestiny = profileService.findFirstById(destino);
+            if(profileDestiny == null) {
                 throw new RecomendacaoInvalidaException("Perfil destino não encontrado.");
             }
 
-            if(profileOrigem.getId() == profileDestino.getId()) {
+            Profile profileOrigin = userService.getUserInSession().getProfile();
+
+            if(userService.isSessionOfUser(profileDestiny.getUser())) {
                 throw new RecomendacaoInvalidaException("Você não pode recomendar-se.");
             }
 
@@ -86,8 +79,8 @@ public class RecomendacaoController {
             String descricao = (String)body.get("descricao");
 
             Recommendation recomendacoNew = new Recommendation();
-            recomendacoNew.setDestiny(profileDestino);
-            recomendacoNew.setOrigin(profileOrigem);
+            recomendacoNew.setDestiny(profileDestiny);
+            recomendacoNew.setOrigin(profileOrigin);
             recomendacoNew.setCompetenceType(compT);
 
             if(descricao != null && descricao.length() > 0) {
@@ -97,7 +90,7 @@ public class RecomendacaoController {
             recomendacaoService.save(recomendacoNew);
 
             resposta.message = "A sua recomendação foi feita.";
-            resposta.redirectTo = "/p/" + profileDestino.getUser().getUsername();
+            resposta.redirectTo = "/p/" + profileDestiny.getUser().getUsername();
             resposta.success = true;
             return resposta;
 
@@ -127,9 +120,7 @@ public class RecomendacaoController {
                 throw new GroupException("Recomendação não encontrada.");
             }
 
-            User user = userService.getUserInSession();
-
-            if(user.getProfile().getId() != recommendation.getOrigin().getId()) {
+            if(!userService.isSessionOfUser(recommendation.getOrigin().getUser())) {
                 throw new GroupException("Você não tem permissão para editar esta Recomendação.");
             }
 
@@ -173,9 +164,7 @@ public class RecomendacaoController {
                 throw new GroupException("Recomendação não encontrada.");
             }
 
-            User user = userService.getUserInSession();
-
-            if(user.getProfile().getId() != recommendation.getOrigin().getId()) {
+            if(!userService.isSessionOfUser(recommendation.getOrigin().getUser())) {
                 throw new GroupException("Você não tem permissão para remover esta Recomendação.");
             }
 
@@ -209,7 +198,6 @@ public class RecomendacaoController {
 
             resposta.body.put("recomendacao", recommendation);
 
-            resposta.message = "Operação realizada com exito.";
             resposta.success = true;
             return resposta;
 
@@ -229,7 +217,6 @@ public class RecomendacaoController {
 
             resposta.body.put("lista", recs);
 
-            resposta.message = "Operação realizada com exito.";
             resposta.success = true;
             return resposta;
 

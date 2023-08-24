@@ -134,11 +134,7 @@ public class CompetenceController {
                 throw new CompetenceException("Competência não encontrada.");
             }
 
-            User user = userService.getUserInSession();
-
-            Profile profile = user.getProfile();
-
-            if(competence.getProfile().getId() != profile.getId()) {
+            if(!userService.isSessionOfUser(competence.getProfile().getUser())) {
                 throw new CompetenceException("Você não tem permissão para editar esta Competêcia.");
             }
 
@@ -184,11 +180,7 @@ public class CompetenceController {
                 throw new CompetenceException("Competência não encontrada.");
             }
 
-            User user = userService.getUserInSession();
-
-            Profile profile = user.getProfile();
-
-            if(competence.getProfile().getId() != profile.getId()) {
+            if(!userService.isSessionOfUser(competence.getProfile().getUser())) {
                 throw new CompetenceException("Você não tem permissão para editar esta Competêcia.");
             }
 
