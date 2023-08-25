@@ -1,16 +1,16 @@
 package me.universi.capacity.entidades;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.NotNull;
 import me.universi.profile.entities.Profile;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -37,8 +37,9 @@ public class VideoCategory {
     @Column(name = "created_at")
     private Date createdAt;
 
-    @OneToOne(cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "profile_id", referencedColumnName = "id")
+    @ManyToOne
+    @JoinColumn(name="profile_id")
+    @NotNull
     private Profile author;
 
     public VideoCategory() {

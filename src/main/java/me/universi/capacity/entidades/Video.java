@@ -11,6 +11,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -63,8 +64,9 @@ public class Video {
     @Column(name = "created_at")
     private Date createdAt;
 
-    @OneToOne(cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "profile_id", referencedColumnName = "id")
+    @ManyToOne
+    @JoinColumn(name="profile_id")
+    @NotNull
     private Profile author;
 
     public Video() {
