@@ -397,12 +397,12 @@ public class VideoController {
         Response response = new Response(); // default
         try {
 
-            Object videoId = body.get("id");
-            if(videoId == null) {
+            Object categoryId = body.get("id");
+            if(categoryId == null) {
                 throw new VideoException("ID da Categoria não informado.");
             }
 
-            VideoCategory videoCategory = videoService.getCategoryById(UUID.fromString(String.valueOf(videoId)));
+            VideoCategory videoCategory = videoService.getCategoryById(UUID.fromString(String.valueOf(categoryId)));
             if(videoCategory == null) {
                 throw new VideoException("Categoria não encontrado.");
             }
@@ -411,7 +411,7 @@ public class VideoController {
                 throw new VideoException("Você não tem permissão para editar esta categoria.");
             }
 
-            boolean result = videoService.deleteVideoCategory(UUID.fromString(String.valueOf(videoId)));
+            boolean result = videoService.deleteVideoCategory(UUID.fromString(String.valueOf(categoryId)));
             if(!result) {
                 throw new VideoException("Erro ao deletar Categoria.");
             }
@@ -431,12 +431,12 @@ public class VideoController {
         Response response = new Response(); // default
         try {
 
-            Object categoryId = body.get("id");
-            if(categoryId == null) {
+            Object playlistId = body.get("id");
+            if(playlistId == null) {
                 throw new VideoException("ID da playlist não informado.");
             }
 
-            response.body.put("playlist", videoService.getPlaylistById(UUID.fromString(String.valueOf(categoryId))));
+            response.body.put("playlist", videoService.getPlaylistById(UUID.fromString(String.valueOf(playlistId))));
             response.success = true;
 
         } catch (Exception e) {
@@ -502,8 +502,8 @@ public class VideoController {
         Response response = new Response(); // default
         try {
 
-            Object categoryId = body.get("id");
-            if(categoryId == null) {
+            Object playlistId = body.get("id");
+            if(playlistId == null) {
                 throw new VideoException("ID da categoria não informado.");
             }
 
@@ -513,7 +513,7 @@ public class VideoController {
             Object rating = body.get("rating");
             Object category = body.get("category");
 
-            VideoPlaylist videoPlaylist = videoService.getPlaylistById(UUID.fromString(String.valueOf(categoryId)));
+            VideoPlaylist videoPlaylist = videoService.getPlaylistById(UUID.fromString(String.valueOf(playlistId)));
             if(videoPlaylist == null) {
                 throw new VideoException("Playlist não encontrado.");
             }
@@ -558,18 +558,18 @@ public class VideoController {
         Response response = new Response(); // default
         try {
 
-            Object videoId = body.get("id");
-            if(videoId == null) {
+            Object playlistId = body.get("id");
+            if(playlistId == null) {
                 throw new VideoException("ID da Playlist não informado.");
             }
 
-            VideoPlaylist videoPlaylist = videoService.getPlaylistById(UUID.fromString(String.valueOf(videoId)));
+            VideoPlaylist videoPlaylist = videoService.getPlaylistById(UUID.fromString(String.valueOf(playlistId)));
 
             if(!UserService.getInstance().isSessionOfUser(videoPlaylist.getAuthor().getUser())) {
                 throw new VideoException("Você não tem permissão para editar esta playlist.");
             }
 
-            boolean result = videoService.deleteVideoPlaylist(UUID.fromString(String.valueOf(videoId)));
+            boolean result = videoService.deleteVideoPlaylist(UUID.fromString(String.valueOf(playlistId)));
             if(!result) {
                 throw new VideoException("Erro ao deletar Playlist.");
             }
