@@ -1,5 +1,6 @@
 package me.universi.capacity.entidades;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -32,11 +33,13 @@ public class VideoCategory {
     @Size(max = 100)
     private String image;
 
+    @JsonIgnore
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at")
     private Date createdAt;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name="profile_id")
     @NotNull
