@@ -18,7 +18,7 @@ import me.universi.capacity.repository.VideoRepository;
 
 
 @Service
-public class VideoService implements VideoServiceInterface{
+public class VideoService implements VideoServiceInterface {
     
     private final VideoRepository videoRepo;
 
@@ -95,8 +95,12 @@ public class VideoService implements VideoServiceInterface{
         if(videoCategory == null) {
             throw new VideoException("Categoria não encontrada.");
         }
-        return videoRepo.findByCategory(videoCategory);
-    } //Listar vídeo por categoria
+        return videoRepo.findByCategories(videoCategory);
+    }
+
+    public List<Video> getVideosByCategory(String categoryId) throws VideoException {
+        return getVideosByCategory(UUID.fromString(categoryId));
+    }
 
     public List<VideoCategory> getVideoAllCategory() {
         return videoCategoryRepository.findAll();
@@ -108,7 +112,11 @@ public class VideoService implements VideoServiceInterface{
             throw new VideoException("Playlist não encontrada.");
         }
         return videoPlaylist.getVideos();
-    } //Listar vídeo por categoria
+    }
+
+    public Collection<Video> getVideosByPlaylist(String playlistId) throws VideoException {
+        return getVideosByPlaylist(UUID.fromString(playlistId));
+    }
 
     public boolean saveOrUpdateVideoCategory(VideoCategory category) throws VideoException {
         boolean titleExists = videoCategoryRepository.existsByName(category.getName());
@@ -144,7 +152,7 @@ public class VideoService implements VideoServiceInterface{
         return videoPlaylistRepository.findFirstById(UUID.fromString(playlistId));
     }
 
-    public void addOrRemoveVideoFromPlaylist(String playlistId, String videoId, boolean isAdding) throws VideoException {
+    public void addOrRemoveVideoFromPlaylist(Object playlistId, Object videoId, boolean isAdding) throws VideoException {
         if(playlistId == null) {
             throw new VideoException("Parametro playlistId é nulo.");
         }
@@ -152,30 +160,25 @@ public class VideoService implements VideoServiceInterface{
             throw new VideoException("Parametro videoId é nulo.");
         }
 
-        VideoPlaylist playlist = findFirstPlaylistById(playlistId);
-        if(playlist == null) {
-            throw new VideoException("Playlist não encontrada.");
+        Object videoIds = videoId;
+        if(videoIds instanceof String) {
+            videoIds = new ArrayList<String>() {{ add((String) videoId); }};
         }
-
-        Video video = findFirstById(videoId);
-        if(video == null) {
-            throw new VideoException("Video não encontrado.");
-        }
-
-        if(!UserService.getInstance().isSessionOfUser(playlist.getAuthor().getUser())) {
-            throw new VideoException("Você não tem permissão para alterar essa playlist.");
-        }
-
-        if(isAdding) {
-            playlist.getVideos().remove(video);
-            playlist.getVideos().add(video);
-        } else {
-            playlist.getVideos().remove(video);
-        }
-
-        boolean result = saveOrUpdateVideo(video);
-        if(!result) {
-            throw new VideoException("Erro ao adicionar video a playlist.");
+        if(videoIds instanceof ArrayList) {
+            for (String videoIdNow : (ArrayList<String>) videoIds) {
+                if (videoIdNow == null || videoIdNow.isEmpty()) {
+                    continue;
+                }
+                Video video = findFirstById(videoIdNow);
+                if (video == null) {
+                    throw new VideoException("Video não encontrado.");
+                }
+                addOrRemovePlaylistsFromVideo(video, playlistId, isAdding);
+                boolean result = saveOrUpdateVideo(video);
+                if (!result) {
+                    throw new VideoException("Erro ao adicionar video a playlist.");
+                }
+            }
         }
     }
 
@@ -187,6 +190,10 @@ public class VideoService implements VideoServiceInterface{
         return videoCategory;
     }
 
+    public VideoCategory getCategoryById(String uuid) throws VideoException {
+        return getCategoryById(UUID.fromString(uuid));
+    }
+
     public VideoPlaylist getPlaylistById(UUID uuid) throws VideoException {
         VideoPlaylist videoPlaylist = videoPlaylistRepository.findFirstById(uuid);
         if(videoPlaylist == null) {
@@ -194,4 +201,92 @@ public class VideoService implements VideoServiceInterface{
         }
         return videoPlaylist;
     }
+
+    public VideoPlaylist getPlaylistById(String uuid) throws VideoException {
+        return getPlaylistById(UUID.fromString(uuid));
+    }
+
+    public Collection<VideoPlaylist> getPlaylistByCategory(UUID videoCategory) throws VideoException {
+        VideoCategory category = videoCategoryRepository.findFirstById(videoCategory);
+        if(category == null) {
+            throw new VideoException("Categoria não encontrada.");
+        }
+        return videoPlaylistRepository.findByCategories(category);
+    }
+
+    public Collection<VideoPlaylist> getPlaylistByCategory(String videoCategory) throws VideoException {
+        return getPlaylistByCategory(UUID.fromString(videoCategory));
+    }
+
+    public void addOrRemoveCategoriesFromVideoOrPlaylist(Object videoOrPlaylist, Object categoriesId, boolean isAdding, boolean removeAllBefore) throws VideoException {
+        Object categoriesIds = categoriesId;
+        if(categoriesId instanceof String) {
+            categoriesIds = new ArrayList<String>() {{ add((String) categoriesId); }};
+        }
+        if(categoriesIds instanceof ArrayList) {
+            for(String categoryId : (ArrayList<String>) categoriesIds) {
+                if(categoryId==null || categoryId.isEmpty()) {
+                    continue;
+                }
+                VideoCategory category = getCategoryById(categoryId);
+                if(category == null) {
+                    throw new VideoException("Categoria não encontrada.");
+                }
+                if(videoOrPlaylist instanceof Video) {
+                    if(removeAllBefore) {
+                        ((Video)videoOrPlaylist).getCategories().clear();
+                    }
+                    if (isAdding) {
+                        if (!((Video)videoOrPlaylist).getCategories().contains(category)) {
+                            ((Video)videoOrPlaylist).getCategories().add(category);
+                        }
+                    } else {
+                        ((Video)videoOrPlaylist).getCategories().remove(category);
+                    }
+                } else if(videoOrPlaylist instanceof VideoPlaylist) {
+                    if(removeAllBefore) {
+                        ((VideoPlaylist)videoOrPlaylist).getCategories().clear();
+                    }
+                    if (isAdding) {
+                        if (!((VideoPlaylist)videoOrPlaylist).getCategories().contains(category)) {
+                            ((VideoPlaylist)videoOrPlaylist).getCategories().add(category);
+                        }
+                    } else {
+                        ((VideoPlaylist)videoOrPlaylist).getCategories().remove(category);
+                    }
+                }
+            }
+        }
+    }
+
+    public void addOrRemovePlaylistsFromVideo(Video video, Object playlistsId, boolean isAdding) throws VideoException {
+        Object playlistsIds = playlistsId;
+        if(playlistsIds instanceof String) {
+            playlistsIds = new ArrayList<String>() {{ add((String) playlistsId); }};
+        }
+        if(playlistsIds instanceof ArrayList) {
+            for(String playlistId : (ArrayList<String>)playlistsIds) {
+                if(playlistId==null || playlistId.isEmpty()) {
+                    continue;
+                }
+                VideoPlaylist playlist = getPlaylistById(playlistId);
+                if(playlist == null) {
+                    throw new VideoException("Playlist não encontrada.");
+                }
+                if(!UserService.getInstance().isSessionOfUser(playlist.getAuthor().getUser())) {
+                    if(!UserService.getInstance().isUserAdmin(UserService.getInstance().getUserInSession())) {
+                        throw new VideoException("Você não tem permissão para alterar essa playlist.");
+                    }
+                }
+                if(isAdding) {
+                    if(!playlist.getVideos().contains(video)) {
+                        playlist.getVideos().add(video);
+                    }
+                } else {
+                    playlist.getVideos().remove(video);
+                }
+            }
+        }
+    }
+
 }

@@ -1,7 +1,8 @@
 package me.universi.capacity.entidades;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.CascadeType;
@@ -46,9 +47,8 @@ public class Video {
     @Size(max = 200)
     private String description;
 
-    @OneToOne(cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "category_id", referencedColumnName = "id")
-    private VideoCategory category;
+    @OneToMany(cascade = CascadeType.PERSIST)
+    private Collection<VideoCategory> categories;
 
     @ManyToMany(mappedBy = "videos", cascade = CascadeType.ALL)
     private Collection<VideoPlaylist> playlists;
@@ -112,12 +112,12 @@ public class Video {
         this.description = description;
     }
 
-    public VideoCategory getCategory() {
-        return category;
+    public Collection<VideoCategory> getCategories() {
+        return categories;
     }
 
-    public void setCategory(VideoCategory category) {
-        this.category = category;
+    public void setCategories(Collection<VideoCategory> categories) {
+        this.categories = categories;
     }
 
     public Integer getRating() {

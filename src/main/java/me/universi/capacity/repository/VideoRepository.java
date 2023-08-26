@@ -14,5 +14,5 @@ public interface VideoRepository extends JpaRepository<Video, UUID> {
     boolean existsByTitle(String title);
     boolean existsByUrl(String url);
 
-    List<Video> findByCategory(VideoCategory videoCategory);
+    List<Video> findByCategories(VideoCategory videoCategory);
 }
