@@ -233,6 +233,9 @@ public class VideoService implements VideoServiceInterface {
                     throw new VideoException("Categoria não encontrada.");
                 }
                 if(videoOrPlaylist instanceof Video) {
+                    if(((Video)videoOrPlaylist).getCategories() == null) {
+                        ((Video)videoOrPlaylist).setCategories(new ArrayList<>());
+                    }
                     if(removeAllBefore) {
                         ((Video)videoOrPlaylist).getCategories().clear();
                     }
@@ -244,6 +247,9 @@ public class VideoService implements VideoServiceInterface {
                         ((Video)videoOrPlaylist).getCategories().remove(category);
                     }
                 } else if(videoOrPlaylist instanceof VideoPlaylist) {
+                    if(((VideoPlaylist)videoOrPlaylist).getCategories() == null) {
+                        ((VideoPlaylist)videoOrPlaylist).setCategories(new ArrayList<>());
+                    }
                     if(removeAllBefore) {
                         ((VideoPlaylist)videoOrPlaylist).getCategories().clear();
                     }
@@ -277,6 +283,9 @@ public class VideoService implements VideoServiceInterface {
                     if(!UserService.getInstance().isUserAdmin(UserService.getInstance().getUserInSession())) {
                         throw new VideoException("Você não tem permissão para alterar essa playlist.");
                     }
+                }
+                if(playlist.getVideos() == null) {
+                    playlist.setVideos(new ArrayList<>());
                 }
                 if(isAdding) {
                     if(!playlist.getVideos().contains(video)) {
