@@ -492,4 +492,25 @@ public class GrupoController {
             return response;
         }
     }
+
+    @PostMapping(value = "/parents", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response list_available_parents(@RequestBody Map<String, Object> body) {
+        Response response = new Response();
+        try {
+            Collection<Group> groups = groupService.findAll().stream()
+                .filter(Group::isCanCreateGroup)
+                .toList();
+
+            response.body.put("groups", groups);
+            response.success = true;
+        }
+
+        catch (Exception e) {
+            response.message = e.getMessage();
+            response.success = false;
+        }
+
+        return response;
+    }
 }
