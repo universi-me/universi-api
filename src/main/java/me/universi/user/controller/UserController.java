@@ -111,7 +111,7 @@ public class UserController {
             if (username==null || username.length()==0 || !userService.usernameRegex(username)) {
                 throw new UserException("Verifique o campo Usuário!");
             }
-            if (email==null || email.length()==0 || !userService.emailRegex(email + "@dcx.ufpb.br")) {
+            if (email==null || email.length()==0 || !userService.emailRegex(email)) {
                 throw new UserException("Verifique o campo Email!");
             }
             if (password==null || password.length()==0) {
@@ -127,8 +127,7 @@ public class UserController {
 
             User user = new User();
             user.setName(username);
-            // only for dcx
-            user.setEmail(email + "@dcx.ufpb.br");
+            user.setEmail(email);
             user.setPassword(userService.encodePassword(password));
 
             userService.createUser(user);
