@@ -1,12 +1,12 @@
 package me.universi.competence.services;
 
 import me.universi.competence.entities.Competence;
+import me.universi.competence.entities.CompetenceType;
 import me.universi.competence.repositories.CompetenceRepository;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -20,11 +20,13 @@ public class CompetenceService {
     private CompetenceRepository competenceRepository;
     private ProfileService profileService;
     private UserService userService;
+    private CompetenceTypeService competenceTypeService;
 
-    public CompetenceService(CompetenceRepository competenceRepository, ProfileService profileService, UserService userService){
+    public CompetenceService(CompetenceRepository competenceRepository, ProfileService profileService, UserService userService, CompetenceTypeService competenceTypeService){
         this.competenceRepository = competenceRepository;
         this.profileService = profileService;
         this.userService = userService;
+        this.competenceTypeService = competenceTypeService;
     }
 
     public Competence findFirstById(UUID id) {
