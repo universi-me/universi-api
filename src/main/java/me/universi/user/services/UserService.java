@@ -1,6 +1,11 @@
 package me.universi.user.services;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.List;
 import me.universi.Sys;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
@@ -34,11 +39,6 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import jakarta.servlet.http.HttpSession;
 
-import java.util.Collection;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
@@ -64,9 +64,9 @@ public class UserService implements UserDetailsService {
     }
 
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<User> usuario = userRepository.findFirstByName(username);
-        if (usuario.isPresent()) {
-            return usuario.get();
+        Optional<User> user = userRepository.findFirstByName(username);
+        if (user.isPresent()) {
+            return user.get();
         }
         if(emailRegex(username)) {
             try {
@@ -79,19 +79,16 @@ public class UserService implements UserDetailsService {
     }
 
     public UserDetails findFirstByEmail(String email) throws UserException {
-        Optional<User> usuario = userRepository.findFirstByEmail(email);
-        if (usuario.isPresent()) {
-            return usuario.get();
+        Optional<User> user = userRepository.findFirstByEmail(email);
+        if (user.isPresent()) {
+            return user.get();
         }
         throw new UserException("Email de Usuário não encontrado!");
     }
 
     public UserDetails findFirstById(UUID id) {
         Optional<User> userGet = userRepository.findFirstById(id);
-        if (userGet.isPresent()) {
-            return userGet.get();
-        }
-        return null;
+        return userGet.orElse(null);
     }
 
     public UserDetails findFirstById(String id) {
@@ -106,7 +103,7 @@ public class UserService implements UserDetailsService {
         }
         user.setAuthority(Authority.ROLE_USER);
 
-        userRepository.saveAndFlush((User)user);
+        userRepository.saveAndFlush(user);
 
         if(user.getProfile() == null) {
             Profile userProfile = new Profile();
@@ -124,8 +121,8 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    public String encodePassword(String senha) {
-        return passwordEncoder.encode(senha);
+    public String encodePassword(String rawPassword) {
+        return passwordEncoder.encode(rawPassword);
     }
 
     public boolean usernameExist(String username) {
@@ -151,17 +148,23 @@ public class UserService implements UserDetailsService {
     }
 
     public boolean usernameRegex(String username) {
-        String usuarioRegex = "^[a-z0-9_-]+$";
-        Pattern emailPattern = Pattern.compile(usuarioRegex, Pattern.CASE_INSENSITIVE);
-        Matcher matcher = emailPattern.matcher(username);
-        return matcher.find();
+        return matchRegex(username, "^[a-z0-9_.-]+$");
+    }
+
+    public boolean passwordRegex(String password) {
+        return matchRegex(password, "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[^A-Za-zçÇ]).{8,}$");
     }
 
     public boolean emailRegex(String email) {
-        String emailRegex = "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$";
-        Pattern emailPattern = Pattern.compile(emailRegex, Pattern.CASE_INSENSITIVE);
-        Matcher matcher = emailPattern.matcher(email);
-        return matcher.find();
+        return matchRegex(email, "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$");
+    }
+
+    public boolean matchRegex(String input, String expression) {
+        try {
+            return Pattern.compile(expression, Pattern.CASE_INSENSITIVE).matcher(input).find();
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public boolean passwordValid(User user, String rawPassword) {
@@ -203,10 +206,7 @@ public class UserService implements UserDetailsService {
     public User getUserInSession() {
         HttpSession session = getActiveSession();
         if(session != null) {
-            User userSession = (User) session.getAttribute("usuario");
-            if(userSession != null) {
-                return userSession;
-            }
+            return (User) session.getAttribute("usuario");
         }
         return null;
     }
@@ -247,10 +247,7 @@ public class UserService implements UserDetailsService {
     // check if user has authority following springsecurity hierarchy
     public boolean userHasAuthority(User user, Authority authority) {
         Collection<? extends GrantedAuthority> reachableRoles = roleHierarchy.getReachableGrantedAuthorities(user.getAuthorities());
-        if (reachableRoles.contains(new SimpleGrantedAuthority(authority.toString()))) {
-            return true;
-        }
-        return false;
+        return reachableRoles.contains(new SimpleGrantedAuthority(authority.toString()));
     }
 
     public boolean isUserAdmin(User userSession) {
@@ -263,10 +260,7 @@ public class UserService implements UserDetailsService {
 
     public boolean userNeedAnProfile(User user) {
         try {
-            if((user.getProfile()==null || user.getProfile().getFirstname()==null) && !isUserAdmin(user)) {
-                return true;
-            }
-            return false;
+            return (user.getProfile() == null || user.getProfile().getFirstname() == null) && !isUserAdmin(user);
         } catch (Exception e) {
             return true;
         }
@@ -327,9 +321,11 @@ public class UserService implements UserDetailsService {
             if (principal instanceof UserDetails) {
                 String usernameNow = ((UserDetails) principal).getUsername();
                 if(usernameNow.equals(username))  {
-                    for(SessionInformation sInfo : sessionRegistry.getAllSessions(principal, false)) {
+                    List<SessionInformation> activeSessions = sessionRegistry.getAllSessions(principal, false);
+                    if(activeSessions != null && !activeSessions.isEmpty()) {
                         return true;
                     }
+                    break;
                 }
             }
         }
