@@ -164,9 +164,7 @@ public class UserService implements UserDetailsService {
 
     public boolean matchRegex(String input, String expression) {
         try {
-            Pattern pattern = Pattern.compile(expression, Pattern.CASE_INSENSITIVE);
-            Matcher matcher = pattern.matcher(input);
-            return matcher.find();
+            return Pattern.compile(expression, Pattern.CASE_INSENSITIVE).matcher(input).find();
         } catch (Exception e) {
             return false;
         }
