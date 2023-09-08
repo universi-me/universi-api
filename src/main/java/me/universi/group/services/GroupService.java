@@ -189,36 +189,6 @@ public class GroupService {
                 available = nicknameRegex(nickname);
             }
 
-            String[] reservedWords = new String[] {
-                    "admin",
-                    "rem-participante",
-                    "add-participante",
-                    "participantes",
-                    "adicionar",
-                    "remover",
-                    "conta",
-                    "grupo",
-                    "grupos",
-                    "editar",
-                    "criar",
-                    "obter",
-                    "listar",
-                    "competencia",
-                    "atualizar",
-                    "recomendacao",
-                    "perfil",
-                    "registrar",
-                    "login",
-                    "logout",
-                    "login.js",
-                    "usuario",
-                    ""
-            };
-
-            if(Arrays.asList(reservedWords).contains(nicknameLower)) {
-                available = false;
-            }
-
             if(available && group != null) {
                 for (Group groupNow : group.getSubGroups()) {
                     if (groupNow.nickname.toLowerCase().equals(nicknameLower)) {
@@ -242,10 +212,7 @@ public class GroupService {
     }
 
     public boolean nicknameRegex(String nickname) {
-        String nicknameRegex = "^[a-z0-9_-]+$";
-        Pattern emailPattern = Pattern.compile(nicknameRegex, Pattern.CASE_INSENSITIVE);
-        Matcher matcher = emailPattern.matcher(nickname);
-        return matcher.find();
+        return userService.usernameRegex(nickname);
     }
 
     public void save(Group group) {

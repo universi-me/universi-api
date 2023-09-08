@@ -102,8 +102,6 @@ public class UserController {
             }
 
             String username = (String)body.get("username");
-
-            // email only part before @
             String email = (String)body.get("email");
 
             String password = (String)body.get("password");
@@ -114,7 +112,7 @@ public class UserController {
             if (email==null || email.length()==0 || !userService.emailRegex(email)) {
                 throw new UserException("Verifique o campo Email!");
             }
-            if (password==null || password.length()==0) {
+            if (password==null || password.length()==0 || !userService.passwordRegex(password)) {
                 throw new UserException("Verifique o campo Senha!");
             }
 

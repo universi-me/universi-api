@@ -151,17 +151,25 @@ public class UserService implements UserDetailsService {
     }
 
     public boolean usernameRegex(String username) {
-        String usuarioRegex = "^[a-z0-9_-]+$";
-        Pattern emailPattern = Pattern.compile(usuarioRegex, Pattern.CASE_INSENSITIVE);
-        Matcher matcher = emailPattern.matcher(username);
-        return matcher.find();
+        return matchRegex(username, "^[a-z0-9_.-]+$");
+    }
+
+    public boolean passwordRegex(String password) {
+        return matchRegex(password, "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[^A-Za-zçÇ]).{8,}$");
     }
 
     public boolean emailRegex(String email) {
-        String emailRegex = "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$";
-        Pattern emailPattern = Pattern.compile(emailRegex, Pattern.CASE_INSENSITIVE);
-        Matcher matcher = emailPattern.matcher(email);
-        return matcher.find();
+        return matchRegex(email, "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$");
+    }
+
+    public boolean matchRegex(String input, String expression) {
+        try {
+            Pattern pattern = Pattern.compile(expression, Pattern.CASE_INSENSITIVE);
+            Matcher matcher = pattern.matcher(input);
+            return matcher.find();
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public boolean passwordValid(User user, String rawPassword) {
