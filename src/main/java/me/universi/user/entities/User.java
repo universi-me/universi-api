@@ -214,6 +214,11 @@ public class User implements UserDetails {
         return UserService.getInstance().isSessionOfUser(this);
     }
 
+    @Transient
+    public boolean needProfile() {
+        return UserService.getInstance().userNeedAnProfile(this);
+    }
+
     @Override
     public boolean equals(Object otherUser) {
         if(otherUser == null) return false;
