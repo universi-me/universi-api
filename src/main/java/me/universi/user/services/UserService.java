@@ -64,9 +64,9 @@ public class UserService implements UserDetailsService {
     }
 
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<User> user = userRepository.findFirstByName(username);
-        if (user.isPresent()) {
-            return user.get();
+        UserDetails user = findFirstByUsername(username);
+        if (user != null) {
+            return user;
         }
         if(emailRegex(username)) {
             try {
@@ -84,6 +84,11 @@ public class UserService implements UserDetailsService {
             return user.get();
         }
         throw new UserException("Email de Usuário não encontrado!");
+    }
+
+    public UserDetails findFirstByUsername(String username) {
+        Optional<User> userGet = userRepository.findFirstByName(username);
+        return userGet.orElse(null);
     }
 
     public UserDetails findFirstById(UUID id) {

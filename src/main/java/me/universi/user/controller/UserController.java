@@ -90,6 +90,31 @@ public class UserController {
         }
     }
 
+    @PostMapping(value = "/username-available", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response available_check(@RequestBody Map<String, Object> body) {
+        Response response = new Response();
+        try {
+
+            String username = (String)body.get("username");
+
+            if(!userService.usernameRegex(username)) {
+                throw new UserException("Nome de usuário está com formato inválido!");
+            }
+
+            if(userService.usernameExist(username)) {
+                throw new UserException("Nome de usuário \""+ username +"\" não está disponível!");
+            }
+
+            response.success = true;
+            return response;
+
+        } catch (Exception e) {
+            response.message = e.getMessage();
+            return response;
+        }
+    }
+
     @PostMapping(value = "/signup", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response signup(@RequestBody Map<String, Object> body) {
