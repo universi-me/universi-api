@@ -2,6 +2,7 @@ package me.universi.curriculum.component.services;
 
 import me.universi.curriculum.component.entities.Component;
 import me.universi.curriculum.component.repositories.ComponentRespository;
+import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
@@ -41,6 +42,11 @@ public class ComponentService {
 
     public List<Component> findAll(){
         return componentRespository.findAll();
+    }
+
+    public List<Component> findByProfileInSession(){
+        User user = userService.getUserInSession();
+        return componentRespository.findByProfileId(user.getProfile().getId());
     }
 
     public Optional<Component> findFirstById(UUID id){

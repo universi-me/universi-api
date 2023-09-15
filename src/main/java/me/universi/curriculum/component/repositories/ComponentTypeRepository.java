@@ -12,6 +12,5 @@ import java.util.UUID;
 public interface ComponentTypeRepository extends JpaRepository<ComponentType, UUID> {
 
     Optional <ComponentType> findFirstById(UUID id);
-    ComponentType findFirstByName(String name);
 
 }
