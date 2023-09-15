@@ -215,7 +215,7 @@ public class User implements UserDetails {
     }
 
     @Transient
-    public boolean needProfile() {
+    public boolean isNeedProfile() {
         return UserService.getInstance().userNeedAnProfile(this);
     }
 
