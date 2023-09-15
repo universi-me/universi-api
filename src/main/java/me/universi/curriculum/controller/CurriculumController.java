@@ -1,6 +1,8 @@
 package me.universi.curriculum.controller;
 
 import me.universi.competence.entities.Competence;
+import me.universi.curriculum.component.entities.Component;
+import me.universi.curriculum.component.services.ComponentService;
 import me.universi.curriculum.entities.Curriculum;
 import me.universi.curriculum.services.CurriculumService;
 import org.springframework.http.HttpStatus;
@@ -24,10 +26,12 @@ import java.util.UUID;
 public class CurriculumController {
 
     public CurriculumService curriculumService;
+    public ComponentService componentService;
 
 
-    public CurriculumController(CurriculumService curriculumService){
+    public CurriculumController(CurriculumService curriculumService, ComponentService componentService){
         this.curriculumService = curriculumService;
+        this.componentService = componentService;
     }
 
     @PostMapping
@@ -63,5 +67,10 @@ public class CurriculumController {
     @ResponseStatus(HttpStatus.OK)
     public void delete(@PathVariable UUID id){
         curriculumService.delete(id);
+    }
+
+    @GetMapping(value = "/profile")
+    public List<Component> getComponentProfile(){
+        return componentService.findByProfileInSession();
     }
 }

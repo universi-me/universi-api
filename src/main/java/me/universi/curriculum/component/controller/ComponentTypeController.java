@@ -37,11 +37,6 @@ public class ComponentTypeController {
     public List<ComponentType> getAllComponentType() throws Exception{
         return componentTypeService.findAll();
     }
-    @GetMapping(value = "/{name}")
-    @ResponseStatus(HttpStatus.OK)
-    public ComponentType getByName(@PathVariable String name){
-        return componentTypeService.findFirstByName(name);
-    }
 
     @GetMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.OK)

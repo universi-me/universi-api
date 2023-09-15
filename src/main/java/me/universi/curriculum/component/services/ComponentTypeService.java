@@ -29,10 +29,6 @@ public class ComponentTypeService {
         return componentTypeRepository.findFirstById(id);
     }
 
-    public ComponentType findFirstByName(String name){
-        return componentTypeRepository.findFirstByName(name);
-    }
-
     public ComponentType update(ComponentType newComponentType, UUID id) throws Exception{
         return componentTypeRepository.findById(id).map(componentType -> {
             componentType.setName(newComponentType.getName());
