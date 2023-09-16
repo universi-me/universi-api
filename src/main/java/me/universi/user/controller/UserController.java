@@ -213,7 +213,7 @@ public class UserController {
     @PostMapping(value = "/admin/account/edit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response admin_account_edit(@RequestBody Map<String, Object> body) {
-        Response resposta = new Response();
+        Response response = new Response();
         try {
 
             String userId = (String)body.get("userId");
@@ -240,7 +240,7 @@ public class UserController {
             String usernameOld = userEdit.getUsername();
 
             if(username != null && username.length()>0) {
-                if(userService.usernameExist(username)) {
+                if(userService.usernameExist(username) && !username.equals(usernameOld)) {
                     throw new UserException("Usuário \""+username+"\" já esta cadastrado!");
                 }
                 if(userService.usernameRegex(username)) {
@@ -250,7 +250,7 @@ public class UserController {
                 }
             }
             if(email != null && email.length()>0) {
-                if(userService.emailExist(email)) {
+                if(userService.emailExist(email) && !email.equals(userEdit.getEmail())) {
                     throw new UserException("Email \""+email+"\" já esta cadastrado!");
                 }
                 if(userService.emailRegex(email)) {
@@ -292,14 +292,14 @@ public class UserController {
             // force logout
             userService.logoutUsername(usernameOld);
 
-            resposta.success = true;
-            resposta.message = "As Alterações foram salvas com sucesso, A sessão do usuário foi finalizada.";
+            response.success = true;
+            response.message = "As Alterações foram salvas com sucesso, A sessão do usuário foi finalizada.";
 
-            return resposta;
+            return response;
 
         }catch (Exception e) {
-            resposta.message = e.getMessage();
-            return resposta;
+            response.message = e.getMessage();
+            return response;
         }
     }
 
