@@ -169,15 +169,19 @@ public class UserController {
     @PostMapping(value = "/account/edit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response account_edit(@RequestBody Map<String, Object> body) {
-        Response resposta = new Response();
+        Response response = new Response();
         try {
 
-            String password = (String)body.get("newPassword");
-            if(password == null) {
-                throw new UserException("Parametro password é nulo.");
+            String newPassword = (String)body.get("newPassword");
+            if(newPassword == null) {
+                throw new UserException("Parametro newPassword é nulo.");
             }
 
-            String senha = (String)body.get("password");
+            if(!userService.passwordRegex(newPassword)) {
+                throw new UserException("Nova Senha está com formato inválido!");
+            }
+
+            String password = (String)body.get("password");
 
             User user = userService.getUserInSession();
 
@@ -185,24 +189,24 @@ public class UserController {
             HttpSession session = userService.getActiveSession();
             boolean logadoComGoogle = (session.getAttribute("loginViaGoogle") != null);
 
-            if (logadoComGoogle || userService.passwordValid(user, senha)) {
-                user.setPassword(userService.encodePassword(password));
+            if (logadoComGoogle || userService.passwordValid(user, password)) {
+                user.setPassword(userService.encodePassword(newPassword));
                 user.setExpired_credentials(false);
                 userService.save(user);
 
                 userService.updateUserInSession();
 
-                resposta.success = true;
-                resposta.message = "As Alterações foram salvas com sucesso.";
+                response.success = true;
+                response.message = "As Alterações foram salvas com sucesso.";
 
-                return resposta;
+                return response;
             }
 
             throw new UserException("Credenciais Invalidas!");
 
         }catch (Exception e) {
-            resposta.message = e.getMessage();
-            return resposta;
+            response.message = e.getMessage();
+            return response;
         }
     }
 
@@ -236,18 +240,33 @@ public class UserController {
             String usernameOld = userEdit.getUsername();
 
             if(username != null && username.length()>0) {
+                if(userService.usernameExist(username)) {
+                    throw new UserException("Usuário \""+username+"\" já esta cadastrado!");
+                }
                 if(userService.usernameRegex(username)) {
                     userEdit.setName(username);
                 } else {
-                    throw new UserException("username está com formato inválido!");
+                    throw new UserException("Nome de Usuário está com formato inválido!");
                 }
             }
             if(email != null && email.length()>0) {
-                userEdit.setEmail(email);
+                if(userService.emailExist(email)) {
+                    throw new UserException("Email \""+email+"\" já esta cadastrado!");
+                }
+                if(userService.emailRegex(email)) {
+                    userEdit.setEmail(email);
+                } else {
+                    throw new UserException("Email está com formato inválido!");
+                }
             }
             if(password != null && password.length()>0) {
-                userEdit.setPassword(userService.encodePassword(password));
+                if(userService.passwordRegex(password)) {
+                    userEdit.setPassword(userService.encodePassword(password));
+                } else {
+                    throw new UserException("Nova Senha está com formato inválido!");
+                }
             }
+
             if(authorityLevel != null && authorityLevel.length()>0) {
                 userEdit.setAuthority(Authority.valueOf(authorityLevel));
             }
@@ -325,7 +344,7 @@ public class UserController {
                 //String familyName = (String) payload.get("family_name");
                 //String givenName = (String) payload.get("given_name");
 
-                User user = null;
+                User user;
 
                 try {
                     user = (User) userService.findFirstByEmail(email);
@@ -333,7 +352,7 @@ public class UserController {
                     // register user with DCX account, with secure payload information
 
                     // create username from email DCX
-                    String newUsername = ((String)email.split("@")[0]).trim();
+                    String newUsername = email.split("@")[0].trim();
                     if(!userService.usernameExist(newUsername)) {
 
                         user = new User();
@@ -347,7 +366,7 @@ public class UserController {
                             // if have space, extract first name and last name
                             if(name.contains(" ")) {
                                 String[] nameArr = name.split(" ");
-                                profile.setFirstname(((String)nameArr[0]).trim());
+                                profile.setFirstname((nameArr[0]).trim());
                                 profile.setLastname(name.substring(nameArr[0].length()).trim());
                             } else {
                                 profile.setFirstname(name.trim());
