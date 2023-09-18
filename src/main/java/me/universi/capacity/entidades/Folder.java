@@ -1,6 +1,8 @@
 package me.universi.capacity.entidades;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Temporal;
@@ -10,122 +12,101 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import java.util.Collection;
-import java.util.Date;
-import java.util.UUID;
 import me.universi.profile.entities.Profile;
 import org.hibernate.annotations.CreationTimestamp;
 
-@Entity(name="video")
-public class Video {
+import java.util.Collection;
+import java.util.Date;
+import java.util.UUID;
+
+@Entity(name="folder")
+public class Folder {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id")
     private UUID id;
 
-    @Column(name = "url")
+    @Column
     @Size(max = 100)
-    private String url;
-    
-    @Column(name = "title")
-    @Size(max = 100)
-    private String title;
+    private String name;
 
-    @Column(name = "image")
+    @Column
     @Size(max = 100)
     private String image;
 
-    @Column(name = "description")
+    @Column
     @Size(max = 200)
     private String description;
 
     @OneToMany(cascade = CascadeType.PERSIST)
-    private Collection<VideoCategory> categories;
-
-    @ManyToMany(mappedBy = "videos", cascade = CascadeType.ALL)
-    private Collection<VideoPlaylist> playlists;
-    
-    @Column(name = "rating")
-    @NotNull
-    @Min(0)
-    @Max(5)
-    private Integer rating;
+    private Collection<Category> categories;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at")
     private Date createdAt;
 
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JsonIgnore
+    private Collection<Content> contents;
+
+    @Column
+    @NotNull
+    @Min(0)
+    @Max(5)
+    private Integer rating;
+
     @ManyToOne
     @JoinColumn(name="profile_id")
     @NotNull
     private Profile author;
 
-    public Video() {
-    }
-
-    public UUID getId() {
-        return id;
+    public Folder() {
     }
 
     public void setId(UUID id) {
         this.id = id;
     }
 
-    public String getUrl() {
-        return url;
+    public UUID getId() {
+        return id;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getTitle() {
-        return title;
-    }
-
-    public String getImage() {
-        return image;
+    public String getName() {
+        return this.name;
     }
 
     public void setImage(String image) {
         this.image = image;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getDescription() {
-        return description;
+    public String getImage() {
+        return this.image;
     }
 
     public void setDescription(String description) {
         this.description = description;
     }
 
-    public Collection<VideoCategory> getCategories() {
+    public String getDescription() {
+        return this.description;
+    }
+
+    public Collection<Category> getCategories() {
         return categories;
     }
 
-    public void setCategories(Collection<VideoCategory> categories) {
+    public void setCategories(Collection<Category> categories) {
         this.categories = categories;
-    }
-
-    public Integer getRating() {
-        return rating;
-    }
-
-    public void setRating(Integer rating) {
-        this.rating = rating;
     }
 
     public Date getCreatedAt() {
@@ -136,12 +117,20 @@ public class Video {
         this.createdAt = createdAt;
     }
 
-    public Collection<VideoPlaylist> getPlaylists() {
-        return playlists;
+    public void setContents(Collection<Content> contents) {
+        this.contents = contents;
     }
 
-    public void setPlaylists(Collection<VideoPlaylist> playlist) {
-        this.playlists = playlist;
+    public Collection<Content> getContents() {
+        return this.contents;
+    }
+
+    public void setRating(Integer rating) {
+        this.rating = rating;
+    }
+
+    public Integer getRating() {
+        return this.rating;
     }
 
     public Profile getAuthor() {
@@ -151,5 +140,4 @@ public class Video {
     public void setAuthor(Profile author) {
         this.author = author;
     }
-
 }

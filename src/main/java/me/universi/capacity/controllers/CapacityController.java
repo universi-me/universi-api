@@ -4,38 +4,35 @@ package me.universi.capacity.controllers;
 import java.util.Map;
 import java.util.UUID;
 
-import me.universi.Sys;
 import me.universi.api.entities.Response;
-import me.universi.capacity.entidades.VideoCategory;
-import me.universi.capacity.entidades.VideoPlaylist;
-import me.universi.profile.entities.Profile;
-import me.universi.user.entities.User;
+import me.universi.capacity.entidades.Content;
+import me.universi.capacity.entidades.Category;
+import me.universi.capacity.entidades.Folder;
 import me.universi.user.services.UserService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 
-import me.universi.capacity.entidades.Video;
-import me.universi.capacity.exceptions.VideoException;
-import me.universi.capacity.service.VideoService;
+import me.universi.capacity.exceptions.CapacityException;
+import me.universi.capacity.service.CapacityService;
 
 
 @RestController
 @RequestMapping("/api/capacity")
-public class VideoController {
+public class CapacityController {
 
-    private final VideoService videoService;
+    private final CapacityService capacityService;
 
-    public VideoController(VideoService videoService) {
-        this.videoService = videoService;
+    public CapacityController(CapacityService capacityService) {
+        this.capacityService = capacityService;
     }
 
     @GetMapping("/videos")
-    public Response videoList() {
+    public Response contentList() {
         Response response = new Response(); // default
         try {
 
-            response.body.put("videos", videoService.getAllVideo());
+            response.body.put("videos", capacityService.getAllContents());
             response.success = true;
 
         } catch (Exception e) {
@@ -49,7 +46,7 @@ public class VideoController {
         Response response = new Response(); // default
         try {
 
-            response.body.put("categories", videoService.getVideoAllCategory());
+            response.body.put("categories", capacityService.getAllCategories());
             response.success = true;
 
         } catch (Exception e) {
@@ -59,11 +56,11 @@ public class VideoController {
     }
 
     @GetMapping("/playlists")
-    public Response playlistList() {
+    public Response foldersList() {
         Response response = new Response(); // default
         try {
 
-            response.body.put("playlists", videoService.getVideoAllPlaylist());
+            response.body.put("playlists", capacityService.getAllFolders());
             response.success = true;
 
         } catch (Exception e) {
@@ -74,16 +71,16 @@ public class VideoController {
 
     @PostMapping(value = "/category/videos", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Response list_video_by_category(@RequestBody Map<String, Object> body) {
+    public Response list_content_by_category(@RequestBody Map<String, Object> body) {
         Response response = new Response(); // default
         try {
 
             Object categoryId = body.get("id");
             if(categoryId == null || String.valueOf(categoryId).isEmpty()) {
-                throw new VideoException("ID da categoria não informado.");
+                throw new CapacityException("ID da categoria não informado.");
             }
 
-            response.body.put("videos", videoService.getVideosByCategory(String.valueOf(categoryId)));
+            response.body.put("videos", capacityService.getContentsByCategory(String.valueOf(categoryId)));
             response.success = true;
 
         } catch (Exception e) {
@@ -94,16 +91,16 @@ public class VideoController {
 
     @PostMapping(value = "/category/playlists", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Response list_playlist_by_category(@RequestBody Map<String, Object> body) {
+    public Response list_folder_by_category(@RequestBody Map<String, Object> body) {
         Response response = new Response(); // default
         try {
 
             Object categoryId = body.get("id");
             if(categoryId == null || String.valueOf(categoryId).isEmpty()) {
-                throw new VideoException("ID da categoria não informado.");
+                throw new CapacityException("ID da categoria não informado.");
             }
 
-            response.body.put("playlists", videoService.getPlaylistByCategory(String.valueOf(categoryId)));
+            response.body.put("playlists", capacityService.getFoldersByCategory(String.valueOf(categoryId)));
             response.success = true;
 
         } catch (Exception e) {
@@ -114,16 +111,16 @@ public class VideoController {
 
     @PostMapping(value = "/playlist/videos", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Response list_video_by_playlist(@RequestBody Map<String, Object> body) {
+    public Response list_content_by_folder(@RequestBody Map<String, Object> body) {
         Response response = new Response(); // default
         try {
 
-            Object playlistId = body.get("id");
-            if(playlistId == null || String.valueOf(playlistId).isEmpty()) {
-                throw new VideoException("ID da categoria não informado.");
+            Object folderId = body.get("id");
+            if(folderId == null || String.valueOf(folderId).isEmpty()) {
+                throw new CapacityException("ID da pasta não informado.");
             }
 
-            response.body.put("videos", videoService.getVideosByPlaylist(String.valueOf(playlistId)));
+            response.body.put("videos", capacityService.getContentsByFolder(String.valueOf(folderId)));
             response.success = true;
 
         } catch (Exception e) {
@@ -134,21 +131,21 @@ public class VideoController {
 
     @PostMapping(value = "/video/get", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Response get_video(@RequestBody Map<String, Object> body) {
+    public Response get_content(@RequestBody Map<String, Object> body) {
         Response response = new Response(); // default
         try {
 
-            Object videoId = body.get("id");
-            if(videoId == null || String.valueOf(videoId).isEmpty()) {
-                throw new VideoException("ID do vídeo não informado.");
+            Object contentId = body.get("id");
+            if(contentId == null || String.valueOf(contentId).isEmpty()) {
+                throw new CapacityException("ID do conteúdo não informado.");
             }
 
-            Video video = videoService.findFirstById(String.valueOf(videoId));
-            if(video == null) {
-                throw new VideoException("Vídeo não encontrado.");
+            Content content = capacityService.findFirstById(String.valueOf(contentId));
+            if(content == null) {
+                throw new CapacityException("Conteúdo não encontrado.");
             }
 
-            response.body.put("video", video);
+            response.body.put("video", content);
             response.success = true;
 
         } catch (Exception e) {
@@ -159,7 +156,7 @@ public class VideoController {
 
     @PostMapping(value = "/video/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Response create_video(@RequestBody Map<String, Object> body) {
+    public Response create_content(@RequestBody Map<String, Object> body) {
         Response response = new Response(); // default
         try {
 
@@ -174,51 +171,51 @@ public class VideoController {
             Object addPlaylistsByIds =     body.get("addPlaylistsByIds");
 
             if(url == null || String.valueOf(url).isEmpty()) {
-                throw new VideoException("URL do vídeo não informado.");
+                throw new CapacityException("URL do conteúdo não informado.");
             }
             if(title == null || String.valueOf(title).isEmpty()) {
-                throw new VideoException("Título do vídeo não informado.");
+                throw new CapacityException("Título do conteúdo não informado.");
             }
 
-            Video video = new Video();
-            video.setUrl(String.valueOf(url));
-            video.setTitle(String.valueOf(title));
+            Content content = new Content();
+            content.setUrl(String.valueOf(url));
+            content.setTitle(String.valueOf(title));
 
             if(image != null) {
                 String imageStr = String.valueOf(image);
                 if(!imageStr.isEmpty()) {
-                    video.setImage(imageStr);
+                    content.setImage(imageStr);
                 }
             }
             if(description != null) {
                 String descriptionStr = String.valueOf(description);
                 if(!descriptionStr.isEmpty()) {
-                    video.setDescription(descriptionStr);
+                    content.setDescription(descriptionStr);
                 }
             }
             if(rating != null) {
                 String ratingStr = String.valueOf(rating);
                 if(!ratingStr.isEmpty()) {
-                    video.setRating(Integer.parseInt(ratingStr));
+                    content.setRating(Integer.parseInt(ratingStr));
                 }
             }
 
             if(addCategoriesByIds != null) {
-                videoService.addOrRemoveCategoriesFromVideoOrPlaylist(video, addCategoriesByIds, true, false);
+                capacityService.addOrRemoveCategoriesFromContentOrFolder(content, addCategoriesByIds, true, false);
             }
 
             if(addPlaylistsByIds != null) {
-                videoService.addOrRemovePlaylistsFromVideo(video, addPlaylistsByIds, true);
+                capacityService.addOrRemoveFoldersFromContent(content, addPlaylistsByIds, true);
             }
 
-            video.setAuthor(UserService.getInstance().getUserInSession().getProfile());
+            content.setAuthor(UserService.getInstance().getUserInSession().getProfile());
 
-            boolean result = videoService.saveOrUpdateVideo(video);
+            boolean result = capacityService.saveOrUpdateContent(content);
             if(!result) {
-                throw new VideoException("Erro ao salvar o vídeo.");
+                throw new CapacityException("Erro ao salvar o conteúdo.");
             }
 
-            response.message = "Vídeo criado com sucesso.";
+            response.message = "Conteúdo criado com sucesso.";
             response.success = true;
 
         } catch (Exception e) {
@@ -229,13 +226,13 @@ public class VideoController {
 
     @PostMapping(value = "/video/edit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Response edit_video(@RequestBody Map<String, Object> body) {
+    public Response edit_content(@RequestBody Map<String, Object> body) {
         Response response = new Response(); // default
         try {
 
-            Object videoId = body.get("id");
-            if(videoId == null || String.valueOf(videoId).isEmpty()) {
-                throw new VideoException("ID do vídeo não informado.");
+            Object contentId = body.get("id");
+            if(contentId == null || String.valueOf(contentId).isEmpty()) {
+                throw new CapacityException("ID do conteúdo não informado.");
             }
 
             Object url =         body.get("url");
@@ -247,71 +244,71 @@ public class VideoController {
             // id or array of ids
             Object addCategoriesByIds =    body.get("addCategoriesByIds");
             Object removeCategoriesByIds = body.get("removeCategoriesByIds");
-            Object addPlaylistsByIds =     body.get("addPlaylistsByIds");
-            Object removePlaylistsByIds =  body.get("removePlaylistsByIds");
+            Object addFoldersByIds =       body.get("addPlaylistsByIds");
+            Object removeFoldersByIds =    body.get("removePlaylistsByIds");
 
-            Video video = videoService.findFirstById(String.valueOf(videoId));
-            if(video == null) {
-                throw new VideoException("Vídeo não encontrado.");
+            Content content = capacityService.findFirstById(String.valueOf(contentId));
+            if(content == null) {
+                throw new CapacityException("Conteúdo não encontrado.");
             }
 
-            if(!UserService.getInstance().isSessionOfUser(video.getAuthor().getUser())) {
+            if(!UserService.getInstance().isSessionOfUser(content.getAuthor().getUser())) {
                 if(!UserService.getInstance().isUserAdmin(UserService.getInstance().getUserInSession())) {
-                    throw new VideoException("Você não tem permissão para editar este vídeo.");
+                    throw new CapacityException("Você não tem permissão para editar este conteúdo.");
                 }
             }
 
             if(url != null) {
                 String urlStr = String.valueOf(url);
                 if(!urlStr.isEmpty()) {
-                    video.setUrl(urlStr);
+                    content.setUrl(urlStr);
                 }
             }
             if(title != null) {
                 String titleStr = String.valueOf(title);
                 if(!titleStr.isEmpty()) {
-                    video.setTitle(titleStr);
+                    content.setTitle(titleStr);
                 }
             }
             if(image != null) {
                 String imageStr = String.valueOf(image);
                 if(!imageStr.isEmpty()) {
-                    video.setImage(imageStr);
+                    content.setImage(imageStr);
                 }
             }
             if(description != null) {
                 String descriptionStr = String.valueOf(description);
                 if(!descriptionStr.isEmpty()) {
-                    video.setDescription(descriptionStr);
+                    content.setDescription(descriptionStr);
                 }
             }
             if(rating != null) {
                 String ratingStr = String.valueOf(rating);
                 if(!ratingStr.isEmpty()) {
-                    video.setRating(Integer.parseInt(ratingStr));
+                    content.setRating(Integer.parseInt(ratingStr));
                 }
             }
 
             if(addCategoriesByIds != null) {
-                videoService.addOrRemoveCategoriesFromVideoOrPlaylist(video, addCategoriesByIds, true, false);
+                capacityService.addOrRemoveCategoriesFromContentOrFolder(content, addCategoriesByIds, true, false);
             }
             if(removeCategoriesByIds != null) {
-                videoService.addOrRemoveCategoriesFromVideoOrPlaylist(video, removeCategoriesByIds, false, false);
+                capacityService.addOrRemoveCategoriesFromContentOrFolder(content, removeCategoriesByIds, false, false);
             }
 
-            if(addPlaylistsByIds != null) {
-                videoService.addOrRemovePlaylistsFromVideo(video, addPlaylistsByIds, true);
+            if(addFoldersByIds != null) {
+                capacityService.addOrRemoveFoldersFromContent(content, addFoldersByIds, true);
             }
-            if(removePlaylistsByIds != null) {
-                videoService.addOrRemovePlaylistsFromVideo(video, removePlaylistsByIds, false);
+            if(removeFoldersByIds != null) {
+                capacityService.addOrRemoveFoldersFromContent(content, removeFoldersByIds, false);
             }
 
-            boolean result = videoService.saveOrUpdateVideo(video);
+            boolean result = capacityService.saveOrUpdateContent(content);
             if(!result) {
-                throw new VideoException("Erro ao salvar o vídeo.");
+                throw new CapacityException("Erro ao salvar o conteúdo.");
             }
 
-            response.message = "Vídeo atualizado com sucesso.";
+            response.message = "Conteúdo atualizado com sucesso.";
             response.success = true;
 
         } catch (Exception e) {
@@ -322,32 +319,32 @@ public class VideoController {
 
     @PostMapping(value = "/video/delete", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Response delete_video(@RequestBody Map<String, Object> body) {
+    public Response delete_content(@RequestBody Map<String, Object> body) {
         Response response = new Response(); // default
         try {
 
-            Object videoId = body.get("id");
-            if(videoId == null || String.valueOf(videoId).isEmpty()) {
-                throw new VideoException("ID do vídeo não informado.");
+            Object contentId = body.get("id");
+            if(contentId == null || String.valueOf(contentId).isEmpty()) {
+                throw new CapacityException("ID do conteúdo não informado.");
             }
 
-            Video video = videoService.findFirstById(String.valueOf(videoId));
-            if(video == null) {
-                throw new VideoException("Vídeo não encontrado.");
+            Content content = capacityService.findFirstById(String.valueOf(contentId));
+            if(content == null) {
+                throw new CapacityException("Conteúdo não encontrado.");
             }
 
-            if(!UserService.getInstance().isSessionOfUser(video.getAuthor().getUser())) {
+            if(!UserService.getInstance().isSessionOfUser(content.getAuthor().getUser())) {
                 if(!UserService.getInstance().isUserAdmin(UserService.getInstance().getUserInSession())) {
-                    throw new VideoException("Você não tem permissão para apagar este vídeo.");
+                    throw new CapacityException("Você não tem permissão para apagar este conteúdo.");
                 }
             }
 
-            boolean result = videoService.deleteVideo(UUID.fromString(String.valueOf(videoId)));
+            boolean result = capacityService.deleteContent(UUID.fromString(String.valueOf(contentId)));
             if(!result) {
-                throw new VideoException("Erro ao deletar o vídeo.");
+                throw new CapacityException("Erro ao deletar o conteúdo.");
             }
 
-            response.message = "Vídeo deletado com sucesso.";
+            response.message = "Conteúdo deletado com sucesso.";
             response.success = true;
 
         } catch (Exception e) {
@@ -364,10 +361,10 @@ public class VideoController {
 
             Object categoryId = body.get("id");
             if(categoryId == null || String.valueOf(categoryId).isEmpty()) {
-                throw new VideoException("ID da categoria não informado.");
+                throw new CapacityException("ID da categoria não informado.");
             }
 
-            response.body.put("category", videoService.getCategoryById(UUID.fromString(String.valueOf(categoryId))));
+            response.body.put("category", capacityService.getCategoryById(UUID.fromString(String.valueOf(categoryId))));
             response.success = true;
 
         } catch (Exception e) {
@@ -386,10 +383,10 @@ public class VideoController {
             Object image = body.get("image");
 
             if(name == null || String.valueOf(name).isEmpty()) {
-                throw new VideoException("Parametro name não informado.");
+                throw new CapacityException("Parametro name não informado.");
             }
 
-            VideoCategory category = new VideoCategory();
+            Category category = new Category();
             category.setName(String.valueOf(name));
 
             if(image != null) {
@@ -401,9 +398,9 @@ public class VideoController {
 
             category.setAuthor(UserService.getInstance().getUserInSession().getProfile());
 
-            boolean result = videoService.saveOrUpdateVideoCategory(category);
+            boolean result = capacityService.saveOrUpdateCategory(category);
             if(!result) {
-                throw new VideoException("Erro ao salvar o categoria.");
+                throw new CapacityException("Erro ao salvar o categoria.");
             }
 
             response.message = "Categoria criada com sucesso.";
@@ -423,39 +420,39 @@ public class VideoController {
 
             Object categoryId = body.get("id");
             if(categoryId == null || String.valueOf(categoryId).isEmpty()) {
-                throw new VideoException("ID da categoria não informado.");
+                throw new CapacityException("ID da categoria não informado.");
             }
 
             Object name =  body.get("name");
             Object image = body.get("image");
 
-            VideoCategory videoCategory = videoService.getCategoryById(String.valueOf(categoryId));
-            if(videoCategory == null) {
-                throw new VideoException("Categoria não encontrado.");
+            Category category = capacityService.getCategoryById(String.valueOf(categoryId));
+            if(category == null) {
+                throw new CapacityException("Categoria não encontrado.");
             }
 
-            if(!UserService.getInstance().isSessionOfUser(videoCategory.getAuthor().getUser())) {
+            if(!UserService.getInstance().isSessionOfUser(category.getAuthor().getUser())) {
                 if(!UserService.getInstance().isUserAdmin(UserService.getInstance().getUserInSession())) {
-                    throw new VideoException("Você não tem permissão para editar esta categoria.");
+                    throw new CapacityException("Você não tem permissão para editar esta categoria.");
                 }
             }
 
             if(name != null) {
                 String nameStr = String.valueOf(name);
                 if(!nameStr.isEmpty()) {
-                    videoCategory.setName(nameStr);
+                    category.setName(nameStr);
                 }
             }
             if(image != null) {
                 String imageStr = String.valueOf(image);
                 if(!imageStr.isEmpty()) {
-                    videoCategory.setImage(imageStr);
+                    category.setImage(imageStr);
                 }
             }
 
-            boolean result = videoService.saveOrUpdateVideoCategory(videoCategory);
+            boolean result = capacityService.saveOrUpdateCategory(category);
             if(!result) {
-                throw new VideoException("Erro ao editar o categoria.");
+                throw new CapacityException("Erro ao editar o categoria.");
             }
 
             response.message = "Categoria atualizada com sucesso.";
@@ -475,23 +472,23 @@ public class VideoController {
 
             Object categoryId = body.get("id");
             if(categoryId == null || String.valueOf(categoryId).isEmpty()) {
-                throw new VideoException("ID da Categoria não informado.");
+                throw new CapacityException("ID da Categoria não informado.");
             }
 
-            VideoCategory videoCategory = videoService.getCategoryById(UUID.fromString(String.valueOf(categoryId)));
-            if(videoCategory == null) {
-                throw new VideoException("Categoria não encontrada.");
+            Category category = capacityService.getCategoryById(UUID.fromString(String.valueOf(categoryId)));
+            if(category == null) {
+                throw new CapacityException("Categoria não encontrada.");
             }
 
-            if(!UserService.getInstance().isSessionOfUser(videoCategory.getAuthor().getUser())) {
+            if(!UserService.getInstance().isSessionOfUser(category.getAuthor().getUser())) {
                 if(!UserService.getInstance().isUserAdmin(UserService.getInstance().getUserInSession())) {
-                    throw new VideoException("Você não tem permissão para editar esta categoria.");
+                    throw new CapacityException("Você não tem permissão para editar esta categoria.");
                 }
             }
 
-            boolean result = videoService.deleteVideoCategory(UUID.fromString(String.valueOf(categoryId)));
+            boolean result = capacityService.deleteCategory(UUID.fromString(String.valueOf(categoryId)));
             if(!result) {
-                throw new VideoException("Erro ao deletar Categoria.");
+                throw new CapacityException("Erro ao deletar Categoria.");
             }
 
             response.message = "Categoria deletada com sucesso.";
@@ -505,16 +502,16 @@ public class VideoController {
 
     @PostMapping(value = "/playlist/get", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Response get_playlist(@RequestBody Map<String, Object> body) {
+    public Response get_folder(@RequestBody Map<String, Object> body) {
         Response response = new Response(); // default
         try {
 
-            Object playlistId = body.get("id");
-            if(playlistId == null || String.valueOf(playlistId).isEmpty()) {
-                throw new VideoException("ID da playlist não informado.");
+            Object folderId = body.get("id");
+            if(folderId == null || String.valueOf(folderId).isEmpty()) {
+                throw new CapacityException("ID da pasta não informado.");
             }
 
-            response.body.put("playlist", videoService.getPlaylistById(String.valueOf(playlistId)));
+            response.body.put("playlist", capacityService.getFolderById(String.valueOf(folderId)));
             response.success = true;
 
         } catch (Exception e) {
@@ -525,7 +522,7 @@ public class VideoController {
 
     @PostMapping(value = "/playlist/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Response create_playlist(@RequestBody Map<String, Object> body) {
+    public Response create_folder(@RequestBody Map<String, Object> body) {
         Response response = new Response(); // default
         try {
 
@@ -538,44 +535,44 @@ public class VideoController {
             Object addCategoriesByIds =    body.get("addCategoriesByIds");
 
             if(name == null || String.valueOf(name).isEmpty()) {
-                throw new VideoException("Parametro name não informado.");
+                throw new CapacityException("Parametro name não informado.");
             }
 
-            VideoPlaylist playlist = new VideoPlaylist();
+            Folder folder = new Folder();
 
-            playlist.setName(String.valueOf(name));
+            folder.setName(String.valueOf(name));
 
             if(image != null) {
                 String imageStr = String.valueOf(image);
                 if(!imageStr.isEmpty()) {
-                    playlist.setImage(imageStr);
+                    folder.setImage(imageStr);
                 }
             }
             if(description != null) {
                 String descriptionStr = String.valueOf(description);
                 if(!descriptionStr.isEmpty()) {
-                    playlist.setDescription(descriptionStr);
+                    folder.setDescription(descriptionStr);
                 }
             }
             if(rating != null) {
                 String ratingStr = String.valueOf(rating);
                 if(!ratingStr.isEmpty()) {
-                    playlist.setRating(Integer.parseInt(ratingStr));
+                    folder.setRating(Integer.parseInt(ratingStr));
                 }
             }
 
             if(addCategoriesByIds != null) {
-                videoService.addOrRemoveCategoriesFromVideoOrPlaylist(playlist, addCategoriesByIds, true, false);
+                capacityService.addOrRemoveCategoriesFromContentOrFolder(folder, addCategoriesByIds, true, false);
             }
 
-            playlist.setAuthor(UserService.getInstance().getUserInSession().getProfile());
+            folder.setAuthor(UserService.getInstance().getUserInSession().getProfile());
 
-            boolean result = videoService.saveOrUpdateVideoPlaylist(playlist);
+            boolean result = capacityService.saveOrUpdateFolder(folder);
             if(!result) {
-                throw new VideoException("Erro ao salvar o playlist.");
+                throw new CapacityException("Erro ao salvar o pasta.");
             }
 
-            response.message = "Playlist criada com sucesso.";
+            response.message = "Pasta criada com sucesso.";
             response.success = true;
 
         } catch (Exception e) {
@@ -586,13 +583,13 @@ public class VideoController {
 
     @PostMapping(value = "/playlist/edit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Response edit_playlist(@RequestBody Map<String, Object> body) {
+    public Response edit_folder(@RequestBody Map<String, Object> body) {
         Response response = new Response(); // default
         try {
 
-            Object playlistId = body.get("id");
-            if(playlistId == null || String.valueOf(playlistId).isEmpty()) {
-                throw new VideoException("ID da playlist não informado.");
+            Object folderId = body.get("id");
+            if(folderId == null || String.valueOf(folderId).isEmpty()) {
+                throw new CapacityException("ID da pasta não informado.");
             }
 
             Object name =        body.get("name");
@@ -604,55 +601,55 @@ public class VideoController {
             Object addCategoriesByIds =    body.get("addCategoriesByIds");
             Object removeCategoriesByIds = body.get("removeCategoriesByIds");
 
-            VideoPlaylist videoPlaylist = videoService.getPlaylistById(UUID.fromString(String.valueOf(playlistId)));
-            if(videoPlaylist == null) {
-                throw new VideoException("Playlist não encontrado.");
+            Folder folder = capacityService.getFolderById(UUID.fromString(String.valueOf(folderId)));
+            if(folder == null) {
+                throw new CapacityException("Playlist não encontrado.");
             }
 
-            if(!UserService.getInstance().isSessionOfUser(videoPlaylist.getAuthor().getUser())) {
+            if(!UserService.getInstance().isSessionOfUser(folder.getAuthor().getUser())) {
                 if(!UserService.getInstance().isUserAdmin(UserService.getInstance().getUserInSession())) {
-                    throw new VideoException("Você não tem permissão para editar esta playlist.");
+                    throw new CapacityException("Você não tem permissão para editar esta pasta.");
                 }
             }
 
             if(name != null) {
                 String nameStr = String.valueOf(name);
                 if(!nameStr.isEmpty()) {
-                    videoPlaylist.setName(nameStr);
+                    folder.setName(nameStr);
                 }
             }
             if(image != null) {
                 String imageStr = String.valueOf(image);
                 if(!imageStr.isEmpty()) {
-                    videoPlaylist.setImage(imageStr);
+                    folder.setImage(imageStr);
                 }
             }
             if(description != null) {
                 String descriptionStr = String.valueOf(description);
                 if(!descriptionStr.isEmpty()) {
-                    videoPlaylist.setDescription(descriptionStr);
+                    folder.setDescription(descriptionStr);
                 }
             }
             if(rating != null) {
                 String ratingStr = String.valueOf(rating);
                 if(!ratingStr.isEmpty()) {
-                    videoPlaylist.setRating(Integer.parseInt(ratingStr));
+                    folder.setRating(Integer.parseInt(ratingStr));
                 }
             }
 
             if(addCategoriesByIds != null) {
-                videoService.addOrRemoveCategoriesFromVideoOrPlaylist(videoPlaylist, addCategoriesByIds, true, false);
+                capacityService.addOrRemoveCategoriesFromContentOrFolder(folder, addCategoriesByIds, true, false);
             }
             if(removeCategoriesByIds != null) {
-                videoService.addOrRemoveCategoriesFromVideoOrPlaylist(videoPlaylist, removeCategoriesByIds, false, false);
+                capacityService.addOrRemoveCategoriesFromContentOrFolder(folder, removeCategoriesByIds, false, false);
             }
 
-            boolean result = videoService.saveOrUpdateVideoPlaylist(videoPlaylist);
+            boolean result = capacityService.saveOrUpdateFolder(folder);
             if(!result) {
-                throw new VideoException("Erro ao editar o playlist.");
+                throw new CapacityException("Erro ao editar o pasta.");
             }
 
-            response.message = "Playlist atualizada com sucesso.";
+            response.message = "Pasta atualizada com sucesso.";
             response.success = true;
 
         } catch (Exception e) {
@@ -663,29 +660,29 @@ public class VideoController {
 
     @PostMapping(value = "/playlist/delete", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Response delete_playlist(@RequestBody Map<String, Object> body) {
+    public Response delete_folder(@RequestBody Map<String, Object> body) {
         Response response = new Response(); // default
         try {
 
-            Object playlistId = body.get("id");
-            if(playlistId == null || String.valueOf(playlistId).isEmpty()) {
-                throw new VideoException("ID da Playlist não informado.");
+            Object folderId = body.get("id");
+            if(folderId == null || String.valueOf(folderId).isEmpty()) {
+                throw new CapacityException("ID da pasta não informado.");
             }
 
-            VideoPlaylist videoPlaylist = videoService.getPlaylistById(UUID.fromString(String.valueOf(playlistId)));
+            Folder folder = capacityService.getFolderById(UUID.fromString(String.valueOf(folderId)));
 
-            if(!UserService.getInstance().isSessionOfUser(videoPlaylist.getAuthor().getUser())) {
+            if(!UserService.getInstance().isSessionOfUser(folder.getAuthor().getUser())) {
                 if(!UserService.getInstance().isUserAdmin(UserService.getInstance().getUserInSession())) {
-                    throw new VideoException("Você não tem permissão para apagar esta playlist.");
+                    throw new CapacityException("Você não tem permissão para apagar esta pasta.");
                 }
             }
 
-            boolean result = videoService.deleteVideoPlaylist(UUID.fromString(String.valueOf(playlistId)));
+            boolean result = capacityService.deleteFolder(UUID.fromString(String.valueOf(folderId)));
             if(!result) {
-                throw new VideoException("Erro ao deletar Playlist.");
+                throw new CapacityException("Erro ao deletar pasta.");
             }
 
-            response.message = "Playlist deletada com sucesso.";
+            response.message = "Pasta deletada com sucesso.";
             response.success = true;
 
         } catch (Exception e) {
@@ -696,25 +693,25 @@ public class VideoController {
 
     @PostMapping(value = "/playlist/video/add", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Response playlist_add_video(@RequestBody Map<String, Object> body) {
+    public Response folder_add_content(@RequestBody Map<String, Object> body) {
         Response response = new Response(); // default
         try {
 
-            Object playlistId = body.get("id");
+            Object folderId = body.get("id");
 
             // id or array of ids
-            Object videoIds    = body.get("videoIds");
+            Object contentIds    = body.get("videoIds");
 
-            if(playlistId == null || String.valueOf(playlistId).isEmpty()) {
-                throw new VideoException("ID da Playlist não informado.");
+            if(folderId == null || String.valueOf(folderId).isEmpty()) {
+                throw new CapacityException("ID da pasta não informado.");
             }
-            if(videoIds == null) {
-                throw new VideoException("ID do Video não informado.");
+            if(contentIds == null) {
+                throw new CapacityException("ID do conteúdo não informado.");
             }
 
-            videoService.addOrRemoveVideoFromPlaylist(playlistId, videoIds, true);
+            capacityService.addOrRemoveContentFromFolder(folderId, contentIds, true);
 
-            response.message = "Video adicionado a playlist com sucesso.";
+            response.message = "Conteúdo adicionado a pasta com sucesso.";
             response.success = true;
 
         } catch (Exception e) {
@@ -725,25 +722,25 @@ public class VideoController {
 
     @PostMapping(value = "/playlist/video/remove", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Response playlist_remove_video(@RequestBody Map<String, Object> body) {
+    public Response folder_remove_content(@RequestBody Map<String, Object> body) {
         Response response = new Response(); // default
         try {
 
-            Object playlistId = body.get("id");
+            Object folderId = body.get("id");
 
             // id or array of ids
-            Object videoIds    = body.get("videoIds");
+            Object contentIds    = body.get("videoIds");
 
-            if(playlistId == null || String.valueOf(playlistId).isEmpty()) {
-                throw new VideoException("ID da Playlist não informado.");
+            if(folderId == null || String.valueOf(folderId).isEmpty()) {
+                throw new CapacityException("ID da pasta não informado.");
             }
-            if(videoIds == null) {
-                throw new VideoException("ID do Video não informado.");
+            if(contentIds == null) {
+                throw new CapacityException("ID do conteúdo não informado.");
             }
 
-            videoService.addOrRemoveVideoFromPlaylist(playlistId, videoIds, false);
+            capacityService.addOrRemoveContentFromFolder(folderId, contentIds, false);
 
-            response.message = "Video removido da playlist com sucesso.";
+            response.message = "Conteúdo removido da pasta com sucesso.";
             response.success = true;
 
         } catch (Exception e) {
