@@ -18,8 +18,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.util.Date;
 import java.util.UUID;
 
-@Entity(name="videocategory")
-public class VideoCategory {
+@Entity(name="category")
+public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id")
@@ -45,7 +45,7 @@ public class VideoCategory {
     @NotNull
     private Profile author;
 
-    public VideoCategory() {
+    public Category() {
     }
 
     public void setId(UUID id) {
