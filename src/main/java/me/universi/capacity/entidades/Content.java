@@ -1,5 +1,6 @@
 package me.universi.capacity.entidades;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Temporal;
@@ -49,6 +50,7 @@ public class Content {
     @OneToMany(cascade = CascadeType.PERSIST)
     private Collection<Category> categories;
 
+    @JsonProperty("playlists")
     @ManyToMany(mappedBy = "contents", cascade = CascadeType.ALL)
     private Collection<Folder> folders;
     

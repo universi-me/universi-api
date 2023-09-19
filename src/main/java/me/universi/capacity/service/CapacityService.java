@@ -4,12 +4,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import java.util.Objects;
 
 import me.universi.capacity.entidades.Content;
 import me.universi.capacity.entidades.Category;
 import me.universi.capacity.entidades.Folder;
 import me.universi.capacity.repository.CategoryRepository;
 import me.universi.capacity.repository.FolderRepository;
+import me.universi.group.entities.Group;
+import me.universi.group.exceptions.GroupException;
+import me.universi.group.services.GroupService;
+import me.universi.profile.entities.Profile;
 import me.universi.user.services.UserService;
 import org.springframework.stereotype.Service;
 
@@ -26,12 +31,54 @@ public class CapacityService implements CapacityServiceInterface {
 
     private final FolderRepository folderRepository;
 
-    public CapacityService(ContentRepository contentRepository, CategoryRepository categoryRepository, FolderRepository folderRepository) {
+    private final GroupService groupService;
+
+    public CapacityService(GroupService groupService, ContentRepository contentRepository, CategoryRepository categoryRepository, FolderRepository folderRepository) {
         this.contentRepository = contentRepository;
         this.categoryRepository = categoryRepository;
         this.folderRepository = folderRepository;
+        this.groupService = groupService;
     }
 
+    public void checkFolderPermissions(Folder folder, boolean forWrite) throws CapacityException {
+        if(folder == null) {
+            throw new CapacityException("Pasta não encontrada.");
+        }
+        if(!UserService.getInstance().isSessionOfUser(folder.getAuthor().getUser())) {
+            if(!UserService.getInstance().isUserAdmin(UserService.getInstance().getUserInSession())) {
+                if(forWrite) {
+                    throw new CapacityException("Você não tem permissão para alterar essa pasta.");
+                } else {
+                    if(!folder.isPublicFolder()) {
+                        Profile userProfile = UserService.getInstance().getUserInSession().getProfile();
+                        Collection<Group> userGroups = userProfile.getGroups();
+                        Collection<Group> folderGroups = folder.getGrantedAccessGroups();
+                        boolean hasPermission = false;
+                        for(Group folderGroupNow : folderGroups) {
+                            for(Group userGroupNow : userGroups) {
+                                if(Objects.equals(folderGroupNow.getId(), userGroupNow.getId())) {
+                                    hasPermission = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if(!hasPermission) {
+                            throw new CapacityException("Você não tem permissão para ver essa pasta.");
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public boolean hasFolderPermissions(Folder folder, boolean forWrite) {
+        try {
+            checkFolderPermissions(folder, forWrite);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
     public List<Content> getAllContents(){
         List<Content> contentList = new ArrayList<>();
@@ -154,10 +201,10 @@ public class CapacityService implements CapacityServiceInterface {
 
     public void addOrRemoveContentFromFolder(Object folderId, Object contentId, boolean isAdding) throws CapacityException {
         if(folderId == null) {
-            throw new CapacityException("Parametro playlistId é nulo.");
+            throw new CapacityException("Parametro folderId é nulo.");
         }
         if(contentId == null) {
-            throw new CapacityException("Parametro videoId é nulo.");
+            throw new CapacityException("Parametro contentId é nulo.");
         }
 
         Object videoIds = contentId;
@@ -171,12 +218,12 @@ public class CapacityService implements CapacityServiceInterface {
                 }
                 Content content = findFirstById(videoIdNow);
                 if (content == null) {
-                    throw new CapacityException("Video não encontrado.");
+                    throw new CapacityException("Conteúdo não encontrado.");
                 }
                 addOrRemoveFoldersFromContent(content, folderId, isAdding);
                 boolean result = saveOrUpdateContent(content);
                 if (!result) {
-                    throw new CapacityException("Erro ao adicionar video a playlist.");
+                    throw new CapacityException("Erro ao adicionar conteúdo a pasta.");
                 }
             }
         }
@@ -275,24 +322,50 @@ public class CapacityService implements CapacityServiceInterface {
                 if(playlistId==null || playlistId.isEmpty()) {
                     continue;
                 }
-                Folder playlist = getFolderById(playlistId);
-                if(playlist == null) {
-                    throw new CapacityException("Playlist não encontrada.");
+                Folder folder = getFolderById(playlistId);
+                if(folder == null) {
+                    throw new CapacityException("Pasta não encontrada.");
                 }
-                if(!UserService.getInstance().isSessionOfUser(playlist.getAuthor().getUser())) {
-                    if(!UserService.getInstance().isUserAdmin(UserService.getInstance().getUserInSession())) {
-                        throw new CapacityException("Você não tem permissão para alterar essa playlist.");
-                    }
-                }
-                if(playlist.getContents() == null) {
-                    playlist.setContents(new ArrayList<>());
+
+                checkFolderPermissions(folder, true);
+
+                if(folder.getContents() == null) {
+                    folder.setContents(new ArrayList<>());
                 }
                 if(isAdding) {
-                    if(!playlist.getContents().contains(content)) {
-                        playlist.getContents().add(content);
+                    if(!folder.getContents().contains(content)) {
+                        folder.getContents().add(content);
                     }
                 } else {
-                    playlist.getContents().remove(content);
+                    folder.getContents().remove(content);
+                }
+            }
+        }
+    }
+
+    public void addOrRemoveGrantedAccessGroupFromFolder(Folder folder, Object groupsId, boolean isAdding) throws CapacityException, GroupException {
+        Object groupById = groupsId;
+        if(groupById instanceof String) {
+            groupById = new ArrayList<String>() {{ add((String) groupsId); }};
+        }
+        if(groupById instanceof ArrayList) {
+            for(String addGrantedAccessGroupId : (ArrayList<String>)groupById) {
+                if(addGrantedAccessGroupId==null || addGrantedAccessGroupId.isEmpty()) {
+                    continue;
+                }
+                Group group = groupService.getGroupByGroupIdOrGroupPath(addGrantedAccessGroupId, null);
+                if(group == null) {
+                    continue;
+                }
+                if(folder.getGrantedAccessGroups() == null) {
+                    folder.setGrantedAccessGroups(new ArrayList<>());
+                }
+                if(isAdding) {
+                    if(!folder.getGrantedAccessGroups().contains(group)) {
+                        folder.getGrantedAccessGroups().add(group);
+                    }
+                } else {
+                    folder.getGrantedAccessGroups().remove(group);
                 }
             }
         }
