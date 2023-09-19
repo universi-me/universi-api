@@ -70,6 +70,10 @@ public class Content {
     @NotNull
     private Profile author;
 
+    @Column(name = "type")
+    @Size(max = 100)
+    private String type;
+
     public Content() {
     }
 
@@ -151,6 +155,14 @@ public class Content {
 
     public void setAuthor(Profile author) {
         this.author = author;
+    }
+
+    public void setType(String type){
+        this.type = type;
+    }
+
+    public String getType(){
+        return type;
     }
 
 }
