@@ -1,0 +1,3 @@
+
+ALTER TABLE folder
+    ADD COLUMN "public_folder" BOOLEAN DEFAULT TRUE;

@@ -17,6 +17,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import me.universi.group.entities.Group;
 import me.universi.profile.entities.Profile;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -65,6 +66,13 @@ public class Folder {
     @JoinColumn(name="profile_id")
     @NotNull
     private Profile author;
+
+    @Column(name = "public_folder")
+    @NotNull
+    public boolean publicFolder;
+
+    @ManyToMany(cascade = CascadeType.ALL)
+    private Collection<Group> grantedAccessGroups;
 
     public Folder() {
     }
@@ -139,5 +147,21 @@ public class Folder {
 
     public void setAuthor(Profile author) {
         this.author = author;
+    }
+
+    public boolean isPublicFolder() {
+        return publicFolder;
+    }
+
+    public void setPublicFolder(boolean publicFolder) {
+        this.publicFolder = publicFolder;
+    }
+
+    public Collection<Group> getGrantedAccessGroups() {
+        return grantedAccessGroups;
+    }
+
+    public void setGrantedAccessGroups(Collection<Group> grantedAccessGroups) {
+        this.grantedAccessGroups = grantedAccessGroups;
     }
 }

@@ -168,7 +168,7 @@ public class CapacityController {
 
             // id or array of ids
             Object addCategoriesByIds =    body.get("addCategoriesByIds");
-            Object addPlaylistsByIds =     body.get("addPlaylistsByIds");
+            Object addFoldersByIds =     body.get("addPlaylistsByIds");
 
             if(url == null || String.valueOf(url).isEmpty()) {
                 throw new CapacityException("URL do conteúdo não informado.");
@@ -178,6 +178,7 @@ public class CapacityController {
             }
 
             Content content = new Content();
+            content.setAuthor(UserService.getInstance().getUserInSession().getProfile());
             content.setUrl(String.valueOf(url));
             content.setTitle(String.valueOf(title));
 
@@ -204,11 +205,10 @@ public class CapacityController {
                 capacityService.addOrRemoveCategoriesFromContentOrFolder(content, addCategoriesByIds, true, false);
             }
 
-            if(addPlaylistsByIds != null) {
-                capacityService.addOrRemoveFoldersFromContent(content, addPlaylistsByIds, true);
+            if(addFoldersByIds != null) {
+                capacityService.addOrRemoveFoldersFromContent(content, addFoldersByIds, true);
             }
 
-            content.setAuthor(UserService.getInstance().getUserInSession().getProfile());
 
             boolean result = capacityService.saveOrUpdateContent(content);
             if(!result) {
@@ -511,7 +511,11 @@ public class CapacityController {
                 throw new CapacityException("ID da pasta não informado.");
             }
 
-            response.body.put("playlist", capacityService.getFolderById(String.valueOf(folderId)));
+            Folder folder = capacityService.getFolderById(String.valueOf(folderId));
+
+            capacityService.checkFolderPermissions(folder, false);
+
+            response.body.put("playlist", folder);
             response.success = true;
 
         } catch (Exception e) {
@@ -526,13 +530,15 @@ public class CapacityController {
         Response response = new Response(); // default
         try {
 
-            Object name =        body.get("name");
-            Object image =       body.get("image");
-            Object description = body.get("description");
-            Object rating =      body.get("rating");
+            Object name =           body.get("name");
+            Object image =          body.get("image");
+            Object description =    body.get("description");
+            Object rating =         body.get("rating");
+            Object publicFolder =   body.get("publicFolder");
 
             // id or array of ids
-            Object addCategoriesByIds =    body.get("addCategoriesByIds");
+            Object addCategoriesByIds =            body.get("addCategoriesByIds");
+            Object addGrantedAccessGroupByIds =    body.get("addGrantedAccessGroupByIds");
 
             if(name == null || String.valueOf(name).isEmpty()) {
                 throw new CapacityException("Parametro name não informado.");
@@ -541,6 +547,7 @@ public class CapacityController {
             Folder folder = new Folder();
 
             folder.setName(String.valueOf(name));
+            folder.setAuthor(UserService.getInstance().getUserInSession().getProfile());
 
             if(image != null) {
                 String imageStr = String.valueOf(image);
@@ -560,12 +567,22 @@ public class CapacityController {
                     folder.setRating(Integer.parseInt(ratingStr));
                 }
             }
+            if(publicFolder != null) {
+                String publicFolderStr = String.valueOf(publicFolder);
+                if(!publicFolderStr.isEmpty()) {
+                    folder.setPublicFolder(Boolean.parseBoolean(publicFolderStr));
+                }
+            }
 
             if(addCategoriesByIds != null) {
                 capacityService.addOrRemoveCategoriesFromContentOrFolder(folder, addCategoriesByIds, true, false);
             }
 
-            folder.setAuthor(UserService.getInstance().getUserInSession().getProfile());
+            if(addGrantedAccessGroupByIds != null) {
+                capacityService.addOrRemoveGrantedAccessGroupFromFolder(folder, addGrantedAccessGroupByIds, true);
+            }
+
+
 
             boolean result = capacityService.saveOrUpdateFolder(folder);
             if(!result) {
@@ -592,25 +609,24 @@ public class CapacityController {
                 throw new CapacityException("ID da pasta não informado.");
             }
 
-            Object name =        body.get("name");
-            Object image =       body.get("image");
-            Object description = body.get("description");
-            Object rating =      body.get("rating");
+            Object name =           body.get("name");
+            Object image =          body.get("image");
+            Object description =    body.get("description");
+            Object rating =         body.get("rating");
+            Object publicFolder =   body.get("publicFolder");
 
             // id or array of ids
-            Object addCategoriesByIds =    body.get("addCategoriesByIds");
-            Object removeCategoriesByIds = body.get("removeCategoriesByIds");
+            Object addCategoriesByIds =            body.get("addCategoriesByIds");
+            Object removeCategoriesByIds =         body.get("removeCategoriesByIds");
+            Object addGrantedAccessGroupByIds =    body.get("addGrantedAccessGroupByIds");
+            Object removeGrantedAccessGroupByIds = body.get("removeGrantedAccessGroupByIds");
 
             Folder folder = capacityService.getFolderById(UUID.fromString(String.valueOf(folderId)));
             if(folder == null) {
-                throw new CapacityException("Playlist não encontrado.");
+                throw new CapacityException("Pasta não encontrado.");
             }
 
-            if(!UserService.getInstance().isSessionOfUser(folder.getAuthor().getUser())) {
-                if(!UserService.getInstance().isUserAdmin(UserService.getInstance().getUserInSession())) {
-                    throw new CapacityException("Você não tem permissão para editar esta pasta.");
-                }
-            }
+            capacityService.checkFolderPermissions(folder, true);
 
             if(name != null) {
                 String nameStr = String.valueOf(name);
@@ -636,12 +652,25 @@ public class CapacityController {
                     folder.setRating(Integer.parseInt(ratingStr));
                 }
             }
+            if(publicFolder != null) {
+                String publicFolderStr = String.valueOf(publicFolder);
+                if(!publicFolderStr.isEmpty()) {
+                    folder.setPublicFolder(Boolean.parseBoolean(publicFolderStr));
+                }
+            }
 
             if(addCategoriesByIds != null) {
                 capacityService.addOrRemoveCategoriesFromContentOrFolder(folder, addCategoriesByIds, true, false);
             }
             if(removeCategoriesByIds != null) {
                 capacityService.addOrRemoveCategoriesFromContentOrFolder(folder, removeCategoriesByIds, false, false);
+            }
+
+            if(addGrantedAccessGroupByIds != null) {
+                capacityService.addOrRemoveGrantedAccessGroupFromFolder(folder, addGrantedAccessGroupByIds, true);
+            }
+            if(removeGrantedAccessGroupByIds != null) {
+                capacityService.addOrRemoveGrantedAccessGroupFromFolder(folder, removeGrantedAccessGroupByIds, false);
             }
 
             boolean result = capacityService.saveOrUpdateFolder(folder);
@@ -671,11 +700,7 @@ public class CapacityController {
 
             Folder folder = capacityService.getFolderById(UUID.fromString(String.valueOf(folderId)));
 
-            if(!UserService.getInstance().isSessionOfUser(folder.getAuthor().getUser())) {
-                if(!UserService.getInstance().isUserAdmin(UserService.getInstance().getUserInSession())) {
-                    throw new CapacityException("Você não tem permissão para apagar esta pasta.");
-                }
-            }
+            capacityService.checkFolderPermissions(folder, true);
 
             boolean result = capacityService.deleteFolder(UUID.fromString(String.valueOf(folderId)));
             if(!result) {
