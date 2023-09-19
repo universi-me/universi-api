@@ -182,7 +182,7 @@ public class CapacityController {
             content.setAuthor(UserService.getInstance().getUserInSession().getProfile());
             content.setUrl(String.valueOf(url));
             content.setTitle(String.valueOf(title));
-            content.setType(String.valueOf(tipo));
+            content.setType(String.valueOf(type));
 
             if(image != null) {
                 String imageStr = String.valueOf(image);
