@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.Objects;
 
+import me.universi.Sys;
 import me.universi.capacity.entidades.Content;
 import me.universi.capacity.entidades.Category;
 import me.universi.capacity.entidades.Folder;
@@ -108,6 +109,15 @@ public class CapacityService implements CapacityServiceInterface {
     } //Salvar o vídeo, ou se o ID já existir atualizar um vídeo
 
     public boolean deleteContent(UUID id){
+
+        Content content = contentRepository.findFirstById(id);
+
+        // remove from linked folders
+        content.getFolders().forEach(folder -> {
+            folder.getContents().remove(content);
+            folderRepository.save(folder);
+        });
+
         contentRepository.deleteById(id);
 
         if (contentRepository.findById(id) != null){
@@ -158,7 +168,7 @@ public class CapacityService implements CapacityServiceInterface {
         if(folder == null) {
             throw new CapacityException("Pasta não encontrada.");
         }
-        return folder.getContents();
+        return contentRepository.findOrderedContentsByFolder(folder.getId());
     }
 
     public Collection<Content> getContentsByFolder(String folderId) throws CapacityException {
@@ -371,4 +381,57 @@ public class CapacityService implements CapacityServiceInterface {
         }
     }
 
+    public void setOrderOfContentInFolder(UUID folderId, UUID contentId, int order) throws CapacityException {
+        folderRepository.setOrderInFolder(folderId, contentId, order);
+    }
+
+    public void setOrderOfContentInFolder(Object folderId, Object contentId, int order) throws CapacityException {
+        folderRepository.setOrderInFolder(UUID.fromString((String)folderId), UUID.fromString((String)contentId), order);
+    }
+
+    public int getOrderOfContentInFolder(UUID folderId, UUID contentId) throws CapacityException {
+        return folderRepository.getOrderInFolder(folderId, contentId);
+    }
+
+    public int getOrderOfContentInFolder(Object folderId, Object contentId) throws CapacityException {
+        return folderRepository.getOrderInFolder(UUID.fromString((String)folderId), UUID.fromString((String)contentId));
+    }
+
+    public void orderContentInFolder(Object folderId, Object contentId, int toIndex) throws CapacityException {
+        Folder folder = folderRepository.findFirstById(UUID.fromString((String)folderId));
+        if(folder == null) {
+            throw new CapacityException("Pasta não encontrada.");
+        }
+        if(folder.getContents() == null) {
+            throw new CapacityException("Pasta sem conteúdo.");
+        }
+
+        checkFolderPermissions(folder, true);
+
+        Content content = contentRepository.findFirstById(UUID.fromString((String)contentId));
+        if(content == null) {
+            throw new CapacityException("Conteúdo não encontrado.");
+        }
+
+        // mount ordered list
+        List<Content> contentsOrdered = new ArrayList<>();
+        for(Content contentNow : contentRepository.findOrderedContentsByFolder(folder.getId())) {
+            if(Objects.equals(contentNow.getId(), content.getId())) {
+                // ignore content to be moved
+                continue;
+            }
+            contentsOrdered.add(contentNow);
+        }
+        // set in toIndex to move
+        contentsOrdered.add(toIndex, content);
+        // update order in db
+        for(Content contentNow : contentsOrdered) {
+            int newOrder = contentsOrdered.indexOf(contentNow);
+            if(getOrderOfContentInFolder(folder.getId(), contentNow.getId()) == newOrder) {
+                continue;
+            }
+            setOrderOfContentInFolder(folder.getId(), contentNow.getId(), newOrder);
+        }
+
+    }
 }

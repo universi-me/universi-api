@@ -774,4 +774,37 @@ public class CapacityController {
         return response;
     }
 
+    @PostMapping(value = "/folder/content/order", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response folder_move_content(@RequestBody Map<String, Object> body) {
+        Response response = new Response(); // default
+        try {
+
+            Object folderId = body.get("folderId");
+            Object contentId = body.get("contentId");
+            Object toIndex = body.get("toIndex");
+
+            if(folderId == null || String.valueOf(folderId).isEmpty()) {
+                throw new CapacityException("ID da pasta não informado.");
+            }
+            if(contentId == null || String.valueOf(contentId).isEmpty()) {
+                throw new CapacityException("ID do conteúdo não informado.");
+            }
+            if(toIndex == null || String.valueOf(toIndex).isEmpty()) {
+                throw new CapacityException("Índice não informado.");
+            }
+
+            int toIndexInt = Integer.parseInt(String.valueOf(toIndex));
+
+            capacityService.orderContentInFolder(folderId, contentId, toIndexInt);
+
+            response.message = "Conteúdo ordenado na pasta com sucesso.";
+            response.success = true;
+
+        } catch (Exception e) {
+            response.message = e.getMessage();
+        }
+        return response;
+    }
+
 }

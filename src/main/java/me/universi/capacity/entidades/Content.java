@@ -51,7 +51,7 @@ public class Content {
     private Collection<Category> categories;
 
     @JsonProperty("playlists")
-    @ManyToMany(mappedBy = "contents", cascade = CascadeType.ALL)
+    @ManyToMany(mappedBy = "contents")
     private Collection<Folder> folders;
     
     @Column(name = "rating")

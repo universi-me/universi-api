@@ -1,11 +1,14 @@
 package me.universi.capacity.repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
 import me.universi.capacity.entidades.Content;
 import me.universi.capacity.entidades.Category;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface ContentRepository extends JpaRepository<Content, UUID> {
     Content findFirstById(UUID id);
@@ -14,4 +17,7 @@ public interface ContentRepository extends JpaRepository<Content, UUID> {
     boolean existsByUrl(String url);
 
     List<Content> findByCategories(Category category);
+
+    @Query(value = "SELECT * FROM content INNER JOIN folder_contents ON content.id=folder_contents.contents_id ORDER BY order_num ASC", nativeQuery = true)
+    Collection<Content> findOrderedContentsByFolder(@Param("FolderId") UUID folderId);
 }
