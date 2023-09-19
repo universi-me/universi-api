@@ -9,6 +9,7 @@ CREATE TABLE video
     playlist            VARCHAR(255),
     rating              INTEGER NOT NULL,
     created_at          TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    type                VARCHAR(100),
 
     CONSTRAINT pk_videos PRIMARY KEY (id),
     CONSTRAINT uc_videos_title UNIQUE (title),
