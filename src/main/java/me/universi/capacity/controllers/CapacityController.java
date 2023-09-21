@@ -30,7 +30,7 @@ public class CapacityController {
         this.capacityService = capacityService;
     }
 
-    @GetMapping("/videos")
+    @GetMapping("/contents")
     public Response contentList() {
         Response response = new Response(); // default
         try {
@@ -58,7 +58,7 @@ public class CapacityController {
         return response;
     }
 
-    @GetMapping("/playlists")
+    @GetMapping("/folders")
     public Response foldersList() {
         Response response = new Response(); // default
         try {
@@ -72,7 +72,7 @@ public class CapacityController {
         return response;
     }
 
-    @PostMapping(value = "/category/videos", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/category/contents", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response list_content_by_category(@RequestBody Map<String, Object> body) {
         Response response = new Response(); // default
@@ -92,7 +92,7 @@ public class CapacityController {
         return response;
     }
 
-    @PostMapping(value = "/category/playlists", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/category/folders", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response list_folder_by_category(@RequestBody Map<String, Object> body) {
         Response response = new Response(); // default
@@ -112,7 +112,7 @@ public class CapacityController {
         return response;
     }
 
-    @PostMapping(value = "/playlist/videos", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/folder/contents", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response list_content_by_folder(@RequestBody Map<String, Object> body) {
         Response response = new Response(); // default
@@ -132,7 +132,7 @@ public class CapacityController {
         return response;
     }
 
-    @PostMapping(value = "/video/get", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/content/get", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response get_content(@RequestBody Map<String, Object> body) {
         Response response = new Response(); // default
@@ -157,7 +157,7 @@ public class CapacityController {
         return response;
     }
 
-    @PostMapping(value = "/video/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/content/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response create_content(@RequestBody Map<String, Object> body) {
         Response response = new Response(); // default
@@ -229,7 +229,7 @@ public class CapacityController {
         return response;
     }
 
-    @PostMapping(value = "/video/edit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/content/edit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response edit_content(@RequestBody Map<String, Object> body) {
         Response response = new Response(); // default
@@ -322,7 +322,7 @@ public class CapacityController {
         return response;
     }
 
-    @PostMapping(value = "/video/delete", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/content/delete", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response delete_content(@RequestBody Map<String, Object> body) {
         Response response = new Response(); // default
@@ -505,7 +505,7 @@ public class CapacityController {
         return response;
     }
 
-    @PostMapping(value = "/playlist/get", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/folder/get", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response get_folder(@RequestBody Map<String, Object> body) {
         Response response = new Response(); // default
@@ -529,7 +529,7 @@ public class CapacityController {
         return response;
     }
 
-    @PostMapping(value = "/playlist/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/folder/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response create_folder(@RequestBody Map<String, Object> body) {
         Response response = new Response(); // default
@@ -603,7 +603,7 @@ public class CapacityController {
         return response;
     }
 
-    @PostMapping(value = "/playlist/edit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/folder/edit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response edit_folder(@RequestBody Map<String, Object> body) {
         Response response = new Response(); // default
@@ -689,7 +689,7 @@ public class CapacityController {
         return response;
     }
 
-    @PostMapping(value = "/playlist/delete", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/folder/delete", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response delete_folder(@RequestBody Map<String, Object> body) {
         Response response = new Response(); // default
@@ -718,7 +718,7 @@ public class CapacityController {
         return response;
     }
 
-    @PostMapping(value = "/playlist/video/add", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/folder/content/add", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response folder_add_content(@RequestBody Map<String, Object> body) {
         Response response = new Response(); // default
@@ -747,7 +747,7 @@ public class CapacityController {
         return response;
     }
 
-    @PostMapping(value = "/playlist/video/remove", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/folder/content/remove", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response folder_remove_content(@RequestBody Map<String, Object> body) {
         Response response = new Response(); // default
