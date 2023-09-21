@@ -32,7 +32,7 @@ public class CapacityController {
         Response response = new Response(); // default
         try {
 
-            response.body.put("videos", capacityService.getAllContents());
+            response.body.put("contents", capacityService.getAllContents());
             response.success = true;
 
         } catch (Exception e) {
@@ -60,7 +60,7 @@ public class CapacityController {
         Response response = new Response(); // default
         try {
 
-            response.body.put("playlists", capacityService.getAllFolders());
+            response.body.put("folders", capacityService.getAllFolders());
             response.success = true;
 
         } catch (Exception e) {
@@ -80,7 +80,7 @@ public class CapacityController {
                 throw new CapacityException("ID da categoria não informado.");
             }
 
-            response.body.put("videos", capacityService.getContentsByCategory(String.valueOf(categoryId)));
+            response.body.put("contents", capacityService.getContentsByCategory(String.valueOf(categoryId)));
             response.success = true;
 
         } catch (Exception e) {
@@ -100,7 +100,7 @@ public class CapacityController {
                 throw new CapacityException("ID da categoria não informado.");
             }
 
-            response.body.put("playlists", capacityService.getFoldersByCategory(String.valueOf(categoryId)));
+            response.body.put("folders", capacityService.getFoldersByCategory(String.valueOf(categoryId)));
             response.success = true;
 
         } catch (Exception e) {
@@ -120,7 +120,7 @@ public class CapacityController {
                 throw new CapacityException("ID da pasta não informado.");
             }
 
-            response.body.put("videos", capacityService.getContentsByFolder(String.valueOf(folderId)));
+            response.body.put("contents", capacityService.getContentsByFolder(String.valueOf(folderId)));
             response.success = true;
 
         } catch (Exception e) {
@@ -145,7 +145,7 @@ public class CapacityController {
                 throw new CapacityException("Conteúdo não encontrado.");
             }
 
-            response.body.put("video", content);
+            response.body.put("content", content);
             response.success = true;
 
         } catch (Exception e) {
@@ -517,7 +517,7 @@ public class CapacityController {
 
             capacityService.checkFolderPermissions(folder, false);
 
-            response.body.put("playlist", folder);
+            response.body.put("folder", folder);
             response.success = true;
 
         } catch (Exception e) {

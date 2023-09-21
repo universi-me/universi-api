@@ -50,7 +50,6 @@ public class Content {
     @OneToMany(cascade = CascadeType.PERSIST)
     private Collection<Category> categories;
 
-    @JsonProperty("playlists")
     @ManyToMany(mappedBy = "contents")
     private Collection<Folder> folders;
     
