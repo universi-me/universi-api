@@ -168,8 +168,8 @@ public class CapacityController {
             Object type =        body.get("type");
 
             // id or array of ids
-            Object addCategoriesByIds =    body.get("addCategoriesByIds");
-            Object addFoldersByIds =     body.get("addPlaylistsByIds");
+            Object addCategoriesByIds = body.get("addCategoriesByIds");
+            Object addFoldersByIds =    body.get("addFoldersByIds");
 
             if(url == null || String.valueOf(url).isEmpty()) {
                 throw new CapacityException("URL do conteúdo não informado.");
@@ -246,8 +246,8 @@ public class CapacityController {
             // id or array of ids
             Object addCategoriesByIds =    body.get("addCategoriesByIds");
             Object removeCategoriesByIds = body.get("removeCategoriesByIds");
-            Object addFoldersByIds =       body.get("addPlaylistsByIds");
-            Object removeFoldersByIds =    body.get("removePlaylistsByIds");
+            Object addFoldersByIds =       body.get("addFoldersByIds");
+            Object removeFoldersByIds =    body.get("removeFoldersByIds");
 
             Content content = capacityService.findFirstById(String.valueOf(contentId));
             if(content == null) {
@@ -727,7 +727,7 @@ public class CapacityController {
             Object folderId = body.get("id");
 
             // id or array of ids
-            Object contentIds    = body.get("videoIds");
+            Object contentIds    = body.get("contentIds");
 
             if(folderId == null || String.valueOf(folderId).isEmpty()) {
                 throw new CapacityException("ID da pasta não informado.");
@@ -756,7 +756,7 @@ public class CapacityController {
             Object folderId = body.get("id");
 
             // id or array of ids
-            Object contentIds    = body.get("videoIds");
+            Object contentIds    = body.get("contentIds");
 
             if(folderId == null || String.valueOf(folderId).isEmpty()) {
                 throw new CapacityException("ID da pasta não informado.");
