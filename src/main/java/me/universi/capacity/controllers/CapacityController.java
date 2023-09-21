@@ -1,6 +1,7 @@
 package me.universi.capacity.controllers;
 
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -8,6 +9,8 @@ import me.universi.api.entities.Response;
 import me.universi.capacity.entidades.Content;
 import me.universi.capacity.entidades.Category;
 import me.universi.capacity.entidades.Folder;
+import me.universi.capacity.entidades.Watch;
+import me.universi.capacity.enums.WatchStatus;
 import me.universi.user.services.UserService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -80,7 +83,7 @@ public class CapacityController {
                 throw new CapacityException("ID da categoria não informado.");
             }
 
-            response.body.put("contents", capacityService.getContentsByCategory(String.valueOf(categoryId)));
+            response.body.put("contents", capacityService.findContentsByCategory(String.valueOf(categoryId)));
             response.success = true;
 
         } catch (Exception e) {
@@ -100,7 +103,7 @@ public class CapacityController {
                 throw new CapacityException("ID da categoria não informado.");
             }
 
-            response.body.put("folders", capacityService.getFoldersByCategory(String.valueOf(categoryId)));
+            response.body.put("folders", capacityService.findFoldersByCategory(String.valueOf(categoryId)));
             response.success = true;
 
         } catch (Exception e) {
@@ -120,7 +123,7 @@ public class CapacityController {
                 throw new CapacityException("ID da pasta não informado.");
             }
 
-            response.body.put("contents", capacityService.getContentsByFolder(String.valueOf(folderId)));
+            response.body.put("contents", capacityService.findContentsByFolder(String.valueOf(folderId)));
             response.success = true;
 
         } catch (Exception e) {
@@ -140,7 +143,7 @@ public class CapacityController {
                 throw new CapacityException("ID do conteúdo não informado.");
             }
 
-            Content content = capacityService.findFirstById(String.valueOf(contentId));
+            Content content = capacityService.findContentById(String.valueOf(contentId));
             if(content == null) {
                 throw new CapacityException("Conteúdo não encontrado.");
             }
@@ -249,7 +252,7 @@ public class CapacityController {
             Object addFoldersByIds =       body.get("addFoldersByIds");
             Object removeFoldersByIds =    body.get("removeFoldersByIds");
 
-            Content content = capacityService.findFirstById(String.valueOf(contentId));
+            Content content = capacityService.findContentById(String.valueOf(contentId));
             if(content == null) {
                 throw new CapacityException("Conteúdo não encontrado.");
             }
@@ -330,7 +333,7 @@ public class CapacityController {
                 throw new CapacityException("ID do conteúdo não informado.");
             }
 
-            Content content = capacityService.findFirstById(String.valueOf(contentId));
+            Content content = capacityService.findContentById(String.valueOf(contentId));
             if(content == null) {
                 throw new CapacityException("Conteúdo não encontrado.");
             }
@@ -366,7 +369,7 @@ public class CapacityController {
                 throw new CapacityException("ID da categoria não informado.");
             }
 
-            response.body.put("category", capacityService.getCategoryById(UUID.fromString(String.valueOf(categoryId))));
+            response.body.put("category", capacityService.findCategoryById(UUID.fromString(String.valueOf(categoryId))));
             response.success = true;
 
         } catch (Exception e) {
@@ -428,7 +431,7 @@ public class CapacityController {
             Object name =  body.get("name");
             Object image = body.get("image");
 
-            Category category = capacityService.getCategoryById(String.valueOf(categoryId));
+            Category category = capacityService.findCategoryById(String.valueOf(categoryId));
             if(category == null) {
                 throw new CapacityException("Categoria não encontrado.");
             }
@@ -477,7 +480,7 @@ public class CapacityController {
                 throw new CapacityException("ID da Categoria não informado.");
             }
 
-            Category category = capacityService.getCategoryById(UUID.fromString(String.valueOf(categoryId)));
+            Category category = capacityService.findCategoryById(UUID.fromString(String.valueOf(categoryId)));
             if(category == null) {
                 throw new CapacityException("Categoria não encontrada.");
             }
@@ -513,7 +516,7 @@ public class CapacityController {
                 throw new CapacityException("ID da pasta não informado.");
             }
 
-            Folder folder = capacityService.getFolderById(String.valueOf(folderId));
+            Folder folder = capacityService.findFolderById(String.valueOf(folderId));
 
             capacityService.checkFolderPermissions(folder, false);
 
@@ -623,10 +626,7 @@ public class CapacityController {
             Object addGrantedAccessGroupByIds =    body.get("addGrantedAccessGroupByIds");
             Object removeGrantedAccessGroupByIds = body.get("removeGrantedAccessGroupByIds");
 
-            Folder folder = capacityService.getFolderById(UUID.fromString(String.valueOf(folderId)));
-            if(folder == null) {
-                throw new CapacityException("Pasta não encontrado.");
-            }
+            Folder folder = capacityService.findFolderById(String.valueOf(folderId));
 
             capacityService.checkFolderPermissions(folder, true);
 
@@ -700,7 +700,7 @@ public class CapacityController {
                 throw new CapacityException("ID da pasta não informado.");
             }
 
-            Folder folder = capacityService.getFolderById(UUID.fromString(String.valueOf(folderId)));
+            Folder folder = capacityService.findFolderById(UUID.fromString(String.valueOf(folderId)));
 
             capacityService.checkFolderPermissions(folder, true);
 
@@ -801,6 +801,58 @@ public class CapacityController {
             capacityService.orderContentInFolder(folderId, contentId, toIndexInt);
 
             response.message = "Conteúdo ordenado na pasta com sucesso.";
+            response.success = true;
+
+        } catch (Exception e) {
+            response.message = e.getMessage();
+        }
+        return response;
+    }
+
+    @PostMapping(value = "/content/watch", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response content_watch(@RequestBody Map<String, Object> body) {
+        Response response = new Response(); // default
+        try {
+            Object contentId = body.get("contentId");
+
+            if(contentId == null || String.valueOf(contentId).isEmpty()) {
+                throw new CapacityException("ID do conteúdo não informado.");
+            }
+
+            Watch watch = capacityService.findWatchByContentId((String)contentId);
+
+            response.body.put("watch", watch);
+            response.success = true;
+
+        } catch (Exception e) {
+            response.message = e.getMessage();
+        }
+        return response;
+    }
+
+    @PostMapping(value = "/content/watch/edit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response content_watch_edit(@RequestBody Map<String, Object> body) {
+        Response response = new Response(); // default
+        try {
+
+            Object contentId = body.get("contentId");
+            Object status = body.get("watchStatus");
+
+            if(contentId == null || String.valueOf(contentId).isEmpty()) {
+                throw new CapacityException("ID do conteúdo não informado.");
+            }
+            if(status == null || String.valueOf(status).isEmpty()) {
+                throw new CapacityException("Status do conteúdo não informado.");
+            }
+
+            WatchStatus watchStatus = WatchStatus.valueOf(String.valueOf(status));
+
+            Watch watch = capacityService.setWatchStatus(String.valueOf(contentId), watchStatus);
+
+            response.body.put("watch", watch);
+            response.message = "Status do conteúdo atualizado com sucesso.";
             response.success = true;
 
         } catch (Exception e) {
