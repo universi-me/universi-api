@@ -1,6 +1,5 @@
 package me.universi.capacity.repository;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,14 +14,11 @@ import org.springframework.transaction.annotation.Transactional;
 public interface FolderRepository extends JpaRepository<Folder, UUID> {
     Folder findFirstById(UUID id);
     List<Folder> findByName(String name);
-
-    Collection<Folder> findByCategories(Category category);
-
+    List<Folder> findByCategories(Category category);
     @Modifying
     @Transactional
     @Query(value = "UPDATE folder_contents SET order_num = :OrderNum WHERE folders_id = :FolderId AND contents_id = :ContentId", nativeQuery = true)
     void setOrderInFolder( @Param("FolderId") UUID folderId, @Param("ContentId") UUID contentId, @Param("OrderNum") int num);
-
     @Query(value = "SELECT order_num FROM folder_contents WHERE folders_id = :FolderId AND contents_id = :ContentId LIMIT 1", nativeQuery = true)
     int getOrderInFolder( @Param("FolderId") UUID folderId, @Param("ContentId") UUID contentId);
 }
