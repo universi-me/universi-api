@@ -8,6 +8,6 @@ import me.universi.capacity.entidades.Content;
 import me.universi.capacity.exceptions.CapacityException;
 
 public interface CapacityServiceInterface {
-    List<Content> getContentsByCategory(UUID categoryId) throws CapacityException;
-    Collection<Content> getContentsByFolder(UUID folderId) throws CapacityException;
+    List<Content> findContentsByCategory(UUID categoryId) throws CapacityException;
+    Collection<Content> findContentsByFolder(UUID folderId) throws CapacityException;
 }

@@ -13,6 +13,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Transient;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -21,6 +22,7 @@ import jakarta.validation.constraints.Size;
 import java.util.Collection;
 import java.util.Date;
 import java.util.UUID;
+import me.universi.capacity.service.CapacityService;
 import me.universi.profile.entities.Profile;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -73,6 +75,9 @@ public class Content {
     @Column(name = "type")
     @Size(max = 100)
     private String type;
+
+    @Transient
+    public Watch watch;
 
     public Content() {
     }

@@ -10,8 +10,10 @@ import me.universi.Sys;
 import me.universi.capacity.entidades.Content;
 import me.universi.capacity.entidades.Category;
 import me.universi.capacity.entidades.Folder;
+import me.universi.capacity.entidades.Watch;
 import me.universi.capacity.repository.CategoryRepository;
 import me.universi.capacity.repository.FolderRepository;
+import me.universi.capacity.repository.WatchRepository;
 import me.universi.group.entities.Group;
 import me.universi.group.exceptions.GroupException;
 import me.universi.group.services.GroupService;
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import me.universi.capacity.exceptions.CapacityException;
 import me.universi.capacity.repository.ContentRepository;
+import me.universi.capacity.enums.WatchStatus;
 
 
 @Service
@@ -32,13 +35,20 @@ public class CapacityService implements CapacityServiceInterface {
 
     private final FolderRepository folderRepository;
 
+    private final WatchRepository watchRepository;
+
     private final GroupService groupService;
 
-    public CapacityService(GroupService groupService, ContentRepository contentRepository, CategoryRepository categoryRepository, FolderRepository folderRepository) {
+    public CapacityService(GroupService groupService, ContentRepository contentRepository, CategoryRepository categoryRepository, FolderRepository folderRepository, WatchRepository watchRepository) {
         this.contentRepository = contentRepository;
         this.categoryRepository = categoryRepository;
         this.folderRepository = folderRepository;
         this.groupService = groupService;
+        this.watchRepository = watchRepository;
+    }
+
+    public static CapacityService getInstance() {
+        return Sys.context.getBean("capacityService", CapacityService.class);
     }
 
     public void checkFolderPermissions(Folder folder, boolean forWrite) throws CapacityException {
@@ -88,91 +98,88 @@ public class CapacityService implements CapacityServiceInterface {
         return contentList;
     } //Lista todos os vídeos existentes
 
+    public Content findContentById(UUID contentId) throws CapacityException {
+        Content content = contentRepository.findFirstById(contentId);
+        if(content == null) {
+            throw new CapacityException("Conteúdo não encontrada.");
+        }
+        return content;
+    }
 
-    public Content findFirstById(UUID id){
-        return contentRepository.findFirstById(id);
-    } //Lista os vídeos pelo ID
+    public Content findContentById(String contentId) throws CapacityException {
+        return findContentById(UUID.fromString(contentId));
+    }
 
-    public Content findFirstById(String id){
-        return contentRepository.findFirstById(UUID.fromString(id));
+    public Folder findFolderById(UUID folderId) throws CapacityException {
+        Folder folder = folderRepository.findFirstById(folderId);
+        if(folder == null) {
+            throw new CapacityException("Pasta não encontrada.");
+        }
+        return folder;
+    }
+
+    public Folder findFolderById(String folderId) throws CapacityException {
+        return findFolderById(UUID.fromString(folderId));
+    }
+
+    public Category findCategoryById(UUID uuid) throws CapacityException {
+        Category category = categoryRepository.findFirstById(uuid);
+        if(category == null) {
+            throw new CapacityException("Categoria não encontrada.");
+        }
+        return category;
+    }
+
+    public Category findCategoryById(String uuid) throws CapacityException {
+        return findCategoryById(UUID.fromString(uuid));
+    }
+
+    public List<Content> findContentsByCategory(UUID categoryId) throws CapacityException {
+        Category category = findCategoryById(categoryId);
+        return contentRepository.findByCategories(category);
+    }
+
+    public List<Content> findContentsByCategory(String categoryId) throws CapacityException {
+        return findContentsByCategory(UUID.fromString(categoryId));
+    }
+
+    public List<Content> findContentsByFolder(UUID folderId) throws CapacityException {
+        Folder folder = findFolderById(folderId);
+
+        List<Content> contents = contentRepository.findOrderedContentsByFolder(folder.getId());
+
+        for(Content content : contents) {
+            Watch watch = findWatchByContentId(content.getId());
+            if(watch != null) {
+                content.watch = watch;
+            }
+        }
+
+        return contents;
+    }
+
+    public Collection<Content> findContentsByFolder(String folderId) throws CapacityException {
+        return findContentsByFolder(UUID.fromString(folderId));
+    }
+
+    public Collection<Folder> findFoldersByCategory(UUID categoryId) throws CapacityException {
+        Category category = findCategoryById(categoryId);
+        return folderRepository.findByCategories(category);
+    }
+
+    public Collection<Folder> findFoldersByCategory(String categoryId) throws CapacityException {
+        return findFoldersByCategory(UUID.fromString(categoryId));
     }
 
     public boolean saveOrUpdateContent(Content content) throws CapacityException {
 
         Content updatedContent = contentRepository.save(content);
 
-        if (findFirstById(updatedContent.getId()) != null){
+        if (findContentById(updatedContent.getId()) != null){
             return true;
         }
 
         return false;
-    } //Salvar o vídeo, ou se o ID já existir atualizar um vídeo
-
-    public boolean deleteContent(UUID id){
-
-        Content content = contentRepository.findFirstById(id);
-
-        // remove from linked folders
-        content.getFolders().forEach(folder -> {
-            folder.getContents().remove(content);
-            folderRepository.save(folder);
-        });
-
-        contentRepository.deleteById(id);
-
-        if (contentRepository.findById(id) != null){
-            return true;
-        }
-
-        return false;
-    } //Deleta o vídeo pelo ID
-
-    public boolean deleteCategory(UUID id){
-        categoryRepository.deleteById(id);
-
-        if (categoryRepository.findById(id) != null){
-            return true;
-        }
-
-        return false;
-    }
-
-    public boolean deleteFolder(UUID id){
-        folderRepository.deleteById(id);
-
-        if (folderRepository.findById(id) != null){
-            return true;
-        }
-
-        return false;
-    }
-
-    public List<Content> getContentsByCategory(UUID categoryId) throws CapacityException {
-        Category category = categoryRepository.findFirstById(categoryId);
-        if(category == null) {
-            throw new CapacityException("Categoria não encontrada.");
-        }
-        return contentRepository.findByCategories(category);
-    }
-
-    public List<Content> getContentsByCategory(String categoryId) throws CapacityException {
-        return getContentsByCategory(UUID.fromString(categoryId));
-    }
-
-    public List<Category> getAllCategories() {
-        return categoryRepository.findAll();
-    }
-
-    public Collection<Content> getContentsByFolder(UUID folderId) throws CapacityException {
-        Folder folder = folderRepository.findFirstById(folderId);
-        if(folder == null) {
-            throw new CapacityException("Pasta não encontrada.");
-        }
-        return contentRepository.findOrderedContentsByFolder(folder.getId());
-    }
-
-    public Collection<Content> getContentsByFolder(String folderId) throws CapacityException {
-        return getContentsByFolder(UUID.fromString(folderId));
     }
 
     public boolean saveOrUpdateCategory(Category category) throws CapacityException {
@@ -201,12 +208,40 @@ public class CapacityService implements CapacityServiceInterface {
         return false;
     }
 
-    public List<Folder> getAllFolders() {
-        return folderRepository.findAll();
+    public boolean deleteContent(UUID id) throws CapacityException {
+
+        Content content = findContentById(id);
+
+        // remove from linked folders
+        content.getFolders().forEach(folder -> {
+            folder.getContents().remove(content);
+            folderRepository.save(folder);
+        });
+
+        // remove from linked watch`s
+        deleteWatchForContent(content.getId());
+
+        contentRepository.deleteById(id);
+
+        return true;
     }
 
-    public Folder findFirstFolderById(String folderId) {
-        return folderRepository.findFirstById(UUID.fromString(folderId));
+    public boolean deleteCategory(UUID id){
+        categoryRepository.deleteById(id);
+        return true;
+    }
+
+    public boolean deleteFolder(UUID id){
+        folderRepository.deleteById(id);
+        return true;
+    }
+
+    public List<Category> getAllCategories() {
+        return categoryRepository.findAll();
+    }
+
+    public List<Folder> getAllFolders() {
+        return folderRepository.findAll();
     }
 
     public void addOrRemoveContentFromFolder(Object folderId, Object contentId, boolean isAdding) throws CapacityException {
@@ -226,10 +261,8 @@ public class CapacityService implements CapacityServiceInterface {
                 if (videoIdNow == null || videoIdNow.isEmpty()) {
                     continue;
                 }
-                Content content = findFirstById(videoIdNow);
-                if (content == null) {
-                    throw new CapacityException("Conteúdo não encontrado.");
-                }
+                Content content = findContentById(videoIdNow);
+
                 addOrRemoveFoldersFromContent(content, folderId, isAdding);
                 boolean result = saveOrUpdateContent(content);
                 if (!result) {
@@ -237,42 +270,6 @@ public class CapacityService implements CapacityServiceInterface {
                 }
             }
         }
-    }
-
-    public Category getCategoryById(UUID uuid) throws CapacityException {
-        Category category = categoryRepository.findFirstById(uuid);
-        if(category == null) {
-            throw new CapacityException("Categoria não encontrada.");
-        }
-        return category;
-    }
-
-    public Category getCategoryById(String uuid) throws CapacityException {
-        return getCategoryById(UUID.fromString(uuid));
-    }
-
-    public Folder getFolderById(UUID uuid) throws CapacityException {
-        Folder folder = folderRepository.findFirstById(uuid);
-        if(folder == null) {
-            throw new CapacityException("Playlist não encontrada.");
-        }
-        return folder;
-    }
-
-    public Folder getFolderById(String uuid) throws CapacityException {
-        return getFolderById(UUID.fromString(uuid));
-    }
-
-    public Collection<Folder> getFoldersByCategory(UUID categoryId) throws CapacityException {
-        Category category = categoryRepository.findFirstById(categoryId);
-        if(category == null) {
-            throw new CapacityException("Categoria não encontrada.");
-        }
-        return folderRepository.findByCategories(category);
-    }
-
-    public Collection<Folder> getFoldersByCategory(String categoryId) throws CapacityException {
-        return getFoldersByCategory(UUID.fromString(categoryId));
     }
 
     public void addOrRemoveCategoriesFromContentOrFolder(Object contentOrFolder, Object categoriesId, boolean isAdding, boolean removeAllBefore) throws CapacityException {
@@ -285,10 +282,8 @@ public class CapacityService implements CapacityServiceInterface {
                 if(categoryId==null || categoryId.isEmpty()) {
                     continue;
                 }
-                Category category = getCategoryById(categoryId);
-                if(category == null) {
-                    throw new CapacityException("Categoria não encontrada.");
-                }
+                Category category = findCategoryById(categoryId);
+
                 if(contentOrFolder instanceof Content) {
                     if(((Content)contentOrFolder).getCategories() == null) {
                         ((Content)contentOrFolder).setCategories(new ArrayList<>());
@@ -332,10 +327,7 @@ public class CapacityService implements CapacityServiceInterface {
                 if(playlistId==null || playlistId.isEmpty()) {
                     continue;
                 }
-                Folder folder = getFolderById(playlistId);
-                if(folder == null) {
-                    throw new CapacityException("Pasta não encontrada.");
-                }
+                Folder folder = findFolderById(playlistId);
 
                 checkFolderPermissions(folder, true);
 
@@ -398,20 +390,11 @@ public class CapacityService implements CapacityServiceInterface {
     }
 
     public void orderContentInFolder(Object folderId, Object contentId, int toIndex) throws CapacityException {
-        Folder folder = folderRepository.findFirstById(UUID.fromString((String)folderId));
-        if(folder == null) {
-            throw new CapacityException("Pasta não encontrada.");
-        }
-        if(folder.getContents() == null) {
-            throw new CapacityException("Pasta sem conteúdo.");
-        }
+        Folder folder = findFolderById((String)folderId);
 
         checkFolderPermissions(folder, true);
 
-        Content content = contentRepository.findFirstById(UUID.fromString((String)contentId));
-        if(content == null) {
-            throw new CapacityException("Conteúdo não encontrado.");
-        }
+        Content content = findContentById((String)contentId);
 
         // mount ordered list
         List<Content> contentsOrdered = new ArrayList<>();
@@ -433,5 +416,40 @@ public class CapacityService implements CapacityServiceInterface {
             setOrderOfContentInFolder(folder.getId(), contentNow.getId(), newOrder);
         }
 
+    }
+
+    public Watch findWatchByContentId(UUID contentId) throws CapacityException {
+        Profile userProfile = UserService.getInstance().getUserInSession().getProfile();
+        Watch watch = watchRepository.findFirstByProfileIdAndContentId(userProfile.getId(), contentId);
+        if(watch == null) {
+            watch = new Watch();
+            watch.setContent(findContentById(contentId));
+            watch.setProfile(UserService.getInstance().getUserInSession().getProfile());
+            watch.setStatus(WatchStatus.NOT_VIEWED);
+            return watch;
+        }
+        return watch;
+    }
+
+    public Watch findWatchByContentId(String contentId) throws CapacityException {
+        return findWatchByContentId(UUID.fromString(contentId));
+    }
+
+    public Watch setWatchStatus(UUID contentId, WatchStatus status) throws CapacityException {
+        Watch watch = findWatchByContentId(contentId);
+        if(watch.getStatus() != status) {
+            watch.setStatus(status);
+            watch.setUpdatedAt(new java.util.Date());
+            return watchRepository.save(watch);
+        }
+        return watch;
+    }
+
+    public Watch setWatchStatus(String contentId, WatchStatus status) throws CapacityException {
+        return setWatchStatus(UUID.fromString(contentId), status);
+    }
+
+    public void deleteWatchForContent(UUID contentId) {
+        watchRepository.deleteByContentId(contentId);
     }
 }
