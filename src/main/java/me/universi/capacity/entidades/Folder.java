@@ -74,6 +74,11 @@ public class Folder {
     @ManyToMany(cascade = CascadeType.ALL)
     private Collection<Group> grantedAccessGroups;
 
+    @ManyToOne
+    @JoinColumn(name = "owner_group_id")
+    @NotNull
+    private Group ownerGroup;
+
     public Folder() {
     }
 
@@ -163,5 +168,13 @@ public class Folder {
 
     public void setGrantedAccessGroups(Collection<Group> grantedAccessGroups) {
         this.grantedAccessGroups = grantedAccessGroups;
+    }
+
+    public Group getOwnerGroup() {
+        return this.ownerGroup;
+    }
+
+    public void setOwnerGroup(Group ownerGroup) {
+        this.ownerGroup = ownerGroup;
     }
 }

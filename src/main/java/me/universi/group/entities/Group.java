@@ -14,10 +14,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotNull;
+import me.universi.capacity.entidades.Folder;
 import me.universi.group.enums.GroupType;
 import me.universi.group.services.GroupService;
 import me.universi.profile.entities.Profile;
@@ -103,6 +105,10 @@ public class Group {
     @Column(name = "public_group")
     @NotNull
     public boolean publicGroup;
+
+    @OneToMany(mappedBy = "ownerGroup", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private Collection<Folder> folders;
 
     public Group() {
     }
@@ -246,6 +252,15 @@ public class Group {
 
     public void setId(UUID id) {
         this.id = id;
+    }
+
+    @Transient
+    public Collection<Folder> getFolders() {
+        return this.folders;
+    }
+
+    public void setFolders(Collection<Folder> folders) {
+        this.folders = folders;
     }
 
     @Transient
