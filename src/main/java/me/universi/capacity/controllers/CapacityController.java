@@ -30,12 +30,12 @@ public class CapacityController {
         this.capacityService = capacityService;
     }
 
-    @GetMapping("/videos")
+    @GetMapping("/contents")
     public Response contentList() {
         Response response = new Response(); // default
         try {
 
-            response.body.put("videos", capacityService.getAllContents());
+            response.body.put("contents", capacityService.getAllContents());
             response.success = true;
 
         } catch (Exception e) {
@@ -58,12 +58,12 @@ public class CapacityController {
         return response;
     }
 
-    @GetMapping("/playlists")
+    @GetMapping("/folders")
     public Response foldersList() {
         Response response = new Response(); // default
         try {
 
-            response.body.put("playlists", capacityService.getAllFolders());
+            response.body.put("folders", capacityService.getAllFolders());
             response.success = true;
 
         } catch (Exception e) {
@@ -72,7 +72,7 @@ public class CapacityController {
         return response;
     }
 
-    @PostMapping(value = "/category/videos", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/category/contents", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response list_content_by_category(@RequestBody Map<String, Object> body) {
         Response response = new Response(); // default
@@ -83,7 +83,7 @@ public class CapacityController {
                 throw new CapacityException("ID da categoria não informado.");
             }
 
-            response.body.put("videos", capacityService.findContentsByCategory(String.valueOf(categoryId)));
+            response.body.put("contents", capacityService.findContentsByCategory(String.valueOf(categoryId)));
             response.success = true;
 
         } catch (Exception e) {
@@ -92,7 +92,7 @@ public class CapacityController {
         return response;
     }
 
-    @PostMapping(value = "/category/playlists", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/category/folders", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response list_folder_by_category(@RequestBody Map<String, Object> body) {
         Response response = new Response(); // default
@@ -103,7 +103,7 @@ public class CapacityController {
                 throw new CapacityException("ID da categoria não informado.");
             }
 
-            response.body.put("playlists", capacityService.findFoldersByCategory(String.valueOf(categoryId)));
+            response.body.put("folders", capacityService.findFoldersByCategory(String.valueOf(categoryId)));
             response.success = true;
 
         } catch (Exception e) {
@@ -112,7 +112,7 @@ public class CapacityController {
         return response;
     }
 
-    @PostMapping(value = "/playlist/videos", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/folder/contents", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response list_content_by_folder(@RequestBody Map<String, Object> body) {
         Response response = new Response(); // default
@@ -123,7 +123,7 @@ public class CapacityController {
                 throw new CapacityException("ID da pasta não informado.");
             }
 
-            response.body.put("videos", capacityService.findContentsByFolder(String.valueOf(folderId)));
+            response.body.put("contents", capacityService.findContentsByFolder(String.valueOf(folderId)));
             response.success = true;
 
         } catch (Exception e) {
@@ -132,7 +132,7 @@ public class CapacityController {
         return response;
     }
 
-    @PostMapping(value = "/video/get", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/content/get", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response get_content(@RequestBody Map<String, Object> body) {
         Response response = new Response(); // default
@@ -148,7 +148,7 @@ public class CapacityController {
                 throw new CapacityException("Conteúdo não encontrado.");
             }
 
-            response.body.put("video", content);
+            response.body.put("content", content);
             response.success = true;
 
         } catch (Exception e) {
@@ -157,7 +157,7 @@ public class CapacityController {
         return response;
     }
 
-    @PostMapping(value = "/video/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/content/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response create_content(@RequestBody Map<String, Object> body) {
         Response response = new Response(); // default
@@ -171,8 +171,8 @@ public class CapacityController {
             Object type =        body.get("type");
 
             // id or array of ids
-            Object addCategoriesByIds =    body.get("addCategoriesByIds");
-            Object addFoldersByIds =     body.get("addPlaylistsByIds");
+            Object addCategoriesByIds = body.get("addCategoriesByIds");
+            Object addFoldersByIds =    body.get("addFoldersByIds");
 
             if(url == null || String.valueOf(url).isEmpty()) {
                 throw new CapacityException("URL do conteúdo não informado.");
@@ -229,7 +229,7 @@ public class CapacityController {
         return response;
     }
 
-    @PostMapping(value = "/video/edit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/content/edit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response edit_content(@RequestBody Map<String, Object> body) {
         Response response = new Response(); // default
@@ -249,8 +249,8 @@ public class CapacityController {
             // id or array of ids
             Object addCategoriesByIds =    body.get("addCategoriesByIds");
             Object removeCategoriesByIds = body.get("removeCategoriesByIds");
-            Object addFoldersByIds =       body.get("addPlaylistsByIds");
-            Object removeFoldersByIds =    body.get("removePlaylistsByIds");
+            Object addFoldersByIds =       body.get("addFoldersByIds");
+            Object removeFoldersByIds =    body.get("removeFoldersByIds");
 
             Content content = capacityService.findContentById(String.valueOf(contentId));
             if(content == null) {
@@ -322,7 +322,7 @@ public class CapacityController {
         return response;
     }
 
-    @PostMapping(value = "/video/delete", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/content/delete", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response delete_content(@RequestBody Map<String, Object> body) {
         Response response = new Response(); // default
@@ -505,7 +505,7 @@ public class CapacityController {
         return response;
     }
 
-    @PostMapping(value = "/playlist/get", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/folder/get", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response get_folder(@RequestBody Map<String, Object> body) {
         Response response = new Response(); // default
@@ -520,7 +520,7 @@ public class CapacityController {
 
             capacityService.checkFolderPermissions(folder, false);
 
-            response.body.put("playlist", folder);
+            response.body.put("folder", folder);
             response.success = true;
 
         } catch (Exception e) {
@@ -529,7 +529,7 @@ public class CapacityController {
         return response;
     }
 
-    @PostMapping(value = "/playlist/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/folder/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response create_folder(@RequestBody Map<String, Object> body) {
         Response response = new Response(); // default
@@ -603,7 +603,7 @@ public class CapacityController {
         return response;
     }
 
-    @PostMapping(value = "/playlist/edit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/folder/edit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response edit_folder(@RequestBody Map<String, Object> body) {
         Response response = new Response(); // default
@@ -689,7 +689,7 @@ public class CapacityController {
         return response;
     }
 
-    @PostMapping(value = "/playlist/delete", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/folder/delete", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response delete_folder(@RequestBody Map<String, Object> body) {
         Response response = new Response(); // default
@@ -718,7 +718,7 @@ public class CapacityController {
         return response;
     }
 
-    @PostMapping(value = "/playlist/video/add", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/folder/content/add", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response folder_add_content(@RequestBody Map<String, Object> body) {
         Response response = new Response(); // default
@@ -727,7 +727,7 @@ public class CapacityController {
             Object folderId = body.get("id");
 
             // id or array of ids
-            Object contentIds    = body.get("videoIds");
+            Object contentIds    = body.get("contentIds");
 
             if(folderId == null || String.valueOf(folderId).isEmpty()) {
                 throw new CapacityException("ID da pasta não informado.");
@@ -747,7 +747,7 @@ public class CapacityController {
         return response;
     }
 
-    @PostMapping(value = "/playlist/video/remove", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/folder/content/remove", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response folder_remove_content(@RequestBody Map<String, Object> body) {
         Response response = new Response(); // default
@@ -756,7 +756,7 @@ public class CapacityController {
             Object folderId = body.get("id");
 
             // id or array of ids
-            Object contentIds    = body.get("videoIds");
+            Object contentIds    = body.get("contentIds");
 
             if(folderId == null || String.valueOf(folderId).isEmpty()) {
                 throw new CapacityException("ID da pasta não informado.");

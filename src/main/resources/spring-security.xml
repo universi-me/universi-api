@@ -26,10 +26,6 @@
         <intercept-url pattern="/api/swagger-ui/**" access="permitAll"/>
         <intercept-url pattern="/api/v3/api-docs/**" access="permitAll"/>
 
-        <intercept-url pattern="/api/capacitacao/categoria/{category}" access="permitAll"/>
-        <intercept-url pattern="/api/capacitacao/video/{id}" access="permitAll"/>
-        <intercept-url pattern="/api/capacitacao/playlist/{playlist}" access="permitAll"/>
-
         <!-- Admin rules -->
         <intercept-url pattern="/api/admin/**" access="hasRole('ADMIN')"/>
 

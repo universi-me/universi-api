@@ -96,7 +96,7 @@ public class CapacityService implements CapacityServiceInterface {
         contentRepository.findAll().forEach(content -> contentList.add(content));
 
         return contentList;
-    } //Lista todos os vídeos existentes
+    } //Lista todos os conteúdos existentes
 
     public Content findContentById(UUID contentId) throws CapacityException {
         Content content = contentRepository.findFirstById(contentId);
@@ -199,9 +199,9 @@ public class CapacityService implements CapacityServiceInterface {
 
     public boolean saveOrUpdateFolder(Folder folder) throws CapacityException {
 
-        Folder updatedVideoCategory = folderRepository.save(folder);
+        Folder updatedFolder = folderRepository.save(folder);
 
-        if (folderRepository.findFirstById(updatedVideoCategory.getId()) != null){
+        if (folderRepository.findFirstById(updatedFolder.getId()) != null){
             return true;
         }
 
@@ -252,16 +252,16 @@ public class CapacityService implements CapacityServiceInterface {
             throw new CapacityException("Parametro contentId é nulo.");
         }
 
-        Object videoIds = contentId;
-        if(videoIds instanceof String) {
-            videoIds = new ArrayList<String>() {{ add((String) contentId); }};
+        Object contentIds = contentId;
+        if(contentIds instanceof String) {
+            contentIds = new ArrayList<String>() {{ add((String) contentId); }};
         }
-        if(videoIds instanceof ArrayList) {
-            for (String videoIdNow : (ArrayList<String>) videoIds) {
-                if (videoIdNow == null || videoIdNow.isEmpty()) {
+        if(contentIds instanceof ArrayList) {
+            for (String contentIdNow : (ArrayList<String>) contentIds) {
+                if (contentIdNow == null || contentIdNow.isEmpty()) {
                     continue;
                 }
-                Content content = findContentById(videoIdNow);
+                Content content = findContentById(contentIdNow);
 
                 addOrRemoveFoldersFromContent(content, folderId, isAdding);
                 boolean result = saveOrUpdateContent(content);
@@ -318,16 +318,16 @@ public class CapacityService implements CapacityServiceInterface {
     }
 
     public void addOrRemoveFoldersFromContent(Content content, Object foldersId, boolean isAdding) throws CapacityException {
-        Object playlistsIds = foldersId;
-        if(playlistsIds instanceof String) {
-            playlistsIds = new ArrayList<String>() {{ add((String) foldersId); }};
+        Object foldersIds = foldersId;
+        if(foldersIds instanceof String) {
+            foldersIds = new ArrayList<String>() {{ add((String) foldersId); }};
         }
-        if(playlistsIds instanceof ArrayList) {
-            for(String playlistId : (ArrayList<String>)playlistsIds) {
-                if(playlistId==null || playlistId.isEmpty()) {
+        if(foldersIds instanceof ArrayList) {
+            for(String folderId : (ArrayList<String>)foldersIds) {
+                if(folderId==null || folderId.isEmpty()) {
                     continue;
                 }
-                Folder folder = findFolderById(playlistId);
+                Folder folder = findFolderById(folderId);
 
                 checkFolderPermissions(folder, true);
 
