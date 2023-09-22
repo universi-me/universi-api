@@ -513,4 +513,25 @@ public class GrupoController {
 
         return response;
     }
+
+    @PostMapping(value = "/folders", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response list_folders(@RequestBody Map<String, Object> body) {
+        Response response = new Response();
+        try {
+
+            String groupId = (String)body.get("groupId");
+            String groupPath = (String)body.get("groupPath");
+
+            Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
+
+            response.body.put("folders", group.getFolders());
+            response.success = true;
+
+        } catch (Exception e) {
+            response.message = e.getMessage();
+            response.success = false;
+        }
+        return response;
+    }
 }
