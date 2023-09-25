@@ -13,7 +13,7 @@ import me.universi.capacity.entidades.ContentStatus;
 import me.universi.capacity.entidades.Folder;
 import me.universi.capacity.repository.CategoryRepository;
 import me.universi.capacity.repository.FolderRepository;
-import me.universi.capacity.repository.StatusRepository;
+import me.universi.capacity.repository.ContentStatusRepository;
 import me.universi.group.entities.Group;
 import me.universi.group.exceptions.GroupException;
 import me.universi.group.services.GroupService;
@@ -35,16 +35,16 @@ public class CapacityService implements CapacityServiceInterface {
 
     private final FolderRepository folderRepository;
 
-    private final StatusRepository statusRepository;
+    private final ContentStatusRepository contentStatusRepository;
 
     private final GroupService groupService;
 
-    public CapacityService(GroupService groupService, ContentRepository contentRepository, CategoryRepository categoryRepository, FolderRepository folderRepository, StatusRepository statusRepository) {
+    public CapacityService(GroupService groupService, ContentRepository contentRepository, CategoryRepository categoryRepository, FolderRepository folderRepository, ContentStatusRepository contentStatusRepository) {
         this.contentRepository = contentRepository;
         this.categoryRepository = categoryRepository;
         this.folderRepository = folderRepository;
         this.groupService = groupService;
-        this.statusRepository = statusRepository;
+        this.contentStatusRepository = contentStatusRepository;
     }
 
     public static CapacityService getInstance() {
@@ -417,7 +417,7 @@ public class CapacityService implements CapacityServiceInterface {
 
     public ContentStatus findStatusByContentId(UUID contentId) throws CapacityException {
         Profile userProfile = UserService.getInstance().getUserInSession().getProfile();
-        ContentStatus contentStatus = statusRepository.findFirstByProfileIdAndContentId(userProfile.getId(), contentId);
+        ContentStatus contentStatus = contentStatusRepository.findFirstByProfileIdAndContentId(userProfile.getId(), contentId);
         if(contentStatus == null) {
             contentStatus = new ContentStatus();
             contentStatus.setContent(findContentById(contentId));
@@ -437,7 +437,7 @@ public class CapacityService implements CapacityServiceInterface {
         if(contentStatus.getStatus() != status) {
             contentStatus.setStatus(status);
             contentStatus.setUpdatedAt(new java.util.Date());
-            return statusRepository.save(contentStatus);
+            return contentStatusRepository.save(contentStatus);
         }
         return contentStatus;
     }
@@ -447,6 +447,6 @@ public class CapacityService implements CapacityServiceInterface {
     }
 
     public void deleteStatusForContent(UUID contentId) {
-        statusRepository.deleteByContentId(contentId);
+        contentStatusRepository.deleteByContentId(contentId);
     }
 }

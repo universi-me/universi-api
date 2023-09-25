@@ -9,11 +9,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
-public interface StatusRepository extends JpaRepository<ContentStatus, UUID> {
+public interface ContentStatusRepository extends JpaRepository<ContentStatus, UUID> {
     ContentStatus findFirstById(UUID id);
     ContentStatus findFirstByProfileIdAndContentId(UUID profileId, UUID contentId);
     @Modifying
     @Transactional
-    @Query(value = "DELETE FROM status WHERE content_id = :ContentId", nativeQuery = true)
+    @Query(value = "DELETE FROM contentstatus WHERE content_id = :ContentId", nativeQuery = true)
     void deleteByContentId(@Param("ContentId") UUID contentId);
 }
