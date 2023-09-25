@@ -3,6 +3,7 @@ package me.universi.user.services;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import me.universi.api.entities.Response;
+import me.universi.user.exceptions.UserException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
@@ -13,11 +14,12 @@ public final class RestAuthenticationEntryPoint implements AuthenticationEntryPo
 
     @Override
     public void commence(final HttpServletRequest request, final HttpServletResponse response, final AuthenticationException authException) throws IOException {
-        Response responseBuild = new Response();
 
-        responseBuild.success = false;
-        responseBuild.message = "Usuário não esta logado.";
-        responseBuild.redirectTo = "/login";
+        Response responseBuild = Response.buildResponse(r -> {
+            r.status = 401;
+            r.redirectTo = "/login";
+            throw new UserException("Usuário não esta logado.");
+        });
 
         response.setHeader("Content-Type", "application/json; charset=utf-8");
         response.getWriter().print(responseBuild.toString());
