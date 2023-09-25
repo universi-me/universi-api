@@ -9,11 +9,11 @@ import java.util.Objects;
 import me.universi.Sys;
 import me.universi.capacity.entidades.Content;
 import me.universi.capacity.entidades.Category;
+import me.universi.capacity.entidades.ContentStatus;
 import me.universi.capacity.entidades.Folder;
-import me.universi.capacity.entidades.Watch;
 import me.universi.capacity.repository.CategoryRepository;
 import me.universi.capacity.repository.FolderRepository;
-import me.universi.capacity.repository.WatchRepository;
+import me.universi.capacity.repository.StatusRepository;
 import me.universi.group.entities.Group;
 import me.universi.group.exceptions.GroupException;
 import me.universi.group.services.GroupService;
@@ -23,7 +23,7 @@ import org.springframework.stereotype.Service;
 
 import me.universi.capacity.exceptions.CapacityException;
 import me.universi.capacity.repository.ContentRepository;
-import me.universi.capacity.enums.WatchStatus;
+import me.universi.capacity.enums.ContentStatusType;
 
 
 @Service
@@ -35,16 +35,16 @@ public class CapacityService implements CapacityServiceInterface {
 
     private final FolderRepository folderRepository;
 
-    private final WatchRepository watchRepository;
+    private final StatusRepository statusRepository;
 
     private final GroupService groupService;
 
-    public CapacityService(GroupService groupService, ContentRepository contentRepository, CategoryRepository categoryRepository, FolderRepository folderRepository, WatchRepository watchRepository) {
+    public CapacityService(GroupService groupService, ContentRepository contentRepository, CategoryRepository categoryRepository, FolderRepository folderRepository, StatusRepository statusRepository) {
         this.contentRepository = contentRepository;
         this.categoryRepository = categoryRepository;
         this.folderRepository = folderRepository;
         this.groupService = groupService;
-        this.watchRepository = watchRepository;
+        this.statusRepository = statusRepository;
     }
 
     public static CapacityService getInstance() {
@@ -146,12 +146,12 @@ public class CapacityService implements CapacityServiceInterface {
     public List<Content> findContentsByFolder(UUID folderId) throws CapacityException {
         Folder folder = findFolderById(folderId);
 
-        List<Content> contents = contentRepository.findOrderedContentsByFolder(folder.getId());
+        List<Content> contents = contentRepository.findContentsInFolderByOrderPosition(folder.getId());
 
         for(Content content : contents) {
-            Watch watch = findWatchByContentId(content.getId());
-            if(watch != null) {
-                content.watch = watch;
+            ContentStatus contentStatus = findStatusByContentId(content.getId());
+            if(contentStatus != null) {
+                content.contentStatus = contentStatus;
             }
         }
 
@@ -219,7 +219,7 @@ public class CapacityService implements CapacityServiceInterface {
         });
 
         // remove from linked watch`s
-        deleteWatchForContent(content.getId());
+        deleteStatusForContent(content.getId());
 
         contentRepository.deleteById(id);
 
@@ -373,23 +373,23 @@ public class CapacityService implements CapacityServiceInterface {
         }
     }
 
-    public void setOrderOfContentInFolder(UUID folderId, UUID contentId, int order) throws CapacityException {
-        folderRepository.setOrderInFolder(folderId, contentId, order);
+    public void setPositionOfContentInFolder(UUID folderId, UUID contentId, int order) throws CapacityException {
+        folderRepository.setPositionOfContentInFolder(folderId, contentId, order);
     }
 
-    public void setOrderOfContentInFolder(Object folderId, Object contentId, int order) throws CapacityException {
-        folderRepository.setOrderInFolder(UUID.fromString((String)folderId), UUID.fromString((String)contentId), order);
+    public void setPositionOfContentInFolder(Object folderId, Object contentId, int order) throws CapacityException {
+        folderRepository.setPositionOfContentInFolder(UUID.fromString((String)folderId), UUID.fromString((String)contentId), order);
     }
 
-    public int getOrderOfContentInFolder(UUID folderId, UUID contentId) throws CapacityException {
-        return folderRepository.getOrderInFolder(folderId, contentId);
+    public int getPositionOfContentInFolder(UUID folderId, UUID contentId) throws CapacityException {
+        return folderRepository.getPositionOfContentInFolder(folderId, contentId);
     }
 
-    public int getOrderOfContentInFolder(Object folderId, Object contentId) throws CapacityException {
-        return folderRepository.getOrderInFolder(UUID.fromString((String)folderId), UUID.fromString((String)contentId));
+    public int getPositionOfContentInFolder(Object folderId, Object contentId) throws CapacityException {
+        return folderRepository.getPositionOfContentInFolder(UUID.fromString((String)folderId), UUID.fromString((String)contentId));
     }
 
-    public void orderContentInFolder(Object folderId, Object contentId, int toIndex) throws CapacityException {
+    public void setNewPositionOfContentInFolder(Object folderId, Object contentId, int toIndex) throws CapacityException {
         Folder folder = findFolderById((String)folderId);
 
         checkFolderPermissions(folder, true);
@@ -398,58 +398,55 @@ public class CapacityService implements CapacityServiceInterface {
 
         // mount ordered list
         List<Content> contentsOrdered = new ArrayList<>();
-        for(Content contentNow : contentRepository.findOrderedContentsByFolder(folder.getId())) {
-            if(Objects.equals(contentNow.getId(), content.getId())) {
-                // ignore content to be moved
-                continue;
+        for(Content contentNow : contentRepository.findContentsInFolderByOrderPosition(folder.getId())) {
+            if(!Objects.equals(contentNow.getId(), content.getId())) {
+                contentsOrdered.add(contentNow);
             }
-            contentsOrdered.add(contentNow);
         }
         // set in toIndex to move
         contentsOrdered.add(toIndex, content);
         // update order in db
         for(Content contentNow : contentsOrdered) {
             int newOrder = contentsOrdered.indexOf(contentNow);
-            if(getOrderOfContentInFolder(folder.getId(), contentNow.getId()) == newOrder) {
-                continue;
+            if(getPositionOfContentInFolder(folder.getId(), contentNow.getId()) != newOrder) {
+                setPositionOfContentInFolder(folder.getId(), contentNow.getId(), newOrder);
             }
-            setOrderOfContentInFolder(folder.getId(), contentNow.getId(), newOrder);
         }
 
     }
 
-    public Watch findWatchByContentId(UUID contentId) throws CapacityException {
+    public ContentStatus findStatusByContentId(UUID contentId) throws CapacityException {
         Profile userProfile = UserService.getInstance().getUserInSession().getProfile();
-        Watch watch = watchRepository.findFirstByProfileIdAndContentId(userProfile.getId(), contentId);
-        if(watch == null) {
-            watch = new Watch();
-            watch.setContent(findContentById(contentId));
-            watch.setProfile(UserService.getInstance().getUserInSession().getProfile());
-            watch.setStatus(WatchStatus.NOT_VIEWED);
-            return watch;
+        ContentStatus contentStatus = statusRepository.findFirstByProfileIdAndContentId(userProfile.getId(), contentId);
+        if(contentStatus == null) {
+            contentStatus = new ContentStatus();
+            contentStatus.setContent(findContentById(contentId));
+            contentStatus.setProfile(UserService.getInstance().getUserInSession().getProfile());
+            contentStatus.setStatus(ContentStatusType.NOT_VIEWED);
+            return contentStatus;
         }
-        return watch;
+        return contentStatus;
     }
 
-    public Watch findWatchByContentId(String contentId) throws CapacityException {
-        return findWatchByContentId(UUID.fromString(contentId));
+    public ContentStatus findStatusByContentId(String contentId) throws CapacityException {
+        return findStatusByContentId(UUID.fromString(contentId));
     }
 
-    public Watch setWatchStatus(UUID contentId, WatchStatus status) throws CapacityException {
-        Watch watch = findWatchByContentId(contentId);
-        if(watch.getStatus() != status) {
-            watch.setStatus(status);
-            watch.setUpdatedAt(new java.util.Date());
-            return watchRepository.save(watch);
+    public ContentStatus setContentStatus(UUID contentId, ContentStatusType status) throws CapacityException {
+        ContentStatus contentStatus = findStatusByContentId(contentId);
+        if(contentStatus.getStatus() != status) {
+            contentStatus.setStatus(status);
+            contentStatus.setUpdatedAt(new java.util.Date());
+            return statusRepository.save(contentStatus);
         }
-        return watch;
+        return contentStatus;
     }
 
-    public Watch setWatchStatus(String contentId, WatchStatus status) throws CapacityException {
-        return setWatchStatus(UUID.fromString(contentId), status);
+    public ContentStatus setContentStatus(String contentId, ContentStatusType status) throws CapacityException {
+        return setContentStatus(UUID.fromString(contentId), status);
     }
 
-    public void deleteWatchForContent(UUID contentId) {
-        watchRepository.deleteByContentId(contentId);
+    public void deleteStatusForContent(UUID contentId) {
+        statusRepository.deleteByContentId(contentId);
     }
 }

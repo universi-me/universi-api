@@ -1,16 +1,15 @@
 package me.universi.capacity.controllers;
 
 
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import me.universi.api.entities.Response;
 import me.universi.capacity.entidades.Content;
 import me.universi.capacity.entidades.Category;
+import me.universi.capacity.entidades.ContentStatus;
 import me.universi.capacity.entidades.Folder;
-import me.universi.capacity.entidades.Watch;
-import me.universi.capacity.enums.WatchStatus;
+import me.universi.capacity.enums.ContentStatusType;
 import me.universi.user.services.UserService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -32,51 +31,29 @@ public class CapacityController {
 
     @GetMapping("/contents")
     public Response contentList() {
-        Response response = new Response(); // default
-        try {
-
+        return Response.buildResponse(response -> {
             response.body.put("contents", capacityService.getAllContents());
-            response.success = true;
-
-        } catch (Exception e) {
-            response.message = e.getMessage();
-        }
-        return response;
+        });
     }
 
     @GetMapping("/categories")
     public Response categoryList() {
-        Response response = new Response(); // default
-        try {
-
+        return Response.buildResponse(response -> {
             response.body.put("categories", capacityService.getAllCategories());
-            response.success = true;
-
-        } catch (Exception e) {
-            response.message = e.getMessage();
-        }
-        return response;
+        });
     }
 
     @GetMapping("/folders")
     public Response foldersList() {
-        Response response = new Response(); // default
-        try {
-
+        return Response.buildResponse(response -> {
             response.body.put("folders", capacityService.getAllFolders());
-            response.success = true;
-
-        } catch (Exception e) {
-            response.message = e.getMessage();
-        }
-        return response;
+        });
     }
 
     @PostMapping(value = "/category/contents", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response list_content_by_category(@RequestBody Map<String, Object> body) {
-        Response response = new Response(); // default
-        try {
+        return Response.buildResponse(response -> {
 
             Object categoryId = body.get("id");
             if(categoryId == null || String.valueOf(categoryId).isEmpty()) {
@@ -84,19 +61,14 @@ public class CapacityController {
             }
 
             response.body.put("contents", capacityService.findContentsByCategory(String.valueOf(categoryId)));
-            response.success = true;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-        }
-        return response;
+        });
     }
 
     @PostMapping(value = "/category/folders", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response list_folder_by_category(@RequestBody Map<String, Object> body) {
-        Response response = new Response(); // default
-        try {
+        return Response.buildResponse(response -> {
 
             Object categoryId = body.get("id");
             if(categoryId == null || String.valueOf(categoryId).isEmpty()) {
@@ -104,19 +76,14 @@ public class CapacityController {
             }
 
             response.body.put("folders", capacityService.findFoldersByCategory(String.valueOf(categoryId)));
-            response.success = true;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-        }
-        return response;
+        });
     }
 
     @PostMapping(value = "/folder/contents", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response list_content_by_folder(@RequestBody Map<String, Object> body) {
-        Response response = new Response(); // default
-        try {
+        return Response.buildResponse(response -> {
 
             Object folderId = body.get("id");
             if(folderId == null || String.valueOf(folderId).isEmpty()) {
@@ -124,19 +91,14 @@ public class CapacityController {
             }
 
             response.body.put("contents", capacityService.findContentsByFolder(String.valueOf(folderId)));
-            response.success = true;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-        }
-        return response;
+        });
     }
 
     @PostMapping(value = "/content/get", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response get_content(@RequestBody Map<String, Object> body) {
-        Response response = new Response(); // default
-        try {
+        return Response.buildResponse(response -> {
 
             Object contentId = body.get("id");
             if(contentId == null || String.valueOf(contentId).isEmpty()) {
@@ -149,19 +111,14 @@ public class CapacityController {
             }
 
             response.body.put("content", content);
-            response.success = true;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-        }
-        return response;
+        });
     }
 
     @PostMapping(value = "/content/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response create_content(@RequestBody Map<String, Object> body) {
-        Response response = new Response(); // default
-        try {
+        return Response.buildResponse(response -> {
 
             Object url =         body.get("url");
             Object title =       body.get("title");
@@ -221,19 +178,14 @@ public class CapacityController {
             }
 
             response.message = "Conteúdo criado com sucesso.";
-            response.success = true;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-        }
-        return response;
+        });
     }
 
     @PostMapping(value = "/content/edit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response edit_content(@RequestBody Map<String, Object> body) {
-        Response response = new Response(); // default
-        try {
+        return Response.buildResponse(response -> {
 
             Object contentId = body.get("id");
             if(contentId == null || String.valueOf(contentId).isEmpty()) {
@@ -314,19 +266,14 @@ public class CapacityController {
             }
 
             response.message = "Conteúdo atualizado com sucesso.";
-            response.success = true;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-        }
-        return response;
+        });
     }
 
     @PostMapping(value = "/content/delete", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response delete_content(@RequestBody Map<String, Object> body) {
-        Response response = new Response(); // default
-        try {
+        return Response.buildResponse(response -> {
 
             Object contentId = body.get("id");
             if(contentId == null || String.valueOf(contentId).isEmpty()) {
@@ -350,19 +297,14 @@ public class CapacityController {
             }
 
             response.message = "Conteúdo deletado com sucesso.";
-            response.success = true;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-        }
-        return response;
+        });
     }
 
     @PostMapping(value = "/category/get", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response get_category(@RequestBody Map<String, Object> body) {
-        Response response = new Response(); // default
-        try {
+        return Response.buildResponse(response -> {
 
             Object categoryId = body.get("id");
             if(categoryId == null || String.valueOf(categoryId).isEmpty()) {
@@ -372,17 +314,13 @@ public class CapacityController {
             response.body.put("category", capacityService.findCategoryById(UUID.fromString(String.valueOf(categoryId))));
             response.success = true;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-        }
-        return response;
+        });
     }
 
     @PostMapping(value = "/category/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response create_category(@RequestBody Map<String, Object> body) {
-        Response response = new Response(); // default
-        try {
+        return Response.buildResponse(response -> {
 
             Object name = body.get("name");
             Object image = body.get("image");
@@ -409,19 +347,14 @@ public class CapacityController {
             }
 
             response.message = "Categoria criada com sucesso.";
-            response.success = true;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-        }
-        return response;
+        });
     }
 
     @PostMapping(value = "/category/edit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response edit_category(@RequestBody Map<String, Object> body) {
-        Response response = new Response(); // default
-        try {
+        return Response.buildResponse(response -> {
 
             Object categoryId = body.get("id");
             if(categoryId == null || String.valueOf(categoryId).isEmpty()) {
@@ -461,19 +394,14 @@ public class CapacityController {
             }
 
             response.message = "Categoria atualizada com sucesso.";
-            response.success = true;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-        }
-        return response;
+        });
     }
 
     @PostMapping(value = "/category/delete", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response delete_category(@RequestBody Map<String, Object> body) {
-        Response response = new Response(); // default
-        try {
+        return Response.buildResponse(response -> {
 
             Object categoryId = body.get("id");
             if(categoryId == null || String.valueOf(categoryId).isEmpty()) {
@@ -497,19 +425,14 @@ public class CapacityController {
             }
 
             response.message = "Categoria deletada com sucesso.";
-            response.success = true;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-        }
-        return response;
+        });
     }
 
     @PostMapping(value = "/folder/get", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response get_folder(@RequestBody Map<String, Object> body) {
-        Response response = new Response(); // default
-        try {
+        return Response.buildResponse(response -> {
 
             Object folderId = body.get("id");
             if(folderId == null || String.valueOf(folderId).isEmpty()) {
@@ -521,19 +444,14 @@ public class CapacityController {
             capacityService.checkFolderPermissions(folder, false);
 
             response.body.put("folder", folder);
-            response.success = true;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-        }
-        return response;
+        });
     }
 
     @PostMapping(value = "/folder/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response create_folder(@RequestBody Map<String, Object> body) {
-        Response response = new Response(); // default
-        try {
+        return Response.buildResponse(response -> {
 
             Object name =           body.get("name");
             Object image =          body.get("image");
@@ -595,19 +513,14 @@ public class CapacityController {
             }
 
             response.message = "Pasta criada com sucesso.";
-            response.success = true;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-        }
-        return response;
+        });
     }
 
     @PostMapping(value = "/folder/edit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response edit_folder(@RequestBody Map<String, Object> body) {
-        Response response = new Response(); // default
-        try {
+        return Response.buildResponse(response -> {
 
             Object folderId = body.get("id");
             if(folderId == null || String.valueOf(folderId).isEmpty()) {
@@ -681,19 +594,14 @@ public class CapacityController {
             }
 
             response.message = "Pasta atualizada com sucesso.";
-            response.success = true;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-        }
-        return response;
+        });
     }
 
     @PostMapping(value = "/folder/delete", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response delete_folder(@RequestBody Map<String, Object> body) {
-        Response response = new Response(); // default
-        try {
+        return Response.buildResponse(response -> {
 
             Object folderId = body.get("id");
             if(folderId == null || String.valueOf(folderId).isEmpty()) {
@@ -710,19 +618,14 @@ public class CapacityController {
             }
 
             response.message = "Pasta deletada com sucesso.";
-            response.success = true;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-        }
-        return response;
+        });
     }
 
     @PostMapping(value = "/folder/content/add", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response folder_add_content(@RequestBody Map<String, Object> body) {
-        Response response = new Response(); // default
-        try {
+        return Response.buildResponse(response -> {
 
             Object folderId = body.get("id");
 
@@ -739,19 +642,14 @@ public class CapacityController {
             capacityService.addOrRemoveContentFromFolder(folderId, contentIds, true);
 
             response.message = "Conteúdo adicionado a pasta com sucesso.";
-            response.success = true;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-        }
-        return response;
+        });
     }
 
     @PostMapping(value = "/folder/content/remove", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response folder_remove_content(@RequestBody Map<String, Object> body) {
-        Response response = new Response(); // default
-        try {
+        return Response.buildResponse(response -> {
 
             Object folderId = body.get("id");
 
@@ -768,20 +666,13 @@ public class CapacityController {
             capacityService.addOrRemoveContentFromFolder(folderId, contentIds, false);
 
             response.message = "Conteúdo removido da pasta com sucesso.";
-            response.success = true;
-
-        } catch (Exception e) {
-            response.message = e.getMessage();
-        }
-        return response;
+        });
     }
 
-    @PostMapping(value = "/folder/content/order", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/folder/content/position", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response folder_move_content(@RequestBody Map<String, Object> body) {
-        Response response = new Response(); // default
-        try {
-
+        return Response.buildResponse(response -> {
             Object folderId = body.get("folderId");
             Object contentId = body.get("contentId");
             Object toIndex = body.get("toIndex");
@@ -798,67 +689,51 @@ public class CapacityController {
 
             int toIndexInt = Integer.parseInt(String.valueOf(toIndex));
 
-            capacityService.orderContentInFolder(folderId, contentId, toIndexInt);
+            capacityService.setNewPositionOfContentInFolder(folderId, contentId, toIndexInt);
 
             response.message = "Conteúdo ordenado na pasta com sucesso.";
-            response.success = true;
-
-        } catch (Exception e) {
-            response.message = e.getMessage();
-        }
-        return response;
+        });
     }
 
-    @PostMapping(value = "/content/watch", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/content/status", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Response content_watch(@RequestBody Map<String, Object> body) {
-        Response response = new Response(); // default
-        try {
+    public Response content_status(@RequestBody Map<String, Object> body) {
+        return Response.buildResponse(response -> {
+
             Object contentId = body.get("contentId");
 
             if(contentId == null || String.valueOf(contentId).isEmpty()) {
                 throw new CapacityException("ID do conteúdo não informado.");
             }
 
-            Watch watch = capacityService.findWatchByContentId((String)contentId);
+            ContentStatus contentStatus = capacityService.findStatusByContentId((String)contentId);
 
-            response.body.put("watch", watch);
-            response.success = true;
-
-        } catch (Exception e) {
-            response.message = e.getMessage();
-        }
-        return response;
+            response.body.put("contentStatus", contentStatus);
+        });
     }
 
-    @PostMapping(value = "/content/watch/edit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/content/status/edit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Response content_watch_edit(@RequestBody Map<String, Object> body) {
-        Response response = new Response(); // default
-        try {
+    public Response content_status_edit(@RequestBody Map<String, Object> body) {
+        return Response.buildResponse(response -> {
 
             Object contentId = body.get("contentId");
-            Object status = body.get("watchStatus");
+            Object status = body.get("contentStatusType");
 
-            if(contentId == null || String.valueOf(contentId).isEmpty()) {
+            if (contentId == null || String.valueOf(contentId).isEmpty()) {
                 throw new CapacityException("ID do conteúdo não informado.");
             }
-            if(status == null || String.valueOf(status).isEmpty()) {
+            if (status == null || String.valueOf(status).isEmpty()) {
                 throw new CapacityException("Status do conteúdo não informado.");
             }
 
-            WatchStatus watchStatus = WatchStatus.valueOf(String.valueOf(status));
+            ContentStatusType contentStatusType = ContentStatusType.valueOf(String.valueOf(status));
 
-            Watch watch = capacityService.setWatchStatus(String.valueOf(contentId), watchStatus);
+            ContentStatus contentStatus = capacityService.setContentStatus(String.valueOf(contentId), contentStatusType);
 
-            response.body.put("watch", watch);
+            response.body.put("contentStatus", contentStatus);
             response.message = "Status do conteúdo atualizado com sucesso.";
-            response.success = true;
-
-        } catch (Exception e) {
-            response.message = e.getMessage();
-        }
-        return response;
+        });
     }
 
 }

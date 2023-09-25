@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import me.universi.Sys;
+import me.universi.capacity.entidades.ContentStatus;
 import me.universi.competence.entities.Competence;
 import me.universi.group.entities.Group;
 import me.universi.group.services.GroupService;
@@ -63,6 +64,10 @@ public class Profile {
     @JsonIgnore
     @OneToMany(mappedBy = "destiny")
     private Collection<Recommendation> recomendationsReceived;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "profile")
+    private Collection<ContentStatus> contentStatus;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
@@ -184,6 +189,14 @@ public class Profile {
 
     public void setRecomendationsReceived(Collection<Recommendation> recomendationsReceived) {
         this.recomendationsReceived = recomendationsReceived;
+    }
+
+    public Collection<ContentStatus> getContentStatus() {
+        return contentStatus;
+    }
+
+    public void setContentStatus(Collection<ContentStatus> contentStatus) {
+        this.contentStatus = contentStatus;
     }
 
     public void setId(UUID id) {
