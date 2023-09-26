@@ -1,4 +1,4 @@
-package me.universi.curriculum.education.entities;
+package me.universi.curriculum.component.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Column;
@@ -14,10 +14,9 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.util.Date;
 import java.util.UUID;
 
-@Entity(name = "institution")
+@Entity(name = "component_type")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-public class Institution {
-
+public class ComponentType {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id")
@@ -27,24 +26,19 @@ public class Institution {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "description")
-    private String description;
-
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at")
     private Date creationDate;
 
-    public Institution(){
+    public ComponentType(){
 
     }
-
-    public Institution(String name, String description){
+    public ComponentType(String name){
         this.name = name;
-        this.description = description;
     }
 
-    public UUID getId() {
+    public UUID getId(){
         return id;
     }
 
@@ -56,19 +50,7 @@ public class Institution {
         this.name = name;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     public Date getCreationDate() {
         return creationDate;
-    }
-
-    public void setCreationDate(Date creationDate) {
-        this.creationDate = creationDate;
     }
 }
