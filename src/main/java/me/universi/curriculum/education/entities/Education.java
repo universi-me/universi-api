@@ -1,4 +1,5 @@
-package me.universi.curriculum.component.entities;
+package me.universi.curriculum.education.entities;
+
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
@@ -9,6 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.NotNull;
@@ -18,9 +20,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.util.Date;
 import java.util.UUID;
 
-@Entity(name = "component")
-public class Component {
-
+@Entity(name = "education")
+public class Education {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id")
@@ -29,28 +30,26 @@ public class Component {
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "component_type_id")
-    private ComponentType  componentType;
-
-    @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profile_id")
     private Profile profile;
 
-    @Column(name = "title")
-    private String title;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "type_education_id")
+    private TypeEducation typeEducation;
 
-    @Column(name = "description", columnDefinition = "TEXT")
-    private String description;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "institution_id")
+    private Institution institution;
 
-    @Temporal(TemporalType.TIMESTAMP)
+    @Temporal(TemporalType.DATE)
     @Column(name = "start_date")
     private Date startDate;
 
-    @Temporal(TemporalType.TIMESTAMP)
+    @Temporal(TemporalType.DATE)
     @Column(name = "end_date")
     private Date endDate;
 
+    /*Vai verificar se o usuario ainda nao terminou*/
     @Column(name = "present_date")
     private Boolean presentDate;
 
@@ -59,62 +58,48 @@ public class Component {
     @Column(name = "created_at")
     private Date creationDate;
 
-    public Component(){
+    public Education(){
 
     }
 
-    public Component (ComponentType  componentType , String description, String title, Date startDate, Date endDate) {
-        this.componentType  = componentType ;
-        this.description = description;
-        this.title = title;
-        this.startDate = startDate;
-        this.endDate = endDate;
-    }
-
-    public Component (ComponentType  componentType , String description, String title, Date startDate, Date endDate, Boolean presentDate) {
-        this.componentType  = componentType ;
-        this.description = description;
-        this.title = title;
+    public Education( TypeEducation typeEducation, Institution institution, Date startDate, Date endDate, Boolean presentDate){
+        this.typeEducation = typeEducation;
+        this.institution = institution;
         this.startDate = startDate;
         this.endDate = endDate;
         this.presentDate = presentDate;
+    }
+
+    public Education( TypeEducation typeEducation, Institution institution, Date startDate, Date endDate){
+        this.typeEducation = typeEducation;
+        this.institution = institution;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.presentDate = false;
     }
 
     public UUID getId() {
         return id;
     }
 
-
-    public ComponentType  getCurriculumItemType () {
-        return componentType;
-    }
-
-    public void setCurriculumItem (ComponentType  componentType ) {
-        this.componentType  = componentType ;
-    }
-
     public Profile getProfile() {
         return profile;
     }
 
-    public void setProfile(Profile profile) {
-        this.profile = profile;
+    public TypeEducation getTypeEducation() {
+        return typeEducation;
     }
 
-    public String getTitle() {
-        return title;
+    public void setTypeEducation(TypeEducation typeEducation) {
+        this.typeEducation = typeEducation;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public Institution getInstitution() {
+        return institution;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
+    public void setInstitution(Institution institution) {
+        this.institution = institution;
     }
 
     public Date getStartDate() {
@@ -141,6 +126,7 @@ public class Component {
         this.presentDate = presentDate;
     }
 
+
     public Date getCreationDate() {
         return creationDate;
     }
@@ -149,11 +135,7 @@ public class Component {
         this.creationDate = creationDate;
     }
 
-    public ComponentType getComponentType(){
-       return this.componentType;
-    }
-
-    public void setComponentType(ComponentType componentType){
-        this.componentType = componentType;
+    public void setProfile(Profile profile) {
+        this.profile = profile;
     }
 }
