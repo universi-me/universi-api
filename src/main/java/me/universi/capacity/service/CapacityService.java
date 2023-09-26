@@ -18,6 +18,7 @@ import me.universi.group.entities.Group;
 import me.universi.group.exceptions.GroupException;
 import me.universi.group.services.GroupService;
 import me.universi.profile.entities.Profile;
+import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import org.springframework.stereotype.Service;
 
@@ -53,33 +54,51 @@ public class CapacityService implements CapacityServiceInterface {
 
     public void checkFolderPermissions(Folder folder, boolean forWrite) throws CapacityException {
         if(folder == null) {
+            /* Folder doesn't exist */
             throw new CapacityException("Pasta não encontrada.");
         }
-        if(!UserService.getInstance().isSessionOfUser(folder.getAuthor().getUser())) {
-            if(!UserService.getInstance().isUserAdmin(UserService.getInstance().getUserInSession())) {
-                if(forWrite) {
-                    throw new CapacityException("Você não tem permissão para alterar essa pasta.");
-                } else {
-                    if(!folder.isPublicFolder()) {
-                        Profile userProfile = UserService.getInstance().getUserInSession().getProfile();
-                        Collection<Group> userGroups = userProfile.getGroups();
-                        Collection<Group> folderGroups = folder.getGrantedAccessGroups();
-                        boolean hasPermission = false;
-                        for(Group folderGroupNow : folderGroups) {
-                            for(Group userGroupNow : userGroups) {
-                                if(Objects.equals(folderGroupNow.getId(), userGroupNow.getId())) {
-                                    hasPermission = true;
-                                    break;
-                                }
-                            }
-                        }
-                        if(!hasPermission) {
-                            throw new CapacityException("Você não tem permissão para ver essa pasta.");
-                        }
-                    }
+
+        if (UserService.getInstance().isSessionOfUser(folder.getAuthor().getUser())) {
+            /* Folder author always have access */
+            return;
+        }
+
+        User userSession = UserService.getInstance().getUserInSession();
+
+        if (UserService.getInstance().isUserAdmin(userSession)) {
+            /* Admins always have access */
+            return;
+        }
+
+        if(forWrite) {
+            /* Only admin and author have write access */
+            throw new CapacityException("Você não tem permissão para alterar essa pasta.");
+        }
+
+        if (folder.isPublicFolder()) {
+            /* Everyone has reading access to public folder */
+            return;
+        }
+
+        Collection<Group> userGroups = userSession.getProfile().getGroups();
+        Collection<Group> folderGroups = folder.getGrantedAccessGroups();
+        UUID folderOwnerId = folder.getOwnerGroup().getId();
+
+        for(Group userGroupNow : userGroups) {
+            if (Objects.equals(folderOwnerId, userGroupNow.getId())) {
+                /* User is in the owner group of the folder */
+                return;
+            }
+
+            for(Group folderGroupNow : folderGroups) {
+                if(Objects.equals(folderGroupNow.getId(), userGroupNow.getId())) {
+                    /* User is in a group with access to the folder */
+                    return;
                 }
             }
         }
+
+        throw new CapacityException("Você não tem permissão para ver essa pasta.");
     }
 
     public boolean hasFolderPermissions(Folder folder, boolean forWrite) {
