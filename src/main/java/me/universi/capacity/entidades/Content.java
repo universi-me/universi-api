@@ -1,6 +1,5 @@
 package me.universi.capacity.entidades;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Temporal;
@@ -22,7 +21,6 @@ import jakarta.validation.constraints.Size;
 import java.util.Collection;
 import java.util.Date;
 import java.util.UUID;
-import me.universi.capacity.service.CapacityService;
 import me.universi.profile.entities.Profile;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -76,7 +74,7 @@ public class Content {
     private String type;
 
     @Transient
-    public Watch watch;
+    public ContentStatus contentStatus;
 
     public Content() {
     }

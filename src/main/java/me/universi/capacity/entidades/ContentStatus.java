@@ -4,12 +4,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.Date;
 import java.util.UUID;
-import me.universi.capacity.enums.WatchStatus;
+import me.universi.capacity.enums.ContentStatusType;
 import me.universi.profile.entities.Profile;
 import org.hibernate.annotations.CreationTimestamp;
 
-@Entity(name="watch")
-public class Watch {
+@Entity(name="contentstatus")
+public class ContentStatus {
     @JsonIgnore
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -18,7 +18,7 @@ public class Watch {
 
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
-    private WatchStatus status;
+    private ContentStatusType status;
 
     @JsonIgnore
     @OneToOne
@@ -26,7 +26,7 @@ public class Watch {
     private Content content;
 
     @JsonIgnore
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name="profile_id")
     private Profile profile;
 
@@ -35,7 +35,7 @@ public class Watch {
     @Column(name = "updated_at")
     private Date updatedAt;
 
-    public Watch() {
+    public ContentStatus() {
     }
 
     public UUID getId() {
@@ -46,11 +46,11 @@ public class Watch {
         this.id = id;
     }
 
-    public WatchStatus getStatus() {
+    public ContentStatusType getStatus() {
         return status;
     }
 
-    public void setStatus(WatchStatus status) {
+    public void setStatus(ContentStatusType status) {
         this.status = status;
     }
 

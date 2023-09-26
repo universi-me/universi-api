@@ -18,7 +18,7 @@ public interface FolderRepository extends JpaRepository<Folder, UUID> {
     @Modifying
     @Transactional
     @Query(value = "UPDATE folder_contents SET order_num = :OrderNum WHERE folders_id = :FolderId AND contents_id = :ContentId", nativeQuery = true)
-    void setOrderInFolder( @Param("FolderId") UUID folderId, @Param("ContentId") UUID contentId, @Param("OrderNum") int num);
+    void setPositionOfContentInFolder(@Param("FolderId") UUID folderId, @Param("ContentId") UUID contentId, @Param("OrderNum") int num);
     @Query(value = "SELECT order_num FROM folder_contents WHERE folders_id = :FolderId AND contents_id = :ContentId LIMIT 1", nativeQuery = true)
-    int getOrderInFolder( @Param("FolderId") UUID folderId, @Param("ContentId") UUID contentId);
+    int getPositionOfContentInFolder(@Param("FolderId") UUID folderId, @Param("ContentId") UUID contentId);
 }

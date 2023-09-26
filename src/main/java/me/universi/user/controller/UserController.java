@@ -51,50 +51,41 @@ public class UserController {
     @GetMapping(value = "/account", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response account() {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             if(userService.userIsLoggedIn()) {
                 response.success = true;
                 response.body.put("user", userService.getUserInSession());
-                return response;
+            } else {
+                response.success = false;
+                response.status = 401;
             }
 
-            throw new UserException("Usuário não esta logado.");
-
-        }catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
     @GetMapping("/logout")
     @ResponseBody
     public Response logout() {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             if(userService.userIsLoggedIn()) {
                 userService.logout();
                 response.success = true;
                 response.message = "Usuário deslogado com sucesso.";
                 response.redirectTo = userService.getUrlWhenLogout();
-                return response;
+                return;
             }
 
             throw new UserException("Usuário não esta logado.");
 
-        }catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
     @PostMapping(value = "/username-available", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response available_check(@RequestBody Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             String username = (String)body.get("username");
 
@@ -107,19 +98,14 @@ public class UserController {
             }
 
             response.success = true;
-            return response;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
     @PostMapping(value = "/signup", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response signup(@RequestBody Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             // check if register is enabled
             if(!Boolean.parseBoolean(environment.getProperty("SIGNUP_ENABLED"))) {
@@ -157,20 +143,15 @@ public class UserController {
 
             response.success = true;
             response.message = "Usuário registrado com sucesso, efetue o login para completar o cadastro.";
-            return response;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
 
     @PostMapping(value = "/account/edit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response account_edit(@RequestBody Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             String newPassword = (String)body.get("newPassword");
             if(newPassword == null) {
@@ -199,22 +180,17 @@ public class UserController {
                 response.success = true;
                 response.message = "As Alterações foram salvas com sucesso.";
 
-                return response;
+            } else {
+                throw new UserException("Credenciais Invalidas!");
             }
 
-            throw new UserException("Credenciais Invalidas!");
-
-        }catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
     @PostMapping(value = "/admin/account/edit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response admin_account_edit(@RequestBody Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             String userId = (String)body.get("userId");
             if(userId == null) {
@@ -295,19 +271,13 @@ public class UserController {
             response.success = true;
             response.message = "As Alterações foram salvas com sucesso, A sessão do usuário foi finalizada.";
 
-            return response;
-
-        }catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
     @PostMapping(value = "/login/google", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response login_google(@RequestBody Map<String, Object> body) {
-        Response responseBuild = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             if(!Boolean.parseBoolean(environment.getProperty("LOGIN_GOOGLE_ENABLED"))) {
                 throw new UserException("Login via Google desabilitado!");
@@ -397,15 +367,15 @@ public class UserController {
 
                     userService.configureSessionForUser(user, authenticationManager);
 
-                    responseBuild.success = true;
-                    responseBuild.redirectTo = userService.getUrlWhenLogin();
-                    responseBuild.message = "Usuário Logado com sucesso.";
+                    response.success = true;
+                    response.redirectTo = userService.getUrlWhenLogin();
+                    response.message = "Usuário Logado com sucesso.";
 
-                    responseBuild.token = jwtService.buildTokenForUser(user);
+                    response.token = jwtService.buildTokenForUser(user);
 
-                    responseBuild.body.put("user", user);
+                    response.body.put("user", user);
 
-                    return responseBuild;
+                    return;
                 }
 
             } else {
@@ -414,10 +384,7 @@ public class UserController {
 
             throw new UserException("Falha ao fazer login com Google.");
 
-        }catch (Exception e) {
-            responseBuild.message = e.getMessage();
-            return responseBuild;
-        }
+        });
     }
 
 

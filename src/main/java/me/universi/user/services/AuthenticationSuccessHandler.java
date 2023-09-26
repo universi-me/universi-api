@@ -34,8 +34,8 @@ public class AuthenticationSuccessHandler extends SavedRequestAwareAuthenticatio
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws ServletException, IOException {
-        String username = null;
-        User user = null;
+        String username;
+        User user;
 
         if (authentication.getPrincipal() instanceof Principal) {
             username = ((Principal) authentication.getPrincipal()).getName();
@@ -45,19 +45,18 @@ public class AuthenticationSuccessHandler extends SavedRequestAwareAuthenticatio
         if(username != null) {
             user = (User) userService.loadUserByUsername(username);
             userService.configureSessionForUser(user, authenticationManager);
+        } else {
+            user = null;
         }
 
         if ("application/json".equals(request.getHeader("Content-Type"))) { // request via JSON
 
-            Response responseBuild = new Response();
-            responseBuild.success = true;
-            responseBuild.message = "Usuário Logado com sucesso.";
-
-            responseBuild.redirectTo = userService.getUrlWhenLogin();
-
-            responseBuild.token = jwtService.buildTokenForUser(user);
-
-            responseBuild.body.put("user", user);
+            Response responseBuild = Response.buildResponse(r -> {
+                r.message = "Usuário Logado com sucesso.";
+                r.redirectTo = userService.getUrlWhenLogin();
+                r.token = jwtService.buildTokenForUser(user);
+                r.body.put("user", user);
+            });
 
             response.setHeader("Content-Type", "application/json; charset=utf-8");
             response.getWriter().print(responseBuild.toString());

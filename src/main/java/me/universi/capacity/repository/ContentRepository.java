@@ -15,5 +15,5 @@ public interface ContentRepository extends JpaRepository<Content, UUID> {
     boolean existsByUrl(String url);
     List<Content> findByCategories(Category category);
     @Query(value = "SELECT * FROM content INNER JOIN folder_contents ON content.id=folder_contents.contents_id WHERE folder_contents.folders_id=:FolderId ORDER BY order_num ASC", nativeQuery = true)
-    List<Content> findOrderedContentsByFolder(@Param("FolderId") UUID folderId);
+    List<Content> findContentsInFolderByOrderPosition(@Param("FolderId") UUID folderId);
 }
