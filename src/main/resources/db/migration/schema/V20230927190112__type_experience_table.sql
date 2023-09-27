@@ -1,7 +1,9 @@
 CREATE TABLE type_experience (
-    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
-    name VARCHAR(255),
-    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    id              UUID NOT NULL DEFAULT uuid_generate_v4(),
+    name            VARCHAR(255),
+    created_at      TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT pk_type_experience PRIMARY KEY (id)
 );
 
 COMMENT ON TABLE type_experience IS 'Tabela para armazenar tipos de experiência';

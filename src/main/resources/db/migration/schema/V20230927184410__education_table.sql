@@ -1,12 +1,14 @@
 CREATE TABLE education (
-    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
-    profile_id UUID NOT NULL,
-    type_education_id UUID NOT NULL,
-    institution_id UUID NOT NULL,
-    start_date DATE NOT NULL,
-    end_date DATE,
-    present_date BOOLEAN,
-    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    id                      UUID NOT NULL DEFAULT uuid_generate_v4(),
+    profile_id              UUID NOT NULL,
+    type_education_id       UUID NOT NULL,
+    institution_id          UUID NOT NULL,
+    start_date              DATE NOT NULL,
+    end_date                DATE,
+    present_date            BOOLEAN,
+    created_at              TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT pk_education PRIMARY KEY (id)
 );
 
 -- Adicione uma chave estrangeira para a tabela Profile
