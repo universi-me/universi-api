@@ -1,8 +1,10 @@
 CREATE TABLE institution (
-    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
-    name VARCHAR(255),
-    description TEXT,
-    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    id              UUID NOT NULL DEFAULT uuid_generate_v4(),
+    name            VARCHAR(255),
+    description     TEXT,
+    created_at      TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT pk_institution PRIMARY KEY (id)
 );
 
 COMMENT ON TABLE institution IS 'Tabela para armazenar informações sobre Instituições';

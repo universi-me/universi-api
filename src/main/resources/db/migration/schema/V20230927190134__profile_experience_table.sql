@@ -1,13 +1,15 @@
 CREATE TABLE profile_experience (
-    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
-    profile_id UUID NOT NULL,
-    type_experience_id UUID NOT NULL,
-    local VARCHAR(255),
-    description TEXT,
-    start_date DATE NOT NULL,
-    end_date DATE,
-    present_date BOOLEAN,
-    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    id                      UUID NOT NULL DEFAULT uuid_generate_v4(),
+    profile_id              UUID NOT NULL,
+    type_experience_id      UUID NOT NULL,
+    local                   VARCHAR(255),
+    description             TEXT,
+    start_date              DATE NOT NULL,
+    end_date                DATE,
+    present_date            BOOLEAN,
+    created_at              TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT pk_profile_experience PRIMARY KEY (id)
 );
 
 ALTER TABLE profile_experience
