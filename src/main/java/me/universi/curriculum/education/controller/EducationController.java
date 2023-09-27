@@ -35,4 +35,5 @@ public class EducationController {
     public Collection<Education> getAllEducation(){
         return educationService.findAll();
     }
+
 }

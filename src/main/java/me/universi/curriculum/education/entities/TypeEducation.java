@@ -57,4 +57,5 @@ public class TypeEducation {
     public void setCreationDate(Date creationDate) {
         this.creationDate = creationDate;
     }
+
 }

@@ -29,4 +29,5 @@ public class CurriculumController {
         return curriculumService.findCompetenceUserByType(competenceTypeName);
     }
 
+
 }

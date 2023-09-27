@@ -34,4 +34,5 @@ public class TypeEducationController {
     public List<TypeEducation> getAll() throws Exception{
         return typeEducationService.findAll();
     }
+
 }

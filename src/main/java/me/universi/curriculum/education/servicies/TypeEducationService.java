@@ -23,4 +23,5 @@ public class TypeEducationService {
     public List<TypeEducation> findAll(){
         return typeEducationRepository.findAll();
     }
+
 }

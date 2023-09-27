@@ -33,4 +33,5 @@ public class InstitutionController {
     public List<Institution> getAll() throws Exception{
         return institutionService.findAll();
     }
+
 }

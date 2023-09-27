@@ -33,4 +33,5 @@ public class TypeExperienceController {
     public List<TypeExperience> getAllCurriculum() throws Exception{
         return typeExperienceRepository.findAll();
     }
+
 }

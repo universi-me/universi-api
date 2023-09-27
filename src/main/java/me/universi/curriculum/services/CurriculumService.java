@@ -41,4 +41,5 @@ public class CurriculumService {
     public Collection<Competence> findByProfile(Profile profile){
         return profile.getCompetences();
     }
+
 }

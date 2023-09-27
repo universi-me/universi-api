@@ -9,3 +9,4 @@ import java.util.UUID;
 @Repository
 public interface TypeExperienceRepository extends JpaRepository<TypeExperience, UUID>{
 }
+

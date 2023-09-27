@@ -138,4 +138,5 @@ public class Education {
     public void setProfile(Profile profile) {
         this.profile = profile;
     }
+
 }

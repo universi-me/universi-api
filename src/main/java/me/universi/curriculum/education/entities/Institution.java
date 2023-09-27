@@ -36,7 +36,6 @@ public class Institution {
     private Date creationDate;
 
     public Institution(){
-
     }
 
     public Institution(String name, String description){
