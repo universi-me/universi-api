@@ -8,8 +8,8 @@ jwt:
 
 # DATABASE ENV VARIABLES
 database:
-  name: ${API_DB_NAME:universime}
-  port: ${API_DB_PORT:5434}
+  name: ${API_DB_NAME:universime_api}
+  port: ${API_DB_PORT:5432}
   domain: ${API_DB_DOMAIN:localhost}
   url: ${API_DB_URL:jdbc:postgresql://${database.domain}:${database.port}/${database.name}}
   username: ${API_DB_USER:postgres}
