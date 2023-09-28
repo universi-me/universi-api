@@ -1,10 +1,14 @@
 package me.universi.curriculum.education.servicies;
 
+import me.universi.curriculum.education.entities.Education;
 import me.universi.curriculum.education.entities.Institution;
 import me.universi.curriculum.education.repositories.InstitutionRepository;
+import me.universi.user.entities.User;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class InstitutionService {
@@ -23,5 +27,23 @@ public class InstitutionService {
         return institutionRepository.findAll();
     }
 
+    public Optional<Institution> findById(UUID id){
+        return institutionRepository.findById(id);
+    }
+
+    public Institution update(Institution newInstitution, UUID id) throws Exception{
+        return institutionRepository.findById(id).map(institution -> {
+            institution.setName(newInstitution.getName());
+            institution.setDescription(newInstitution.getDescription());
+            return institutionRepository.saveAndFlush(institution);
+        }).orElseGet(()->{
+            try {
+                return institutionRepository.saveAndFlush(newInstitution);
+            }catch (Exception e){
+                /*Implementar tratamento de exeptions*/
+                return null;
+            }
+        });
+    }
 
 }

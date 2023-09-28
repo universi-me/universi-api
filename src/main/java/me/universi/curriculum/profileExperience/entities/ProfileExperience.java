@@ -81,6 +81,7 @@ public class ProfileExperience {
         this.description = description;
         this.startDate = startDate;
         this.endDate = endDate;
+        this.presentDate = false;
     }
 
     public UUID getId() {
