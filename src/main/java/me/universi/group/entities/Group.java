@@ -110,10 +110,14 @@ public class Group {
     @JsonIgnore
     private Collection<Folder> folders;
 
+    /*Este atributo indica que o grupo deve fazer parte do currículo da pessoa*/
+    @Column(name = "enable_curriculum")
+    private boolean enableCurriculum;
+
     public Group() {
     }
 
-    public Group(String nickname, String name, String description, Profile admin, Collection<Profile> participants, GroupType type, Collection<Group> subGroups, boolean rootGroup, boolean canCreateGroup) {
+    public Group(String nickname, String name, String description, Profile admin, Collection<Profile> participants, GroupType type, Collection<Group> subGroups, boolean rootGroup, boolean canCreateGroup, boolean enableCurriculum) {
         this.nickname = nickname;
         this.name = name;
         this.description = description;
@@ -123,15 +127,17 @@ public class Group {
         this.subGroups = subGroups;
         this.rootGroup = rootGroup;
         this.canCreateGroup = canCreateGroup;
+        this.enableCurriculum = enableCurriculum;
     }
 
-    public Group(String nickname, String name, String description, Profile admin, GroupType type, Date createdAt) {
+    public Group(String nickname, String name, String description, Profile admin, GroupType type, Date createdAt, boolean enableCurriculum) {
         this.nickname = nickname;
         this.name = name;
         this.description = description;
         this.admin = admin;
         this.type = type;
         this.createdAt = createdAt;
+        this.enableCurriculum = enableCurriculum;
     }
 
     public UUID getId() {
@@ -271,5 +277,13 @@ public class Group {
     @Override
     public String toString() {
         return "Grupo [id=\""+this.id+"\", nome=\""+this.name+"\", descricao=\""+this.description+"\"]";
+    }
+
+    public boolean isEnableCurriculum() {
+        return enableCurriculum;
+    }
+
+    public void setEnableCurriculum(boolean enableCurriculum) {
+        this.enableCurriculum = enableCurriculum;
     }
 }

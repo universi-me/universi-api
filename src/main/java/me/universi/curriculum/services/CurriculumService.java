@@ -27,17 +27,6 @@ public class CurriculumService {
     }
 
 
-    public Collection<Competence> findCompetenceUserByType(String competenceTypeName){
-        CompetenceType competenceType = competenceTypeService.findFirstByName(competenceTypeName);
-        Collection<Competence> competences = findByProfile(userService.getUserInSession().getProfile());
-        for (Competence comp : competences) {
-            if(!comp.getCompetenceType().equals(competenceType)){
-                competences.remove(comp);
-            }
-        }
-        return competences;
-    }
-
     public Collection<Competence> findByProfile(Profile profile){
         return profile.getCompetences();
     }

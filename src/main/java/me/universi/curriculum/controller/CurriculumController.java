@@ -23,11 +23,5 @@ public class CurriculumController {
     }
 
 
-    @GetMapping(value = "/user")
-    @ResponseStatus(HttpStatus.OK)
-    public Collection<Competence> getCurriculoUser(@RequestBody String competenceTypeName) throws Exception{
-        return curriculumService.findCompetenceUserByType(competenceTypeName);
-    }
-
 
 }
