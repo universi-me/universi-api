@@ -8,31 +8,34 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 
 import jakarta.validation.constraints.NotNull;
 
-@Entity(name = "folder_content")
+@Entity
+@Table(name = "folder_content")
 public class FolderContent {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id")
     private UUID id;
 
-    @Column(name = "content", nullable = false)
+    @JoinColumn(name = "content", nullable = false)
     @ManyToOne
     @NotNull
     private Content content;
 
-    @Column(name = "folder", nullable = false)
+    @JoinColumn(name = "folder", nullable = false)
     @ManyToOne
     @NotNull
     private Folder folder;
 
-    @Column(name = "previous_content", unique = true, nullable = true)
+    @JoinColumn(name = "previous_content", unique = true, nullable = true)
     @OneToOne
     private FolderContent previousContent;
 
