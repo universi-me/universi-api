@@ -31,11 +31,15 @@ public class TypeEducation {
     @Column(name = "created_at")
     private Date creationDate;
 
+    @Column(name = "is_deleted")
+    private Boolean isDeleted;
+
     public TypeEducation() {
     }
 
     public TypeEducation(String name) {
         this.name = name;
+        this.isDeleted = false;
     }
 
     public UUID getId() {
@@ -58,4 +62,11 @@ public class TypeEducation {
         this.creationDate = creationDate;
     }
 
+    public Boolean getDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        isDeleted = deleted;
+    }
 }

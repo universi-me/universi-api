@@ -62,6 +62,9 @@ public class ProfileExperience {
     @Column(name = "created_at")
     private Date creationDate;
 
+    @Column(name = "is_deleted")
+    private Boolean isDeleted;
+
     public ProfileExperience(){
 
     }
@@ -73,6 +76,7 @@ public class ProfileExperience {
         this.startDate = startDate;
         this.endDate = endDate;
         this.presentDate = presentDate;
+        this.isDeleted = false;
     }
 
     public ProfileExperience(TypeExperience typeExperience,String local, String description, Date startDate, Date endDate) {
@@ -82,6 +86,7 @@ public class ProfileExperience {
         this.startDate = startDate;
         this.endDate = endDate;
         this.presentDate = false;
+        this.isDeleted = false;
     }
 
     public UUID getId() {
@@ -152,4 +157,11 @@ public class ProfileExperience {
         this.typeExperience = typeExperience;
     }
 
+    public Boolean getDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        isDeleted = deleted;
+    }
 }
