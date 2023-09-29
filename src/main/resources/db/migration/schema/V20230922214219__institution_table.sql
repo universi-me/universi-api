@@ -1,5 +1,5 @@
 CREATE TABLE institution (
-    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+    id UUID UNIQUE PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     name VARCHAR(255),
     description TEXT,
     created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP

@@ -1,5 +1,5 @@
 CREATE TABLE education (
-    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+    id UUID UNIQUE PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     profile_id UUID NOT NULL,
     type_education_id UUID NOT NULL,
     institution_id UUID NOT NULL,
