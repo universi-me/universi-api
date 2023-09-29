@@ -3,6 +3,8 @@ package me.universi.capacity.entidades;
 import java.util.Date;
 import java.util.UUID;
 
+import org.hibernate.annotations.CreationTimestamp;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -35,13 +37,13 @@ public class FolderContent {
     @NotNull
     private Folder folder;
 
-    @JoinColumn(name = "previous_content", unique = true, nullable = true)
+    @JoinColumn(name = "previous_content", nullable = true)
     @OneToOne
     private FolderContent previousContent;
 
     @Column(name = "created_at", nullable = false)
-    @NotNull
     @Temporal(TemporalType.TIMESTAMP)
+    @CreationTimestamp
     private Date createdAt;
 
     public FolderContent() { }
