@@ -50,9 +50,6 @@ public class Content {
     @OneToMany(cascade = CascadeType.PERSIST)
     private Collection<Category> categories;
 
-    @ManyToMany(mappedBy = "contents")
-    private Collection<Folder> folders;
-    
     @Column(name = "rating")
     @NotNull
     @Min(0)
@@ -141,14 +138,6 @@ public class Content {
 
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
-    }
-
-    public Collection<Folder> getFolders() {
-        return folders;
-    }
-
-    public void setFolders(Collection<Folder> folders) {
-        this.folders = folders;
     }
 
     public Profile getAuthor() {

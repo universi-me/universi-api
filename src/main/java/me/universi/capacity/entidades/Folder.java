@@ -52,10 +52,6 @@ public class Folder {
     @Column(name = "created_at")
     private Date createdAt;
 
-    @ManyToMany(cascade = CascadeType.ALL)
-    @JsonIgnore
-    private Collection<Content> contents;
-
     @Column
     @NotNull
     @Min(0)
@@ -128,14 +124,6 @@ public class Folder {
 
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
-    }
-
-    public void setContents(Collection<Content> contents) {
-        this.contents = contents;
-    }
-
-    public Collection<Content> getContents() {
-        return this.contents;
     }
 
     public void setRating(Integer rating) {

@@ -11,9 +11,11 @@ import me.universi.capacity.entidades.Content;
 import me.universi.capacity.entidades.Category;
 import me.universi.capacity.entidades.ContentStatus;
 import me.universi.capacity.entidades.Folder;
+import me.universi.capacity.entidades.FolderContent;
 import me.universi.capacity.repository.CategoryRepository;
 import me.universi.capacity.repository.FolderRepository;
 import me.universi.capacity.repository.ContentStatusRepository;
+import me.universi.capacity.repository.FolderContentRepository;
 import me.universi.group.entities.Group;
 import me.universi.group.exceptions.GroupException;
 import me.universi.group.services.GroupService;
@@ -38,14 +40,17 @@ public class CapacityService implements CapacityServiceInterface {
 
     private final ContentStatusRepository contentStatusRepository;
 
+    private final FolderContentRepository folderContentRepository;
+
     private final GroupService groupService;
 
-    public CapacityService(GroupService groupService, ContentRepository contentRepository, CategoryRepository categoryRepository, FolderRepository folderRepository, ContentStatusRepository contentStatusRepository) {
+    public CapacityService(GroupService groupService, ContentRepository contentRepository, CategoryRepository categoryRepository, FolderRepository folderRepository, ContentStatusRepository contentStatusRepository, FolderContentRepository folderContentRepository) {
         this.contentRepository = contentRepository;
         this.categoryRepository = categoryRepository;
         this.folderRepository = folderRepository;
         this.groupService = groupService;
         this.contentStatusRepository = contentStatusRepository;
+        this.folderContentRepository = folderContentRepository;
     }
 
     public static CapacityService getInstance() {
@@ -230,11 +235,14 @@ public class CapacityService implements CapacityServiceInterface {
     public boolean deleteContent(UUID id) throws CapacityException {
 
         Content content = findContentById(id);
+        List<FolderContent> folderContents = folderContentRepository.findByContent(content);
 
-        // remove from linked folders
-        content.getFolders().forEach(folder -> {
-            folder.getContents().remove(content);
-            folderRepository.save(folder);
+        folderContents.forEach(folderContent -> {
+            FolderContent next = folderContentRepository.findNextFolderContent(folderContent);
+            next.setPreviousContent(folderContent.getPreviousContent());
+
+            folderContentRepository.save(next);
+            folderContentRepository.delete(folderContent);
         });
 
         // remove from linked watch`s
@@ -350,15 +358,32 @@ public class CapacityService implements CapacityServiceInterface {
 
                 checkFolderPermissions(folder, true);
 
-                if(folder.getContents() == null) {
-                    folder.setContents(new ArrayList<>());
-                }
                 if(isAdding) {
-                    if(!folder.getContents().contains(content)) {
-                        folder.getContents().add(content);
+                    FolderContent previousOrder = folderContentRepository.findFirstContentFolderInFolder(folder.getId());
+                    while (true) {
+                        FolderContent next = folderContentRepository.findNextFolderContent(previousOrder);
+                        if (next == null) {
+                            break;
+                        }
+
+                            previousOrder = next;
                     }
+
+                    FolderContent newFolderContent = new FolderContent();
+                    newFolderContent.setContent(content);
+                    newFolderContent.setFolder(folder);
+                    newFolderContent.setPreviousContent(previousOrder);
+                    folderContentRepository.save(newFolderContent);
                 } else {
-                    folder.getContents().remove(content);
+                    FolderContent folderContent = folderContentRepository.findFirstByContentAndFolder(content, folder);
+                    FolderContent nextFolderContent = folderContentRepository.findNextFolderContent(folderContent);
+
+                    if (nextFolderContent != null) {
+                        nextFolderContent.setPreviousContent(folderContent.getPreviousContent());
+                        folderContentRepository.save(nextFolderContent);
+                    }
+
+                    folderContentRepository.delete(folderContent);
                 }
             }
         }
