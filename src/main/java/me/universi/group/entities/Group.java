@@ -130,14 +130,14 @@ public class Group {
         this.enableCurriculum = enableCurriculum;
     }
 
-    public Group(String nickname, String name, String description, Profile admin, GroupType type, Date createdAt, boolean enableCurriculum) {
+    public Group(String nickname, String name, String description, Profile admin, GroupType type, Date createdAt) {
         this.nickname = nickname;
         this.name = name;
         this.description = description;
         this.admin = admin;
         this.type = type;
         this.createdAt = createdAt;
-        this.enableCurriculum = enableCurriculum;
+        this.enableCurriculum = false;
     }
 
     public UUID getId() {
