@@ -170,7 +170,7 @@ public class CapacityService implements CapacityServiceInterface {
     public List<Content> findContentsByFolder(UUID folderId) throws CapacityException {
         Folder folder = findFolderById(folderId);
 
-        List<Content> contents = contentRepository.findContentsInFolderByOrderPosition(folder.getId());
+        List<Content> contents = this.listSortedContentsOfFolder(folder);
 
         for(Content content : contents) {
             ContentStatus contentStatus = findStatusByContentId(content.getId());
@@ -442,7 +442,7 @@ public class CapacityService implements CapacityServiceInterface {
 
         // mount ordered list
         List<Content> contentsOrdered = new ArrayList<>();
-        for(Content contentNow : contentRepository.findContentsInFolderByOrderPosition(folder.getId())) {
+        for(Content contentNow : this.listSortedContentsOfFolder(folder)) {
             if(!Objects.equals(contentNow.getId(), content.getId())) {
                 contentsOrdered.add(contentNow);
             }
@@ -492,5 +492,31 @@ public class CapacityService implements CapacityServiceInterface {
 
     public void deleteStatusForContent(UUID contentId) {
         contentStatusRepository.deleteByContentId(contentId);
+    }
+
+    public List<Content> listSortedContentsOfFolder(Folder folder) throws CapacityException {
+        if (folder == null) {
+            throw new CapacityException("A pasta não existe");
+        }
+
+        List<Content> contents = new ArrayList<>();
+
+        FolderContent previousOrder = folderContentRepository.findFirstContentFolderInFolder(folder.getId());
+        if (previousOrder == null) {
+            return contents;
+        }
+        contents.add(previousOrder.getContent());
+
+        while (true) {
+            FolderContent next = folderContentRepository.findNextFolderContent(previousOrder);
+            if (next == null) {
+                break;
+            }
+
+            contents.add(next.getContent());
+            previousOrder = next;
+        }
+
+        return contents;
     }
 }
