@@ -27,12 +27,12 @@ public class FolderContent {
     @Column(name = "id")
     private UUID id;
 
-    @JoinColumn(name = "content", nullable = false)
+    @JoinColumn(name = "content_id", nullable = false)
     @ManyToOne
     @NotNull
     private Content content;
 
-    @JoinColumn(name = "folder", nullable = false)
+    @JoinColumn(name = "folder_id", nullable = false)
     @ManyToOne
     @NotNull
     private Folder folder;
