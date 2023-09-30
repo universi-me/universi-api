@@ -1,5 +1,5 @@
 CREATE TABLE profile_experience (
-    id UUID UNIQUE PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     profile_id UUID NOT NULL,
     type_experience_id UUID NOT NULL,
     local VARCHAR(255),
