@@ -434,10 +434,12 @@ public class UserController {
             User user = userService.getUserByRecoveryPasswordToken(token);
 
             if(user == null) {
-                throw new UserException("Token de recuperação de senha inválido!");
+                throw new UserException("Token de recuperação de senha inválido ou expirado!");
             }
 
+            user.setRecoveryPasswordToken(null);
             userService.setRawPasswordToUser(user, newPassword, true);
+
 
             response.message = "Senha alterada com sucesso, efetue o login para continuar.";
             response.redirectTo = "/login";

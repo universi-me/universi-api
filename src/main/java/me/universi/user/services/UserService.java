@@ -366,7 +366,6 @@ public class UserService implements UserDetailsService {
     public void setRawPasswordToUser(User user, String rawPassword, boolean logout) {
         user.setPassword(encodePassword(rawPassword));
         user.setExpired_credentials(false);
-        user.setRecoveryPasswordToken(null);
         save(user);
         if(logout) {
             logoutUsername(user.getUsername());
@@ -389,7 +388,7 @@ public class UserService implements UserDetailsService {
     public String generateRecoveryPasswordToken(User user) throws Exception {
         String tokenRandom = UUID.randomUUID().toString();
 
-        MessageDigest digest = MessageDigest.getInstance("SHA-512");
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
         byte[] encodedHash = digest.digest(tokenRandom.getBytes(StandardCharsets.UTF_8));
         String tokenString = ConvertUtil.bytesToHex(encodedHash);
 
