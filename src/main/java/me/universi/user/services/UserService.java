@@ -390,7 +390,7 @@ public class UserService implements UserDetailsService {
 
     // send recovery password email to user
     public void sendRecoveryPasswordEmail(User user) throws Exception {
-        String userIp = getRequest().getRemoteAddr();
+        String userIp = getRequest().getHeader("X-FORWARDED-FOR");
         String token = generateRecoveryPasswordToken(user);
         String url = "https://codata.universi.me/recuperar-senha/" + token;
         String subject = "Universi.me - Recuperação de Senha";
