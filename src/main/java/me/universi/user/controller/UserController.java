@@ -171,9 +171,8 @@ public class UserController {
             boolean logadoComGoogle = (session.getAttribute("loginViaGoogle") != null);
 
             if (logadoComGoogle || userService.passwordValid(user, password)) {
-                user.setPassword(userService.encodePassword(newPassword));
-                user.setExpired_credentials(false);
-                userService.save(user);
+
+                userService.setRawPasswordToUser(user, newPassword, false);
 
                 userService.updateUserInSession();
 
@@ -438,10 +437,7 @@ public class UserController {
                 throw new UserException("Token de recuperação de senha inválido!");
             }
 
-            user.setPassword(userService.encodePassword(newPassword));
-            user.setExpired_credentials(false);
-            user.setRecoveryPasswordToken(null);
-            userService.save(user);
+            userService.setRawPasswordToUser(user, newPassword, true);
 
             response.message = "Senha alterada com sucesso, efetue o login para continuar.";
             response.redirectTo = "/login";
