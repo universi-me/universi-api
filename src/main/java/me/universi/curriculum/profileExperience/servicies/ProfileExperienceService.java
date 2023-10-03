@@ -1,8 +1,8 @@
 package me.universi.curriculum.profileExperience.servicies;
 
 import me.universi.curriculum.profileExperience.entities.ProfileExperience;
-import me.universi.curriculum.profileExperience.entities.TypeExperience;
 import me.universi.curriculum.profileExperience.repositories.ProfileExperienceRepository;
+import me.universi.profile.entities.Profile;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import org.springframework.stereotype.Service;
@@ -39,6 +39,10 @@ public class ProfileExperienceService {
 
     public Optional<ProfileExperience> findById(UUID id){
         return profileExperienceRepository.findById(id);
+    }
+
+    public List<ProfileExperience> findByProfile(Profile profile){
+        return profileExperienceRepository.findByProfile(profile);
     }
 
     public ProfileExperience update(ProfileExperience newProfileExperience, UUID id) throws Exception{

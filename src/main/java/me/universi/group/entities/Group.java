@@ -110,7 +110,7 @@ public class Group {
     @JsonIgnore
     private Collection<Folder> folders;
 
-    /*Este atributo indica que o grupo deve fazer parte do currículo da pessoa*/
+    /*Attribute indicates that the group must be part of the person's resume*/
     @Column(name = "enable_curriculum")
     private boolean enableCurriculum;
 
