@@ -35,12 +35,16 @@ public class Institution {
     @Column(name = "created_at")
     private Date creationDate;
 
+    @Column(name = "is_deleted")
+    private Boolean isDeleted;
+
     public Institution(){
     }
 
     public Institution(String name, String description){
         this.name = name;
         this.description = description;
+        this.isDeleted = false;
     }
 
     public UUID getId() {
@@ -69,5 +73,13 @@ public class Institution {
 
     public void setCreationDate(Date creationDate) {
         this.creationDate = creationDate;
+    }
+
+    public Boolean getIsDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted(Boolean deleted) {
+        isDeleted = deleted;
     }
 }

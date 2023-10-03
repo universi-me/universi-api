@@ -58,6 +58,9 @@ public class Education {
     @Column(name = "created_at")
     private Date creationDate;
 
+    @Column(name = "is_deleted")
+    private Boolean isDeleted;
+
     public Education(){
 
     }
@@ -68,6 +71,7 @@ public class Education {
         this.startDate = startDate;
         this.endDate = endDate;
         this.presentDate = presentDate;
+        this.isDeleted = false;
     }
 
     public Education( TypeEducation typeEducation, Institution institution, Date startDate, Date endDate){
@@ -76,6 +80,7 @@ public class Education {
         this.startDate = startDate;
         this.endDate = endDate;
         this.presentDate = false;
+        this.isDeleted = false;
     }
 
     public UUID getId() {
@@ -139,4 +144,11 @@ public class Education {
         this.profile = profile;
     }
 
+    public Boolean getIsDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted(Boolean delected) {
+        isDeleted = delected;
+    }
 }

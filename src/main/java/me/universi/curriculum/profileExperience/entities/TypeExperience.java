@@ -31,12 +31,16 @@ public class TypeExperience {
     @Column(name = "created_at")
     private Date creationDate;
 
+    @Column(name = "is_deleted")
+    private Boolean isDeleted;
+
     public TypeExperience(){
 
     }
 
     public TypeExperience(String name){
         this.name = name;
+        this.isDeleted = false;
     }
 
     public UUID getId() {
@@ -59,4 +63,11 @@ public class TypeExperience {
         this.creationDate = creationDate;
     }
 
+    public Boolean getDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        isDeleted = deleted;
+    }
 }

@@ -1,11 +1,14 @@
 package me.universi.curriculum.education.servicies;
 
 import me.universi.curriculum.education.controller.TypeEducationController;
+import me.universi.curriculum.education.entities.Institution;
 import me.universi.curriculum.education.entities.TypeEducation;
 import me.universi.curriculum.education.repositories.TypeEducationRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class TypeEducationService {
@@ -24,4 +27,21 @@ public class TypeEducationService {
         return typeEducationRepository.findAll();
     }
 
+    public Optional<TypeEducation> findById(UUID id){
+        return typeEducationRepository.findById(id);
+    }
+
+    public TypeEducation update(TypeEducation newTypeEducation, UUID id) throws Exception{
+        return typeEducationRepository.findById(id).map(typeEducation -> {
+            typeEducation.setName(newTypeEducation.getName());
+            return typeEducationRepository.saveAndFlush(typeEducation);
+        }).orElseGet(()->{
+            try {
+                return typeEducationRepository.saveAndFlush(newTypeEducation);
+            }catch (Exception e){
+                /*Implementar tratamento de exeptions*/
+                return null;
+            }
+        });
+    }
 }
