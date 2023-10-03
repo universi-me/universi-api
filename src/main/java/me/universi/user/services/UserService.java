@@ -1,6 +1,8 @@
 package me.universi.user.services;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
@@ -13,6 +15,7 @@ import me.universi.user.entities.User;
 import me.universi.user.enums.Authority;
 import me.universi.user.exceptions.UserException;
 import me.universi.user.repositories.UserRepository;
+import me.universi.util.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -192,14 +195,17 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    public HttpSession getActiveSession() {
+    public HttpServletRequest getRequest() {
         ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
-        return attr.getRequest().getSession(true);
+        return attr.getRequest();
+    }
+
+    public HttpSession getActiveSession() {
+        return getRequest().getSession(true);
     }
 
     public String getActiveUrl() {
-        ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
-        return attr.getRequest().getRequestURI();
+        return  getRequest().getRequestURI();
     }
 
     public void updateUserInSession() {
@@ -366,5 +372,40 @@ public class UserService implements UserDetailsService {
         message.setSubject(subject);
         message.setText(text);
         emailSender.send(message);
+    }
+
+    // generate recovery password token sha256 for user
+    public String generateRecoveryPasswordToken(User user) throws Exception {
+        String tokenRandom = UUID.randomUUID().toString();
+
+        MessageDigest digest = MessageDigest.getInstance("SHA-512");
+        byte[] encodedHash = digest.digest(tokenRandom.getBytes(StandardCharsets.UTF_8));
+        String tokenString = ConvertUtil.bytesToHex(encodedHash);
+
+        user.setRecoveryPasswordToken(tokenString);
+        save(user);
+
+        return tokenString;
+    }
+
+    // send recovery password email to user
+    public void sendRecoveryPasswordEmail(User user) throws Exception {
+        String userIp = getRequest().getRemoteAddr();
+        String token = generateRecoveryPasswordToken(user);
+        String url = "https://codata.universi.me/recuperar-senha/" + token;
+        String subject = "Universi.me - Recuperação de Senha";
+        String text = "Olá " + user.getUsername() + ",\n\n" +
+                "Você solicitou a recuperação de senha para sua conta no Universi.me.\n" +
+                "Para recuperar sua senha, clique no link abaixo:\n\n" +
+                url + "\n\n" +
+                "Se você não solicitou a recuperação de senha, por favor, ignore este email.\n\n" +
+                "Endereço IP: " + userIp + "\n\n" +
+                "Atenciosamente,\n" +
+                "Equipe Universi.me";
+        sendSystemEmailToUser(user, subject, text);
+    }
+
+    public User getUserByRecoveryPasswordToken(String token) {
+        return userRepository.findFirstByRecoveryPasswordToken(token).orElse(null);
     }
 }
