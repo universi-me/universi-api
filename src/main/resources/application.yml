@@ -149,6 +149,21 @@ spring:
   config:
     activate:
       on-profile: prod
+  # EMAIL
+  mail:
+    host: ${API_MAIL_HOST:smtp.gmail.com}
+    port: ${API_MAIL_PORT:587}
+    username: ${API_MAIL_USERNAME:username}
+    password: ${API_MAIL_PASSWORD:password}
+    tls: true
+    properties:
+      mail:
+        smtp:
+          ssl:
+            trust: ${API_MAIL_HOST:smtp.gmail.com}
+          auth: true
+          starttls:
+            enable: true
   web:
     resources:
       cache:

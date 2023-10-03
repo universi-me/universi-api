@@ -14,6 +14,8 @@ import me.universi.user.enums.Authority;
 import me.universi.user.exceptions.UserException;
 import me.universi.user.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -48,14 +50,16 @@ public class UserService implements UserDetailsService {
     private final ProfileService profileService;
     private final RoleHierarchyImpl roleHierarchy;
     private final SessionRegistry sessionRegistry;
+    private final JavaMailSender emailSender;
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, ProfileService profileService, RoleHierarchyImpl roleHierarchy, SessionRegistry sessionRegistry) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, ProfileService profileService, RoleHierarchyImpl roleHierarchy, SessionRegistry sessionRegistry, JavaMailSender emailSender) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.profileService = profileService;
         this.roleHierarchy = roleHierarchy;
         this.sessionRegistry = sessionRegistry;
+        this.emailSender = emailSender;
     }
 
     // UserService bean instance via context
@@ -350,5 +354,17 @@ public class UserService implements UserDetailsService {
 
     public String getUrlWhenLogout() {
         return "/login";
+    }
+
+    public void sendSystemEmailToUser(UserDetails user, String subject, String text) throws UserException {
+        String email = ((User)user).getEmail();
+        if(email == null) {
+            throw new UserException("Usuário não possui um email.");
+        }
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(email);
+        message.setSubject(subject);
+        message.setText(text);
+        emailSender.send(message);
     }
 }
