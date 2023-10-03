@@ -1,6 +1,7 @@
 package me.universi.user.services;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Collection;
@@ -362,6 +363,15 @@ public class UserService implements UserDetailsService {
         return "/login";
     }
 
+    public void setRawPasswordToUser(User user, String rawPassword, boolean logout) {
+        user.setPassword(encodePassword(rawPassword));
+        user.setExpired_credentials(false);
+        save(user);
+        if(logout) {
+            logoutUsername(user.getUsername());
+        }
+    }
+
     public void sendSystemEmailToUser(UserDetails user, String subject, String text) throws UserException {
         String email = ((User)user).getEmail();
         if(email == null) {
@@ -378,7 +388,7 @@ public class UserService implements UserDetailsService {
     public String generateRecoveryPasswordToken(User user) throws Exception {
         String tokenRandom = UUID.randomUUID().toString();
 
-        MessageDigest digest = MessageDigest.getInstance("SHA-512");
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
         byte[] encodedHash = digest.digest(tokenRandom.getBytes(StandardCharsets.UTF_8));
         String tokenString = ConvertUtil.bytesToHex(encodedHash);
 
@@ -391,8 +401,11 @@ public class UserService implements UserDetailsService {
     // send recovery password email to user
     public void sendRecoveryPasswordEmail(User user) throws Exception {
         String userIp = getRequest().getHeader("X-Forwarded-For");
+        URL requestUrl = new URL(getRequest().getRequestURL().toString());
+
         String token = generateRecoveryPasswordToken(user);
-        String url = "https://codata.universi.me/recuperar-senha/" + token;
+
+        String url = "https://" + requestUrl.getHost() + "/recovery-password/" + token;
         String subject = "Universi.me - Recuperação de Senha";
         String text = "Olá " + user.getUsername() + ",\n\n" +
                 "Você solicitou a recuperação de senha para sua conta no Universi.me.\n" +
