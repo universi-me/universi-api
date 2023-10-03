@@ -38,6 +38,10 @@ public class User implements UserDetails {
     private String password;
 
     @JsonIgnore
+    @Column(name = "recovery_token")
+    private String recoveryPasswordToken;
+
+    @JsonIgnore
     @OneToOne(mappedBy = "user", cascade = CascadeType.DETACH)
     private Profile profile;
 
@@ -127,6 +131,14 @@ public class User implements UserDetails {
 
     public void setEmail_verified(boolean email_verified) {
         this.email_verified = email_verified;
+    }
+
+    public String getRecoveryPasswordToken() {
+        return recoveryPasswordToken;
+    }
+
+    public void setRecoveryPasswordToken(String recoveryPasswordToken) {
+        this.recoveryPasswordToken = recoveryPasswordToken;
     }
 
     public boolean isExpired_user() {

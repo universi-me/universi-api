@@ -1,6 +1,8 @@
 spring:
   profiles:
     active: ${API_PROFILE_ACTIVE:dev}
+  flyway:
+    out-of-order: true
 
 jwt:
   secret:

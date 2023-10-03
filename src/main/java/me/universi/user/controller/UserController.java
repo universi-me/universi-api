@@ -387,5 +387,68 @@ public class UserController {
         });
     }
 
+    // recovery user password
+    @PostMapping(value = "/recovery-password", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response recovery_password(@RequestBody Map<String, Object> body) {
+        return Response.buildResponse(response -> {
+
+            String usernameOrEmail = (String)body.get("username");
+
+            if(usernameOrEmail == null) {
+                throw new UserException("Parametro username é nulo.");
+            }
+
+            User user = (User) userService.loadUserByUsername(usernameOrEmail);
+
+            if(user == null) {
+                throw new UserException("Conta não encontrada!");
+            }
+
+            userService.sendRecoveryPasswordEmail(user);
+
+            response.message = "Email de recuperação de senha enviado com sucesso, verifique a sua caixa de email.";
+
+        });
+    }
+
+    // create new password for user
+    @PostMapping(value = "/new-password", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response new_password(@RequestBody Map<String, Object> body) {
+        return Response.buildResponse(response -> {
+
+            String token = (String)body.get("token");
+            String newPassword = (String)body.get("newPassword");
+
+            if(token == null) {
+                throw new UserException("Parametro token é nulo.");
+            }
+            if(newPassword == null) {
+                throw new UserException("Parametro newPassword é nulo.");
+            }
+
+            if(!userService.passwordRegex(newPassword)) {
+                throw new UserException("Nova Senha está com formato inválido!");
+            }
+
+            User user = userService.getUserByRecoveryPasswordToken(token);
+
+            if(user == null) {
+                throw new UserException("Token de recuperação de senha inválido!");
+            }
+
+            user.setPassword(userService.encodePassword(newPassword));
+            user.setExpired_credentials(false);
+            user.setRecoveryPasswordToken(null);
+            userService.save(user);
+
+            response.message = "Senha alterada com sucesso, efetue o login para continuar.";
+            response.redirectTo = "/login";
+
+        });
+    }
+
+
 
 }
