@@ -3,6 +3,7 @@ package me.universi.capacity.entidades;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Temporal;
@@ -78,6 +79,15 @@ public class Folder {
     @JoinColumn(name = "owner_group_id")
     @NotNull
     private Group ownerGroup;
+
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(
+        name = "users_folders",
+        joinColumns = @JoinColumn(name = "folder_id"),
+        inverseJoinColumns = @JoinColumn(name = "profile_id")
+    )
+    @JsonIgnore
+    private Collection<Profile> assignedUsers;
 
     public Folder() {
     }
@@ -176,5 +186,13 @@ public class Folder {
 
     public void setOwnerGroup(Group ownerGroup) {
         this.ownerGroup = ownerGroup;
+    }
+
+    public Collection<Profile> getAssignedUsers() {
+        return assignedUsers;
+    }
+
+    public void setAssignedUsers(Collection<Profile> assignedUsers) {
+        this.assignedUsers = assignedUsers;
     }
 }
