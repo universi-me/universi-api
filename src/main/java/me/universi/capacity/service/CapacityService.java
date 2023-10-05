@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 import java.util.Objects;
 
 import me.universi.Sys;
@@ -18,6 +19,7 @@ import me.universi.group.entities.Group;
 import me.universi.group.exceptions.GroupException;
 import me.universi.group.services.GroupService;
 import me.universi.profile.entities.Profile;
+import me.universi.profile.services.ProfileService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import org.springframework.stereotype.Service;
@@ -40,12 +42,15 @@ public class CapacityService implements CapacityServiceInterface {
 
     private final GroupService groupService;
 
-    public CapacityService(GroupService groupService, ContentRepository contentRepository, CategoryRepository categoryRepository, FolderRepository folderRepository, ContentStatusRepository contentStatusRepository) {
+    private final ProfileService profileService;
+
+    public CapacityService(GroupService groupService, ContentRepository contentRepository, CategoryRepository categoryRepository, FolderRepository folderRepository, ContentStatusRepository contentStatusRepository, ProfileService profileService) {
         this.contentRepository = contentRepository;
         this.categoryRepository = categoryRepository;
         this.folderRepository = folderRepository;
         this.groupService = groupService;
         this.contentStatusRepository = contentStatusRepository;
+        this.profileService = profileService;
     }
 
     public static CapacityService getInstance() {
@@ -467,5 +472,22 @@ public class CapacityService implements CapacityServiceInterface {
 
     public void deleteStatusForContent(UUID contentId) {
         contentStatusRepository.deleteByContentId(contentId);
+    }
+
+    public Collection<Folder> findFoldersByProfile(UUID profileId) {
+        Collection<Folder> assignedFolders = folderRepository.findAssignedToProfile(profileId);
+
+        Collection<Group> profileGroups = profileService.findFirstById(profileId).getGroups();
+        Collection<Folder> foldersFromGroups = new ArrayList<>(profileGroups.size());
+        for (Group g : profileGroups) {
+            for (Folder f : g.getFolders()) {
+                foldersFromGroups.add(f);
+            }
+        }
+
+        return Stream.concat(
+            assignedFolders.stream(),
+            foldersFromGroups.stream()
+        ).distinct().toList();
     }
 }
