@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 import java.util.Objects;
 
 import me.universi.Sys;
@@ -476,6 +477,17 @@ public class CapacityService implements CapacityServiceInterface {
     public Collection<Folder> findFoldersByProfile(UUID profileId) {
         Collection<Folder> assignedFolders = folderRepository.findAssignedToProfile(profileId);
 
-        return assignedFolders;
+        Collection<Group> profileGroups = profileService.findFirstById(profileId).getGroups();
+        Collection<Folder> foldersFromGroups = new ArrayList<>(profileGroups.size());
+        for (Group g : profileGroups) {
+            for (Folder f : g.getFolders()) {
+                foldersFromGroups.add(f);
+            }
+        }
+
+        return Stream.concat(
+            assignedFolders.stream(),
+            foldersFromGroups.stream()
+        ).distinct().toList();
     }
 }
