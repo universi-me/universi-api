@@ -18,6 +18,7 @@ import me.universi.group.entities.Group;
 import me.universi.group.exceptions.GroupException;
 import me.universi.group.services.GroupService;
 import me.universi.profile.entities.Profile;
+import me.universi.profile.services.ProfileService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import org.springframework.stereotype.Service;
@@ -40,12 +41,15 @@ public class CapacityService implements CapacityServiceInterface {
 
     private final GroupService groupService;
 
-    public CapacityService(GroupService groupService, ContentRepository contentRepository, CategoryRepository categoryRepository, FolderRepository folderRepository, ContentStatusRepository contentStatusRepository) {
+    private final ProfileService profileService;
+
+    public CapacityService(GroupService groupService, ContentRepository contentRepository, CategoryRepository categoryRepository, FolderRepository folderRepository, ContentStatusRepository contentStatusRepository, ProfileService profileService) {
         this.contentRepository = contentRepository;
         this.categoryRepository = categoryRepository;
         this.folderRepository = folderRepository;
         this.groupService = groupService;
         this.contentStatusRepository = contentStatusRepository;
+        this.profileService = profileService;
     }
 
     public static CapacityService getInstance() {
@@ -467,5 +471,11 @@ public class CapacityService implements CapacityServiceInterface {
 
     public void deleteStatusForContent(UUID contentId) {
         contentStatusRepository.deleteByContentId(contentId);
+    }
+
+    public Collection<Folder> findFoldersByProfile(UUID profileId) {
+        Collection<Folder> assignedFolders = folderRepository.findAssignedToProfile(profileId);
+
+        return assignedFolders;
     }
 }

@@ -1,6 +1,7 @@
 package me.universi.profile.controller;
 
 import me.universi.api.entities.Response;
+import me.universi.capacity.service.CapacityService;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.enums.Gender;
 import me.universi.profile.exceptions.ProfileException;
@@ -26,6 +27,9 @@ public class ProfileController {
 
     @Autowired
     public ProfileService profileService;
+
+    @Autowired
+    public CapacityService capacityService;
 
     @GetMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
@@ -199,5 +203,28 @@ public class ProfileController {
         }
 
         return response;
+    }
+
+    @PostMapping(value = "/folders", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response profile_folders(@RequestBody Map<String, Object> body) {
+        return Response.buildResponse(response -> {
+            try {
+                Object profileId = body.get("profileId");
+                Object username = body.get("username");
+
+                if (profileId == null && username == null) {
+                    throw new IllegalArgumentException("Parâmetro profileId ou username devem ser informados");
+                }
+
+                Profile profile = profileService.getProfileByUserIdOrUsername(profileId, username);
+                response.body.put("folders", capacityService.findFoldersByProfile(profile.getId()));
+            }
+
+            catch (Exception e) {
+                response.message = e.getMessage();
+                response.success = false;
+            }
+        });
     }
 }
