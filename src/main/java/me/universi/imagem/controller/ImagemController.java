@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
-import jakarta.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.InputStream;
 import java.io.FileInputStream;
@@ -40,13 +39,13 @@ public class ImagemController {
     private Environment env;
 
     @PostMapping(value = "/imagem/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Response upload_de_image(@RequestParam("imagem") MultipartFile imagem) {
+    public Response upload_of_image(@RequestParam("imagem") MultipartFile image) {
         return Response.buildResponse(response -> {
 
             // check if save image in local or remote.
             // TODO: save image in database.
-            String link = (Boolean.parseBoolean(env.getProperty("SAVE_IMAGE_LOCAL")))?salvarImagemEmDisco(imagem):uploadImagemImgur(imagem);
-            
+            String link = (Boolean.parseBoolean(env.getProperty("SAVE_IMAGE_LOCAL")))? saveImageInFilesystem(image):uploadImagemImgur(image);
+
             // return link of image remote or local.
             if(link != null) {
                 response.body.put("link", link.toString());
@@ -58,12 +57,12 @@ public class ImagemController {
         });
     }
 
-    @GetMapping(value = "/img/imagem/{imagem}.jpg", produces = MediaType.IMAGE_JPEG_VALUE)
+    @GetMapping(value = "/img/imagem/{image}.jpg", produces = MediaType.IMAGE_JPEG_VALUE)
     @ResponseBody
-    public ResponseEntity<InputStreamResource> obterImageEmDisco(HttpServletResponse response, @PathVariable("imagem") String nomeImagem) {
+    public ResponseEntity<InputStreamResource> getImageFromFilesystem(@PathVariable("image") String nameOfImage) {
         try {
 
-            String filename = nomeImagem.replaceAll("[^a-f0-9]", "");
+            String filename = nameOfImage.replaceAll("[^a-f0-9]", "");
 
             if(!filename.contains("..") && !filename.contains("/")) {
                 // parse do arquivo imagem salva para saida url.
@@ -79,7 +78,7 @@ public class ImagemController {
         }
     }
 
-    public String salvarImagemEmDisco(MultipartFile imagem) throws Exception {
+    public String saveImageInFilesystem(MultipartFile imagem) throws Exception {
 
         String tokenRandom = UUID.randomUUID().toString();
 
