@@ -52,6 +52,9 @@ public class Group {
     @Column(name = "image")
     public String image;
 
+    @Column(name = "bannerImage")
+    public String bannerImage;
+
     @ManyToOne
     @JoinColumn(name="profile_id")
     @NotNull
@@ -285,5 +288,13 @@ public class Group {
 
     public void setEnableCurriculum(boolean enableCurriculum) {
         this.enableCurriculum = enableCurriculum;
+    }
+
+    public String getBannerImage() {
+        return bannerImage;
+    }
+
+    public void setBannerImage(String bannerImage) {
+        this.bannerImage = bannerImage;
     }
 }
