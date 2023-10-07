@@ -41,8 +41,6 @@ public class CompetenceService {
 
     public Competence save(Competence competence) throws Exception {
         try {
-            User user = userService.getUserInSession();
-            competence.setProfile(user.getProfile());
             return competenceRepository.saveAndFlush(competence);
         } catch (Exception e) {
             e.printStackTrace();

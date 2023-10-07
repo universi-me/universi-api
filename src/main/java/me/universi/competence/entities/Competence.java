@@ -34,11 +34,6 @@ public class Competence {
     @JoinColumn(name = "competence_type_id")
     private CompetenceType competenceType;
 
-    @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "profile_id")
-    private Profile profile;
-
     @Column(name = "title")
     private String title;
 
@@ -124,14 +119,6 @@ public class Competence {
 
     public void setCompetenceType(CompetenceType competenceType) {
         this.competenceType = competenceType;
-    }
-
-    public Profile getProfile() {
-        return profile;
-    }
-
-    public void setProfile(Profile profile) {
-        this.profile = profile;
     }
 
     public Date getStartDate() { return startDate; }
