@@ -1,7 +1,9 @@
 package me.universi.profile.controller;
 
+import java.net.URI;
 import me.universi.api.entities.Response;
 import me.universi.capacity.service.CapacityService;
+import me.universi.group.entities.Group;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.enums.Gender;
 import me.universi.profile.exceptions.ProfileException;
@@ -9,15 +11,13 @@ import me.universi.profile.services.ProfileService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping(value = "/api/profile")
@@ -226,5 +226,17 @@ public class ProfileController {
                 response.success = false;
             }
         });
+    }
+
+    // get image of profile
+    @GetMapping(value = "/image/{profileId}")
+    public ResponseEntity<Void> get_image(@PathVariable String profileId) {
+        Profile profile = profileService.findFirstById(profileId);
+        if(profile != null) {
+            if(profile.getImage() != null) {
+                return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(profile.getImage())).build();
+            }
+        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "not found");
     }
 }

@@ -1,5 +1,6 @@
 package me.universi.group.controller;
 
+import java.net.URI;
 import me.universi.api.entities.Response;
 import me.universi.group.entities.Group;
 import me.universi.group.enums.GroupType;
@@ -10,12 +11,15 @@ import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/group")
@@ -29,7 +33,7 @@ public class GrupoController {
     @ResponseBody
     public Response create(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
-            
+
             User user = userService.getUserInSession();
 
             Boolean groupRoot = (Boolean)body.get("groupRoot");
@@ -464,21 +468,26 @@ public class GrupoController {
     }
 
     // get image of group
-    @GetMapping(value = "/image/{groupId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response get_image(@PathVariable String groupId) {
-        Response response = new Response();
-        try {
-            Group group = groupService.findFirstById(groupId);
-            if(group != null) {
-                response.body.put("image", group.getImage());
-                response.success = true;
-                return response;
+    @GetMapping(value = "/image/{groupId}")
+    public ResponseEntity<Void> get_image(@PathVariable String groupId) {
+        Group group = groupService.findFirstById(groupId);
+        if(group != null) {
+            if(group.getImage() != null) {
+                return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(group.getImage())).build();
             }
-            throw new GroupException("Falha ao obter imagem do grupo.");
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
         }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "not found");
+    }
+
+    // get image banner of group
+    @GetMapping(value = "/banner/{groupId}")
+    public ResponseEntity<Void> get_image_banner(@PathVariable String groupId) {
+        Group group = groupService.findFirstById(groupId);
+        if(group != null) {
+            if(group.getBannerImage() != null) {
+                return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(group.getBannerImage())).build();
+            }
+        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "not found");
     }
 }
