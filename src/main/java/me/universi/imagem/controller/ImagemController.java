@@ -1,7 +1,11 @@
 package me.universi.imagem.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.util.UUID;
 import me.universi.api.entities.Response;
+import me.universi.util.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.InputStreamResource;
@@ -36,26 +40,22 @@ public class ImagemController {
     private Environment env;
 
     @PostMapping(value = "/imagem/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Response upload_de_imagem(@RequestParam("imagem") MultipartFile imagem) {
-        Response resposta = new Response();
-        try {
-            // verificar o modo de salvamento da imagem no enviroment
-            String link = (Boolean.parseBoolean(env.getProperty("SAVE_IMAGE_LOCAL")))?salvarImagemEmDisco(imagem):uploadImagemImgur(imagem);
+    public Response upload_de_image(@RequestParam("imagem") MultipartFile imagem) {
+        return Response.buildResponse(response -> {
 
-            // retornar link da imagem remoto ou local.
+            // check if save image in local or remote.
+            // TODO: save image in database.
+            String link = (Boolean.parseBoolean(env.getProperty("SAVE_IMAGE_LOCAL")))?salvarImagemEmDisco(imagem):uploadImagemImgur(imagem);
+            
+            // return link of image remote or local.
             if(link != null) {
-                resposta.body.put("link", link.toString());
-                resposta.success = true;
-                return resposta;
+                response.body.put("link", link.toString());
+                return;
             }
 
-            resposta.message = "Falha ao salvar imagem.";
-            return resposta;
+            throw  new Exception("Falha ao salvar imagem.");
 
-        } catch (Exception e) {
-            resposta.message = e.getMessage();
-            return resposta;
-        }
+        });
     }
 
     @GetMapping(value = "/img/imagem/{imagem}.jpg", produces = MediaType.IMAGE_JPEG_VALUE)
@@ -81,20 +81,25 @@ public class ImagemController {
 
     public String salvarImagemEmDisco(MultipartFile imagem) throws Exception {
 
-        String nomeDaImage = Long.toHexString(System.currentTimeMillis());
+        String tokenRandom = UUID.randomUUID().toString();
+
+        MessageDigest digest = MessageDigest.getInstance("SHA-1");
+        byte[] encodedHash = digest.digest(tokenRandom.getBytes(StandardCharsets.UTF_8));
+        String nameOfImage = ConvertUtil.bytesToHex(encodedHash);
+
 
         File imagemDir = new File(env.getProperty("PATH_IMAGE_SAVE"));
         if (!imagemDir.exists()){
             imagemDir.mkdirs();
         }
 
-        File file = new File(imagemDir.toString() + "/" + nomeDaImage);
+        File file = new File(imagemDir.toString() + "/" + nameOfImage);
 
         OutputStream os = new FileOutputStream(file);
         os.write(imagem.getBytes());
 
-        if(nomeDaImage != null) {
-            return "/img/imagem/" + nomeDaImage + ".jpg";
+        if(nameOfImage != null) {
+            return "/img/imagem/" + nameOfImage + ".jpg";
         }
 
         throw new Exception("Falha ao salvar imagem em disco.");
