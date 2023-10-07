@@ -34,8 +34,7 @@ public class ProfileController {
     @GetMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response profile() {
-        Response response = new Response(); // default
-        try {
+        return Response.buildResponse(response -> {
 
             User userSession = userService.getUserInSession();
 
@@ -45,22 +44,14 @@ public class ProfileController {
             }
 
             response.body.put("profile", userProfile);
-            response.success = true;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-        }
-
-        return response;
+        });
     }
 
     @PostMapping(value = "/edit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Response perfil_editar(@RequestBody Map<String, Object> body) {
-
-        Response response = new Response(); // default
-
-        try {
+    public Response profile_edit(@RequestBody Map<String, Object> body) {
+        return Response.buildResponse(response -> {
 
             Profile profileGet = profileService.getProfileByUserIdOrUsername(body.get("profileId"), body.get("username"));
 
@@ -104,127 +95,87 @@ public class ProfileController {
             userService.updateUserInSession();
 
             response.message = "As Alterações foram salvas com sucesso.";
-            response.success = true;
             response.redirectTo = "/profile/" + profileGet.getUser().getUsername();
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-        }
-
-        return response;
+        });
     }
 
     @PostMapping(value = "/get", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response profile_get(@RequestBody Map<String, Object> body) {
-        Response response = new Response(); // default
-        try {
+        return Response.buildResponse(response -> {
 
             Profile profileGet = profileService.getProfileByUserIdOrUsername(body.get("profileId"), body.get("username"));
 
             response.body.put("profile", profileGet);
-            response.success = true;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-        }
-
-        return response;
+        });
     }
 
     @PostMapping(value = "/recomendations", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response profile_recomendations(@RequestBody Map<String, Object> body) {
-        Response response = new Response(); // default
-        try {
+        return Response.buildResponse(response -> {
 
             Profile profileGet = profileService.getProfileByUserIdOrUsername(body.get("profileId"), body.get("username"));
 
             response.body.put("recomendationsSend", profileGet.getRecomendationsSend());
             response.body.put("recomendationsReceived", profileGet.getRecomendationsReceived());
-            response.success = true;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-        }
-
-        return response;
+        });
     }
 
     @PostMapping(value = "/groups", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response profile_groups(@RequestBody Map<String, Object> body) {
-        Response response = new Response(); // default
-        try {
+        return Response.buildResponse(response -> {
 
             Profile profileGet = profileService.getProfileByUserIdOrUsername(body.get("profileId"), body.get("username"));
 
             response.body.put("groups", profileGet.getGroups());
-            response.success = true;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-        }
-
-        return response;
+        });
     }
 
     @PostMapping(value = "/links", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response profile_links(@RequestBody Map<String, Object> body) {
-        Response response = new Response(); // default
-        try {
+        return Response.buildResponse(response -> {
 
             Profile profileGet = profileService.getProfileByUserIdOrUsername(body.get("profileId"), body.get("username"));
 
             response.body.put("links", profileGet.getLinks());
-            response.success = true;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-        }
-
-        return response;
+        });
     }
 
     @PostMapping(value = "/competences", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response profile_competences(@RequestBody Map<String, Object> body) {
-        Response response = new Response(); // default
-        try {
+        return Response.buildResponse(response -> {
 
             Profile profileGet = profileService.getProfileByUserIdOrUsername(body.get("profileId"), body.get("username"));
 
             response.body.put("competences", profileGet.getCompetences());
-            response.success = true;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-        }
-
-        return response;
+        });
     }
 
     @PostMapping(value = "/folders", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response profile_folders(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
-            try {
-                Object profileId = body.get("profileId");
-                Object username = body.get("username");
 
-                if (profileId == null && username == null) {
-                    throw new IllegalArgumentException("Parâmetro profileId ou username devem ser informados");
-                }
+            Object profileId = body.get("profileId");
+            Object username = body.get("username");
 
-                Profile profile = profileService.getProfileByUserIdOrUsername(profileId, username);
-                response.body.put("folders", capacityService.findFoldersByProfile(profile.getId()));
+            if (profileId == null && username == null) {
+                throw new IllegalArgumentException("Parâmetro profileId ou username devem ser informados");
             }
 
-            catch (Exception e) {
-                response.message = e.getMessage();
-                response.success = false;
-            }
+            Profile profile = profileService.getProfileByUserIdOrUsername(profileId, username);
+            response.body.put("folders", capacityService.findFoldersByProfile(profile.getId()));
+            
         });
     }
 
