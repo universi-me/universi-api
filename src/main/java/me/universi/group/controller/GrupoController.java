@@ -11,11 +11,7 @@ import me.universi.user.services.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
 import java.util.Map;
@@ -32,8 +28,8 @@ public class GrupoController {
     @PostMapping(value = "/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response create(@RequestBody Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
+            
             User user = userService.getUserInSession();
 
             Boolean groupRoot = (Boolean)body.get("groupRoot");
@@ -113,23 +109,18 @@ public class GrupoController {
                 }
 
                 response.message = "Grupo criado com sucesso.";
-                response.success = true;
-                return response;
+                return;
             }
 
             throw new GroupException("Apenas Administradores podem criar subgrupos.");
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
     @PostMapping(value = "/update", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response update(@RequestBody Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             String groupId = (String)body.get("groupId");
             String groupPath = (String)body.get("groupPath");
@@ -174,23 +165,18 @@ public class GrupoController {
                 groupService.save(groupEdit);
 
                 response.message = "As Alterações foram salvas com sucesso.";
-                response.success = true;
-                return response;
+                return;
             }
 
             throw new GroupException("Falha ao editar grupo");
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
     @PostMapping(value = "/participant/enter", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response participant_enter(@RequestBody Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             String groupId = (String)body.get("groupId");
             String groupPath = (String)body.get("groupPath");
@@ -205,9 +191,8 @@ public class GrupoController {
 
             if(groupEdit.isCanEnter() || groupService.verifyPermissionToEditGroup(groupEdit, user)) {
                 if(groupService.addParticipantToGroup(groupEdit, user.getProfile())) {
-                    response.success = true;
                     response.message = "Você entrou no Grupo.";
-                    return response;
+                    return;
                 } else {
                     throw new GroupException("Você já esta neste Grupo.");
                 }
@@ -215,17 +200,13 @@ public class GrupoController {
 
             throw new GroupException("Falha ao adicionar participante ao grupo");
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
     @PostMapping(value = "/participant/exit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response participant_exit(@RequestBody Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             String groupId = (String)body.get("groupId");
             String groupPath = (String)body.get("groupPath");
@@ -235,24 +216,18 @@ public class GrupoController {
             Group groupEdit = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
 
             if(groupService.removeParticipantFromGroup(groupEdit, user.getProfile())) {
-                response.success = true;
                 response.message = "Você saiu do Grupo.";
-                return response;
             } else {
                 throw new GroupException("Você não está neste Grupo.");
             }
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
     @PostMapping(value = "/participant/add", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response participant_add(@RequestBody Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             String groupId = (String)body.get("groupId");
             String groupPath = (String)body.get("groupPath");
@@ -277,9 +252,8 @@ public class GrupoController {
 
             if(participantUser != null && groupService.verifyPermissionToEditGroup(groupEdit, user)) {
                 if(groupService.addParticipantToGroup(groupEdit, participantUser.getProfile())) {
-                    response.success = true;
                     response.message = "Participante adicionado com sucesso.";
-                    return response;
+                    return;
                 } else {
                     throw new GroupException("Participante já esta neste Grupo.");
                 }
@@ -287,17 +261,13 @@ public class GrupoController {
 
             throw new GroupException("Falha ao adicionar participante ao grupo");
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
     @PostMapping(value = "/participant/remove", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response participant_remove(@RequestBody Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             String groupId = (String)body.get("groupId");
             String groupPath = (String)body.get("groupPath");
@@ -322,9 +292,8 @@ public class GrupoController {
 
             if(participantUser != null && groupService.verifyPermissionToEditGroup(groupEdit, user)) {
                 if(groupService.removeParticipantFromGroup(groupEdit, participantUser.getProfile())) {
-                    response.success = true;
                     response.message = "Participante removido com sucesso.";
-                    return response;
+                    return;
                 } else {
                     throw new GroupException("Participante não faz parte deste Grupo.");
                 }
@@ -332,17 +301,13 @@ public class GrupoController {
 
             throw new GroupException("Falha ao adicionar participante ao grupo");
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
     @PostMapping(value = "/participant/list", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response participant_list(@RequestBody Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             String groupId = (String)body.get("groupId");
             String groupPath = (String)body.get("groupPath");
@@ -351,23 +316,18 @@ public class GrupoController {
 
             if(group != null) {
                 response.body.put("participants", group.getParticipants());
-                response.success = true;
-                return response;
+                return;
             }
 
             throw new GroupException("Falha ao listar participante ao grupo");
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
     @PostMapping(value = "/remove", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response remove(@RequestBody Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             String groupId = (String)body.get("groupId");
             String groupPath = (String)body.get("groupPath");
@@ -394,23 +354,18 @@ public class GrupoController {
                 groupService.removeSubGroup(group, groupRemove);
 
                 response.message = "Grupo removido com exito.";
-                response.success = true;
-                return response;
+                return;
             }
 
             throw new GroupException("Erro ao executar operação.");
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
     @PostMapping(value = "/delete", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response delete(@RequestBody Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             String groupId = (String)body.get("groupId");
             String groupPath = (String)body.get("groupPath");
@@ -430,23 +385,18 @@ public class GrupoController {
                 groupService.delete(group);
 
                 response.message = "Grupo deletado com exito.";
-                response.success = true;
-                return response;
+                return;
             }
 
             throw new GroupException("Erro ao executar operação.");
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
     @PostMapping(value = "/get", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response get(@RequestBody Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             String groupId = (String)body.get("groupId");
             String groupPath = (String)body.get("groupPath");
@@ -455,23 +405,18 @@ public class GrupoController {
 
             if (group != null) {
                 response.body.put("group", group);
-                response.success = true;
-                return response;
+                return;
             }
 
             throw new GroupException("Falha ao obter grupo.");
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
     @PostMapping(value = "/list", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response list_subgroup(@RequestBody Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             String groupId = (String)body.get("groupId");
             String groupPath = (String)body.get("groupPath");
@@ -481,44 +426,32 @@ public class GrupoController {
             if(group != null) {
                 Collection<Group> subgroupList = group.getSubGroups();
                 response.body.put("subgroups", subgroupList);
-                response.success = true;
-                return response;
+                return;
             }
 
             throw new GroupException("Falha ao listar grupo.");
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
     @PostMapping(value = "/parents", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response list_available_parents(@RequestBody Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
+
             Collection<Group> groups = groupService.findAll().stream()
                 .filter(Group::isCanCreateGroup)
                 .toList();
 
             response.body.put("groups", groups);
-            response.success = true;
-        }
 
-        catch (Exception e) {
-            response.message = e.getMessage();
-            response.success = false;
-        }
-
-        return response;
+        });
     }
 
     @PostMapping(value = "/folders", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response list_folders(@RequestBody Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             String groupId = (String)body.get("groupId");
             String groupPath = (String)body.get("groupPath");
@@ -526,12 +459,26 @@ public class GrupoController {
             Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
 
             response.body.put("folders", group.getFolders());
-            response.success = true;
 
+        });
+    }
+
+    // get image of group
+    @GetMapping(value = "/image/{groupId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response get_image(@PathVariable String groupId) {
+        Response response = new Response();
+        try {
+            Group group = groupService.findFirstById(groupId);
+            if(group != null) {
+                response.body.put("image", group.getImage());
+                response.success = true;
+                return response;
+            }
+            throw new GroupException("Falha ao obter imagem do grupo.");
         } catch (Exception e) {
             response.message = e.getMessage();
-            response.success = false;
+            return response;
         }
-        return response;
     }
 }
