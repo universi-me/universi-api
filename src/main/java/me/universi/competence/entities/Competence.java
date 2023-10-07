@@ -88,6 +88,12 @@ public class Competence {
         this.presentDate = presentDate;
     }
 
+    public Competence(CompetenceType competenceType, String title, Level level) {
+        this.competenceType = competenceType;
+        this.title = title;
+        this.level = level;
+    }
+
     public UUID getId() {
         return id;
     }

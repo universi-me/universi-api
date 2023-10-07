@@ -51,6 +51,7 @@ public class VacancyService {
         return findFirstById(UUID.fromString(id));
     }
 
+    /*Refatorar*/
     public Vacancy update(Vacancy newVacancy, UUID id) throws Exception{
         return vacancyRepository.findById(id).map(vacancy -> {
             vacancy.setDescription(newVacancy.getDescription());
