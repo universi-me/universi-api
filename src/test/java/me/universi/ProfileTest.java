@@ -101,14 +101,12 @@ public class ProfileTest {
         competenciaTipoRepository.save(compTipo2);
 
         Competence competenciaNew = new Competence();
-        competenciaNew.setProfile(admin_profile);
         competenciaNew.setCompetenceType(compTipo1);
         competenciaNew.setTitle("Java - admin"+userNew.getId());
         competenciaNew.setDescription("Sou top em java - admin"+userNew.getId());
         competenciaService.save(competenciaNew);
 
         Competence competenciaNew1 = new Competence();
-        competenciaNew1.setProfile(admin_profile);
         competenciaNew1.setCompetenceType(compTipo2);
         competenciaNew1.setTitle("Java - admin 1"+userNew.getId());
         competenciaNew1.setDescription("Sou top em java - admin 1"+userNew.getId());

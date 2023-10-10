@@ -65,13 +65,11 @@ public class CompetenciaTest {
         competenciaTipoRepository.save(compTipo2);
 
         Competence competencia1 = new Competence();
-        competencia1.setProfile(profile);
         competencia1.setCompetenceType(compTipo1);
         competencia1.setDescription("Sou top em java - teste 1"+userNew.getId());
         competenciaService.save(competencia1);
 
         Competence competencia2 = new Competence();
-        competencia2.setProfile(profile);
         competencia2.setCompetenceType(compTipo2);
         competencia2.setDescription("Sou top em java - teste 2"+userNew.getId());
         competenciaService.save(competencia2);
@@ -124,13 +122,11 @@ public class CompetenciaTest {
         competenciaTipoRepository.save(compTipo2);
 
         Competence competencia1 = new Competence();
-        competencia1.setProfile(profile);
         competencia1.setCompetenceType(compTipo1);
         competencia1.setDescription("Sou top em java - update 1"+userNew.getId());
         competenciaService.save(competencia1);
 
         Competence competencia2 = new Competence();
-        competencia2.setProfile(profile);
         competencia2.setCompetenceType(compTipo2);
         competencia2.setDescription("Sou top em java - update 2"+userNew.getId());
         competenciaService.save(competencia2);
@@ -189,13 +185,11 @@ public class CompetenciaTest {
         competenciaTipoRepository.save(compTipo2);
 
         Competence competencia1 = new Competence();
-        competencia1.setProfile(profile);
         competencia1.setCompetenceType(compTipo1);
         competencia1.setDescription("Sou top em java - delete 1"+userNew.getId());
         competenciaService.save(competencia1);
 
         Competence competencia2 = new Competence();
-        competencia2.setProfile(profile);
         competencia2.setCompetenceType(compTipo2);
         competencia2.setDescription("Sou top em java - delete 2"+userNew.getId());
         competenciaService.save(competencia2);
@@ -255,13 +249,11 @@ public class CompetenciaTest {
         competenciaTipoRepository.save(compTipo2);
 
         Competence competencia1 = new Competence();
-        competencia1.setProfile(profile);
         competencia1.setCompetenceType(compTipo1);
         competencia1.setDescription("Sou top em java - read 1"+userNew.getId());
         competenciaService.save(competencia1);
 
         Competence competencia2 = new Competence();
-        competencia2.setProfile(profile);
         competencia2.setCompetenceType(compTipo2);
         competencia2.setDescription("Sou top em java - read 2"+userNew.getId());
         competenciaService.save(competencia2);
