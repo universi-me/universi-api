@@ -1,5 +1,7 @@
 package me.universi.vacancy.services;
 
+import me.universi.competence.entities.Competence;
+import me.universi.competence.services.CompetenceService;
 import me.universi.profile.services.ProfileService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
@@ -18,11 +20,13 @@ public class VacancyService {
 
     public ProfileService profileService;
     public UserService userService;
+    private CompetenceService competenceService;
 
-    public VacancyService(VacancyRepository vacancyRepository, ProfileService profileService, UserService userService){
+    public VacancyService(VacancyRepository vacancyRepository, ProfileService profileService, UserService userService, CompetenceService competenceService){
         this.vacancyRepository = vacancyRepository;
         this.profileService = profileService;
         this.userService = userService;
+        this.competenceService = competenceService;
     }
 
     public Vacancy save(Vacancy vacancy) throws Exception{
@@ -43,14 +47,27 @@ public class VacancyService {
         return vacancyRepository.findAll();
     }
 
-    public Optional<Vacancy> findFirstById(UUID id) {
+    public Vacancy findFirstById(UUID id) {
         return vacancyRepository.findFirstById(id);
     }
 
-    public Optional<Vacancy> findFirstById(String id) {
+    public Vacancy addCompetenceInVacancy(UUID id, Competence newCompetence){
+        try {
+            Vacancy vacancy = vacancyRepository.findFirstById(id);
+            /*Implementar execetion para quando nao existir vaga com o id passado*/
+            competenceService.save(newCompetence);
+            vacancy.getCompetenceRequired().add(newCompetence);
+            return vacancyRepository.saveAndFlush(vacancy);
+        }catch (Exception e){
+            return null;
+        }
+    }
+
+    public Vacancy findFirstById(String id) {
         return findFirstById(UUID.fromString(id));
     }
 
+    /*Refatorar*/
     public Vacancy update(Vacancy newVacancy, UUID id) throws Exception{
         return vacancyRepository.findById(id).map(vacancy -> {
             vacancy.setDescription(newVacancy.getDescription());

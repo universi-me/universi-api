@@ -42,7 +42,12 @@ public class Profile {
     @Column(name = "bio", columnDefinition = "TEXT")
     private String bio;
     @JsonIgnore
-    @ManyToMany(mappedBy = "profile", fetch = FetchType.EAGER, cascade = { CascadeType.ALL })
+    @ManyToMany
+    @JoinTable(
+            name = "competence_profile",
+            joinColumns = @JoinColumn(name = "profile_id"),
+            inverseJoinColumns = @JoinColumn(name = "competence_id")
+    )
     private Collection<Competence> competences;
     @ManyToMany(cascade = { CascadeType.ALL })
     @JoinTable(

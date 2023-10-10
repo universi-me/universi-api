@@ -101,14 +101,15 @@ public class CompetenceController {
             }
 
             Competence newCompetence = new Competence();
-            newCompetence.setProfile(user.getProfile());
             newCompetence.setCompetenceType(compT);
             newCompetence.setDescription(description);
             newCompetence.setLevel(Level.valueOf(level));
 
             competenceService.save(newCompetence);
 
-            response.message = "Competência Criada";
+            profileService.addCompetenceInProfile(user, newCompetence);
+
+            response.message = "Competência Criada e adicionado ao perfil";
             response.success = true;
             return response;
 
@@ -138,10 +139,6 @@ public class CompetenceController {
             Competence competence = competenceService.findFirstById(id);
             if (competence == null) {
                 throw new CompetenceException("Competência não encontrada.");
-            }
-
-            if(!userService.isSessionOfUser(competence.getProfile().getUser())) {
-                throw new CompetenceException("Você não tem permissão para editar esta Competêcia.");
             }
 
             if(competenceTypeId != null && competenceTypeId.length()>0) {
@@ -184,10 +181,6 @@ public class CompetenceController {
             Competence competence = competenceService.findFirstById(id);
             if (competence == null) {
                 throw new CompetenceException("Competência não encontrada.");
-            }
-
-            if(!userService.isSessionOfUser(competence.getProfile().getUser())) {
-                throw new CompetenceException("Você não tem permissão para editar esta Competêcia.");
             }
 
             competenceService.delete(competence);

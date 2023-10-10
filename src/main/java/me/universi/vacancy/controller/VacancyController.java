@@ -1,5 +1,6 @@
 package me.universi.vacancy.controller;
 
+import me.universi.competence.entities.Competence;
 import me.universi.vacancy.entities.Vacancy;
 import me.universi.vacancy.services.VacancyService;
 import org.springframework.http.HttpStatus;
@@ -41,16 +42,22 @@ public class VacancyController {
 
     @GetMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Optional<Vacancy> getVacancy(@PathVariable UUID id){
+    public Vacancy getVacancy(@PathVariable UUID id){
         return vacancyService.findFirstById(id);
     }
 
     @PutMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Vacancy update(@RequestBody Vacancy newCurriculum, @PathVariable UUID id) throws Exception {
-        return vacancyService.update(newCurriculum, id);
+    public Vacancy update(@RequestBody Vacancy newVacancy, @PathVariable UUID id) throws Exception {
+        return vacancyService.update(newVacancy, id);
     }
 
+    @PutMapping(value = "/addCompetencesInVacancy/{id}")
+    public Vacancy addCompetencesInVacancy(@PathVariable UUID id,@RequestBody Competence newCompetences) throws Exception{
+        return vacancyService.addCompetenceInVacancy(id, newCompetences);
+    }
+
+    /*Emplementar delete logico, nao o hard delete no banco*/
     @DeleteMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.OK)
     public void delete(@PathVariable UUID id){

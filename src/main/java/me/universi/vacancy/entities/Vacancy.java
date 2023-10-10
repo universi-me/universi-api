@@ -8,15 +8,19 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToOne;
-import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.NotNull;
+import me.universi.competence.entities.Competence;
 import me.universi.profile.entities.Profile;
+import me.universi.vacancy.typeVacancy.entities.TypeVacancy;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @Entity(name="vacancy")
@@ -30,23 +34,75 @@ public class Vacancy {
 
     @JsonIgnore
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id")
-    @PrimaryKeyJoinColumn(name = "profile_id")
+    @JoinColumn(name = "id_profile")
     private Profile profile;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "type_vacancy_id")
+    private TypeVacancy typeVacancy;
+
+    @Column(name = "title", columnDefinition = "TEXT")
+    private String title;
 
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
+
+    @Column(name = "prerequisites")
+    private String prerequisites;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "registration_date")
+    private Date registrationDate;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "end_registration_date")
+    private Date endRegistrationDate;
+
+    @ManyToMany
+    @JoinTable(
+            name = "competence_vacancy",
+            joinColumns = @JoinColumn(name = "vacancy_id"),
+            inverseJoinColumns = @JoinColumn(name = "competence_id")
+    )
+    private List<Competence> competenceRequired;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at")
     private Date creationDate;
 
-    public Vacancy(){
+    @Column(name = "is_active")
+    private Boolean isActive;
 
+    @Column(name = "is_deleted")
+    private Boolean isDeleted;
+
+    public Vacancy(){
+        this.isActive = true;
+        this.isDeleted = false;
     }
-    public Vacancy(String description){
+
+    public Vacancy(TypeVacancy typeVacancy, String title, String description, String prerequisites, Date registrationDate, Date endRegistrationDate, Date creationDate) {
+        this.typeVacancy = typeVacancy;
+        this.title = title;
         this.description = description;
+        this.prerequisites = prerequisites;
+        this.registrationDate = registrationDate;
+        this.endRegistrationDate = endRegistrationDate;
+        this.creationDate = creationDate;
+        this.isActive = true;
+        this.isDeleted = false;
+    }
+    public Vacancy(String title, String description, String prerequisites, Date registrationDate, Date endRegistrationDate, List<Competence> competenceRequired, Date creationDate) {
+        this.title = title;
+        this.description = description;
+        this.prerequisites = prerequisites;
+        this.registrationDate = registrationDate;
+        this.endRegistrationDate = endRegistrationDate;
+        this.competenceRequired = competenceRequired;
+        this.creationDate = creationDate;
+        this.isActive = true;
+        this.isDeleted = false;
     }
 
     public UUID getId(){
@@ -69,5 +125,69 @@ public class Vacancy {
     }
     public void setCreationDate(Date creationDate){
         this.creationDate = creationDate;
+    }
+
+    public TypeVacancy getTypeVacancy() {
+        return typeVacancy;
+    }
+
+    public void setTypeVacancy(TypeVacancy typeVacancy) {
+        this.typeVacancy = typeVacancy;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getPrerequisites() {
+        return prerequisites;
+    }
+
+    public void setPrerequisites(String prerequisites) {
+        this.prerequisites = prerequisites;
+    }
+
+    public Date getRegistrationDate() {
+        return registrationDate;
+    }
+
+    public void setRegistrationDate(Date registrationDate) {
+        this.registrationDate = registrationDate;
+    }
+
+    public Date getEndRegistrationDate() {
+        return endRegistrationDate;
+    }
+
+    public void setEndRegistrationDate(Date endRegistrationDate) {
+        this.endRegistrationDate = endRegistrationDate;
+    }
+
+    public Boolean getActive() {
+        return isActive;
+    }
+
+    public void setActive(Boolean active) {
+        isActive = active;
+    }
+
+    public Boolean getDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        isDeleted = deleted;
+    }
+
+    public List<Competence> getCompetenceRequired() {
+        return competenceRequired;
+    }
+
+    public void setCompetenceRequired(List<Competence> competenceRequired) {
+        this.competenceRequired = competenceRequired;
     }
 }

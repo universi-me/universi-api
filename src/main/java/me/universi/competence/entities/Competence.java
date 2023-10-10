@@ -1,6 +1,7 @@
 package me.universi.competence.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -22,6 +23,7 @@ import java.util.Date;
 import java.util.UUID;
 
 @Entity(name = "competence")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Competence {
 
     @Id
@@ -33,11 +35,6 @@ public class Competence {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "competence_type_id")
     private CompetenceType competenceType;
-
-    @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "profile_id")
-    private Profile profile;
 
     @Column(name = "title")
     private String title;
@@ -88,6 +85,12 @@ public class Competence {
         this.presentDate = presentDate;
     }
 
+    public Competence(CompetenceType competenceType, String title, Level level) {
+        this.competenceType = competenceType;
+        this.title = title;
+        this.level = level;
+    }
+
     public UUID getId() {
         return id;
     }
@@ -118,14 +121,6 @@ public class Competence {
 
     public void setCompetenceType(CompetenceType competenceType) {
         this.competenceType = competenceType;
-    }
-
-    public Profile getProfile() {
-        return profile;
-    }
-
-    public void setProfile(Profile profile) {
-        this.profile = profile;
     }
 
     public Date getStartDate() { return startDate; }
