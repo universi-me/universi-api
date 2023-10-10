@@ -475,7 +475,15 @@ public class CapacityService implements CapacityServiceInterface {
     }
 
     public Collection<Folder> findFoldersByProfile(UUID profileId) {
+        return findFoldersByProfile(profileId, false);
+    }
+
+    public Collection<Folder> findFoldersByProfile(UUID profileId, boolean assignedOnly) {
         Collection<Folder> assignedFolders = folderRepository.findAssignedToProfile(profileId);
+
+        if (assignedOnly) {
+            return assignedFolders;
+        }
 
         Collection<Group> profileGroups = profileService.findFirstById(profileId).getGroups();
         Collection<Folder> foldersFromGroups = new ArrayList<>(profileGroups.size());
