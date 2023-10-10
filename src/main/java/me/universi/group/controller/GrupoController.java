@@ -473,7 +473,8 @@ public class GrupoController {
         Group group = groupService.findFirstById(groupId);
         if(group != null) {
             if(group.getImage() != null) {
-                return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(group.getImage())).build();
+                String urlImage = (group.getImage().startsWith("/")) ? "/api" + group.getImage() : group.getImage();
+                return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(urlImage)).build();
             }
         }
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "not found");
@@ -485,7 +486,8 @@ public class GrupoController {
         Group group = groupService.findFirstById(groupId);
         if(group != null) {
             if(group.getBannerImage() != null) {
-                return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(group.getBannerImage())).build();
+                String urlImage = (group.getBannerImage().startsWith("/")) ? "/api" + group.getBannerImage() : group.getBannerImage();
+                return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(urlImage)).build();
             }
         }
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "not found");

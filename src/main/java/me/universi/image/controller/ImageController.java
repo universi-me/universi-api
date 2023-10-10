@@ -1,10 +1,15 @@
-package me.universi.imagem.controller;
+package me.universi.image.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.UUID;
 import me.universi.api.entities.Response;
+import me.universi.image.entities.Image;
+import me.universi.image.repositories.ImageRepository;
+import me.universi.image.services.ImageService;
+import me.universi.user.services.UserService;
 import me.universi.util.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -20,13 +25,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.InputStream;
-import java.io.FileInputStream;
-import java.io.OutputStream;
-import java.io.FileOutputStream;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
@@ -34,17 +32,19 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
-public class ImagemController {
+public class ImageController {
     @Autowired
     private Environment env;
+
+    @Autowired
+    private ImageService imageService;
 
     @PostMapping(value = "/imagem/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Response upload_of_image(@RequestParam("imagem") MultipartFile image) {
         return Response.buildResponse(response -> {
 
-            // check if save image in local or remote.
-            // TODO: save image in database.
-            String link = (Boolean.parseBoolean(env.getProperty("SAVE_IMAGE_LOCAL")))? saveImageInFilesystem(image):uploadImagemImgur(image);
+            // check if save image in local or database.
+            String link = (Boolean.parseBoolean(env.getProperty("SAVE_IMAGE_LOCAL"))) ? saveImageInFilesystem(image) : saveImageInDatabase(image);
 
             // return link of image remote or local.
             if(link != null) {
@@ -57,6 +57,7 @@ public class ImagemController {
         });
     }
 
+    // get image from filesystem
     @GetMapping(value = "/img/imagem/{image}.jpg", produces = MediaType.IMAGE_JPEG_VALUE)
     @ResponseBody
     public ResponseEntity<InputStreamResource> getImageFromFilesystem(@PathVariable("image") String nameOfImage) {
@@ -78,7 +79,23 @@ public class ImagemController {
         }
     }
 
-    public String saveImageInFilesystem(MultipartFile imagem) throws Exception {
+    // get image from database
+    @GetMapping(value = "/img/store/{imageId}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    @ResponseBody
+    public ResponseEntity<InputStreamResource> getImageFromDatabase(@PathVariable("imageId") UUID imageId) {
+        try {
+            Image img = imageService.findFirstById(imageId);
+            if(img != null) {
+                InputStream targetStream = new ByteArrayInputStream(img.getData());
+                return ResponseEntity.ok().contentType(MediaType.valueOf(img.getContentType())).body(new InputStreamResource(targetStream));
+            }
+            return ResponseEntity.notFound().build();
+        }catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    public String saveImageInFilesystem(MultipartFile image) throws Exception {
 
         String tokenRandom = UUID.randomUUID().toString();
 
@@ -95,13 +112,37 @@ public class ImagemController {
         File file = new File(imagemDir.toString() + "/" + nameOfImage);
 
         OutputStream os = new FileOutputStream(file);
-        os.write(imagem.getBytes());
+        os.write(image.getBytes());
 
         if(nameOfImage != null) {
             return "/img/imagem/" + nameOfImage + ".jpg";
         }
 
         throw new Exception("Falha ao salvar imagem em disco.");
+    }
+
+    public String saveImageInDatabase(MultipartFile image) throws Exception {
+
+        // image big than 1MB.
+        if(image.getBytes().length > 1024 * 1024 * Integer.parseInt(env.getProperty("IMAGE_UPLOAD_LIMIT"))) {
+            throw new Exception("Imagem muito grande.");
+        }
+
+        Image img = new Image();
+        img.setData(image.getBytes());
+        img.setFilename(image.getOriginalFilename());
+        img.setContentType(image.getContentType());
+        img.setSize(image.getSize());
+        img.setAuthor(UserService.getInstance().getUserInSession().getProfile());
+        img.setCreated(ConvertUtil.getDateTimeNow());
+
+        img = imageService.save(img);
+
+        if(img.getId() != null) {
+            return "/img/store/" + img.getId();
+        }
+
+        throw new Exception("Falha ao salvar imagem.");
     }
 
     public String uploadImagemImgur(MultipartFile imagem) throws Exception {

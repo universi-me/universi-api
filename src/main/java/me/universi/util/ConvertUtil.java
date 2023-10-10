@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.nio.ByteBuffer;
+import java.util.Date;
 import java.util.UUID;
 
 public class ConvertUtil {
@@ -35,5 +36,9 @@ public class ConvertUtil {
             hexString.append(hex);
         }
         return hexString.toString();
+    }
+
+    public static Date getDateTimeNow() {
+        return new Date();
     }
 }
