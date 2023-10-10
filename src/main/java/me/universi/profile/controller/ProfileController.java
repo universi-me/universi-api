@@ -185,7 +185,8 @@ public class ProfileController {
         Profile profile = profileService.findFirstById(profileId);
         if(profile != null) {
             if(profile.getImage() != null) {
-                return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(profile.getImage())).build();
+                String urlImage = (profile.getImage().startsWith("/")) ? "/api" + profile.getImage() : profile.getImage();
+                return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(urlImage)).build();
             }
         }
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "not found");
