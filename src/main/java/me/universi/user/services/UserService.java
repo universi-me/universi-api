@@ -169,12 +169,12 @@ public class UserService implements UserDetailsService {
     }
 
     public boolean emailRegex(String email) {
-        return matchRegex(email, "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$");
+        return matchRegex(email, "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$");
     }
 
     public boolean matchRegex(String input, String expression) {
         try {
-            return Pattern.compile(expression, Pattern.CASE_INSENSITIVE).matcher(input).find();
+            return Pattern.compile(expression).matcher(input).find();
         } catch (Exception e) {
             return false;
         }
@@ -363,7 +363,10 @@ public class UserService implements UserDetailsService {
         return "/login";
     }
 
-    public void setRawPasswordToUser(User user, String rawPassword, boolean logout) {
+    public void setRawPasswordToUser(User user, String rawPassword, boolean logout) throws UserException {
+        if(!passwordRegex(rawPassword)) {
+            throw new UserException("Senha está com formato inválido!");
+        }
         user.setPassword(encodePassword(rawPassword));
         user.setExpired_credentials(false);
         save(user);

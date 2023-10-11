@@ -137,7 +137,7 @@ public class UserController {
             User user = new User();
             user.setName(username);
             user.setEmail(email);
-            user.setPassword(userService.encodePassword(password));
+            userService.setRawPasswordToUser(user, password, false);
 
             userService.createUser(user);
 
@@ -235,11 +235,7 @@ public class UserController {
                 }
             }
             if(password != null && password.length()>0) {
-                if(userService.passwordRegex(password)) {
-                    userEdit.setPassword(userService.encodePassword(password));
-                } else {
-                    throw new UserException("Nova Senha está com formato inválido!");
-                }
+                userService.setRawPasswordToUser(userEdit, password, false);
             }
 
             if(authorityLevel != null && authorityLevel.length()>0) {
