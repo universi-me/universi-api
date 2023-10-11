@@ -1,7 +1,6 @@
 package me.universi.competence.services;
 
 import me.universi.competence.entities.Competence;
-import me.universi.competence.entities.CompetenceType;
 import me.universi.competence.repositories.CompetenceRepository;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.exceptions.ProfileException;
@@ -12,9 +11,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.Objects;
 
 @Service
 public class CompetenceService {

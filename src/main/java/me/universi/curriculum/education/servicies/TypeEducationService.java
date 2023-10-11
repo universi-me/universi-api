@@ -1,7 +1,5 @@
 package me.universi.curriculum.education.servicies;
 
-import me.universi.curriculum.education.controller.TypeEducationController;
-import me.universi.curriculum.education.entities.Institution;
 import me.universi.curriculum.education.entities.TypeEducation;
 import me.universi.curriculum.education.repositories.TypeEducationRepository;
 import org.springframework.stereotype.Service;

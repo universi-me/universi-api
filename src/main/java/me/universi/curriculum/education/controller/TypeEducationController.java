@@ -2,8 +2,6 @@ package me.universi.curriculum.education.controller;
 
 
 import me.universi.api.entities.Response;
-import me.universi.competence.entities.Competence;
-import me.universi.competence.exceptions.CompetenceException;
 import me.universi.curriculum.education.entities.TypeEducation;
 import me.universi.curriculum.education.exceptions.TypeEducationException;
 import me.universi.curriculum.education.servicies.TypeEducationService;

@@ -1,10 +1,8 @@
 package me.universi.curriculum.services;
 
 import me.universi.competence.entities.Competence;
-import me.universi.competence.entities.CompetenceType;
 import me.universi.competence.services.CompetenceService;
 import me.universi.competence.services.CompetenceTypeService;
-import me.universi.curriculum.education.entities.Education;
 import me.universi.curriculum.education.servicies.EducationService;
 import me.universi.curriculum.profileExperience.servicies.ProfileExperienceService;
 import me.universi.profile.entities.Profile;
@@ -16,7 +14,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service

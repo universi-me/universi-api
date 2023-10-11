@@ -4,9 +4,7 @@ package me.universi.curriculum.education.servicies;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
-import me.universi.competence.entities.Competence;
 import me.universi.curriculum.education.entities.Education;
-import me.universi.curriculum.education.entities.TypeEducation;
 import me.universi.curriculum.education.repositories.EducationRepository;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.exceptions.ProfileException;
@@ -14,7 +12,6 @@ import me.universi.profile.services.ProfileService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import org.springframework.stereotype.Service;
-
 
 import java.util.List;
 import java.util.Optional;
