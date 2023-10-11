@@ -117,14 +117,28 @@ public class UserController {
 
             String password = (String)body.get("password");
 
-            if (username==null || username.length()==0 || !userService.usernameRegex(username)) {
+            if (username==null || username.length()==0) {
                 throw new UserException("Verifique o campo Usuário!");
+            } else {
+                username = username.trim().toLowerCase();
+                if(!userService.usernameRegex(username)) {
+                    throw new UserException("Nome de usuário está com formato inválido!");
+                }
             }
-            if (email==null || email.length()==0 || !userService.emailRegex(email)) {
+            if (email==null || email.length()==0) {
                 throw new UserException("Verifique o campo Email!");
+            } else {
+                email = email.trim().toLowerCase();
+                if(!userService.emailRegex(email)) {
+                    throw new UserException("Email está com formato inválido!");
+                }
             }
-            if (password==null || password.length()==0 || !userService.passwordRegex(password)) {
+            if (password==null || password.length()==0) {
                 throw new UserException("Verifique o campo Senha!");
+            } else {
+                if(!userService.passwordRegex(password)) {
+                    throw new UserException("Senha está com formato inválido!");
+                }
             }
 
             if(userService.usernameExist(username)) {
@@ -154,7 +168,7 @@ public class UserController {
         return Response.buildResponse(response -> {
 
             String newPassword = (String)body.get("newPassword");
-            if(newPassword == null) {
+            if(newPassword == null || newPassword.length()==0) {
                 throw new UserException("Parametro newPassword é nulo.");
             }
 

@@ -169,7 +169,7 @@ public class UserService implements UserDetailsService {
     }
 
     public boolean emailRegex(String email) {
-        return matchRegex(email, "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$");
+        return matchRegex(email, "^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,6}$");
     }
 
     public boolean matchRegex(String input, String expression) {
