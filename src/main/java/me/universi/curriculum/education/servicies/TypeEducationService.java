@@ -44,4 +44,9 @@ public class TypeEducationService {
             }
         });
     }
+
+    public void deleteLogic(UUID id){
+        TypeEducation typeEducation = findById(id).get();
+        typeEducation.setDeleted(true);
+    }
 }

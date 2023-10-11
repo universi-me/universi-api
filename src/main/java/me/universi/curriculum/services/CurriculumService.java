@@ -50,7 +50,6 @@ public class CurriculumService {
         User user = userService.getUserInSession();
         List<List> curriculum = new ArrayList<List>();
 
-        curriculum.add(educationService.findByProfile(user.getProfile()));
         curriculum.add(profileExperienceService.findByProfile(user.getProfile()));
 
         return curriculum;

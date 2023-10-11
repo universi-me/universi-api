@@ -28,11 +28,6 @@ public class Education {
     @NotNull
     private UUID id;
 
-    @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "profile_id")
-    private Profile profile;
-
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "type_education_id")
     private TypeEducation typeEducation;
@@ -62,7 +57,8 @@ public class Education {
     private Boolean isDeleted;
 
     public Education(){
-
+        this.presentDate = false;
+        this.isDeleted = false;
     }
 
     public Education( TypeEducation typeEducation, Institution institution, Date startDate, Date endDate, Boolean presentDate){
@@ -85,10 +81,6 @@ public class Education {
 
     public UUID getId() {
         return id;
-    }
-
-    public Profile getProfile() {
-        return profile;
     }
 
     public TypeEducation getTypeEducation() {
@@ -131,17 +123,12 @@ public class Education {
         this.presentDate = presentDate;
     }
 
-
     public Date getCreationDate() {
         return creationDate;
     }
 
     public void setCreationDate(Date creationDate) {
         this.creationDate = creationDate;
-    }
-
-    public void setProfile(Profile profile) {
-        this.profile = profile;
     }
 
     public Boolean getIsDeleted() {

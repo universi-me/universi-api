@@ -4,6 +4,7 @@ import me.universi.competence.entities.Competence;
 import me.universi.competence.entities.CompetenceType;
 import me.universi.competence.repositories.CompetenceRepository;
 import me.universi.profile.entities.Profile;
+import me.universi.profile.exceptions.ProfileException;
 import me.universi.profile.services.ProfileService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
@@ -96,6 +97,12 @@ public class CompetenceService {
                 return null;
             }
         });
+    }
+
+    public void addCompetenceInProfile(User user,Competence newCompetence) throws ProfileException {
+        Profile profile = profileService.getProfileByUserIdOrUsername(user.getProfile().getId(), user.getUsername());
+        profile.getCompetences().add(newCompetence);
+        profileService.save(profile);
     }
 
     public void delete(UUID id) {

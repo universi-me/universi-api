@@ -2,6 +2,7 @@ package me.universi.profile.services;
 
 import me.universi.competence.entities.Competence;
 import me.universi.competence.services.CompetenceService;
+import me.universi.curriculum.education.entities.Education;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.exceptions.ProfileException;
 import me.universi.profile.repositories.PerfilRepository;
@@ -10,7 +11,9 @@ import me.universi.user.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.swing.plaf.PanelUI;
 import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -45,12 +48,6 @@ public class ProfileService {
 
     public void deleteAll() { perfilRepository.deleteAll();}
 
-    public void addCompetenceInProfile(User user,Competence newCompetence) throws ProfileException {
-        Profile profile = getProfileByUserIdOrUsername(user.getProfile().getId(), user.getUsername());
-        profile.getCompetences().add(newCompetence);
-        perfilRepository.saveAndFlush(profile);
-    }
-
     public Profile getProfileByUserIdOrUsername(Object profileId, Object username) throws ProfileException {
 
         if(profileId == null && username == null) {
@@ -77,6 +74,11 @@ public class ProfileService {
         }
 
         return profileGet;
+    }
+
+    public Collection<Education> findEducationByProfile(User user){
+        Profile profile = user.getProfile();
+        return profile.getEducations();
     }
 
     // search the first 5 containing the string uppercase or lowercase

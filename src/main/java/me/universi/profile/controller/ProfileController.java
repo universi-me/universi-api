@@ -191,4 +191,16 @@ public class ProfileController {
         }
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "not found");
     }
+
+    @PostMapping(value = "/educations", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response profile_educations(@RequestBody Map<String, Object> body) {
+        return Response.buildResponse(response -> {
+
+            Profile profileGet = profileService.getProfileByUserIdOrUsername(body.get("profileId"), body.get("username"));
+
+            response.body.put("educations", profileGet.getEducations());
+
+        });
+    }
 }

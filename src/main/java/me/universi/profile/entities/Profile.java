@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import me.universi.Sys;
 import me.universi.capacity.entidades.ContentStatus;
 import me.universi.competence.entities.Competence;
+import me.universi.curriculum.education.entities.Education;
 import me.universi.group.entities.Group;
 import me.universi.group.services.GroupService;
 import me.universi.indicators.entities.Indicators;
@@ -57,6 +58,16 @@ public class Profile {
     )
     @JsonIgnore
     private Collection<Group> groups;
+
+    @JsonIgnore
+    @ManyToMany
+    @JoinTable(
+            name = "education_profile",
+            joinColumns = @JoinColumn(name = "profile_id"),
+            inverseJoinColumns = @JoinColumn(name = "education_id")
+    )
+    private Collection<Education> educations;
+
     @JsonIgnore
     @OneToMany(mappedBy = "profile")
     private Collection<Link> links;
@@ -214,6 +225,14 @@ public class Profile {
 
     public void setIndicators(Indicators indicators) {
         this.indicators = indicators;
+    }
+
+    public Collection<Education> getEducations() {
+        return educations;
+    }
+
+    public void setEducations(Collection<Education> educations) {
+        this.educations = educations;
     }
 
     @Override

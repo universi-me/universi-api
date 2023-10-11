@@ -2,6 +2,7 @@ package me.universi.curriculum.education.servicies;
 
 import me.universi.curriculum.education.entities.Education;
 import me.universi.curriculum.education.entities.Institution;
+import me.universi.curriculum.education.entities.TypeEducation;
 import me.universi.curriculum.education.repositories.InstitutionRepository;
 import me.universi.user.entities.User;
 import org.springframework.stereotype.Service;
@@ -44,6 +45,11 @@ public class InstitutionService {
                 return null;
             }
         });
+    }
+
+    public void deleteLogic(UUID id){
+        Institution institution = findById(id).get();
+        institution.setIsDeleted(true);
     }
 
 }

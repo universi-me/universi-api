@@ -4,9 +4,13 @@ package me.universi.curriculum.education.servicies;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
+import me.universi.competence.entities.Competence;
 import me.universi.curriculum.education.entities.Education;
+import me.universi.curriculum.education.entities.TypeEducation;
 import me.universi.curriculum.education.repositories.EducationRepository;
 import me.universi.profile.entities.Profile;
+import me.universi.profile.exceptions.ProfileException;
+import me.universi.profile.services.ProfileService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import org.springframework.stereotype.Service;
@@ -22,16 +26,17 @@ public class EducationService {
     private EntityManager entityManager;
     private EducationRepository educationRepository;
     private UserService userService;
+    private ProfileService profileService;
 
-    public EducationService(EducationRepository educationRepository, UserService userService){
+    public EducationService(EducationRepository educationRepository, UserService userService, ProfileService profileService){
         this.educationRepository = educationRepository;
         this.userService = userService;
+        this.profileService = profileService;
     }
 
     public Education save(Education education) {
         try {
             User user = userService.getUserInSession();
-            education.setProfile(user.getProfile());
             return educationRepository.saveAndFlush(education);
         } catch (Exception e) {
             System.out.println(e);
@@ -43,24 +48,8 @@ public class EducationService {
         return educationRepository.findAll();
     }
 
-    public Optional<Education> findByProfileSession(){
-        try{
-            User user = userService.getUserInSession();
-            Profile profile = user.getProfile();
-           return educationRepository.findById(profile.getId());
-        }catch (Exception e){
-            /*Implementar tratamento de exeptions*/
-            System.out.println(e);
-        }
-        return null;
-    }
-
     public Optional<Education> findById(UUID id){
         return educationRepository.findById(id);
-    }
-
-    public List<Education> findByProfile(Profile profile){
-        return educationRepository.findByProfile(profile);
     }
 
     public Education update(Education newEducation, UUID id) throws Exception{
@@ -74,7 +63,6 @@ public class EducationService {
         }).orElseGet(()->{
             try {
                 User user = userService.getUserInSession();
-                newEducation.setProfile(user.getProfile());
                 return educationRepository.saveAndFlush(newEducation);
             }catch (Exception e){
                 return null;
@@ -96,5 +84,14 @@ public class EducationService {
         return resultados;
     }
 
+    public void addEducationInProfile(User user, Education newEducation) throws ProfileException {
+        Profile profile = profileService.getProfileByUserIdOrUsername(user.getProfile().getId(), user.getUsername());
+        profile.getEducations().add(newEducation);
+        profileService.save(profile);
+    }
 
+    public void deleteLogic(UUID id){
+        Education education = findById(id).get();
+        education.setIsDeleted(true);
+    }
 }
