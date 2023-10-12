@@ -1,7 +1,6 @@
 package me.universi.profile.services;
 
-import me.universi.competence.entities.Competence;
-import me.universi.competence.services.CompetenceService;
+import me.universi.curriculum.education.entities.Education;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.exceptions.ProfileException;
 import me.universi.profile.repositories.PerfilRepository;
@@ -45,12 +44,6 @@ public class ProfileService {
 
     public void deleteAll() { perfilRepository.deleteAll();}
 
-    public void addCompetenceInProfile(User user,Competence newCompetence) throws ProfileException {
-        Profile profile = getProfileByUserIdOrUsername(user.getProfile().getId(), user.getUsername());
-        profile.getCompetences().add(newCompetence);
-        perfilRepository.saveAndFlush(profile);
-    }
-
     public Profile getProfileByUserIdOrUsername(Object profileId, Object username) throws ProfileException {
 
         if(profileId == null && username == null) {
@@ -77,6 +70,11 @@ public class ProfileService {
         }
 
         return profileGet;
+    }
+
+    public Collection<Education> findEducationByProfile(User user){
+        Profile profile = user.getProfile();
+        return profile.getEducations();
     }
 
     // search the first 5 containing the string uppercase or lowercase

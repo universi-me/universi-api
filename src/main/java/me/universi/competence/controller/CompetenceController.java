@@ -107,7 +107,7 @@ public class CompetenceController {
 
             competenceService.save(newCompetence);
 
-            profileService.addCompetenceInProfile(user, newCompetence);
+            competenceService.addCompetenceInProfile(user, newCompetence);
 
             response.message = "Competência Criada e adicionado ao perfil";
             response.success = true;

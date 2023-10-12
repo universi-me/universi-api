@@ -12,6 +12,5 @@ import java.util.UUID;
 @Repository
 public interface EducationRepository extends JpaRepository<Education, UUID> {
 
-    public List<Education> findByProfile(Profile profile);
 }
 
