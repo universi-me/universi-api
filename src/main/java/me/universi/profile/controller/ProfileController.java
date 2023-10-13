@@ -196,11 +196,8 @@ public class ProfileController {
     @ResponseBody
     public Response profile_educations(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
-
-            Profile profileGet = profileService.getProfileByUserIdOrUsername(body.get("profileId"), body.get("username"));
-
-            response.body.put("educations", profileGet.getEducations());
-
+                Profile profileGet = profileService.getProfileByUserIdOrUsername(body.get("profileId"), body.get("username"));
+                response.body.put("educations", profileService.findEducationByProfile(profileGet));
         });
     }
 }

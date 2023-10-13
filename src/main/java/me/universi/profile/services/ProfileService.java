@@ -72,9 +72,14 @@ public class ProfileService {
         return profileGet;
     }
 
-    public Collection<Education> findEducationByProfile(User user){
-        Profile profile = user.getProfile();
-        return profile.getEducations();
+    public Collection<Education> findEducationByProfile(Profile profile){
+        Collection<Education> educationsActive = null;
+        for (Education education: profile.getEducations()) {
+            if (!education.getIsDeleted()){
+                educationsActive.add(education);
+            }
+        }
+        return educationsActive;
     }
 
     // search the first 5 containing the string uppercase or lowercase
