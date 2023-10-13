@@ -87,8 +87,9 @@ public class EducationService {
         profileService.save(profile);
     }
 
-    public void deleteLogic(UUID id){
+    public void deleteLogic(UUID id) throws Exception {
         Education education = findById(id).get();
         education.setIsDeleted(true);
+        update(education, id);
     }
 }

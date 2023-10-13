@@ -2,6 +2,10 @@ package me.universi.curriculum.education.controller;
 
 
 import me.universi.api.entities.Response;
+import me.universi.competence.entities.Competence;
+import me.universi.competence.entities.CompetenceType;
+import me.universi.competence.enums.Level;
+import me.universi.competence.exceptions.CompetenceException;
 import me.universi.curriculum.education.entities.Education;
 import me.universi.curriculum.education.entities.Institution;
 import me.universi.curriculum.education.entities.TypeEducation;
@@ -73,6 +77,72 @@ public class EducationController {
         return educationService.update(newEducation, id);
     }
 
+    @PostMapping(value = "/atualizar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response update(@RequestBody Map<String, Object> body) {
+        Response response = new Response();
+        try {
+
+            String dateFormat = "yyyy-MM-dd";
+            SimpleDateFormat  simpleDateFormat = new SimpleDateFormat(dateFormat);
+
+            String id = (String)body.get("educationId");
+            if(id == null) {
+                throw new CompetenceException("Parametro educationId é nulo.");
+            }
+
+            String typeEducationId = (String)body.get("typeEducationId");
+            String institutionId = (String)body.get("institutionId");
+            Date startDate = simpleDateFormat.parse((String) body.get("startDate"));
+            Date endDate = simpleDateFormat.parse((String) body.get("endDate"));
+            Boolean presentDate = (Boolean) body.get("presentDate");
+
+
+
+            Education education = educationService.findById(UUID.fromString(id)).get();
+            if (education == null) {
+                throw new EducationException("Formação não encontrada.");
+            }
+
+            if(typeEducationId != null) {
+                TypeEducation typeEducation = typeEducationService.findById(UUID.fromString(typeEducationId)).get();
+                if(typeEducation == null) {
+                    throw new EducationException("Tipo de Education não encontrado.");
+                }
+                education.setTypeEducation(typeEducation);
+            }
+
+            if(institutionId != null) {
+                Institution institution = institutionService.findById(UUID.fromString(institutionId)).get();
+                if(institution == null) {
+                    throw new EducationException("Institution não encontrada.");
+                }
+                education.setInstitution(institution);
+            }
+
+            if (startDate != null) {
+                education.setStartDate(startDate);
+            }
+            if (endDate != null) {
+                education.setEndDate(endDate);
+            }
+            if (presentDate != null){
+                education.setPresentDate(presentDate);
+            }
+
+            educationService.update(education, education.getId());
+
+            response.message = "Formação atualizada";
+            response.success = true;
+            return response;
+
+        } catch (Exception e) {
+            response.message = e.getMessage();
+            e.printStackTrace();
+            return response;
+        }
+    }
+
     @PostMapping(value = "/criar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response create(@RequestBody Map<String, Object> body) {
@@ -94,8 +164,8 @@ public class EducationController {
                 throw new TypeEducationException("Paramentro institutionId passado é nulo");
             }
 
-            Date starDate = simpleDateFormat.parse((String) body.get("starDate"));
-            if(starDate == null){
+            Date startDate = simpleDateFormat.parse((String) body.get("starDate"));
+            if(startDate == null){
                 throw new EducationException("Paramentro starDate passado é nulo");
             }
 
@@ -118,7 +188,7 @@ public class EducationController {
             Education newEducation = new Education();
             newEducation.setTypeEducation(typeEducation);
             newEducation.setInstitution(institution);
-            newEducation.setStartDate(starDate);
+            newEducation.setStartDate(startDate);
             newEducation.setEndDate(endDate);
             if(presentDate != null){
                 newEducation.setPresentDate(presentDate);
@@ -127,7 +197,7 @@ public class EducationController {
 
             educationService.addEducationInProfile(user, newEducation);
 
-            response.message = "Education criada.";
+            response.message = "Formação criada.";
             response.success = true;
             return response;
 
@@ -193,7 +263,7 @@ public class EducationController {
 
             educationService.deleteLogic(UUID.fromString(id));
 
-            response.message = "Education removida logicamente";
+            response.message = "Formação removida logicamente";
             response.success = true;
             return response;
 

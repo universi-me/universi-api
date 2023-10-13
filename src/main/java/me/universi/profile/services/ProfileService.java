@@ -9,6 +9,7 @@ import me.universi.user.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
 
@@ -73,7 +74,7 @@ public class ProfileService {
     }
 
     public Collection<Education> findEducationByProfile(Profile profile){
-        Collection<Education> educationsActive = null;
+        Collection<Education> educationsActive = new ArrayList<>();
         for (Education education: profile.getEducations()) {
             if (!education.getIsDeleted()){
                 educationsActive.add(education);
