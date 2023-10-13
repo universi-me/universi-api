@@ -66,7 +66,7 @@ public class ProfileExperience {
     private Boolean isDeleted;
 
     public ProfileExperience(){
-
+        this.isDeleted = false;
     }
 
     public ProfileExperience(TypeExperience typeExperience,String local, String description, Date startDate, Date endDate, Boolean presentDate) {

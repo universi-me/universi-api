@@ -35,7 +35,7 @@ public class TypeExperience {
     private Boolean isDeleted;
 
     public TypeExperience(){
-
+        this.isDeleted = false;
     }
 
     public TypeExperience(String name){

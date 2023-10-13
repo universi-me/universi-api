@@ -1,6 +1,7 @@
 package me.universi.curriculum.profileExperience.servicies;
 
 import me.universi.curriculum.profileExperience.entities.ProfileExperience;
+import me.universi.curriculum.profileExperience.entities.TypeExperience;
 import me.universi.curriculum.profileExperience.repositories.ProfileExperienceRepository;
 import me.universi.profile.entities.Profile;
 import me.universi.user.entities.User;
@@ -61,5 +62,11 @@ public class ProfileExperienceService {
                 return null;
             }
         });
+    }
+
+    public void deleteLogic(UUID id) throws Exception {
+        ProfileExperience profileExperience = findById(id).get();
+        profileExperience.setDeleted(true);
+        update(profileExperience, id);
     }
 }
