@@ -8,6 +8,7 @@ import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -68,5 +69,16 @@ public class ProfileExperienceService {
         ProfileExperience profileExperience = findById(id).get();
         profileExperience.setDeleted(true);
         update(profileExperience, id);
+    }
+
+    public List<ProfileExperience> findByProfileAndExperienceActive(Profile profile){
+        List<ProfileExperience> profileExperiencesActive = new ArrayList<>();
+
+        for(ProfileExperience experience: findByProfile(profile)) {
+           if(!experience.getDeleted()){
+               profileExperiencesActive.add(experience);
+           }
+        }
+        return profileExperiencesActive;
     }
 }

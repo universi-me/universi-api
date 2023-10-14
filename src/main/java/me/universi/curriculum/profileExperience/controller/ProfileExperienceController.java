@@ -1,19 +1,16 @@
 package me.universi.curriculum.profileExperience.controller;
 
 import me.universi.api.entities.Response;
-import me.universi.competence.exceptions.CompetenceException;
-import me.universi.curriculum.education.entities.Education;
-import me.universi.curriculum.education.entities.Institution;
-import me.universi.curriculum.education.entities.TypeEducation;
 import me.universi.curriculum.education.exceptions.EducationException;
-import me.universi.curriculum.education.exceptions.InstitutionException;
 import me.universi.curriculum.education.exceptions.TypeEducationException;
 import me.universi.curriculum.profileExperience.entities.ProfileExperience;
 import me.universi.curriculum.profileExperience.entities.TypeExperience;
 import me.universi.curriculum.profileExperience.exceptions.TypeExperienceException;
 import me.universi.curriculum.profileExperience.servicies.ProfileExperienceService;
 import me.universi.curriculum.profileExperience.servicies.TypeExperienceService;
+import me.universi.profile.entities.Profile;
 import me.universi.profile.exceptions.ProfileException;
+import me.universi.profile.services.ProfileService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import org.springframework.http.HttpStatus;
@@ -42,11 +39,13 @@ public class ProfileExperienceController {
     private ProfileExperienceService profileExperienceService;
     private UserService userService;
     private TypeExperienceService typeExperienceService;
+    private ProfileService profileService;
 
-    public ProfileExperienceController(ProfileExperienceService profileExperienceService, UserService userService, TypeExperienceService typeExperienceService){
+    public ProfileExperienceController(ProfileExperienceService profileExperienceService, UserService userService, TypeExperienceService typeExperienceService, ProfileService profileService){
         this.profileExperienceService = profileExperienceService;
         this.userService = userService;
         this.typeExperienceService = typeExperienceService;
+        this.profileService = profileService;
     }
 
     @PostMapping
@@ -267,6 +266,37 @@ public class ProfileExperienceController {
             response.body.put("lista", profileExperiences);
 
             response.message = "Operação realizada com exito.";
+            response.success = true;
+            return response;
+
+        } catch (Exception e) {
+            response.message = e.getMessage();
+            return response;
+        }
+    }
+    @PostMapping(value = "/obterExperienceActiveByProfile", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response getByProfileOnlyExperienceActive(@RequestBody Map<String, Object> body) {
+        Response response = new Response();
+        try {
+
+            String id = (String)body.get("profileId");
+            if(id == null) {
+                throw new ProfileException("Parametro profileId é nulo.");
+            }
+
+            Profile profile = profileService.findFirstById(UUID.fromString(id));
+            if (profile == null) {
+                throw new ProfileException("profile não encontrada.");
+            }
+
+            List<ProfileExperience> profileExperiences = profileExperienceService.findByProfileAndExperienceActive(profile);
+            if (profileExperiences == null){
+                throw new ProfileException("valor de profileExperiences nulo.");
+            }
+
+            response.body.put("profileExperience", profileExperiences);
+
             response.success = true;
             return response;
 
