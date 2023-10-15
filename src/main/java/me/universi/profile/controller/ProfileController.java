@@ -205,4 +205,14 @@ public class ProfileController {
                 response.body.put("educations", profileService.findEducationByProfile(profileGet));
         });
     }
+
+    @PostMapping(value = "/experiences", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response profile_experiences(@RequestBody Map<String, Object> body) {
+        return Response.buildResponse(response -> {
+            Profile profileGet = profileService.getProfileByUserIdOrUsername(body.get("profileId"), body.get("username"));
+            response.body.put("experiences", profileService.findExperienceByProfile(profileGet));
+        });
+    }
+
 }

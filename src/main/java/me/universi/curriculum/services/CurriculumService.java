@@ -4,7 +4,7 @@ import me.universi.competence.entities.Competence;
 import me.universi.competence.services.CompetenceService;
 import me.universi.competence.services.CompetenceTypeService;
 import me.universi.curriculum.education.servicies.EducationService;
-import me.universi.curriculum.profileExperience.servicies.ProfileExperienceService;
+import me.universi.curriculum.experience.servicies.ExperienceService;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
 import me.universi.user.entities.User;
@@ -25,17 +25,17 @@ public class CurriculumService {
     private CompetenceTypeService competenceTypeService;
     private EducationService educationService;
 
-    private ProfileExperienceService profileExperienceService;
+    private ExperienceService experienceService;
 
 
     public CurriculumService(ProfileService profileService, UserService userService, CompetenceService competenceService,
-                             CompetenceTypeService competenceTypeService, EducationService educationService, ProfileExperienceService profileExperienceService){
+                             CompetenceTypeService competenceTypeService, EducationService educationService, ExperienceService experienceService){
         this.profileService = profileService;
         this.userService = userService;
         this.competenceService = competenceService;
         this.competenceTypeService = competenceTypeService;
         this.educationService = educationService;
-        this.profileExperienceService = profileExperienceService;
+        this.experienceService = experienceService;
     }
 
 
@@ -46,8 +46,6 @@ public class CurriculumService {
     public List<List> mountCurriculum(){
         User user = userService.getUserInSession();
         List<List> curriculum = new ArrayList<List>();
-
-        curriculum.add(profileExperienceService.findByProfile(user.getProfile()));
 
         return curriculum;
     }

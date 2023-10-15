@@ -1,7 +1,6 @@
-package me.universi.curriculum.profileExperience.entities;
+package me.universi.curriculum.experience.entities;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -9,31 +8,23 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.NotNull;
-import me.universi.curriculum.education.entities.TypeEducation;
-import me.universi.profile.entities.Profile;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
 import java.util.UUID;
 
-@Entity(name = "profile_experience")
-public class ProfileExperience {
+@Entity(name = "experience")
+public class Experience {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id")
     @NotNull
     private UUID id;
-
-    @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "profile_id")
-    private Profile profile;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "type_experience_id")
@@ -65,11 +56,11 @@ public class ProfileExperience {
     @Column(name = "is_deleted")
     private Boolean isDeleted;
 
-    public ProfileExperience(){
+    public Experience(){
         this.isDeleted = false;
     }
 
-    public ProfileExperience(TypeExperience typeExperience,String local, String description, Date startDate, Date endDate, Boolean presentDate) {
+    public Experience(TypeExperience typeExperience, String local, String description, Date startDate, Date endDate, Boolean presentDate) {
         this.typeExperience = typeExperience;
         this.local = local;
         this.description = description;
@@ -79,7 +70,7 @@ public class ProfileExperience {
         this.isDeleted = false;
     }
 
-    public ProfileExperience(TypeExperience typeExperience,String local, String description, Date startDate, Date endDate) {
+    public Experience(TypeExperience typeExperience, String local, String description, Date startDate, Date endDate) {
         this.typeExperience = typeExperience;
         this.local = local;
         this.description = description;
@@ -91,14 +82,6 @@ public class ProfileExperience {
 
     public UUID getId() {
         return id;
-    }
-
-    public Profile getProfile() {
-        return profile;
-    }
-
-    public void setProfile(Profile profile) {
-        this.profile = profile;
     }
 
     public String getLocal() {

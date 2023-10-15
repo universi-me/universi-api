@@ -2,20 +2,32 @@ package me.universi.profile.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.NotNull;
-import me.universi.Sys;
 import me.universi.capacity.entidades.ContentStatus;
 import me.universi.competence.entities.Competence;
 import me.universi.curriculum.education.entities.Education;
+import me.universi.curriculum.experience.entities.Experience;
 import me.universi.group.entities.Group;
-import me.universi.group.services.GroupService;
 import me.universi.indicators.entities.Indicators;
 import me.universi.link.entities.Link;
 import me.universi.profile.enums.Gender;
 import me.universi.recommendation.entities.Recommendation;
 import me.universi.user.entities.User;
-import me.universi.user.services.UserService;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Collection;
@@ -67,6 +79,15 @@ public class Profile {
             inverseJoinColumns = @JoinColumn(name = "education_id")
     )
     private Collection<Education> educations;
+
+    @JsonIgnore
+    @ManyToMany
+    @JoinTable(
+            name = "experience_profile",
+            joinColumns = @JoinColumn(name = "profile_id"),
+            inverseJoinColumns = @JoinColumn(name = "experience_id")
+    )
+    private Collection<Experience> experiences;
 
     @JsonIgnore
     @OneToMany(mappedBy = "profile")
@@ -233,6 +254,14 @@ public class Profile {
 
     public void setEducations(Collection<Education> educations) {
         this.educations = educations;
+    }
+
+    public Collection<Experience> getExperiences() {
+        return experiences;
+    }
+
+    public void setExperiences(Collection<Experience> experiences) {
+        this.experiences = experiences;
     }
 
     @Override

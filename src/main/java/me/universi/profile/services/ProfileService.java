@@ -1,6 +1,7 @@
 package me.universi.profile.services;
 
 import me.universi.curriculum.education.entities.Education;
+import me.universi.curriculum.experience.entities.Experience;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.exceptions.ProfileException;
 import me.universi.profile.repositories.PerfilRepository;
@@ -81,6 +82,16 @@ public class ProfileService {
             }
         }
         return educationsActive;
+    }
+
+    public Collection<Experience> findExperienceByProfile(Profile profile){
+        Collection<Experience> experiencesActive = new ArrayList<>();
+        for (Experience experience: profile.getExperiences()) {
+            if (!experience.getDeleted()){
+                experiencesActive.add(experience);
+            }
+        }
+        return experiencesActive;
     }
 
     // search the first 5 containing the string uppercase or lowercase

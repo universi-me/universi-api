@@ -1,14 +1,13 @@
-package me.universi.curriculum.profileExperience.controller;
+package me.universi.curriculum.experience.controller;
 
 import me.universi.api.entities.Response;
 import me.universi.curriculum.education.exceptions.EducationException;
 import me.universi.curriculum.education.exceptions.TypeEducationException;
-import me.universi.curriculum.profileExperience.entities.ProfileExperience;
-import me.universi.curriculum.profileExperience.entities.TypeExperience;
-import me.universi.curriculum.profileExperience.exceptions.TypeExperienceException;
-import me.universi.curriculum.profileExperience.servicies.ProfileExperienceService;
-import me.universi.curriculum.profileExperience.servicies.TypeExperienceService;
-import me.universi.profile.entities.Profile;
+import me.universi.curriculum.experience.entities.Experience;
+import me.universi.curriculum.experience.entities.TypeExperience;
+import me.universi.curriculum.experience.exceptions.TypeExperienceException;
+import me.universi.curriculum.experience.servicies.ExperienceService;
+import me.universi.curriculum.experience.servicies.TypeExperienceService;
 import me.universi.profile.exceptions.ProfileException;
 import me.universi.profile.services.ProfileService;
 import me.universi.user.entities.User;
@@ -33,16 +32,16 @@ import java.util.Optional;
 import java.util.UUID;
 
 @RestController
-@RequestMapping(value = "/api/curriculum/profileExperience")
-public class ProfileExperienceController {
+@RequestMapping(value = "/api/curriculum/experience")
+public class ExperienceController {
 
-    private ProfileExperienceService profileExperienceService;
+    private ExperienceService experienceService;
     private UserService userService;
     private TypeExperienceService typeExperienceService;
     private ProfileService profileService;
 
-    public ProfileExperienceController(ProfileExperienceService profileExperienceService, UserService userService, TypeExperienceService typeExperienceService, ProfileService profileService){
-        this.profileExperienceService = profileExperienceService;
+    public ExperienceController(ExperienceService experienceService, UserService userService, TypeExperienceService typeExperienceService, ProfileService profileService){
+        this.experienceService = experienceService;
         this.userService = userService;
         this.typeExperienceService = typeExperienceService;
         this.profileService = profileService;
@@ -50,26 +49,26 @@ public class ProfileExperienceController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ProfileExperience save(@RequestBody ProfileExperience profileExperience) throws Exception{
-        return  profileExperienceService.save(profileExperience);
+    public Experience save(@RequestBody Experience experience) throws Exception{
+        return  experienceService.save(experience);
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<ProfileExperience> findAll() throws Exception{
-        return profileExperienceService.findAll();
+    public List<Experience> findAll() throws Exception{
+        return experienceService.findAll();
     }
 
     @GetMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Optional<ProfileExperience> getProfileExperience(@PathVariable UUID id){
-        return profileExperienceService.findById(id);
+    public Optional<Experience> getProfileExperience(@PathVariable UUID id){
+        return experienceService.findById(id);
     }
 
     @PutMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ProfileExperience update(@RequestBody ProfileExperience newProfileExperience, @PathVariable UUID id) throws Exception {
-        return profileExperienceService.update(newProfileExperience, id);
+    public Experience update(@RequestBody Experience newExperience, @PathVariable UUID id) throws Exception {
+        return experienceService.update(newExperience, id);
     }
 
     @PostMapping(value = "/criar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -114,16 +113,17 @@ public class ProfileExperienceController {
                 throw new TypeEducationException("typeExperience não encontrado.");
             }
 
-            ProfileExperience profileExperience = new ProfileExperience();
-            profileExperience.setTypeExperience(typeExperience);
-            profileExperience.setLocal(local);
-            profileExperience.setDescription(description);
-            profileExperience.setStartDate(startDate);
-            profileExperience.setEndDate(endDate);
+            Experience experience = new Experience();
+            experience.setTypeExperience(typeExperience);
+            experience.setLocal(local);
+            experience.setDescription(description);
+            experience.setStartDate(startDate);
+            experience.setEndDate(endDate);
             if(presentDate != null){
-                profileExperience.setPresentDate(presentDate);
+                experience.setPresentDate(presentDate);
             }
-            profileExperienceService.save(profileExperience);
+            experienceService.save(experience);
+            experienceService.addExperienceInProfile(user, experience);
 
             response.message = "Experiencia criada.";
             response.success = true;
@@ -158,8 +158,8 @@ public class ProfileExperienceController {
 
 
 
-            ProfileExperience profileExperience = profileExperienceService.findById(UUID.fromString(id)).get();
-            if (profileExperience == null) {
+            Experience experience = experienceService.findById(UUID.fromString(id)).get();
+            if (experience == null) {
                 throw new ProfileException("Experiencia não encontrada.");
             }
 
@@ -168,26 +168,26 @@ public class ProfileExperienceController {
                 if(typeExperience == null) {
                     throw new TypeExperienceException("Tipo de Experiencia não encontrado.");
                 }
-                profileExperience.setTypeExperience(typeExperience);
+                experience.setTypeExperience(typeExperience);
             }
 
             if (local != null) {
-                profileExperience.setLocal(local);
+                experience.setLocal(local);
             }
             if (description != null) {
-                profileExperience.setDescription(description);
+                experience.setDescription(description);
             }
             if (startDate != null) {
-                profileExperience.setStartDate(startDate);
+                experience.setStartDate(startDate);
             }
             if (endDate != null) {
-                profileExperience.setEndDate(endDate);
+                experience.setEndDate(endDate);
             }
             if (presentDate != null){
-                profileExperience.setPresentDate(presentDate);
+                experience.setPresentDate(presentDate);
             }
 
-            profileExperienceService.update(profileExperience, profileExperience.getId());
+            experienceService.update(experience, experience.getId());
 
             response.message = "Experience atualizada";
             response.success = true;
@@ -211,12 +211,12 @@ public class ProfileExperienceController {
                 throw new TypeEducationException("Parametro experienceId é nulo.");
             }
 
-            ProfileExperience profileExperience = profileExperienceService.findById(UUID.fromString(id)).get();
-            if (profileExperience == null) {
+            Experience experience = experienceService.findById(UUID.fromString(id)).get();
+            if (experience == null) {
                 throw new ProfileException("profileExperience não encontrada.");
             }
 
-            profileExperienceService.deleteLogic(profileExperience.getId());
+            experienceService.deleteLogic(experience.getId());
 
             response.message = "profileExperience removida logicamente";
             response.success = true;
@@ -239,12 +239,12 @@ public class ProfileExperienceController {
                 throw new TypeEducationException("Parametro profileExperienceId é nulo.");
             }
 
-            ProfileExperience profileExperience = profileExperienceService.findById(UUID.fromString(id)).get();
-            if (profileExperience == null) {
+            Experience experience = experienceService.findById(UUID.fromString(id)).get();
+            if (experience == null) {
                 throw new TypeEducationException("profileExperience não encontrada.");
             }
 
-            response.body.put("profileExperience", profileExperience);
+            response.body.put("profileExperience", experience);
 
             response.success = true;
             return response;
@@ -261,42 +261,11 @@ public class ProfileExperienceController {
         Response response = new Response();
         try {
 
-            List<ProfileExperience> profileExperiences = profileExperienceService.findAll();
+            List<Experience> experiences = experienceService.findAll();
 
-            response.body.put("lista", profileExperiences);
+            response.body.put("lista", experiences);
 
             response.message = "Operação realizada com exito.";
-            response.success = true;
-            return response;
-
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
-    }
-    @PostMapping(value = "/obterExperienceActiveByProfile", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response getByProfileOnlyExperienceActive(@RequestBody Map<String, Object> body) {
-        Response response = new Response();
-        try {
-
-            String id = (String)body.get("profileId");
-            if(id == null) {
-                throw new ProfileException("Parametro profileId é nulo.");
-            }
-
-            Profile profile = profileService.findFirstById(UUID.fromString(id));
-            if (profile == null) {
-                throw new ProfileException("profile não encontrada.");
-            }
-
-            List<ProfileExperience> profileExperiences = profileExperienceService.findByProfileAndExperienceActive(profile);
-            if (profileExperiences == null){
-                throw new ProfileException("valor de profileExperiences nulo.");
-            }
-
-            response.body.put("profileExperience", profileExperiences);
-
             response.success = true;
             return response;
 

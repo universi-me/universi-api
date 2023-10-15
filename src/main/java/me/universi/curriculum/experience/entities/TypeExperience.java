@@ -1,4 +1,4 @@
-package me.universi.curriculum.profileExperience.entities;
+package me.universi.curriculum.experience.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Column;

@@ -1,20 +1,10 @@
-package me.universi.curriculum.profileExperience.controller;
+package me.universi.curriculum.experience.controller;
 
 import me.universi.api.entities.Response;
-import me.universi.competence.entities.Competence;
-import me.universi.competence.entities.CompetenceType;
-import me.universi.competence.enums.Level;
 import me.universi.competence.exceptions.CompetenceException;
-import me.universi.curriculum.education.entities.Education;
-import me.universi.curriculum.education.entities.Institution;
-import me.universi.curriculum.education.entities.TypeEducation;
-import me.universi.curriculum.education.exceptions.EducationException;
-import me.universi.curriculum.education.exceptions.InstitutionException;
 import me.universi.curriculum.education.exceptions.TypeEducationException;
-import me.universi.curriculum.profileExperience.entities.TypeExperience;
-import me.universi.curriculum.profileExperience.repositories.TypeExperienceRepository;
-import me.universi.curriculum.profileExperience.servicies.TypeExperienceService;
-import me.universi.user.entities.User;
+import me.universi.curriculum.experience.entities.TypeExperience;
+import me.universi.curriculum.experience.servicies.TypeExperienceService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,8 +17,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
