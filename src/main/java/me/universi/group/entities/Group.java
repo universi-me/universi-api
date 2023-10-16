@@ -277,6 +277,11 @@ public class Group {
         return GroupService.getInstance().getGroupPath(this.id);
     }
 
+    @Transient
+    public Group getOrganization() {
+        return GroupService.getInstance().getGroupRootFromGroupId(this.id);
+    }
+
     @Override
     public String toString() {
         return "Grupo [id=\""+this.id+"\", nome=\""+this.name+"\", descricao=\""+this.description+"\"]";

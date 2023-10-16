@@ -11,12 +11,8 @@ import me.universi.util.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Predicate;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Service
 public class GroupService {
@@ -351,6 +347,20 @@ public class GroupService {
         }
 
         return group;
+    }
+
+    /** Get the root group from a group id */
+    public Group getGroupRootFromGroupId(UUID groupId) {
+        UUID parentGroupId = findParentGroupId(groupId);
+        while(parentGroupId != null) {
+            UUID partentUUID = findParentGroupId(parentGroupId);
+            if(partentUUID == null) {
+                break;
+            } else {
+                parentGroupId = partentUUID;
+            }
+        }
+        return findFirstById(parentGroupId);
     }
 
     /** Searches the first 5 groups containing {@code name} ignoring case */
