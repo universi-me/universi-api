@@ -47,7 +47,7 @@ public class GrupoController {
                 if(!(groupRoot != null && userService.isUserAdmin(user))) {
                     throw new GroupException("Parâmetro groupId é nulo.");
                 }
-            } else if(((groupIdParent != null && groupIdParent.length() > 0) || (groupPathParent != null && groupPathParent.length() > 0)) && (groupRoot!=null && groupRoot)) {
+            } else if(((groupIdParent != null && !groupIdParent.isEmpty()) || (groupPathParent != null && !groupPathParent.isEmpty())) && (groupRoot!=null && groupRoot)) {
                 throw new GroupException("Você não pode criar Grupo Master em Subgrupos.");
             }
 
@@ -91,10 +91,10 @@ public class GrupoController {
                 Group groupNew = new Group();
                 groupNew.setNickname(nickname);
                 groupNew.setName(name);
-                if(image != null && image.length()>0) {
+                if(image != null && !image.isEmpty()) {
                     groupNew.setImage(image);
                 }
-                if(bannerImage != null && bannerImage.length()>0) {
+                if(bannerImage != null && !bannerImage.isEmpty()) {
                     groupNew.setBannerImage(bannerImage);
                 }
                 groupNew.setDescription(description);
@@ -148,19 +148,19 @@ public class GrupoController {
             User user = userService.getUserInSession();
 
             if(groupService.verifyPermissionToEditGroup(groupEdit, user)) {
-                if(name != null && name.length() > 0) {
+                if(name != null && !name.isEmpty()) {
                     groupEdit.setName(name);
                 }
-                if(description != null && description.length() > 0) {
+                if(description != null && !description.isEmpty()) {
                     groupEdit.setDescription(description);
                 }
-                if(groupType != null && groupType.length() > 0) {
+                if(groupType != null && !groupType.isEmpty()) {
                     groupEdit.setType(GroupType.valueOf(groupType));
                 }
-                if(image != null && image.length()>0) {
+                if(image != null && !image.isEmpty()) {
                     groupEdit.setImage(image);
                 }
-                if(bannerImage != null && bannerImage.length()>0) {
+                if(bannerImage != null && !bannerImage.isEmpty()) {
                     groupEdit.setBannerImage(bannerImage);
                 }
                 if(canCreateGroup != null) {
@@ -193,13 +193,13 @@ public class GrupoController {
             String groupId = (String)body.get("groupId");
             String groupPath = (String)body.get("groupPath");
 
-            User user = userService.getUserInSession();
-
             Group groupEdit = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
 
             if(!groupEdit.isCanEnter()) {
                 throw new GroupException("Grupo não permite entrada de participantes.");
             }
+
+            User user = userService.getUserInSession();
 
             if(groupEdit.isCanEnter() || groupService.verifyPermissionToEditGroup(groupEdit, user)) {
                 if(groupService.addParticipantToGroup(groupEdit, user.getProfile())) {
@@ -249,10 +249,8 @@ public class GrupoController {
                 throw new GroupException("Parâmetro participant é nulo.");
             }
 
-            User user = userService.getUserInSession();
-
             User participantUser = null;
-            if(participant != null && participant.length() > 0) {
+            if(participant != null && !participant.isEmpty()) {
                 if (participant.contains("@")) {
                     participantUser = (User) userService.findFirstByEmail(participant);
                 } else {
@@ -261,6 +259,8 @@ public class GrupoController {
             }
 
             Group groupEdit = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
+
+            User user = userService.getUserInSession();
 
             if(participantUser != null && groupService.verifyPermissionToEditGroup(groupEdit, user)) {
                 if(groupService.addParticipantToGroup(groupEdit, participantUser.getProfile())) {
@@ -289,10 +289,8 @@ public class GrupoController {
                 throw new GroupException("Parâmetro participant é nulo.");
             }
 
-            User user = userService.getUserInSession();
-
             User participantUser = null;
-            if(participant != null && participant.length() > 0) {
+            if(participant != null && !participant.isEmpty()) {
                 if (participant.contains("@")) {
                     participantUser = (User) userService.findFirstByEmail(participant);
                 } else {
@@ -301,6 +299,8 @@ public class GrupoController {
             }
 
             Group groupEdit = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
+
+            User user = userService.getUserInSession();
 
             if(participantUser != null && groupService.verifyPermissionToEditGroup(groupEdit, user)) {
                 if(groupService.removeParticipantFromGroup(groupEdit, participantUser.getProfile())) {
