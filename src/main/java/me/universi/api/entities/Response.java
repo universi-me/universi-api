@@ -51,7 +51,13 @@ public class Response {
             completionHandler.accept(response);
         } catch (Exception e) {
             response.success = false;
-            response.message = e.getMessage();
+
+            if(e.getClass().getPackageName().startsWith("me.universi")) {
+                response.message = e.getMessage();
+            } else {
+                response.message = "Ocorreu um erro interno do servidor.";
+            }
+
             if(response.status == null) {
                 response.status = 500;
             }
