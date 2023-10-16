@@ -38,9 +38,14 @@ public class Response {
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public HashMap<String, Object> body;
 
+    /** SweetAlert2 alert options */
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    public HashMap<String, Object> alertOptions;
+
     public Response() {
         // Allocate map
         body = new HashMap<>();
+        alertOptions = new HashMap<>();
         status = null;
     }
 
