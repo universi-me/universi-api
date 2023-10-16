@@ -93,11 +93,7 @@ public class UserController {
                 throw new UserException("Nome de usuário está com formato inválido!");
             }
 
-            if(userService.usernameExist(username)) {
-                throw new UserException("Nome de usuário \""+ username +"\" não está disponível!");
-            }
-
-            response.success = true;
+            response.success = !userService.usernameExist(username);
 
         });
     }
