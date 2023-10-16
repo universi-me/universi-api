@@ -62,6 +62,7 @@ public class GrupoController {
             }
 
             String image = (String)body.get("imageUrl");
+            String bannerImage = (String)body.get("bannerImageUrl");
 
             String description = (String)body.get("description");
             if(description == null) {
@@ -92,6 +93,9 @@ public class GrupoController {
                 groupNew.setName(name);
                 if(image != null && image.length()>0) {
                     groupNew.setImage(image);
+                }
+                if(bannerImage != null && bannerImage.length()>0) {
+                    groupNew.setBannerImage(bannerImage);
                 }
                 groupNew.setDescription(description);
                 groupNew.setType(GroupType.valueOf(groupType));
@@ -133,6 +137,7 @@ public class GrupoController {
             String description = (String)body.get("description");
             String groupType = (String)body.get("type");
             String image = (String)body.get("imageUrl");
+            String bannerImage = (String)body.get("bannerImageUrl");
 
             Boolean canCreateGroup = (Boolean)body.get("canCreateGroup");
             Boolean publicGroup = (Boolean)body.get("publicGroup");
@@ -154,6 +159,9 @@ public class GrupoController {
                 }
                 if(image != null && image.length()>0) {
                     groupEdit.setImage(image);
+                }
+                if(bannerImage != null && bannerImage.length()>0) {
+                    groupEdit.setBannerImage(bannerImage);
                 }
                 if(canCreateGroup != null) {
                     groupEdit.setCanCreateGroup(canCreateGroup);
