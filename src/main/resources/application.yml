@@ -42,12 +42,15 @@ server:
   port: ${API_SERVER_PORT:8080}
   servlet:
     session:
-      timeout: 31536000 # 1 year
-      persistent: true
+      timeout: ${API_SERVER_SESSION_TIMEOUT:31536000} # 1 year
+      persistent: ${API_SERVER_SESSION_PERSISTENT:true}
+      store-dir: ${API_SERVER_SESSION_STORE_DIR:}
     multipart:
       enabled: true
       max-file-size: 200MB
       max-request-size: 200MB
+  tomcat:
+    max-http-form-post-size: 200MB
 
 
 # SPRINGDOC
