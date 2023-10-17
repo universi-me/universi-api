@@ -113,7 +113,7 @@ public class UserController {
 
             String password = (String)body.get("password");
 
-            if (username==null || username.length()==0) {
+            if (username==null || username.isEmpty()) {
                 throw new UserException("Verifique o campo Usuário!");
             } else {
                 username = username.trim().toLowerCase();
@@ -121,7 +121,7 @@ public class UserController {
                     throw new UserException("Nome de usuário está com formato inválido!");
                 }
             }
-            if (email==null || email.length()==0) {
+            if (email==null || email.isEmpty()) {
                 throw new UserException("Verifique o campo Email!");
             } else {
                 email = email.trim().toLowerCase();
@@ -129,7 +129,7 @@ public class UserController {
                     throw new UserException("Email está com formato inválido!");
                 }
             }
-            if (password==null || password.length()==0) {
+            if (password==null || password.isEmpty()) {
                 throw new UserException("Verifique o campo Senha!");
             } else {
                 if(!userService.passwordRegex(password)) {
@@ -164,7 +164,7 @@ public class UserController {
         return Response.buildResponse(response -> {
 
             String newPassword = (String)body.get("newPassword");
-            if(newPassword == null || newPassword.length()==0) {
+            if(newPassword == null || newPassword.isEmpty()) {
                 throw new UserException("Parametro newPassword é nulo.");
             }
 
@@ -224,7 +224,7 @@ public class UserController {
 
             String usernameOld = userEdit.getUsername();
 
-            if(username != null && username.length()>0) {
+            if(username != null && !username.isEmpty()) {
                 if(userService.usernameExist(username) && !username.equals(usernameOld)) {
                     throw new UserException("Usuário \""+username+"\" já esta cadastrado!");
                 }
@@ -234,7 +234,7 @@ public class UserController {
                     throw new UserException("Nome de Usuário está com formato inválido!");
                 }
             }
-            if(email != null && email.length()>0) {
+            if(email != null && !email.isEmpty()) {
                 if(userService.emailExist(email) && !email.equals(userEdit.getEmail())) {
                     throw new UserException("Email \""+email+"\" já esta cadastrado!");
                 }
@@ -244,11 +244,11 @@ public class UserController {
                     throw new UserException("Email está com formato inválido!");
                 }
             }
-            if(password != null && password.length()>0) {
+            if(password != null && !password.isEmpty()) {
                 userService.setRawPasswordToUser(userEdit, password, false);
             }
 
-            if(authorityLevel != null && authorityLevel.length()>0) {
+            if(authorityLevel != null && !authorityLevel.isEmpty()) {
                 userEdit.setAuthority(Authority.valueOf(authorityLevel));
             }
 
@@ -398,15 +398,19 @@ public class UserController {
     public Response recovery_password(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
 
+            response.alertOptions.put("title", "Recuperação de Senha");
+
             String usernameOrEmail = (String)body.get("username");
 
             if(usernameOrEmail == null) {
                 throw new UserException("Parametro username é nulo.");
             }
 
-            User user = (User) userService.loadUserByUsername(usernameOrEmail);
+            User user = null;
 
-            if(user == null) {
+            try {
+                user = (User) userService.loadUserByUsername(usernameOrEmail);
+            } catch (Exception e) {
                 throw new UserException("Conta não encontrada!");
             }
 
@@ -414,6 +418,11 @@ public class UserController {
 
             response.message = "Email de recuperação de senha enviado com sucesso, verifique a sua caixa de email.";
 
+            response.alertOptions.put("type", "success");
+            response.alertOptions.put("modalAlert", true);
+            response.alertOptions.put("timer", null);
+
+            response.redirectTo = "/login";
         });
     }
 

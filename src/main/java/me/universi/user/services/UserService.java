@@ -229,8 +229,8 @@ public class UserService implements UserDetailsService {
 
     public void configureSessionForUser(User user, AuthenticationManager authenticationManager) {
         HttpSession session = getActiveSession();
-        // set user session timeout to 10min
-        session.setMaxInactiveInterval(10 * 60);
+        // set user session inactivity to 6 months
+        session.setMaxInactiveInterval(6 * 30 * 24 * 60 * 60);
 
         // save user in session
         session.setAttribute("usuario", user);
