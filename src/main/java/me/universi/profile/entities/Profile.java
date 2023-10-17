@@ -18,6 +18,8 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.NotNull;
+import java.io.Serial;
+import java.io.Serializable;
 import me.universi.capacity.entidades.ContentStatus;
 import me.universi.competence.entities.Competence;
 import me.universi.curriculum.education.entities.Education;
@@ -35,7 +37,10 @@ import java.util.Date;
 import java.util.UUID;
 
 @Entity(name = "profile")
-public class Profile {
+public class Profile implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = -7368873462832313132L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

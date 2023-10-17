@@ -7,6 +7,7 @@ import java.security.MessageDigest;
 import java.util.UUID;
 import me.universi.api.entities.Response;
 import me.universi.image.entities.Image;
+import me.universi.image.exceptions.ImageException;
 import me.universi.image.repositories.ImageRepository;
 import me.universi.image.services.ImageService;
 import me.universi.user.services.UserService;
@@ -33,26 +34,25 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api")
 public class ImageController {
-    @Autowired
-    private Environment env;
+
+    private final ImageService imageService;
 
     @Autowired
-    private ImageService imageService;
+    public ImageController(ImageService imageService) {
+        this.imageService = imageService;
+    }
 
     @PostMapping(value = "/imagem/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Response upload_of_image(@RequestParam("imagem") MultipartFile image) {
         return Response.buildResponse(response -> {
 
-            // check if save image in local or database.
-            String link = (Boolean.parseBoolean(env.getProperty("SAVE_IMAGE_LOCAL"))) ? saveImageInFilesystem(image) : saveImageInDatabase(image);
-
-            // return link of image remote or local.
+            String link = imageService.saveImageFromMultipartFile(image);
             if(link != null) {
                 response.body.put("link", link.toString());
                 return;
             }
 
-            throw  new Exception("Falha ao salvar imagem.");
+            throw  new ImageException("Falha ao salvar imagem.");
 
         });
     }
@@ -64,14 +64,12 @@ public class ImageController {
         try {
 
             String filename = nameOfImage.replaceAll("[^a-f0-9]", "");
-
             if(!filename.contains("..") && !filename.contains("/")) {
-                // parse do arquivo imagem salva para saida url.
-                File initialFile = new File(env.getProperty("PATH_IMAGE_SAVE"), filename);
-                InputStream targetStream = new FileInputStream(initialFile);
-                return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(new InputStreamResource(targetStream));
+                InputStreamResource targetStream = imageService.getImageFromFilesystem(filename);
+                if(targetStream != null) {
+                    return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(targetStream);
+                }
             }
-            
             return ResponseEntity.notFound().build();
 
         }catch (Exception e) {
@@ -95,88 +93,4 @@ public class ImageController {
         }
     }
 
-    public String saveImageInFilesystem(MultipartFile image) throws Exception {
-
-        String tokenRandom = UUID.randomUUID().toString();
-
-        MessageDigest digest = MessageDigest.getInstance("SHA-1");
-        byte[] encodedHash = digest.digest(tokenRandom.getBytes(StandardCharsets.UTF_8));
-        String nameOfImage = ConvertUtil.bytesToHex(encodedHash);
-
-
-        File imagemDir = new File(env.getProperty("PATH_IMAGE_SAVE"));
-        if (!imagemDir.exists()){
-            imagemDir.mkdirs();
-        }
-
-        File file = new File(imagemDir.toString() + "/" + nameOfImage);
-
-        OutputStream os = new FileOutputStream(file);
-        os.write(image.getBytes());
-
-        if(nameOfImage != null) {
-            return "/img/imagem/" + nameOfImage + ".jpg";
-        }
-
-        throw new Exception("Falha ao salvar imagem em disco.");
-    }
-
-    public String saveImageInDatabase(MultipartFile image) throws Exception {
-
-        // image big than 1MB.
-        if(image.getBytes().length > 1024 * 1024 * Integer.parseInt(env.getProperty("IMAGE_UPLOAD_LIMIT"))) {
-            throw new Exception("Imagem muito grande.");
-        }
-
-        Image img = new Image();
-        img.setData(image.getBytes());
-        img.setFilename(image.getOriginalFilename());
-        img.setContentType(image.getContentType());
-        img.setSize(image.getSize());
-        img.setAuthor(UserService.getInstance().getUserInSession().getProfile());
-        img.setCreated(ConvertUtil.getDateTimeNow());
-
-        img = imageService.save(img);
-
-        if(img.getId() != null) {
-            return "/img/store/" + img.getId();
-        }
-
-        throw new Exception("Falha ao salvar imagem.");
-    }
-
-    public String uploadImagemImgur(MultipartFile imagem) throws Exception {
-        // post da imagem para api da Imgur e retornar o link.
-        String urlApi = "https://api.imgur.com/3/image";
-        String boundary = "----WebKitFormBoundary"+Long.toHexString(System.currentTimeMillis());
-        URLConnection connection = new URL(urlApi).openConnection();
-        connection.setDoOutput(true);
-        connection.setRequestProperty("Authorization", "Client-ID " + env.getProperty("IMGUR_CLIENT_ID"));
-        connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
-        OutputStream outPut = connection.getOutputStream();
-        outPut.write(("--" + boundary).getBytes());
-        outPut.write(("\n").getBytes());
-        outPut.write(("Content-Disposition: form-data; name=\"image\"; filename=\"" + imagem.getName() + "\"").getBytes());
-        outPut.write(("\n").getBytes());
-        outPut.write(("Content-Type: "+imagem.getContentType()).getBytes());
-        outPut.write(("\n").getBytes());
-        outPut.write(("\n").getBytes());
-        outPut.write(imagem.getBytes());
-        outPut.write(("\n").getBytes());
-        outPut.write(("--" + boundary + "--").getBytes());
-        outPut.write(("\n").getBytes());
-        HttpURLConnection connectionResp = ((HttpURLConnection)connection);
-        String strCurrentLine = "";
-        if (connectionResp.getResponseCode() == 200) {
-            BufferedReader br = new BufferedReader(new InputStreamReader(connectionResp.getInputStream()));
-            String resp;
-            while ((resp = br.readLine()) != null) {
-                strCurrentLine += resp;
-            }
-            ObjectMapper mapper = new ObjectMapper();
-            Map mapRequest = mapper.readValue(strCurrentLine, Map.class);
-            return ((Map)mapRequest.get("data")).get("link").toString();
-        }
-        throw new Exception("Falha ao fazer upload da imagem.");
-    }
 }
