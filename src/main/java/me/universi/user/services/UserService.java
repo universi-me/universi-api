@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.List;
 import me.universi.Sys;
+import me.universi.group.services.GroupService;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
 import me.universi.user.entities.User;
@@ -108,7 +109,7 @@ public class UserService implements UserDetailsService {
         return findFirstById(UUID.fromString(id));
     }
 
-    public void createUser(User user) throws UserException {
+    public void createUser(User user) throws Exception {
         if (user==null) {
             throw new UserException("Usuario está vazio!");
         } else if (user.getUsername()==null) {
@@ -122,6 +123,12 @@ public class UserService implements UserDetailsService {
             Profile userProfile = new Profile();
             userProfile.setUser(user);
             profileService.save(userProfile);
+            try {
+                // add organization to user profile
+                GroupService groupService = GroupService.getInstance();
+                groupService.addParticipantToGroup(groupService.getOrganizationBasedInDomain(), userProfile);
+            } catch (Exception ignored) {
+            }
             user.setProfile(userProfile);
         }
     }
@@ -299,10 +306,13 @@ public class UserService implements UserDetailsService {
         if (userSession != null) {
             if(userNeedAnProfile(userSession)) {
                 // go to user profile edit
-                return "/profile/" + userSession.getUsername() + "/editar";
+                return "/manage-profile";
             } else {
-                // go to user profile
-                return "/profile/" + userSession.getUsername();
+                try {
+                    return "/group/" + GroupService.getInstance().getOrganizationBasedInDomain().getNickname();
+                } catch (Exception e) {
+                    return "/profile/" + userSession.getUsername();
+                }
             }
         }
 
