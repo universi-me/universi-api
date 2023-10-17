@@ -1,11 +1,10 @@
-package me.universi.curriculum.profileExperience.servicies;
+package me.universi.curriculum.experience.servicies;
 
-import me.universi.curriculum.education.entities.Education;
-import me.universi.curriculum.profileExperience.entities.TypeExperience;
-import me.universi.curriculum.profileExperience.repositories.TypeExperienceRepository;
-import me.universi.user.entities.User;
+import me.universi.curriculum.experience.entities.TypeExperience;
+import me.universi.curriculum.experience.repositories.TypeExperienceRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -43,4 +42,20 @@ public class TypeExperienceService {
             }
         });
     }
+    public void deleteLogic(UUID id) throws Exception {
+        TypeExperience typeExperience = findById(id).get();
+        typeExperience.setDeleted(true);
+        update(typeExperience, id);
+    }
+
+    public List<TypeExperience> findAllNotDeleted(){
+        List<TypeExperience> typeExperiences = new ArrayList<>();
+        for (TypeExperience type: typeExperienceRepository.findAll()) {
+            if (!type.getDeleted()){
+                typeExperiences.add(type);
+            }
+        }
+        return typeExperiences;
+    }
+
 }

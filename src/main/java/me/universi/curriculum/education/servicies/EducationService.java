@@ -33,7 +33,6 @@ public class EducationService {
 
     public Education save(Education education) {
         try {
-            User user = userService.getUserInSession();
             return educationRepository.saveAndFlush(education);
         } catch (Exception e) {
             System.out.println(e);
@@ -87,8 +86,9 @@ public class EducationService {
         profileService.save(profile);
     }
 
-    public void deleteLogic(UUID id){
+    public void deleteLogic(UUID id) throws Exception {
         Education education = findById(id).get();
         education.setIsDeleted(true);
+        update(education, id);
     }
 }

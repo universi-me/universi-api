@@ -1,4 +1,4 @@
-package me.universi.curriculum.profileExperience.entities;
+package me.universi.curriculum.experience.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Column;
@@ -35,7 +35,7 @@ public class TypeExperience {
     private Boolean isDeleted;
 
     public TypeExperience(){
-
+        this.isDeleted = false;
     }
 
     public TypeExperience(String name){

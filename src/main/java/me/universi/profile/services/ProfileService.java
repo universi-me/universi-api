@@ -1,6 +1,7 @@
 package me.universi.profile.services;
 
 import me.universi.curriculum.education.entities.Education;
+import me.universi.curriculum.experience.entities.Experience;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.exceptions.ProfileException;
 import me.universi.profile.repositories.PerfilRepository;
@@ -9,6 +10,7 @@ import me.universi.user.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
 
@@ -72,9 +74,24 @@ public class ProfileService {
         return profileGet;
     }
 
-    public Collection<Education> findEducationByProfile(User user){
-        Profile profile = user.getProfile();
-        return profile.getEducations();
+    public Collection<Education> findEducationByProfile(Profile profile){
+        Collection<Education> educationsActive = new ArrayList<>();
+        for (Education education: profile.getEducations()) {
+            if (!education.getIsDeleted()){
+                educationsActive.add(education);
+            }
+        }
+        return educationsActive;
+    }
+
+    public Collection<Experience> findExperienceByProfile(Profile profile){
+        Collection<Experience> experiencesActive = new ArrayList<>();
+        for (Experience experience: profile.getExperiences()) {
+            if (!experience.getDeleted()){
+                experiencesActive.add(experience);
+            }
+        }
+        return experiencesActive;
     }
 
     // search the first 5 containing the string uppercase or lowercase

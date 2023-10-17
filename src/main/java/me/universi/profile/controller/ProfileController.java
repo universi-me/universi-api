@@ -1,9 +1,7 @@
 package me.universi.profile.controller;
 
-import java.net.URI;
 import me.universi.api.entities.Response;
 import me.universi.capacity.service.CapacityService;
-import me.universi.group.entities.Group;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.enums.Gender;
 import me.universi.profile.exceptions.ProfileException;
@@ -14,10 +12,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.net.URI;
+import java.util.Map;
 
 @RestController
 @RequestMapping(value = "/api/profile")
@@ -196,11 +201,18 @@ public class ProfileController {
     @ResponseBody
     public Response profile_educations(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
-
-            Profile profileGet = profileService.getProfileByUserIdOrUsername(body.get("profileId"), body.get("username"));
-
-            response.body.put("educations", profileGet.getEducations());
-
+                Profile profileGet = profileService.getProfileByUserIdOrUsername(body.get("profileId"), body.get("username"));
+                response.body.put("educations", profileService.findEducationByProfile(profileGet));
         });
     }
+
+    @PostMapping(value = "/experiences", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response profile_experiences(@RequestBody Map<String, Object> body) {
+        return Response.buildResponse(response -> {
+            Profile profileGet = profileService.getProfileByUserIdOrUsername(body.get("profileId"), body.get("username"));
+            response.body.put("experiences", profileService.findExperienceByProfile(profileGet));
+        });
+    }
+
 }

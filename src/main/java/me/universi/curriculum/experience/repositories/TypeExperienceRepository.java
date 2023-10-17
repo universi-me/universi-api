@@ -1,6 +1,6 @@
-package me.universi.curriculum.profileExperience.repositories;
+package me.universi.curriculum.experience.repositories;
 
-import me.universi.curriculum.profileExperience.entities.TypeExperience;
+import me.universi.curriculum.experience.entities.TypeExperience;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
