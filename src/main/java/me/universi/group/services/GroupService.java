@@ -1,5 +1,6 @@
 package me.universi.group.services;
 
+import java.net.URL;
 import me.universi.Sys;
 import me.universi.group.entities.Group;
 import me.universi.group.exceptions.GroupException;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.function.Predicate;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 @Service
 public class GroupService {
@@ -367,4 +370,17 @@ public class GroupService {
     public Collection<Group> findTop5ByNameContainingIgnoreCase(String name){
         return groupRepository.findTop5ByNameContainingIgnoreCase(name);
     }
+
+    public Group getOrganizationBasedInDomain() throws Exception {
+        ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+        URL requestUrl = new URL(attr.getRequest().getRequestURL().toString());
+        String organizationId = requestUrl.getHost().split("\\.")[0];
+        Group organizationG = findFirstByRootGroupAndNicknameIgnoreCase(true, organizationId.toLowerCase());
+        if(organizationG == null) {
+            throw new Exception("Organização não encontrada.");
+        }
+        return organizationG;
+    }
+
+
 }
