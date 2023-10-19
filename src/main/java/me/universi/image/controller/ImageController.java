@@ -1,20 +1,16 @@
 package me.universi.image.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import me.universi.api.entities.Response;
 import me.universi.image.entities.Image;
 import me.universi.image.exceptions.ImageException;
-import me.universi.image.repositories.ImageRepository;
 import me.universi.image.services.ImageService;
-import me.universi.user.services.UserService;
-import me.universi.util.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,11 +21,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -58,8 +49,9 @@ public class ImageController {
     }
 
     // get image from filesystem
-    @GetMapping(value = "/img/imagem/{image}.jpg", produces = MediaType.IMAGE_JPEG_VALUE)
+    @GetMapping(value = "/img/imagem/{image}.jpg", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     @ResponseBody
+    @Cacheable("img")
     public ResponseEntity<InputStreamResource> getImageFromFilesystem(@PathVariable("image") String nameOfImage) {
         try {
 
@@ -67,7 +59,12 @@ public class ImageController {
             if(!filename.contains("..") && !filename.contains("/")) {
                 InputStreamResource targetStream = imageService.getImageFromFilesystem(filename);
                 if(targetStream != null) {
-                    return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(targetStream);
+                    return ResponseEntity
+                            .ok()
+                            .contentLength(targetStream.contentLength())
+                            .contentType(MediaType.IMAGE_JPEG)
+                            .cacheControl(CacheControl.maxAge(365, TimeUnit.DAYS))
+                            .body(targetStream);
                 }
             }
             return ResponseEntity.notFound().build();
@@ -80,12 +77,18 @@ public class ImageController {
     // get image from database
     @GetMapping(value = "/img/store/{imageId}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     @ResponseBody
+    @Cacheable("img")
     public ResponseEntity<InputStreamResource> getImageFromDatabase(@PathVariable("imageId") UUID imageId) {
         try {
             Image img = imageService.findFirstById(imageId);
             if(img != null) {
                 InputStream targetStream = new ByteArrayInputStream(img.getData());
-                return ResponseEntity.ok().contentType(MediaType.valueOf(img.getContentType())).body(new InputStreamResource(targetStream));
+                return ResponseEntity
+                        .ok()
+                        .contentLength(img.getSize())
+                        .contentType(MediaType.valueOf(img.getContentType()))
+                        .cacheControl(CacheControl.maxAge(365, TimeUnit.DAYS))
+                        .body(new InputStreamResource(targetStream));
             }
             return ResponseEntity.notFound().build();
         }catch (Exception e) {
