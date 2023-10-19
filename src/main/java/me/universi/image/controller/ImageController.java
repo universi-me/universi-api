@@ -61,6 +61,7 @@ public class ImageController {
                 if(targetStream != null) {
                     return ResponseEntity
                             .ok()
+                            .contentLength(targetStream.contentLength())
                             .contentType(MediaType.IMAGE_JPEG)
                             .cacheControl(CacheControl.maxAge(365, TimeUnit.DAYS))
                             .body(targetStream);
