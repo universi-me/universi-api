@@ -49,7 +49,7 @@ public class ImageController {
     }
 
     // get image from filesystem
-    @GetMapping(value = "/img/imagem/{image}.jpg", produces = MediaType.IMAGE_JPEG_VALUE)
+    @GetMapping(value = "/img/imagem/{image}.jpg", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     @ResponseBody
     @Cacheable("img")
     public ResponseEntity<InputStreamResource> getImageFromFilesystem(@PathVariable("image") String nameOfImage) {
@@ -59,8 +59,8 @@ public class ImageController {
             if(!filename.contains("..") && !filename.contains("/")) {
                 InputStreamResource targetStream = imageService.getImageFromFilesystem(filename);
                 if(targetStream != null) {
-                    return ResponseEntity.
-                            ok()
+                    return ResponseEntity
+                            .ok()
                             .contentType(MediaType.IMAGE_JPEG)
                             .cacheControl(CacheControl.maxAge(365, TimeUnit.DAYS))
                             .body(targetStream);
