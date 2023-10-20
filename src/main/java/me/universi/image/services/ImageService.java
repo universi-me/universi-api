@@ -15,9 +15,8 @@ import me.universi.user.services.UserService;
 import me.universi.util.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import me.universi.image.repositories.ImageRepository;
 import org.springframework.web.multipart.MultipartFile;
@@ -96,11 +95,10 @@ public class ImageService {
         throw new ImageException("Falha ao salvar imagem.");
     }
 
-    public InputStreamResource getImageFromFilesystem(String filename) throws Exception {
+    public Resource getImageFromFilesystem(String filename) throws Exception {
         File initialFile = new File(env.getProperty("PATH_IMAGE_SAVE"), filename);
         if(initialFile.exists() && !initialFile.isDirectory()) {
-            InputStream targetStream = new FileInputStream(initialFile);
-            return new InputStreamResource(targetStream);
+            return new FileSystemResource(initialFile);
         }
         return null;
     }

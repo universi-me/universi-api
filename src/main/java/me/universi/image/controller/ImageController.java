@@ -1,6 +1,5 @@
 package me.universi.image.controller;
 
-import java.io.*;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import me.universi.api.entities.Response;
@@ -9,7 +8,8 @@ import me.universi.image.exceptions.ImageException;
 import me.universi.image.services.ImageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -52,19 +52,21 @@ public class ImageController {
     @GetMapping(value = "/img/imagem/{image}.jpg", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     @ResponseBody
     @Cacheable("img")
-    public ResponseEntity<InputStreamResource> getImageFromFilesystem(@PathVariable("image") String nameOfImage) {
+    public ResponseEntity<Resource> getImageFromFilesystem(@PathVariable("image") String nameOfImage) {
         try {
 
             String filename = nameOfImage.replaceAll("[^a-f0-9]", "");
             if(!filename.contains("..") && !filename.contains("/")) {
-                InputStreamResource targetStream = imageService.getImageFromFilesystem(filename);
-                if(targetStream != null) {
+
+                Resource imageResource = imageService.getImageFromFilesystem(filename);
+
+                if(imageResource != null) {
                     return ResponseEntity
                             .ok()
-                            .contentLength(targetStream.contentLength())
+                            .contentLength(imageResource.contentLength())
                             .contentType(MediaType.IMAGE_JPEG)
                             .cacheControl(CacheControl.maxAge(365, TimeUnit.DAYS))
-                            .body(targetStream);
+                            .body(imageResource);
                 }
             }
             return ResponseEntity.notFound().build();
@@ -78,17 +80,20 @@ public class ImageController {
     @GetMapping(value = "/img/store/{imageId}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     @ResponseBody
     @Cacheable("img")
-    public ResponseEntity<InputStreamResource> getImageFromDatabase(@PathVariable("imageId") UUID imageId) {
+    public ResponseEntity<Resource> getImageFromDatabase(@PathVariable("imageId") UUID imageId) {
         try {
             Image img = imageService.findFirstById(imageId);
             if(img != null) {
-                InputStream targetStream = new ByteArrayInputStream(img.getData());
+
+                byte[] imageData = img.getData();
+                ByteArrayResource resource = new ByteArrayResource(imageData);
+
                 return ResponseEntity
                         .ok()
-                        .contentLength(img.getSize())
+                        .contentLength(resource.contentLength())
                         .contentType(MediaType.valueOf(img.getContentType()))
                         .cacheControl(CacheControl.maxAge(365, TimeUnit.DAYS))
-                        .body(new InputStreamResource(targetStream));
+                        .body(resource);
             }
             return ResponseEntity.notFound().build();
         }catch (Exception e) {
