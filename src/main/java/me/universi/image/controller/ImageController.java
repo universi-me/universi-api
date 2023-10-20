@@ -1,17 +1,14 @@
 package me.universi.image.controller;
 
-import java.io.*;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import me.universi.api.entities.Response;
 import me.universi.image.entities.Image;
 import me.universi.image.exceptions.ImageException;
 import me.universi.image.services.ImageService;
-import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
@@ -93,7 +90,7 @@ public class ImageController {
 
                 return ResponseEntity
                         .ok()
-                        .contentLength(img.getSize())
+                        .contentLength(resource.contentLength())
                         .contentType(MediaType.valueOf(img.getContentType()))
                         .cacheControl(CacheControl.maxAge(365, TimeUnit.DAYS))
                         .body(resource);
