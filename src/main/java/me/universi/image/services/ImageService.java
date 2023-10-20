@@ -98,7 +98,7 @@ public class ImageService {
     public Resource getImageFromFilesystem(String filename) throws Exception {
         File initialFile = new File(env.getProperty("PATH_IMAGE_SAVE"), filename);
         if(initialFile.exists() && !initialFile.isDirectory()) {
-            return new FileSystemResource(filename);
+            return new FileSystemResource(initialFile);
         }
         return null;
     }
