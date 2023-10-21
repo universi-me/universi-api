@@ -197,6 +197,7 @@ public class CapacityController {
             Object image =       body.get("image");
             Object description = body.get("description");
             Object rating =      body.get("rating");
+            Object type =        body.get("type");
 
             // id or array of ids
             Object addCategoriesByIds =    body.get("addCategoriesByIds");
@@ -243,6 +244,12 @@ public class CapacityController {
                 String ratingStr = String.valueOf(rating);
                 if(!ratingStr.isEmpty()) {
                     content.setRating(Integer.parseInt(ratingStr));
+                }
+            }
+            if(type != null){
+                String typeStr = String.valueOf(type);
+                if(!typeStr.isEmpty()){
+                    content.setType(typeStr);
                 }
             }
 
