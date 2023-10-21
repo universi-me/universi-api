@@ -183,7 +183,7 @@ public class CompetenceController {
                 throw new CompetenceException("Competência não encontrada.");
             }
 
-            competenceService.delete(competence);
+            competenceService.deleteLogico(competence);
 
             response.message = "Competência removida";
             response.success = true;

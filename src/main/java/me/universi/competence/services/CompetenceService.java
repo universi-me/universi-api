@@ -52,8 +52,8 @@ public class CompetenceService {
         return findFirstById(UUID.fromString(id));
     }
 
-    public void delete(Competence competence) {
-        competenceRepository.delete(competence);
+    public void deleteLogico(Competence competence) {
+        competence.setDeleted(true);
     }
 
     public List<Competence> findAll() {
