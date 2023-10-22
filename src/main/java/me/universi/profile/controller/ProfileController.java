@@ -74,14 +74,26 @@ public class ProfileController {
             }
 
             if(name != null) {
-                profileGet.setFirstname(String.valueOf(name));
+                String nameString = String.valueOf(name);
+                if(nameString.isEmpty()) {
+                    throw new ProfileException("O nome não pode estar vazio.");
+                } else if(nameString.length() > 50) {
+                    throw new ProfileException("O nome não pode ter mais de 50 caracteres.");
+                }
+                profileGet.setFirstname(nameString);
             }
             if(lastname != null) {
-                profileGet.setLastname(String.valueOf(lastname));
+                String lastnameString = String.valueOf(lastname);
+                if(lastnameString.isEmpty()) {
+                    throw new ProfileException("O sobrenome não pode estar vazio.");
+                } else if(lastnameString.length() > 50) {
+                    throw new ProfileException("O sobrenome não pode ter mais de 50 caracteres.");
+                }
+                profileGet.setLastname(lastnameString);
             }
             if(imageUrl != null) {
                 String imageUrlString = String.valueOf(imageUrl);
-                if(imageUrlString.length()>0) {
+                if(!imageUrlString.isEmpty()) {
                     profileGet.setImage(imageUrlString);
                 }
             }
@@ -90,7 +102,7 @@ public class ProfileController {
             }
             if(gender != null) {
                 String genderString = String.valueOf(gender);
-                if(genderString.length()>0) {
+                if(!genderString.isEmpty()) {
                     profileGet.setGender(Gender.valueOf(genderString));
                 }
             }
