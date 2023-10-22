@@ -101,7 +101,13 @@ public class ProfileController {
                 }
             }
             if(bio != null) {
-                profileGet.setBio(String.valueOf(bio));
+                String bioString = String.valueOf(bio);
+                if(!bioString.isEmpty()) {
+                    if (bioString.length() > 140) {
+                        throw new ProfileException("A biografia não pode ter mais de 140 caracteres.");
+                    }
+                    profileGet.setBio(bioString);
+                }
             }
             if(gender != null) {
                 String genderString = String.valueOf(gender);
