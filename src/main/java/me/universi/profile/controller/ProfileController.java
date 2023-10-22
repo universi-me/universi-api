@@ -94,6 +94,9 @@ public class ProfileController {
             if(imageUrl != null) {
                 String imageUrlString = String.valueOf(imageUrl);
                 if(!imageUrlString.isEmpty()) {
+                    if(imageUrlString.length() > 255) {
+                        throw new ProfileException("A URL da imagem não pode ter mais de 255 caracteres.");
+                    }
                     profileGet.setImage(imageUrlString);
                 }
             }
@@ -103,6 +106,9 @@ public class ProfileController {
             if(gender != null) {
                 String genderString = String.valueOf(gender);
                 if(!genderString.isEmpty()) {
+                    if(genderString.length() > 4) {
+                        throw new ProfileException("O gênero não pode ter mais de 4 caractere.");
+                    }
                     profileGet.setGender(Gender.valueOf(genderString));
                 }
             }
