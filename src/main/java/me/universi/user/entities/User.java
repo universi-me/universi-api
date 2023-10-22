@@ -233,7 +233,7 @@ public class User implements UserDetails, Serializable {
 
     @Transient
     public boolean isNeedProfile() {
-        return UserService.getInstance().userNeedAnProfile(this);
+        return UserService.getInstance().userNeedAnProfile(this, false);
     }
 
     @Override
