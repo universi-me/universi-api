@@ -72,7 +72,7 @@ public class UserController {
             if(userService.userIsLoggedIn()) {
                 userService.logout();
                 response.success = true;
-                response.message = "Usuário deslogado com sucesso.";
+                response.message = "A sua sessão foi finalizada com sucesso.";
                 response.redirectTo = userService.getUrlWhenLogout();
                 return;
             }
@@ -416,7 +416,7 @@ public class UserController {
 
             userService.sendRecoveryPasswordEmail(user);
 
-            response.message = "Email de recuperação de senha enviado com sucesso, verifique a sua caixa de email.";
+            response.message = "Enviamos um link de recuperação da senha para seu email cadastrado.";
 
             response.alertOptions.put("type", "success");
             response.alertOptions.put("modalAlert", true);
