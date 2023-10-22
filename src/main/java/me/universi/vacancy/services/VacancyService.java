@@ -2,6 +2,7 @@ package me.universi.vacancy.services;
 
 import me.universi.competence.entities.Competence;
 import me.universi.competence.services.CompetenceService;
+import me.universi.curriculum.education.entities.Education;
 import me.universi.profile.services.ProfileService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
@@ -9,6 +10,9 @@ import me.universi.vacancy.entities.Vacancy;
 import me.universi.vacancy.repositories.VacancyRepository;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -67,19 +71,27 @@ public class VacancyService {
         return findFirstById(UUID.fromString(id));
     }
 
-    /*Refatorar*/
-    public Vacancy update(Vacancy newVacancy, UUID id) throws Exception{
-        return vacancyRepository.findById(id).map(vacancy -> {
-            vacancy.setDescription(newVacancy.getDescription());
-            return vacancyRepository.saveAndFlush(vacancy);
-        }).orElseGet(()->{
-            try {
-                User user = userService.getUserInSession();
-                newVacancy.setProfile(user.getProfile());
-                return vacancyRepository.saveAndFlush(newVacancy);
-            }catch (Exception e){
-                return null;
+    public void deleteLogic(UUID id) throws Exception {
+        Vacancy vacancy = findFirstById(id);
+        vacancy.setDeleted(true);
+        save(vacancy);
+    }
+
+    public List<Vacancy> findAllActive(){
+        List<Vacancy> vacanciesActive = new ArrayList<>();
+        for(Vacancy vacancy: findAll()){
+            refreshActive(vacancy);
+            if(vacancy.getActive()){
+                vacanciesActive.add(vacancy);
             }
-        });
+        }
+        return vacanciesActive;
+    }
+
+    private void refreshActive(Vacancy vacancy){
+        Date dataAtual = new Date(); // Isso pega a data e hora atual.
+        if (dataAtual.after(vacancy.getEndRegistrationDate())){
+            vacancy.setActive(false);
+        }
     }
 }
