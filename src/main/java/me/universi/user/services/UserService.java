@@ -168,11 +168,11 @@ public class UserService implements UserDetailsService {
     }
 
     public boolean usernameRegex(String username) {
-        return matchRegex(username, "^[a-z0-9_.-]+$");
+        return matchRegex(username, "^[a-z0-9_.-].{1,49}$");
     }
 
     public boolean passwordRegex(String password) {
-        return matchRegex(password, "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[^A-Za-zçÇ]).{8,}$");
+        return matchRegex(password, "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[^A-Za-zçÇ]).{8,255}$");
     }
 
     public boolean emailRegex(String email) {
