@@ -2,9 +2,12 @@ package me.universi.vacancy.controller;
 
 import me.universi.api.entities.Response;
 import me.universi.competence.entities.Competence;
+import me.universi.competence.entities.CompetenceType;
 import me.universi.competence.enums.Level;
 import me.universi.competence.exceptions.CompetenceException;
+import me.universi.competence.services.CompetenceTypeService;
 import me.universi.curriculum.education.exceptions.EducationException;
+import me.universi.profile.services.ProfileService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import me.universi.vacancy.entities.Vacancy;
@@ -27,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.xml.bind.ValidationException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -39,11 +43,14 @@ public class VacancyController {
     public VacancyService vacancyService;
     private UserService userService;
     private TypeVacancyService typeVacancyService;
+    private CompetenceTypeService competenceTypeService;
 
-    public VacancyController(VacancyService vacancyService, UserService userService, TypeVacancyService typeVacancyService){
+    public VacancyController(VacancyService vacancyService, UserService userService, TypeVacancyService typeVacancyService,
+                             CompetenceTypeService competenceTypeService){
         this.vacancyService = vacancyService;
         this.userService = userService;
         this.typeVacancyService = typeVacancyService;
+        this.competenceTypeService = competenceTypeService;
     }
 
     @PostMapping(value = "/criar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -267,4 +274,39 @@ public class VacancyController {
             return response;
         }
     }
+
+    @PostMapping(value = "/filtrar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response filtrar(@RequestBody Map<String, Object> body) {
+        Response response = new Response();
+        try {
+
+            List<Vacancy> vacancies;
+
+            String competenceTypeId = (String)body.get("competenceTypeId");
+            if(competenceTypeId == null) {
+                throw new CompetenceException("Parametro vacancyId é nulo.");
+            }
+
+            Level level = (Level)body.get("level");
+            if(level == null) {
+                throw new CompetenceException("Parametro level é nulo.");
+            }
+
+            CompetenceType competenceType = competenceTypeService.findFirstById(competenceTypeId);
+
+            vacancies = vacancyService.findByCompetenceTypeAndLevel(competenceType, level);
+
+            response.body.put("lista vagas por tipo da competencia e nivel", vacancies);
+
+            response.message = "Operação realizada com exito.";
+            response.success = true;
+            return response;
+
+        } catch (Exception e) {
+            response.message = e.getMessage();
+            return response;
+        }
+    }
+
 }

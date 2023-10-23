@@ -1,6 +1,8 @@
 package me.universi.vacancy.services;
 
 import me.universi.competence.entities.Competence;
+import me.universi.competence.entities.CompetenceType;
+import me.universi.competence.enums.Level;
 import me.universi.competence.services.CompetenceService;
 import me.universi.curriculum.education.entities.Education;
 import me.universi.profile.services.ProfileService;
@@ -88,10 +90,24 @@ public class VacancyService {
         return vacanciesActive;
     }
 
+    /*Colocar essa funcao em um timer futuramente 21/10/23*/
     private void refreshActive(Vacancy vacancy){
         Date dataAtual = new Date(); // Isso pega a data e hora atual.
         if (dataAtual.after(vacancy.getEndRegistrationDate())){
             vacancy.setActive(false);
         }
     }
+
+    public List<Vacancy> findByCompetenceTypeAndLevel(CompetenceType competenceType, Level level){
+        List<Vacancy> vacancies = new ArrayList<>();
+        for (Vacancy vacancy: findAllActive()) {
+            for (Competence competence : vacancy.getCompetenceRequired()) {
+                if (competence.getCompetenceType().equals(competenceType) && competence.getLevel().equals(level)){
+                    vacancies.add(vacancy);
+                }
+            }
+        }
+        return vacancies;
+    }
+
 }
