@@ -88,7 +88,7 @@ public class GroupService {
         }
 
         Profile profile = user.getProfile();
-        if (userService.userNeedAnProfile(user)) {
+        if (userService.userNeedAnProfile(user, true)) {
             throw new GroupException("Você precisa criar um Perfil.");
         } else if(!Objects.equals(group.getAdmin().getId(), profile.getId())) {
             if(!userService.isUserAdmin(user)) {

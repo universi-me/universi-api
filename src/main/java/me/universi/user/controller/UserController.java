@@ -86,15 +86,8 @@ public class UserController {
     @ResponseBody
     public Response available_check(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
-
             String username = (String)body.get("username");
-
-            if(!userService.usernameRegex(username)) {
-                throw new UserException("Nome de usuário está com formato inválido!");
-            }
-
-            response.success = !userService.usernameExist(username);
-
+            response.success = userService.usernameRegex(username) && !userService.usernameExist(username);
         });
     }
 

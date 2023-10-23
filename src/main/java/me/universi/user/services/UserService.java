@@ -281,9 +281,12 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    public boolean userNeedAnProfile(User user) {
+    public boolean userNeedAnProfile(User user, boolean checkAdmin) {
         try {
-            return (user.getProfile() == null || user.getProfile().getFirstname() == null) && !isUserAdmin(user);
+            if(checkAdmin && isUserAdmin(user)) {
+                return false;
+            }
+            return (user.getProfile() == null || user.getProfile().getFirstname() == null);
         } catch (Exception e) {
             return true;
         }
@@ -304,7 +307,7 @@ public class UserService implements UserDetailsService {
 
         User userSession = getUserInSession();
         if (userSession != null) {
-            if(userNeedAnProfile(userSession)) {
+            if(userNeedAnProfile(userSession, true)) {
                 // go to user profile edit
                 return "/manage-profile";
             } else {
