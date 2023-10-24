@@ -68,6 +68,11 @@ public class VacancyController {
                 throw new CompetenceException("Parametro typeVacancyId é nulo.");
             }
 
+            List<Competence> competence = (List<Competence>) body.get("competence");
+            if (competence == null){
+                throw new VacancyException("Paramentro competence é nulo.");
+            }
+
             String title = (String)body.get("title");
             if(title == null) {
                 throw new CompetenceException("Parametro title é nulo.");
@@ -103,6 +108,7 @@ public class VacancyController {
             newVacancy.setTitle(title);
             newVacancy.setDescription(description);
             newVacancy.setPrerequisites(prerequisites);
+            newVacancy.setCompetenceRequired(competence);
             newVacancy.setRegistrationDate(registrationDate);
             newVacancy.setEndRegistrationDate(endRegistrationDate);
 
@@ -308,5 +314,41 @@ public class VacancyController {
             return response;
         }
     }
+
+    @PostMapping(value = "/adicionarCompetence", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response addCompetence(@RequestBody Map<String, Object> body) {
+        Response response = new Response();
+        try {
+
+            Vacancy vacancie;
+
+            String vacancyId = (String)body.get("vacancyId");
+            if(vacancyId == null) {
+                throw new CompetenceException("Parametro vacancyId é nulo.");
+            }
+
+            List<Competence> competence = (List<Competence>) body.get("competence");
+            if (competence == null){
+                throw new VacancyException("Paramentro competence é nulo.");
+            }
+
+
+            vacancie = vacancyService.findFirstById(vacancyId);
+
+            vacancie.getCompetenceRequired().addAll(competence);
+
+            response.body.put("lista de competencia adicionada", vacancie);
+
+            response.message = "Operação realizada com exito.";
+            response.success = true;
+            return response;
+
+        } catch (Exception e) {
+            response.message = e.getMessage();
+            return response;
+        }
+    }
+
 
 }
