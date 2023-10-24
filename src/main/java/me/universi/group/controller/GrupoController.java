@@ -475,6 +475,18 @@ public class GrupoController {
         });
     }
 
+    @PostMapping(value = "/current-organization", consumes = MediaType.ALL_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response currentOrganization() {
+        return Response.buildResponse(response -> {
+            try {
+                response.body.put("organization", groupService.getOrganizationBasedInDomain());
+            } catch (Exception e) {
+                response.body.put("organization", null);
+            }
+        });
+    }
+
     // get image of group
     @GetMapping(value = "/image/{groupId}")
     public ResponseEntity<Void> get_image(@PathVariable String groupId) {
