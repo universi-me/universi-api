@@ -60,7 +60,11 @@ public class Competence {
     @Column(name = "created_at")
     private Date creationDate;
 
+    @Column(name = "is_deleted")
+    private Boolean isDeleted;
+
     public Competence() {
+        this.isDeleted = false;
     }
 
 
@@ -72,6 +76,8 @@ public class Competence {
         this.level = level;
         this.startDate = startDate;
         this.endDate = endDate;
+        this.isDeleted = false;
+
     }
 
     public Competence(CompetenceType competenceType, String description, String title, Level level, Date startDate, Boolean presentDate) {
@@ -81,12 +87,15 @@ public class Competence {
         this.level = level;
         this.startDate = startDate;
         this.presentDate = presentDate;
+        this.isDeleted = false;
+
     }
 
     public Competence(CompetenceType competenceType, String title, Level level) {
         this.competenceType = competenceType;
         this.title = title;
         this.level = level;
+        this.isDeleted = false;
     }
 
     public UUID getId() {
@@ -136,4 +145,12 @@ public class Competence {
     public String getTitle() { return title; }
 
     public void setTitle(String title) { this.title = title; }
+
+    public Boolean getDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        isDeleted = deleted;
+    }
 }
