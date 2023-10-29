@@ -10,6 +10,7 @@ import me.universi.capacity.entidades.Category;
 import me.universi.capacity.entidades.ContentStatus;
 import me.universi.capacity.entidades.Folder;
 import me.universi.capacity.enums.ContentStatusType;
+import me.universi.capacity.enums.ContentType;
 import me.universi.user.services.UserService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -137,13 +138,21 @@ public class CapacityController {
             if(title == null || String.valueOf(title).isEmpty()) {
                 throw new CapacityException("Título do conteúdo não informado.");
             }
+            if(type == null || String.valueOf(type).isEmpty()) {
+                throw new CapacityException("Tipo do conteúdo não informado.");
+            }
 
             Content content = new Content();
             content.setAuthor(UserService.getInstance().getUserInSession().getProfile());
             content.setUrl(String.valueOf(url));
             content.setTitle(String.valueOf(title));
-            content.setType(String.valueOf(type));
 
+            if(type != null) {
+                String typeStr = String.valueOf(type);
+                if(!typeStr.isEmpty()) {
+                    content.setType(ContentType.valueOf(typeStr));
+                }
+            }
             if(image != null) {
                 String imageStr = String.valueOf(image);
                 if(!imageStr.isEmpty()) {
@@ -246,10 +255,10 @@ public class CapacityController {
                     content.setRating(Integer.parseInt(ratingStr));
                 }
             }
-            if(type != null){
+            if(type != null) {
                 String typeStr = String.valueOf(type);
-                if(!typeStr.isEmpty()){
-                    content.setType(typeStr);
+                if(!typeStr.isEmpty()) {
+                    content.setType(ContentType.valueOf(typeStr));
                 }
             }
 
