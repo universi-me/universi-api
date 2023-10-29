@@ -13,6 +13,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Transient;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -21,6 +23,7 @@ import jakarta.validation.constraints.Size;
 import java.util.Collection;
 import java.util.Date;
 import java.util.UUID;
+import me.universi.capacity.enums.ContentType;
 import me.universi.profile.entities.Profile;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -70,8 +73,8 @@ public class Content {
     private Profile author;
 
     @Column(name = "type")
-    @Size(max = 100)
-    private String type;
+    @Enumerated(EnumType.STRING)
+    public ContentType type;
 
     @Transient
     public ContentStatus contentStatus;
@@ -159,11 +162,11 @@ public class Content {
         this.author = author;
     }
 
-    public void setType(String type){
+    public void setType(ContentType type){
         this.type = type;
     }
 
-    public String getType(){
+    public ContentType getType(){
         return type;
     }
 
