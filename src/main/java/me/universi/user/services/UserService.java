@@ -1,16 +1,14 @@
 package me.universi.user.services;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.util.Collection;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.regex.Pattern;
 import me.universi.Sys;
 import me.universi.group.services.GroupService;
 import me.universi.profile.entities.Profile;
@@ -22,6 +20,7 @@ import me.universi.user.repositories.UserRepository;
 import me.universi.util.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
@@ -48,10 +47,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import jakarta.servlet.http.HttpSession;
-
-import java.util.regex.Pattern;
-
 @Service
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
@@ -61,28 +56,23 @@ public class UserService implements UserDetailsService {
     private final SessionRegistry sessionRegistry;
     private final JavaMailSender emailSender;
     private final Executor emailExecutor;
-
-    @Value("${spring.profiles.active}")
-    private String PROFILE_ACTIVE;
+    private final Environment env;
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, ProfileService profileService, RoleHierarchyImpl roleHierarchy, SessionRegistry sessionRegistry, JavaMailSender emailSender) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, ProfileService profileService, RoleHierarchyImpl roleHierarchy, SessionRegistry sessionRegistry, JavaMailSender emailSender, Environment env) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.profileService = profileService;
         this.roleHierarchy = roleHierarchy;
         this.sessionRegistry = sessionRegistry;
         this.emailSender = emailSender;
+        this.env = env;
         this.emailExecutor = Executors.newFixedThreadPool(5);
     }
 
     // UserService bean instance via context
     public static UserService getInstance() {
         return Sys.context.getBean("userService", UserService.class);
-    }
-
-    public static boolean isProduction() {
-        return "prod".equals(getInstance().PROFILE_ACTIVE);
     }
 
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -478,6 +468,10 @@ public class UserService implements UserDetailsService {
 
     // is account confirmed
     public boolean isAccountConfirmed(User user) {
-        return user.isInactive();
+        return !user.isInactive();
+    }
+
+    public boolean confirmAccountEnabled() {
+        return Boolean.parseBoolean(env.getProperty("SIGNUP_CONFIRMATION_ENABLED"));
     }
 }

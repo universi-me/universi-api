@@ -156,28 +156,26 @@ public class UserController {
                 throw new UserException("Email \""+email+"\" já esta cadastrado!");
             }
 
-            boolean isProd = UserService.isProduction();
-
             User user = new User();
             user.setName(username);
             user.setEmail(email);
-            if(isProd) {
+            if(userService.confirmAccountEnabled()) {
                 user.setInactive(true);
             }
             userService.setRawPasswordToUser(user, password, false);
 
             userService.createUser(user);
-            
-            if(isProd) {
+
+            if(userService.confirmAccountEnabled()) {
                 userService.sendConfirmAccountEmail(user);
             }
 
             response.success = true;
 
-            response.message = "Usuário registrado com sucesso, Enviamos um link de confirmação de conta para seu email cadastrado.";
+            response.message = userService.confirmAccountEnabled() ? "Usuário registrado com sucesso, Enviamos um link de confirmação de conta para seu email cadastrado." : "Usuário registrado com sucesso, efetue o login para continuar.";
 
-            response.alertOptions.put("title", "Confirmação de Conta");
-            response.alertOptions.put("icon", "info");
+            response.alertOptions.put("title", userService.confirmAccountEnabled() ? "Confirmação de Conta" : "Registro de Conta");
+            response.alertOptions.put("icon", userService.confirmAccountEnabled() ? "info" : "success");
             response.alertOptions.put("modalAlert", true);
             response.alertOptions.put("timer", null);
 
