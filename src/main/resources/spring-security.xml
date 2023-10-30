@@ -26,6 +26,8 @@
         <intercept-url pattern="/api/username-available" access="permitAll"/>
         <intercept-url pattern="/api/recovery-password" access="permitAll"/>
         <intercept-url pattern="/api/new-password" access="permitAll"/>
+        <intercept-url pattern="/api/confirm-account/*" access="permitAll"/>
+
 
         <intercept-url pattern="/api/swagger-ui.html" access="permitAll"/>
         <intercept-url pattern="/api/swagger-ui/**" access="permitAll"/>

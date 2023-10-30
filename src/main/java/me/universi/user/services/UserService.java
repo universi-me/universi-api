@@ -9,6 +9,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import me.universi.Sys;
 import me.universi.group.services.GroupService;
 import me.universi.profile.entities.Profile;
@@ -19,12 +21,14 @@ import me.universi.user.exceptions.UserException;
 import me.universi.user.repositories.UserRepository;
 import me.universi.util.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -56,6 +60,10 @@ public class UserService implements UserDetailsService {
     private final RoleHierarchyImpl roleHierarchy;
     private final SessionRegistry sessionRegistry;
     private final JavaMailSender emailSender;
+    private final Executor emailExecutor;
+
+    @Value("${spring.profiles.active}")
+    private String PROFILE_ACTIVE;
 
     @Autowired
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, ProfileService profileService, RoleHierarchyImpl roleHierarchy, SessionRegistry sessionRegistry, JavaMailSender emailSender) {
@@ -65,11 +73,16 @@ public class UserService implements UserDetailsService {
         this.roleHierarchy = roleHierarchy;
         this.sessionRegistry = sessionRegistry;
         this.emailSender = emailSender;
+        this.emailExecutor = Executors.newFixedThreadPool(5);
     }
 
     // UserService bean instance via context
     public static UserService getInstance() {
         return Sys.context.getBean("userService", UserService.class);
+    }
+
+    public static boolean isProduction() {
+        return "prod".equals(getInstance().PROFILE_ACTIVE);
     }
 
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -296,8 +309,10 @@ public class UserService implements UserDetailsService {
         String error = null;
         if (exception instanceof BadCredentialsException) {
             error = "Email ou Senha Inválidos";
+        } else if (exception instanceof DisabledException) {
+            error = "Conta Inativa";
         } else if(exception != null) {
-            error = exception.getLocalizedMessage();
+            error = exception.getClass().getName() + "--" + exception.getLocalizedMessage();
         }
         return error;
     }
@@ -389,15 +404,17 @@ public class UserService implements UserDetailsService {
     }
 
     public void sendSystemEmailToUser(UserDetails user, String subject, String text) throws UserException {
-        String email = ((User)user).getEmail();
-        if(email == null) {
+        String email = ((User) user).getEmail();
+        if (email == null) {
             throw new UserException("Usuário não possui um email.");
         }
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(email);
-        message.setSubject(subject);
-        message.setText(text);
-        emailSender.send(message);
+        emailExecutor.execute(() -> {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(((User) user).getEmail());
+            message.setSubject(subject);
+            message.setText(text);
+            emailSender.send(message);
+        });
     }
 
     // generate recovery password token sha256 for user
@@ -436,5 +453,31 @@ public class UserService implements UserDetailsService {
 
     public User getUserByRecoveryPasswordToken(String token) {
         return userRepository.findFirstByRecoveryPasswordToken(token).orElse(null);
+    }
+
+    //send confirmation signup account email to user
+    public void sendConfirmAccountEmail(User user) throws Exception {
+        String userIp = getRequest().getHeader("X-Forwarded-For");
+        URL requestUrl = new URL(getRequest().getRequestURL().toString());
+
+        String token = generateRecoveryPasswordToken(user);
+
+        String url = "https://" + requestUrl.getHost() + "/api/confirm-account/" + token;
+        String subject = "Universi.me - Confirmação de Conta";
+        String text = "Olá " + user.getUsername() + ",\n\n" +
+                "Seja bem-vindo(a) ao Universi.me, para continuar com o seu cadastro precisamos confirmar a sua conta do Universi.me.\n\n" +
+                "Para confirmar sua conta, clique no link abaixo:\n\n" +
+                url + "\n\n" +
+                "Se você não solicitou a confirmação de conta, por favor, ignore este email.\n\n" +
+                "Endereço IP: " + userIp + "\n\n" +
+                "Atenciosamente,\n" +
+                "Equipe Universi.me";
+
+        sendSystemEmailToUser(user, subject, text);
+    }
+
+    // is account confirmed
+    public boolean isAccountConfirmed(User user) {
+        return user.isInactive();
     }
 }
