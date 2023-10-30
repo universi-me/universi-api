@@ -172,7 +172,7 @@ public class UserController {
 
             response.success = true;
 
-            response.message = userService.confirmAccountEnabled() ? "Usuário registrado com sucesso, Enviamos um link de confirmação de conta para seu email cadastrado." : "Usuário registrado com sucesso, efetue o login para continuar.";
+            response.message = userService.confirmAccountEnabled() ? "Usuário registrado com sucesso, Enviamos um link de confirmação de conta para o seu email cadastrado." : "Usuário registrado com sucesso, efetue o login para continuar.";
 
             response.alertOptions.put("title", userService.confirmAccountEnabled() ? "Confirmação de Conta" : "Registro de Conta");
             response.alertOptions.put("icon", userService.confirmAccountEnabled() ? "info" : "success");
