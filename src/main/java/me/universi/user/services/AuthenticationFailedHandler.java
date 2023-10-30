@@ -30,6 +30,8 @@ public class AuthenticationFailedHandler extends SimpleUrlAuthenticationFailureH
 
             Response resp = Response.buildResponse(r -> {
                 r.status = 401;
+                r.alertOptions.put("icon", "warning");
+                r.alertOptions.put("title", "Falha na autenticação");
                 throw new UserException(userService.getLastSpringSecurityError(exception));
             });
 

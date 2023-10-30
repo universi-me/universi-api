@@ -24,10 +24,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -300,9 +297,15 @@ public class UserService implements UserDetailsService {
         if (exception instanceof BadCredentialsException) {
             error = "Email ou Senha Inválidos";
         } else if (exception instanceof DisabledException) {
-            error = "Conta Inativa";
+            error = "Conta Inativa, Tente recuperar conta.";
+        } else if (exception instanceof AccountExpiredException) {
+            error = "Conta Expirada";
+        } else if (exception instanceof LockedException) {
+            error = "Conta Bloqueada";
+        } else if (exception instanceof CredentialsExpiredException) {
+            error = "Conta com Credenciais Expirada";
         } else if(exception != null) {
-            error = exception.getClass().getName() + "--" + exception.getLocalizedMessage();
+            error = exception.getLocalizedMessage();
         }
         return error;
     }
