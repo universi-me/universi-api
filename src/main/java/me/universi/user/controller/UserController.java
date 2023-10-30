@@ -1,5 +1,8 @@
 package me.universi.user.controller;
 
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
 import java.util.Collections;
 import java.util.Map;
 
@@ -17,14 +20,11 @@ import me.universi.user.services.JWTService;
 import me.universi.user.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
@@ -61,6 +61,23 @@ public class UserController {
                 response.status = 401;
             }
 
+            HttpSession session = userService.getActiveSession();
+            if(session.getAttribute("account_confirmed") != null) {
+
+                response.success = true;
+                response.redirectTo = "/login";
+
+                response.message = session.getAttribute("message_account_confirmed").toString();
+
+                response.alertOptions.put("title", "Confirmação de Conta");
+                response.alertOptions.put("icon", "success");
+                response.alertOptions.put("modalAlert", true);
+                response.alertOptions.put("timer", null);
+
+                session.removeAttribute("account_confirmed");
+                session.removeAttribute("message_account_confirmed");
+            }
+
         });
     }
 
@@ -95,6 +112,8 @@ public class UserController {
     @ResponseBody
     public Response signup(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
+
+            response.alertOptions.put("title", "Registro de Conta");
 
             // check if register is enabled
             if(!Boolean.parseBoolean(environment.getProperty("SIGNUP_ENABLED"))) {
@@ -140,12 +159,25 @@ public class UserController {
             User user = new User();
             user.setName(username);
             user.setEmail(email);
+            if(userService.confirmAccountEnabled()) {
+                user.setInactive(true);
+            }
             userService.setRawPasswordToUser(user, password, false);
 
             userService.createUser(user);
 
+            if(userService.confirmAccountEnabled()) {
+                userService.sendConfirmAccountEmail(user);
+            }
+
             response.success = true;
-            response.message = "Usuário registrado com sucesso, efetue o login para completar o cadastro.";
+
+            response.message = userService.confirmAccountEnabled() ? "Usuário registrado com sucesso, Enviamos um link de confirmação de conta para seu email cadastrado." : "Usuário registrado com sucesso, efetue o login para continuar.";
+
+            response.alertOptions.put("title", userService.confirmAccountEnabled() ? "Confirmação de Conta" : "Registro de Conta");
+            response.alertOptions.put("icon", userService.confirmAccountEnabled() ? "info" : "success");
+            response.alertOptions.put("modalAlert", true);
+            response.alertOptions.put("timer", null);
 
         });
     }
@@ -446,13 +478,43 @@ public class UserController {
             }
 
             user.setRecoveryPasswordToken(null);
+            user.setInactive(false);
             userService.setRawPasswordToUser(user, newPassword, true);
+
 
 
             response.message = "Senha alterada com sucesso, efetue o login para continuar.";
             response.redirectTo = "/login";
 
         });
+    }
+
+    // confirm account
+    @GetMapping(value = "/confirm-account/{token}")
+    @ResponseBody
+    public ResponseEntity confirm_account(@PathVariable("token")String token) throws Exception {
+
+        URL requestUrl = new URL(userService.getRequest().getRequestURL().toString());
+
+        String baseUrl = "https://" + requestUrl.getHost();
+
+        HttpSession session = userService.getActiveSession();
+
+        User user = token==null ? null : userService.getUserByRecoveryPasswordToken(token);
+
+        if(user == null) {
+            session.setAttribute("message_account_confirmed", "Token de confirmação de conta inválido ou expirado!");
+            return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(baseUrl + "/login")).build();
+        }
+
+        user.setRecoveryPasswordToken(null);
+        user.setInactive(false);
+        userService.save(user);
+
+        session.setAttribute("account_confirmed", true);
+        session.setAttribute("message_account_confirmed", "Conta confirmada com sucesso, efetue o login para continuar.");
+
+        return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(baseUrl + "/login")).build();
     }
 
 
