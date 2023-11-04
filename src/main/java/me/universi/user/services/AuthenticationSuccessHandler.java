@@ -1,6 +1,7 @@
 package me.universi.user.services;
 
 import me.universi.api.entities.Response;
+import me.universi.profile.enums.Gender;
 import me.universi.user.entities.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -52,7 +53,12 @@ public class AuthenticationSuccessHandler extends SavedRequestAwareAuthenticatio
         if ("application/json".equals(request.getHeader("Content-Type"))) { // request via JSON
 
             Response responseBuild = Response.buildResponse(r -> {
-                r.message = "Usuário Logado com sucesso.";
+                if(user.getProfile() != null && user.getProfile().getGender() != Gender.O)
+                    r.message = (user.getProfile().getGender() == Gender.F ? "Bem-vinda, " : "Bem-vindo, ")+user.getProfile().getFirstname()+".";
+                else if (user.getProfile() != null && user.getProfile().getGender() == Gender.O)
+                    r.message = "Boas vindas, "+user.getProfile().getFirstname()+".";
+                else
+                    r.message = "Boas vindas, "+user.getName()+".";
                 r.redirectTo = userService.getUrlWhenLogin();
                 r.token = jwtService.buildTokenForUser(user);
                 r.body.put("user", user);
