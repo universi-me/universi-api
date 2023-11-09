@@ -449,7 +449,7 @@ public class UserService implements UserDetailsService {
     }
 
     //send confirmation signup account email to user
-    public void sendConfirmAccountEmail(User user) throws Exception {
+    public void sendConfirmAccountEmail(User user, boolean signup) throws Exception {
         String userIp = getRequest().getHeader("X-Forwarded-For");
         URL requestUrl = new URL(getRequest().getRequestURL().toString());
 
@@ -457,8 +457,9 @@ public class UserService implements UserDetailsService {
 
         String url = "https://" + requestUrl.getHost() + "/api/confirm-account/" + token;
         String subject = "Universi.me - Confirmação de Conta";
+        String messageExplain = (signup) ? "Seja bem-vindo(a) ao Universi.me, para continuar com o seu cadastro precisamos confirmar a sua conta do Universi.me." : "Você solicitou a confirmação de sua conta no Universi.me.";
         String text = "Olá " + user.getUsername() + ",\n\n" +
-                "Seja bem-vindo(a) ao Universi.me, para continuar com o seu cadastro precisamos confirmar a sua conta do Universi.me.\n\n" +
+                messageExplain + "\n\n" +
                 "Para confirmar sua conta, clique no link abaixo:\n\n" +
                 url + "\n\n" +
                 "Se você não solicitou a confirmação de conta, por favor, ignore este email.\n\n" +
@@ -471,7 +472,7 @@ public class UserService implements UserDetailsService {
 
     // is account confirmed
     public boolean isAccountConfirmed(User user) {
-        return !user.isInactive();
+        return user.isConfirmed();
     }
 
     public boolean confirmAccountEnabled() {
