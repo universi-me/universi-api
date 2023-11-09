@@ -443,7 +443,7 @@ public class UserController {
 
             response.message = "Enviamos um link de recuperação da senha para seu email cadastrado.";
 
-            response.alertOptions.put("type", "success");
+            response.alertOptions.put("icon", "success");
             response.alertOptions.put("modalAlert", true);
             response.alertOptions.put("timer", null);
 
@@ -507,7 +507,7 @@ public class UserController {
 
             response.message = "Enviamos um link de confirmação de conta para seu email cadastrado.";
 
-            response.alertOptions.put("type", "success");
+            response.alertOptions.put("icon", "info");
             response.alertOptions.put("modalAlert", true);
             response.alertOptions.put("timer", null);
 
