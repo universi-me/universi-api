@@ -167,7 +167,7 @@ public class UserController {
             userService.createUser(user);
 
             if(userService.confirmAccountEnabled()) {
-                userService.sendConfirmAccountEmail(user);
+                userService.sendConfirmAccountEmail(user, true);
             }
 
             response.success = true;
@@ -485,6 +485,31 @@ public class UserController {
 
             response.message = "Senha alterada com sucesso, efetue o login para continuar.";
             response.redirectTo = "/login";
+
+        });
+    }
+
+    // request confirm account
+    @PostMapping(value = "/confirm-account", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response request_confirm_account() {
+        return Response.buildResponse(response -> {
+
+            response.alertOptions.put("title", "Confirmação de Conta");
+
+            User user = userService.getUserInSession();
+
+            if(userService.isAccountConfirmed(user)) {
+                throw new UserException("Conta já confirmada!");
+            }
+
+            userService.sendConfirmAccountEmail(user, false);
+
+            response.message = "Enviamos um link de confirmação de conta para seu email cadastrado.";
+
+            response.alertOptions.put("type", "success");
+            response.alertOptions.put("modalAlert", true);
+            response.alertOptions.put("timer", null);
 
         });
     }
