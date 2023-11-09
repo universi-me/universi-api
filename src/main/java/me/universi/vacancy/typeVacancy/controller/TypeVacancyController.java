@@ -1,18 +1,23 @@
 package me.universi.vacancy.typeVacancy.controller;
 
+import me.universi.api.entities.Response;
 import me.universi.vacancy.typeVacancy.entities.TypeVacancy;
 import me.universi.vacancy.typeVacancy.service.TypeVacancyService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -26,28 +31,28 @@ public class TypeVacancyController {
         this.typeVacancyService = typeVacancyService;
     }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public TypeVacancy save(@RequestBody TypeVacancy typeVacancy) throws Exception{
-        return  typeVacancyService.save(typeVacancy);
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response create(@RequestBody Map<String, Object> body) {
+        return typeVacancyService.create(body);
     }
 
-    @GetMapping
-    @ResponseStatus(HttpStatus.OK)
-    public List<TypeVacancy> getAll() throws Exception{
-        return typeVacancyService.findAll();
+    @GetMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response get(@RequestBody Map<String, Object> body) {
+        return typeVacancyService.get(body);
     }
 
-    @GetMapping(value = "/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public Optional<TypeVacancy> getTypeVacancy(@PathVariable UUID id){
-        return typeVacancyService.findById(id);
+    @GetMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response findAll(@RequestBody Map<String, Object> body) {
+        return typeVacancyService.findAll(body);
     }
 
-    @PutMapping(value = "/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public TypeVacancy update(@RequestBody TypeVacancy newTypeVacancy, @PathVariable UUID id) throws Exception {
-        return typeVacancyService.update(newTypeVacancy, id);
+    @DeleteMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response remove(@RequestBody Map<String, Object> body) {
+        return typeVacancyService.remove(body);
     }
 
 }
