@@ -534,6 +534,7 @@ public class UserController {
 
         user.setRecoveryPasswordToken(null);
         user.setInactive(false);
+        user.setConfirmed(true);
         userService.save(user);
 
         session.setAttribute("account_confirmed", true);

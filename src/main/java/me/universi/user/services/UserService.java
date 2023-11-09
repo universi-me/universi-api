@@ -472,7 +472,7 @@ public class UserService implements UserDetailsService {
 
     // is account confirmed
     public boolean isAccountConfirmed(User user) {
-        return !user.isInactive();
+        return user.isConfirmed();
     }
 
     public boolean confirmAccountEnabled() {

@@ -76,6 +76,11 @@ public class User implements UserDetails, Serializable {
     private boolean inactive;
 
     @JsonIgnore
+    @Column(name = "confirmed")
+    @NotNull
+    private boolean confirmed;
+
+    @JsonIgnore
     @Enumerated(EnumType.STRING)
     @Column(name = "authority")
     private Authority authority;
@@ -224,6 +229,16 @@ public class User implements UserDetails, Serializable {
     @Override
     public boolean isEnabled() {
         return !this.inactive;
+    }
+
+    @JsonIgnore
+    public boolean isConfirmed() {
+        return this.confirmed;
+    }
+
+    @JsonIgnore
+    public void setConfirmed(boolean confirmed) {
+        this.confirmed = confirmed;
     }
 
     @Transient
