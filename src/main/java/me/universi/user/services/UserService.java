@@ -320,7 +320,7 @@ public class UserService implements UserDetailsService {
                 return "/manage-profile";
             } else {
                 try {
-                    return "/group/" + GroupService.getInstance().getOrganizationBasedInDomain().getNickname();
+                    return "/group" + userSession.getOrganization().getPath();
                 } catch (Exception e) {
                     return "/profile/" + userSession.getUsername();
                 }
