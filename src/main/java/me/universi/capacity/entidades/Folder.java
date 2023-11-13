@@ -19,6 +19,8 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import java.io.Serial;
+import java.io.Serializable;
 import me.universi.group.entities.Group;
 import me.universi.profile.entities.Profile;
 import org.hibernate.annotations.CreationTimestamp;
@@ -32,7 +34,11 @@ import org.hibernate.annotations.Where;
 @Entity(name="folder")
 @SQLDelete(sql = "UPDATE folder SET deleted = true WHERE id=?")
 @Where(clause = "deleted=false")
-public class Folder {
+public class Folder implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = -1163545345342344343L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id")

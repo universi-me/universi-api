@@ -12,6 +12,8 @@ import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.NotNull;
+import java.io.Serial;
+import java.io.Serializable;
 import me.universi.profile.entities.Profile;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -23,7 +25,11 @@ import org.hibernate.annotations.Where;
 @Entity(name="category")
 @SQLDelete(sql = "UPDATE category SET deleted = true WHERE id=?")
 @Where(clause = "deleted=false")
-public class Category {
+public class Category implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = -1963545345342344343L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id")

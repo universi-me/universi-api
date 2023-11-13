@@ -19,6 +19,8 @@ import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotNull;
+import java.io.Serial;
+import java.io.Serializable;
 import me.universi.capacity.entidades.Folder;
 import me.universi.group.enums.GroupType;
 import me.universi.group.services.GroupService;
@@ -35,7 +37,10 @@ import org.hibernate.annotations.Where;
 @Entity(name = "system_group")
 @SQLDelete(sql = "UPDATE system_group SET deleted = true WHERE id=?")
 @Where(clause = "deleted=false")
-public class Group {
+public class Group implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = -2163545345342344343L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

@@ -2,6 +2,8 @@ package me.universi.capacity.entidades;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
 import me.universi.capacity.enums.ContentStatusType;
@@ -13,7 +15,11 @@ import org.hibernate.annotations.Where;
 @Entity(name="contentstatus")
 @SQLDelete(sql = "UPDATE contentstatus SET deleted = true WHERE id=?")
 @Where(clause = "deleted=false")
-public class ContentStatus {
+public class ContentStatus implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = -1763545345342344343L;
+
     @JsonIgnore
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
