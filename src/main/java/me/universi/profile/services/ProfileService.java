@@ -77,7 +77,7 @@ public class ProfileService {
     public Collection<Education> findEducationByProfile(Profile profile){
         Collection<Education> educationsActive = new ArrayList<>();
         for (Education education: profile.getEducations()) {
-            if (!education.getIsDeleted()){
+            if (!education.isDeleted()){
                 educationsActive.add(education);
             }
         }
@@ -87,7 +87,7 @@ public class ProfileService {
     public Collection<Experience> findExperienceByProfile(Profile profile){
         Collection<Experience> experiencesActive = new ArrayList<>();
         for (Experience experience: profile.getExperiences()) {
-            if (!experience.getDeleted()){
+            if (!experience.isDeleted()){
                 experiencesActive.add(experience);
             }
         }

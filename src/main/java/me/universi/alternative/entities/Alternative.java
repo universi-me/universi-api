@@ -1,6 +1,7 @@
 package me.universi.alternative.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -12,6 +13,8 @@ import jakarta.persistence.ManyToOne;
 import me.universi.alternative.dto.AlternativeCreateDTO;
 import me.universi.question.entities.Question;
 import org.hibernate.Hibernate;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 import org.springframework.beans.factory.annotation.Value;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -21,6 +24,8 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Entity(name = "alternative")
+@SQLDelete(sql = "UPDATE alternative SET deleted = true WHERE id=?")
+@Where(clause = "deleted=false")
 public class Alternative implements Serializable {
 
     @Serial
@@ -45,6 +50,10 @@ public class Alternative implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JsonBackReference
     private Question question;
+
+    @JsonIgnore
+    @Column(name = "deleted")
+    private boolean deleted = Boolean.FALSE;
 
     public Alternative(String title, Boolean correct, Question question) {
         this.title = title;
@@ -92,6 +101,14 @@ public class Alternative implements Serializable {
 
     public void setQuestion(Question question) {
         this.question = question;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 
     @Override

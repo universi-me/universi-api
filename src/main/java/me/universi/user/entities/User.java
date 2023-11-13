@@ -12,6 +12,8 @@ import me.universi.profile.entities.Profile;
 import me.universi.user.enums.Authority;
 import me.universi.user.services.JsonEmailOwnerSessionFilter;
 import me.universi.user.services.UserService;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,8 +22,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.UUID;
 
+
 @Entity(name = "User")
 @Table(name = "system_users", uniqueConstraints = {@UniqueConstraint(name = "system_users_username_organization_key", columnNames = {"username", "organization"})})
+@SQLDelete(sql = "UPDATE system_users SET deleted = true WHERE id=?")
+@Where(clause = "deleted=false")
 public class User implements UserDetails, Serializable {
 
     @Serial
@@ -92,6 +97,10 @@ public class User implements UserDetails, Serializable {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "organization")
     private Group organization;
+
+    @JsonIgnore
+    @Column(name = "deleted")
+    private boolean deleted = Boolean.FALSE;
 
     public User(String name, String email, String password){
         this.name = name;
@@ -258,6 +267,10 @@ public class User implements UserDetails, Serializable {
     public boolean isNeedProfile() {
         return UserService.getInstance().userNeedAnProfile(this, false);
     }
+
+    public boolean isDeleted() { return deleted; }
+
+    public void setDeleted(boolean deleted) { this.deleted = deleted; }
 
     @Override
     public boolean equals(Object otherUser) {

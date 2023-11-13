@@ -32,117 +32,27 @@ public class TypeEducationController {
         this.typeEducationService = typeEducationService;
     }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public TypeEducation save(@RequestBody TypeEducation typeEducation) throws Exception{
-        return typeEducationService.save(typeEducation);
-    }
-
-    @GetMapping
-    @ResponseStatus(HttpStatus.OK)
-    public List<TypeEducation> getAll() throws Exception{
-        return typeEducationService.findAll();
-    }
-
-    @GetMapping(value = "/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public Optional<TypeEducation> getTypeEducation(@PathVariable UUID id){
-        return typeEducationService.findById(id);
-    }
-
-    @PutMapping(value = "/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public TypeEducation update(@RequestBody TypeEducation newTypeEducation, @PathVariable UUID id) throws Exception {
-        return typeEducationService.update(newTypeEducation, id);
-    }
-
     @PostMapping(value = "/criar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response create(@RequestBody Map<String, Object> body) {
-        Response response = new Response();
-
-        try {
-            String name = (String) body.get("name");
-            if(name.isBlank() || name.isEmpty()){
-                throw new TypeEducationException("Paramentro name passado é nulo");
-            }
-
-            TypeEducation newTypeEducation = new TypeEducation(name);
-            typeEducationService.save(newTypeEducation);
-
-            response.message = "TypeEducation criada.";
-            response.success = true;
-            return response;
-
-        }catch (Exception e){
-            response.message = e.getMessage();
-            return response;
-        }
+        return typeEducationService.create(body);
     }
 
     @PostMapping(value = "/obter", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response get(@RequestBody Map<String, Object> body) {
-        Response response = new Response();
-        try {
-            String id = (String)body.get("typeEducationId");
-
-            if(id.isEmpty()) {
-                throw new TypeEducationException("Parametro id é nulo.");
-            }
-
-            TypeEducation typeEducation = typeEducationService.findById(UUID.fromString(id)).get();
-
-            response.body.put("typeEducation", typeEducation);
-
-            response.success = true;
-            return response;
-        }catch (Exception e){
-            response.message = e.getMessage();
-            return response;
-        }
+        return typeEducationService.get(body);
     }
 
     @PostMapping(value = "/listar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response findAll(@RequestBody Map<String, Object> body) {
-        Response response = new Response();
-        try {
-
-            List<TypeEducation> typeEducations = typeEducationService.findAll();
-
-            response.body.put("lista", typeEducations);
-
-            response.message = "Operação realizada com exito.";
-            response.success = true;
-            return response;
-
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        return typeEducationService.findAll(body);
     }
 
     @PostMapping(value = "/remover", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response remove(@RequestBody Map<String, Object> body) {
-        Response response = new Response();
-        try {
-
-            String id = (String)body.get("tyEducationId");
-            if(id.isEmpty()) {
-                throw new TypeEducationException("Parametro typeEducationId é nulo.");
-            }
-
-            typeEducationService.deleteLogic(UUID.fromString(id));
-
-            response.message = "TypeEdcation removida logicamente";
-            response.success = true;
-            return response;
-
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        return typeEducationService.remove(body);
     }
 }

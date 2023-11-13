@@ -53,301 +53,52 @@ public class VacancyController {
         this.competenceTypeService = competenceTypeService;
     }
 
-    @PostMapping(value = "/criar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response create(@RequestBody Map<String, Object> body) {
-        Response response = new Response();
-        try {
-
-            User user = userService.getUserInSession();
-            String dateFormat = "yyyy-MM-dd";
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat);
-
-            String typeVacancyId = (String)body.get("typeVacancyId");
-            if(typeVacancyId == null) {
-                throw new CompetenceException("Parametro typeVacancyId é nulo.");
-            }
-
-            List<Competence> competence = (List<Competence>) body.get("competence");
-            if (competence == null){
-                throw new VacancyException("Paramentro competence é nulo.");
-            }
-
-            String title = (String)body.get("title");
-            if(title == null) {
-                throw new CompetenceException("Parametro title é nulo.");
-            }
-
-            String description = (String)body.get("description");
-            if(description == null) {
-                throw new CompetenceException("Parametro description é nulo.");
-            }
-
-            String prerequisites = (String)body.get("prerequisites");
-            if(prerequisites == null) {
-                throw new CompetenceException("Parametro prerequisites é nulo.");
-            }
-
-            Date registrationDate = simpleDateFormat.parse((String) body.get("registrationDate"));
-            if(registrationDate == null){
-                throw new EducationException("Paramentro registrationDate passado é nulo");
-            }
-
-            Date endRegistrationDate = simpleDateFormat.parse((String) body.get("endRegistrationDate"));
-            if(endRegistrationDate == null){
-                throw new EducationException("Paramentro endRegistrationDate passado é nulo");
-            }
-
-            TypeVacancy typeVacancy = typeVacancyService.findById(UUID.fromString(typeVacancyId)).get();
-            if(typeVacancy == null) {
-                throw new ValidationException("Tipo de Vaga não encontrado.");
-            }
-
-            Vacancy newVacancy = new Vacancy();
-            newVacancy.setTypeVacancy(typeVacancy);
-            newVacancy.setTitle(title);
-            newVacancy.setDescription(description);
-            newVacancy.setPrerequisites(prerequisites);
-            newVacancy.setCompetenceRequired(competence);
-            newVacancy.setRegistrationDate(registrationDate);
-            newVacancy.setEndRegistrationDate(endRegistrationDate);
-
-            vacancyService.save(newVacancy);
-
-            response.message = "Vaga Criada";
-            response.success = true;
-            return response;
-
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        return vacancyService.create(body);
     }
 
-    @PostMapping(value = "/atualizar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response update(@RequestBody Map<String, Object> body) {
-        Response response = new Response();
-        try {
-
-            String dateFormat = "yyyy-MM-dd";
-            SimpleDateFormat  simpleDateFormat = new SimpleDateFormat(dateFormat);
-
-            String vacancyId = (String)body.get("vacancyId");
-            if(vacancyId == null) {
-                throw new CompetenceException("Parametro vacancyId é nulo.");
-            }
-
-            String typeVacancyId = (String)body.get("typeVacancyId");
-            String title = (String)body.get("title");
-            String description = (String)body.get("description");
-            String prerequisites = (String)body.get("prerequisites");
-            Date registrationDate = simpleDateFormat.parse((String) body.get("registrationDate"));
-            Date endRegistrationDate = simpleDateFormat.parse((String) body.get("endRegistrationDate"));
-
-
-            Vacancy vacancy = vacancyService.findFirstById(vacancyId);
-            if (vacancy == null) {
-                throw new CompetenceException("Vaga não encontrada.");
-            }
-
-            if(typeVacancyId != null && typeVacancyId.length()>0) {
-                TypeVacancy typeVacancy = typeVacancyService.findById(UUID.fromString(typeVacancyId)).get();
-                if(typeVacancy == null) {
-                    throw new VacancyException("Tipo de Vaga não encontrado.");
-                }
-                vacancy.setTypeVacancy(typeVacancy);
-            }
-            if (title != null) {
-                vacancy.setTitle(title);
-            }
-            if (description != null) {
-                vacancy.setDescription(description);
-            }
-            if (prerequisites != null) {
-                vacancy.setPrerequisites(prerequisites);
-            }
-            if (registrationDate != null) {
-                vacancy.setRegistrationDate(registrationDate);
-            }
-            if (endRegistrationDate != null) {
-                vacancy.setEndRegistrationDate(endRegistrationDate);
-            }
-
-            vacancyService.save(vacancy);
-
-            response.message = "Vaga atualizada";
-            response.success = true;
-            return response;
-
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        return vacancyService.update(body);
     }
 
-    @PostMapping(value = "/remover", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response remove(@RequestBody Map<String, Object> body) {
-        Response response = new Response();
-        try {
-
-            String vacancyId = (String)body.get("vacancyId");
-            if(vacancyId == null) {
-                throw new CompetenceException("Parametro vacancyId é nulo.");
-            }
-
-            Vacancy vacancy = vacancyService.findFirstById(vacancyId);
-            if (vacancy == null) {
-                throw new CompetenceException("Vaga não encontrada.");
-            }
-
-            vacancyService.deleteLogic(UUID.fromString(vacancyId));
-
-            response.message = "Vaga removida";
-            response.success = true;
-            return response;
-
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        return vacancyService.remove(body);
     }
 
-    @PostMapping(value = "/obter", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response get(@RequestBody Map<String, Object> body) {
-        Response response = new Response();
-        try {
-
-            String vacancyId = (String)body.get("vacancyId");
-            if(vacancyId == null) {
-                throw new CompetenceException("Parametro vacancyId é nulo.");
-            }
-
-            Vacancy vacancy = vacancyService.findFirstById(vacancyId);
-            if (vacancy == null) {
-                throw new CompetenceException("Vaga não encontrada.");
-            }
-
-            response.body.put("Vaga", vacancy);
-
-            response.success = true;
-            return response;
-
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        return vacancyService.get(body);
     }
 
-    @PostMapping(value = "/listar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/listar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response findAll(@RequestBody Map<String, Object> body) {
-        Response response = new Response();
-        try {
-
-            List<Vacancy> vacancies = vacancyService.findAll();
-
-            response.body.put("lista", vacancies);
-
-            response.message = "Operação realizada com exito.";
-            response.success = true;
-            return response;
-
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        return vacancyService.findAll(body);
     }
 
-    @PostMapping(value = "/listarActive", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/listarActive", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response findAllActive(@RequestBody Map<String, Object> body) {
-        Response response = new Response();
-        try {
-
-            List<Vacancy> vacancies = vacancyService.findAllActive();
-
-            response.body.put("lista vagas ativas", vacancies);
-
-            response.message = "Operação realizada com exito.";
-            response.success = true;
-            return response;
-
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        return vacancyService.findAllActive(body);
     }
 
-    @PostMapping(value = "/filtrar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/filtrar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response filtrar(@RequestBody Map<String, Object> body) {
-        Response response = new Response();
-        try {
-
-            List<Vacancy> vacancies;
-
-            String competenceTypeId = (String)body.get("competenceTypeId");
-            if(competenceTypeId == null) {
-                throw new CompetenceException("Parametro vacancyId é nulo.");
-            }
-
-            Level level = (Level)body.get("level");
-            if(level == null) {
-                throw new CompetenceException("Parametro level é nulo.");
-            }
-
-            CompetenceType competenceType = competenceTypeService.findFirstById(competenceTypeId);
-
-            vacancies = vacancyService.findByCompetenceTypeAndLevel(competenceType, level);
-
-            response.body.put("lista vagas por tipo da competencia e nivel", vacancies);
-
-            response.message = "Operação realizada com exito.";
-            response.success = true;
-            return response;
-
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        return vacancyService.filtrar(body);
     }
 
-    @PostMapping(value = "/adicionarCompetence", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/adicionarCompetence", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response addCompetence(@RequestBody Map<String, Object> body) {
-        Response response = new Response();
-        try {
-
-            Vacancy vacancie;
-
-            String vacancyId = (String)body.get("vacancyId");
-            if(vacancyId == null) {
-                throw new CompetenceException("Parametro vacancyId é nulo.");
-            }
-
-            List<Competence> competence = (List<Competence>) body.get("competence");
-            if (competence == null){
-                throw new VacancyException("Paramentro competence é nulo.");
-            }
-
-
-            vacancie = vacancyService.findFirstById(vacancyId);
-
-            vacancie.getCompetenceRequired().addAll(competence);
-
-            response.body.put("lista de competencia adicionada", vacancie);
-
-            response.message = "Operação realizada com exito.";
-            response.success = true;
-            return response;
-
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        return vacancyService.addCompetence(body);
     }
 
 

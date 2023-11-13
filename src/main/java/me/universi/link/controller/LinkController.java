@@ -55,7 +55,7 @@ public class LinkController {
 
 
             Profile profile = user.getProfile();
-            linkNew.setPerfil(profile);
+            linkNew.setProfile(profile);
 
             linkService.save(linkNew);
 
@@ -85,7 +85,7 @@ public class LinkController {
                 throw new LinkException("Link não encontrada.");
             }
 
-            if(!userService.isSessionOfUser(link.getPerfil().getUser())) {
+            if(!userService.isSessionOfUser(link.getProfile().getUser())) {
                 throw new LinkException("Você não tem permissão para editar este Link.");
             }
 
@@ -121,7 +121,7 @@ public class LinkController {
                 throw new LinkException("Link não encontrada.");
             }
 
-            if(!userService.isSessionOfUser(link.getPerfil().getUser())) {
+            if(!userService.isSessionOfUser(link.getProfile().getUser())) {
                 throw new LinkException("Você não tem permissão para editar este Link.");
             }
 

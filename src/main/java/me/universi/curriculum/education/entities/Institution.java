@@ -1,5 +1,6 @@
 package me.universi.curriculum.education.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,8 +14,12 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
 import java.util.UUID;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 @Entity(name = "institution")
+@SQLDelete(sql = "UPDATE institution SET deleted = true WHERE id=?")
+@Where(clause = "deleted=false")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Institution {
 
@@ -35,8 +40,9 @@ public class Institution {
     @Column(name = "created_at")
     private Date creationDate;
 
-    @Column(name = "is_deleted")
-    private Boolean isDeleted;
+    @JsonIgnore
+    @Column(name = "deleted")
+    private boolean deleted = Boolean.FALSE;
 
     public Institution(){
     }
@@ -44,7 +50,6 @@ public class Institution {
     public Institution(String name, String description){
         this.name = name;
         this.description = description;
-        this.isDeleted = false;
     }
 
     public UUID getId() {
@@ -75,11 +80,7 @@ public class Institution {
         this.creationDate = creationDate;
     }
 
-    public Boolean getIsDeleted() {
-        return isDeleted;
-    }
+    public boolean isDeleted() { return deleted; }
 
-    public void setIsDeleted(Boolean deleted) {
-        isDeleted = deleted;
-    }
+    public void setDeleted(boolean deleted) { this.deleted = deleted; }
 }

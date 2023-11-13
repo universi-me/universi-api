@@ -1,5 +1,6 @@
 package me.universi.recommendation.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import me.universi.competence.entities.CompetenceType;
 import me.universi.profile.entities.Profile;
 import org.hibernate.annotations.CreationTimestamp;
@@ -17,8 +18,12 @@ import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.UUID;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 @Entity(name = "recommendation")
+@SQLDelete(sql = "UPDATE recommendation SET deleted = true WHERE id=?")
+@Where(clause = "deleted=false")
 public class Recommendation {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -44,6 +49,10 @@ public class Recommendation {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at")
     private Date creationDate;
+
+    @JsonIgnore
+    @Column(name = "deleted")
+    private boolean deleted = Boolean.FALSE;
 
     public Recommendation(Profile origin, Profile destiny, CompetenceType competencia, String description) {
         this.origin = origin;
@@ -96,4 +105,8 @@ public class Recommendation {
     public void setCreationDate(Date creationDate) {
         this.creationDate = creationDate;
     }
+
+    public boolean isDeleted() { return deleted; }
+
+    public void setDeleted(boolean deleted) { this.deleted = deleted; }
 }

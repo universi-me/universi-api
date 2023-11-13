@@ -1,5 +1,6 @@
 package me.universi.achievement.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -17,9 +18,13 @@ import java.io.Serializable;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 
 @Entity(name = "achievement")
+@SQLDelete(sql = "UPDATE achievement SET deleted = true WHERE id=?")
+@Where(clause = "deleted=false")
 public class Achievement implements Serializable {
 
     @Serial
@@ -45,6 +50,10 @@ public class Achievement implements Serializable {
             {@JoinColumn(name="indicators_id")}, inverseJoinColumns=
             {@JoinColumn(name="achievement_id")})
     private Set<Indicators> indicators;
+
+    @JsonIgnore
+    @Column(name = "deleted")
+    private boolean deleted = Boolean.FALSE;
 
     public Achievement(UUID id, String icon, String title, String description) {
         this.id = id;
@@ -92,6 +101,14 @@ public class Achievement implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 
     @Override

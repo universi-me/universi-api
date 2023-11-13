@@ -22,8 +22,12 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 @Entity(name="vacancy")
+@SQLDelete(sql = "UPDATE vacancy SET deleted = true WHERE id=?")
+@Where(clause = "deleted=false")
 public class Vacancy {
 
     @Id
@@ -74,12 +78,12 @@ public class Vacancy {
     @Column(name = "is_active")
     private Boolean isActive;
 
-    @Column(name = "is_deleted")
-    private Boolean isDeleted;
+    @JsonIgnore
+    @Column(name = "deleted")
+    private boolean deleted = Boolean.FALSE;
 
     public Vacancy(){
         this.isActive = true;
-        this.isDeleted = false;
     }
 
     public Vacancy(TypeVacancy typeVacancy, String title, String description, String prerequisites, Date registrationDate, Date endRegistrationDate, Date creationDate) {
@@ -91,7 +95,6 @@ public class Vacancy {
         this.endRegistrationDate = endRegistrationDate;
         this.creationDate = creationDate;
         this.isActive = true;
-        this.isDeleted = false;
     }
     public Vacancy(String title, String description, String prerequisites, Date registrationDate, Date endRegistrationDate, List<Competence> competenceRequired, Date creationDate) {
         this.title = title;
@@ -102,7 +105,6 @@ public class Vacancy {
         this.competenceRequired = competenceRequired;
         this.creationDate = creationDate;
         this.isActive = true;
-        this.isDeleted = false;
     }
 
     public UUID getId(){
@@ -175,13 +177,9 @@ public class Vacancy {
         isActive = active;
     }
 
-    public Boolean getDeleted() {
-        return isDeleted;
-    }
+    public boolean isDeleted() { return deleted; }
 
-    public void setDeleted(Boolean deleted) {
-        isDeleted = deleted;
-    }
+    public void setDeleted(boolean deleted) { this.deleted = deleted; }
 
     public List<Competence> getCompetenceRequired() {
         return competenceRequired;
