@@ -35,8 +35,12 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.util.Collection;
 import java.util.Date;
 import java.util.UUID;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 @Entity(name = "profile")
+@SQLDelete(sql = "UPDATE profile SET deleted = true WHERE id=?")
+@Where(clause = "deleted=false")
 public class Profile implements Serializable {
 
     @Serial
@@ -119,6 +123,10 @@ public class Profile implements Serializable {
     @OneToOne(cascade = CascadeType.ALL)
     @JsonBackReference
     private Indicators indicators;
+
+    @JsonIgnore
+    @Column(name = "deleted")
+    private boolean deleted = Boolean.FALSE;
 
     public Profile(UUID id, User user, String bio, Collection<Competence> competences, Collection<Group> groups, Collection<Link> links) {
         this.id = id;
@@ -268,6 +276,10 @@ public class Profile implements Serializable {
     public void setExperiences(Collection<Experience> experiences) {
         this.experiences = experiences;
     }
+
+    public boolean isDeleted() { return deleted; }
+
+    public void setDeleted(boolean deleted) { this.deleted = deleted; }
 
     @Override
     public String toString() {

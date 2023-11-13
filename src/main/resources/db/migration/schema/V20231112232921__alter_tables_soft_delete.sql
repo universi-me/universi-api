@@ -1,0 +1,96 @@
+
+ALTER TABLE achievement
+    ADD COLUMN deleted BOOLEAN DEFAULT FALSE;
+
+ALTER TABLE alternative
+    ADD COLUMN deleted BOOLEAN DEFAULT FALSE;
+
+ALTER TABLE category
+    ADD COLUMN deleted BOOLEAN DEFAULT FALSE;
+
+ALTER TABLE content
+    ADD COLUMN deleted BOOLEAN DEFAULT FALSE;
+
+ALTER TABLE contentstatus
+    ADD COLUMN deleted BOOLEAN DEFAULT FALSE;
+
+ALTER TABLE folder
+    ADD COLUMN deleted BOOLEAN DEFAULT FALSE;
+
+ALTER TABLE competence
+    ADD COLUMN deleted BOOLEAN DEFAULT FALSE;
+
+ALTER TABLE competence
+    DROP COLUMN is_deleted;
+
+ALTER TABLE competence_type
+    ADD COLUMN deleted BOOLEAN DEFAULT FALSE;
+
+ALTER TABLE education
+    ADD COLUMN deleted BOOLEAN DEFAULT FALSE;
+
+ALTER TABLE education
+    DROP COLUMN is_deleted;
+
+ALTER TABLE institution
+    ADD COLUMN deleted BOOLEAN DEFAULT FALSE;
+
+ALTER TABLE institution
+    DROP COLUMN is_deleted;
+
+ALTER TABLE type_education
+    ADD COLUMN deleted BOOLEAN DEFAULT FALSE;
+
+ALTER TABLE type_education
+    DROP COLUMN is_deleted;
+
+ALTER TABLE experience
+    ADD COLUMN deleted BOOLEAN DEFAULT FALSE;
+
+ALTER TABLE experience
+    DROP COLUMN is_deleted;
+
+ALTER TABLE type_experience
+    ADD COLUMN deleted BOOLEAN DEFAULT FALSE;
+
+ALTER TABLE type_experience
+    DROP COLUMN is_deleted;
+
+ALTER TABLE exercise
+    ADD COLUMN deleted BOOLEAN DEFAULT FALSE;
+
+ALTER TABLE feedback
+    ADD COLUMN deleted BOOLEAN DEFAULT FALSE;
+
+ALTER TABLE system_group
+    ADD COLUMN deleted BOOLEAN DEFAULT FALSE;
+
+ALTER TABLE image
+    ADD COLUMN deleted BOOLEAN DEFAULT FALSE;
+
+ALTER TABLE indicators
+    ADD COLUMN deleted BOOLEAN DEFAULT FALSE;
+
+ALTER TABLE link
+    ADD COLUMN deleted BOOLEAN DEFAULT FALSE;
+
+ALTER TABLE profile
+    ADD COLUMN deleted BOOLEAN DEFAULT FALSE;
+
+ALTER TABLE question
+    ADD COLUMN deleted BOOLEAN DEFAULT FALSE;
+
+ALTER TABLE recommendation
+    ADD COLUMN deleted BOOLEAN DEFAULT FALSE;
+
+ALTER TABLE subject
+    ADD COLUMN deleted BOOLEAN DEFAULT FALSE;
+
+ALTER TABLE system_users
+    ADD COLUMN deleted BOOLEAN DEFAULT FALSE;
+
+ALTER TABLE vacancy
+    ADD COLUMN deleted BOOLEAN DEFAULT FALSE;
+
+ALTER TABLE vacancy
+    DROP COLUMN is_deleted;

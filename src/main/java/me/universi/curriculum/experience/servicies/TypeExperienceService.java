@@ -51,7 +51,7 @@ public class TypeExperienceService {
     public List<TypeExperience> findAllNotDeleted(){
         List<TypeExperience> typeExperiences = new ArrayList<>();
         for (TypeExperience type: typeExperienceRepository.findAll()) {
-            if (!type.getDeleted()){
+            if (!type.isDeleted()){
                 typeExperiences.add(type);
             }
         }

@@ -1,6 +1,7 @@
 package me.universi.curriculum.education.entities;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -16,8 +17,12 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
 import java.util.UUID;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 @Entity(name = "education")
+@SQLDelete(sql = "UPDATE education SET deleted = true WHERE id=?")
+@Where(clause = "deleted=false")
 public class Education {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -50,12 +55,12 @@ public class Education {
     @Column(name = "created_at")
     private Date creationDate;
 
-    @Column(name = "is_deleted")
-    private Boolean isDeleted;
+    @JsonIgnore
+    @Column(name = "deleted")
+    private boolean deleted = Boolean.FALSE;
 
     public Education(){
         this.presentDate = false;
-        this.isDeleted = false;
     }
 
     public Education( TypeEducation typeEducation, Institution institution, Date startDate, Date endDate, Boolean presentDate){
@@ -64,7 +69,6 @@ public class Education {
         this.startDate = startDate;
         this.endDate = endDate;
         this.presentDate = presentDate;
-        this.isDeleted = false;
     }
 
     public Education( TypeEducation typeEducation, Institution institution, Date startDate, Date endDate){
@@ -73,7 +77,6 @@ public class Education {
         this.startDate = startDate;
         this.endDate = endDate;
         this.presentDate = false;
-        this.isDeleted = false;
     }
 
     public UUID getId() {
@@ -128,11 +131,7 @@ public class Education {
         this.creationDate = creationDate;
     }
 
-    public Boolean getIsDeleted() {
-        return isDeleted;
-    }
+    public boolean isDeleted() { return deleted; }
 
-    public void setIsDeleted(Boolean delected) {
-        isDeleted = delected;
-    }
+    public void setDeleted(boolean deleted) { this.deleted = deleted; }
 }

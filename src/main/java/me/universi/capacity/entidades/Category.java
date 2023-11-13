@@ -17,8 +17,12 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
 import java.util.UUID;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 @Entity(name="category")
+@SQLDelete(sql = "UPDATE category SET deleted = true WHERE id=?")
+@Where(clause = "deleted=false")
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -44,6 +48,10 @@ public class Category {
     @JoinColumn(name="profile_id")
     @NotNull
     private Profile author;
+
+    @JsonIgnore
+    @Column(name = "deleted")
+    private boolean deleted = Boolean.FALSE;
 
     public Category() {
     }
@@ -86,5 +94,13 @@ public class Category {
 
     public void setAuthor(Profile author) {
         this.author = author;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 }

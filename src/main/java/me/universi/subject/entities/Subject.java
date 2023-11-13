@@ -1,5 +1,6 @@
 package me.universi.subject.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -10,8 +11,12 @@ import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.UUID;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 @Entity(name = "subject")
+@SQLDelete(sql = "UPDATE subject SET deleted = true WHERE id=?")
+@Where(clause = "deleted=false")
 public class Subject implements Serializable {
 
     @Serial
@@ -25,6 +30,10 @@ public class Subject implements Serializable {
 
     private String subject;
 
+    @JsonIgnore
+    @Column(name = "deleted")
+    private boolean deleted = Boolean.FALSE;
+
     public String getSubject() {
         return subject;
     }
@@ -36,4 +45,9 @@ public class Subject implements Serializable {
     public UUID getId() {
         return id;
     }
+
+    public boolean isDeleted() { return deleted; }
+
+    public void setDeleted(boolean deleted) { this.deleted = deleted; }
+
 }

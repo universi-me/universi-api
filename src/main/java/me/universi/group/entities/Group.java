@@ -28,9 +28,13 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.util.Collection;
 import java.util.Date;
 import java.util.UUID;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 
 @Entity(name = "system_group")
+@SQLDelete(sql = "UPDATE system_group SET deleted = true WHERE id=?")
+@Where(clause = "deleted=false")
 public class Group {
 
     @Id
@@ -59,6 +63,10 @@ public class Group {
     @JoinColumn(name="profile_id")
     @NotNull
     public Profile admin;
+
+    @JsonIgnore
+    @Column(name = "deleted")
+    private boolean deleted = Boolean.FALSE;
 
     @ManyToMany(cascade = { CascadeType.ALL })
     @JoinTable(
@@ -302,4 +310,9 @@ public class Group {
     public void setBannerImage(String bannerImage) {
         this.bannerImage = bannerImage;
     }
+
+    public boolean isDeleted() { return deleted; }
+
+    public void setDeleted(boolean deleted) { this.deleted = deleted; }
+
 }

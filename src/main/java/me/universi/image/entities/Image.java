@@ -1,14 +1,19 @@
 package me.universi.image.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.UUID;
 import me.universi.profile.entities.Profile;
+import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Type;
+import org.hibernate.annotations.Where;
 
 @Entity(name = "image")
+@SQLDelete(sql = "UPDATE image SET deleted = true WHERE id=?")
+@Where(clause = "deleted=false")
 public class Image {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -32,8 +37,13 @@ public class Image {
     @JoinColumn(name = "profile_id")
     private Profile author;
 
+    @JsonIgnore
     @Column(name = "data", columnDefinition="BYTEA")
     private byte[] data;
+
+    @JsonIgnore
+    @Column(name = "deleted")
+    private boolean deleted = Boolean.FALSE;
 
     public Image() {
     }
@@ -93,4 +103,8 @@ public class Image {
     public void setCreated(Date created) {
         this.created = created;
     }
+
+    public boolean isDeleted() { return deleted; }
+
+    public void setDeleted(boolean deleted) { this.deleted = deleted; }
 }

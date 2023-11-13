@@ -26,8 +26,12 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.util.Collection;
 import java.util.Date;
 import java.util.UUID;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 @Entity(name="folder")
+@SQLDelete(sql = "UPDATE folder SET deleted = true WHERE id=?")
+@Where(clause = "deleted=false")
 public class Folder {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -90,6 +94,10 @@ public class Folder {
     )
     @JsonIgnore
     private Collection<Profile> assignedUsers;
+
+    @JsonIgnore
+    @Column(name = "deleted")
+    private boolean deleted = Boolean.FALSE;
 
     public Folder() {
     }
@@ -196,5 +204,13 @@ public class Folder {
 
     public void setAssignedUsers(Collection<Profile> assignedUsers) {
         this.assignedUsers = assignedUsers;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 }

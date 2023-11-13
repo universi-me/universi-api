@@ -1,5 +1,6 @@
 package me.universi.capacity.entidades;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Temporal;
@@ -26,8 +27,12 @@ import java.util.UUID;
 import me.universi.capacity.enums.ContentType;
 import me.universi.profile.entities.Profile;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 @Entity(name="content")
+@SQLDelete(sql = "UPDATE content SET deleted = true WHERE id=?")
+@Where(clause = "deleted=false")
 public class Content {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -75,6 +80,10 @@ public class Content {
     @Column(name = "type")
     @Enumerated(EnumType.STRING)
     public ContentType type;
+
+    @JsonIgnore
+    @Column(name = "deleted")
+    private boolean deleted = Boolean.FALSE;
 
     @Transient
     public ContentStatus contentStatus;
@@ -168,6 +177,14 @@ public class Content {
 
     public ContentType getType(){
         return type;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 
 }

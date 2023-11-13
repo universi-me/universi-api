@@ -1,5 +1,6 @@
 package me.universi.competence.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -9,8 +10,12 @@ import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.UUID;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 @Entity(name = "competence_type")
+@SQLDelete(sql = "UPDATE competence_type SET deleted = true WHERE id=?")
+@Where(clause = "deleted=false")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class CompetenceType {
     @Id
@@ -21,6 +26,10 @@ public class CompetenceType {
 
     @Column(name = "name", unique=true)
     private String name;
+
+    @JsonIgnore
+    @Column(name = "deleted")
+    private boolean deleted = Boolean.FALSE;
 
     public UUID getId() {
         return id;
@@ -33,5 +42,9 @@ public class CompetenceType {
     public void setName(String name) {
         this.name = name;
     }
+
+    public boolean isDeleted() { return deleted; }
+
+    public void setDeleted(boolean deleted) { this.deleted = deleted; }
 
 }
