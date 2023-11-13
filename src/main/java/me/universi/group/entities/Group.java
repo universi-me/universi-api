@@ -18,6 +18,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
+import jakarta.persistence.OrderColumn;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
@@ -73,22 +74,24 @@ public class Group implements Serializable {
     @Column(name = "deleted")
     private boolean deleted = Boolean.FALSE;
 
+    @JsonIgnore
     @ManyToMany(cascade = { CascadeType.ALL })
     @JoinTable(
             name = "profile_group",
             joinColumns = { @JoinColumn(name = "group_id") },
             inverseJoinColumns = { @JoinColumn(name =  "profile_id") }
     )
-    @JsonIgnore
+    @OrderColumn(name="joined")
     public Collection<Profile> participants;
 
+    @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
     @JoinTable(
             name = "subgroup",
             joinColumns = { @JoinColumn(name = "group_id", referencedColumnName = "id") },
             inverseJoinColumns = { @JoinColumn(name = "subgroup_id", referencedColumnName = "id") }
     )
-    @JsonIgnore
+    @OrderColumn(name="added")
     public Collection<Group> subGroups;
 
     @Column(name = "type")
