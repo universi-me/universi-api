@@ -1,6 +1,7 @@
 package me.universi.question.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -26,8 +27,12 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 @Entity(name = "question")
+@SQLDelete(sql = "UPDATE question SET deleted = true WHERE id=?")
+@Where(clause = "deleted=false")
 public class Question implements Serializable {
 
     @Serial
@@ -56,6 +61,10 @@ public class Question implements Serializable {
     @ManyToMany(mappedBy = "questions", cascade = CascadeType.REFRESH)
     @JsonBackReference
     private List<Exercise> exercises;
+
+    @JsonIgnore
+    @Column(name = "deleted")
+    private boolean deleted = Boolean.FALSE;
 
     public Question() {
     }
@@ -129,6 +138,10 @@ public class Question implements Serializable {
     public void setFeedback(Feedback feedback) {
         this.feedback = feedback;
     }
+
+    public boolean isDeleted() { return deleted; }
+
+    public void setDeleted(boolean deleted) { this.deleted = deleted; }
 
     @Override
     public boolean equals(Object o) {

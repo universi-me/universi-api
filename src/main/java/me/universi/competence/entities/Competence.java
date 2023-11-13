@@ -1,5 +1,6 @@
 package me.universi.competence.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -19,8 +20,12 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
 import java.util.UUID;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 @Entity(name = "competence")
+@SQLDelete(sql = "UPDATE competence SET deleted = true WHERE id=?")
+@Where(clause = "deleted=false")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Competence {
 
@@ -60,11 +65,12 @@ public class Competence {
     @Column(name = "created_at")
     private Date creationDate;
 
-    @Column(name = "is_deleted")
-    private Boolean isDeleted;
+    @JsonIgnore
+    @Column(name = "deleted")
+    private boolean deleted = Boolean.FALSE;
 
     public Competence() {
-        this.isDeleted = false;
+
     }
 
 
@@ -76,8 +82,6 @@ public class Competence {
         this.level = level;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.isDeleted = false;
-
     }
 
     public Competence(CompetenceType competenceType, String description, String title, Level level, Date startDate, Boolean presentDate) {
@@ -87,7 +91,6 @@ public class Competence {
         this.level = level;
         this.startDate = startDate;
         this.presentDate = presentDate;
-        this.isDeleted = false;
 
     }
 
@@ -95,7 +98,6 @@ public class Competence {
         this.competenceType = competenceType;
         this.title = title;
         this.level = level;
-        this.isDeleted = false;
     }
 
     public UUID getId() {
@@ -146,11 +148,7 @@ public class Competence {
 
     public void setTitle(String title) { this.title = title; }
 
-    public Boolean getDeleted() {
-        return isDeleted;
-    }
+    public boolean isDeleted() { return deleted; }
 
-    public void setDeleted(Boolean deleted) {
-        isDeleted = deleted;
-    }
+    public void setDeleted(boolean deleted) { this.deleted = deleted; }
 }

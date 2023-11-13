@@ -1,6 +1,7 @@
 package me.universi.feedback.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -12,6 +13,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import me.universi.question.entities.Question;
 import org.hibernate.Hibernate;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 import org.hibernate.validator.constraints.URL;
 import me.universi.feedback.dto.FeedbackCreateDTO;
 import java.io.Serial;
@@ -20,6 +23,8 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Entity(name = "feedback")
+@SQLDelete(sql = "UPDATE feedback SET deleted = true WHERE id=?")
+@Where(clause = "deleted=false")
 public class Feedback implements Serializable {
 
     @Serial
@@ -44,6 +49,10 @@ public class Feedback implements Serializable {
     @OneToOne(mappedBy = "feedback")
     @JsonBackReference
     private Question question;
+
+    @JsonIgnore
+    @Column(name = "deleted")
+    private boolean deleted = Boolean.FALSE;
 
     public Feedback(String link, String feedbackText, Question question) {
         this.link = link;
@@ -97,6 +106,10 @@ public class Feedback implements Serializable {
     public void setQuestion(Question question) {
         this.question = question;
     }
+
+    public boolean isDeleted() { return deleted; }
+
+    public void setDeleted(boolean deleted) { this.deleted = deleted; }
 
     @Override
     public boolean equals(Object o) {
