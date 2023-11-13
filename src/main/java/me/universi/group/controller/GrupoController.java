@@ -480,7 +480,12 @@ public class GrupoController {
     public Response currentOrganization() {
         return Response.buildResponse(response -> {
             try {
-                response.body.put("organization", groupService.getOrganizationBasedInDomain());
+                User user = userService.getUserInSession();
+                Group loggedOrganization = user != null
+                    ? user.getOrganization()
+                    : groupService.getOrganizationBasedInDomain();
+
+                response.body.put("organization", loggedOrganization);
             } catch (Exception e) {
                 response.body.put("organization", null);
             }

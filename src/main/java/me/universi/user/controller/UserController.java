@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpSession;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import me.universi.api.entities.Response;
+import me.universi.group.services.GroupService;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
 import me.universi.user.entities.User;
@@ -35,17 +36,19 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 public class UserController {
     private final UserService userService;
     private final ProfileService profileService;
+    private final GroupService groupService;
     private final Environment environment;
     private final AuthenticationManager authenticationManager;
     private final JWTService jwtService;
 
     @Autowired
-    public UserController(UserService userService, ProfileService profileService, Environment environment, AuthenticationManager authenticationManager, JWTService jwtService) {
+    public UserController(UserService userService, ProfileService profileService, Environment environment, AuthenticationManager authenticationManager, JWTService jwtService, GroupService groupService) {
         this.userService = userService;
         this.profileService = profileService;
         this.environment = environment;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
+        this.groupService = groupService;
     }
 
     @GetMapping(value = "/account", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -163,6 +166,7 @@ public class UserController {
                 user.setInactive(true);
             }
             userService.setRawPasswordToUser(user, password, false);
+            user.setOrganization(groupService.getOrganizationBasedInDomain());
 
             userService.createUser(user);
 
@@ -358,6 +362,7 @@ public class UserController {
                         user = new User();
                         user.setName(newUsername);
                         user.setEmail(email.trim());
+                        user.setOrganization(groupService.getOrganizationBasedInDomain());
                         userService.createUser(user);
 
                         Profile profile = user.getProfile();

@@ -10,6 +10,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 import me.universi.Sys;
+import me.universi.group.entities.Group;
 import me.universi.group.services.GroupService;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
@@ -88,7 +89,8 @@ public class UserService implements UserDetailsService {
     }
 
     public UserDetails findFirstByEmail(String email) throws UserException {
-        Optional<User> user = userRepository.findFirstByEmail(email);
+        Group organization = GroupService.getInstance().getOrganizationBasedInDomainIfExist();
+        Optional<User> user = organization == null ? userRepository.findFirstByEmail(email) : userRepository.findFirstByEmailAndOrganization(email, organization);
         if (user.isPresent()) {
             return user.get();
         }
@@ -96,7 +98,8 @@ public class UserService implements UserDetailsService {
     }
 
     public UserDetails findFirstByUsername(String username) {
-        Optional<User> userGet = userRepository.findFirstByName(username);
+        Group organization = GroupService.getInstance().getOrganizationBasedInDomainIfExist();
+        Optional<User> userGet = organization == null ? userRepository.findFirstByName(username) : userRepository.findFirstByNameAndOrganization(username, organization);
         return userGet.orElse(null);
     }
 
@@ -320,7 +323,7 @@ public class UserService implements UserDetailsService {
                 return "/manage-profile";
             } else {
                 try {
-                    return "/group/" + GroupService.getInstance().getOrganizationBasedInDomain().getNickname();
+                    return "/group" + userSession.getOrganization().getPath();
                 } catch (Exception e) {
                     return "/profile/" + userSession.getUsername();
                 }

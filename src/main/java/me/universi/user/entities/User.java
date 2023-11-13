@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
+
+import me.universi.group.entities.Group;
 import me.universi.profile.entities.Profile;
 import me.universi.user.enums.Authority;
 import me.universi.user.services.JsonEmailOwnerSessionFilter;
@@ -20,7 +22,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.UUID;
 
-@Entity(name = "system_users")
+
+@Entity(name = "User")
+@Table(name = "system_users", uniqueConstraints = {@UniqueConstraint(name = "system_users_username_organization_key", columnNames = {"username", "organization"})})
 @SQLDelete(sql = "UPDATE system_users SET deleted = true WHERE id=?")
 @Where(clause = "deleted=false")
 public class User implements UserDetails, Serializable {
@@ -88,6 +92,11 @@ public class User implements UserDetails, Serializable {
     @Enumerated(EnumType.STRING)
     @Column(name = "authority")
     private Authority authority;
+
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "organization")
+    private Group organization;
 
     @JsonIgnore
     @Column(name = "deleted")
@@ -272,5 +281,13 @@ public class User implements UserDetails, Serializable {
     @Override
     public int hashCode() {
         return getUsername().hashCode();
+    }
+
+    public Group getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(Group organization) {
+        this.organization = organization;
     }
 }

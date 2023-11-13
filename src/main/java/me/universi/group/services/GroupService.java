@@ -1,6 +1,8 @@
 package me.universi.group.services;
 
 import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import me.universi.Sys;
 import me.universi.group.entities.Group;
 import me.universi.group.exceptions.GroupException;
@@ -23,6 +25,7 @@ public class GroupService {
     private UserService userService;
     @Autowired
     private GroupRepository groupRepository;
+    private static final Pattern patternGetSubdomain = Pattern.compile("(?:http[s]*\\:\\/\\/)?(.*?)((\\.)|(:))");
 
     public static GroupService getInstance() {
         return Sys.context.getBean("groupService", GroupService.class);
@@ -60,6 +63,9 @@ public class GroupService {
     }
 
     public Group findFirstByRootGroupAndNicknameIgnoreCase(boolean rootGroup, String nickname) {
+        if(nickname == null || nickname.isEmpty()) {
+            return null;
+        }
         Optional<Group> optionalGroup = groupRepository.findFirstByRootGroupAndNicknameIgnoreCase(rootGroup, nickname);
         return optionalGroup.orElse(null);
     }
@@ -373,13 +379,35 @@ public class GroupService {
 
     public Group getOrganizationBasedInDomain() throws Exception {
         ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
-        URL requestUrl = new URL(attr.getRequest().getRequestURL().toString());
-        String organizationId = requestUrl.getHost().split("\\.")[0];
-        Group organizationG = findFirstByRootGroupAndNicknameIgnoreCase(true, organizationId.toLowerCase());
+        String url = attr.getRequest().getRequestURL().toString();
+
+        Matcher matcher = patternGetSubdomain.matcher(url);
+
+        String organizationId = null;
+
+        if (matcher.find()) {
+            organizationId = matcher.group(1).toLowerCase();
+        } else {
+            throw new Exception("Organização não encontrada.");
+        }
+
+        if("localhost".equals(organizationId)) {
+            organizationId = "ccae";
+        }
+
+        Group organizationG = findFirstByRootGroupAndNicknameIgnoreCase(true, organizationId);
         if(organizationG == null) {
             throw new Exception("Organização não encontrada.");
         }
         return organizationG;
+    }
+
+    public Group getOrganizationBasedInDomainIfExist() {
+        try {
+            return getOrganizationBasedInDomain();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
 
