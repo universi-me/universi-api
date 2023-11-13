@@ -21,6 +21,8 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.UUID;
@@ -33,7 +35,11 @@ import org.hibernate.annotations.Where;
 @Entity(name="content")
 @SQLDelete(sql = "UPDATE content SET deleted = true WHERE id=?")
 @Where(clause = "deleted=false")
-public class Content {
+public class Content implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = -1663545345342344343L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id")
