@@ -184,7 +184,7 @@ public class EducationService {
             String dateFormat = "yyyy-MM-dd";
             SimpleDateFormat  simpleDateFormat = new SimpleDateFormat(dateFormat);
 
-            String typeEducationId = (String) body.get("typeEducationId");
+            String typeEducationId = (String)body.get("typeEducationId");
             if(typeEducationId.isBlank() || typeEducationId.isEmpty()){
                 throw new TypeEducationException("Paramentro typeEducationId passado é nulo");
             }
@@ -194,7 +194,7 @@ public class EducationService {
                 throw new TypeEducationException("Paramentro institutionId passado é nulo");
             }
 
-            Date startDate = simpleDateFormat.parse((String) body.get("starDate"));
+            Date startDate = simpleDateFormat.parse((String) body.get("startDate"));
             if(startDate == null){
                 throw new EducationException("Paramentro starDate passado é nulo");
             }
@@ -220,8 +220,11 @@ public class EducationService {
             newEducation.setInstitution(institution);
             newEducation.setStartDate(startDate);
             newEducation.setEndDate(endDate);
-            if(presentDate != null){
+            if(presentDate == true){
                 newEducation.setPresentDate(presentDate);
+                newEducation.setEndDate(null);
+            }else{
+                newEducation.setPresentDate(false);
             }
             educationRepository.saveAndFlush(newEducation);
 

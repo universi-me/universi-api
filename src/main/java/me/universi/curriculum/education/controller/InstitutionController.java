@@ -45,7 +45,7 @@ public class InstitutionController {
         return institutionService.get(body);
     }
 
-    @GetMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/all", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response findAll(@RequestBody Map<String, Object> body) {
         return institutionService.findAll(body);

@@ -128,9 +128,7 @@ public class VacancyService {
         return vacancies;
     }
 
-    @PostMapping(value = "/criar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response create(@RequestBody Map<String, Object> body) {
+    public Response create(Map<String, Object> body) {
         Response response = new Response();
         try {
 

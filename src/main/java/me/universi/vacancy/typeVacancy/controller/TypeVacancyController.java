@@ -43,7 +43,7 @@ public class TypeVacancyController {
         return typeVacancyService.get(body);
     }
 
-    @GetMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/all", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response findAll(@RequestBody Map<String, Object> body) {
         return typeVacancyService.findAll(body);

@@ -112,7 +112,7 @@ public class InstitutionService {
         Response response = new Response();
         try {
 
-            List<Institution> institutions = findAll();
+            List<Institution> institutions = institutionRepository.findAll();
 
             response.body.put("lista", institutions);
 
