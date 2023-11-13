@@ -23,8 +23,12 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 @Entity(name = "exercise")
+@SQLDelete(sql = "UPDATE exercise SET deleted = true WHERE id=?")
+@Where(clause = "deleted=false")
 public class Exercise implements Serializable {
 
     @Serial
@@ -54,6 +58,10 @@ public class Exercise implements Serializable {
 
     @Column(columnDefinition = "boolean default false")
     private boolean inactivate;
+
+    @JsonIgnore
+    @Column(name = "deleted")
+    private boolean deleted = Boolean.FALSE;
 
     public Exercise() {
     }
@@ -115,6 +123,10 @@ public class Exercise implements Serializable {
     public void setInactivate(boolean inactivate) {
         this.inactivate = inactivate;
     }
+
+    public boolean isDeleted() { return deleted; }
+
+    public void setDeleted(boolean deleted) { this.deleted = deleted; }
 
     @Override
     public boolean equals(Object o) {

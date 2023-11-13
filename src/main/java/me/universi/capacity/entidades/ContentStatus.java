@@ -7,8 +7,12 @@ import java.util.UUID;
 import me.universi.capacity.enums.ContentStatusType;
 import me.universi.profile.entities.Profile;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 @Entity(name="contentstatus")
+@SQLDelete(sql = "UPDATE contentstatus SET deleted = true WHERE id=?")
+@Where(clause = "deleted=false")
 public class ContentStatus {
     @JsonIgnore
     @Id
@@ -34,6 +38,10 @@ public class ContentStatus {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "updated_at")
     private Date updatedAt;
+
+    @JsonIgnore
+    @Column(name = "deleted")
+    private boolean deleted = Boolean.FALSE;
 
     public ContentStatus() {
     }
@@ -76,5 +84,13 @@ public class ContentStatus {
 
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 }

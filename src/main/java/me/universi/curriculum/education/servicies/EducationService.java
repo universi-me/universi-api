@@ -88,7 +88,7 @@ public class EducationService {
 
     public void deleteLogic(UUID id) throws Exception {
         Education education = findById(id).get();
-        education.setIsDeleted(true);
+        education.setDeleted(true);
         update(education, id);
     }
 }

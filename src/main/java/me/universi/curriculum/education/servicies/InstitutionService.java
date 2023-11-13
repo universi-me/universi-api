@@ -49,7 +49,7 @@ public class InstitutionService {
 
     public void deleteLogic(UUID id){
         Institution institution = findById(id).get();
-        institution.setIsDeleted(true);
+        institution.setDeleted(true);
         save(institution);
     }
 

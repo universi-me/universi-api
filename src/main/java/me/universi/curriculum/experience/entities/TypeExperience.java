@@ -1,5 +1,6 @@
 package me.universi.curriculum.experience.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,8 +14,12 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
 import java.util.UUID;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 @Entity(name = "type_experience")
+@SQLDelete(sql = "UPDATE type_experience SET deleted = true WHERE id=?")
+@Where(clause = "deleted=false")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class TypeExperience {
     @Id
@@ -31,16 +36,16 @@ public class TypeExperience {
     @Column(name = "created_at")
     private Date creationDate;
 
-    @Column(name = "is_deleted")
-    private Boolean isDeleted;
+    @JsonIgnore
+    @Column(name = "deleted")
+    private boolean deleted = Boolean.FALSE;
 
     public TypeExperience(){
-        this.isDeleted = false;
+
     }
 
     public TypeExperience(String name){
         this.name = name;
-        this.isDeleted = false;
     }
 
     public UUID getId() {
@@ -63,11 +68,7 @@ public class TypeExperience {
         this.creationDate = creationDate;
     }
 
-    public Boolean getDeleted() {
-        return isDeleted;
-    }
+    public boolean isDeleted() { return deleted; }
 
-    public void setDeleted(Boolean deleted) {
-        isDeleted = deleted;
-    }
+    public void setDeleted(boolean deleted) { this.deleted = deleted; }
 }

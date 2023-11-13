@@ -8,8 +8,12 @@ import me.universi.profile.entities.Profile;
 import jakarta.persistence.*;
 
 import java.util.UUID;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 @Entity(name = "link")
+@SQLDelete(sql = "UPDATE link SET deleted = true WHERE id=?")
+@Where(clause = "deleted=false")
 public class Link {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -31,6 +35,10 @@ public class Link {
     @JoinColumn(name = "profile_id")
     @NotNull
     private Profile profile;
+
+    @JsonIgnore
+    @Column(name = "deleted")
+    private boolean deleted = Boolean.FALSE;
 
     public Link(TypeLink typeLink, String url){
         this.typeLink = typeLink;
@@ -59,11 +67,11 @@ public class Link {
         return id;
     }
 
-    public Profile getPerfil() {
+    public Profile getProfile() {
         return profile;
     }
 
-    public void setPerfil(Profile profile) {
+    public void setProfile(Profile profile) {
         this.profile = profile;
     }
 
@@ -74,4 +82,8 @@ public class Link {
     public void setName(String name) {
         this.name = name;
     }
+
+    public boolean isDeleted() { return deleted; }
+
+    public void setDeleted(boolean deleted) { this.deleted = deleted; }
 }

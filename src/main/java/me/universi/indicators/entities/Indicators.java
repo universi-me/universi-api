@@ -1,5 +1,6 @@
 package me.universi.indicators.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -16,8 +17,12 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Set;
 import java.util.UUID;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 @Entity(name = "indicators")
+@SQLDelete(sql = "UPDATE indicators SET deleted = true WHERE id=?")
+@Where(clause = "deleted=false")
 public class Indicators implements Serializable {
 
     @Serial
@@ -37,6 +42,10 @@ public class Indicators implements Serializable {
 
     @OneToOne
     private Profile profile;
+
+    @JsonIgnore
+    @Column(name = "deleted")
+    private boolean deleted = Boolean.FALSE;
 
     public Indicators(Long score, Set<Achievement> achievements, Profile profile) {
         this.score = score;
@@ -78,4 +87,9 @@ public class Indicators implements Serializable {
     public void setProfile(Profile profile) {
         this.profile = profile;
     }
+
+    public boolean isDeleted() { return deleted; }
+
+    public void setDeleted(boolean deleted) { this.deleted = deleted; }
+
 }

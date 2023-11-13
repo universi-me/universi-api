@@ -1,6 +1,7 @@
 package me.universi.curriculum.experience.entities;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -16,8 +17,12 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
 import java.util.UUID;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 @Entity(name = "experience")
+@SQLDelete(sql = "UPDATE experience SET deleted = true WHERE id=?")
+@Where(clause = "deleted=false")
 public class Experience {
 
     @Id
@@ -53,11 +58,12 @@ public class Experience {
     @Column(name = "created_at")
     private Date creationDate;
 
-    @Column(name = "is_deleted")
-    private Boolean isDeleted;
+    @JsonIgnore
+    @Column(name = "deleted")
+    private boolean deleted = Boolean.FALSE;
 
     public Experience(){
-        this.isDeleted = false;
+
     }
 
     public Experience(TypeExperience typeExperience, String local, String description, Date startDate, Date endDate, Boolean presentDate) {
@@ -67,7 +73,6 @@ public class Experience {
         this.startDate = startDate;
         this.endDate = endDate;
         this.presentDate = presentDate;
-        this.isDeleted = false;
     }
 
     public Experience(TypeExperience typeExperience, String local, String description, Date startDate, Date endDate) {
@@ -77,7 +82,6 @@ public class Experience {
         this.startDate = startDate;
         this.endDate = endDate;
         this.presentDate = false;
-        this.isDeleted = false;
     }
 
     public UUID getId() {
@@ -140,11 +144,7 @@ public class Experience {
         this.typeExperience = typeExperience;
     }
 
-    public Boolean getDeleted() {
-        return isDeleted;
-    }
+    public boolean isDeleted() { return deleted; }
 
-    public void setDeleted(Boolean deleted) {
-        isDeleted = deleted;
-    }
+    public void setDeleted(boolean deleted) { this.deleted = deleted; }
 }
