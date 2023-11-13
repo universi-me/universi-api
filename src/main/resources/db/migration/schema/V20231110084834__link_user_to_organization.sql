@@ -16,3 +16,6 @@ ALTER TABLE system_users
 
 ALTER TABLE system_users
 	ADD CONSTRAINT system_users_username_organization_key UNIQUE (username, organization);
+
+ALTER TABLE system_users
+    ADD CONSTRAINT system_users_email_organization_key UNIQUE (email, organization);
