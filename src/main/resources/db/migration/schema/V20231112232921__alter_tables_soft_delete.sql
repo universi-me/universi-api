@@ -17,44 +17,8 @@ ALTER TABLE contentstatus
 ALTER TABLE folder
     ADD COLUMN deleted BOOLEAN DEFAULT FALSE;
 
-ALTER TABLE competence
-    ADD COLUMN deleted BOOLEAN DEFAULT FALSE;
-
-ALTER TABLE competence
-    DROP COLUMN is_deleted;
-
 ALTER TABLE competence_type
     ADD COLUMN deleted BOOLEAN DEFAULT FALSE;
-
-ALTER TABLE education
-    ADD COLUMN deleted BOOLEAN DEFAULT FALSE;
-
-ALTER TABLE education
-    DROP COLUMN is_deleted;
-
-ALTER TABLE institution
-    ADD COLUMN deleted BOOLEAN DEFAULT FALSE;
-
-ALTER TABLE institution
-    DROP COLUMN is_deleted;
-
-ALTER TABLE type_education
-    ADD COLUMN deleted BOOLEAN DEFAULT FALSE;
-
-ALTER TABLE type_education
-    DROP COLUMN is_deleted;
-
-ALTER TABLE experience
-    ADD COLUMN deleted BOOLEAN DEFAULT FALSE;
-
-ALTER TABLE experience
-    DROP COLUMN is_deleted;
-
-ALTER TABLE type_experience
-    ADD COLUMN deleted BOOLEAN DEFAULT FALSE;
-
-ALTER TABLE type_experience
-    DROP COLUMN is_deleted;
 
 ALTER TABLE exercise
     ADD COLUMN deleted BOOLEAN DEFAULT FALSE;
@@ -89,8 +53,65 @@ ALTER TABLE subject
 ALTER TABLE system_users
     ADD COLUMN deleted BOOLEAN DEFAULT FALSE;
 
-ALTER TABLE vacancy
-    ADD COLUMN deleted BOOLEAN DEFAULT FALSE;
+ALTER TABLE competence
+    RENAME COLUMN is_deleted TO deleted;
+
+ALTER TABLE competence
+    ALTER COLUMN deleted TYPE BOOLEAN;
+
+ALTER TABLE competence
+    ALTER COLUMN deleted SET DEFAULT FALSE;
 
 ALTER TABLE vacancy
-    DROP COLUMN is_deleted;
+    RENAME COLUMN is_deleted TO deleted;
+
+ALTER TABLE vacancy
+    ALTER COLUMN deleted TYPE BOOLEAN;
+
+ALTER TABLE vacancy
+    ALTER COLUMN deleted SET DEFAULT FALSE;
+
+ALTER TABLE education
+    RENAME COLUMN is_deleted TO deleted;
+
+ALTER TABLE education
+    ALTER COLUMN deleted TYPE BOOLEAN;
+
+ALTER TABLE education
+    ALTER COLUMN deleted SET DEFAULT FALSE;
+
+ALTER TABLE institution
+    RENAME COLUMN is_deleted TO deleted;
+
+ALTER TABLE institution
+    ALTER COLUMN deleted TYPE BOOLEAN;
+
+ALTER TABLE institution
+    ALTER COLUMN deleted SET DEFAULT FALSE;
+
+ALTER TABLE type_education
+    RENAME COLUMN is_deleted TO deleted;
+
+ALTER TABLE type_education
+    ALTER COLUMN deleted TYPE BOOLEAN;
+
+ALTER TABLE type_education
+    ALTER COLUMN deleted SET DEFAULT FALSE;
+
+ALTER TABLE experience
+    RENAME COLUMN is_deleted TO deleted;
+
+ALTER TABLE experience
+    ALTER COLUMN deleted TYPE BOOLEAN;
+
+ALTER TABLE experience
+    ALTER COLUMN deleted SET DEFAULT FALSE;
+
+ALTER TABLE type_experience
+    RENAME COLUMN is_deleted TO deleted;
+
+ALTER TABLE type_experience
+    ALTER COLUMN deleted TYPE BOOLEAN;
+
+ALTER TABLE type_experience
+    ALTER COLUMN deleted SET DEFAULT FALSE;
