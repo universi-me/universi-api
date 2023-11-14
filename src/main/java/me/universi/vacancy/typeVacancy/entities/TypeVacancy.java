@@ -13,8 +13,12 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
 import java.util.UUID;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 @Entity(name = "type_vacancy")
+@SQLDelete(sql = "UPDATE type_vacancy SET deleted = true WHERE id=?")
+@Where(clause = "deleted=false")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class TypeVacancy {
 
@@ -32,8 +36,8 @@ public class TypeVacancy {
     @Column(name = "created_at")
     private Date creationDate;
 
-    @Column(name = "is_deleted")
-    private Boolean isDeleted;
+    @Column(name = "deleted")
+    private boolean deleted = Boolean.FALSE;
 
     public TypeVacancy(){
 
@@ -41,7 +45,6 @@ public class TypeVacancy {
 
     public TypeVacancy(String name) {
         this.name = name;
-        this.isDeleted = false;
     }
 
     public UUID getId() {
@@ -64,11 +67,7 @@ public class TypeVacancy {
         this.creationDate = creationDate;
     }
 
-    public Boolean getDeleted() {
-        return isDeleted;
-    }
+    public boolean isDeleted() { return deleted; }
 
-    public void setDeleted(Boolean deleted) {
-        isDeleted = deleted;
-    }
+    public void setDeleted(boolean deleted) { this.deleted = deleted; }
 }

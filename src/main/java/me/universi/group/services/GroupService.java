@@ -33,11 +33,7 @@ public class GroupService {
 
     public Group findFirstById(UUID id) {
         Optional<Group> optionalGroup = groupRepository.findFirstById(id);
-        if(optionalGroup.isPresent()){
-            return optionalGroup.get();
-        }else{
-            return null;
-        }
+        return optionalGroup.orElse(null);
     }
 
     public Group findFirstById(String id) {
@@ -114,26 +110,13 @@ public class GroupService {
     }
 
     public void addSubGroup(Group group, Group sub) {
-        Collection<Group> subGroups = group.getSubGroups();
-        if(subGroups == null) {
-            subGroups = new ArrayList<>();
-        }
-        if(!subGroups.contains(sub)) {
-            subGroups.add(sub);
-            group.setSubGroups(subGroups);
-            this.save(group);
+        if(!groupRepository.existsByIdAndSubGroupsId(group.getId(), sub.getId())) {
+            groupRepository.addGroup(group.getId(), sub.getId());
         }
     }
 
     public void removeSubGroup(Group group, Group sub) {
-        Collection<Group> subGroups = group.getSubGroups();
-        if(subGroups == null) {
-            subGroups = new ArrayList<>();
-        }
-        if(subGroups.contains(sub)) {
-            subGroups.remove(sub);
-            group.setSubGroups(subGroups);
-            this.save(group);
+        if(groupRepository.existsByIdAndSubGroupsId(group.getId(), sub.getId())) {
             this.delete(sub);
         }
     }
@@ -142,15 +125,8 @@ public class GroupService {
         if(profile == null) {
             throw new GroupException("Parametro Perfil é nulo.");
         }
-        Collection<Profile> groupParticipants = group.getParticipants();
-        if(groupParticipants == null) {
-            groupParticipants = new ArrayList<>();
-        }
-        Profile participant = getParticipantInGroup(group, profile.getId());
-        if(participant == null) {
-            groupParticipants.add(profile);
-            group.setParticipants(groupParticipants);
-            this.save(group);
+        if(!groupRepository.existsByIdAndParticipantsId(group.getId(), profile.getId())) {
+            groupRepository.addParticipant(group.getId(), profile.getId());
             return true;
         }
         return false;
@@ -160,15 +136,8 @@ public class GroupService {
         if(profile == null) {
             throw new GroupException("Parametro Perfil é nulo.");
         }
-        Collection<Profile> groupParticipants = group.getParticipants();
-        if(groupParticipants == null) {
-            groupParticipants = new ArrayList<>();
-        }
-        Profile participant = getParticipantInGroup(group, profile.getId());
-        if(participant != null) {
-            groupParticipants.remove(participant);
-            group.setParticipants(groupParticipants);
-            this.save(group);
+        if(groupRepository.existsByIdAndParticipantsId(group.getId(), profile.getId())) {
+            groupRepository.removeParticipant(group.getId(), profile.getId());
             return true;
         }
         return false;
@@ -230,29 +199,14 @@ public class GroupService {
 
     private void deleteRecursive(Group group, boolean insideRecursion) {
 
-        if(group.participants != null) {
-            group.participants.clear();
-        }
-
         if(group.subGroups != null) {
             for(Group groupNow : group.subGroups) {
                 this.deleteRecursive(groupNow, true);
             }
         }
 
-        // Don't execute if it's inside the recursion (conflicts with the deletion of above subgroups)
-        if(!insideRecursion) {
-            UUID parentGroupId = this.findParentGroupId(group.getId());
-            if (parentGroupId != null) {
-                Group parentGroup = findFirstById(parentGroupId);
-                if (parentGroup.subGroups != null) {
-                    parentGroup.subGroups.remove(group);
-                    groupRepository.save(parentGroup);
-                }
-            }
-        }
-
-        groupRepository.delete(group);
+        group.setDeleted(true);
+        groupRepository.save(group);
     }
 
     public List<Group> findAll() {
@@ -268,7 +222,7 @@ public class GroupService {
             Group groupInsta = rootGroup;
             for (int i = 0; i < nicknameSequenceArr.length; i++) {
                 String nicknameNow = nicknameSequenceArr[i];
-                if (nicknameNow == null || nicknameNow.length() == 0) {
+                if (nicknameNow == null || nicknameNow.isEmpty()) {
                     continue;
                 }
                 if (i == 0) {

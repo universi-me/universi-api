@@ -1,12 +1,15 @@
 package me.universi.group.controller;
 
+import com.google.common.collect.Lists;
 import java.net.URI;
+import java.util.*;
 import me.universi.api.entities.Response;
 import me.universi.group.entities.Group;
 import me.universi.group.enums.GroupType;
 import me.universi.group.exceptions.GroupException;
 import me.universi.group.services.GroupService;
 
+import me.universi.profile.entities.Profile;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 
@@ -16,9 +19,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.UUID;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
@@ -113,6 +113,7 @@ public class GrupoController {
                     groupNew.setRootGroup(true);
                     groupService.save(groupNew);
                 } else {
+                    groupService.save(groupNew);
                     groupService.addSubGroup(parentGroup, groupNew);
                 }
 
@@ -327,7 +328,7 @@ public class GrupoController {
             Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
 
             if(group != null) {
-                response.body.put("participants", group.getParticipants());
+                response.body.put("participants", Lists.reverse(group.getParticipants().stream().toList()));
                 return;
             }
 
@@ -437,7 +438,7 @@ public class GrupoController {
 
             if(group != null) {
                 Collection<Group> subgroupList = group.getSubGroups();
-                response.body.put("subgroups", subgroupList);
+                response.body.put("subgroups",  Lists.reverse(subgroupList.stream().toList()));
                 return;
             }
 
