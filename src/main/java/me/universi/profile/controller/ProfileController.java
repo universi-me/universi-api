@@ -1,5 +1,6 @@
 package me.universi.profile.controller;
 
+import com.google.common.collect.Lists;
 import me.universi.api.entities.Response;
 import me.universi.capacity.service.CapacityService;
 import me.universi.profile.entities.Profile;
@@ -161,7 +162,7 @@ public class ProfileController {
 
             Profile profileGet = profileService.getProfileByUserIdOrUsername(body.get("profileId"), body.get("username"));
 
-            response.body.put("groups", profileGet.getGroups());
+            response.body.put("groups", Lists.reverse(profileGet.getGroups().stream().toList()));
 
         });
     }

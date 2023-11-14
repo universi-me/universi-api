@@ -70,8 +70,12 @@ public class Response {
         if(response.status != null) {
             // set http status to current response
             RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-            HttpServletResponse actualResponse = ((ServletRequestAttributes) requestAttributes).getResponse();
-            actualResponse.setStatus(response.status);
+            if(requestAttributes != null) {
+                HttpServletResponse actualResponse = ((ServletRequestAttributes) requestAttributes).getResponse();
+                if(actualResponse != null) {
+                    actualResponse.setStatus(response.status);
+                }
+            }
         }
         return response;
     }
