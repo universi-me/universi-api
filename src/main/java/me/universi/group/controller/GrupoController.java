@@ -3,8 +3,11 @@ package me.universi.group.controller;
 import com.google.common.collect.Lists;
 import java.net.URI;
 import java.util.*;
+import java.util.stream.Collectors;
 import me.universi.api.entities.Response;
 import me.universi.group.entities.Group;
+import me.universi.group.entities.ProfileGroup;
+import me.universi.group.entities.Subgroup;
 import me.universi.group.enums.GroupType;
 import me.universi.group.exceptions.GroupException;
 import me.universi.group.services.GroupService;
@@ -328,7 +331,14 @@ public class GrupoController {
             Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
 
             if(group != null) {
-                response.body.put("participants", Lists.reverse(group.getParticipants().stream().toList()));
+                Collection<ProfileGroup> participants = group.getParticipants();
+
+                List<Profile> profiles = participants.stream()
+                        .map(ProfileGroup::getProfile)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList());
+
+                response.body.put("participants", profiles);
                 return;
             }
 
@@ -437,8 +447,14 @@ public class GrupoController {
             Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
 
             if(group != null) {
-                Collection<Group> subgroupList = group.getSubGroups();
-                response.body.put("subgroups",  Lists.reverse(subgroupList.stream().toList()));
+                Collection<Subgroup> subgroupList = group.getSubGroups();
+
+                List<Group> groups = subgroupList.stream()
+                        .map(Subgroup::getSubgroup)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList());
+
+                response.body.put("subgroups",  groups);
                 return;
             }
 

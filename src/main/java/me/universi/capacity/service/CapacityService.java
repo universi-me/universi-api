@@ -16,6 +16,7 @@ import me.universi.capacity.repository.CategoryRepository;
 import me.universi.capacity.repository.FolderRepository;
 import me.universi.capacity.repository.ContentStatusRepository;
 import me.universi.group.entities.Group;
+import me.universi.group.entities.ProfileGroup;
 import me.universi.group.exceptions.GroupException;
 import me.universi.group.services.GroupService;
 import me.universi.profile.entities.Profile;
@@ -85,18 +86,18 @@ public class CapacityService implements CapacityServiceInterface {
             return;
         }
 
-        Collection<Group> userGroups = userSession.getProfile().getGroups();
+        Collection<ProfileGroup> userGroups = userSession.getProfile().getGroups();
         Collection<Group> folderGroups = folder.getGrantedAccessGroups();
         UUID folderOwnerId = folder.getOwnerGroup().getId();
 
-        for(Group userGroupNow : userGroups) {
-            if (Objects.equals(folderOwnerId, userGroupNow.getId())) {
+        for(ProfileGroup userGroupNow : userGroups) {
+            if (userGroupNow.group != null && Objects.equals(folderOwnerId, userGroupNow.group.getId())) {
                 /* User is in the owner group of the folder */
                 return;
             }
 
             for(Group folderGroupNow : folderGroups) {
-                if(Objects.equals(folderGroupNow.getId(), userGroupNow.getId())) {
+                if(userGroupNow.group != null && Objects.equals(folderGroupNow.getId(), userGroupNow.group.getId())) {
                     /* User is in a group with access to the folder */
                     return;
                 }
@@ -485,11 +486,13 @@ public class CapacityService implements CapacityServiceInterface {
             return assignedFolders;
         }
 
-        Collection<Group> profileGroups = profileService.findFirstById(profileId).getGroups();
+        Collection<ProfileGroup> profileGroups = profileService.findFirstById(profileId).getGroups();
         Collection<Folder> foldersFromGroups = new ArrayList<>(profileGroups.size());
-        for (Group g : profileGroups) {
-            for (Folder f : g.getFolders()) {
-                foldersFromGroups.add(f);
+        for (ProfileGroup g : profileGroups) {
+            if(g.group != null) {
+                for (Folder f : g.group.getFolders()) {
+                    foldersFromGroups.add(f);
+                }
             }
         }
 

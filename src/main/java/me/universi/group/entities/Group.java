@@ -1,24 +1,7 @@
 package me.universi.group.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
-import jakarta.persistence.Transient;
-import jakarta.persistence.OrderColumn;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
@@ -75,24 +58,14 @@ public class Group implements Serializable {
     private boolean deleted = Boolean.FALSE;
 
     @JsonIgnore
-    @ManyToMany(cascade = { CascadeType.ALL })
-    @JoinTable(
-            name = "profile_group",
-            joinColumns = { @JoinColumn(name = "group_id") },
-            inverseJoinColumns = { @JoinColumn(name =  "profile_id") }
-    )
-    @OrderColumn(name="joined")
-    public Collection<Profile> participants;
+    @OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
+    @OrderBy("joined DESC")
+    public Collection<ProfileGroup> participants;
 
     @JsonIgnore
-    @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
-    @JoinTable(
-            name = "subgroup",
-            joinColumns = { @JoinColumn(name = "group_id", referencedColumnName = "id") },
-            inverseJoinColumns = { @JoinColumn(name = "subgroup_id", referencedColumnName = "id") }
-    )
-    @OrderColumn(name="added")
-    public Collection<Group> subGroups;
+    @OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
+    @OrderBy("added DESC")
+    public Collection<Subgroup> subGroups;
 
     @Column(name = "type")
     @Enumerated(EnumType.STRING)
@@ -136,7 +109,7 @@ public class Group implements Serializable {
     public Group() {
     }
 
-    public Group(String nickname, String name, String description, Profile admin, Collection<Profile> participants, GroupType type, Collection<Group> subGroups, boolean rootGroup, boolean canCreateGroup, boolean enableCurriculum) {
+    public Group(String nickname, String name, String description, Profile admin, Collection<ProfileGroup> participants, GroupType type, Collection<Subgroup> subGroups, boolean rootGroup, boolean canCreateGroup, boolean enableCurriculum) {
         this.nickname = nickname;
         this.name = name;
         this.description = description;
@@ -187,11 +160,11 @@ public class Group implements Serializable {
         this.admin = admin;
     }
 
-    public Collection<Profile> getParticipants() {
+    public Collection<ProfileGroup> getParticipants() {
         return participants;
     }
 
-    public void setParticipants(Collection<Profile> participants) {
+    public void setParticipants(Collection<ProfileGroup> participants) {
         this.participants = participants;
     }
 
@@ -211,11 +184,11 @@ public class Group implements Serializable {
         this.nickname = nickname;
     }
 
-    public Collection<Group> getSubGroups() {
+    public Collection<Subgroup> getSubGroups() {
         return subGroups;
     }
 
-    public void setSubGroups(Collection<Group> subGroups) {
+    public void setSubGroups(Collection<Subgroup> subGroups) {
         this.subGroups = subGroups;
     }
 
