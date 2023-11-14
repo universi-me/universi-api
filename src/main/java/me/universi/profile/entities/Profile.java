@@ -11,6 +11,7 @@ import me.universi.competence.entities.Competence;
 import me.universi.curriculum.education.entities.Education;
 import me.universi.curriculum.experience.entities.Experience;
 import me.universi.group.entities.Group;
+import me.universi.group.entities.ProfileGroup;
 import me.universi.indicators.entities.Indicators;
 import me.universi.link.entities.Link;
 import me.universi.profile.enums.Gender;
@@ -57,15 +58,11 @@ public class Profile implements Serializable {
             inverseJoinColumns = @JoinColumn(name = "competence_id")
     )
     private Collection<Competence> competences;
-    @ManyToMany(cascade = { CascadeType.ALL })
-    @JoinTable(
-            name = "profile_group",
-            joinColumns = { @JoinColumn(name = "profile_id") },
-            inverseJoinColumns = { @JoinColumn(name = "group_id") }
-    )
+
     @JsonIgnore
-    @OrderColumn(name="joined")
-    private Collection<Group> groups;
+    @OneToMany(mappedBy = "profile", fetch = FetchType.LAZY)
+    @OrderBy("joined DESC")
+    private Collection<ProfileGroup> groups;
 
     @JsonIgnore
     @ManyToMany
@@ -115,7 +112,7 @@ public class Profile implements Serializable {
     @Column(name = "deleted")
     private boolean deleted = Boolean.FALSE;
 
-    public Profile(UUID id, User user, String bio, Collection<Competence> competences, Collection<Group> groups, Collection<Link> links) {
+    public Profile(UUID id, User user, String bio, Collection<Competence> competences, Collection<ProfileGroup> groups, Collection<Link> links) {
         this.id = id;
         this.user = user;
         this.bio = bio;
@@ -148,11 +145,11 @@ public class Profile implements Serializable {
         this.competences = competences;
     }
 
-    public Collection<Group> getGroups() {
+    public Collection<ProfileGroup> getGroups() {
         return groups;
     }
 
-    public void setGroups(Collection<Group> groups) {
+    public void setGroups(Collection<ProfileGroup> groups) {
         this.groups = groups;
     }
 

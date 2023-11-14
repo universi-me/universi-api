@@ -1,8 +1,14 @@
 package me.universi.profile.controller;
 
 import com.google.common.collect.Lists;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import me.universi.api.entities.Response;
 import me.universi.capacity.service.CapacityService;
+import me.universi.group.entities.Group;
+import me.universi.group.entities.ProfileGroup;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.enums.Gender;
 import me.universi.profile.exceptions.ProfileException;
@@ -162,7 +168,14 @@ public class ProfileController {
 
             Profile profileGet = profileService.getProfileByUserIdOrUsername(body.get("profileId"), body.get("username"));
 
-            response.body.put("groups", Lists.reverse(profileGet.getGroups().stream().toList()));
+            Collection<ProfileGroup> group = profileGet.getGroups();
+
+            List<Group> groups = group.stream()
+                    .map(ProfileGroup::getGroup)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+
+            response.body.put("groups", groups);
 
         });
     }

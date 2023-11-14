@@ -1,12 +1,15 @@
 package me.universi.group.services;
 
-import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import me.universi.Sys;
 import me.universi.group.entities.Group;
+import me.universi.group.entities.ProfileGroup;
+import me.universi.group.entities.Subgroup;
 import me.universi.group.exceptions.GroupException;
 import me.universi.group.repositories.GroupRepository;
+import me.universi.group.repositories.ProfileGroupRepository;
+import me.universi.group.repositories.SubgroupRepository;
 import me.universi.profile.entities.Profile;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
@@ -25,6 +28,11 @@ public class GroupService {
     private UserService userService;
     @Autowired
     private GroupRepository groupRepository;
+    @Autowired
+    private ProfileGroupRepository profileGroupRepository;
+    @Autowired
+    private SubgroupRepository subgroupRepository;
+
     private static final Pattern patternGetSubdomain = Pattern.compile("(?:http[s]*\\:\\/\\/)?(.*?)((\\.)|(:))");
 
     public static GroupService getInstance() {
@@ -110,13 +118,16 @@ public class GroupService {
     }
 
     public void addSubGroup(Group group, Group sub) {
-        if(!groupRepository.existsByIdAndSubGroupsId(group.getId(), sub.getId())) {
-            groupRepository.addGroup(group.getId(), sub.getId());
+        if(!subgroupRepository.existsByGroupIdAndSubgroupId(group.getId(), sub.getId())) {
+            Subgroup subgroup = new Subgroup();
+            subgroup.group = group;
+            subgroup.subgroup = sub;
+            subgroupRepository.save(subgroup);
         }
     }
 
     public void removeSubGroup(Group group, Group sub) {
-        if(groupRepository.existsByIdAndSubGroupsId(group.getId(), sub.getId())) {
+        if(subgroupRepository.existsByGroupIdAndSubgroupId(group.getId(), sub.getId())) {
             this.delete(sub);
         }
     }
@@ -125,8 +136,11 @@ public class GroupService {
         if(profile == null) {
             throw new GroupException("Parametro Perfil é nulo.");
         }
-        if(!groupRepository.existsByIdAndParticipantsId(group.getId(), profile.getId())) {
-            groupRepository.addParticipant(group.getId(), profile.getId());
+        if(!profileGroupRepository.existsByGroupIdAndProfileId(group.getId(), profile.getId())) {
+            ProfileGroup profileGroup = new ProfileGroup();
+            profileGroup.profile = profile;
+            profileGroup.group = group;
+            profileGroupRepository.save(profileGroup);
             return true;
         }
         return false;
@@ -136,8 +150,11 @@ public class GroupService {
         if(profile == null) {
             throw new GroupException("Parametro Perfil é nulo.");
         }
-        if(groupRepository.existsByIdAndParticipantsId(group.getId(), profile.getId())) {
-            groupRepository.removeParticipant(group.getId(), profile.getId());
+        if(profileGroupRepository.existsByGroupIdAndProfileId(group.getId(), profile.getId())) {
+            ProfileGroup profileGroup = profileGroupRepository.findFirstByGroupAndProfile(group, profile);
+            profileGroup.exited = ConvertUtil.getDateTimeNow();
+            profileGroup.deleted = true;
+            profileGroupRepository.save(profileGroup);
             return true;
         }
         return false;
@@ -145,9 +162,9 @@ public class GroupService {
 
     public Profile getParticipantInGroup(Group group, UUID participantId) {
         if(participantId != null && group.getParticipants() != null) {
-            for (Profile participantNow : group.getParticipants()) {
-                if (Objects.equals(participantNow.getId(), participantId)) {
-                    return participantNow;
+            for (ProfileGroup participantNow : group.getParticipants()) {
+                if (Objects.equals(participantNow.profile.getId(), participantId)) {
+                    return participantNow.profile;
                 }
             }
         }
@@ -164,8 +181,8 @@ public class GroupService {
             }
 
             if(available && group != null) {
-                for (Group groupNow : group.getSubGroups()) {
-                    if (groupNow.nickname.toLowerCase().equals(nicknameLower)) {
+                for (Subgroup groupNow : group.getSubGroups()) {
+                    if (groupNow.subgroup != null && groupNow.subgroup.nickname.toLowerCase().equals(nicknameLower)) {
                         available = false;
                         break;
                     }
@@ -200,8 +217,8 @@ public class GroupService {
     private void deleteRecursive(Group group, boolean insideRecursion) {
 
         if(group.subGroups != null) {
-            for(Group groupNow : group.subGroups) {
-                this.deleteRecursive(groupNow, true);
+            for(Subgroup groupNow : group.subGroups) {
+                this.deleteRecursive(groupNow.subgroup, true);
             }
         }
 
@@ -230,9 +247,9 @@ public class GroupService {
                     continue;
                 }
                 Group sub = null;
-                for (Group grupoNow : groupInsta.subGroups) {
-                    if (nicknameNow.equals(grupoNow.nickname.toLowerCase())) {
-                        sub = grupoNow;
+                for (Subgroup grupoNow : groupInsta.subGroups) {
+                    if (grupoNow.subgroup != null && nicknameNow.equals(grupoNow.subgroup.nickname.toLowerCase())) {
+                        sub = grupoNow.subgroup;
                         break;
                     }
                 }

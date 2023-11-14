@@ -1,0 +1,19 @@
+
+ALTER TABLE profile_group
+    ADD COLUMN id UUID NOT NULL DEFAULT uuid_generate_v4();
+
+ALTER TABLE profile_group
+    ADD COLUMN exited TIMESTAMP WITHOUT TIME ZONE;
+
+ALTER TABLE profile_group
+    ADD COLUMN deleted BOOLEAN DEFAULT FALSE;
+
+
+ALTER TABLE subgroup
+    ADD COLUMN id UUID NOT NULL DEFAULT uuid_generate_v4();
+
+ALTER TABLE subgroup
+    ADD COLUMN removed TIMESTAMP WITHOUT TIME ZONE;
+
+ALTER TABLE subgroup
+    ADD COLUMN deleted BOOLEAN DEFAULT FALSE;
