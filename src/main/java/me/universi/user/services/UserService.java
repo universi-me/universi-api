@@ -485,4 +485,8 @@ public class UserService implements UserDetailsService {
     public boolean confirmAccountEnabled() {
         return Boolean.parseBoolean(env.getProperty("SIGNUP_CONFIRMATION_ENABLED"));
     }
+
+    public boolean isProduction() {
+        return "prod".equals(env.getProperty("spring.profiles.active"));
+    }
 }
