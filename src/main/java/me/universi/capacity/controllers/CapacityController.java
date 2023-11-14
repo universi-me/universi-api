@@ -11,6 +11,9 @@ import me.universi.capacity.entidades.ContentStatus;
 import me.universi.capacity.entidades.Folder;
 import me.universi.capacity.enums.ContentStatusType;
 import me.universi.capacity.enums.ContentType;
+import me.universi.group.entities.Group;
+import me.universi.group.services.GroupService;
+import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -25,9 +28,11 @@ import me.universi.capacity.service.CapacityService;
 public class CapacityController {
 
     private final CapacityService capacityService;
+    private final GroupService groupService;
 
-    public CapacityController(CapacityService capacityService) {
+    public CapacityController(CapacityService capacityService, GroupService groupService) {
         this.capacityService = capacityService;
+        this.groupService = groupService;
     }
 
     @GetMapping("/contents")
@@ -474,6 +479,8 @@ public class CapacityController {
             Object description =    body.get("description");
             Object rating =         body.get("rating");
             Object publicFolder =   body.get("publicFolder");
+            Object groupId =        body.get("groupId");
+            Object groupPath =      body.get("groupPath");
 
             // id or array of ids
             Object addCategoriesByIds =            body.get("addCategoriesByIds");
@@ -483,10 +490,20 @@ public class CapacityController {
                 throw new CapacityException("Parametro name não informado.");
             }
 
+            Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
+            if(group == null) {
+                throw new CapacityException("Grupo não encontrado.");
+            }
+
+            User user = UserService.getInstance().getUserInSession();
+
+            groupService.verifyPermissionToEditGroup(group, user);
+
             Folder folder = new Folder();
 
             folder.setName(String.valueOf(name));
-            folder.setAuthor(UserService.getInstance().getUserInSession().getProfile());
+            folder.setAuthor(user.getProfile());
+            folder.setOwnerGroup(group);
 
             if(image != null) {
                 String imageStr = String.valueOf(image);

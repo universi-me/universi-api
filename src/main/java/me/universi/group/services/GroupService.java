@@ -308,7 +308,7 @@ public class GroupService {
         }
     }
 
-    public Group getGroupByGroupIdOrGroupPath(String groupId, String groupPath) throws GroupException {
+    public Group getGroupByGroupIdOrGroupPath(Object groupId, Object groupPath) throws GroupException {
 
         if(groupId == null && groupPath == null) {
             throw new GroupException("Parâmetro groupId e groupPath é nulo.");
@@ -316,10 +316,10 @@ public class GroupService {
 
         Group group = null;
         if(groupId != null) {
-            group = findFirstById(groupId);
+            group = findFirstById(String.valueOf(groupId));
         }
         if (group == null && groupPath != null) {
-            group = getGroupFromPath(groupPath);
+            group = getGroupFromPath(String.valueOf(groupPath));
         }
 
         if(group == null) {
