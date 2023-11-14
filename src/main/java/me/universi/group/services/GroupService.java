@@ -359,16 +359,16 @@ public class GroupService {
         if (matcher.find()) {
             organizationId = matcher.group(1).toLowerCase();
         } else {
-            throw new Exception("Organização não encontrada.");
+            throw new GroupException("Organização não encontrada.");
         }
 
         if("localhost".equals(organizationId)) {
-            organizationId = "ccae";
+            organizationId = "dcx";
         }
 
         Group organizationG = findFirstByRootGroupAndNicknameIgnoreCase(true, organizationId);
         if(organizationG == null) {
-            throw new Exception("Organização não encontrada.");
+            throw new GroupException("Organização não encontrada.");
         }
         return organizationG;
     }

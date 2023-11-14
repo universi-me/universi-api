@@ -3,6 +3,7 @@ package me.universi.api.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.servlet.http.HttpServletResponse;
+import me.universi.user.services.UserService;
 import me.universi.util.ConvertUtil;
 import java.util.HashMap;
 import org.springframework.web.context.request.RequestAttributes;
@@ -60,7 +61,7 @@ public class Response {
             if(e.getClass().getPackageName().startsWith("me.universi")) {
                 response.message = e.getMessage();
             } else {
-                response.message = "Ocorreu um erro interno do servidor.";
+                response.message = "Ocorreu um erro interno por parte do servidor." + (UserService.getInstance().isProduction() ? "" : "\n (" + e.getMessage() + ")");
             }
 
             if(response.status == null) {
