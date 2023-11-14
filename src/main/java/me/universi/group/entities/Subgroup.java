@@ -48,6 +48,10 @@ public class Subgroup implements Serializable {
     public Subgroup() {
     }
 
+    public Date getAdded() {
+        return this.added;
+    }
+
     public Group getGroup() {
         return this.group;
     }

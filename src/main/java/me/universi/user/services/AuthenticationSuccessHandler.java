@@ -53,9 +53,9 @@ public class AuthenticationSuccessHandler extends SavedRequestAwareAuthenticatio
         if ("application/json".equals(request.getHeader("Content-Type"))) { // request via JSON
 
             Response responseBuild = Response.buildResponse(r -> {
-                if(user.getProfile() != null && user.getProfile().getGender() != Gender.O)
+                if(!userService.userNeedAnProfile(user, false) && user.getProfile().getGender() != Gender.O)
                     r.message = (user.getProfile().getGender() == Gender.F ? "Bem-vinda, " : "Bem-vindo, ")+user.getProfile().getFirstname()+".";
-                else if (user.getProfile() != null && user.getProfile().getGender() == Gender.O)
+                else if (!userService.userNeedAnProfile(user, false) && user.getProfile().getGender() == Gender.O)
                     r.message = "Boas vindas, "+user.getProfile().getFirstname()+".";
                 else
                     r.message = "Boas vindas, "+user.getName()+".";

@@ -60,7 +60,7 @@ public class Response {
             if(e.getClass().getPackageName().startsWith("me.universi")) {
                 response.message = e.getMessage();
             } else {
-                response.message = "Ocorreu um erro interno do servidor.";
+                response.message = "Ocorreu um erro interno do servidor." + e.getMessage();
             }
 
             if(response.status == null) {

@@ -65,4 +65,8 @@ public class ProfileGroup implements Serializable {
     public void setGroup(Group group) {
         this.group = group;
     }
+
+    public Date getJoined() {
+        return this.joined;
+    }
 }

@@ -313,6 +313,10 @@ public class UserService implements UserDetailsService {
         return error;
     }
 
+    public String manageProfilePath() {
+        return "/manage-profile";
+    }
+
     // url redirect when user login
     public String getUrlWhenLogin() {
 
@@ -320,7 +324,7 @@ public class UserService implements UserDetailsService {
         if (userSession != null) {
             if(userNeedAnProfile(userSession, true)) {
                 // go to user profile edit
-                return "/manage-profile";
+                return manageProfilePath();
             } else {
                 try {
                     return "/group" + userSession.getOrganization().getPath();

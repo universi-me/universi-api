@@ -61,7 +61,6 @@ public class Profile implements Serializable {
 
     @JsonIgnore
     @OneToMany(mappedBy = "profile", fetch = FetchType.LAZY)
-    @OrderBy("joined DESC")
     private Collection<ProfileGroup> groups;
 
     @JsonIgnore

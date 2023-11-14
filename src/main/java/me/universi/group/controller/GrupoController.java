@@ -334,6 +334,7 @@ public class GrupoController {
                 Collection<ProfileGroup> participants = group.getParticipants();
 
                 List<Profile> profiles = participants.stream()
+                        .sorted(Comparator.comparing(ProfileGroup::getJoined).reversed())
                         .map(ProfileGroup::getProfile)
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList());
@@ -426,6 +427,11 @@ public class GrupoController {
 
             Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
 
+            if(userService.userNeedAnProfile(userService.getUserInSession(), true)) {
+                // go to user profile edit
+                response.redirectTo = userService.manageProfilePath();
+            }
+
             if (group != null) {
                 response.body.put("group", group);
                 return;
@@ -450,6 +456,7 @@ public class GrupoController {
                 Collection<Subgroup> subgroupList = group.getSubGroups();
 
                 List<Group> groups = subgroupList.stream()
+                        .sorted(Comparator.comparing(Subgroup::getAdded).reversed())
                         .map(Subgroup::getSubgroup)
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList());

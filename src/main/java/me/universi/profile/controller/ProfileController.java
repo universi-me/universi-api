@@ -1,14 +1,13 @@
 package me.universi.profile.controller;
 
 import com.google.common.collect.Lists;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 import me.universi.api.entities.Response;
 import me.universi.capacity.service.CapacityService;
 import me.universi.group.entities.Group;
 import me.universi.group.entities.ProfileGroup;
+import me.universi.group.entities.Subgroup;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.enums.Gender;
 import me.universi.profile.exceptions.ProfileException;
@@ -29,7 +28,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.net.URI;
-import java.util.Map;
 
 @RestController
 @RequestMapping(value = "/api/profile")
@@ -171,6 +169,7 @@ public class ProfileController {
             Collection<ProfileGroup> group = profileGet.getGroups();
 
             List<Group> groups = group.stream()
+                    .sorted(Comparator.comparing(ProfileGroup::getJoined).reversed())
                     .map(ProfileGroup::getGroup)
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());

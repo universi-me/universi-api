@@ -59,12 +59,10 @@ public class Group implements Serializable {
 
     @JsonIgnore
     @OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
-    @OrderBy("joined DESC")
     public Collection<ProfileGroup> participants;
 
     @JsonIgnore
     @OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
-    @OrderBy("added DESC")
     public Collection<Subgroup> subGroups;
 
     @Column(name = "type")
