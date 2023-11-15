@@ -65,20 +65,20 @@ public class UserController {
             }
 
             HttpSession session = userService.getActiveSession();
-            if(session.getAttribute("account_confirmed") != null) {
+            if(userService.getInSession("account_confirmed") != null) {
 
                 response.success = true;
                 response.redirectTo = "/login";
 
-                response.message = session.getAttribute("message_account_confirmed").toString();
+                response.message = userService.getInSession("message_account_confirmed").toString();
 
                 response.alertOptions.put("title", "Confirmação de Conta");
                 response.alertOptions.put("icon", "success");
                 response.alertOptions.put("modalAlert", true);
                 response.alertOptions.put("timer", null);
 
-                session.removeAttribute("account_confirmed");
-                session.removeAttribute("message_account_confirmed");
+                userService.removeInSession("account_confirmed");
+                userService.removeInSession("message_account_confirmed");
             }
 
         });
@@ -206,8 +206,7 @@ public class UserController {
             User user = userService.getUserInSession();
 
             // if logged with google don't check password
-            HttpSession session = userService.getActiveSession();
-            boolean logadoComGoogle = (session.getAttribute("loginViaGoogle") != null);
+            boolean logadoComGoogle = (userService.getInSession("loginViaGoogle") != null);
 
             if (logadoComGoogle || userService.passwordValid(user, password)) {
 
@@ -383,7 +382,7 @@ public class UserController {
 
                         profileService.save(profile);
 
-                        sessionReq.setAttribute("novoUsuario", true);
+                        userService.saveInSession("novoUsuario", true);
 
                     } else {
                         throw new UserException("Usúario \""+newUsername+"\" já existe.");
@@ -398,7 +397,7 @@ public class UserController {
                         userService.save(user);
                     }
 
-                    sessionReq.setAttribute("loginViaGoogle", true);
+                    userService.saveInSession("loginViaGoogle", true);
 
                     userService.configureSessionForUser(user, authenticationManager);
 
@@ -528,12 +527,10 @@ public class UserController {
 
         String baseUrl = "https://" + requestUrl.getHost();
 
-        HttpSession session = userService.getActiveSession();
-
         User user = token==null ? null : userService.getUserByRecoveryPasswordToken(token);
 
         if(user == null) {
-            session.setAttribute("message_account_confirmed", "Token de confirmação de conta inválido ou expirado!");
+            userService.saveInSession("message_account_confirmed", "Token de confirmação de conta inválido ou expirado!");
             return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(baseUrl + "/login")).build();
         }
 
@@ -542,8 +539,8 @@ public class UserController {
         user.setConfirmed(true);
         userService.save(user);
 
-        session.setAttribute("account_confirmed", true);
-        session.setAttribute("message_account_confirmed", "Conta confirmada com sucesso, efetue o login para continuar.");
+        userService.saveInSession("account_confirmed", true);
+        userService.saveInSession("message_account_confirmed", "Conta confirmada com sucesso, efetue o login para continuar.");
 
         return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(baseUrl + "/login")).build();
     }
