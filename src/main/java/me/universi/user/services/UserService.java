@@ -431,7 +431,7 @@ public class UserService implements UserDetailsService {
     public void logout() {
         try {
             SecurityContextHolder.clearContext();
-            HttpSession session = getActiveSession();
+            HttpSession session = getRequest().getSession(true);
             session.invalidate();
         } catch (Exception e) {
             e.printStackTrace();

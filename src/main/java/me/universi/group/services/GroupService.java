@@ -41,7 +41,18 @@ public class GroupService {
 
     public Group findFirstById(UUID id) {
         Optional<Group> optionalGroup = groupRepository.findFirstById(id);
-        return optionalGroup.orElse(null);
+        Group group = optionalGroup.orElse(null);
+
+        // check if user is logged in and if the group is from the user organization, elso return null
+        if(group != null && userService.userIsLoggedIn()) {
+            User user = userService.getUserInSession();
+            Group userOrg = user.getOrganization();
+            if(userOrg != null && !Objects.equals(userOrg.getId(), id)) {
+                return null;
+            }
+        }
+
+        return group;
     }
 
     public Group findFirstById(String id) {
