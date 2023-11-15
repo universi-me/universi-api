@@ -16,6 +16,7 @@ import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
 import me.universi.user.entities.User;
 import me.universi.user.enums.Authority;
+import me.universi.user.exceptions.ExceptionResponse;
 import me.universi.user.exceptions.UserException;
 import me.universi.user.repositories.UserRepository;
 import me.universi.util.ConvertUtil;
@@ -212,7 +213,11 @@ public class UserService implements UserDetailsService {
     }
 
     public HttpSession getActiveSession() {
-        return getRequest().getSession(true);
+        HttpSession session = getRequest().getSession(true);
+        if (session.getAttribute("domain") == null) {
+            session.setAttribute("domain", getDomainFromRequest());
+        }
+        return session;
     }
 
     public String getActiveUrl() {
@@ -222,17 +227,55 @@ public class UserService implements UserDetailsService {
     public void updateUserInSession() {
         User userSession = getUserInSession();
         if(userSession != null) {
-            User userAtualizado = (User) findFirstById(userSession.getId());
-            if(userAtualizado != null) {
-                configureSessionForUser(userAtualizado, null);
+            User actualUser = (User) findFirstById(userSession.getId());
+            if(actualUser != null) {
+                configureSessionForUser(actualUser, null);
             }
         }
+    }
+
+    // get host from request
+    public String getDomainFromRequest() {
+        try {
+            return new URL(getRequest().getRequestURL().toString()).getHost();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    // save in session based in domain
+    public void saveInSession(String key, Object value) {
+        HttpSession session = getActiveSession();
+        Object domain = session.getAttribute("domain");
+        session.setAttribute(key + "|" + domain, value);
+    }
+
+    // get in session based in domain
+    public Object getInSession(String key) {
+        HttpSession session = getActiveSession();
+        Object domain = session.getAttribute("domain");
+        return session.getAttribute(key + "|" + domain);
+    }
+
+    // remove in session based in domain
+    public void removeInSession(String key) {
+        HttpSession session = getActiveSession();
+        Object domain = session.getAttribute("domain");
+        session.removeAttribute(key + "|" + domain);
     }
 
     public User getUserInSession() {
         HttpSession session = getActiveSession();
         if(session != null) {
-            return (User) session.getAttribute("usuario");
+            User user = (User) getInSession("user");
+            if(user != null) {
+                return user;
+            }
+        }
+        if(userIsLoggedIn()) {
+            // force logout if session is invalid, due to logged with no user
+            logout();
+            throw new ExceptionResponse("Sessão inválida!", "/login");
         }
         return null;
     }
@@ -242,8 +285,8 @@ public class UserService implements UserDetailsService {
         // set user session inactivity to 6 months
         session.setMaxInactiveInterval(6 * 30 * 24 * 60 * 60);
 
-        // save user in session
-        session.setAttribute("usuario", user);
+        // save user based in domain in session
+        saveInSession("user", user);
 
         // force authentication
         if(authenticationManager != null) {
