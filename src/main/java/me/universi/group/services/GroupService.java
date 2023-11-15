@@ -78,12 +78,23 @@ public class GroupService {
         return optionalGroup.orElse(null);
     }
 
-    public Group findFirstByRootGroupAndNicknameIgnoreCase(boolean rootGroup, String nickname) {
+    public Group findFirstByRootGroupAndNicknameIgnoreCase(boolean rootGroup, String nickname, boolean checkUserOrganizationAccess) {
         if(nickname == null || nickname.isEmpty()) {
             return null;
         }
         Optional<Group> optionalGroup = groupRepository.findFirstByRootGroupAndNicknameIgnoreCase(rootGroup, nickname);
-        return optionalGroup.orElse(null);
+        Group group = optionalGroup.orElse(null);
+
+        // check if user is logged in and if the group is from the user organization, elso return null
+        if(checkUserOrganizationAccess && rootGroup && group != null && userService.userIsLoggedIn()) {
+            User user = userService.getUserInSession();
+            Group userOrg = user.getOrganization();
+            if(userOrg != null && !Objects.equals(userOrg.getId(), group.getId())) {
+                return null;
+            }
+        }
+
+        return group;
     }
 
     public List<Group> findByPublicGroup(boolean publicGroup) {
@@ -202,7 +213,7 @@ public class GroupService {
             }
 
             if(available && group==null) {
-                Group groupRoot = findFirstByRootGroupAndNicknameIgnoreCase(true, nicknameLower);
+                Group groupRoot = findFirstByRootGroupAndNicknameIgnoreCase(true, nicknameLower, false);
                 if(groupRoot != null) {
                     available = false;
                 }
@@ -308,7 +319,7 @@ public class GroupService {
             Group groupActual = null;
 
             // get group root, its nickname is unique in the system, it can be accessed direct
-            groupRoot = findFirstByRootGroupAndNicknameIgnoreCase(true, nicknameArr[0]);
+            groupRoot = findFirstByRootGroupAndNicknameIgnoreCase(true, nicknameArr[0], true);
             if(groupRoot != null) {
                 // check if group path is valid and return that group
                 groupActual = getGroupFromNicknamePath(groupRoot, nicknameArr);
@@ -381,7 +392,7 @@ public class GroupService {
             organizationId = "dcx";
         }
 
-        Group organizationG = findFirstByRootGroupAndNicknameIgnoreCase(true, organizationId);
+        Group organizationG = findFirstByRootGroupAndNicknameIgnoreCase(true, organizationId, false);
         if(organizationG == null) {
             throw new GroupException("Organização não encontrada.");
         }
