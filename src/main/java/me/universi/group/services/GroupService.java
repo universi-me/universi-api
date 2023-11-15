@@ -45,9 +45,10 @@ public class GroupService {
 
         // check if user is logged in and if the group is from the user organization, elso return null
         if(group != null && userService.userIsLoggedIn()) {
+            UUID orgAccessId = group.rootGroup ? group.getId() : getGroupRootIdFromGroupId(group.getId());
             User user = userService.getUserInSession();
             Group userOrg = user.getOrganization();
-            if(userOrg != null && !Objects.equals(userOrg.getId(), id)) {
+            if(userOrg != null && !Objects.equals(userOrg.getId(), orgAccessId)) {
                 return null;
             }
         }
@@ -342,6 +343,9 @@ public class GroupService {
 
     /** Get the root group from a group id */
     public Group getGroupRootFromGroupId(UUID groupId) {
+        return findFirstById(getGroupRootIdFromGroupId(groupId));
+    }
+    public UUID getGroupRootIdFromGroupId(UUID groupId) {
         UUID parentGroupId = findParentGroupId(groupId);
         while(parentGroupId != null) {
             UUID partentUUID = findParentGroupId(parentGroupId);
@@ -351,7 +355,7 @@ public class GroupService {
                 parentGroupId = partentUUID;
             }
         }
-        return findFirstById(parentGroupId);
+        return parentGroupId;
     }
 
     /** Searches the first 5 groups containing {@code name} ignoring case */
