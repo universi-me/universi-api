@@ -214,8 +214,12 @@ public class UserService implements UserDetailsService {
 
     public HttpSession getActiveSession() {
         HttpSession session = getRequest().getSession(true);
-        if (session.getAttribute("domain") == null) {
-            session.setAttribute("domain", getDomainFromRequest());
+        Object domain = session.getAttribute("domain");
+        if (domain != null) {
+            if(!Objects.equals(domain, getDomainFromRequest())) {
+                // force logout if session is invalid, due to not same domain
+                throwErrorSessionInvalidAndRedirectToLogin();
+            }
         }
         return session;
     }
@@ -237,7 +241,7 @@ public class UserService implements UserDetailsService {
     // get host from request
     public String getDomainFromRequest() {
         try {
-            return new URL(getRequest().getRequestURL().toString()).getHost();
+            return getRequest().getServerName();
         } catch (Exception e) {
             return null;
         }
@@ -246,22 +250,19 @@ public class UserService implements UserDetailsService {
     // save in session based in domain
     public void saveInSession(String key, Object value) {
         HttpSession session = getActiveSession();
-        Object domain = session.getAttribute("domain");
-        session.setAttribute(key + "|" + domain, value);
+        session.setAttribute(key, value);
     }
 
     // get in session based in domain
     public Object getInSession(String key) {
         HttpSession session = getActiveSession();
-        Object domain = session.getAttribute("domain");
-        return session.getAttribute(key + "|" + domain);
+        return session.getAttribute(key);
     }
 
     // remove in session based in domain
     public void removeInSession(String key) {
         HttpSession session = getActiveSession();
-        Object domain = session.getAttribute("domain");
-        session.removeAttribute(key + "|" + domain);
+        session.removeAttribute(key);
     }
 
     public User getUserInSession() {
@@ -274,16 +275,23 @@ public class UserService implements UserDetailsService {
         }
         if(userIsLoggedIn()) {
             // force logout if session is invalid, due to logged with no user
-            logout();
-            throw new ExceptionResponse("Sessão inválida!", "/login");
+            throwErrorSessionInvalidAndRedirectToLogin();
         }
         return null;
+    }
+
+    public void throwErrorSessionInvalidAndRedirectToLogin() {
+        logout();
+        throw new ExceptionResponse("Sessão inválida!", "/login");
     }
 
     public void configureSessionForUser(User user, AuthenticationManager authenticationManager) {
         HttpSession session = getActiveSession();
         // set user session inactivity to 6 months
         session.setMaxInactiveInterval(6 * 30 * 24 * 60 * 60);
+
+        // save domain in session
+        saveInSession("domain", getDomainFromRequest());
 
         // save user based in domain in session
         saveInSession("user", user);
