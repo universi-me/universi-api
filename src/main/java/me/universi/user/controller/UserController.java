@@ -167,6 +167,9 @@ public class UserController {
             if(userService.emailExist(email)) {
                 throw new UserException("Email \""+email+"\" já esta cadastrado!");
             }
+            if(!GroupService.getInstance().emailAvailableForOrganization(email)) {
+                throw new UserException("Email \""+email+"\" não esta disponível para cadastro!");
+            }
 
             User user = new User();
             user.setName(username);
@@ -349,6 +352,11 @@ public class UserController {
                 if(email == null) {
                     throw new UserException("Não foi possível obter Email.");
                 }
+
+                if(!GroupService.getInstance().emailAvailableForOrganization(email)) {
+                    throw new UserException("Email \""+email+"\" não esta disponível para cadastro!");
+                }
+                
                 //boolean emailVerified = Boolean.valueOf(payload.getEmailVerified());
                 String name = (String) payload.get("name");
                 String pictureUrl = (String) payload.get("picture");
