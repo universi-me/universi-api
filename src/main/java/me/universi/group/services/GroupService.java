@@ -408,4 +408,7 @@ public class GroupService {
     }
 
 
+    public boolean emailAvailableForOrganization(String email) {
+        return true;
+    }
 }

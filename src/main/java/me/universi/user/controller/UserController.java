@@ -104,10 +104,19 @@ public class UserController {
 
     @PostMapping(value = "/username-available", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Response available_check(@RequestBody Map<String, Object> body) {
+    public Response available_username_check(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
             String username = (String)body.get("username");
             response.success = userService.usernameRegex(username) && !userService.usernameExist(username);
+        });
+    }
+
+    @PostMapping(value = "/email-available", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response available_email_check(@RequestBody Map<String, Object> body) {
+        return Response.buildResponse(response -> {
+            String email = (String)body.get("email");
+            response.success = userService.emailRegex(email) && !userService.emailExist(email) && GroupService.getInstance().emailAvailableForOrganization(email);
         });
     }
 
