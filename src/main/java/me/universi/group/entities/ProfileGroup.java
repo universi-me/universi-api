@@ -17,6 +17,8 @@ import org.hibernate.annotations.Where;
 @Where(clause = "deleted=false")
 public class ProfileGroup implements Serializable {
 
+    private static final long serialVersionUID = -9163545341342344343L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id")

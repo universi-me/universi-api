@@ -199,6 +199,10 @@ public class GrupoController {
 
             Group groupEdit = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
 
+            if(groupEdit.isRootGroup()) {
+                throw new GroupException("Você não pode sair do Grupo.");
+            }
+            
             if(!groupEdit.isCanEnter()) {
                 throw new GroupException("Grupo não permite entrada de participantes.");
             }
@@ -214,7 +218,7 @@ public class GrupoController {
                 }
             }
 
-            throw new GroupException("Falha ao adicionar participante ao grupo");
+            throw new GroupException("Falha ao entrar ao grupo");
 
         });
     }
@@ -227,9 +231,13 @@ public class GrupoController {
             String groupId = (String)body.get("groupId");
             String groupPath = (String)body.get("groupPath");
 
-            User user = userService.getUserInSession();
-
             Group groupEdit = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
+
+            if(groupEdit.isRootGroup()) {
+                throw new GroupException("Você não pode sair do Grupo.");
+            }
+
+            User user = userService.getUserInSession();
 
             if(groupService.removeParticipantFromGroup(groupEdit, user.getProfile())) {
                 response.message = "Você saiu do Grupo.";
@@ -499,14 +507,13 @@ public class GrupoController {
         });
     }
 
-    @PostMapping(value = "/current-organization", consumes = MediaType.ALL_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/current-organization", consumes = MediaType.ALL_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response currentOrganization() {
         return Response.buildResponse(response -> {
             try {
-                User user = userService.getUserInSession();
-                Group loggedOrganization = user != null
-                    ? user.getOrganization()
+                Group loggedOrganization = userService.userIsLoggedIn()
+                    ? userService.getUserInSession().getOrganization()
                     : groupService.getOrganizationBasedInDomain();
 
                 response.body.put("organization", loggedOrganization);
