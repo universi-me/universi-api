@@ -470,4 +470,8 @@ public class GroupService {
         }
         return false;
     }
+
+    public void saveGroupSettings(GroupSettings gSettings) {
+        groupSettingsRepository.save(gSettings);
+    }
 }

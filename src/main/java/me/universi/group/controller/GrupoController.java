@@ -104,7 +104,9 @@ public class GrupoController {
                 groupNew.setDescription(description);
                 groupNew.setType(GroupType.valueOf(groupType));
                 groupNew.setAdmin(user.getProfile());
-                groupNew.setGroupSettings(new GroupSettings());
+                GroupSettings gSettings = new GroupSettings();
+                groupService.saveGroupSettings(gSettings);
+                groupNew.setGroupSettings(gSettings);
                 if(canCreateGroup != null) {
                     groupNew.setCanCreateGroup(canCreateGroup);
                 }
