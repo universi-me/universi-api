@@ -2,9 +2,13 @@ FROM maven:3.8.4-openjdk-17 as BUILD
 
 EXPOSE 8080
 
-COPY . /opt/universi-api
-
 WORKDIR /opt/universi-api
+
+COPY pom.xml .
+
+RUN mvn dependency:go-offline
+
+COPY . .
 
 RUN mvn clean install -DskipTests
 

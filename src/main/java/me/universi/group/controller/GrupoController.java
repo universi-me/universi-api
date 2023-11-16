@@ -202,7 +202,7 @@ public class GrupoController {
             if(groupEdit.isRootGroup()) {
                 throw new GroupException("Você não pode sair do Grupo.");
             }
-            
+
             if(!groupEdit.isCanEnter()) {
                 throw new GroupException("Grupo não permite entrada de participantes.");
             }
