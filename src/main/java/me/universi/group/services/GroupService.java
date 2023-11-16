@@ -3,13 +3,9 @@ package me.universi.group.services;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import me.universi.Sys;
-import me.universi.group.entities.Group;
-import me.universi.group.entities.ProfileGroup;
-import me.universi.group.entities.Subgroup;
+import me.universi.group.entities.*;
 import me.universi.group.exceptions.GroupException;
-import me.universi.group.repositories.GroupRepository;
-import me.universi.group.repositories.ProfileGroupRepository;
-import me.universi.group.repositories.SubgroupRepository;
+import me.universi.group.repositories.*;
 import me.universi.profile.entities.Profile;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
@@ -32,8 +28,11 @@ public class GroupService {
     private ProfileGroupRepository profileGroupRepository;
     @Autowired
     private SubgroupRepository subgroupRepository;
+    @Autowired
+    private GroupSettingsRepository groupSettingsRepository;
+    @Autowired
+    private GroupEmailFilterRepository groupEmailFilterRepository;
 
-    private static final Pattern patternGetSubdomain = Pattern.compile("(?:http[s]*\\:\\/\\/)?(.*?)((\\.)|(:))");
 
     public static GroupService getInstance() {
         return Sys.context.getBean("groupService", GroupService.class);
@@ -376,20 +375,12 @@ public class GroupService {
 
     public Group getOrganizationBasedInDomain() throws Exception {
         ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
-        String url = attr.getRequest().getRequestURL().toString();
+        String url = attr.getRequest().getServerName();
 
-        Matcher matcher = patternGetSubdomain.matcher(url);
-
-        String organizationId = null;
-
-        if (matcher.find()) {
-            organizationId = matcher.group(1).toLowerCase();
-        } else {
-            throw new GroupException("Organização não encontrada.");
-        }
+        String organizationId = (url.contains(".") ? url.split("\\.")[0] : url).toLowerCase().trim();
 
         if("localhost".equals(organizationId)) {
-            organizationId = "dcx";
+            organizationId = "ccae";
         }
 
         Group organizationG = findFirstByRootGroupAndNicknameIgnoreCase(true, organizationId, false);
@@ -407,5 +398,76 @@ public class GroupService {
         }
     }
 
+    public boolean emailAvailableForOrganization(String email) {
+        Group organization = getOrganizationBasedInDomainIfExist();
+        if(organization != null) {
+            GroupSettings orgSettings = organization.getGroupSettings();
+            for(GroupEmailFilter emailFilterNow : orgSettings.getFilterEmails()) {
+                if(emailFilterNow.enabled && emailFilterNow.isRegex) {
+                    Pattern pattern = Pattern.compile(emailFilterNow.email);
+                    Matcher matcher = pattern.matcher(email);
+                    if(!matcher.find()) {
+                        return false;
+                    }
+                } else if(emailFilterNow.enabled && !emailFilterNow.isRegex) {
+                    if(!email.endsWith(emailFilterNow.email)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
 
+    public boolean addEmailFilter(Group group, String email, Boolean isRegex, Boolean enabled) {
+        if(group == null || email == null || email.isEmpty()) {
+            return false;
+        }
+        GroupEmailFilter groupEmailFilter = new GroupEmailFilter();
+        groupEmailFilter.groupSettings = group.groupSettings;
+        groupEmailFilter.email = email;
+        if(isRegex != null) {
+            groupEmailFilter.isRegex = isRegex;
+        }
+        if(enabled != null) {
+            groupEmailFilter.enabled = enabled;
+        }
+        groupEmailFilterRepository.save(groupEmailFilter);
+        return true;
+    }
+
+    public boolean editEmailFilter(Group group, String groupEmailFilterId, String email, Boolean isRegex, Boolean enabled) {
+        if(group == null || groupEmailFilterId == null || groupEmailFilterId.isEmpty()) {
+            return false;
+        }
+        if(groupEmailFilterRepository.existsByGroupSettingsIdAndEmail(group.groupSettings.getId(), groupEmailFilterId)) {
+            GroupEmailFilter groupEmailFilter = groupEmailFilterRepository.findFirstByGroupSettingsIdAndEmail(group.groupSettings.getId(), groupEmailFilterId);
+            if(email != null) {
+                groupEmailFilter.email = email;
+            }
+            if(isRegex != null) {
+                groupEmailFilter.isRegex = isRegex;
+            }
+            if(enabled != null) {
+                groupEmailFilter.enabled = enabled;
+            }
+            groupEmailFilterRepository.save(groupEmailFilter);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean deleteEmailFilter(Group group, String groupEmailFilterId) {
+        if(group == null || groupEmailFilterId == null || groupEmailFilterId.isEmpty()) {
+            return false;
+        }
+        if(groupEmailFilterRepository.existsByGroupSettingsIdAndEmail(group.groupSettings.getId(), groupEmailFilterId)) {
+            GroupEmailFilter groupEmailFilter = groupEmailFilterRepository.findFirstByGroupSettingsIdAndEmail(group.groupSettings.getId(), groupEmailFilterId);
+            groupEmailFilter.setRemoved(ConvertUtil.getDateTimeNow());
+            groupEmailFilter.setDeleted(true);
+            groupEmailFilterRepository.save(groupEmailFilter);
+            return true;
+        }
+        return false;
+    }
 }

@@ -57,6 +57,11 @@ public class Group implements Serializable {
     @NotNull
     public Profile admin;
 
+    @OneToOne
+    @JoinColumn(name="group_settings_id")
+    @NotNull
+    public GroupSettings groupSettings;
+
     @JsonIgnore
     @Column(name = "deleted")
     private boolean deleted = Boolean.FALSE;
@@ -306,4 +311,11 @@ public class Group implements Serializable {
 
     public void setDeleted(boolean deleted) { this.deleted = deleted; }
 
+    public GroupSettings getGroupSettings() {
+        return groupSettings;
+    }
+
+    public void setGroupSettings(GroupSettings groupSettings) {
+        this.groupSettings = groupSettings;
+    }
 }

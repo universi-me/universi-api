@@ -6,6 +6,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import me.universi.api.entities.Response;
 import me.universi.group.entities.Group;
+import me.universi.group.entities.GroupSettings;
 import me.universi.group.entities.ProfileGroup;
 import me.universi.group.entities.Subgroup;
 import me.universi.group.enums.GroupType;
@@ -103,6 +104,7 @@ public class GrupoController {
                 groupNew.setDescription(description);
                 groupNew.setType(GroupType.valueOf(groupType));
                 groupNew.setAdmin(user.getProfile());
+                groupNew.setGroupSettings(new GroupSettings());
                 if(canCreateGroup != null) {
                     groupNew.setCanCreateGroup(canCreateGroup);
                 }
@@ -547,5 +549,103 @@ public class GrupoController {
             }
         }
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "not found");
+    }
+
+    // add email filter to group
+    @PostMapping(value = "/settings/email-filter/add", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response email_filter_add(@RequestBody Map<String, Object> body) {
+        return Response.buildResponse(response -> {
+
+            Object groupId =   body.get("groupId");
+            Object groupPath = body.get("groupPath");
+
+            String email = (String)body.get("email");
+
+            Boolean enabled = (Boolean)body.get("enabled");
+            Boolean isRegex = (Boolean)body.get("isRegex");
+
+            Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
+
+            if(group != null) {
+                User user = userService.getUserInSession();
+
+                if(groupService.verifyPermissionToEditGroup(group, user)) {
+                    if(groupService.addEmailFilter(group, email, isRegex, enabled)) {
+                        response.message = "Filtro adicionado com sucesso.";
+                        return;
+                    } else {
+                        throw new GroupException("Filtro já existe.");
+                    }
+                }
+            }
+
+            throw new GroupException("Falha ao adicionar filtro.");
+
+        });
+    }
+
+    // edit email filter to group
+    @PostMapping(value = "/settings/email-filter/edit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response email_filter_edit(@RequestBody Map<String, Object> body) {
+        return Response.buildResponse(response -> {
+
+            Object groupId =   body.get("groupId");
+            Object groupPath = body.get("groupPath");
+
+            String groupEmailFilterId = (String)body.get("groupEmailFilterId");
+
+            String email = (String)body.get("email");
+            Boolean enabled = (Boolean)body.get("enabled");
+            Boolean isRegex = (Boolean)body.get("isRegex");
+
+            Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
+
+            if(group != null) {
+                User user = userService.getUserInSession();
+
+                if(groupService.verifyPermissionToEditGroup(group, user)) {
+                    if(groupService.editEmailFilter(group, groupEmailFilterId, email, isRegex, enabled)) {
+                        response.message = "Filtro editado com sucesso.";
+                        return;
+                    } else {
+                        throw new GroupException("Filtro não existe.");
+                    }
+                }
+            }
+
+            throw new GroupException("Falha ao editar filtro.");
+
+        });
+    }
+
+    // delete email filter
+    @PostMapping(value = "/settings/email-filter/delete", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response email_filter_delete(@RequestBody Map<String, Object> body) {
+        return Response.buildResponse(response -> {
+
+            Object groupId =   body.get("groupId");
+            Object groupPath = body.get("groupPath");
+
+            String groupEmailFilterId = (String)body.get("groupEmailFilterId");
+
+            Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
+
+            if(group != null) {
+                User user = userService.getUserInSession();
+
+                if(groupService.verifyPermissionToEditGroup(group, user)) {
+                    if(groupService.deleteEmailFilter(group, groupEmailFilterId)) {
+                        response.message = "Filtro deletado com sucesso.";
+                        return;
+                    } else {
+                        throw new GroupException("Filtro não existe.");
+                    }
+                }
+            }
+
+        });
     }
 }
