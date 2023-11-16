@@ -40,6 +40,7 @@ public class GroupEmailFilter implements Serializable {
     @Column(name = "added")
     public Date added;
 
+    @JsonIgnore
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "removed")
     public Date removed;
