@@ -1,6 +1,7 @@
 package me.universi.group.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
@@ -9,6 +10,7 @@ import me.universi.capacity.entidades.Folder;
 import me.universi.group.enums.GroupType;
 import me.universi.group.services.GroupService;
 import me.universi.profile.entities.Profile;
+import me.universi.user.services.JsonUserLoggedFilter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Collection;
@@ -39,6 +41,7 @@ public class Group implements Serializable {
     @Column(name = "name")
     public String name;
 
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
     @Column(name = "description", columnDefinition = "TEXT")
     public String description;
 
@@ -48,6 +51,7 @@ public class Group implements Serializable {
     @Column(name = "bannerImage")
     public String bannerImage;
 
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
     @ManyToOne
     @JoinColumn(name="profile_id")
     @NotNull
@@ -70,28 +74,34 @@ public class Group implements Serializable {
     public GroupType type;
 
     /** The group's ability to be accessed directly through the URL (parent of all groups) */
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
     @Column(name = "group_root")
     @NotNull
     public boolean rootGroup;
 
     /** Can create subGroups */
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
     @Column(name = "can_create_group")
     @NotNull
     public boolean canCreateGroup;
 
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
     @Column(name = "can_enter")
     @NotNull
     public boolean canEnter;
 
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
     @Column(name = "can_add_participant")
     @NotNull
     public boolean canAddParticipant;
 
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at")
     private Date createdAt;
 
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
     @Column(name = "public_group")
     @NotNull
     public boolean publicGroup;
@@ -101,6 +111,7 @@ public class Group implements Serializable {
     private Collection<Folder> folders;
 
     /*Attribute indicates that the group must be part of the person's resume*/
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
     @Column(name = "enable_curriculum")
     private boolean enableCurriculum;
 
@@ -264,6 +275,7 @@ public class Group implements Serializable {
         return GroupService.getInstance().getGroupPath(this.id);
     }
 
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
     @Transient
     public Group getOrganization() {
         return GroupService.getInstance().getGroupRootFromGroupId(this.id);
