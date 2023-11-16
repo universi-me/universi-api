@@ -104,7 +104,9 @@ public class GrupoController {
                 groupNew.setDescription(description);
                 groupNew.setType(GroupType.valueOf(groupType));
                 groupNew.setAdmin(user.getProfile());
-                groupNew.setGroupSettings(new GroupSettings());
+                GroupSettings gSettings = new GroupSettings();
+                groupService.saveGroupSettings(gSettings);
+                groupNew.setGroupSettings(gSettings);
                 if(canCreateGroup != null) {
                     groupNew.setCanCreateGroup(canCreateGroup);
                 }
@@ -514,11 +516,7 @@ public class GrupoController {
     public Response currentOrganization() {
         return Response.buildResponse(response -> {
             try {
-                Group loggedOrganization = userService.userIsLoggedIn()
-                    ? userService.getUserInSession().getOrganization()
-                    : groupService.getOrganizationBasedInDomain();
-
-                response.body.put("organization", loggedOrganization);
+                response.body.put("organization", groupService.getOrganizationBasedInDomain());
             } catch (Exception e) {
                 response.body.put("organization", null);
             }
