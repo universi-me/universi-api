@@ -1,12 +1,11 @@
 package me.universi.group.controller;
 
-import com.google.common.collect.Lists;
 import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
 import me.universi.api.entities.Response;
 import me.universi.group.entities.Group;
-import me.universi.group.entities.GroupSettings;
+import me.universi.group.entities.GroupSettings.GroupSettings;
 import me.universi.group.entities.ProfileGroup;
 import me.universi.group.entities.Subgroup;
 import me.universi.group.enums.GroupType;
@@ -643,6 +642,118 @@ public class GrupoController {
                     }
                 }
             }
+
+        });
+    }
+
+    // edit group theme
+    @PostMapping(value = "/settings/theme/edit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response theme_edit(@RequestBody Map<String, Object> body) {
+        return Response.buildResponse(response -> {
+
+            Object groupId =   body.get("groupId");
+            Object groupPath = body.get("groupPath");
+
+            String primary_color             = (String)body.get("primary_color");
+            String secondary_color           = (String)body.get("secondary_color");
+            String tertiary_color            = (String)body.get("tertiary_color");
+            String background_color          = (String)body.get("background_color");
+            String card_background_color     = (String)body.get("card_background_color");
+            String card_item_color           = (String)body.get("card_item_color");
+            String font_color_v1             = (String)body.get("font_color_v1");
+            String font_color_v2             = (String)body.get("font_color_v2");
+            String font_color_v3             = (String)body.get("font_color_v3");
+            String font_color_v4             = (String)body.get("font_color_v4");
+            String font_color_v5             = (String)body.get("font_color_v5");
+            String font_color_v6             = (String)body.get("font_color_v6");
+            String font_disabled_color       = (String)body.get("font_disabled_color");
+            String forms_color               = (String)body.get("forms_color");
+            String skills_1_color            = (String)body.get("skills_1_color");
+            String wave_color                = (String)body.get("wave_color");
+            String button_yellow_hover_color = (String)body.get("button_yellow_hover_color");
+            String button_hover_color        = (String)body.get("button_hover_color");
+            String alert_color               = (String)body.get("alert_color");
+            String success_color             = (String)body.get("success_color");
+            String wrong_invalid_color       = (String)body.get("wrong_invalid_color");
+            String rank_color                = (String)body.get("rank_color");
+
+            Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
+
+            if(group != null) {
+                User user = userService.getUserInSession();
+
+                if(groupService.verifyPermissionToEditGroup(group, user)) {
+                    if(groupService.editTheme(group,
+                        primary_color,
+                        secondary_color,
+                        tertiary_color,
+                        background_color,
+                        card_background_color,
+                        card_item_color,
+                        font_color_v1,
+                        font_color_v2,
+                        font_color_v3,
+                        font_color_v4,
+                        font_color_v5,
+                        font_color_v6,
+                        font_disabled_color,
+                        forms_color,
+                        skills_1_color,
+                        wave_color,
+                        button_yellow_hover_color,
+                        button_hover_color,
+                        alert_color,
+                        success_color,
+                        wrong_invalid_color,
+                        rank_color
+                    )) {
+                        response.message = "Tema editado com sucesso.";
+                        return;
+                    } else {
+                        throw new GroupException("Tema não existe.");
+                    }
+                }
+            }
+
+            throw new GroupException("Falha ao editar tema.");
+
+        });
+    }
+
+    // edit group features
+    @PostMapping(value = "/settings/features/edit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response features_edit(@RequestBody Map<String, Object> body) {
+        return Response.buildResponse(response -> {
+
+            Object groupId =   body.get("groupId");
+            Object groupPath = body.get("groupPath");
+
+            Boolean showContents =     (Boolean)body.get("showContents");
+            Boolean showGroups =       (Boolean)body.get("showGroups");
+            Boolean showParticipants = (Boolean)body.get("showParticipants");
+
+            Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
+
+            if(group != null) {
+                User user = userService.getUserInSession();
+
+                if(groupService.verifyPermissionToEditGroup(group, user)) {
+                    if(groupService.editFeatures(group,
+                            showContents,
+                            showGroups,
+                            showParticipants
+                    )) {
+                        response.message = "Recursos editados com sucesso.";
+                        return;
+                    } else {
+                        throw new GroupException("Recursos não existe.");
+                    }
+                }
+            }
+
+            throw new GroupException("Falha ao editar recursos.");
 
         });
     }

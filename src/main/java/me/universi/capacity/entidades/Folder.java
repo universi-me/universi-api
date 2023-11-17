@@ -1,26 +1,14 @@
 package me.universi.capacity.entidades;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
-import jakarta.persistence.UniqueConstraint;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.io.Serial;
 import java.io.Serializable;
+import me.universi.capacity.service.CapacityService;
 import me.universi.group.entities.Group;
 import me.universi.profile.entities.Profile;
 import org.hibernate.annotations.CreationTimestamp;
@@ -218,5 +206,10 @@ public class Folder implements Serializable {
 
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;
+    }
+
+    @Transient
+    public boolean isCanEdit() {
+        return CapacityService.getInstance().hasFolderPermissions(this, true);
     }
 }

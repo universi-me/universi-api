@@ -1,6 +1,6 @@
 package me.universi.group.repositories;
 
-import me.universi.group.entities.GroupSettings;
+import me.universi.group.entities.GroupSettings.GroupSettings;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
