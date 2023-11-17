@@ -1,32 +1,5 @@
 package me.universi.group.entities.GroupSettings;
 
-/*
-@primary-color:         #0091B9;
-@secondary-color:       #934588;
-@tertiary-color:        #FFFFFF;
-@background-color:      #F5F4F4;
-@card-background-color: #D9D9D9;
-@card-item-color:       #F3F3F3;
-
-@font-color-v1:       #FFFFFF;
-@font-color-v2:       #191919;
-@font-color-v3:       #8A8A8A;
-@font-color-v4:       #7D7EAE;
-@font-color-v5:       #F5F5F5;
-@font-color-v6:       #4E4E4E;
-@font-disabled-color: #6F6F6F;
-
-@forms-color:               #E0E0E0;
-@skills-1-color:            @secondary-color;
-@wave-color:                #9294CC;
-@button-yellow-hover-color: #d3a61e;
-@button-hover-color:        @tertiary-color;
-@alert-color:               #CC615B;
-@success-color:             #35BD00;
-@wrong-invalid-color:       #B33B3B;
-@rank-color:                #6E70AF;
- */
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
