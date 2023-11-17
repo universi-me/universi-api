@@ -415,24 +415,31 @@ public class GroupService {
     }
 
     public boolean emailAvailableForOrganization(String email) {
+        boolean available = false;
+        boolean hasAnyFilter = false;
         Group organization = getOrganizationBasedInDomainIfExist();
         if(organization != null) {
             GroupSettings orgSettings = organization.getGroupSettings();
             for(GroupEmailFilter emailFilterNow : orgSettings.getFilterEmails()) {
-                if(emailFilterNow.enabled && emailFilterNow.regex) {
-                    Pattern pattern = Pattern.compile(emailFilterNow.email);
-                    Matcher matcher = pattern.matcher(email);
-                    if(!matcher.find()) {
-                        return false;
+                if(emailFilterNow.enabled) {
+                    if(!hasAnyFilter) {
+                        hasAnyFilter = true;
                     }
-                } else if(emailFilterNow.enabled && !emailFilterNow.regex) {
-                    if(!email.endsWith(emailFilterNow.email)) {
-                        return false;
+                    if(emailFilterNow.regex) {
+                        Pattern pattern = Pattern.compile(emailFilterNow.email);
+                        Matcher matcher = pattern.matcher(email);
+                        if(matcher.find()) {
+                            available = true;
+                        }
+                    } else {
+                        if(email.endsWith(emailFilterNow.email)) {
+                            available = true;
+                        }
                     }
                 }
             }
         }
-        return true;
+        return hasAnyFilter ? available : !available;
     }
 
     public boolean addEmailFilter(Group group, String email, Boolean isRegex, Boolean enabled) {
