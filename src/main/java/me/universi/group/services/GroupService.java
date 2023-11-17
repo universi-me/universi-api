@@ -4,6 +4,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import me.universi.Sys;
 import me.universi.group.entities.*;
+import me.universi.group.entities.GroupSettings.GroupEmailFilter;
+import me.universi.group.entities.GroupSettings.GroupFeatures;
+import me.universi.group.entities.GroupSettings.GroupSettings;
+import me.universi.group.entities.GroupSettings.GroupTheme;
 import me.universi.group.exceptions.GroupException;
 import me.universi.group.repositories.*;
 import me.universi.profile.entities.Profile;
@@ -32,6 +36,10 @@ public class GroupService {
     private GroupSettingsRepository groupSettingsRepository;
     @Autowired
     private GroupEmailFilterRepository groupEmailFilterRepository;
+    @Autowired
+    private GroupThemeRepository groupThemeRepository;
+    @Autowired
+    private GroupFeaturesRepository groupFeaturesRepository;
 
 
     public static GroupService getInstance() {
@@ -134,6 +142,14 @@ public class GroupService {
     public boolean hasPermissionToEditGroup(Group group, User user) {
         try {
             return verifyPermissionToEditGroup(group, user);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public boolean canEditGroup(Group group) {
+        try {
+            return verifyPermissionToEditGroup(group, userService.getUserInSession());
         } catch (Exception e) {
             return false;
         }
@@ -399,24 +415,31 @@ public class GroupService {
     }
 
     public boolean emailAvailableForOrganization(String email) {
+        boolean available = false;
+        boolean hasAnyFilter = false;
         Group organization = getOrganizationBasedInDomainIfExist();
         if(organization != null) {
             GroupSettings orgSettings = organization.getGroupSettings();
             for(GroupEmailFilter emailFilterNow : orgSettings.getFilterEmails()) {
-                if(emailFilterNow.enabled && emailFilterNow.isRegex) {
-                    Pattern pattern = Pattern.compile(emailFilterNow.email);
-                    Matcher matcher = pattern.matcher(email);
-                    if(!matcher.find()) {
-                        return false;
+                if(emailFilterNow.enabled) {
+                    if(!hasAnyFilter) {
+                        hasAnyFilter = true;
                     }
-                } else if(emailFilterNow.enabled && !emailFilterNow.isRegex) {
-                    if(!email.endsWith(emailFilterNow.email)) {
-                        return false;
+                    if(emailFilterNow.regex) {
+                        Pattern pattern = Pattern.compile(emailFilterNow.email);
+                        Matcher matcher = pattern.matcher(email);
+                        if(matcher.find()) {
+                            available = true;
+                        }
+                    } else {
+                        if(email.endsWith(emailFilterNow.email)) {
+                            available = true;
+                        }
                     }
                 }
             }
         }
-        return true;
+        return hasAnyFilter ? available : !available;
     }
 
     public boolean addEmailFilter(Group group, String email, Boolean isRegex, Boolean enabled) {
@@ -427,7 +450,7 @@ public class GroupService {
         groupEmailFilter.groupSettings = group.groupSettings;
         groupEmailFilter.email = email;
         if(isRegex != null) {
-            groupEmailFilter.isRegex = isRegex;
+            groupEmailFilter.regex = isRegex;
         }
         if(enabled != null) {
             groupEmailFilter.enabled = enabled;
@@ -446,7 +469,7 @@ public class GroupService {
                 groupEmailFilter.email = email;
             }
             if(isRegex != null) {
-                groupEmailFilter.isRegex = isRegex;
+                groupEmailFilter.regex = isRegex;
             }
             if(enabled != null) {
                 groupEmailFilter.enabled = enabled;
@@ -473,5 +496,116 @@ public class GroupService {
 
     public void saveGroupSettings(GroupSettings gSettings) {
         groupSettingsRepository.save(gSettings);
+    }
+
+    public boolean editTheme(Group group, String primaryColor, String secondaryColor, String tertiaryColor, String backgroundColor, String cardBackgroundColor, String cardItemColor, String fontColorV1, String fontColorV2, String fontColorV3, String fontColorV4, String fontColorV5, String fontColorV6, String fontDisabledColor, String formsColor, String skills1Color, String waveColor, String buttonYellowHoverColor, String buttonHoverColor, String alertColor, String successColor, String wrongInvalidColor, String rankColor) {
+        if(group == null) {
+            return false;
+        }
+        GroupSettings groupSettings = group.getGroupSettings();
+        if(groupSettings == null) {
+            return false;
+        }
+        GroupTheme groupTheme = groupSettings.theme;
+        if(groupTheme == null) {
+            groupTheme = new GroupTheme();
+            groupTheme.groupSettings = groupSettings;
+            groupTheme = groupThemeRepository.save(groupTheme);
+        }
+        if(primaryColor != null) {
+            groupTheme.primaryColor = primaryColor.isEmpty() ? null : primaryColor;
+        }
+        if(secondaryColor != null) {
+            groupTheme.secondaryColor = secondaryColor.isEmpty() ? null : secondaryColor;
+        }
+        if(tertiaryColor != null) {
+            groupTheme.tertiaryColor = tertiaryColor.isEmpty() ? null : tertiaryColor;
+        }
+        if(backgroundColor != null) {
+            groupTheme.backgroundColor = backgroundColor.isEmpty() ? null : backgroundColor;
+        }
+        if(cardBackgroundColor != null) {
+            groupTheme.cardBackgroundColor = cardBackgroundColor.isEmpty() ? null : cardBackgroundColor;
+        }
+        if(cardItemColor != null) {
+            groupTheme.cardItemColor = cardItemColor.isEmpty() ? null : cardItemColor;
+        }
+        if(fontColorV1 != null) {
+            groupTheme.fontColorV1 = fontColorV1.isEmpty() ? null : fontColorV1;
+        }
+        if(fontColorV2 != null) {
+            groupTheme.fontColorV2 = fontColorV2.isEmpty() ? null : fontColorV2;
+        }
+        if(fontColorV3 != null) {
+            groupTheme.fontColorV3 = fontColorV3.isEmpty() ? null : fontColorV3;
+        }
+        if(fontColorV4 != null) {
+            groupTheme.fontColorV4 = fontColorV4.isEmpty() ? null : fontColorV4;
+        }
+        if(fontColorV5 != null) {
+            groupTheme.fontColorV5 = fontColorV5.isEmpty() ? null : fontColorV5;
+        }
+        if(fontColorV6 != null) {
+            groupTheme.fontColorV6 = fontColorV6.isEmpty() ? null : fontColorV6;
+        }
+        if(fontDisabledColor != null) {
+            groupTheme.fontDisabledColor = fontDisabledColor.isEmpty() ? null : fontDisabledColor;
+        }
+        if(formsColor != null) {
+            groupTheme.formsColor = formsColor.isEmpty() ? null : formsColor;
+        }
+        if(skills1Color != null) {
+            groupTheme.skills1Color = skills1Color.isEmpty() ? null : skills1Color;
+        }
+        if(waveColor != null) {
+            groupTheme.waveColor = waveColor.isEmpty() ? null : waveColor;
+        }
+        if(buttonYellowHoverColor != null) {
+            groupTheme.buttonYellowHoverColor = buttonYellowHoverColor.isEmpty() ? null : buttonYellowHoverColor;
+        }
+        if(buttonHoverColor != null) {
+            groupTheme.buttonHoverColor = buttonHoverColor.isEmpty() ? null : buttonHoverColor;
+        }
+        if(alertColor != null) {
+            groupTheme.alertColor = alertColor.isEmpty() ? null : alertColor;
+        }
+        if(successColor != null) {
+            groupTheme.successColor = successColor.isEmpty() ? null : successColor;
+        }
+        if(wrongInvalidColor != null) {
+            groupTheme.wrongInvalidColor = wrongInvalidColor.isEmpty() ? null : wrongInvalidColor;
+        }
+        if(rankColor != null) {
+            groupTheme.rankColor = rankColor.isEmpty() ? null : rankColor;
+        }
+        groupThemeRepository.save(groupTheme);
+        return true;
+    }
+
+    public boolean editFeatures(Group group, Boolean showContents, Boolean showGroups, Boolean showParticipants) {
+        if(group == null) {
+            return false;
+        }
+        GroupSettings groupSettings = group.getGroupSettings();
+        if(groupSettings == null) {
+            return false;
+        }
+        GroupFeatures groupFeatures = groupSettings.features;
+        if(groupFeatures == null) {
+            groupFeatures = new GroupFeatures();
+            groupFeatures.groupSettings = groupSettings;
+            groupFeatures = groupFeaturesRepository.save(groupFeatures);
+        }
+        if(showContents != null) {
+            groupFeatures.showContents = showContents;
+        }
+        if(showGroups != null) {
+            groupFeatures.showGroups = showGroups;
+        }
+        if(showParticipants != null) {
+            groupFeatures.showParticipants = showParticipants;
+        }
+        groupFeaturesRepository.save(groupFeatures);
+        return true;
     }
 }

@@ -1,4 +1,4 @@
-package me.universi.group.entities;
+package me.universi.group.entities.GroupSettings;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -20,6 +20,7 @@ public class GroupSettings implements Serializable {
     @Serial
     private static final long serialVersionUID = -41635422453554343L;
 
+    @JsonIgnore
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id")
@@ -28,7 +29,14 @@ public class GroupSettings implements Serializable {
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
     @OneToMany(mappedBy = "groupSettings", fetch = FetchType.LAZY)
-    private Collection<GroupEmailFilter> filterEmails;
+    public Collection<GroupEmailFilter> filterEmails;
+
+    @OneToOne(mappedBy = "groupSettings", fetch = FetchType.LAZY)
+    public GroupTheme theme;
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
+    @OneToOne(mappedBy = "groupSettings", fetch = FetchType.LAZY)
+    public GroupFeatures features;
 
     @JsonIgnore
     @Column(name = "deleted")

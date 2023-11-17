@@ -1,4 +1,4 @@
-package me.universi.group.entities;
+package me.universi.group.entities.GroupSettings;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -30,7 +30,7 @@ public class GroupEmailFilter implements Serializable {
     public boolean enabled = Boolean.FALSE;
 
     @Column(name = "regex")
-    public boolean isRegex;
+    public boolean regex;
 
     @Column(name = "email")
     public String email;
@@ -75,11 +75,11 @@ public class GroupEmailFilter implements Serializable {
     }
 
     public boolean isRegex() {
-        return isRegex;
+        return regex;
     }
 
     public void setRegex(boolean regex) {
-        isRegex = regex;
+        regex = regex;
     }
 
     public String getEmail() {
