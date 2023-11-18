@@ -1,5 +1,6 @@
 package me.universi.group.entities;
 
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
@@ -13,16 +14,16 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
-
-@Entity(name = "profile_group")
-@SQLDelete(sql = "UPDATE profile_group SET deleted = true WHERE id=?")
+@Entity(name = "group_admin")
+@SQLDelete(sql = "UPDATE group_admin SET deleted = true WHERE id=?")
 @Where(clause = "deleted=false")
 @JsonIgnoreProperties({"hibernateLazyInitializer"})
-public class ProfileGroup implements Serializable {
+public class GroupAdmin implements Serializable {
 
     @Serial
-    private static final long serialVersionUID = -9163545341342344343L;
+    private static final long serialVersionUID = -1163545342242399343L;
 
+    @JsonIgnore
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id")
@@ -31,15 +32,14 @@ public class ProfileGroup implements Serializable {
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "joined")
-    public Date joined;
+    @Column(name = "added")
+    public Date added;
 
     @JsonIgnore
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "exited")
-    public Date exited;
+    @Column(name = "removed")
+    public Date removed;
 
-    @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER)
     @PrimaryKeyJoinColumn(name="profile_id")
     @NotNull
@@ -55,7 +55,7 @@ public class ProfileGroup implements Serializable {
     @Column(name = "deleted")
     public boolean deleted = Boolean.FALSE;
 
-    public ProfileGroup() {
+    public GroupAdmin() {
     }
 
     public Profile getProfile() {
@@ -74,7 +74,27 @@ public class ProfileGroup implements Serializable {
         this.group = group;
     }
 
-    public Date getJoined() {
-        return this.joined;
+    public Date getAdded() {
+        return this.added;
+    }
+
+    public void setDeleted(boolean b) {
+        this.deleted = b;
+    }
+
+    public boolean getDeleted() {
+        return this.deleted;
+    }
+
+    public void setAdded(Date added) {
+        this.added = added;
+    }
+
+    public Date getRemoved() {
+        return this.removed;
+    }
+
+    public void setRemoved(Date removed) {
+        this.removed = removed;
     }
 }

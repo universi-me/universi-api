@@ -5,6 +5,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import me.universi.api.entities.Response;
 import me.universi.group.entities.Group;
+import me.universi.group.entities.GroupAdmin;
+import me.universi.group.entities.GroupSettings.GroupEmailFilter;
 import me.universi.group.entities.GroupSettings.GroupSettings;
 import me.universi.group.entities.ProfileGroup;
 import me.universi.group.entities.Subgroup;
@@ -646,6 +648,39 @@ public class GrupoController {
         });
     }
 
+    // list email filter of group
+    @PostMapping(value = "/settings/email-filter/list", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response email_filter_list(@RequestBody Map<String, Object> body) {
+        return Response.buildResponse(response -> {
+
+            Object groupId =   body.get("groupId");
+            Object groupPath = body.get("groupPath");
+
+            Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
+
+            if(group != null) {
+
+                if(!groupService.canEditGroup(group)) {
+                    throw new GroupException("Você não tem permissão para gerenciar este grupo.");
+                }
+
+                Collection<GroupEmailFilter> emailFilters = group.getGroupSettings().getFilterEmails();
+
+                List<GroupEmailFilter> emailFiltersList = emailFilters.stream()
+                        .sorted(Comparator.comparing(GroupEmailFilter::getAdded).reversed())
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList());
+
+                response.body.put("emailFilters", emailFiltersList);
+                return;
+            }
+
+            throw new GroupException("Falha ao listar filtros de email.");
+
+        });
+    }
+
     // edit group theme
     @PostMapping(value = "/settings/theme/edit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
@@ -745,15 +780,131 @@ public class GrupoController {
                             showGroups,
                             showParticipants
                     )) {
-                        response.message = "Recursos editados com sucesso.";
+                        response.message = "Features editadas com sucesso.";
                         return;
                     } else {
-                        throw new GroupException("Recursos não existe.");
+                        throw new GroupException("Feature não existe.");
                     }
                 }
             }
 
-            throw new GroupException("Falha ao editar recursos.");
+            throw new GroupException("Falha ao editar features.");
+
+        });
+    }
+
+    // add administrator to group
+    @PostMapping(value = "/settings/admin/add", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response admin_add(@RequestBody Map<String, Object> body) {
+        return Response.buildResponse(response -> {
+
+            Object groupId =   body.get("groupId");
+            Object groupPath = body.get("groupPath");
+
+            String admin = (String)body.get("username");
+            if(admin == null || admin.isEmpty()) {
+                throw new GroupException("Parâmetro username é nulo.");
+            }
+
+            User adminUser;
+            try {
+                adminUser = (User) userService.loadUserByUsername(admin);
+            } catch (Exception e) {
+                throw new GroupException("Usuário não encontrado.");
+            }
+
+            Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
+
+            if(group != null) {
+                User user = userService.getUserInSession();
+
+                if(groupService.verifyPermissionToEditGroup(group, user)) {
+                    if(groupService.addAdministrator(group, adminUser.getProfile())) {
+                        response.message = "Administrador adicionado com sucesso.";
+                        return;
+                    } else {
+                        throw new GroupException("Administrador já existe.");
+                    }
+                }
+            }
+
+            throw new GroupException("Falha ao adicionar administrador.");
+
+        });
+    }
+
+    // remove administrator from group
+    @PostMapping(value = "/settings/admin/remove", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response admin_remove(@RequestBody Map<String, Object> body) {
+        return Response.buildResponse(response -> {
+
+            Object groupId =   body.get("groupId");
+            Object groupPath = body.get("groupPath");
+
+            String admin = (String)body.get("username");
+            if(admin == null || admin.isEmpty()) {
+                throw new GroupException("Parâmetro username é nulo.");
+            }
+
+            User adminUser;
+            try {
+                adminUser = (User) userService.loadUserByUsername(admin);
+            } catch (Exception e) {
+                throw new GroupException("Usuário não encontrado.");
+            }
+
+            Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
+
+            if(group != null) {
+                User user = userService.getUserInSession();
+
+                if(groupService.verifyPermissionToEditGroup(group, user)) {
+                    if(groupService.removeAdministrator(group, adminUser.getProfile())) {
+                        response.message = "Administrador removido com sucesso.";
+                        return;
+                    } else {
+                        throw new GroupException("Administrador não existe.");
+                    }
+                }
+            }
+
+            throw new GroupException("Falha ao remover administrador.");
+
+        });
+    }
+
+    // list administrators of group
+    @PostMapping(value = "/settings/admin/list", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response admin_list(@RequestBody Map<String, Object> body) {
+        return Response.buildResponse(response -> {
+
+            Object groupId =   body.get("groupId");
+            Object groupPath = body.get("groupPath");
+
+            Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
+
+            if(group != null) {
+
+                if(!groupService.canEditGroup(group)) {
+                    throw new GroupException("Você não tem permissão para gerenciar este grupo.");
+                }
+
+                Collection<GroupAdmin> administrators = group.getAdministrators();
+
+                List<Profile> profiles = administrators.stream()
+                        .sorted(Comparator.comparing(GroupAdmin::getAdded).reversed())
+                        .map(GroupAdmin::getProfile)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList());
+
+                response.body.put("administrators", profiles);
+                return;
+            }
+
+            throw new GroupException("Falha ao listar filtros de email.");
 
         });
     }

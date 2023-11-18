@@ -82,7 +82,7 @@ public class Profile implements Serializable {
     private Collection<Experience> experiences;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "profile")
+    @OneToMany(mappedBy = "profile", fetch = FetchType.LAZY)
     private Collection<Link> links;
     @Column(name = "gender")
     @Enumerated(EnumType.STRING)
@@ -95,7 +95,7 @@ public class Profile implements Serializable {
     private Collection<Recommendation> recomendationsReceived;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "profile")
+    @OneToMany(mappedBy = "profile", fetch = FetchType.LAZY)
     private Collection<ContentStatus> contentStatus;
 
     @CreationTimestamp

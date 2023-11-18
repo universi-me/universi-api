@@ -1,8 +1,11 @@
 package me.universi.group.entities.GroupSettings;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.UUID;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
@@ -10,7 +13,12 @@ import org.hibernate.annotations.Where;
 @Entity(name = "group_features")
 @SQLDelete(sql = "UPDATE group_features SET deleted = true WHERE id=?")
 @Where(clause = "deleted=false")
-public class GroupFeatures {
+@JsonIgnoreProperties({"hibernateLazyInitializer"})
+public class GroupFeatures  implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = -31637842245354343L;
+
     @JsonIgnore
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -24,7 +32,7 @@ public class GroupFeatures {
 
     @JsonIgnore
     @JoinColumn(name="group_settings_id")
-    @OneToOne
+    @OneToOne(fetch = FetchType.EAGER)
     @NotNull
     public GroupSettings groupSettings;
 

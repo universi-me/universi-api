@@ -1,6 +1,7 @@
 package me.universi.group.entities.GroupSettings;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -15,6 +16,7 @@ import org.hibernate.annotations.Where;
 @Entity(name = "group_settings")
 @SQLDelete(sql = "UPDATE group_settings SET deleted = true WHERE id=?")
 @Where(clause = "deleted=false")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class GroupSettings implements Serializable {
 
     @Serial
@@ -27,15 +29,15 @@ public class GroupSettings implements Serializable {
     @NotNull
     private UUID id;
 
-    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
-    @OneToMany(mappedBy = "groupSettings", fetch = FetchType.LAZY)
+    @JsonIgnore
+    @OneToMany(mappedBy = "groupSettings", fetch = FetchType.EAGER)
     public Collection<GroupEmailFilter> filterEmails;
 
-    @OneToOne(mappedBy = "groupSettings", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "groupSettings", fetch = FetchType.EAGER)
     public GroupTheme theme;
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
-    @OneToOne(mappedBy = "groupSettings", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "groupSettings", fetch = FetchType.EAGER)
     public GroupFeatures features;
 
     @JsonIgnore

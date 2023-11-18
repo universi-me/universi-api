@@ -119,9 +119,9 @@ public class UserService implements UserDetailsService {
         } else if (user.getUsername()==null) {
             throw new UserException("username está vazio!");
         }
-        user.setAuthority(Authority.ROLE_USER);
 
-        userRepository.saveAndFlush(user);
+        user.setAuthority(Authority.ROLE_USER);
+        save(user);
 
         if(user.getProfile() == null) {
             Profile userProfile = new Profile();
@@ -196,6 +196,9 @@ public class UserService implements UserDetailsService {
     }
 
     public void save(User user) {
+        if(user.getOrganization() == null) {
+            user.setOrganization(GroupService.getInstance().getOrganizationBasedInDomain());
+        }
         userRepository.saveAndFlush(user);
     }
 

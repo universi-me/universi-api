@@ -1,9 +1,12 @@
 package me.universi.group.entities.GroupSettings;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.UUID;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
@@ -11,8 +14,12 @@ import org.hibernate.annotations.Where;
 @Entity(name = "group_theme")
 @SQLDelete(sql = "UPDATE group_theme SET deleted = true WHERE id=?")
 @Where(clause = "deleted=false")
+@JsonIgnoreProperties({"hibernateLazyInitializer"})
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class GroupTheme {
+public class GroupTheme  implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = -31637842245354343L;
 
     @JsonIgnore
     @Id
@@ -72,7 +79,7 @@ public class GroupTheme {
 
     @JsonIgnore
     @JoinColumn(name="group_settings_id")
-    @OneToOne
+    @OneToOne(fetch = FetchType.EAGER)
     @NotNull
     public GroupSettings groupSettings;
 
