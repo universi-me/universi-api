@@ -1,6 +1,9 @@
 package me.universi.user.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import me.universi.api.entities.Response;
+import me.universi.user.exceptions.UserException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
@@ -63,8 +66,23 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
 
                 this.jsonUsername = (String)( mapRequest.containsKey("username")? mapRequest.get("username") : mapRequest.get("email"));
                 this.jsonPassword = (String)mapRequest.get("password");
+
+                UserService.getInstance().checkRecaptchaWithToken((String) mapRequest.get("recaptchaToken"));
+
             } catch (Exception e) {
-                e.printStackTrace();
+                try {
+                    Response responseBuild = Response.buildResponse(r -> {
+                        r.status = 401;
+                        r.alertOptions.put("icon", "warning");
+                        r.alertOptions.put("title", "Falha na autenticação");
+                        throw e;
+                    });
+                    response.setHeader("Content-Type", "application/json; charset=utf-8");
+                    response.getWriter().print(responseBuild.toString());
+                    response.getWriter().flush();
+                } catch (Exception ignored) {
+                }
+                return null;
             }
         }
 

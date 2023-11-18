@@ -1,9 +1,9 @@
 package me.universi.user.controller;
 
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import jakarta.servlet.http.HttpSession;
@@ -30,6 +30,8 @@ import org.springframework.web.bind.annotation.*;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+
+import org.springframework.web.client.RestTemplate;
 
 @RestController
 @RequestMapping(value = "/api")
@@ -131,6 +133,8 @@ public class UserController {
             if(!Boolean.parseBoolean(environment.getProperty("SIGNUP_ENABLED"))) {
                 throw new UserException("Registrar-se está desativado!");
             }
+
+            userService.checkRecaptchaWithToken((String)body.get("recaptchaToken"));
 
             String username = (String)body.get("username");
             String email = (String)body.get("email");
@@ -443,6 +447,8 @@ public class UserController {
         return Response.buildResponse(response -> {
 
             response.alertOptions.put("title", "Recuperação de Senha");
+
+            userService.checkRecaptchaWithToken((String)body.get("recaptchaToken"));
 
             String usernameOrEmail = (String)body.get("username");
 

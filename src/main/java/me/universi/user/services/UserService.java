@@ -43,6 +43,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -56,6 +57,18 @@ public class UserService implements UserDetailsService {
     private final JavaMailSender emailSender;
     private final Executor emailExecutor;
     private final Environment env;
+
+    @Value("${RECAPTCHA_API_KEY}")
+    public String recaptchaApiKey;
+
+    @Value("${RECAPTCHA_API_PROJECT_ID}")
+    public String recaptchaApiProjectId;
+
+    @Value("${RECAPTCHA_SITE_KEY}")
+    public String recaptchaSiteKey;
+
+    @Value("${RECAPTCHA_ENABLED}")
+    public boolean captchaEnabled;
 
     @Autowired
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, ProfileService profileService, RoleHierarchyImpl roleHierarchy, SessionRegistry sessionRegistry, JavaMailSender emailSender, Environment env) {
@@ -531,6 +544,40 @@ public class UserService implements UserDetailsService {
         sendSystemEmailToUser(user, subject, text);
     }
 
+    public void checkRecaptchaWithToken(Object gToken) {
+        if(isCaptchaEnabled()) {
+
+            String recaptchaResponse = (String) gToken;
+
+            if (recaptchaResponse == null || recaptchaResponse.isEmpty()) {
+                throw new UserException("Recaptcha Requerido.");
+            }
+
+            String url = "https://recaptchaenterprise.googleapis.com/v1/projects/"+ recaptchaApiProjectId +"/assessments?key=" + recaptchaApiKey;
+
+            HashMap<String, Object> post = new HashMap<>();
+            HashMap<String, Object> event = new HashMap<>();
+            event.put("token", recaptchaResponse);
+            event.put("siteKey", recaptchaSiteKey);
+            event.put("expectedAction", "SUBMIT");
+            post.put("event", event);
+
+            RestTemplate restTemplate = new RestTemplate();
+            HashMap<String, Object> responseCaptcha = restTemplate.postForObject(url, post, HashMap.class);
+
+            boolean isTokenValid = false;
+
+            try {
+                isTokenValid = (((Double)((Map)responseCaptcha.get("riskAnalysis")).get("score")) >= 0.5);
+            } catch (Exception ignored) {
+            }
+
+            if (!isTokenValid) {
+                throw new UserException("Recaptcha inválido.");
+            }
+        }
+    }
+
     // is account confirmed
     public boolean isAccountConfirmed(User user) {
         return user.isConfirmed();
@@ -538,6 +585,10 @@ public class UserService implements UserDetailsService {
 
     public boolean confirmAccountEnabled() {
         return Boolean.parseBoolean(env.getProperty("SIGNUP_CONFIRMATION_ENABLED"));
+    }
+
+    public boolean isCaptchaEnabled() {
+        return captchaEnabled;
     }
 
     public boolean isProduction() {
