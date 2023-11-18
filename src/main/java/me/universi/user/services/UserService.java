@@ -61,6 +61,9 @@ public class UserService implements UserDetailsService {
     @Value("${RECAPTCHA_API_KEY}")
     public String recaptchaApiKey;
 
+    @Value("${RECAPTCHA_API_PROJECT_ID}")
+    public String recaptchaApiProjectId;
+
     @Value("${RECAPTCHA_SITE_KEY}")
     public String recaptchaSiteKey;
 
@@ -550,7 +553,7 @@ public class UserService implements UserDetailsService {
                 throw new UserException("Recaptcha Requerido.");
             }
 
-            String url = "https://recaptchaenterprise.googleapis.com/v1/projects/decisive-depth-277619/assessments?key=" + recaptchaApiKey;
+            String url = "https://recaptchaenterprise.googleapis.com/v1/projects/"+ recaptchaApiProjectId +"/assessments?key=" + recaptchaApiKey;
 
             HashMap<String, Object> post = new HashMap<>();
             HashMap<String, Object> event = new HashMap<>();
