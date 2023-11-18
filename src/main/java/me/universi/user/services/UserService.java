@@ -58,6 +58,15 @@ public class UserService implements UserDetailsService {
     private final Executor emailExecutor;
     private final Environment env;
 
+    @Value("${RECAPTCHA_API_KEY}")
+    public String recaptchaApiKey;
+
+    @Value("${RECAPTCHA_SITE_KEY}")
+    public String recaptchaSiteKey;
+
+    @Value("${RECAPTCHA_ENABLED}")
+    public boolean captchaEnabled;
+
     @Autowired
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, ProfileService profileService, RoleHierarchyImpl roleHierarchy, SessionRegistry sessionRegistry, JavaMailSender emailSender, Environment env) {
         this.userRepository = userRepository;
@@ -534,8 +543,6 @@ public class UserService implements UserDetailsService {
 
     public void checkRecaptchaWithToken(Object gToken) {
         if(isCaptchaEnabled()) {
-            String recaptchaApiKey = env.getProperty("RECAPTCHA_API_KEY");
-            String recaptchaSiteKey = env.getProperty("RECAPTCHA_SITE_KEY");
 
             String recaptchaResponse = (String) gToken;
 
@@ -578,7 +585,7 @@ public class UserService implements UserDetailsService {
     }
 
     public boolean isCaptchaEnabled() {
-        return Boolean.parseBoolean(env.getProperty("RECAPTCHA_ENABLED"));
+        return captchaEnabled;
     }
 
     public boolean isProduction() {
