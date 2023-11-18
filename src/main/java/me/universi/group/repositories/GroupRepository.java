@@ -28,4 +28,5 @@ public interface GroupRepository extends JpaRepository<Group, UUID> {
 
     Boolean existsByIdAndParticipantsId(UUID groupId, UUID profileId);
 
+    boolean existsByAdministratorsIdAndId(UUID id, UUID id1);
 }

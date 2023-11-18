@@ -1,6 +1,7 @@
 package me.universi.group.entities.GroupSettings;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
@@ -15,6 +16,7 @@ import org.hibernate.annotations.Where;
 @Entity(name = "group_email_filter")
 @SQLDelete(sql = "UPDATE group_email_filter SET deleted = true WHERE id=?")
 @Where(clause = "deleted=false")
+@JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class GroupEmailFilter implements Serializable {
 
     @Serial
@@ -46,7 +48,7 @@ public class GroupEmailFilter implements Serializable {
     public Date removed;
 
     @JsonIgnore
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="group_settings_id")
     @NotNull
     public GroupSettings groupSettings;
@@ -104,5 +106,9 @@ public class GroupEmailFilter implements Serializable {
 
     public void setGroupSettings(GroupSettings groupSettings) {
         this.groupSettings = groupSettings;
+    }
+
+    public Date getAdded() {
+        return added;
     }
 }

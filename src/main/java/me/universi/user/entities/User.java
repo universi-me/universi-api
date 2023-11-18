@@ -1,6 +1,7 @@
 package me.universi.user.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -27,6 +28,7 @@ import java.util.UUID;
 @Table(name = "system_users", uniqueConstraints = {@UniqueConstraint(name = "system_users_username_organization_key", columnNames = {"username", "organization"})})
 @SQLDelete(sql = "UPDATE system_users SET deleted = true WHERE id=?")
 @Where(clause = "deleted=false")
+@JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class User implements UserDetails, Serializable {
 
     @Serial
@@ -55,7 +57,7 @@ public class User implements UserDetails, Serializable {
     private String recoveryPasswordToken;
 
     @JsonIgnore
-    @OneToOne(mappedBy = "user", cascade = CascadeType.DETACH)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.DETACH, fetch = FetchType.LAZY)
     private Profile profile;
 
     @JsonIgnore
@@ -96,6 +98,7 @@ public class User implements UserDetails, Serializable {
     @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "organization")
+    @NotNull
     private Group organization;
 
     @JsonIgnore

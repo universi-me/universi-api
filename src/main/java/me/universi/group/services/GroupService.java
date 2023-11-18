@@ -40,6 +40,8 @@ public class GroupService {
     private GroupThemeRepository groupThemeRepository;
     @Autowired
     private GroupFeaturesRepository groupFeaturesRepository;
+    @Autowired
+    private GroupAdminRepository groupAdminRepository;
 
 
     public static GroupService getInstance() {
@@ -127,16 +129,26 @@ public class GroupService {
             throw new GroupException("Usuário não encontrado.");
         }
 
+        if(userService.isUserAdmin(user)) {
+            return true;
+        }
+
         Profile profile = user.getProfile();
         if (userService.userNeedAnProfile(user, true)) {
             throw new GroupException("Você precisa criar um Perfil.");
-        } else if(!Objects.equals(group.getAdmin().getId(), profile.getId())) {
-            if(!userService.isUserAdmin(user)) {
-                throw new GroupException("Apenas administradores podem editar seus grupos!");
+        }
+
+        if(Objects.equals(group.getAdmin().getId(), profile.getId())) {
+            return true;
+        }
+
+        for(GroupAdmin groupAdminNow : group.getAdministrators()) {
+            if(groupAdminNow.profile != null && Objects.equals(groupAdminNow.profile.getId(), profile.getId())) {
+                return true;
             }
         }
 
-        return true;
+        throw new GroupException("Você não tem permissão para editar este grupo.");
     }
 
     public boolean hasPermissionToEditGroup(Group group, User user) {
@@ -148,11 +160,7 @@ public class GroupService {
     }
 
     public boolean canEditGroup(Group group) {
-        try {
-            return verifyPermissionToEditGroup(group, userService.getUserInSession());
-        } catch (Exception e) {
-            return false;
-        }
+        return hasPermissionToEditGroup(group, userService.getUserInSession());
     }
 
     public void addSubGroup(Group group, Group sub) {
@@ -389,21 +397,28 @@ public class GroupService {
         return groupRepository.findTop5ByNameContainingIgnoreCase(name);
     }
 
-    public Group getOrganizationBasedInDomain() throws Exception {
-        ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
-        String url = attr.getRequest().getServerName();
+    // calculate organization based in domain
+    public Group obtainOrganizationBasedInDomain() {
+        String domain = userService.getDomainFromRequest();
 
-        String organizationId = (url.contains(".") ? url.split("\\.")[0] : url).toLowerCase().trim();
+        String organizationId = (domain.contains(".") ? domain.split("\\.")[0] : domain).toLowerCase().trim();
 
         if("localhost".equals(organizationId)) {
             organizationId = "ccae";
         }
 
         Group organizationG = findFirstByRootGroupAndNicknameIgnoreCase(true, organizationId, false);
-        if(organizationG == null) {
-            throw new GroupException("Organização não encontrada.");
-        }
         return organizationG;
+    }
+
+    public Group getOrganizationBasedInDomain() throws RuntimeException {
+        // if logged find updated organization of user without cached from session, else calculate from domain
+        Group gOrg = userService.userIsLoggedIn() ?
+                findFirstById(userService.getUserInSession().getOrganization().getId()) : obtainOrganizationBasedInDomain();
+        if(gOrg == null) {
+            throw new GroupException("Falha ao obter Organização.");
+        }
+        return gOrg;
     }
 
     public Group getOrganizationBasedInDomainIfExist() {
@@ -607,5 +622,33 @@ public class GroupService {
         }
         groupFeaturesRepository.save(groupFeatures);
         return true;
+    }
+
+    public boolean addAdministrator(Group group, Profile profile) {
+        if(group == null || profile == null) {
+            return false;
+        }
+        if(!groupAdminRepository.existsByGroupIdAndProfileId(group.getId(), profile.getId())) {
+            GroupAdmin groupAdmin = new GroupAdmin();
+            groupAdmin.group = group;
+            groupAdmin.profile = profile;
+            groupAdminRepository.save(groupAdmin);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean removeAdministrator(Group group, Profile profile) {
+        if(group == null || profile == null) {
+            return false;
+        }
+        if(groupAdminRepository.existsByGroupIdAndProfileId(group.getId(), profile.getId())) {
+            GroupAdmin groupAdmin = groupAdminRepository.findFirstByGroupIdAndProfileId(group.getId(), profile.getId());
+            groupAdmin.setRemoved(ConvertUtil.getDateTimeNow());
+            groupAdmin.setDeleted(true);
+            groupAdminRepository.save(groupAdmin);
+            return true;
+        }
+        return false;
     }
 }

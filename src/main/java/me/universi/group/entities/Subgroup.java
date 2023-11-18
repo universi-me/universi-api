@@ -1,8 +1,10 @@
 package me.universi.group.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
@@ -14,7 +16,11 @@ import org.hibernate.annotations.Where;
 @Entity(name = "subgroup")
 @SQLDelete(sql = "UPDATE subgroup SET deleted = true WHERE id=?")
 @Where(clause = "deleted=false")
+@JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class Subgroup implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = -2163545341342344343L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -27,16 +33,19 @@ public class Subgroup implements Serializable {
     @Column(name = "added")
     public Date added;
 
+    @JsonIgnore
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "removed")
     public Date removed;
 
-    @ManyToOne
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.EAGER)
     @PrimaryKeyJoinColumn(name="group_id")
     @NotNull
     public Group group;
 
-    @ManyToOne
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.EAGER)
     @PrimaryKeyJoinColumn(name="subgroup_id")
     @NotNull
     public Group subgroup;

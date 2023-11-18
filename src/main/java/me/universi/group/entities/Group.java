@@ -1,6 +1,7 @@
 package me.universi.group.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -24,6 +25,7 @@ import org.hibernate.annotations.Where;
 @Entity(name = "system_group")
 @SQLDelete(sql = "UPDATE system_group SET deleted = true WHERE id=?")
 @Where(clause = "deleted=false")
+@JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class Group implements Serializable {
 
     @Serial
@@ -54,12 +56,16 @@ public class Group implements Serializable {
     public String bannerImage;
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="profile_id")
     @NotNull
     public Profile admin;
 
-    @OneToOne
+    @JsonIgnore
+    @OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
+    public Collection<GroupAdmin> administrators;
+
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="group_settings_id")
     @NotNull
     public GroupSettings groupSettings;
@@ -113,7 +119,7 @@ public class Group implements Serializable {
     @NotNull
     public boolean publicGroup;
 
-    @OneToMany(mappedBy = "ownerGroup", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "ownerGroup", fetch = FetchType.EAGER)
     @JsonIgnore
     private Collection<Folder> folders;
 
@@ -325,5 +331,13 @@ public class Group implements Serializable {
 
     public void setGroupSettings(GroupSettings groupSettings) {
         this.groupSettings = groupSettings;
+    }
+
+    public Collection<GroupAdmin> getAdministrators() {
+        return administrators;
+    }
+
+    public void setAdministrators(Collection<GroupAdmin> administrators) {
+        this.administrators = administrators;
     }
 }

@@ -178,7 +178,6 @@ public class UserController {
                 user.setInactive(true);
             }
             userService.setRawPasswordToUser(user, password, false);
-            user.setOrganization(groupService.getOrganizationBasedInDomain());
 
             userService.createUser(user);
 
@@ -378,7 +377,6 @@ public class UserController {
                         user = new User();
                         user.setName(newUsername);
                         user.setEmail(email.trim());
-                        user.setOrganization(groupService.getOrganizationBasedInDomain());
                         userService.createUser(user);
 
                         Profile profile = user.getProfile();
