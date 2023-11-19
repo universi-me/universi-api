@@ -3,7 +3,6 @@ package me.universi.user.controller;
 import java.net.URI;
 import java.net.URL;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import jakarta.servlet.http.HttpSession;
@@ -20,7 +19,6 @@ import me.universi.user.exceptions.UserException;
 import me.universi.user.services.JWTService;
 import me.universi.user.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -31,26 +29,20 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 
-import org.springframework.web.client.RestTemplate;
-
 @RestController
 @RequestMapping(value = "/api")
 public class UserController {
     private final UserService userService;
     private final ProfileService profileService;
-    private final GroupService groupService;
-    private final Environment environment;
     private final AuthenticationManager authenticationManager;
     private final JWTService jwtService;
 
     @Autowired
-    public UserController(UserService userService, ProfileService profileService, Environment environment, AuthenticationManager authenticationManager, JWTService jwtService, GroupService groupService) {
+    public UserController(UserService userService, ProfileService profileService, AuthenticationManager authenticationManager, JWTService jwtService) {
         this.userService = userService;
         this.profileService = profileService;
-        this.environment = environment;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
-        this.groupService = groupService;
     }
 
     @GetMapping(value = "/account", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -66,7 +58,6 @@ public class UserController {
                 response.status = 401;
             }
 
-            HttpSession session = userService.getActiveSession();
             if(userService.getInSession("account_confirmed") != null) {
 
                 response.success = true;
@@ -130,11 +121,11 @@ public class UserController {
             response.alertOptions.put("title", "Registro de Conta");
 
             // check if register is enabled
-            if(!Boolean.parseBoolean(environment.getProperty("SIGNUP_ENABLED"))) {
+            if(!userService.isSignupEnabled()) {
                 throw new UserException("Registrar-se está desativado!");
             }
 
-            userService.checkRecaptchaWithToken((String)body.get("recaptchaToken"));
+            userService.checkRecaptchaWithToken(body.get("recaptchaToken"));
 
             String username = (String)body.get("username");
             String email = (String)body.get("email");
@@ -178,23 +169,23 @@ public class UserController {
             User user = new User();
             user.setName(username);
             user.setEmail(email);
-            if(userService.confirmAccountEnabled()) {
+            if(userService.isConfirmAccountEnabled()) {
                 user.setInactive(true);
             }
-            userService.setRawPasswordToUser(user, password, false);
+            userService.saveRawPasswordToUser(user, password, false);
 
             userService.createUser(user);
 
-            if(userService.confirmAccountEnabled()) {
+            if(userService.isConfirmAccountEnabled()) {
                 userService.sendConfirmAccountEmail(user, true);
             }
 
             response.success = true;
 
-            response.message = userService.confirmAccountEnabled() ? "Usuário registrado com sucesso, Enviamos um link de confirmação de conta para o seu email cadastrado." : "Usuário registrado com sucesso, efetue o login para continuar.";
+            response.message = userService.isConfirmAccountEnabled() ? "Usuário registrado com sucesso, Enviamos um link de confirmação de conta para o seu email cadastrado." : "Usuário registrado com sucesso, efetue o login para continuar.";
 
-            response.alertOptions.put("title", userService.confirmAccountEnabled() ? "Confirmação de Conta" : "Registro de Conta");
-            response.alertOptions.put("icon", userService.confirmAccountEnabled() ? "info" : "success");
+            response.alertOptions.put("title", userService.isConfirmAccountEnabled() ? "Confirmação de Conta" : "Registro de Conta");
+            response.alertOptions.put("icon", userService.isConfirmAccountEnabled() ? "info" : "success");
             response.alertOptions.put("modalAlert", true);
             response.alertOptions.put("timer", null);
 
@@ -225,7 +216,7 @@ public class UserController {
 
             if (logadoComGoogle || userService.passwordValid(user, password)) {
 
-                userService.setRawPasswordToUser(user, newPassword, false);
+                userService.saveRawPasswordToUser(user, newPassword, false);
 
                 userService.updateUserInSession();
 
@@ -288,7 +279,7 @@ public class UserController {
                 }
             }
             if(password != null && !password.isEmpty()) {
-                userService.setRawPasswordToUser(userEdit, password, false);
+                userService.saveRawPasswordToUser(userEdit, password, false);
             }
 
             if(authorityLevel != null && !authorityLevel.isEmpty()) {
@@ -327,7 +318,7 @@ public class UserController {
     public Response login_google(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
 
-            if(!Boolean.parseBoolean(environment.getProperty("LOGIN_GOOGLE_ENABLED"))) {
+            if(!userService.isLoginViaGoogleEnabled()) {
                 throw new UserException("Login via Google desabilitado!");
             }
 
@@ -339,7 +330,7 @@ public class UserController {
 
             // check if payload is valid
             GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
-                    .setAudience(Collections.singletonList(environment.getProperty("GOOGLE_CLIENT_ID")))
+                    .setAudience(Collections.singletonList(userService.getGoogleClientId()))
                     .build();
 
             GoogleIdToken idToken = verifier.verify(idTokenString);
@@ -448,7 +439,7 @@ public class UserController {
 
             response.alertOptions.put("title", "Recuperação de Senha");
 
-            userService.checkRecaptchaWithToken((String)body.get("recaptchaToken"));
+            userService.checkRecaptchaWithToken(body.get("recaptchaToken"));
 
             String usernameOrEmail = (String)body.get("username");
 
@@ -504,7 +495,7 @@ public class UserController {
 
             user.setRecoveryPasswordToken(null);
             user.setInactive(false);
-            userService.setRawPasswordToUser(user, newPassword, true);
+            userService.saveRawPasswordToUser(user, newPassword, true);
 
 
 

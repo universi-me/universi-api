@@ -216,6 +216,15 @@ public class User implements UserDetails, Serializable {
         return authority;
     }
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @Transient
+    public String getAccessLevel() {
+        if(!UserService.getInstance().isSessionOfUser(this)) {
+            return null;
+        }
+        return authority.toString();
+    }
+
     @JsonIgnore
     @Override
     public String getPassword() {

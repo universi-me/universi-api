@@ -14,7 +14,7 @@ import me.universi.image.exceptions.ImageException;
 import me.universi.user.services.UserService;
 import me.universi.util.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -23,12 +23,22 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class ImageService {
-    private final  Environment env;
     private final  ImageRepository imageRepository;
 
+    @Value("${SAVE_IMAGE_LOCAL}")
+    public boolean saveImageLocal;
+
+    @Value("${PATH_IMAGE_SAVE}")
+    public String pathImageSave;
+
+    @Value("${IMAGE_UPLOAD_LIMIT}")
+    public int imageUploadLimit;
+
+    @Value("${IMGUR_CLIENT_ID}")
+    public String imgurClientId;
+
     @Autowired
-    public ImageService(Environment env, ImageRepository imageRepository) {
-        this.env = env;
+    public ImageService(ImageRepository imageRepository) {
         this.imageRepository = imageRepository;
     }
 
@@ -42,7 +52,7 @@ public class ImageService {
 
     public String saveImageFromMultipartFile(MultipartFile image) throws Exception {
         // check if save image in local or database.
-        return (Boolean.parseBoolean(env.getProperty("SAVE_IMAGE_LOCAL"))) ? saveImageInFilesystem(image) : saveImageInDatabase(image);
+        return isSaveImageLocal() ? saveImageInFilesystem(image) : saveImageInDatabase(image);
     }
 
     public String saveImageInFilesystem(MultipartFile image) throws Exception {
@@ -54,7 +64,7 @@ public class ImageService {
         String nameOfImage = ConvertUtil.bytesToHex(encodedHash);
 
 
-        File imagemDir = new File(env.getProperty("PATH_IMAGE_SAVE"));
+        File imagemDir = new File(getPathImageSave());
         if (!imagemDir.exists()){
             imagemDir.mkdirs();
         }
@@ -74,7 +84,7 @@ public class ImageService {
     public String saveImageInDatabase(MultipartFile image) throws Exception {
 
         // image big than 1MB.
-        if(image.getBytes().length > 1024 * 1024 * Integer.parseInt(env.getProperty("IMAGE_UPLOAD_LIMIT"))) {
+        if(image.getBytes().length > 1024 * 1024 * getImageUploadLimit()) {
             throw new ImageException("Imagem muito grande.");
         }
 
@@ -96,7 +106,7 @@ public class ImageService {
     }
 
     public Resource getImageFromFilesystem(String filename) throws Exception {
-        File initialFile = new File(env.getProperty("PATH_IMAGE_SAVE"), filename);
+        File initialFile = new File(getPathImageSave(), filename);
         if(initialFile.exists() && !initialFile.isDirectory()) {
             return new FileSystemResource(initialFile);
         }
@@ -109,7 +119,7 @@ public class ImageService {
         String boundary = "----WebKitFormBoundary"+Long.toHexString(System.currentTimeMillis());
         URLConnection connection = new URL(urlApi).openConnection();
         connection.setDoOutput(true);
-        connection.setRequestProperty("Authorization", "Client-ID " + env.getProperty("IMGUR_CLIENT_ID"));
+        connection.setRequestProperty("Authorization", "Client-ID " + getImgurClientId());
         connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
         OutputStream outPut = connection.getOutputStream();
         outPut.write(("--" + boundary).getBytes());
@@ -136,6 +146,22 @@ public class ImageService {
             return ((Map)mapRequest.get("data")).get("link").toString();
         }
         throw new ImageException("Falha ao fazer upload da imagem.");
+    }
+
+    public boolean isSaveImageLocal() {
+        return saveImageLocal;
+    }
+
+    public String getPathImageSave() {
+        return pathImageSave;
+    }
+
+    public int getImageUploadLimit() {
+        return imageUploadLimit;
+    }
+
+    public String getImgurClientId() {
+        return imgurClientId;
     }
 
 }

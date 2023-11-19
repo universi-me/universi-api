@@ -15,6 +15,7 @@ import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import me.universi.util.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -42,6 +43,9 @@ public class GroupService {
     private GroupFeaturesRepository groupFeaturesRepository;
     @Autowired
     private GroupAdminRepository groupAdminRepository;
+
+    @Value("${LOCAL_ORGANIZATION_ID}")
+    private String localOrganizationId;
 
 
     public static GroupService getInstance() {
@@ -403,8 +407,8 @@ public class GroupService {
 
         String organizationId = (domain.contains(".") ? domain.split("\\.")[0] : domain).toLowerCase().trim();
 
-        if("localhost".equals(organizationId)) {
-            organizationId = "ccae";
+        if(!userService.isProduction()) {
+            organizationId = localOrganizationId;
         }
 
         Group organizationG = findFirstByRootGroupAndNicknameIgnoreCase(true, organizationId, false);

@@ -55,6 +55,9 @@ public class Group implements Serializable {
     @Column(name = "bannerImage")
     public String bannerImage;
 
+    @Column(name = "headerImage")
+    public String headerImage;
+
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="profile_id")
@@ -339,5 +342,13 @@ public class Group implements Serializable {
 
     public void setAdministrators(Collection<GroupAdmin> administrators) {
         this.administrators = administrators;
+    }
+
+    public String getHeaderImage() {
+        return headerImage;
+    }
+
+    public void setHeaderImage(String headerImage) {
+        this.headerImage = headerImage;
     }
 }
