@@ -68,6 +68,7 @@ public class GrupoController {
 
             String image = (String)body.get("imageUrl");
             String bannerImage = (String)body.get("bannerImageUrl");
+            String headerImage = (String)body.get("headerImageUrl");
 
             String description = (String)body.get("description");
             if(description == null) {
@@ -101,6 +102,9 @@ public class GrupoController {
                 }
                 if(bannerImage != null && !bannerImage.isEmpty()) {
                     groupNew.setBannerImage(bannerImage);
+                }
+                if(headerImage != null && !headerImage.isEmpty()) {
+                    groupNew.setHeaderImage(headerImage);
                 }
                 groupNew.setDescription(description);
                 groupNew.setType(GroupType.valueOf(groupType));
@@ -147,6 +151,7 @@ public class GrupoController {
             String groupType = (String)body.get("type");
             String image = (String)body.get("imageUrl");
             String bannerImage = (String)body.get("bannerImageUrl");
+            String headerImage = (String)body.get("headerImageUrl");
 
             Boolean canCreateGroup = (Boolean)body.get("canCreateGroup");
             Boolean publicGroup = (Boolean)body.get("publicGroup");
@@ -171,6 +176,9 @@ public class GrupoController {
                 }
                 if(bannerImage != null && !bannerImage.isEmpty()) {
                     groupEdit.setBannerImage(bannerImage);
+                }
+                if(headerImage != null && !headerImage.isEmpty()) {
+                    groupEdit.setHeaderImage(headerImage);
                 }
                 if(canCreateGroup != null) {
                     groupEdit.setCanCreateGroup(canCreateGroup);
@@ -544,6 +552,19 @@ public class GrupoController {
         if(group != null) {
             if(group.getBannerImage() != null) {
                 String urlImage = (group.getBannerImage().startsWith("/")) ? "/api" + group.getBannerImage() : group.getBannerImage();
+                return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(urlImage)).build();
+            }
+        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "not found");
+    }
+
+    // get image header of group
+    @GetMapping(value = "/header/{groupId}")
+    public ResponseEntity<Void> get_image_header(@PathVariable String groupId) {
+        Group group = groupService.findFirstById(groupId);
+        if(group != null) {
+            if(group.getHeaderImage() != null) {
+                String urlImage = (group.getHeaderImage().startsWith("/")) ? "/api" + group.getHeaderImage() : group.getHeaderImage();
                 return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(urlImage)).build();
             }
         }

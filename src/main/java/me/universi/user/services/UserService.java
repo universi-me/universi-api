@@ -22,7 +22,6 @@ import me.universi.user.repositories.UserRepository;
 import me.universi.util.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
@@ -56,7 +55,6 @@ public class UserService implements UserDetailsService {
     private final SessionRegistry sessionRegistry;
     private final JavaMailSender emailSender;
     private final Executor emailExecutor;
-    private final Environment env;
 
     @Value("${RECAPTCHA_API_KEY}")
     public String recaptchaApiKey;
@@ -70,15 +68,29 @@ public class UserService implements UserDetailsService {
     @Value("${RECAPTCHA_ENABLED}")
     public boolean captchaEnabled;
 
+    @Value("${LOGIN_GOOGLE_ENABLED}")
+    public boolean loginGoogleEnabled;
+
+    @Value("${GOOGLE_CLIENT_ID}")
+    public String googleClientId;
+
+    @Value("${SIGNUP_ENABLED}")
+    public boolean signupEnabled;
+
+    @Value("${SIGNUP_CONFIRMATION_ENABLED}")
+    public boolean signupConfirmationEnabled;
+
+    @Value("${spring.profiles.active}")
+    public String activeProfile;
+
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, ProfileService profileService, RoleHierarchyImpl roleHierarchy, SessionRegistry sessionRegistry, JavaMailSender emailSender, Environment env) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, ProfileService profileService, RoleHierarchyImpl roleHierarchy, SessionRegistry sessionRegistry, JavaMailSender emailSender) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.profileService = profileService;
         this.roleHierarchy = roleHierarchy;
         this.sessionRegistry = sessionRegistry;
         this.emailSender = emailSender;
-        this.env = env;
         this.emailExecutor = Executors.newFixedThreadPool(5);
     }
 
@@ -458,7 +470,7 @@ public class UserService implements UserDetailsService {
         return "/login";
     }
 
-    public void setRawPasswordToUser(User user, String rawPassword, boolean logout) throws UserException {
+    public void saveRawPasswordToUser(User user, String rawPassword, boolean logout) throws UserException {
         if(!passwordRegex(rawPassword)) {
             throw new UserException("Senha está com formato inválido!");
         }
@@ -583,8 +595,16 @@ public class UserService implements UserDetailsService {
         return user.isConfirmed();
     }
 
-    public boolean confirmAccountEnabled() {
-        return Boolean.parseBoolean(env.getProperty("SIGNUP_CONFIRMATION_ENABLED"));
+    public boolean isConfirmAccountEnabled() {
+        return signupConfirmationEnabled;
+    }
+
+    public boolean isSignupEnabled() {
+        return signupEnabled;
+    }
+
+    public boolean isLoginViaGoogleEnabled() {
+        return loginGoogleEnabled;
     }
 
     public boolean isCaptchaEnabled() {
@@ -592,6 +612,10 @@ public class UserService implements UserDetailsService {
     }
 
     public boolean isProduction() {
-        return "prod".equals(env.getProperty("spring.profiles.active"));
+        return "prod".equals(activeProfile);
+    }
+
+    public String getGoogleClientId() {
+        return googleClientId;
     }
 }
