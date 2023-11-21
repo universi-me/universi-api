@@ -63,6 +63,8 @@ public class ProfileController {
     public Response profile_edit(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
 
+            response.alertOptions.put("title", "Edição de Perfil");
+
             Profile profileGet = profileService.getProfileByUserIdOrUsername(body.get("profileId"), body.get("username"));
 
             Object name      = body.get("name");
@@ -71,9 +73,10 @@ public class ProfileController {
             Object bio       = body.get("bio");
             Object gender    = body.get("gender");
 
-            if(!userService.isSessionOfUser(profileGet.getUser())) {
-                User userSession = userService.getUserInSession();
-                if(!userService.isUserAdmin(userSession)) {
+            if(userService.isSessionOfUser(profileGet.getUser())) {
+                userService.checkPasswordInSession(body.get("rawPassword"));
+            } else {
+                if(!userService.isUserAdminSession()) {
                     throw new ProfileException("Você não tem permissão para editar este perfil.");
                 }
             }
