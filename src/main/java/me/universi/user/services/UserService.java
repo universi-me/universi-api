@@ -220,6 +220,19 @@ public class UserService implements UserDetailsService {
         return passwordEncoder.matches(rawPassword, user.getPassword());
     }
 
+    public void checkPassword(User user, String rawPassword) throws UserException {
+        if(!passwordValid(user, rawPassword)) {
+            throw new UserException("Credenciais inválidas!");
+        }
+    }
+
+    public void checkPasswordInSession(Object rawPassword) throws UserException {
+        if(rawPassword == null || String.valueOf(rawPassword).isEmpty()) {
+            throw new UserException("Requerido autenticar-se por senha!");
+        }
+        checkPassword(getUserInSession(), String.valueOf(rawPassword));
+    }
+
     public void save(User user) {
         if(user.getOrganization() == null) {
             user.setOrganization(GroupService.getInstance().getOrganizationBasedInDomain());
@@ -361,6 +374,10 @@ public class UserService implements UserDetailsService {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    public boolean isUserAdminSession() {
+        return isUserAdmin(getUserInSession());
     }
 
     public boolean userNeedAnProfile(User user, boolean checkAdmin) {
