@@ -12,7 +12,7 @@ import java.util.UUID;
 public interface GroupEmailFilterRepository extends JpaRepository<GroupEmailFilter, UUID> {
     Optional<GroupEmailFilter> findFirstById(UUID id);
 
-    boolean existsByGroupSettingsIdAndEmail(UUID id, String email);
+    boolean existsByGroupSettingsIdAndId(UUID groupSettingsId, UUID id);
 
-    GroupEmailFilter findFirstByGroupSettingsIdAndEmail(UUID id, String email);
+    GroupEmailFilter findFirstByGroupSettingsIdAndId(UUID groupSettingsId, UUID id);
 }

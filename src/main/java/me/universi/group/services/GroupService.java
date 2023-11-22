@@ -20,8 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.function.Predicate;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 @Service
 public class GroupService {
@@ -478,12 +476,12 @@ public class GroupService {
         return true;
     }
 
-    public boolean editEmailFilter(Group group, String groupEmailFilterId, String email, Boolean isRegex, Boolean enabled) {
-        if(group == null || groupEmailFilterId == null || groupEmailFilterId.isEmpty()) {
+    public boolean editEmailFilter(Group group, UUID groupEmailFilterId, String email, Boolean isRegex, Boolean enabled) {
+        if(group == null || groupEmailFilterId == null) {
             return false;
         }
-        if(groupEmailFilterRepository.existsByGroupSettingsIdAndEmail(group.groupSettings.getId(), groupEmailFilterId)) {
-            GroupEmailFilter groupEmailFilter = groupEmailFilterRepository.findFirstByGroupSettingsIdAndEmail(group.groupSettings.getId(), groupEmailFilterId);
+        if(groupEmailFilterRepository.existsByGroupSettingsIdAndId(group.groupSettings.getId(), groupEmailFilterId)) {
+            GroupEmailFilter groupEmailFilter = groupEmailFilterRepository.findFirstByGroupSettingsIdAndId(group.groupSettings.getId(), groupEmailFilterId);
             if(email != null) {
                 groupEmailFilter.email = email;
             }
@@ -499,18 +497,32 @@ public class GroupService {
         return false;
     }
 
-    public boolean deleteEmailFilter(Group group, String groupEmailFilterId) {
+    public boolean editEmailFilter(Group group, String groupEmailFilterId, String email, Boolean isRegex, Boolean enabled) {
         if(group == null || groupEmailFilterId == null || groupEmailFilterId.isEmpty()) {
             return false;
         }
-        if(groupEmailFilterRepository.existsByGroupSettingsIdAndEmail(group.groupSettings.getId(), groupEmailFilterId)) {
-            GroupEmailFilter groupEmailFilter = groupEmailFilterRepository.findFirstByGroupSettingsIdAndEmail(group.groupSettings.getId(), groupEmailFilterId);
+        return editEmailFilter(group, UUID.fromString(groupEmailFilterId), email, isRegex, enabled);
+    }
+
+    public boolean deleteEmailFilter(Group group, UUID groupEmailFilterId) {
+        if(group == null || groupEmailFilterId == null) {
+            return false;
+        }
+        if(groupEmailFilterRepository.existsByGroupSettingsIdAndId(group.groupSettings.getId(), groupEmailFilterId)) {
+            GroupEmailFilter groupEmailFilter = groupEmailFilterRepository.findFirstByGroupSettingsIdAndId(group.groupSettings.getId(), groupEmailFilterId);
             groupEmailFilter.setRemoved(ConvertUtil.getDateTimeNow());
             groupEmailFilter.setDeleted(true);
             groupEmailFilterRepository.save(groupEmailFilter);
             return true;
         }
         return false;
+    }
+
+    public boolean deleteEmailFilter(Group group, String groupEmailFilterId) {
+        if(group == null || groupEmailFilterId == null || groupEmailFilterId.isEmpty()) {
+            return false;
+        }
+        return deleteEmailFilter(group, UUID.fromString(groupEmailFilterId));
     }
 
     public void saveGroupSettings(GroupSettings gSettings) {
