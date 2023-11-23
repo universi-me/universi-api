@@ -635,4 +635,11 @@ public class UserService implements UserDetailsService {
     public String getGoogleClientId() {
         return googleClientId;
     }
+
+    public List<User> findAllUsers(Object byROLE) {
+        if(byROLE != null && !String.valueOf(byROLE).isEmpty()) {
+            return userRepository.findAllByAuthority(Authority.valueOf(String.valueOf(byROLE)));
+        }
+        return userRepository.findAll();
+    }
 }

@@ -219,7 +219,7 @@ public class User implements UserDetails, Serializable {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @Transient
     public String getAccessLevel() {
-        if(!UserService.getInstance().isSessionOfUser(this)) {
+        if(authority == null || !(getOwnerOfSession() || UserService.getInstance().isUserAdminSession())) {
             return null;
         }
         return authority.toString();

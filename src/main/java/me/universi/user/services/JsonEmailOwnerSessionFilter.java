@@ -14,6 +14,10 @@ public class JsonEmailOwnerSessionFilter {
         }
         try {
 
+            if(UserService.getInstance().isUserAdminSession()) {
+                return false;
+            }
+
             User user = UserService.getInstance().getUserInSession();
 
             String emailInSession = user.getEmail();
