@@ -235,6 +235,10 @@ public class UserController {
     public Response admin_account_edit(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
 
+            if(!userService.isUserAdminSession()) {
+                throw new UserException("Você não tem permissão para editar usuário.");
+            }
+
             String userId = (String)body.get("userId");
             if(userId == null) {
                 throw new UserException("Parametro userId é nulo.");
@@ -309,6 +313,23 @@ public class UserController {
 
             response.success = true;
             response.message = "As Alterações foram salvas com sucesso, A sessão do usuário foi finalizada.";
+
+        });
+    }
+
+    @PostMapping(value = "/admin/account/list", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response admin_account_list(@RequestBody Map<String, Object> body) {
+        return Response.buildResponse(response -> {
+
+            if(!userService.isUserAdminSession()) {
+                throw new UserException("Você não tem permissão para listar usuários.");
+            }
+
+            Object byRole = body.get("accessLevel");
+
+            response.success = true;
+            response.body.put("users", userService.findAllUsers(byRole));
 
         });
     }
