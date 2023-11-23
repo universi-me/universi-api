@@ -19,4 +19,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findFirstById(UUID id);
     Optional<User> findFirstByRecoveryPasswordToken(String token);
     List<User> findAllByAuthority(Authority authority);
+    List<User> findAllByAuthorityAndOrganization(Authority authority, Group organization);
+    List<User> findAllByOrganization(Group organization);
 }

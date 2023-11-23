@@ -326,7 +326,7 @@ public class UserController {
                 throw new UserException("Você não tem permissão para listar usuários.");
             }
 
-            Object byRole = body.get("ROLE");
+            Object byRole = body.get("accessLevel");
 
             response.success = true;
             response.body.put("users", userService.findAllUsers(byRole));

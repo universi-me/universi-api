@@ -637,9 +637,10 @@ public class UserService implements UserDetailsService {
     }
 
     public List<User> findAllUsers(Object byROLE) {
+        Group organization = GroupService.getInstance().getOrganizationBasedInDomainIfExist();
         if(byROLE != null && !String.valueOf(byROLE).isEmpty()) {
-            return userRepository.findAllByAuthority(Authority.valueOf(String.valueOf(byROLE)));
+            return organization == null ? userRepository.findAllByAuthority(Authority.valueOf(String.valueOf(byROLE))) : userRepository.findAllByAuthorityAndOrganization(Authority.valueOf(String.valueOf(byROLE)), organization);
         }
-        return userRepository.findAll();
+        return organization == null ? userRepository.findAll() : userRepository.findAllByOrganization(organization);
     }
 }
