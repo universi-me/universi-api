@@ -45,13 +45,16 @@ public class Response {
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public HashMap<String, Object> alertOptions;
 
-    public Response() {
+    private Response() {
         // Allocate map
         body = new HashMap<>();
         alertOptions = new HashMap<>();
         status = null;
     }
 
+    /**
+        Build a new api response for execute action and return optional message for client
+     */
     public static Response buildResponse(ThrowingConsumer<Response> completionHandler)  {
         Response response = new Response();
         try {
@@ -59,8 +62,7 @@ public class Response {
             completionHandler.accept(response);
         } catch (Exception e) {
             response.success = false;
-
-            if(e.getClass().getPackageName().startsWith("me.universi")) {
+            if(e.getClass().getPackageName().startsWith("me.universi")) { // is exception from this project
                 response.message = e.getMessage();
                 if(e instanceof ExceptionResponse) {
                     ExceptionResponse expResp = (ExceptionResponse) e;
@@ -72,11 +74,12 @@ public class Response {
                     }
                 }
             } else {
+                // unknown exception occurred
                 response.message = "Ocorreu um erro interno por parte do servidor." + (UserService.getInstance().isProduction() ? "" : "\n (" + e.getMessage() + ")");
             }
 
             if(response.status == null) {
-                response.status = 500;
+                response.status = 500; // default status code error
             }
         }
         if(response.status != null) {

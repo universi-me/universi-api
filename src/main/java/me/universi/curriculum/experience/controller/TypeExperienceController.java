@@ -59,8 +59,7 @@ public class TypeExperienceController {
     @PostMapping(value = "/criar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response create(@RequestBody Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             String name = (String)body.get("name");
             if(name == null) {
@@ -74,19 +73,14 @@ public class TypeExperienceController {
 
             response.message = "TypeExperience Criada.";
             response.success = true;
-            return response;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
     @PostMapping(value = "/atualizar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response update(@RequestBody Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             String id = (String)body.get("typeExperienceId");
             if(id == null) {
@@ -110,19 +104,14 @@ public class TypeExperienceController {
 
             response.message = "Competência atualizada";
             response.success = true;
-            return response;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
     @PostMapping(value = "/remover", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response remove(@RequestBody Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             String id = (String)body.get("typeExperienceId");
             if(id == null) {
@@ -138,19 +127,14 @@ public class TypeExperienceController {
 
             response.message = "TypeExperience removida logicamente";
             response.success = true;
-            return response;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
     @PostMapping(value = "/obter", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response get(@RequestBody Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             String id = (String)body.get("typeExperienceId");
             if(id == null) {
@@ -163,34 +147,22 @@ public class TypeExperienceController {
             }
 
             response.body.put("typeExperience", typeExperience);
-
             response.success = true;
-            return response;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
     @PostMapping(value = "/listar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response findAll(@RequestBody Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             List<TypeExperience> typeExperiences = typeExperienceService.findAll();
 
             response.body.put("lista", typeExperiences);
-
-            response.message = "Operação realizada com exito.";
             response.success = true;
-            return response;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
 }

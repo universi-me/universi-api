@@ -64,8 +64,7 @@ public class CurriculumController {
     @PostMapping(value = "/filtrar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response filtrar(@RequestBody Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
             /*O que pode ser filtrado
             * CompetenceType
             * Level
@@ -97,12 +96,8 @@ public class CurriculumController {
 
             response.message = "Operação realizada com exito.";
             response.success = true;
-            return response;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
 }

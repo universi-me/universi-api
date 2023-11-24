@@ -111,8 +111,7 @@ public class EducationService {
     }
 
     public Response update(@RequestBody Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             String dateFormat = "yyyy-MM-dd";
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat);
@@ -165,20 +164,13 @@ public class EducationService {
 
             response.message = "Formação atualizada";
             response.success = true;
-            return response;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            e.printStackTrace();
-            return response;
-        }
+        });
     }
 
 
     public Response create(Map<String, Object> body) {
-        Response response = new Response();
-
-        try {
+        return Response.buildResponse(response -> {
 
             User user = userService.getUserInSession();
             String dateFormat = "yyyy-MM-dd";
@@ -232,17 +224,12 @@ public class EducationService {
 
             response.message = "Formação criada.";
             response.success = true;
-            return response;
 
-        }catch (Exception e){
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
     public Response get(Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
             String id = (String)body.get("educationId");
 
             if(id.isEmpty()) {
@@ -252,18 +239,13 @@ public class EducationService {
             Education education = findById(UUID.fromString(id)).get();
 
             response.body.put("education", education);
-
             response.success = true;
-            return response;
-        }catch (Exception e){
-            response.message = e.getMessage();
-            return response;
-        }
+
+        });
     }
 
     public Response findAll(Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             List<Education> educations = findAll();
 
@@ -271,17 +253,12 @@ public class EducationService {
 
             response.message = "Operação realizada com exito.";
             response.success = true;
-            return response;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
     public Response remove(Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             String id = (String)body.get("educationId");
             if(id.isEmpty()) {
@@ -292,11 +269,7 @@ public class EducationService {
 
             response.message = "Formação removida logicamente";
             response.success = true;
-            return response;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 }

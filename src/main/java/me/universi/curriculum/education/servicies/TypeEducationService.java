@@ -58,9 +58,8 @@ public class TypeEducationService {
 
 
     public Response create(Map<String, Object> body) {
-        Response response = new Response();
+        return Response.buildResponse(response -> {
 
-        try {
             String name = (String) body.get("name");
             if(name.isBlank() || name.isEmpty()){
                 throw new TypeEducationException("Paramentro name passado é nulo");
@@ -71,17 +70,13 @@ public class TypeEducationService {
 
             response.message = "TypeEducation criada.";
             response.success = true;
-            return response;
 
-        }catch (Exception e){
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
     public Response get(Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
+
             String id = (String)body.get("typeEducationId");
 
             if(id.isEmpty()) {
@@ -91,37 +86,25 @@ public class TypeEducationService {
             TypeEducation typeEducation = findById(UUID.fromString(id)).get();
 
             response.body.put("typeEducation", typeEducation);
-
             response.success = true;
-            return response;
-        }catch (Exception e){
-            response.message = e.getMessage();
-            return response;
-        }
+
+        });
     }
 
     public Response findAll(Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             List<TypeEducation> typeEducations = findAll();
 
             response.body.put("lista", typeEducations);
-
-            response.message = "Operação realizada com exito.";
             response.success = true;
-            return response;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
 
     public Response remove(Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             String id = (String)body.get("tyEducationId");
             if(id.isEmpty()) {
@@ -132,11 +115,7 @@ public class TypeEducationService {
 
             response.message = "TypeEdcation removida logicamente";
             response.success = true;
-            return response;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 }

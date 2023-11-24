@@ -29,8 +29,7 @@ public class LinkController {
     @PostMapping(value = "/link/criar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response create(@RequestBody Map<String, Object> body) {
-        Response resposta = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             User user = userService.getUserInSession();
 
@@ -50,7 +49,7 @@ public class LinkController {
             linkNew.setTypeLink(TypeLink.valueOf(tipo));
             linkNew.setUrl(url);
             if(nome != null) {
-                linkNew.setName((nome.length()>0)?nome:null);
+                linkNew.setName((!nome.isEmpty())?nome:null);
             }
 
 
@@ -59,21 +58,16 @@ public class LinkController {
 
             linkService.save(linkNew);
 
-            resposta.message = "Link Criado";
-            resposta.success = true;
-            return resposta;
+            response.message = "Link Criado";
+            response.success = true;
 
-        } catch (Exception e) {
-            resposta.message = e.getMessage();
-            return resposta;
-        }
+        });
     }
 
     @PostMapping(value = "/link/remover", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response remove(@RequestBody Map<String, Object> body) {
-        Response resposta = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             String id = (String)body.get("linkId");
             if(id == null) {
@@ -91,21 +85,16 @@ public class LinkController {
 
             linkService.delete(link);
 
-            resposta.message = "Link removido";
-            resposta.success = true;
-            return resposta;
+            response.message = "Link removido";
+            response.success = true;
 
-        } catch (Exception e) {
-            resposta.message = e.getMessage();
-            return resposta;
-        }
+        });
     }
 
     @PostMapping(value = "/link/atualizar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response update(@RequestBody Map<String, Object> body) {
-        Response resposta = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             String id = (String)body.get("linkId");
             if(id == null) {
@@ -132,26 +121,21 @@ public class LinkController {
                 link.setTypeLink(TypeLink.valueOf(tipo));
             }
             if(nome != null) {
-                link.setName((nome.length()>0)?nome:null);
+                link.setName((!nome.isEmpty())?nome:null);
             }
 
             linkService.save(link);
 
-            resposta.message = "Link atualizado";
-            resposta.success = true;
-            return resposta;
+            response.message = "Link atualizado";
+            response.success = true;
 
-        } catch (Exception e) {
-            resposta.message = e.getMessage();
-            return resposta;
-        }
+        });
     }
 
     @PostMapping(value = "/link/obter", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response get(@RequestBody Map<String, Object> body) {
-        Response resposta = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             String id = (String)body.get("linkId");
             if(id == null) {
@@ -163,15 +147,10 @@ public class LinkController {
                 throw new LinkException("Link não encontrada.");
             }
 
-            resposta.body.put("link", link);
+            response.body.put("link", link);
+            response.success = true;
 
-            resposta.success = true;
-            return resposta;
-
-        } catch (Exception e) {
-            resposta.message = e.getMessage();
-            return resposta;
-        }
+        });
     }
 
 }

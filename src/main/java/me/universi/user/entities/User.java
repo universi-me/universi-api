@@ -290,9 +290,10 @@ public class User implements UserDetails, Serializable {
         else if (!(otherUser instanceof UserDetails)) return false;
         else return (otherUser.hashCode() == hashCode());
     }
+
     @Override
     public int hashCode() {
-        return getUsername().hashCode();
+        return (getUsername() + organization.getNickname()).hashCode();
     }
 
     public Group getOrganization() {
