@@ -51,7 +51,7 @@ public class CompetenciaTest {
         profileService.save(profile);
         userNew.setProfile(profile);
         try {
-            userService.createUser(userNew);
+            userService.createUser(userNew, null, null);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -171,7 +171,7 @@ public class CompetenciaTest {
         profileService.save(profile);
         userNew.setProfile(profile);
         try {
-            userService.createUser(userNew);
+            userService.createUser(userNew, null, null);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -235,7 +235,7 @@ public class CompetenciaTest {
         profileService.save(profile);
         userNew.setProfile(profile);
         try {
-            userService.createUser(userNew);
+            userService.createUser(userNew, null, null);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
