@@ -2,7 +2,7 @@ package me.universi.group.enums;
 
 public enum GroupEmailFilterType {
     END_WITH("Terminando em"),
-    START_WITH("Começando em"),
+    START_WITH("Começando com"),
     CONTAINS("Contendo"),
     EQUALS("Igual a"),
     MASK("Máscara ( * )"),
