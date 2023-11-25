@@ -8,6 +8,7 @@ import me.universi.group.entities.GroupSettings.GroupEmailFilter;
 import me.universi.group.entities.GroupSettings.GroupFeatures;
 import me.universi.group.entities.GroupSettings.GroupSettings;
 import me.universi.group.entities.GroupSettings.GroupTheme;
+import me.universi.group.enums.GroupEmailFilterType;
 import me.universi.group.exceptions.GroupException;
 import me.universi.group.repositories.*;
 import me.universi.profile.entities.Profile;
@@ -435,39 +436,67 @@ public class GroupService {
         boolean available = false;
         boolean hasAnyFilter = false;
         Group organization = getOrganizationBasedInDomainIfExist();
-        if(organization != null) {
+
+        if (organization != null) {
             GroupSettings orgSettings = organization.getGroupSettings();
-            for(GroupEmailFilter emailFilterNow : orgSettings.getFilterEmails()) {
-                if(emailFilterNow.enabled) {
-                    if(!hasAnyFilter) {
+
+            for (GroupEmailFilter emailFilterNow : orgSettings.getFilterEmails()) {
+                if (emailFilterNow.enabled) {
+                    if (!hasAnyFilter) {
                         hasAnyFilter = true;
                     }
-                    if(emailFilterNow.regex) {
-                        Pattern pattern = Pattern.compile(emailFilterNow.email);
-                        Matcher matcher = pattern.matcher(email);
-                        if(matcher.find()) {
-                            available = true;
-                        }
-                    } else {
-                        if(email.endsWith(emailFilterNow.email)) {
-                            available = true;
-                        }
+                    switch (emailFilterNow.type) {
+                        case END_WITH:
+                            if (email.endsWith(emailFilterNow.email)) {
+                                available = true;
+                            }
+                            break;
+                        case START_WITH:
+                            if (email.startsWith(emailFilterNow.email)) {
+                                available = true;
+                            }
+                            break;
+                        case CONTAINS:
+                            if (email.contains(emailFilterNow.email)) {
+                                available = true;
+                            }
+                            break;
+                        case EQUALS:
+                            if (email.equals(emailFilterNow.email)) {
+                                available = true;
+                            }
+                            break;
+                        case MASK:
+                            Pattern patternMask = Pattern.compile(emailFilterNow.email.replaceAll("\\*", "(.*)"));
+                            Matcher matcherMask = patternMask.matcher(email);
+                            if (matcherMask.find()) {
+                                available = true;
+                            }
+                            break;
+                        case REGEX:
+                            Pattern pattern = Pattern.compile(emailFilterNow.email);
+                            Matcher matcher = pattern.matcher(email);
+                            if (matcher.find()) {
+                                available = true;
+                            }
+                            break;
                     }
                 }
             }
         }
+
         return hasAnyFilter ? available : !available;
     }
 
-    public boolean addEmailFilter(Group group, String email, Boolean isRegex, Boolean enabled) {
+    public boolean addEmailFilter(Group group, String email, Object type, Boolean enabled) {
         if(group == null || email == null || email.isEmpty()) {
             return false;
         }
         GroupEmailFilter groupEmailFilter = new GroupEmailFilter();
         groupEmailFilter.groupSettings = group.groupSettings;
         groupEmailFilter.email = email;
-        if(isRegex != null) {
-            groupEmailFilter.regex = isRegex;
+        if(type != null) {
+            groupEmailFilter.type = GroupEmailFilterType.valueOf(String.valueOf(type));
         }
         if(enabled != null) {
             groupEmailFilter.enabled = enabled;
@@ -476,7 +505,7 @@ public class GroupService {
         return true;
     }
 
-    public boolean editEmailFilter(Group group, UUID groupEmailFilterId, String email, Boolean isRegex, Boolean enabled) {
+    public boolean editEmailFilter(Group group, UUID groupEmailFilterId, String email, Object type, Boolean enabled) {
         if(group == null || groupEmailFilterId == null) {
             return false;
         }
@@ -485,8 +514,8 @@ public class GroupService {
             if(email != null) {
                 groupEmailFilter.email = email;
             }
-            if(isRegex != null) {
-                groupEmailFilter.regex = isRegex;
+            if(type != null) {
+                groupEmailFilter.type = GroupEmailFilterType.valueOf(String.valueOf(type));
             }
             if(enabled != null) {
                 groupEmailFilter.enabled = enabled;
@@ -497,11 +526,11 @@ public class GroupService {
         return false;
     }
 
-    public boolean editEmailFilter(Group group, String groupEmailFilterId, String email, Boolean isRegex, Boolean enabled) {
+    public boolean editEmailFilter(Group group, String groupEmailFilterId, String email, Object type, Boolean enabled) {
         if(group == null || groupEmailFilterId == null || groupEmailFilterId.isEmpty()) {
             return false;
         }
-        return editEmailFilter(group, UUID.fromString(groupEmailFilterId), email, isRegex, enabled);
+        return editEmailFilter(group, UUID.fromString(groupEmailFilterId), email, type, enabled);
     }
 
     public boolean deleteEmailFilter(Group group, UUID groupEmailFilterId) {
