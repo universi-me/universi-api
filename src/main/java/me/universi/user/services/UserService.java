@@ -13,6 +13,7 @@ import me.universi.Sys;
 import me.universi.group.entities.Group;
 import me.universi.group.services.GroupService;
 import me.universi.profile.entities.Profile;
+import me.universi.profile.exceptions.ProfileException;
 import me.universi.profile.services.ProfileService;
 import me.universi.user.entities.User;
 import me.universi.user.enums.Authority;
@@ -115,8 +116,8 @@ public class UserService implements UserDetailsService {
     }
 
     public UserDetails findFirstByEmail(String email) throws UserException {
-        Group organization = GroupService.getInstance().getOrganizationBasedInDomainIfExist();
-        Optional<User> user = organization == null ? userRepository.findFirstByEmail(email) : userRepository.findFirstByEmailAndOrganization(email, organization);
+        Group organization = GroupService.getInstance().obtainOrganizationBasedInDomain();
+        Optional<User> user = organization == null ? userRepository.findFirstByEmail(email) : userRepository.findFirstByEmailAndOrganizationId(email, organization.getId());
         if (user.isPresent()) {
             return user.get();
         }
@@ -124,8 +125,8 @@ public class UserService implements UserDetailsService {
     }
 
     public UserDetails findFirstByUsername(String username) {
-        Group organization = GroupService.getInstance().getOrganizationBasedInDomainIfExist();
-        Optional<User> userGet = organization == null ? userRepository.findFirstByName(username) : userRepository.findFirstByNameAndOrganization(username, organization);
+        Group organization = GroupService.getInstance().obtainOrganizationBasedInDomain();
+        Optional<User> userGet = organization == null ? userRepository.findFirstByName(username) : userRepository.findFirstByNameAndOrganizationId(username, organization.getId());
         return userGet.orElse(null);
     }
 
@@ -138,7 +139,7 @@ public class UserService implements UserDetailsService {
         return findFirstById(UUID.fromString(id));
     }
 
-    public void createUser(User user) throws Exception {
+    public void createUser(User user, String firstname, String lastname) throws Exception {
         if (user==null) {
             throw new UserException("Usuario está vazio!");
         } else if (user.getUsername()==null) {
@@ -150,6 +151,26 @@ public class UserService implements UserDetailsService {
 
         if(user.getProfile() == null) {
             Profile userProfile = new Profile();
+
+            if(firstname != null) {
+                String nameString = String.valueOf(firstname);
+                if(nameString.length() > 50) {
+                    throw new ProfileException("O nome não pode ter mais de 50 caracteres.");
+                }
+                if(!nameString.isEmpty()) {
+                    userProfile.setFirstname(nameString);
+                }
+            }
+            if(lastname != null) {
+                String lastnameString = String.valueOf(lastname);
+                if(lastnameString.length() > 50) {
+                    throw new ProfileException("O sobrenome não pode ter mais de 50 caracteres.");
+                }
+                if(!lastnameString.isEmpty()) {
+                    userProfile.setLastname(lastnameString);
+                }
+            }
+
             userProfile.setUser(user);
             profileService.save(userProfile);
             try {
@@ -639,8 +660,8 @@ public class UserService implements UserDetailsService {
     public List<User> findAllUsers(Object byROLE) {
         Group organization = GroupService.getInstance().getOrganizationBasedInDomainIfExist();
         if(byROLE != null && !String.valueOf(byROLE).isEmpty()) {
-            return organization == null ? userRepository.findAllByAuthority(Authority.valueOf(String.valueOf(byROLE))) : userRepository.findAllByAuthorityAndOrganization(Authority.valueOf(String.valueOf(byROLE)), organization);
+            return organization == null ? userRepository.findAllByAuthority(Authority.valueOf(String.valueOf(byROLE))) : userRepository.findAllByAuthorityAndOrganizationId(Authority.valueOf(String.valueOf(byROLE)), organization.getId());
         }
-        return organization == null ? userRepository.findAll() : userRepository.findAllByOrganization(organization);
+        return organization == null ? userRepository.findAll() : userRepository.findAllByOrganizationId(organization.getId());
     }
 }
