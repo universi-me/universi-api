@@ -414,9 +414,9 @@ public class GroupService {
         return organizationG;
     }
 
-    public Group getOrganizationBasedInDomain() throws RuntimeException {
+    public Group getOrganizationBasedInDomain() {
         // if logged find updated organization of user without cached from session, else calculate from domain
-        Group gOrg = userService.userIsLoggedIn() ?
+        Group gOrg = userService.userIsLoggedIn() && userService.getUserInSession() != null && userService.getUserInSession().getOrganization() != null ?
                 findFirstById(userService.getUserInSession().getOrganization().getId()) : obtainOrganizationBasedInDomain();
         if(gOrg == null) {
             throw new GroupException("Falha ao obter Organização.");

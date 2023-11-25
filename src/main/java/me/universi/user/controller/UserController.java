@@ -130,6 +130,9 @@ public class UserController {
             String username = (String)body.get("username");
             String email = (String)body.get("email");
 
+            String firstname = (String)body.get("firstname");
+            String lastname = (String)body.get("lastname");
+
             String password = (String)body.get("password");
 
             if (username==null || username.isEmpty()) {
@@ -174,7 +177,7 @@ public class UserController {
             }
             userService.saveRawPasswordToUser(user, password, false);
 
-            userService.createUser(user);
+            userService.createUser(user, firstname, lastname);
 
             if(userService.isConfirmAccountEnabled()) {
                 userService.sendConfirmAccountEmail(user, true);
@@ -393,7 +396,7 @@ public class UserController {
                         user = new User();
                         user.setName(newUsername);
                         user.setEmail(email.trim());
-                        userService.createUser(user);
+                        userService.createUser(user, null, null);
 
                         Profile profile = user.getProfile();
 

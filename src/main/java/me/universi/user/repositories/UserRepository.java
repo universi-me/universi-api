@@ -13,12 +13,12 @@ import java.util.UUID;
 @Repository
 public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findFirstByEmail(String email);
-    Optional<User> findFirstByEmailAndOrganization(String email, Group organization);
+    Optional<User> findFirstByEmailAndOrganizationId(String email, UUID organization);
     Optional<User> findFirstByName(String name);
-    Optional<User> findFirstByNameAndOrganization(String name, Group organization);
+    Optional<User> findFirstByNameAndOrganizationId(String name, UUID organization);
     Optional<User> findFirstById(UUID id);
     Optional<User> findFirstByRecoveryPasswordToken(String token);
     List<User> findAllByAuthority(Authority authority);
-    List<User> findAllByAuthorityAndOrganization(Authority authority, Group organization);
-    List<User> findAllByOrganization(Group organization);
+    List<User> findAllByAuthorityAndOrganizationId(Authority authority, UUID organization);
+    List<User> findAllByOrganizationId(UUID organization);
 }

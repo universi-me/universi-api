@@ -88,7 +88,7 @@ public class ProfileTest {
         userNew.setProfile(admin_profile);
         profileService.save(userNew.getProfile());
         try {
-            userService.createUser(userNew);
+            userService.createUser(userNew, null, null);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
