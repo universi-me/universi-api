@@ -10,6 +10,7 @@ import me.universi.group.entities.GroupSettings.GroupEmailFilter;
 import me.universi.group.entities.GroupSettings.GroupSettings;
 import me.universi.group.entities.ProfileGroup;
 import me.universi.group.entities.Subgroup;
+import me.universi.group.enums.GroupEmailFilterType;
 import me.universi.group.enums.GroupType;
 import me.universi.group.exceptions.GroupException;
 import me.universi.group.services.GroupService;
@@ -583,7 +584,7 @@ public class GrupoController {
             String email = (String)body.get("email");
 
             Boolean enabled = (Boolean)body.get("enabled");
-            Boolean isRegex = (Boolean)body.get("isRegex");
+            Object type = body.get("type");
 
             Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
 
@@ -591,7 +592,7 @@ public class GrupoController {
                 User user = userService.getUserInSession();
 
                 if(groupService.verifyPermissionToEditGroup(group, user)) {
-                    if(groupService.addEmailFilter(group, email, isRegex, enabled)) {
+                    if(groupService.addEmailFilter(group, email, type, enabled)) {
                         response.message = "Filtro adicionado com sucesso.";
                         return;
                     } else {
@@ -618,7 +619,7 @@ public class GrupoController {
 
             String email = (String)body.get("email");
             Boolean enabled = (Boolean)body.get("enabled");
-            Boolean isRegex = (Boolean)body.get("isRegex");
+            Object type = body.get("type");
 
             Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
 
@@ -626,7 +627,7 @@ public class GrupoController {
                 User user = userService.getUserInSession();
 
                 if(groupService.verifyPermissionToEditGroup(group, user)) {
-                    if(groupService.editEmailFilter(group, groupEmailFilterId, email, isRegex, enabled)) {
+                    if(groupService.editEmailFilter(group, groupEmailFilterId, email, type, enabled)) {
                         response.message = "Filtro editado com sucesso.";
                         return;
                     } else {
