@@ -8,6 +8,8 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
+import me.universi.group.enums.GroupEmailFilterType;
+import me.universi.group.enums.GroupType;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
@@ -31,8 +33,9 @@ public class GroupEmailFilter implements Serializable {
     @Column(name = "enabled")
     public boolean enabled = Boolean.FALSE;
 
-    @Column(name = "regex")
-    public boolean regex;
+    @Column(name = "type")
+    @Enumerated(EnumType.STRING)
+    public GroupEmailFilterType type = GroupEmailFilterType.END_WITH;
 
     @Column(name = "email")
     public String email;
@@ -76,12 +79,12 @@ public class GroupEmailFilter implements Serializable {
         this.enabled = enabled;
     }
 
-    public boolean isRegex() {
-        return regex;
+    public GroupEmailFilterType getType() {
+        return type;
     }
 
-    public void setRegex(boolean regex) {
-        regex = regex;
+    public void setType(GroupEmailFilterType type) {
+        this.type = type;
     }
 
     public String getEmail() {

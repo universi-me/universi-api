@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.servlet.http.HttpServletResponse;
 import me.universi.user.exceptions.ExceptionResponse;
-import me.universi.user.exceptions.UserException;
 import me.universi.user.services.UserService;
 import me.universi.util.ConvertUtil;
 import java.util.HashMap;
@@ -64,8 +63,7 @@ public class Response {
             response.success = false;
             if(e.getClass().getPackageName().startsWith("me.universi")) { // is exception from this project
                 response.message = e.getMessage();
-                if(e instanceof ExceptionResponse) {
-                    ExceptionResponse expResp = (ExceptionResponse) e;
+                if(e instanceof ExceptionResponse expResp) {
                     if(expResp.redirectTo != null) {
                         response.redirectTo = expResp.redirectTo;
                     }
