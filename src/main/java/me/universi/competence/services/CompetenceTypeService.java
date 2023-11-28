@@ -74,7 +74,7 @@ public class CompetenceTypeService {
         competenceTypeRepository.deleteById(id);
     }
 
-    public Response create(Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public Response create(Map<String, Object> body) {
         return Response.buildResponse(response -> {
 
             String name = (String)body.get("name");
@@ -97,7 +97,7 @@ public class CompetenceTypeService {
         });
     }
 
-    public Response update(Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public Response update(Map<String, Object> body) {
         return Response.buildResponse(response -> {
 
             String id = (String)body.get("competenceTypeId");
@@ -128,7 +128,7 @@ public class CompetenceTypeService {
         });
     }
 
-    public Response remove(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public Response remove(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
 
             String id = (String)body.get("competenceTypeId");
@@ -149,7 +149,7 @@ public class CompetenceTypeService {
         });
     }
 
-    public Response get(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public Response get(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
 
             String id = (String)body.get("competenceTypeId");
@@ -168,7 +168,7 @@ public class CompetenceTypeService {
         });
     }
 
-    public Response findAll(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
+    public Response findAll(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
 
             List<CompetenceType> competences = findAll();
