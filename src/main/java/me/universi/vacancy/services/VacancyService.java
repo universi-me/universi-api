@@ -129,8 +129,7 @@ public class VacancyService {
     }
 
     public Response create(Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             User user = userService.getUserInSession();
             String dateFormat = "yyyy-MM-dd";
@@ -189,17 +188,12 @@ public class VacancyService {
 
             response.message = "Vaga Criada";
             response.success = true;
-            return response;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
     public Response update(Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             String dateFormat = "yyyy-MM-dd";
             SimpleDateFormat  simpleDateFormat = new SimpleDateFormat(dateFormat);
@@ -249,17 +243,12 @@ public class VacancyService {
 
             response.message = "Vaga atualizada";
             response.success = true;
-            return response;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
     public Response remove(Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             String vacancyId = (String)body.get("vacancyId");
             if(vacancyId == null) {
@@ -275,17 +264,12 @@ public class VacancyService {
 
             response.message = "Vaga removida";
             response.success = true;
-            return response;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
     public Response get(Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             String vacancyId = (String)body.get("vacancyId");
             if(vacancyId == null) {
@@ -298,19 +282,13 @@ public class VacancyService {
             }
 
             response.body.put("Vaga", vacancy);
-
             response.success = true;
-            return response;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
     public Response findAll(Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             List<Vacancy> vacancies = findAll();
 
@@ -318,17 +296,12 @@ public class VacancyService {
 
             response.message = "Operação realizada com exito.";
             response.success = true;
-            return response;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
     public Response findAllActive(Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             List<Vacancy> vacancies = findAllActive();
 
@@ -336,17 +309,12 @@ public class VacancyService {
 
             response.message = "Operação realizada com exito.";
             response.success = true;
-            return response;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
     public Response filtrar( Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             List<Vacancy> vacancies;
 
@@ -368,17 +336,12 @@ public class VacancyService {
 
             response.message = "Operação realizada com exito.";
             response.success = true;
-            return response;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
     public Response addCompetence(Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             Vacancy vacancie;
 
@@ -401,12 +364,8 @@ public class VacancyService {
 
             response.message = "Operação realizada com exito.";
             response.success = true;
-            return response;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
 }

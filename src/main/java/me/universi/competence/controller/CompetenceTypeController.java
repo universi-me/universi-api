@@ -1,57 +1,46 @@
 package me.universi.competence.controller;
 
 import me.universi.api.entities.Response;
-import me.universi.competence.entities.CompetenceType;
-import me.universi.competence.exceptions.CompetenceException;
 import me.universi.competence.services.CompetenceTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
-
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/competencetype")
+@RequestMapping("/api")
 public class CompetenceTypeController {
     @Autowired
     public CompetenceTypeService competenceTypeService;
 
-
-
-    @PostMapping(value = "/admin", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/admin/competencetype/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Response create(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
-       return competenceTypeService.create(body,request, session);
+    public Response create(@RequestBody Map<String, Object> body) {
+       return competenceTypeService.create(body);
     }
 
-    @PutMapping(value = "/admin", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/admin/competencetype/update", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Response update(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
-        return competenceTypeService.update(body, request, session);
+    public Response update(@RequestBody Map<String, Object> body) {
+        return competenceTypeService.update(body);
     }
 
-    @DeleteMapping(value = "/admin", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/admin/competencetype/remove", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Response remove(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
-        return competenceTypeService.remove(body, request, session);
+    public Response remove(@RequestBody Map<String, Object> body) {
+        return competenceTypeService.remove(body);
     }
 
-    @GetMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/competencetype/get", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Response get(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
-        return competenceTypeService.get(body, request, session);
+    public Response get(@RequestBody Map<String, Object> body) {
+        return competenceTypeService.get(body);
     }
 
-    @GetMapping(value = "/list", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/competencetype/list", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Response findAll(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
-        return competenceTypeService.findAll(body, request, session);
+    public Response findAll(@RequestBody Map<String, Object> body) {
+        return competenceTypeService.findAll(body);
     }
 }

@@ -74,9 +74,8 @@ public class CompetenceTypeService {
         competenceTypeRepository.deleteById(id);
     }
 
-    public Response create(Map<String, Object> body, HttpServletRequest request, HttpSession session) {
-        Response response = new Response();
-        try {
+    public Response create(Map<String, Object> body) {
+        return Response.buildResponse(response -> {
 
             String name = (String)body.get("name");
             if(name == null) {
@@ -94,17 +93,12 @@ public class CompetenceTypeService {
 
             response.message = "Competência Criada";
             response.success = true;
-            return response;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
-    public Response update(Map<String, Object> body, HttpServletRequest request, HttpSession session) {
-        Response response = new Response();
-        try {
+    public Response update(Map<String, Object> body) {
+        return Response.buildResponse(response -> {
 
             String id = (String)body.get("competenceTypeId");
             if(id == null) {
@@ -130,17 +124,12 @@ public class CompetenceTypeService {
 
             response.message = "Competência atualizada";
             response.success = true;
-            return response;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
-    public Response remove(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
-        Response response = new Response();
-        try {
+    public Response remove(@RequestBody Map<String, Object> body) {
+        return Response.buildResponse(response -> {
 
             String id = (String)body.get("competenceTypeId");
             if(id == null) {
@@ -156,17 +145,12 @@ public class CompetenceTypeService {
 
             response.message = "Competência removida";
             response.success = true;
-            return response;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
-    public Response get(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
-        Response response = new Response();
-        try {
+    public Response get(@RequestBody Map<String, Object> body) {
+        return Response.buildResponse(response -> {
 
             String id = (String)body.get("competenceTypeId");
             if(id == null) {
@@ -179,29 +163,19 @@ public class CompetenceTypeService {
             }
 
             response.body.put("competenceType", competenceType);
-
             response.success = true;
-            return response;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
-    public Response findAll(@RequestBody Map<String, Object> body, HttpServletRequest request, HttpSession session) {
-        Response response = new Response();
-        try {
+    public Response findAll(@RequestBody Map<String, Object> body) {
+        return Response.buildResponse(response -> {
 
             List<CompetenceType> competences = findAll();
 
             response.body.put("list", competences);
             response.success = true;
-            return response;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 }

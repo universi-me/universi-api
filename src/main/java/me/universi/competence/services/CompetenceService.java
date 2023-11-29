@@ -98,8 +98,7 @@ public class CompetenceService {
     }
 
     public Response create(Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             User user = userService.getUserInSession();
 
@@ -136,17 +135,12 @@ public class CompetenceService {
 
             response.message = "Competência Criada e adicionado ao perfil";
             response.success = true;
-            return response;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
     public Response update( Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             String id = (String)body.get("competenciaId");
             if(id == null) {
@@ -164,7 +158,7 @@ public class CompetenceService {
                 throw new CompetenceException("Competência não encontrada.");
             }
 
-            if(competenceTypeId != null && competenceTypeId.length()>0) {
+            if(competenceTypeId != null && !competenceTypeId.isEmpty()) {
                 CompetenceType compT = competenceTypeService.findFirstById(competenceTypeId);
                 if(compT == null) {
                     throw new CompetenceException("Tipo de Competência não encontrado.");
@@ -182,17 +176,12 @@ public class CompetenceService {
 
             response.message = "Competência atualizada";
             response.success = true;
-            return response;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
     public Response remove( Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             String id = (String)body.get("competenciaId");
             if(id == null) {
@@ -208,17 +197,12 @@ public class CompetenceService {
 
             response.message = "Competência removida";
             response.success = true;
-            return response;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
     public Response get( Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             String id = (String)body.get("competenciaId");
             if(id == null) {
@@ -231,19 +215,13 @@ public class CompetenceService {
             }
 
             response.body.put("competencia", competence);
-
             response.success = true;
-            return response;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
     public Response findAll( Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             List<Competence> competences = findAll();
 
@@ -251,12 +229,8 @@ public class CompetenceService {
 
             response.message = "Operação realizada com exito.";
             response.success = true;
-            return response;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
 }

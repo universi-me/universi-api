@@ -53,9 +53,8 @@ public class TypeVacancyService {
     }
 
     public Response create(Map<String, Object> body) {
-        Response response = new Response();
+        return Response.buildResponse(response -> {
 
-        try {
             String name = (String) body.get("name");
             if(name.isBlank() || name.isEmpty()){
                 throw new InstantiationException("Parametro name passado é nulo ou vazio");
@@ -67,17 +66,13 @@ public class TypeVacancyService {
 
             response.message = "Tipo de Vaga criada.";
             response.success = true;
-            return response;
 
-        }catch (Exception e){
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
     public Response get(Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
+
             String id = (String)body.get("TypeVacancyId");
 
             if(id.isEmpty()) {
@@ -87,36 +82,24 @@ public class TypeVacancyService {
             TypeVacancy typeVacancy = findById(UUID.fromString(id)).get();
 
             response.body.put("typeVacancy", typeVacancy);
-
             response.success = true;
-            return response;
-        }catch (Exception e){
-            response.message = e.getMessage();
-            return response;
-        }
+
+        });
     }
 
     public Response findAll(Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             List<TypeVacancy> typeVacancies = findAll();
 
             response.body.put("lista", typeVacancies);
-
-            response.message = "Operação realizada com exito.";
             response.success = true;
-            return response;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
     public Response remove(Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             String id = (String)body.get("TypeVacancyId");
             if(id.isEmpty()) {
@@ -127,11 +110,7 @@ public class TypeVacancyService {
 
             response.message = "TypeVacancy removida logicamente";
             response.success = true;
-            return response;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 }

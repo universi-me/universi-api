@@ -10,7 +10,6 @@ import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
 import me.universi.recommendation.entities.Recommendation;
 import me.universi.recommendation.exceptions.RecomendacaoInvalidaException;
-import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -47,8 +46,7 @@ public class RecomendacaoController {
     @PostMapping(value = "/recomendacao/criar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response create(@RequestBody Map<String, Object> body) {
-        Response resposta = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             String destino = (String)body.get("destino");
             if(destino == null) {
@@ -83,28 +81,23 @@ public class RecomendacaoController {
             recomendacoNew.setOrigin(profileOrigin);
             recomendacoNew.setCompetenceType(compT);
 
-            if(descricao != null && descricao.length() > 0) {
+            if(descricao != null && !descricao.isEmpty()) {
                 recomendacoNew.setDescription(descricao);
             }
 
             recomendacaoService.save(recomendacoNew);
 
-            resposta.message = "A sua recomendação foi feita.";
-            resposta.redirectTo = "/p/" + profileDestiny.getUser().getUsername();
-            resposta.success = true;
-            return resposta;
+            response.message = "A sua recomendação foi feita.";
+            response.redirectTo = "/profile/" + profileDestiny.getUser().getUsername();
+            response.success = true;
 
-        } catch (Exception e) {
-            resposta.message = e.getMessage();
-            return resposta;
-        }
+        });
     }
 
     @PostMapping(value = "/recomendacao/atualizar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response atualizar(@RequestBody Map<String, Object> body) {
-        Response resposta = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             String id = (String)body.get("id");
             if(id == null) {
@@ -124,11 +117,11 @@ public class RecomendacaoController {
                 throw new GroupException("Você não tem permissão para editar esta Recomendação.");
             }
 
-            if(descricao != null && descricao.length() > 0) {
+            if(descricao != null && !descricao.isEmpty()) {
                 recommendation.setDescription(descricao);
             }
 
-            if(competenciaTipoId != null && competenciaTipoId.length() > 0) {
+            if(competenciaTipoId != null && !competenciaTipoId.isEmpty()) {
                 CompetenceType compT = competenciaTipoService.findFirstById(competenciaTipoId);
                 if(compT == null) {
                     throw new RecomendacaoInvalidaException("Competencia não encontrada.");
@@ -138,21 +131,16 @@ public class RecomendacaoController {
 
             recomendacaoService.update(recommendation);
 
-            resposta.message = "Recomendacao atualizada";
-            resposta.success = true;
-            return resposta;
+            response.message = "Recomendacao atualizada";
+            response.success = true;
 
-        } catch (Exception e) {
-            resposta.message = e.getMessage();
-            return resposta;
-        }
+        });
     }
 
     @PostMapping(value = "/recomendacao/remover", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response remove(@RequestBody Map<String, Object> body) {
-        Response resposta = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             String id = (String)body.get("id");
             if(id == null) {
@@ -170,21 +158,16 @@ public class RecomendacaoController {
 
             recomendacaoService.delete(recommendation);
 
-            resposta.message = "Recomendação removida.";
-            resposta.success = true;
-            return resposta;
+            response.message = "Recomendação removida.";
+            response.success = true;
 
-        } catch (Exception e) {
-            resposta.message = e.getMessage();
-            return resposta;
-        }
+        });
     }
 
     @PostMapping(value = "/recomendacao/obter", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response get(@RequestBody Map<String, Object> body) {
-        Response resposta = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             String id = (String)body.get("id");
             if(id == null) {
@@ -196,33 +179,22 @@ public class RecomendacaoController {
                 throw new GroupException("Recomendação não encontrada.");
             }
 
-            resposta.body.put("recomendacao", recommendation);
+            response.body.put("recomendacao", recommendation);
+            response.success = true;
 
-            resposta.success = true;
-            return resposta;
-
-        } catch (Exception e) {
-            resposta.message = e.getMessage();
-            return resposta;
-        }
+        });
     }
 
     @PostMapping(value = "/recomendacao/listar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response getlist(@RequestBody Map<String, Object> body) {
-        Response resposta = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             List<Recommendation> recs = recomendacaoService.findAll();
 
-            resposta.body.put("lista", recs);
+            response.body.put("lista", recs);
+            response.success = true;
 
-            resposta.success = true;
-            return resposta;
-
-        } catch (Exception e) {
-            resposta.message = e.getMessage();
-            return resposta;
-        }
+        });
     }
 }

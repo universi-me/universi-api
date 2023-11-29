@@ -61,9 +61,8 @@ public class InstitutionService {
     }
 
     public Response create(Map<String, Object> body) {
-        Response response = new Response();
+        return Response.buildResponse(response -> {
 
-        try {
             String name = (String) body.get("name");
             if(name.isBlank() || name.isEmpty()){
                 throw new InstantiationException("Parametro name passado é nulo ou vazio");
@@ -79,17 +78,13 @@ public class InstitutionService {
 
             response.message = "Institution criada.";
             response.success = true;
-            return response;
 
-        }catch (Exception e){
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
     public Response get(Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
+
             String id = (String)body.get("InstitutionId");
 
             if(id.isEmpty()) {
@@ -99,36 +94,25 @@ public class InstitutionService {
             Institution institution = findById(UUID.fromString(id)).get();
 
             response.body.put("institution", institution);
-
             response.success = true;
-            return response;
-        }catch (Exception e){
-            response.message = e.getMessage();
-            return response;
-        }
+
+        });
     }
 
     public Response findAll(Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             List<Institution> institutions = institutionRepository.findAll();
 
             response.body.put("lista", institutions);
 
-            response.message = "Operação realizada com exito.";
             response.success = true;
-            return response;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
     public Response remove(Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             String id = (String)body.get("institutionId");
             if(id.isEmpty()) {
@@ -139,12 +123,8 @@ public class InstitutionService {
 
             response.message = "institution removida logicamente";
             response.success = true;
-            return response;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
 }

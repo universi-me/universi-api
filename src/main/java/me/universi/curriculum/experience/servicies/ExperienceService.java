@@ -90,9 +90,7 @@ public class ExperienceService {
     }
 
     public Response create(Map<String, Object> body) {
-        Response response = new Response();
-
-        try {
+        return Response.buildResponse(response -> {
 
             User user = userService.getUserInSession();
             String dateFormat = "yyyy-MM-dd";
@@ -143,18 +141,13 @@ public class ExperienceService {
 
             response.message = "Experiencia criada.";
             response.success = true;
-            return response;
 
-        }catch (Exception e){
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
 
     public Response update(Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             String dateFormat = "yyyy-MM-dd";
             SimpleDateFormat  simpleDateFormat = new SimpleDateFormat(dateFormat);
@@ -206,19 +199,13 @@ public class ExperienceService {
 
             response.message = "Experience atualizada";
             response.success = true;
-            return response;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            e.printStackTrace();
-            return response;
-        }
+        });
     }
 
 
     public Response remove(Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             String id = (String)body.get("profileExperienceId");
             if(id == null) {
@@ -234,17 +221,12 @@ public class ExperienceService {
 
             response.message = "profileExperience removida logicamente";
             response.success = true;
-            return response;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
     public Response get(Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             String id = (String)body.get("profileExperienceId");
             if(id == null) {
@@ -257,31 +239,19 @@ public class ExperienceService {
             }
 
             response.body.put("profileExperience", experience);
-
             response.success = true;
-            return response;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 
     public Response findAll(Map<String, Object> body) {
-        Response response = new Response();
-        try {
+        return Response.buildResponse(response -> {
 
             List<Experience> experiences = findAll();
 
             response.body.put("lista", experiences);
-
-            response.message = "Operação realizada com exito.";
             response.success = true;
-            return response;
 
-        } catch (Exception e) {
-            response.message = e.getMessage();
-            return response;
-        }
+        });
     }
 }
