@@ -643,17 +643,25 @@ public class GroupService {
     }
 
     public boolean addFeature(Group group, String name, String description, Boolean enabled) {
-        if(group == null || name == null || name.isEmpty()) {
+        if(group == null) {
             return false;
+        }
+        if(name == null || name.isEmpty()) {
+            throw new GroupException("Nome da feature está vazio.");
         }
         GroupSettings groupSettings = group.getGroupSettings();
         if(groupSettings == null) {
             return false;
         }
+        if(groupFeaturesRepository.existsByGroupSettingsIdAndName(groupSettings.getId(), name)) {
+            throw new GroupException("Feature já existe.");
+        }
         GroupFeatures groupFeature = new GroupFeatures();
         groupFeature.groupSettings = groupSettings;
-        groupFeature.name = name;
-        groupFeature.description = description;
+        groupFeature.name = name.trim();
+        if(description != null) {
+            groupFeature.description = description;
+        }
         if(enabled != null) {
             groupFeature.enabled = enabled;
         }

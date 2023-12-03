@@ -12,6 +12,8 @@ import java.util.UUID;
 public interface GroupFeaturesRepository extends JpaRepository<GroupFeatures, UUID> {
     Optional<GroupFeatures> findFirstById(UUID id);
 
+    boolean existsByGroupSettingsIdAndName(UUID groupSettingsId, String name);
+
     boolean existsByGroupSettingsIdAndId(UUID groupSettingsId, UUID id);
 
     GroupFeatures findFirstByGroupSettingsIdAndId(UUID groupSettingsId, UUID id);
