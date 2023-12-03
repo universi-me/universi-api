@@ -37,8 +37,8 @@ public class GroupSettings implements Serializable {
     public GroupTheme theme;
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
-    @OneToOne(mappedBy = "groupSettings", fetch = FetchType.EAGER)
-    public GroupFeatures features;
+    @OneToMany(mappedBy = "groupSettings", fetch = FetchType.EAGER)
+    public Collection<GroupFeatures> features;
 
     @JsonIgnore
     @Column(name = "deleted")
