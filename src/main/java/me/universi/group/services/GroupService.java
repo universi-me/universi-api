@@ -4,10 +4,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import me.universi.Sys;
 import me.universi.group.entities.*;
-import me.universi.group.entities.GroupSettings.GroupEmailFilter;
-import me.universi.group.entities.GroupSettings.GroupFeatures;
-import me.universi.group.entities.GroupSettings.GroupSettings;
-import me.universi.group.entities.GroupSettings.GroupTheme;
+import me.universi.group.entities.GroupSettings.*;
 import me.universi.group.enums.GroupEmailFilterType;
 import me.universi.group.exceptions.GroupException;
 import me.universi.group.repositories.*;
@@ -15,7 +12,6 @@ import me.universi.profile.entities.Profile;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import me.universi.util.ConvertUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -24,27 +20,32 @@ import java.util.function.Predicate;
 
 @Service
 public class GroupService {
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private GroupRepository groupRepository;
-    @Autowired
-    private ProfileGroupRepository profileGroupRepository;
-    @Autowired
-    private SubgroupRepository subgroupRepository;
-    @Autowired
-    private GroupSettingsRepository groupSettingsRepository;
-    @Autowired
-    private GroupEmailFilterRepository groupEmailFilterRepository;
-    @Autowired
-    private GroupThemeRepository groupThemeRepository;
-    @Autowired
-    private GroupFeaturesRepository groupFeaturesRepository;
-    @Autowired
-    private GroupAdminRepository groupAdminRepository;
+    private final UserService userService;
+    private final GroupRepository groupRepository;
+    private final ProfileGroupRepository profileGroupRepository;
+    private final SubgroupRepository subgroupRepository;
+    private final GroupSettingsRepository groupSettingsRepository;
+    private final GroupEmailFilterRepository groupEmailFilterRepository;
+    private final GroupThemeRepository groupThemeRepository;
+    private final GroupFeaturesRepository groupFeaturesRepository;
+    private final GroupAdminRepository groupAdminRepository;
+    private final GroupEnvironmentRepository groupEnvironmentRepository;
 
     @Value("${LOCAL_ORGANIZATION_ID}")
     private String localOrganizationId;
+
+    public GroupService(UserService userService, GroupRepository groupRepository, ProfileGroupRepository profileGroupRepository, SubgroupRepository subgroupRepository, GroupSettingsRepository groupSettingsRepository, GroupEmailFilterRepository groupEmailFilterRepository, GroupThemeRepository groupThemeRepository, GroupFeaturesRepository groupFeaturesRepository, GroupAdminRepository groupAdminRepository, GroupEnvironmentRepository groupEnvironmentRepository) {
+        this.userService = userService;
+        this.groupRepository = groupRepository;
+        this.profileGroupRepository = profileGroupRepository;
+        this.subgroupRepository = subgroupRepository;
+        this.groupSettingsRepository = groupSettingsRepository;
+        this.groupEmailFilterRepository = groupEmailFilterRepository;
+        this.groupThemeRepository = groupThemeRepository;
+        this.groupFeaturesRepository = groupFeaturesRepository;
+        this.groupAdminRepository = groupAdminRepository;
+        this.groupEnvironmentRepository = groupEnvironmentRepository;
+    }
 
 
     public static GroupService getInstance() {
@@ -745,5 +746,71 @@ public class GroupService {
             return true;
         }
         return false;
+    }
+
+    // edit group environment
+    public boolean editEnvironment(Group group, Boolean signup_enabled, Boolean signup_confirm_account_enabled, Boolean login_google_enabled, String google_client_id, Boolean recaptcha_enabled, String recaptcha_api_key, String recaptcha_api_project_id, String recaptcha_site_key) {
+        if(group == null) {
+            return false;
+        }
+        if(!group.isRootGroup()) {
+            throw new GroupException("Este grupo não é uma organização.");
+        }
+        GroupSettings groupSettings = group.getGroupSettings();
+        if(groupSettings == null) {
+            return false;
+        }
+        GroupEnvironment groupEnvironment = groupSettings.environment;
+        if(groupEnvironment == null) {
+            groupEnvironment = new GroupEnvironment();
+            groupEnvironment.groupSettings = groupSettings;
+            groupEnvironment = groupEnvironmentRepository.save(groupEnvironment);
+        }
+        if(signup_enabled != null) {
+            groupEnvironment.signup_enabled = signup_enabled;
+        }
+        if(signup_confirm_account_enabled != null) {
+            groupEnvironment.signup_confirm_account_enabled = signup_confirm_account_enabled;
+        }
+        if(login_google_enabled != null) {
+            groupEnvironment.login_google_enabled = login_google_enabled;
+        }
+        if(google_client_id != null) {
+            groupEnvironment.google_client_id = google_client_id.isEmpty() ? null : google_client_id;
+        }
+        if(recaptcha_enabled != null) {
+            groupEnvironment.recaptcha_enabled = recaptcha_enabled;
+        }
+        if(recaptcha_api_key != null) {
+            groupEnvironment.recaptcha_api_key = recaptcha_api_key.isEmpty() ? null : recaptcha_api_key;
+        }
+        if(recaptcha_api_project_id != null) {
+            groupEnvironment.recaptcha_api_project_id = recaptcha_api_project_id.isEmpty() ? null : recaptcha_api_project_id;
+        }
+        if(recaptcha_site_key != null) {
+            groupEnvironment.recaptcha_site_key = recaptcha_site_key.isEmpty() ? null : recaptcha_site_key;
+        }
+        groupEnvironmentRepository.save(groupEnvironment);
+        return true;
+    }
+
+    public GroupEnvironment getGroupEnvironment(Group group) {
+        if(group == null) {
+            return null;
+        }
+        GroupSettings groupSettings = group.getGroupSettings();
+        if(groupSettings == null) {
+            return null;
+        }
+        GroupEnvironment groupEnvironment = groupSettings.environment;
+        if(groupEnvironment == null) {
+            return null;
+        }
+        return groupEnvironment;
+    }
+
+    // get organization environment
+    public GroupEnvironment getOrganizationEnvironment() {
+        return getGroupEnvironment(getOrganizationBasedInDomainIfExist());
     }
 }
