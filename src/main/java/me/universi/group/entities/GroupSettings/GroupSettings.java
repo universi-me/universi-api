@@ -36,6 +36,10 @@ public class GroupSettings implements Serializable {
     @OneToOne(mappedBy = "groupSettings", fetch = FetchType.EAGER)
     public GroupTheme theme;
 
+    @JsonIgnoreProperties(value = { "signup_confirm_account_enabled", "recaptcha_api_key", "recaptcha_api_project_id", })
+    @OneToOne(mappedBy = "groupSettings", fetch = FetchType.EAGER)
+    public GroupEnvironment environment;
+
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
     @OneToMany(mappedBy = "groupSettings", fetch = FetchType.EAGER)
     public Collection<GroupFeatures> features;

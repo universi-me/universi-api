@@ -11,6 +11,7 @@ import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 import me.universi.Sys;
 import me.universi.group.entities.Group;
+import me.universi.group.entities.GroupSettings.GroupEnvironment;
 import me.universi.group.services.GroupService;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.exceptions.ProfileException;
@@ -594,6 +595,30 @@ public class UserService implements UserDetailsService {
         sendSystemEmailToUser(user, subject, text);
     }
 
+    public String getRecaptchaApiKey() {
+        GroupEnvironment envG = GroupService.getInstance().getOrganizationEnvironment();
+        if(envG != null) {
+            return envG.recaptcha_api_key;
+        }
+        return recaptchaApiKey;
+    }
+
+    public String getRecaptchaApiProjectId() {
+        GroupEnvironment envG = GroupService.getInstance().getOrganizationEnvironment();
+        if(envG != null) {
+            return envG.recaptcha_api_project_id;
+        }
+        return recaptchaApiProjectId;
+    }
+
+    public String getRecaptchaSiteKey() {
+        GroupEnvironment envG = GroupService.getInstance().getOrganizationEnvironment();
+        if(envG != null) {
+            return envG.recaptcha_site_key;
+        }
+        return recaptchaSiteKey;
+    }
+
     public void checkRecaptchaWithToken(Object gToken) {
         if(isCaptchaEnabled()) {
 
@@ -603,12 +628,12 @@ public class UserService implements UserDetailsService {
                 throw new UserException("Recaptcha Requerido.");
             }
 
-            String url = "https://recaptchaenterprise.googleapis.com/v1/projects/"+ recaptchaApiProjectId +"/assessments?key=" + recaptchaApiKey;
+            String url = "https://recaptchaenterprise.googleapis.com/v1/projects/"+ getRecaptchaApiProjectId() +"/assessments?key=" + getRecaptchaApiKey();
 
             HashMap<String, Object> post = new HashMap<>();
             HashMap<String, Object> event = new HashMap<>();
             event.put("token", recaptchaResponse);
-            event.put("siteKey", recaptchaSiteKey);
+            event.put("siteKey", getRecaptchaSiteKey());
             event.put("expectedAction", "SUBMIT");
             post.put("event", event);
 
@@ -634,18 +659,34 @@ public class UserService implements UserDetailsService {
     }
 
     public boolean isConfirmAccountEnabled() {
+        GroupEnvironment envG = GroupService.getInstance().getOrganizationEnvironment();
+        if(envG != null) {
+            return envG.signup_confirm_account_enabled;
+        }
         return signupConfirmationEnabled;
     }
 
     public boolean isSignupEnabled() {
+        GroupEnvironment envG = GroupService.getInstance().getOrganizationEnvironment();
+        if(envG != null) {
+            return envG.signup_enabled;
+        }
         return signupEnabled;
     }
 
     public boolean isLoginViaGoogleEnabled() {
+        GroupEnvironment envG = GroupService.getInstance().getOrganizationEnvironment();
+        if(envG != null) {
+            return envG.login_google_enabled;
+        }
         return loginGoogleEnabled;
     }
 
     public boolean isCaptchaEnabled() {
+        GroupEnvironment envG = GroupService.getInstance().getOrganizationEnvironment();
+        if(envG != null) {
+            return envG.recaptcha_enabled;
+        }
         return captchaEnabled;
     }
 
@@ -654,6 +695,10 @@ public class UserService implements UserDetailsService {
     }
 
     public String getGoogleClientId() {
+        GroupEnvironment envG = GroupService.getInstance().getOrganizationEnvironment();
+        if(envG != null) {
+            return envG.google_client_id;
+        }
         return googleClientId;
     }
 
