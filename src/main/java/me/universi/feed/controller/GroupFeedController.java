@@ -11,11 +11,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/feed/groups")
+@RequestMapping("/api/feed/groups")
 public class GroupFeedController {
 
-    @Autowired
-    private GroupFeedService groupFeedService;
+    private final GroupFeedService groupFeedService;
+
+    public GroupFeedController(GroupFeedService groupFeedService) {
+        this.groupFeedService = groupFeedService;
+    }
 
     @GetMapping("/{groupId}/posts")
     public ResponseEntity<List<GroupPost>> getGroupPosts(@PathVariable String groupId) {

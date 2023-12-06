@@ -35,7 +35,10 @@ database:
     url: ${API_DB_FLY_URL:${database.url}}
     username: ${API_DB_FLY_USER:${database.username}}
     password: ${API_DB_FLY_PASS:${database.password}}
-
+  mongo:
+    host: ${API_DB_MONGO_HOST:${database.domain}}
+    port: ${API_DB_MONGO_PORT:27017}
+    database: ${API_DB_MONGO_NAME:${database.name}}
 
 # SERVER
 server:
@@ -149,6 +152,12 @@ spring:
     activate:
       on-profile: dev
 
+  # MongoDB
+  data:
+    mongodb:
+      host: ${database.mongo.host}
+      port: ${database.mongo.port}
+      database: ${database.mongo.database}
   # POSTGRES
   datasource:
     url: ${database.url}
@@ -191,6 +200,12 @@ spring:
     resources:
       cache:
         period: 3600
+  # MongoDB
+  data:
+    mongodb:
+      host: ${database.mongo.host}
+      port: ${database.mongo.port}
+      database: ${database.mongo.database}
   # POSTGRES
   datasource:
     url: ${database.url}
