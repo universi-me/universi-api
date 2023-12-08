@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
 import me.universi.capacity.entidades.ContentStatus;
+import me.universi.capacity.entidades.Folder;
 import me.universi.competence.entities.Competence;
 import me.universi.curriculum.education.entities.Education;
 import me.universi.curriculum.experience.entities.Experience;
@@ -111,13 +112,18 @@ public class Profile implements Serializable {
     @Column(name = "deleted")
     private boolean deleted = Boolean.FALSE;
 
-    public Profile(UUID id, User user, String bio, Collection<Competence> competences, Collection<ProfileGroup> groups, Collection<Link> links) {
+    @JsonIgnore
+    @ManyToMany(mappedBy = "assignedUsers", cascade = CascadeType.ALL)
+    private Collection<Folder> assignedFolders;
+
+    public Profile(UUID id, User user, String bio, Collection<Competence> competences, Collection<ProfileGroup> groups, Collection<Link> links, Collection<Folder> assignedFolders) {
         this.id = id;
         this.user = user;
         this.bio = bio;
         this.competences = competences;
         this.groups = groups;
         this.links = links;
+        this.assignedFolders = assignedFolders;
     }
 
     public Profile(){
@@ -263,6 +269,18 @@ public class Profile implements Serializable {
     public boolean isDeleted() { return deleted; }
 
     public void setDeleted(boolean deleted) { this.deleted = deleted; }
+
+    public Collection<Folder> getAssignedFolders() {
+        return assignedFolders;
+    }
+
+    public void setAssignedFolders(Collection<Folder> assignedFolders) {
+        this.assignedFolders = assignedFolders;
+    }
+
+    public void addAssignedFolder(Folder folder){
+        this.assignedFolders.add(folder);
+    }
 
     @Override
     public String toString() {

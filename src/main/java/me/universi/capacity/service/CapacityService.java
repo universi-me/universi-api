@@ -501,4 +501,24 @@ public class CapacityService implements CapacityServiceInterface {
             foldersFromGroups.stream()
         ).distinct().toList();
     }
+
+    public Collection<Folder> assignFolderToProfile(UUID profileId, Folder folder){
+        if(profileService.findFirstById(profileId) == null)
+            return null;
+        Profile profile = profileService.findFirstById((profileId));
+        for(Folder f : profile.getAssignedFolders()){
+            if(f.getId().equals(folder.getId()))
+                return null;
+        }
+        folder.addAssignedUser(profile);;
+        folderRepository.save(folder);
+        return profile.getAssignedFolders();
+    }
+
+    public void assignFolderToMultipleProfiles(Collection<String> profileIds, Folder folder){
+        for(String profileId : profileIds){
+            assignFolderToProfile(UUID.fromString(profileId), folder);
+        }
+    }
+
 }

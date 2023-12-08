@@ -200,6 +200,10 @@ public class Folder implements Serializable {
         this.assignedUsers = assignedUsers;
     }
 
+    public void addAssignedUser(Profile profile){
+        this.assignedUsers.add(profile);
+    }
+
     public boolean isDeleted() {
         return deleted;
     }

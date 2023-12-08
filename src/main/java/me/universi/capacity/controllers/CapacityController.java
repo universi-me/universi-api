@@ -1,6 +1,7 @@
 package me.universi.capacity.controllers;
 
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
 
@@ -766,6 +767,45 @@ public class CapacityController {
 
             response.body.put("contentStatus", contentStatus);
             response.message = "Status do conteúdo atualizado com sucesso.";
+        });
+    }
+
+    @PostMapping(value = "/folder/assign", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response assign_folder(@RequestBody Map<String, Object> body){
+
+        return Response.buildResponse( response -> {
+            Object profilesIds = body.get("profilesIds");
+            Object folderId = body.get("folderId");
+
+            if (profilesIds == null || String.valueOf(profilesIds).isEmpty())
+                throw new CapacityException("profilesIds é inválido.");
+            if (folderId == null || String.valueOf(folderId).isEmpty())
+                throw new CapacityException("folderId é inválido.");
+
+            Folder folder = capacityService.findFolderById(String.valueOf(folderId));
+            if (folder == null)
+                throw new CapacityException("folderId é inválido");
+
+            if (profilesIds instanceof Collection) {
+                capacityService.assignFolderToMultipleProfiles((Collection<String>) profilesIds, folder);
+            } else {
+                capacityService.assignFolderToProfile(UUID.fromString(String.valueOf(profilesIds)) , folder);
+            }
+        });
+    }
+
+    @GetMapping(value = "/folder/assigned", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response users_assigned_to_folder(@RequestBody Map<String, Object> body){
+        return Response.buildResponse(response -> {
+
+            Object folderId = body.get("folderId");
+
+            if(folderId == null || String.valueOf(folderId).isEmpty() || capacityService.findFolderById((UUID.fromString(String.valueOf(folderId)))) == null)
+                throw new CapacityException("folderId é inválido.");
+
+           response.body.put("profilesIds", capacityService.findFolderById((UUID.fromString(String.valueOf(folderId)))).getAssignedUsers());
         });
     }
 
