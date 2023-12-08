@@ -1,13 +1,17 @@
 package me.universi.feed.controller;
 
+import me.universi.api.entities.Response;
+import me.universi.feed.dto.GroupGetDTO;
 import me.universi.feed.dto.GroupPostDTO;
 import me.universi.feed.entities.GroupPost;
 import me.universi.feed.services.GroupFeedService;
+import me.universi.profile.services.ProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -15,21 +19,32 @@ import java.util.List;
 public class GroupFeedController {
 
     private final GroupFeedService groupFeedService;
+    @Autowired
+    private ProfileService profileService;
 
     public GroupFeedController(GroupFeedService groupFeedService) {
         this.groupFeedService = groupFeedService;
     }
 
     @GetMapping("/{groupId}/posts")
-    public ResponseEntity<List<GroupPost>> getGroupPosts(@PathVariable String groupId) {
-        List<GroupPost> groupPosts = groupFeedService.getGroupPosts(groupId);
-        return ResponseEntity.ok(groupPosts);
+    public Response getGroupPosts(@PathVariable String groupId) {
+        return Response.buildResponse(response -> {
+            List<GroupPost> groupPosts = groupFeedService.getGroupPosts(groupId);
+            List<GroupGetDTO> groupGetDTOS = new ArrayList<>();
+            for(GroupPost post : groupPosts){
+                groupGetDTOS.add(new GroupGetDTO(post.getContent(), profileService.findFirstById(post.getAuthorId())));
+            }
+            response.body.put("posts", groupGetDTOS);
+        });
     }
 
     @PostMapping("/{groupId}/posts")
-    public ResponseEntity<GroupPost> createGroupPost(@PathVariable String groupId, @RequestBody GroupPostDTO groupPostDTO) {
-        GroupPost createdPost = groupFeedService.createGroupPost(groupId, groupPostDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdPost);
+    public Response createGroupPost(@PathVariable String groupId, @RequestBody GroupPostDTO groupPostDTO) {
+        return Response.buildResponse(response ->{
+            GroupPost createdPost = groupFeedService.createGroupPost(groupId, groupPostDTO);
+            response.body.put("createdPost", createdPost);
+            response.message = "Post criado com sucesso";
+        });
     }
 
     @DeleteMapping("/{groupId}/posts/{postId}")

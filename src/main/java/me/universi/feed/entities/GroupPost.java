@@ -3,6 +3,7 @@ package me.universi.feed.entities;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+
 @Document(collection = "group_posts")
 public class GroupPost {
 
@@ -10,13 +11,15 @@ public class GroupPost {
     private String id;
     private String groupId;
     private String content;
+    private String authorId;
 
     public GroupPost() {
     }
 
-    public GroupPost(String groupId, String content) {
+    public GroupPost(String groupId, String content, String author) {
         this.groupId = groupId;
         this.content = content;
+        this.authorId = author;
     }
     public String getId() {
         return id;
@@ -40,5 +43,13 @@ public class GroupPost {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public String getAuthorId() {
+        return authorId;
+    }
+
+    public void setAuthorId(String authorId) {
+        this.authorId = authorId;
     }
 }

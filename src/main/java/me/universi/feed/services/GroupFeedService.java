@@ -27,7 +27,7 @@ public class GroupFeedService {
     }
 
     public GroupPost createGroupPost(String groupId, GroupPostDTO groupPostDTO) {
-        GroupPost groupPost = new GroupPost(groupId, groupPostDTO.getContent());
+        GroupPost groupPost = new GroupPost(groupId, groupPostDTO.getContent(), groupPostDTO.getAuthorId());
         return groupPostRepository.save(groupPost);
     }
 
