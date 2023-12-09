@@ -16,8 +16,8 @@ services:
             - universi-me-db
             - universi-me-mongo
         environment:
-            API_DB_URL: jdbc:postgresql://universi-me-db:5432/${API_DB_NAME}
-            API_DB_MONGO_URI: mongodb://universi-me-mongo:27017/
+            API_DB_DOMAIN: universi-me-db
+            API_DB_MONGO_HOST: universi-me-mongo
         env_file:
             - .env
 
