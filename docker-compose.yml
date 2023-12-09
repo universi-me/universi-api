@@ -14,8 +14,10 @@ services:
             - universi-me-login-session:/var/lib/login-sesion/data
         depends_on:
             - universi-me-db
+            - universi-me-mongo
         environment:
             API_DB_URL: jdbc:postgresql://universi-me-db:5432/${API_DB_NAME}
+            API_DB_MONGO_URI: mongodb://universi-me-mongo:27017/
         env_file:
             - .env
 
@@ -34,6 +36,19 @@ services:
             POSTGRES_PASSWORD: ${API_DB_PASS}
             POSTGRES_DB: ${API_DB_NAME}
             PGDATA: /var/lib/postgresql/data
+        env_file:
+            - .env
+
+    universi-me-mongo:
+        container_name: universi-me-mongo
+        image: mongo:latest
+        restart: unless-stopped
+        networks:
+            - universi-me-network
+        ports:
+            - "27017:27017"
+        volumes:
+            - universi-me-mongo-data:/data/db
         env_file:
             - .env
 
@@ -62,6 +77,8 @@ volumes:
     universi-me-postgres:
         driver: local
     universi-me-login-session:
+        driver: local
+    universi-me-mongo-data:
         driver: local
 
 networks:
