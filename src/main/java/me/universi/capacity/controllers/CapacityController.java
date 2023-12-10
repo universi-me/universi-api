@@ -807,7 +807,7 @@ public class CapacityController {
             if(folderId == null || String.valueOf(folderId).isEmpty() || capacityService.findFolderById((UUID.fromString(String.valueOf(folderId)))) == null)
                 throw new CapacityException("folderId é inválido.");
 
-           response.body.put("profilesIds", capacityService.findFolderById((UUID.fromString(String.valueOf(folderId)))).getAssignedUsers());
+           response.body.put("profilesIds", capacityService.findAssignedProfilesByFolder((UUID.fromString(String.valueOf(folderId)))));
         });
     }
 

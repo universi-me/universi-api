@@ -486,8 +486,21 @@ public class CapacityService implements CapacityServiceInterface {
         return folders;
     }
 
+    // find profiles assigned to a folder
+    public Collection<Profile> findAssignedProfilesByFolder(UUID folderId) {
+        List<FolderProfile> assignedProfiles = folderProfileRepository.findByFolderIdAndAssigned(folderId, true);
+
+        List<Profile> profiles = assignedProfiles.stream()
+                .sorted(Comparator.comparing(FolderProfile::getCreated).reversed())
+                .map(FolderProfile::getProfile)
+                .filter(Objects::nonNull)
+                .toList();
+
+        return profiles;
+    }
+
     // assign one folder to a profile
-    public Collection<Folder> assignFolderToProfile(UUID profileId, Folder folder) {
+    public void assignFolderToProfile(UUID profileId, Folder folder) {
         Profile profile = profileService.findFirstById(profileId);
         if(profile == null) {
             throw new CapacityException("Perfil não encontrado.");
@@ -495,13 +508,15 @@ public class CapacityService implements CapacityServiceInterface {
         if(folder == null) {
             throw new CapacityException("Pasta não encontrada.");
         }
+        if(folderProfileRepository.existByFolderIdAndProfileId(folder.getId(), profileId)) {
+            throw new CapacityException("Pasta já atribuida ao perfil.");
+        }
         FolderProfile folderProfile = new FolderProfile();
         folderProfile.setAuthor(UserService.getInstance().getUserInSession().getProfile());
         folderProfile.setFolder(folder);
         folderProfile.setProfile(profile);
         folderProfile.setAssigned(true);
         folderProfileRepository.save(folderProfile);
-        return findFoldersByProfile(profileId);
     }
 
     public void assignFolderToMultipleProfiles(Collection<String> profileIds, Folder folder) {
