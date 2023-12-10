@@ -8,6 +8,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import me.universi.capacity.entidades.ContentStatus;
 import me.universi.capacity.entidades.Folder;
+import me.universi.capacity.entidades.FolderProfile;
 import me.universi.competence.entities.Competence;
 import me.universi.curriculum.education.entities.Education;
 import me.universi.curriculum.experience.entities.Experience;
@@ -113,10 +114,10 @@ public class Profile implements Serializable {
     private boolean deleted = Boolean.FALSE;
 
     @JsonIgnore
-    @ManyToMany(mappedBy = "assignedUsers", cascade = CascadeType.ALL)
-    private Collection<Folder> assignedFolders;
+    @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL)
+    private Collection<FolderProfile> assignedFolders;
 
-    public Profile(UUID id, User user, String bio, Collection<Competence> competences, Collection<ProfileGroup> groups, Collection<Link> links, Collection<Folder> assignedFolders) {
+    public Profile(UUID id, User user, String bio, Collection<Competence> competences, Collection<ProfileGroup> groups, Collection<Link> links, Collection<FolderProfile> assignedFolders) {
         this.id = id;
         this.user = user;
         this.bio = bio;
@@ -270,16 +271,12 @@ public class Profile implements Serializable {
 
     public void setDeleted(boolean deleted) { this.deleted = deleted; }
 
-    public Collection<Folder> getAssignedFolders() {
+    public Collection<FolderProfile> getAssignedFolders() {
         return assignedFolders;
     }
 
-    public void setAssignedFolders(Collection<Folder> assignedFolders) {
+    public void setAssignedFolders(Collection<FolderProfile> assignedFolders) {
         this.assignedFolders = assignedFolders;
-    }
-
-    public void addAssignedFolder(Folder folder){
-        this.assignedFolders.add(folder);
     }
 
     @Override

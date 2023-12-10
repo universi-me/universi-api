@@ -770,6 +770,7 @@ public class CapacityController {
         });
     }
 
+    // assign folder to profile or profiles
     @PostMapping(value = "/folder/assign", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response assign_folder(@RequestBody Map<String, Object> body){
@@ -795,6 +796,7 @@ public class CapacityController {
         });
     }
 
+    // assigned profiles to folder
     @GetMapping(value = "/folder/assigned", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response users_assigned_to_folder(@RequestBody Map<String, Object> body){

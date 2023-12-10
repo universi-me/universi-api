@@ -79,15 +79,9 @@ public class Folder implements Serializable {
     @NotNull
     private Group ownerGroup;
 
-    @ManyToMany(cascade = CascadeType.ALL)
-    @JoinTable(
-        name = "users_folders",
-        joinColumns = @JoinColumn(name = "folder_id"),
-        inverseJoinColumns = @JoinColumn(name = "profile_id"),
-        uniqueConstraints = { @UniqueConstraint(columnNames = {"folder_id", "profile_id"}) }
-    )
+    @OneToMany(mappedBy = "folder")
     @JsonIgnore
-    private Collection<Profile> assignedUsers;
+    private Collection<FolderProfile> assignedUsers;
 
     @JsonIgnore
     @Column(name = "deleted")
@@ -192,16 +186,12 @@ public class Folder implements Serializable {
         this.ownerGroup = ownerGroup;
     }
 
-    public Collection<Profile> getAssignedUsers() {
+    public Collection<FolderProfile> getAssignedUsers() {
         return assignedUsers;
     }
 
-    public void setAssignedUsers(Collection<Profile> assignedUsers) {
+    public void setAssignedUsers(Collection<FolderProfile> assignedUsers) {
         this.assignedUsers = assignedUsers;
-    }
-
-    public void addAssignedUser(Profile profile){
-        this.assignedUsers.add(profile);
     }
 
     public boolean isDeleted() {
