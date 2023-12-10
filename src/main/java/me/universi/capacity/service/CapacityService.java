@@ -508,8 +508,8 @@ public class CapacityService implements CapacityServiceInterface {
         if(folder == null) {
             throw new CapacityException("Pasta não encontrada.");
         }
-        if(folderProfileRepository.existByFolderIdAndProfileId(folder.getId(), profileId)) {
-            throw new CapacityException("Pasta já atribuida ao perfil.");
+        if(folderProfileRepository.existsByFolderIdAndProfileId(folder.getId(), profileId)) {
+            throw new CapacityException("Pasta já foi atribuida ao perfil.");
         }
         FolderProfile folderProfile = new FolderProfile();
         folderProfile.setAuthor(UserService.getInstance().getUserInSession().getProfile());

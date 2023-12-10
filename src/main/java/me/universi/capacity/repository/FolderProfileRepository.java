@@ -11,7 +11,7 @@ public interface FolderProfileRepository extends JpaRepository<FolderProfile, UU
 
     List<FolderProfile> findByProfileIdAndAssigned(UUID profileId, boolean assigned);
 
-    boolean existByFolderIdAndProfileId(UUID folderId, UUID profileId);
+    boolean existsByFolderIdAndProfileId(UUID folderId, UUID profileId);
 
     List<FolderProfile> findByFolderIdAndAssigned(UUID folderId, boolean assigned);
 }
