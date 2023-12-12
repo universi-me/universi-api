@@ -39,9 +39,7 @@ database:
     name: ${API_DB_MONGO_NAME:${database.name}}
     host: ${API_DB_MONGO_HOST:${database.domain}}
     port: ${API_DB_MONGO_PORT:27017}
-    username: ${API_DB_MONGO_USER:admin}
-    password: ${API_DB_MONGO_PASS:password}
-    uri: ${API_DB_MONGO_URI:mongodb://${database.mongo.username}:${database.mongo.password}@${database.mongo.host}:${database.mongo.port}/${database.mongo.name}}
+    uri: ${API_DB_MONGO_URI:mongodb://${database.mongo.host}:${database.mongo.port}/${database.mongo.name}}
 
 # SERVER
 server:
@@ -159,11 +157,6 @@ spring:
   data:
     mongodb:
       uri: ${database.mongo.uri}
-      host: ${database.mongo.host}
-      port: ${database.mongo.port}
-      username: ${database.mongo.username}
-      password: ${database.mongo.password}
-      database: ${database.mongo.name}
   # POSTGRES
   datasource:
     url: ${database.url}
@@ -210,11 +203,6 @@ spring:
   data:
     mongodb:
       uri: ${database.mongo.uri}
-      host: ${database.mongo.host}
-      port: ${database.mongo.port}
-      username: ${database.mongo.username}
-      password: ${database.mongo.password}
-      database: ${database.mongo.name}
   # POSTGRES
   datasource:
     url: ${database.url}
