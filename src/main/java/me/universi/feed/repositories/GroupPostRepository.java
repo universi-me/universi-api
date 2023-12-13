@@ -7,4 +7,7 @@ import java.util.List;
 
 public interface GroupPostRepository extends MongoRepository<GroupPost, String> {
     Optional<List<GroupPost>> findByGroupId(String groupId);
+
+    Optional<List<GroupPost>> findByGroupIdAndDeletedIsFalse(String groupId);
+
 }

@@ -22,19 +22,20 @@ public class GroupFeedService {
     }
 
     public List<GroupPost> getGroupPosts(String groupId) {
-        Optional<List<GroupPost>> posts = groupPostRepository.findByGroupId(groupId);
+        Optional<List<GroupPost>> posts = groupPostRepository.findByGroupIdAndDeletedIsFalse(groupId);
         return posts.orElseThrow(() -> new PostNotFoundException("No posts found for the specified group."));
     }
 
     public GroupPost createGroupPost(String groupId, GroupPostDTO groupPostDTO) {
-        GroupPost groupPost = new GroupPost(groupId, groupPostDTO.getContent(), groupPostDTO.getAuthorId());
+        GroupPost groupPost = new GroupPost(groupId, groupPostDTO.getContent(), groupPostDTO.getAuthorId(), false);
         return groupPostRepository.save(groupPost);
     }
 
     public boolean deleteGroupPost(String groupId, String postId) {
         Optional<GroupPost> existingPost = groupPostRepository.findById(postId);
-        if (existingPost.isPresent() && existingPost.get().getGroupId().equals(groupId)) {
-            groupPostRepository.deleteById(postId);
+        if (existingPost.isPresent() && existingPost.get().getGroupId().equals(groupId) && !existingPost.get().isDeleted()) {
+            existingPost.get().setDeleted(true);
+            groupPostRepository.save(existingPost.get());
             return true;
         } else {
             throw new PostNotFoundException("Post not found or does not belong to the specified group.");

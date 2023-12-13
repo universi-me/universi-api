@@ -66,7 +66,9 @@ public class GroupDTO implements Serializable {
 
     public boolean publicGroup;
 
-    public GroupDTO(UUID id, String nickname, String name, String description, String image, Profile admin, Collection<Profile> participants, Collection<Group> subGroups, GroupType type, boolean rootGroup, boolean canCreateGroup, boolean canEnter, boolean canAddParticipant, Date createdAt, boolean publicGroup) {
+    public boolean everyoneCanPost;
+
+    public GroupDTO(UUID id, String nickname, String name, String description, String image, Profile admin, Collection<Profile> participants, Collection<Group> subGroups, GroupType type, boolean rootGroup, boolean canCreateGroup, boolean canEnter, boolean canAddParticipant, Date createdAt, boolean publicGroup, boolean everyoneCanPost) {
         this.id = id;
         this.nickname = nickname;
         this.name = name;
@@ -82,6 +84,7 @@ public class GroupDTO implements Serializable {
         this.canAddParticipant = canAddParticipant;
         this.createdAt = createdAt;
         this.publicGroup = publicGroup;
+        this.everyoneCanPost = everyoneCanPost;
     }
 
     public GroupDTO() {

@@ -32,7 +32,7 @@ public class GroupFeedController {
             List<GroupPost> groupPosts = groupFeedService.getGroupPosts(groupId);
             List<GroupGetDTO> groupGetDTOS = new ArrayList<>();
             for(GroupPost post : groupPosts){
-                groupGetDTOS.add(new GroupGetDTO(post.getContent(), profileService.findFirstById(post.getAuthorId())));
+                groupGetDTOS.add(new GroupGetDTO(post.getContent(), profileService.findFirstById(post.getAuthorId()), post.getId(), post.getGroupId()));
             }
             response.body.put("posts", groupGetDTOS);
         });
@@ -48,12 +48,14 @@ public class GroupFeedController {
     }
 
     @DeleteMapping("/{groupId}/posts/{postId}")
-    public ResponseEntity<String> deleteGroupPost(@PathVariable String groupId, @PathVariable String postId) {
-        boolean success = groupFeedService.deleteGroupPost(groupId, postId);
-        if (success) {
-            return ResponseEntity.ok("Group post deleted successfully.");
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Group post not found.");
-        }
+    public Response deleteGroupPost(@PathVariable String groupId, @PathVariable String postId) {
+        return Response.buildResponse(response-> {
+            boolean success = groupFeedService.deleteGroupPost(groupId, postId);
+            if (success) {
+                response.message = "Post excluído com sucesso";
+            } else {
+                response.message = "Houve um erro interno ao excluir o post";
+            }
+        });
     }
 }

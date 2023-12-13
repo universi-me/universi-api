@@ -12,11 +12,12 @@ public class GroupPost {
     private String groupId;
     private String content;
     private String authorId;
+    private boolean deleted;
 
     public GroupPost() {
     }
 
-    public GroupPost(String groupId, String content, String author) {
+    public GroupPost(String groupId, String content, String author, boolean deleted) {
         this.groupId = groupId;
         this.content = content;
         this.authorId = author;
@@ -51,5 +52,13 @@ public class GroupPost {
 
     public void setAuthorId(String authorId) {
         this.authorId = authorId;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 }
