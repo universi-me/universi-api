@@ -249,10 +249,14 @@ public class UserService implements UserDetailsService {
     }
 
     public void checkPasswordInSession(Object rawPassword) throws UserException {
+        User userSession = getUserInSession();
+        if(userSession.getPassword() == null || userSession.getPassword().isEmpty()) {
+            return;
+        }
         if(rawPassword == null || String.valueOf(rawPassword).isEmpty()) {
             throw new UserException("Requerido autenticar-se por senha!");
         }
-        checkPassword(getUserInSession(), String.valueOf(rawPassword));
+        checkPassword(userSession, String.valueOf(rawPassword));
     }
 
     public void save(User user) {
