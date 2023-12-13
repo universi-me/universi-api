@@ -280,6 +280,15 @@ public class User implements UserDetails, Serializable {
         return UserService.getInstance().userNeedAnProfile(this, false);
     }
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @Transient
+    public Boolean isHasPassword() {
+        if(!(getOwnerOfSession() || UserService.getInstance().isUserAdminSession())) {
+            return null;
+        }
+        return getPassword() != null && !getPassword().isEmpty();
+    }
+
     public boolean isDeleted() { return deleted; }
 
     public void setDeleted(boolean deleted) { this.deleted = deleted; }
