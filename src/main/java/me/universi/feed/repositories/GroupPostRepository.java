@@ -10,4 +10,5 @@ public interface GroupPostRepository extends MongoRepository<GroupPost, String> 
 
     Optional<List<GroupPost>> findByGroupIdAndDeletedIsFalse(String groupId);
 
+    Optional<GroupPost> findFirstById(String postId);
 }
