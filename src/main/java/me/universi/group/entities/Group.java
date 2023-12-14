@@ -131,10 +131,14 @@ public class Group implements Serializable {
     @Column(name = "enable_curriculum")
     private boolean enableCurriculum;
 
+    @NotNull
+    @Column(name = "everyone_can_post")
+    private boolean everyoneCanPost;
+
     public Group() {
     }
 
-    public Group(String nickname, String name, String description, Profile admin, Collection<ProfileGroup> participants, GroupType type, Collection<Subgroup> subGroups, boolean rootGroup, boolean canCreateGroup, boolean enableCurriculum) {
+    public Group(String nickname, String name, String description, Profile admin, Collection<ProfileGroup> participants, GroupType type, Collection<Subgroup> subGroups, boolean rootGroup, boolean canCreateGroup, boolean enableCurriculum, boolean everyoneCanPost) {
         this.nickname = nickname;
         this.name = name;
         this.description = description;
@@ -145,6 +149,7 @@ public class Group implements Serializable {
         this.rootGroup = rootGroup;
         this.canCreateGroup = canCreateGroup;
         this.enableCurriculum = enableCurriculum;
+        this.everyoneCanPost = everyoneCanPost;
     }
 
     public Group(String nickname, String name, String description, Profile admin, GroupType type, Date createdAt) {
@@ -350,5 +355,13 @@ public class Group implements Serializable {
 
     public void setHeaderImage(String headerImage) {
         this.headerImage = headerImage;
+    }
+
+    public boolean isEveryoneCanPost() {
+        return everyoneCanPost;
+    }
+
+    public void setEveryoneCanPost(boolean everyoneCanPost) {
+        this.everyoneCanPost = everyoneCanPost;
     }
 }

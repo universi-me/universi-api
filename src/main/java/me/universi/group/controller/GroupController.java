@@ -158,6 +158,7 @@ public class GroupController {
             Boolean canCreateGroup = (Boolean)body.get("canCreateGroup");
             Boolean publicGroup = (Boolean)body.get("publicGroup");
             Boolean canEnter = (Boolean)body.get("canEnter");
+            Boolean everyoneCanPost = (Boolean)body.get("everyoneCanPost");
 
             Group groupEdit = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
 
@@ -190,6 +191,9 @@ public class GroupController {
                 }
                 if(canEnter != null) {
                     groupEdit.setCanEnter(canEnter);
+                }
+                if(everyoneCanPost != null){
+                    groupEdit.setEveryoneCanPost(everyoneCanPost);
                 }
 
 

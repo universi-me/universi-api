@@ -1,0 +1,1 @@
+ALTER TABLE system_group ADD COLUMN everyone_can_post BOOLEAN DEFAULT FALSE;
