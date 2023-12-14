@@ -36,8 +36,8 @@ public class GroupFeedService {
     }
 
     public GroupPost getGroupPost(String groupId, String postId) {
-        Optional<GroupPost> existingPost = groupPostRepository.findFirstById(postId);
-        if (existingPost.isPresent() && existingPost.get().getGroupId().equals(groupId) && !existingPost.get().isDeleted()) {
+        Optional<GroupPost> existingPost = groupPostRepository.findFirstByGroupIdAndId(groupId, postId);
+        if (existingPost.isPresent() && !existingPost.get().isDeleted()) {
             return existingPost.get();
         } else {
             throw new PostNotFoundException("Post not found or does not belong to the specified group.");
