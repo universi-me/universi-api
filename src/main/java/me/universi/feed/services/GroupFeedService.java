@@ -31,6 +31,11 @@ public class GroupFeedService {
 
     public GroupPost createGroupPost(String groupId, GroupPostDTO groupPostDTO) {
         String authorId = String.valueOf(UserService.getInstance().getUserInSession().getProfile().getId());
+        if (groupPostDTO.getContent() == null || groupPostDTO.getContent().isEmpty()) {
+            throw new GroupFeedException("O conteúdo do post não pode estar vazio.");
+        } else if(groupPostDTO.getContent().length() > 3000) {
+            throw new GroupFeedException("O conteúdo do post não pode ter mais de 3000 caracteres.");
+        }
         GroupPost groupPost = new GroupPost(groupId, groupPostDTO.getContent(), authorId, false);
         return groupPostRepository.save(groupPost);
     }
@@ -59,6 +64,9 @@ public class GroupFeedService {
         checkPermissionForEdit(post);
 
         if(groupPostDTO.getContent() != null && !groupPostDTO.getContent().isEmpty()) {
+            if(groupPostDTO.getContent().length() > 3000) {
+                throw new GroupFeedException("O conteúdo do post não pode ter mais de 3000 caracteres.");
+            }
             post.setContent(groupPostDTO.getContent());
         }
 
