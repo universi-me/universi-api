@@ -1,22 +1,15 @@
 package me.universi.capacity.service;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.Objects;
 
 import me.universi.Sys;
-import me.universi.capacity.entidades.Content;
-import me.universi.capacity.entidades.Category;
-import me.universi.capacity.entidades.ContentStatus;
-import me.universi.capacity.entidades.Folder;
-import me.universi.capacity.repository.CategoryRepository;
-import me.universi.capacity.repository.FolderRepository;
-import me.universi.capacity.repository.ContentStatusRepository;
+import me.universi.capacity.entidades.*;
+import me.universi.capacity.repository.*;
 import me.universi.group.entities.Group;
 import me.universi.group.entities.ProfileGroup;
+import me.universi.group.entities.Subgroup;
 import me.universi.group.exceptions.GroupException;
 import me.universi.group.services.GroupService;
 import me.universi.profile.entities.Profile;
@@ -26,7 +19,6 @@ import me.universi.user.services.UserService;
 import org.springframework.stereotype.Service;
 
 import me.universi.capacity.exceptions.CapacityException;
-import me.universi.capacity.repository.ContentRepository;
 import me.universi.capacity.enums.ContentStatusType;
 
 
@@ -45,13 +37,16 @@ public class CapacityService implements CapacityServiceInterface {
 
     private final ProfileService profileService;
 
-    public CapacityService(GroupService groupService, ContentRepository contentRepository, CategoryRepository categoryRepository, FolderRepository folderRepository, ContentStatusRepository contentStatusRepository, ProfileService profileService) {
+    private final FolderProfileRepository folderProfileRepository;
+
+    public CapacityService(GroupService groupService, ContentRepository contentRepository, CategoryRepository categoryRepository, FolderRepository folderRepository, ContentStatusRepository contentStatusRepository, ProfileService profileService, FolderProfileRepository folderProfileRepository) {
         this.contentRepository = contentRepository;
         this.categoryRepository = categoryRepository;
         this.folderRepository = folderRepository;
         this.groupService = groupService;
         this.contentStatusRepository = contentStatusRepository;
         this.profileService = profileService;
+        this.folderProfileRepository = folderProfileRepository;
     }
 
     public static CapacityService getInstance() {
@@ -480,25 +475,54 @@ public class CapacityService implements CapacityServiceInterface {
     }
 
     public Collection<Folder> findFoldersByProfile(UUID profileId, boolean assignedOnly) {
-        Collection<Folder> assignedFolders = folderRepository.findAssignedToProfile(profileId);
+        List<FolderProfile> assignedFolders = folderProfileRepository.findByProfileIdAndAssigned(profileId, assignedOnly);
 
-        if (assignedOnly) {
-            return assignedFolders;
-        }
+        List<Folder> folders = assignedFolders.stream()
+                .sorted(Comparator.comparing(FolderProfile::getCreated).reversed())
+                .map(FolderProfile::getFolder)
+                .filter(Objects::nonNull)
+                .toList();
 
-        Collection<ProfileGroup> profileGroups = profileService.findFirstById(profileId).getGroups();
-        Collection<Folder> foldersFromGroups = new ArrayList<>(profileGroups.size());
-        for (ProfileGroup g : profileGroups) {
-            if(g.group != null) {
-                for (Folder f : g.group.getFolders()) {
-                    foldersFromGroups.add(f);
-                }
-            }
-        }
-
-        return Stream.concat(
-            assignedFolders.stream(),
-            foldersFromGroups.stream()
-        ).distinct().toList();
+        return folders;
     }
+
+    // find profiles assigned to a folder
+    public Collection<Profile> findAssignedProfilesByFolder(UUID folderId) {
+        List<FolderProfile> assignedProfiles = folderProfileRepository.findByFolderIdAndAssigned(folderId, true);
+
+        List<Profile> profiles = assignedProfiles.stream()
+                .sorted(Comparator.comparing(FolderProfile::getCreated).reversed())
+                .map(FolderProfile::getProfile)
+                .filter(Objects::nonNull)
+                .toList();
+
+        return profiles;
+    }
+
+    // assign one folder to a profile
+    public void assignFolderToProfile(UUID profileId, Folder folder) {
+        Profile profile = profileService.findFirstById(profileId);
+        if(profile == null) {
+            throw new CapacityException("Perfil não encontrado.");
+        }
+        if(folder == null) {
+            throw new CapacityException("Pasta não encontrada.");
+        }
+        if(folderProfileRepository.existsByFolderIdAndProfileId(folder.getId(), profileId)) {
+            throw new CapacityException("Pasta já foi atribuida ao perfil.");
+        }
+        FolderProfile folderProfile = new FolderProfile();
+        folderProfile.setAuthor(UserService.getInstance().getUserInSession().getProfile());
+        folderProfile.setFolder(folder);
+        folderProfile.setProfile(profile);
+        folderProfile.setAssigned(true);
+        folderProfileRepository.save(folderProfile);
+    }
+
+    public void assignFolderToMultipleProfiles(Collection<String> profileIds, Folder folder) {
+        for(String profileId : profileIds){
+            assignFolderToProfile(UUID.fromString(profileId), folder);
+        }
+    }
+
 }
