@@ -5,6 +5,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import me.universi.api.entities.Response;
 import me.universi.capacity.service.CapacityService;
+import me.universi.capacity.service.FolderService;
 import me.universi.group.entities.Group;
 import me.universi.group.entities.ProfileGroup;
 import me.universi.group.entities.Subgroup;
@@ -40,6 +41,9 @@ public class ProfileController {
 
     @Autowired
     public CapacityService capacityService;
+
+    @Autowired
+    public FolderService folderService;
 
     @GetMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
@@ -220,7 +224,7 @@ public class ProfileController {
             }
 
             Profile profile = profileService.getProfileByUserIdOrUsername(profileId, username);
-            response.body.put("folders", capacityService.findFoldersByProfile(profile.getId(), Boolean.valueOf(String.valueOf(assignedOnly))));
+            response.body.put("folders", folderService.findByProfile(profile.getId(), Boolean.valueOf(String.valueOf(assignedOnly))));
         });
     }
 

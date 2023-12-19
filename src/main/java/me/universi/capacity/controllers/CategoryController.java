@@ -15,6 +15,7 @@ import me.universi.capacity.entidades.Category;
 import me.universi.capacity.exceptions.CapacityException;
 import me.universi.capacity.service.CapacityService;
 import me.universi.capacity.service.ContentService;
+import me.universi.capacity.service.FolderService;
 import me.universi.user.services.UserService;
 
 @RestController
@@ -22,10 +23,12 @@ import me.universi.user.services.UserService;
 public class CategoryController {
     private final CapacityService capacityService;
     private final ContentService contentService;
+    private final FolderService folderService;
 
-    public CategoryController(CapacityService capacityService, ContentService contentService) {
+    public CategoryController(CapacityService capacityService, ContentService contentService, FolderService folderService) {
         this.capacityService = capacityService;
         this.contentService = contentService;
+        this.folderService = folderService;
     }
 
     @GetMapping("/all")
@@ -57,7 +60,7 @@ public class CategoryController {
                 throw new CapacityException("ID da categoria não informado.");
             }
 
-            response.body.put("folders", capacityService.findFoldersByCategory(String.valueOf(categoryId)));
+            response.body.put("folders", folderService.findByCategory(String.valueOf(categoryId)));
         });
     }
 

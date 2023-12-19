@@ -23,13 +23,13 @@ import me.universi.user.services.UserService;
 public class ContentService {
     private final CapacityService capacityService;
     private final ContentRepository contentRepository;
-    private final FolderRepository folderRepository;
+    private final FolderService folderService;
     private final ContentStatusRepository contentStatusRepository;
 
-    public ContentService(CapacityService capacityService, ContentRepository contentRepository, FolderRepository folderRepository, ContentStatusRepository contentStatusRepository) {
+    public ContentService(CapacityService capacityService, ContentRepository contentRepository, FolderService folderService, ContentStatusRepository contentStatusRepository) {
         this.capacityService = capacityService;
         this.contentRepository = contentRepository;
-        this.folderRepository = folderRepository;
+        this.folderService = folderService;
         this.contentStatusRepository = contentStatusRepository;
     }
 
@@ -66,7 +66,7 @@ public class ContentService {
     }
 
     public List<Content> findByFolder(UUID folderId) throws CapacityException {
-        Folder folder = capacityService.findFolderById(folderId);
+        Folder folder = folderService.findById(folderId);
 
         List<Content> contents = contentRepository.findContentsInFolderByOrderPosition(folder.getId());
 
@@ -95,7 +95,7 @@ public class ContentService {
         // remove from linked folders
         content.getFolders().forEach(folder -> {
             folder.getContents().remove(content);
-            folderRepository.save(folder);
+            folderService.saveOrUpdate(folder);
         });
 
         // remove from linked watch`s

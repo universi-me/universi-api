@@ -19,6 +19,7 @@ import me.universi.capacity.enums.ContentType;
 import me.universi.capacity.exceptions.CapacityException;
 import me.universi.capacity.service.CapacityService;
 import me.universi.capacity.service.ContentService;
+import me.universi.capacity.service.FolderService;
 import me.universi.user.services.UserService;
 
 @RestController
@@ -26,10 +27,12 @@ import me.universi.user.services.UserService;
 public class ContentController {
     private final CapacityService capacityService;
     private final ContentService contentService;
+    private final FolderService folderService;
 
-    public ContentController(CapacityService capacityService, ContentService contentService) {
+    public ContentController(CapacityService capacityService, ContentService contentService, FolderService folderService) {
         this.capacityService = capacityService;
         this.contentService = contentService;
+        this.folderService = folderService;
     }
 
     @GetMapping("/all")
@@ -113,11 +116,11 @@ public class ContentController {
             }
 
             if(addCategoriesByIds != null) {
-                capacityService.addOrRemoveCategoriesFromContentOrFolder(content, addCategoriesByIds, true, false);
+                folderService.addOrRemoveCategoriesFromContentOrFolder(content, addCategoriesByIds, true, false);
             }
 
             if(addFoldersByIds != null) {
-                capacityService.addOrRemoveFoldersFromContent(content, addFoldersByIds, true);
+                folderService.addOrRemoveFromContent(content, addFoldersByIds, true);
             }
 
 
@@ -201,17 +204,17 @@ public class ContentController {
             }
 
             if(addCategoriesByIds != null) {
-                capacityService.addOrRemoveCategoriesFromContentOrFolder(content, addCategoriesByIds, true, false);
+                folderService.addOrRemoveCategoriesFromContentOrFolder(content, addCategoriesByIds, true, false);
             }
             if(removeCategoriesByIds != null) {
-                capacityService.addOrRemoveCategoriesFromContentOrFolder(content, removeCategoriesByIds, false, false);
+                folderService.addOrRemoveCategoriesFromContentOrFolder(content, removeCategoriesByIds, false, false);
             }
 
             if(addFoldersByIds != null) {
-                capacityService.addOrRemoveFoldersFromContent(content, addFoldersByIds, true);
+                folderService.addOrRemoveFromContent(content, addFoldersByIds, true);
             }
             if(removeFoldersByIds != null) {
-                capacityService.addOrRemoveFoldersFromContent(content, removeFoldersByIds, false);
+                folderService.addOrRemoveFromContent(content, removeFoldersByIds, false);
             }
 
             boolean result = contentService.saveOrUpdate(content);
