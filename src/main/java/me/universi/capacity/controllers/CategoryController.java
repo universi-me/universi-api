@@ -8,22 +8,24 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import me.universi.api.entities.Response;
 import me.universi.capacity.entidades.Category;
 import me.universi.capacity.exceptions.CapacityException;
 import me.universi.capacity.service.CapacityService;
+import me.universi.capacity.service.ContentService;
 import me.universi.user.services.UserService;
 
 @RestController
 @RequestMapping("/api/capacity/category")
 public class CategoryController {
     private final CapacityService capacityService;
+    private final ContentService contentService;
 
-    public CategoryController(CapacityService capacityService) {
+    public CategoryController(CapacityService capacityService, ContentService contentService) {
         this.capacityService = capacityService;
+        this.contentService = contentService;
     }
 
     @GetMapping("/all")
@@ -42,7 +44,7 @@ public class CategoryController {
                 throw new CapacityException("ID da categoria não informado.");
             }
 
-            response.body.put("contents", capacityService.findContentsByCategory(String.valueOf(categoryId)));
+            response.body.put("contents", contentService.findByCategory(String.valueOf(categoryId)));
         });
     }
 

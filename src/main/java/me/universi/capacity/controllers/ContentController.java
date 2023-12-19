@@ -18,21 +18,24 @@ import me.universi.capacity.enums.ContentStatusType;
 import me.universi.capacity.enums.ContentType;
 import me.universi.capacity.exceptions.CapacityException;
 import me.universi.capacity.service.CapacityService;
+import me.universi.capacity.service.ContentService;
 import me.universi.user.services.UserService;
 
 @RestController
 @RequestMapping("/api/capacity/content")
 public class ContentController {
     private final CapacityService capacityService;
+    private final ContentService contentService;
 
-    public ContentController(CapacityService capacityService) {
+    public ContentController(CapacityService capacityService, ContentService contentService) {
         this.capacityService = capacityService;
+        this.contentService = contentService;
     }
 
     @GetMapping("/all")
     public Response list() {
         return Response.buildResponse(response -> {
-            response.body.put("contents", capacityService.getAllContents());
+            response.body.put("contents", contentService.findAll());
         });
     }
 
@@ -45,7 +48,7 @@ public class ContentController {
                 throw new CapacityException("ID do conteúdo não informado.");
             }
 
-            Content content = capacityService.findContentById(String.valueOf(contentId));
+            Content content = contentService.findById(String.valueOf(contentId));
             if(content == null) {
                 throw new CapacityException("Conteúdo não encontrado.");
             }
@@ -118,7 +121,7 @@ public class ContentController {
             }
 
 
-            boolean result = capacityService.saveOrUpdateContent(content);
+            boolean result = contentService.saveOrUpdate(content);
             if(!result) {
                 throw new CapacityException("Erro ao salvar o conteúdo.");
             }
@@ -149,7 +152,7 @@ public class ContentController {
             Object addFoldersByIds =       body.get("addFoldersByIds");
             Object removeFoldersByIds =    body.get("removeFoldersByIds");
 
-            Content content = capacityService.findContentById(String.valueOf(contentId));
+            Content content = contentService.findById(String.valueOf(contentId));
             if(content == null) {
                 throw new CapacityException("Conteúdo não encontrado.");
             }
@@ -211,7 +214,7 @@ public class ContentController {
                 capacityService.addOrRemoveFoldersFromContent(content, removeFoldersByIds, false);
             }
 
-            boolean result = capacityService.saveOrUpdateContent(content);
+            boolean result = contentService.saveOrUpdate(content);
             if(!result) {
                 throw new CapacityException("Erro ao salvar o conteúdo.");
             }
@@ -230,7 +233,7 @@ public class ContentController {
                 throw new CapacityException("ID do conteúdo não informado.");
             }
 
-            Content content = capacityService.findContentById(String.valueOf(contentId));
+            Content content = contentService.findById(String.valueOf(contentId));
             if(content == null) {
                 throw new CapacityException("Conteúdo não encontrado.");
             }
@@ -241,7 +244,7 @@ public class ContentController {
                 }
             }
 
-            boolean result = capacityService.deleteContent(UUID.fromString(String.valueOf(contentId)));
+            boolean result = contentService.delete(UUID.fromString(String.valueOf(contentId)));
             if(!result) {
                 throw new CapacityException("Erro ao deletar o conteúdo.");
             }
@@ -260,7 +263,7 @@ public class ContentController {
                 throw new CapacityException("ID do conteúdo não informado.");
             }
 
-            ContentStatus contentStatus = capacityService.findStatusByContentId((String)contentId);
+            ContentStatus contentStatus = contentService.findStatusById((String)contentId);
 
             response.body.put("contentStatus", contentStatus);
         });
@@ -282,7 +285,7 @@ public class ContentController {
 
             ContentStatusType contentStatusType = ContentStatusType.valueOf(String.valueOf(status));
 
-            ContentStatus contentStatus = capacityService.setContentStatus(String.valueOf(contentId), contentStatusType);
+            ContentStatus contentStatus = contentService.setStatus(String.valueOf(contentId), contentStatusType);
 
             response.body.put("contentStatus", contentStatus);
             response.message = "Status do conteúdo atualizado com sucesso.";

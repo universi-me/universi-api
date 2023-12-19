@@ -9,13 +9,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import me.universi.api.entities.Response;
 import me.universi.capacity.entidades.Folder;
 import me.universi.capacity.exceptions.CapacityException;
 import me.universi.capacity.service.CapacityService;
+import me.universi.capacity.service.ContentService;
 import me.universi.group.entities.Group;
 import me.universi.group.services.GroupService;
 import me.universi.user.entities.User;
@@ -26,10 +26,12 @@ import me.universi.user.services.UserService;
 public class FolderController {
     private final CapacityService capacityService;
     private final GroupService groupService;
+    private final ContentService contentService;
 
-    public FolderController(CapacityService capacityService, GroupService groupService) {
+    public FolderController(CapacityService capacityService, GroupService groupService, ContentService contentService) {
         this.capacityService = capacityService;
         this.groupService = groupService;
+        this.contentService = contentService;
     }
 
     @GetMapping("/all")
@@ -48,7 +50,7 @@ public class FolderController {
                 throw new CapacityException("ID da pasta não informado.");
             }
 
-            response.body.put("contents", capacityService.findContentsByFolder(String.valueOf(folderId)));
+            response.body.put("contents", contentService.findByFolder(String.valueOf(folderId)));
         });
     }
 
