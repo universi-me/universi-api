@@ -1,51 +1,46 @@
 package me.universi.capacity.controllers;
 
-
 import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
 
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
 import me.universi.api.entities.Response;
-import me.universi.capacity.entidades.Content;
-import me.universi.capacity.entidades.Category;
-import me.universi.capacity.entidades.ContentStatus;
 import me.universi.capacity.entidades.Folder;
-import me.universi.capacity.enums.ContentStatusType;
-import me.universi.capacity.enums.ContentType;
+import me.universi.capacity.exceptions.CapacityException;
+import me.universi.capacity.service.CapacityService;
 import me.universi.group.entities.Group;
 import me.universi.group.services.GroupService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
-
-
-import me.universi.capacity.exceptions.CapacityException;
-import me.universi.capacity.service.CapacityService;
-
 
 @RestController
-@RequestMapping("/api/capacity")
-public class CapacityController {
-
+@RequestMapping("/api/capacity/folder")
+public class FolderController {
     private final CapacityService capacityService;
     private final GroupService groupService;
 
-    public CapacityController(CapacityService capacityService, GroupService groupService) {
+    public FolderController(CapacityService capacityService, GroupService groupService) {
         this.capacityService = capacityService;
         this.groupService = groupService;
     }
 
-    @GetMapping("/folders")
-    public Response foldersList() {
+    @GetMapping("/all")
+    public Response list() {
         return Response.buildResponse(response -> {
             response.body.put("folders", capacityService.getAllFolders());
         });
     }
 
-    @PostMapping(value = "/folder/contents", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response list_content_by_folder(@RequestBody Map<String, Object> body) {
+    @PostMapping(value = "/contents", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Response contentsByFolder(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
 
             Object folderId = body.get("id");
@@ -54,13 +49,11 @@ public class CapacityController {
             }
 
             response.body.put("contents", capacityService.findContentsByFolder(String.valueOf(folderId)));
-
         });
     }
 
-    @PostMapping(value = "/folder/get", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response get_folder(@RequestBody Map<String, Object> body) {
+    @PostMapping(value = "/get", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Response get(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
 
             Object folderId = body.get("id");
@@ -73,13 +66,11 @@ public class CapacityController {
             capacityService.checkFolderPermissions(folder, false);
 
             response.body.put("folder", folder);
-
         });
     }
 
-    @PostMapping(value = "/folder/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response create_folder(@RequestBody Map<String, Object> body) {
+    @PostMapping(value = "/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Response create(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
 
             Object name =           body.get("name");
@@ -154,13 +145,11 @@ public class CapacityController {
             }
 
             response.message = "Pasta criada com sucesso.";
-
         });
     }
 
-    @PostMapping(value = "/folder/edit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response edit_folder(@RequestBody Map<String, Object> body) {
+    @PostMapping(value = "/edit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Response edit(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
 
             Object folderId = body.get("id");
@@ -235,13 +224,11 @@ public class CapacityController {
             }
 
             response.message = "Pasta atualizada com sucesso.";
-
         });
     }
 
-    @PostMapping(value = "/folder/delete", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response delete_folder(@RequestBody Map<String, Object> body) {
+    @PostMapping(value = "/delete", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Response delete(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
 
             Object folderId = body.get("id");
@@ -259,13 +246,11 @@ public class CapacityController {
             }
 
             response.message = "Pasta deletada com sucesso.";
-
         });
     }
 
-    @PostMapping(value = "/folder/content/add", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response folder_add_content(@RequestBody Map<String, Object> body) {
+    @PostMapping(value = "/content/add", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Response addContent(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
 
             Object folderId = body.get("id");
@@ -283,13 +268,11 @@ public class CapacityController {
             capacityService.addOrRemoveContentFromFolder(folderId, contentIds, true);
 
             response.message = "Conteúdo adicionado a pasta com sucesso.";
-
         });
     }
 
-    @PostMapping(value = "/folder/content/remove", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response folder_remove_content(@RequestBody Map<String, Object> body) {
+    @PostMapping(value = "/content/remove", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Response removeContent(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
 
             Object folderId = body.get("id");
@@ -310,9 +293,8 @@ public class CapacityController {
         });
     }
 
-    @PostMapping(value = "/folder/content/position", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response folder_move_content(@RequestBody Map<String, Object> body) {
+    @PostMapping(value = "/content/position", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Response moveContent(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
             Object folderId = body.get("folderId");
             Object contentId = body.get("contentId");
@@ -336,11 +318,8 @@ public class CapacityController {
         });
     }
 
-    // assign folder to profile or profiles
-    @PostMapping(value = "/folder/assign", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response assign_folder(@RequestBody Map<String, Object> body){
-
+    @PostMapping(value = "/assign", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Response assign(@RequestBody Map<String, Object> body){
         return Response.buildResponse( response -> {
             Object profilesIds = body.get("profilesIds");
             Object folderId = body.get("folderId");
@@ -362,10 +341,8 @@ public class CapacityController {
         });
     }
 
-    // assigned profiles to folder
-    @GetMapping(value = "/folder/assigned", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response users_assigned_to_folder(@RequestBody Map<String, Object> body){
+    @GetMapping(value = "/assigned", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Response usersAssigned(@RequestBody Map<String, Object> body){
         return Response.buildResponse(response -> {
 
             Object folderId = body.get("folderId");
@@ -376,5 +353,4 @@ public class CapacityController {
            response.body.put("profilesIds", capacityService.findAssignedProfilesByFolder((UUID.fromString(String.valueOf(folderId)))));
         });
     }
-
 }
