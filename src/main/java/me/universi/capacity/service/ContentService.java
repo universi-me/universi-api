@@ -12,6 +12,7 @@ import me.universi.capacity.entidades.Content;
 import me.universi.capacity.entidades.ContentStatus;
 import me.universi.capacity.entidades.Folder;
 import me.universi.capacity.enums.ContentStatusType;
+import me.universi.capacity.enums.ContentType;
 import me.universi.capacity.exceptions.CapacityException;
 import me.universi.capacity.repository.ContentRepository;
 import me.universi.capacity.repository.ContentStatusRepository;
@@ -81,6 +82,61 @@ public class ContentService {
 
     public List<Content> findByFolder(String folderId) throws CapacityException {
         return findByFolder(UUID.fromString(folderId));
+    }
+
+    public boolean handleCreate(Object title, Object url, Object image, Object description, Object rating, Object type, Object addCategoriesByIds, Object addFoldersByIds) throws CapacityException {
+        Content content = new Content();
+        content.setAuthor(UserService.getInstance().getUserInSession().getProfile());
+
+        if (title == null || String.valueOf(title).isEmpty()) {
+            throw new CapacityException("Título do conteúdo não informado.");
+        }
+        content.setTitle(String.valueOf(title));
+
+        if(url == null || String.valueOf(url).isEmpty()) {
+            throw new CapacityException("URL do conteúdo não informado.");
+        }
+        content.setUrl(String.valueOf(url));
+
+        if(type == null || String.valueOf(type).isEmpty()) {
+            throw new CapacityException("Tipo do conteúdo não informado.");
+        }
+
+        try {
+            ContentType typeValue = ContentType.valueOf(String.valueOf(type));
+            content.setType(typeValue);
+        } catch (Exception e) {
+            // todo: add available types on the message
+            throw new CapacityException("Tipo do conteúdo não suportado.");
+        }
+
+        if(image != null) {
+            String imageStr = String.valueOf(image);
+            if(!imageStr.isEmpty())
+                content.setImage(imageStr);
+        }
+
+        if(description != null) {
+            String descriptionStr = String.valueOf(description);
+            if(!descriptionStr.isEmpty())
+                content.setDescription(descriptionStr);
+        }
+
+        if(rating != null) {
+            String ratingStr = String.valueOf(rating);
+            if(!ratingStr.isEmpty())
+                content.setRating(Integer.parseInt(ratingStr));
+        }
+
+        if(addCategoriesByIds != null) {
+            folderService.addOrRemoveCategoriesFromContentOrFolder(content, addCategoriesByIds, true, false);
+        }
+
+        if(addFoldersByIds != null) {
+            folderService.addOrRemoveFromContent(content, addFoldersByIds, true);
+        }
+
+        return saveOrUpdate(content);
     }
 
     public boolean saveOrUpdate(Content content) throws CapacityException {

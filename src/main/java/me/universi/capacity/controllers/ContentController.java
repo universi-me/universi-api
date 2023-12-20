@@ -72,56 +72,7 @@ public class ContentController {
             Object addCategoriesByIds = body.get("addCategoriesByIds");
             Object addFoldersByIds =    body.get("addFoldersByIds");
 
-            if(url == null || String.valueOf(url).isEmpty()) {
-                throw new CapacityException("URL do conteúdo não informado.");
-            }
-            if(title == null || String.valueOf(title).isEmpty()) {
-                throw new CapacityException("Título do conteúdo não informado.");
-            }
-            if(type == null || String.valueOf(type).isEmpty()) {
-                throw new CapacityException("Tipo do conteúdo não informado.");
-            }
-
-            Content content = new Content();
-            content.setAuthor(UserService.getInstance().getUserInSession().getProfile());
-            content.setUrl(String.valueOf(url));
-            content.setTitle(String.valueOf(title));
-
-            if(type != null) {
-                String typeStr = String.valueOf(type);
-                if(!typeStr.isEmpty()) {
-                    content.setType(ContentType.valueOf(typeStr));
-                }
-            }
-            if(image != null) {
-                String imageStr = String.valueOf(image);
-                if(!imageStr.isEmpty()) {
-                    content.setImage(imageStr);
-                }
-            }
-            if(description != null) {
-                String descriptionStr = String.valueOf(description);
-                if(!descriptionStr.isEmpty()) {
-                    content.setDescription(descriptionStr);
-                }
-            }
-            if(rating != null) {
-                String ratingStr = String.valueOf(rating);
-                if(!ratingStr.isEmpty()) {
-                    content.setRating(Integer.parseInt(ratingStr));
-                }
-            }
-
-            if(addCategoriesByIds != null) {
-                folderService.addOrRemoveCategoriesFromContentOrFolder(content, addCategoriesByIds, true, false);
-            }
-
-            if(addFoldersByIds != null) {
-                folderService.addOrRemoveFromContent(content, addFoldersByIds, true);
-            }
-
-
-            boolean result = contentService.saveOrUpdate(content);
+            boolean result = contentService.handleCreate(title, url, image, description, rating, type, addCategoriesByIds, addFoldersByIds);
             if(!result) {
                 throw new CapacityException("Erro ao salvar o conteúdo.");
             }
