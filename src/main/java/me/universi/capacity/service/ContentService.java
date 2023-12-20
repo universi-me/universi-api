@@ -215,9 +215,24 @@ public class ContentService {
         return findById(updatedContent.getId()) != null;
     }
 
-    public boolean delete(UUID id) throws CapacityException {
-        Content content = findById(id);
+    public boolean handleDelete(Object id) throws CapacityException {
+        if(id == null || String.valueOf(id).isEmpty()) {
+            throw new CapacityException("ID do conteúdo não informado.");
+        }
 
+        Content content = findById(String.valueOf(id));
+        if(content == null) {
+            throw new CapacityException("Conteúdo não encontrado.");
+        }
+
+        if (!hasWritePermission(content)) {
+            throw new CapacityException("Você não tem permissão para apagar este conteúdo.");
+        }
+
+        return delete(content);
+    }
+
+    public boolean delete(Content content) throws CapacityException {
         // remove from linked folders
         content.getFolders().forEach(folder -> {
             folder.getContents().remove(content);
@@ -227,7 +242,7 @@ public class ContentService {
         // remove from linked watch`s
         deleteStatus(content.getId());
 
-        contentRepository.deleteById(id);
+        contentRepository.deleteById(content.getId());
 
         return true;
     }
@@ -273,6 +288,7 @@ public class ContentService {
     public boolean hasWritePermission(Content content) {
         return hasWritePermission(content, UserService.getInstance().getUserInSession());
     }
+
     /**
      * Checks if `user` has write access to the content.
      */

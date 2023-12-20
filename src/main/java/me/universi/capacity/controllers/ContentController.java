@@ -108,22 +108,8 @@ public class ContentController {
         return Response.buildResponse(response -> {
 
             Object contentId = body.get("id");
-            if(contentId == null || String.valueOf(contentId).isEmpty()) {
-                throw new CapacityException("ID do conteúdo não informado.");
-            }
 
-            Content content = contentService.findById(String.valueOf(contentId));
-            if(content == null) {
-                throw new CapacityException("Conteúdo não encontrado.");
-            }
-
-            if(!UserService.getInstance().isSessionOfUser(content.getAuthor().getUser())) {
-                if(!UserService.getInstance().isUserAdmin(UserService.getInstance().getUserInSession())) {
-                    throw new CapacityException("Você não tem permissão para apagar este conteúdo.");
-                }
-            }
-
-            boolean result = contentService.delete(UUID.fromString(String.valueOf(contentId)));
+            boolean result = contentService.handleDelete(contentId);
             if(!result) {
                 throw new CapacityException("Erro ao deletar o conteúdo.");
             }
