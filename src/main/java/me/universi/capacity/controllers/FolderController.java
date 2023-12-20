@@ -9,13 +9,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import me.universi.api.entities.Response;
 import me.universi.capacity.entidades.Folder;
 import me.universi.capacity.exceptions.CapacityException;
-import me.universi.capacity.service.CapacityService;
+import me.universi.capacity.service.ContentService;
+import me.universi.capacity.service.FolderService;
 import me.universi.group.entities.Group;
 import me.universi.group.services.GroupService;
 import me.universi.user.entities.User;
@@ -24,18 +24,20 @@ import me.universi.user.services.UserService;
 @RestController
 @RequestMapping("/api/capacity/folder")
 public class FolderController {
-    private final CapacityService capacityService;
     private final GroupService groupService;
+    private final ContentService contentService;
+    private final FolderService folderService;
 
-    public FolderController(CapacityService capacityService, GroupService groupService) {
-        this.capacityService = capacityService;
+    public FolderController(GroupService groupService, ContentService contentService, FolderService folderService) {
         this.groupService = groupService;
+        this.contentService = contentService;
+        this.folderService = folderService;
     }
 
     @GetMapping("/all")
     public Response list() {
         return Response.buildResponse(response -> {
-            response.body.put("folders", capacityService.getAllFolders());
+            response.body.put("folders", folderService.findAll());
         });
     }
 
@@ -48,7 +50,7 @@ public class FolderController {
                 throw new CapacityException("ID da pasta não informado.");
             }
 
-            response.body.put("contents", capacityService.findContentsByFolder(String.valueOf(folderId)));
+            response.body.put("contents", contentService.findByFolder(String.valueOf(folderId)));
         });
     }
 
@@ -61,9 +63,9 @@ public class FolderController {
                 throw new CapacityException("ID da pasta não informado.");
             }
 
-            Folder folder = capacityService.findFolderById(String.valueOf(folderId));
+            Folder folder = folderService.findById(String.valueOf(folderId));
 
-            capacityService.checkFolderPermissions(folder, false);
+            folderService.checkPermissions(folder, false);
 
             response.body.put("folder", folder);
         });
@@ -130,16 +132,16 @@ public class FolderController {
             }
 
             if(addCategoriesByIds != null) {
-                capacityService.addOrRemoveCategoriesFromContentOrFolder(folder, addCategoriesByIds, true, false);
+                folderService.addOrRemoveCategoriesFromContentOrFolder(folder, addCategoriesByIds, true, false);
             }
 
             if(addGrantedAccessGroupByIds != null) {
-                capacityService.addOrRemoveGrantedAccessGroupFromFolder(folder, addGrantedAccessGroupByIds, true);
+                folderService.addOrRemoveGrantedAccessGroup(folder, addGrantedAccessGroupByIds, true);
             }
 
 
 
-            boolean result = capacityService.saveOrUpdateFolder(folder);
+            boolean result = folderService.saveOrUpdate(folder);
             if(!result) {
                 throw new CapacityException("Erro ao salvar o pasta.");
             }
@@ -169,9 +171,9 @@ public class FolderController {
             Object addGrantedAccessGroupByIds =    body.get("addGrantedAccessGroupByIds");
             Object removeGrantedAccessGroupByIds = body.get("removeGrantedAccessGroupByIds");
 
-            Folder folder = capacityService.findFolderById(String.valueOf(folderId));
+            Folder folder = folderService.findById(String.valueOf(folderId));
 
-            capacityService.checkFolderPermissions(folder, true);
+            folderService.checkPermissions(folder, true);
 
             if(name != null) {
                 String nameStr = String.valueOf(name);
@@ -205,20 +207,20 @@ public class FolderController {
             }
 
             if(addCategoriesByIds != null) {
-                capacityService.addOrRemoveCategoriesFromContentOrFolder(folder, addCategoriesByIds, true, false);
+                folderService.addOrRemoveCategoriesFromContentOrFolder(folder, addCategoriesByIds, true, false);
             }
             if(removeCategoriesByIds != null) {
-                capacityService.addOrRemoveCategoriesFromContentOrFolder(folder, removeCategoriesByIds, false, false);
+                folderService.addOrRemoveCategoriesFromContentOrFolder(folder, removeCategoriesByIds, false, false);
             }
 
             if(addGrantedAccessGroupByIds != null) {
-                capacityService.addOrRemoveGrantedAccessGroupFromFolder(folder, addGrantedAccessGroupByIds, true);
+                folderService.addOrRemoveGrantedAccessGroup(folder, addGrantedAccessGroupByIds, true);
             }
             if(removeGrantedAccessGroupByIds != null) {
-                capacityService.addOrRemoveGrantedAccessGroupFromFolder(folder, removeGrantedAccessGroupByIds, false);
+                folderService.addOrRemoveGrantedAccessGroup(folder, removeGrantedAccessGroupByIds, false);
             }
 
-            boolean result = capacityService.saveOrUpdateFolder(folder);
+            boolean result = folderService.saveOrUpdate(folder);
             if(!result) {
                 throw new CapacityException("Erro ao editar o pasta.");
             }
@@ -236,11 +238,11 @@ public class FolderController {
                 throw new CapacityException("ID da pasta não informado.");
             }
 
-            Folder folder = capacityService.findFolderById(UUID.fromString(String.valueOf(folderId)));
+            Folder folder = folderService.findById(UUID.fromString(String.valueOf(folderId)));
 
-            capacityService.checkFolderPermissions(folder, true);
+            folderService.checkPermissions(folder, true);
 
-            boolean result = capacityService.deleteFolder(UUID.fromString(String.valueOf(folderId)));
+            boolean result = folderService.delete(UUID.fromString(String.valueOf(folderId)));
             if(!result) {
                 throw new CapacityException("Erro ao deletar pasta.");
             }
@@ -265,7 +267,7 @@ public class FolderController {
                 throw new CapacityException("ID do conteúdo não informado.");
             }
 
-            capacityService.addOrRemoveContentFromFolder(folderId, contentIds, true);
+            folderService.addOrRemoveContent(folderId, contentIds, true);
 
             response.message = "Conteúdo adicionado a pasta com sucesso.";
         });
@@ -287,7 +289,7 @@ public class FolderController {
                 throw new CapacityException("ID do conteúdo não informado.");
             }
 
-            capacityService.addOrRemoveContentFromFolder(folderId, contentIds, false);
+            folderService.addOrRemoveContent(folderId, contentIds, false);
 
             response.message = "Conteúdo removido da pasta com sucesso.";
         });
@@ -312,7 +314,7 @@ public class FolderController {
 
             int toIndexInt = Integer.parseInt(String.valueOf(toIndex));
 
-            capacityService.setNewPositionOfContentInFolder(folderId, contentId, toIndexInt);
+            folderService.setNewPositionOfContent(folderId, contentId, toIndexInt);
 
             response.message = "Conteúdo ordenado na pasta com sucesso.";
         });
@@ -329,14 +331,14 @@ public class FolderController {
             if (folderId == null || String.valueOf(folderId).isEmpty())
                 throw new CapacityException("folderId é inválido.");
 
-            Folder folder = capacityService.findFolderById(String.valueOf(folderId));
+            Folder folder = folderService.findById(String.valueOf(folderId));
             if (folder == null)
                 throw new CapacityException("folderId é inválido");
 
             if (profilesIds instanceof Collection) {
-                capacityService.assignFolderToMultipleProfiles((Collection<String>) profilesIds, folder);
+                folderService.assignToMultipleProfiles((Collection<String>) profilesIds, folder);
             } else {
-                capacityService.assignFolderToProfile(UUID.fromString(String.valueOf(profilesIds)) , folder);
+                folderService.assignToProfile(UUID.fromString(String.valueOf(profilesIds)) , folder);
             }
         });
     }
@@ -347,10 +349,10 @@ public class FolderController {
 
             Object folderId = body.get("folderId");
 
-            if(folderId == null || String.valueOf(folderId).isEmpty() || capacityService.findFolderById((UUID.fromString(String.valueOf(folderId)))) == null)
+            if(folderId == null || String.valueOf(folderId).isEmpty() || folderService.findById((UUID.fromString(String.valueOf(folderId)))) == null)
                 throw new CapacityException("folderId é inválido.");
 
-           response.body.put("profilesIds", capacityService.findAssignedProfilesByFolder((UUID.fromString(String.valueOf(folderId)))));
+           response.body.put("profilesIds", folderService.findAssignedProfiles((UUID.fromString(String.valueOf(folderId)))));
         });
     }
 }

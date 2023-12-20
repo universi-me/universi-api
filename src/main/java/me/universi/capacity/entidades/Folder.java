@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.io.Serial;
 import java.io.Serializable;
-import me.universi.capacity.service.CapacityService;
+import me.universi.capacity.service.FolderService;
 import me.universi.group.entities.Group;
 import me.universi.profile.entities.Profile;
 import org.hibernate.annotations.CreationTimestamp;
@@ -204,6 +204,6 @@ public class Folder implements Serializable {
 
     @Transient
     public boolean isCanEdit() {
-        return CapacityService.getInstance().hasFolderPermissions(this, true);
+        return FolderService.getInstance().hasPermissions(this, true);
     }
 }

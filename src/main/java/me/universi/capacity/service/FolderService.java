@@ -1,59 +1,59 @@
 package me.universi.capacity.service;
 
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+
+import org.springframework.stereotype.Service;
 
 import me.universi.Sys;
-import me.universi.capacity.entidades.*;
-import me.universi.capacity.repository.*;
+import me.universi.capacity.entidades.Category;
+import me.universi.capacity.entidades.Content;
+import me.universi.capacity.entidades.Folder;
+import me.universi.capacity.entidades.FolderProfile;
+import me.universi.capacity.exceptions.CapacityException;
+import me.universi.capacity.repository.ContentRepository;
+import me.universi.capacity.repository.FolderProfileRepository;
+import me.universi.capacity.repository.FolderRepository;
 import me.universi.group.entities.Group;
 import me.universi.group.entities.ProfileGroup;
-import me.universi.group.entities.Subgroup;
 import me.universi.group.exceptions.GroupException;
 import me.universi.group.services.GroupService;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
-import org.springframework.stereotype.Service;
-
-import me.universi.capacity.exceptions.CapacityException;
-import me.universi.capacity.enums.ContentStatusType;
-
 
 @Service
-public class CapacityService implements CapacityServiceInterface {
-    
+public class FolderService {
+    private final GroupService groupService;
+    private final ProfileService profileService;
+    private final CategoryService categoryService;
+    private final FolderRepository folderRepository;
+    private final FolderProfileRepository folderProfileRepository;
     private final ContentRepository contentRepository;
 
-    private final CategoryRepository categoryRepository;
-
-    private final FolderRepository folderRepository;
-
-    private final ContentStatusRepository contentStatusRepository;
-
-    private final GroupService groupService;
-
-    private final ProfileService profileService;
-
-    private final FolderProfileRepository folderProfileRepository;
-
-    public CapacityService(GroupService groupService, ContentRepository contentRepository, CategoryRepository categoryRepository, FolderRepository folderRepository, ContentStatusRepository contentStatusRepository, ProfileService profileService, FolderProfileRepository folderProfileRepository) {
-        this.contentRepository = contentRepository;
-        this.categoryRepository = categoryRepository;
-        this.folderRepository = folderRepository;
+    public FolderService(GroupService groupService, ProfileService profileService, CategoryService categoryService, FolderRepository folderRepository, FolderProfileRepository folderProfileRepository, ContentRepository contentRepository) {
         this.groupService = groupService;
-        this.contentStatusRepository = contentStatusRepository;
         this.profileService = profileService;
+        this.categoryService = categoryService;
+        this.folderRepository = folderRepository;
         this.folderProfileRepository = folderProfileRepository;
+        this.contentRepository = contentRepository;
     }
 
-    public static CapacityService getInstance() {
-        return Sys.context.getBean("capacityService", CapacityService.class);
+    public static FolderService getInstance() {
+        return Sys.context.getBean("folderService", FolderService.class);
     }
 
-    public void checkFolderPermissions(Folder folder, boolean forWrite) throws CapacityException {
+    public List<Folder> findAll() {
+        return folderRepository.findAll();
+    }
+
+    public void checkPermissions(Folder folder, boolean forWrite) throws CapacityException {
         if(folder == null) {
             /* Folder doesn't exist */
             throw new CapacityException("Pasta não encontrada.");
@@ -102,35 +102,16 @@ public class CapacityService implements CapacityServiceInterface {
         throw new CapacityException("Você não tem permissão para ver essa pasta.");
     }
 
-    public boolean hasFolderPermissions(Folder folder, boolean forWrite) {
+    public boolean hasPermissions(Folder folder, boolean forWrite) {
         try {
-            checkFolderPermissions(folder, forWrite);
+            checkPermissions(folder, forWrite);
             return true;
         } catch (Exception e) {
             return false;
         }
     }
 
-    public List<Content> getAllContents(){
-        List<Content> contentList = new ArrayList<>();
-        contentRepository.findAll().forEach(content -> contentList.add(content));
-
-        return contentList;
-    } //Lista todos os conteúdos existentes
-
-    public Content findContentById(UUID contentId) throws CapacityException {
-        Content content = contentRepository.findFirstById(contentId);
-        if(content == null) {
-            throw new CapacityException("Conteúdo não encontrada.");
-        }
-        return content;
-    }
-
-    public Content findContentById(String contentId) throws CapacityException {
-        return findContentById(UUID.fromString(contentId));
-    }
-
-    public Folder findFolderById(UUID folderId) throws CapacityException {
+    public Folder findById(UUID folderId) throws CapacityException {
         Folder folder = folderRepository.findFirstById(folderId);
         if(folder == null) {
             throw new CapacityException("Pasta não encontrada.");
@@ -138,86 +119,20 @@ public class CapacityService implements CapacityServiceInterface {
         return folder;
     }
 
-    public Folder findFolderById(String folderId) throws CapacityException {
-        return findFolderById(UUID.fromString(folderId));
+    public Folder findById(String folderId) throws CapacityException {
+        return findById(UUID.fromString(folderId));
     }
 
-    public Category findCategoryById(UUID uuid) throws CapacityException {
-        Category category = categoryRepository.findFirstById(uuid);
-        if(category == null) {
-            throw new CapacityException("Categoria não encontrada.");
-        }
-        return category;
-    }
-
-    public Category findCategoryById(String uuid) throws CapacityException {
-        return findCategoryById(UUID.fromString(uuid));
-    }
-
-    public List<Content> findContentsByCategory(UUID categoryId) throws CapacityException {
-        Category category = findCategoryById(categoryId);
-        return contentRepository.findByCategories(category);
-    }
-
-    public List<Content> findContentsByCategory(String categoryId) throws CapacityException {
-        return findContentsByCategory(UUID.fromString(categoryId));
-    }
-
-    public List<Content> findContentsByFolder(UUID folderId) throws CapacityException {
-        Folder folder = findFolderById(folderId);
-
-        List<Content> contents = contentRepository.findContentsInFolderByOrderPosition(folder.getId());
-
-        for(Content content : contents) {
-            ContentStatus contentStatus = findStatusByContentId(content.getId());
-            if(contentStatus != null) {
-                content.contentStatus = contentStatus;
-            }
-        }
-
-        return contents;
-    }
-
-    public Collection<Content> findContentsByFolder(String folderId) throws CapacityException {
-        return findContentsByFolder(UUID.fromString(folderId));
-    }
-
-    public Collection<Folder> findFoldersByCategory(UUID categoryId) throws CapacityException {
-        Category category = findCategoryById(categoryId);
+    public List<Folder> findByCategory(UUID categoryId) throws CapacityException {
+        Category category = categoryService.findById(categoryId);
         return folderRepository.findByCategories(category);
     }
 
-    public Collection<Folder> findFoldersByCategory(String categoryId) throws CapacityException {
-        return findFoldersByCategory(UUID.fromString(categoryId));
+    public List<Folder> findByCategory(String categoryId) throws CapacityException {
+        return findByCategory(UUID.fromString(categoryId));
     }
 
-    public boolean saveOrUpdateContent(Content content) throws CapacityException {
-
-        Content updatedContent = contentRepository.save(content);
-
-        if (findContentById(updatedContent.getId()) != null){
-            return true;
-        }
-
-        return false;
-    }
-
-    public boolean saveOrUpdateCategory(Category category) throws CapacityException {
-        boolean titleExists = categoryRepository.existsByName(category.getName());
-        if (titleExists) {
-            throw new CapacityException("Categoria com título já existente.");
-        }
-
-        Category updatedCategory = categoryRepository.save(category);
-
-        if (categoryRepository.findFirstById(updatedCategory.getId()) != null){
-            return true;
-        }
-
-        return false;
-    }
-
-    public boolean saveOrUpdateFolder(Folder folder) throws CapacityException {
+    public boolean saveOrUpdate(Folder folder) throws CapacityException {
 
         Folder updatedFolder = folderRepository.save(folder);
 
@@ -228,43 +143,12 @@ public class CapacityService implements CapacityServiceInterface {
         return false;
     }
 
-    public boolean deleteContent(UUID id) throws CapacityException {
-
-        Content content = findContentById(id);
-
-        // remove from linked folders
-        content.getFolders().forEach(folder -> {
-            folder.getContents().remove(content);
-            folderRepository.save(folder);
-        });
-
-        // remove from linked watch`s
-        deleteStatusForContent(content.getId());
-
-        contentRepository.deleteById(id);
-
-        return true;
-    }
-
-    public boolean deleteCategory(UUID id){
-        categoryRepository.deleteById(id);
-        return true;
-    }
-
-    public boolean deleteFolder(UUID id){
+    public boolean delete(UUID id){
         folderRepository.deleteById(id);
         return true;
     }
 
-    public List<Category> getAllCategories() {
-        return categoryRepository.findAll();
-    }
-
-    public List<Folder> getAllFolders() {
-        return folderRepository.findAll();
-    }
-
-    public void addOrRemoveContentFromFolder(Object folderId, Object contentId, boolean isAdding) throws CapacityException {
+    public void addOrRemoveContent(Object folderId, Object contentId, boolean isAdding) throws CapacityException {
         if(folderId == null) {
             throw new CapacityException("Parametro folderId é nulo.");
         }
@@ -281,10 +165,10 @@ public class CapacityService implements CapacityServiceInterface {
                 if (contentIdNow == null || contentIdNow.isEmpty()) {
                     continue;
                 }
-                Content content = findContentById(contentIdNow);
+                Content content = ContentService.getInstance().findById(contentIdNow);
 
-                addOrRemoveFoldersFromContent(content, folderId, isAdding);
-                boolean result = saveOrUpdateContent(content);
+                addOrRemoveFromContent(content, folderId, isAdding);
+                boolean result = ContentService.getInstance().saveOrUpdate(content);
                 if (!result) {
                     throw new CapacityException("Erro ao adicionar conteúdo a pasta.");
                 }
@@ -302,7 +186,7 @@ public class CapacityService implements CapacityServiceInterface {
                 if(categoryId==null || categoryId.isEmpty()) {
                     continue;
                 }
-                Category category = findCategoryById(categoryId);
+                Category category = categoryService.findById(categoryId);
 
                 if(contentOrFolder instanceof Content) {
                     if(((Content)contentOrFolder).getCategories() == null) {
@@ -337,7 +221,7 @@ public class CapacityService implements CapacityServiceInterface {
         }
     }
 
-    public void addOrRemoveFoldersFromContent(Content content, Object foldersId, boolean isAdding) throws CapacityException {
+    public void addOrRemoveFromContent(Content content, Object foldersId, boolean isAdding) throws CapacityException {
         Object foldersIds = foldersId;
         if(foldersIds instanceof String) {
             foldersIds = new ArrayList<String>() {{ add((String) foldersId); }};
@@ -347,9 +231,9 @@ public class CapacityService implements CapacityServiceInterface {
                 if(folderId==null || folderId.isEmpty()) {
                     continue;
                 }
-                Folder folder = findFolderById(folderId);
+                Folder folder = findById(folderId);
 
-                checkFolderPermissions(folder, true);
+                checkPermissions(folder, true);
 
                 if(folder.getContents() == null) {
                     folder.setContents(new ArrayList<>());
@@ -365,7 +249,7 @@ public class CapacityService implements CapacityServiceInterface {
         }
     }
 
-    public void addOrRemoveGrantedAccessGroupFromFolder(Folder folder, Object groupsId, boolean isAdding) throws CapacityException, GroupException {
+    public void addOrRemoveGrantedAccessGroup(Folder folder, Object groupsId, boolean isAdding) throws CapacityException, GroupException {
         Object groupById = groupsId;
         if(groupById instanceof String) {
             groupById = new ArrayList<String>() {{ add((String) groupsId); }};
@@ -393,28 +277,28 @@ public class CapacityService implements CapacityServiceInterface {
         }
     }
 
-    public void setPositionOfContentInFolder(UUID folderId, UUID contentId, int order) throws CapacityException {
+    public void setPositionOfContent(UUID folderId, UUID contentId, int order) throws CapacityException {
         folderRepository.setPositionOfContentInFolder(folderId, contentId, order);
     }
 
-    public void setPositionOfContentInFolder(Object folderId, Object contentId, int order) throws CapacityException {
+    public void setPositionOfContent(Object folderId, Object contentId, int order) throws CapacityException {
         folderRepository.setPositionOfContentInFolder(UUID.fromString((String)folderId), UUID.fromString((String)contentId), order);
     }
 
-    public int getPositionOfContentInFolder(UUID folderId, UUID contentId) throws CapacityException {
+    public int getPositionOfContent(UUID folderId, UUID contentId) throws CapacityException {
         return folderRepository.getPositionOfContentInFolder(folderId, contentId);
     }
 
-    public int getPositionOfContentInFolder(Object folderId, Object contentId) throws CapacityException {
+    public int getPositionOfContent(Object folderId, Object contentId) throws CapacityException {
         return folderRepository.getPositionOfContentInFolder(UUID.fromString((String)folderId), UUID.fromString((String)contentId));
     }
 
-    public void setNewPositionOfContentInFolder(Object folderId, Object contentId, int toIndex) throws CapacityException {
-        Folder folder = findFolderById((String)folderId);
+    public void setNewPositionOfContent(Object folderId, Object contentId, int toIndex) throws CapacityException {
+        Folder folder = findById((String)folderId);
 
-        checkFolderPermissions(folder, true);
+        checkPermissions(folder, true);
 
-        Content content = findContentById((String)contentId);
+        Content content = ContentService.getInstance().findById((String)contentId);
 
         // mount ordered list
         List<Content> contentsOrdered = new ArrayList<>();
@@ -428,53 +312,17 @@ public class CapacityService implements CapacityServiceInterface {
         // update order in db
         for(Content contentNow : contentsOrdered) {
             int newOrder = contentsOrdered.indexOf(contentNow);
-            if(getPositionOfContentInFolder(folder.getId(), contentNow.getId()) != newOrder) {
-                setPositionOfContentInFolder(folder.getId(), contentNow.getId(), newOrder);
+            if(getPositionOfContent(folder.getId(), contentNow.getId()) != newOrder) {
+                setPositionOfContent(folder.getId(), contentNow.getId(), newOrder);
             }
         }
-
     }
 
-    public ContentStatus findStatusByContentId(UUID contentId) throws CapacityException {
-        Profile userProfile = UserService.getInstance().getUserInSession().getProfile();
-        ContentStatus contentStatus = contentStatusRepository.findFirstByProfileIdAndContentId(userProfile.getId(), contentId);
-        if(contentStatus == null) {
-            contentStatus = new ContentStatus();
-            contentStatus.setContent(findContentById(contentId));
-            contentStatus.setProfile(UserService.getInstance().getUserInSession().getProfile());
-            contentStatus.setStatus(ContentStatusType.NOT_VIEWED);
-            return contentStatus;
-        }
-        return contentStatus;
+    public List<Folder> findFoldersByProfile(UUID profileId) {
+        return findByProfile(profileId, false);
     }
 
-    public ContentStatus findStatusByContentId(String contentId) throws CapacityException {
-        return findStatusByContentId(UUID.fromString(contentId));
-    }
-
-    public ContentStatus setContentStatus(UUID contentId, ContentStatusType status) throws CapacityException {
-        ContentStatus contentStatus = findStatusByContentId(contentId);
-        if(contentStatus.getStatus() != status) {
-            contentStatus.setStatus(status);
-            contentStatus.setUpdatedAt(new java.util.Date());
-            return contentStatusRepository.save(contentStatus);
-        }
-        return contentStatus;
-    }
-
-    public ContentStatus setContentStatus(String contentId, ContentStatusType status) throws CapacityException {
-        return setContentStatus(UUID.fromString(contentId), status);
-    }
-
-    public void deleteStatusForContent(UUID contentId) {
-        contentStatusRepository.deleteByContentId(contentId);
-    }
-
-    public Collection<Folder> findFoldersByProfile(UUID profileId) {
-        return findFoldersByProfile(profileId, false);
-    }
-
-    public Collection<Folder> findFoldersByProfile(UUID profileId, boolean assignedOnly) {
+    public List<Folder> findByProfile(UUID profileId, boolean assignedOnly) {
         List<FolderProfile> assignedFolders = folderProfileRepository.findByProfileIdAndAssigned(profileId, assignedOnly);
 
         List<Folder> folders = assignedFolders.stream()
@@ -487,7 +335,7 @@ public class CapacityService implements CapacityServiceInterface {
     }
 
     // find profiles assigned to a folder
-    public Collection<Profile> findAssignedProfilesByFolder(UUID folderId) {
+    public Collection<Profile> findAssignedProfiles(UUID folderId) {
         List<FolderProfile> assignedProfiles = folderProfileRepository.findByFolderIdAndAssigned(folderId, true);
 
         List<Profile> profiles = assignedProfiles.stream()
@@ -500,7 +348,7 @@ public class CapacityService implements CapacityServiceInterface {
     }
 
     // assign one folder to a profile
-    public void assignFolderToProfile(UUID profileId, Folder folder) {
+    public void assignToProfile(UUID profileId, Folder folder) {
         Profile profile = profileService.findFirstById(profileId);
         if(profile == null) {
             throw new CapacityException("Perfil não encontrado.");
@@ -519,10 +367,9 @@ public class CapacityService implements CapacityServiceInterface {
         folderProfileRepository.save(folderProfile);
     }
 
-    public void assignFolderToMultipleProfiles(Collection<String> profileIds, Folder folder) {
+    public void assignToMultipleProfiles(Collection<String> profileIds, Folder folder) {
         for(String profileId : profileIds){
-            assignFolderToProfile(UUID.fromString(profileId), folder);
+            assignToProfile(UUID.fromString(profileId), folder);
         }
     }
-
 }
