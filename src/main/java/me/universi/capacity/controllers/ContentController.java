@@ -1,7 +1,6 @@
 package me.universi.capacity.controllers;
 
 import java.util.Map;
-import java.util.UUID;
 
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,10 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 import me.universi.api.entities.Response;
 import me.universi.capacity.entidades.Content;
 import me.universi.capacity.entidades.ContentStatus;
-import me.universi.capacity.enums.ContentStatusType;
 import me.universi.capacity.exceptions.CapacityException;
 import me.universi.capacity.service.ContentService;
-import me.universi.user.services.UserService;
 
 @RestController
 @RequestMapping("/api/capacity/content")
@@ -128,31 +125,20 @@ public class ContentController {
                 throw new CapacityException("ID do conteúdo não informado.");
             }
 
-            ContentStatus contentStatus = contentService.findStatusById((String)contentId);
+            ContentStatus contentStatus = contentService.findStatusById(String.valueOf(contentId));
 
             response.body.put("contentStatus", contentStatus);
         });
     }
 
     @PostMapping(value = "/status/edit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Response edit_status(@RequestBody Map<String, Object> body) {
+    public Response editStatus(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
 
             Object contentId = body.get("contentId");
             Object status = body.get("contentStatusType");
 
-            if (contentId == null || String.valueOf(contentId).isEmpty()) {
-                throw new CapacityException("ID do conteúdo não informado.");
-            }
-            if (status == null || String.valueOf(status).isEmpty()) {
-                throw new CapacityException("Status do conteúdo não informado.");
-            }
-
-            ContentStatusType contentStatusType = ContentStatusType.valueOf(String.valueOf(status));
-
-            ContentStatus contentStatus = contentService.setStatus(String.valueOf(contentId), contentStatusType);
-
-            response.body.put("contentStatus", contentStatus);
+            response.body.put("contentStatus", contentService.handleEditStatus(contentId, status));
             response.message = "Status do conteúdo atualizado com sucesso.";
         });
     }

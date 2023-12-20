@@ -264,6 +264,29 @@ public class ContentService {
         return findStatusById(UUID.fromString(contentId));
     }
 
+    public ContentStatus handleEditStatus(Object id, Object newStatus) throws CapacityException {
+        if (id == null || String.valueOf(id).isEmpty()) {
+            throw new CapacityException("ID do conteúdo não informado.");
+        }
+
+        Content content = findById(String.valueOf(id));
+        if (content == null) {
+            throw new CapacityException("Conteúdo não encontrado.");
+        }
+
+        if (newStatus == null || String.valueOf(newStatus).isEmpty()) {
+            throw new CapacityException("Status do conteúdo não informado.");
+        }
+
+        try {
+            ContentStatusType contentStatus = ContentStatusType.valueOf(String.valueOf(newStatus));
+            return setStatus(content.getId(), contentStatus);
+        } catch (Exception e) {
+            // todo: add available types on the message
+            throw new CapacityException("Tipo de status não suportado.");
+        }
+    }
+
     public ContentStatus setStatus(UUID contentId, ContentStatusType status) throws CapacityException {
         ContentStatus contentStatus = findStatusById(contentId);
         if(contentStatus.getStatus() != status) {
