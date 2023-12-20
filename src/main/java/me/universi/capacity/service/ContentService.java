@@ -17,6 +17,7 @@ import me.universi.capacity.exceptions.CapacityException;
 import me.universi.capacity.repository.ContentRepository;
 import me.universi.capacity.repository.ContentStatusRepository;
 import me.universi.profile.entities.Profile;
+import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 
 @Service
@@ -139,6 +140,76 @@ public class ContentService {
         return saveOrUpdate(content);
     }
 
+    public boolean handleEdit(Object id, Object url, Object title, Object image, Object description, Object rating, Object type, Object addCategoriesByIds, Object removeCategoriesByIds, Object addFoldersByIds, Object removeFoldersByIds) throws CapacityException {
+        if(id == null || String.valueOf(id).isEmpty()) {
+            throw new CapacityException("ID do conteúdo não informado.");
+        }
+
+        Content content = findById(String.valueOf(id));
+        if(content == null)
+            throw new CapacityException("Conteúdo não encontrado.");
+
+        if (!hasWritePermission(content)) {
+            throw new CapacityException("Você não tem permissão para editar este conteúdo.");
+        }
+
+        if(url != null) {
+            String urlStr = String.valueOf(url);
+            if(!urlStr.isEmpty())
+                content.setUrl(urlStr);
+        }
+
+        if(title != null) {
+            String titleStr = String.valueOf(title);
+            if(!titleStr.isEmpty())
+                content.setTitle(titleStr);
+        }
+
+        if(image != null) {
+            String imageStr = String.valueOf(image);
+            if(!imageStr.isEmpty())
+                content.setImage(imageStr);
+        }
+
+        if(description != null) {
+            String descriptionStr = String.valueOf(description);
+            if(!descriptionStr.isEmpty())
+                content.setDescription(descriptionStr);
+        }
+
+        if(rating != null) {
+            String ratingStr = String.valueOf(rating);
+            if(!ratingStr.isEmpty())
+                content.setRating(Integer.parseInt(ratingStr));
+        }
+
+        if(type != null) {
+            try {
+                ContentType typeValue = ContentType.valueOf(String.valueOf(type));
+                content.setType(typeValue);
+            } catch (Exception e) {
+                // todo: add available types on the message
+                throw new CapacityException("Tipo do conteúdo não suportado.");
+            }
+        }
+
+        if(addCategoriesByIds != null) {
+            folderService.addOrRemoveCategoriesFromContentOrFolder(content, addCategoriesByIds, true, false);
+        }
+        if(removeCategoriesByIds != null) {
+            folderService.addOrRemoveCategoriesFromContentOrFolder(content, removeCategoriesByIds, false, false);
+        }
+
+        if(addFoldersByIds != null) {
+            folderService.addOrRemoveFromContent(content, addFoldersByIds, true);
+        }
+        if(removeFoldersByIds != null) {
+            folderService.addOrRemoveFromContent(content, removeFoldersByIds, false);
+        }
+
+        return saveOrUpdate(content);
+    }
+
     public boolean saveOrUpdate(Content content) throws CapacityException {
         Content updatedContent = contentRepository.save(content);
         return findById(updatedContent.getId()) != null;
@@ -194,5 +265,25 @@ public class ContentService {
 
     public void deleteStatus(UUID contentId) {
         contentStatusRepository.deleteByContentId(contentId);
+    }
+
+    /**
+     * Checks if the current logged user has write access to the content.
+     */
+    public boolean hasWritePermission(Content content) {
+        return hasWritePermission(content, UserService.getInstance().getUserInSession());
+    }
+    /**
+     * Checks if `user` has write access to the content.
+     */
+    public boolean hasWritePermission(Content content, User user) {
+        if (user == null)
+            return false;
+
+        UserService userService = UserService.getInstance();
+        User author = content.getAuthor().getUser();
+
+        return userService.isSessionOfUser(author)
+            || userService.isUserAdmin(user);
     }
 }

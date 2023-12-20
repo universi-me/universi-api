@@ -8,28 +8,23 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import me.universi.api.entities.Response;
 import me.universi.capacity.entidades.Content;
 import me.universi.capacity.entidades.ContentStatus;
 import me.universi.capacity.enums.ContentStatusType;
-import me.universi.capacity.enums.ContentType;
 import me.universi.capacity.exceptions.CapacityException;
 import me.universi.capacity.service.ContentService;
-import me.universi.capacity.service.FolderService;
 import me.universi.user.services.UserService;
 
 @RestController
 @RequestMapping("/api/capacity/content")
 public class ContentController {
     private final ContentService contentService;
-    private final FolderService folderService;
 
-    public ContentController(ContentService contentService, FolderService folderService) {
+    public ContentController(ContentService contentService) {
         this.contentService = contentService;
-        this.folderService = folderService;
     }
 
     @GetMapping("/all")
@@ -86,10 +81,6 @@ public class ContentController {
         return Response.buildResponse(response -> {
 
             Object contentId = body.get("id");
-            if(contentId == null || String.valueOf(contentId).isEmpty()) {
-                throw new CapacityException("ID do conteúdo não informado.");
-            }
-
             Object url =         body.get("url");
             Object title =       body.get("title");
             Object image =       body.get("image");
@@ -103,69 +94,7 @@ public class ContentController {
             Object addFoldersByIds =       body.get("addFoldersByIds");
             Object removeFoldersByIds =    body.get("removeFoldersByIds");
 
-            Content content = contentService.findById(String.valueOf(contentId));
-            if(content == null) {
-                throw new CapacityException("Conteúdo não encontrado.");
-            }
-
-            if(!UserService.getInstance().isSessionOfUser(content.getAuthor().getUser())) {
-                if(!UserService.getInstance().isUserAdmin(UserService.getInstance().getUserInSession())) {
-                    throw new CapacityException("Você não tem permissão para editar este conteúdo.");
-                }
-            }
-
-            if(url != null) {
-                String urlStr = String.valueOf(url);
-                if(!urlStr.isEmpty()) {
-                    content.setUrl(urlStr);
-                }
-            }
-            if(title != null) {
-                String titleStr = String.valueOf(title);
-                if(!titleStr.isEmpty()) {
-                    content.setTitle(titleStr);
-                }
-            }
-            if(image != null) {
-                String imageStr = String.valueOf(image);
-                if(!imageStr.isEmpty()) {
-                    content.setImage(imageStr);
-                }
-            }
-            if(description != null) {
-                String descriptionStr = String.valueOf(description);
-                if(!descriptionStr.isEmpty()) {
-                    content.setDescription(descriptionStr);
-                }
-            }
-            if(rating != null) {
-                String ratingStr = String.valueOf(rating);
-                if(!ratingStr.isEmpty()) {
-                    content.setRating(Integer.parseInt(ratingStr));
-                }
-            }
-            if(type != null) {
-                String typeStr = String.valueOf(type);
-                if(!typeStr.isEmpty()) {
-                    content.setType(ContentType.valueOf(typeStr));
-                }
-            }
-
-            if(addCategoriesByIds != null) {
-                folderService.addOrRemoveCategoriesFromContentOrFolder(content, addCategoriesByIds, true, false);
-            }
-            if(removeCategoriesByIds != null) {
-                folderService.addOrRemoveCategoriesFromContentOrFolder(content, removeCategoriesByIds, false, false);
-            }
-
-            if(addFoldersByIds != null) {
-                folderService.addOrRemoveFromContent(content, addFoldersByIds, true);
-            }
-            if(removeFoldersByIds != null) {
-                folderService.addOrRemoveFromContent(content, removeFoldersByIds, false);
-            }
-
-            boolean result = contentService.saveOrUpdate(content);
+            boolean result = contentService.handleEdit(contentId, url, title, image, description, rating, type, addCategoriesByIds, removeCategoriesByIds, addFoldersByIds, removeFoldersByIds);
             if(!result) {
                 throw new CapacityException("Erro ao salvar o conteúdo.");
             }
@@ -175,7 +104,6 @@ public class ContentController {
     }
 
     @PostMapping(value = "/delete", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
     public Response delete(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
 
