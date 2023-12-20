@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import me.universi.api.entities.Response;
 import me.universi.capacity.entidades.Folder;
 import me.universi.capacity.exceptions.CapacityException;
-import me.universi.capacity.service.CapacityService;
 import me.universi.capacity.service.ContentService;
 import me.universi.capacity.service.FolderService;
 import me.universi.group.entities.Group;
@@ -25,13 +24,11 @@ import me.universi.user.services.UserService;
 @RestController
 @RequestMapping("/api/capacity/folder")
 public class FolderController {
-    private final CapacityService capacityService;
     private final GroupService groupService;
     private final ContentService contentService;
     private final FolderService folderService;
 
-    public FolderController(CapacityService capacityService, GroupService groupService, ContentService contentService, FolderService folderService) {
-        this.capacityService = capacityService;
+    public FolderController(GroupService groupService, ContentService contentService, FolderService folderService) {
         this.groupService = groupService;
         this.contentService = contentService;
         this.folderService = folderService;

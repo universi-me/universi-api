@@ -31,13 +31,15 @@ import me.universi.user.services.UserService;
 public class FolderService {
     private final GroupService groupService;
     private final ProfileService profileService;
+    private final CategoryService categoryService;
     private final FolderRepository folderRepository;
     private final FolderProfileRepository folderProfileRepository;
     private final ContentRepository contentRepository;
 
-    public FolderService(GroupService groupService, ProfileService profileService, FolderRepository folderRepository, FolderProfileRepository folderProfileRepository, ContentRepository contentRepository) {
+    public FolderService(GroupService groupService, ProfileService profileService, CategoryService categoryService, FolderRepository folderRepository, FolderProfileRepository folderProfileRepository, ContentRepository contentRepository) {
         this.groupService = groupService;
         this.profileService = profileService;
+        this.categoryService = categoryService;
         this.folderRepository = folderRepository;
         this.folderProfileRepository = folderProfileRepository;
         this.contentRepository = contentRepository;
@@ -122,7 +124,7 @@ public class FolderService {
     }
 
     public List<Folder> findByCategory(UUID categoryId) throws CapacityException {
-        Category category = CapacityService.getInstance().findCategoryById(categoryId);
+        Category category = categoryService.findById(categoryId);
         return folderRepository.findByCategories(category);
     }
 
@@ -184,7 +186,7 @@ public class FolderService {
                 if(categoryId==null || categoryId.isEmpty()) {
                     continue;
                 }
-                Category category = CapacityService.getInstance().findCategoryById(categoryId);
+                Category category = categoryService.findById(categoryId);
 
                 if(contentOrFolder instanceof Content) {
                     if(((Content)contentOrFolder).getCategories() == null) {

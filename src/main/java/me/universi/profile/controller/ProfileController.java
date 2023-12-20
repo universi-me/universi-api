@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import java.util.*;
 import java.util.stream.Collectors;
 import me.universi.api.entities.Response;
-import me.universi.capacity.service.CapacityService;
 import me.universi.capacity.service.FolderService;
 import me.universi.group.entities.Group;
 import me.universi.group.entities.ProfileGroup;
@@ -38,9 +37,6 @@ public class ProfileController {
 
     @Autowired
     public ProfileService profileService;
-
-    @Autowired
-    public CapacityService capacityService;
 
     @Autowired
     public FolderService folderService;

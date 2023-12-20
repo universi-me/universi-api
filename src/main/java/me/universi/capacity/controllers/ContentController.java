@@ -17,7 +17,6 @@ import me.universi.capacity.entidades.ContentStatus;
 import me.universi.capacity.enums.ContentStatusType;
 import me.universi.capacity.enums.ContentType;
 import me.universi.capacity.exceptions.CapacityException;
-import me.universi.capacity.service.CapacityService;
 import me.universi.capacity.service.ContentService;
 import me.universi.capacity.service.FolderService;
 import me.universi.user.services.UserService;
@@ -25,12 +24,10 @@ import me.universi.user.services.UserService;
 @RestController
 @RequestMapping("/api/capacity/content")
 public class ContentController {
-    private final CapacityService capacityService;
     private final ContentService contentService;
     private final FolderService folderService;
 
-    public ContentController(CapacityService capacityService, ContentService contentService, FolderService folderService) {
-        this.capacityService = capacityService;
+    public ContentController(ContentService contentService, FolderService folderService) {
         this.contentService = contentService;
         this.folderService = folderService;
     }

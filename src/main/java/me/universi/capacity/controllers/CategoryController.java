@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import me.universi.api.entities.Response;
 import me.universi.capacity.entidades.Category;
 import me.universi.capacity.exceptions.CapacityException;
-import me.universi.capacity.service.CapacityService;
+import me.universi.capacity.service.CategoryService;
 import me.universi.capacity.service.ContentService;
 import me.universi.capacity.service.FolderService;
 import me.universi.user.services.UserService;
@@ -21,12 +21,12 @@ import me.universi.user.services.UserService;
 @RestController
 @RequestMapping("/api/capacity/category")
 public class CategoryController {
-    private final CapacityService capacityService;
+    private final CategoryService categoryService;
     private final ContentService contentService;
     private final FolderService folderService;
 
-    public CategoryController(CapacityService capacityService, ContentService contentService, FolderService folderService) {
-        this.capacityService = capacityService;
+    public CategoryController(CategoryService categoryService, ContentService contentService, FolderService folderService) {
+        this.categoryService = categoryService;
         this.contentService = contentService;
         this.folderService = folderService;
     }
@@ -34,7 +34,7 @@ public class CategoryController {
     @GetMapping("/all")
     public Response list() {
         return Response.buildResponse(response -> {
-            response.body.put("categories", capacityService.getAllCategories());
+            response.body.put("categories", categoryService.findAll());
         });
     }
 
@@ -73,7 +73,7 @@ public class CategoryController {
                 throw new CapacityException("ID da categoria não informado.");
             }
 
-            response.body.put("category", capacityService.findCategoryById(UUID.fromString(String.valueOf(categoryId))));
+            response.body.put("category", categoryService.findById(UUID.fromString(String.valueOf(categoryId))));
         });
     }
 
@@ -100,7 +100,7 @@ public class CategoryController {
 
             category.setAuthor(UserService.getInstance().getUserInSession().getProfile());
 
-            boolean result = capacityService.saveOrUpdateCategory(category);
+            boolean result = categoryService.saveOrUpdate(category);
             if(!result) {
                 throw new CapacityException("Erro ao salvar o categoria.");
             }
@@ -121,7 +121,7 @@ public class CategoryController {
             Object name =  body.get("name");
             Object image = body.get("image");
 
-            Category category = capacityService.findCategoryById(String.valueOf(categoryId));
+            Category category = categoryService.findById(String.valueOf(categoryId));
             if(category == null) {
                 throw new CapacityException("Categoria não encontrado.");
             }
@@ -145,7 +145,7 @@ public class CategoryController {
                 }
             }
 
-            boolean result = capacityService.saveOrUpdateCategory(category);
+            boolean result = categoryService.saveOrUpdate(category);
             if(!result) {
                 throw new CapacityException("Erro ao editar o categoria.");
             }
@@ -163,7 +163,7 @@ public class CategoryController {
                 throw new CapacityException("ID da Categoria não informado.");
             }
 
-            Category category = capacityService.findCategoryById(UUID.fromString(String.valueOf(categoryId)));
+            Category category = categoryService.findById(UUID.fromString(String.valueOf(categoryId)));
             if(category == null) {
                 throw new CapacityException("Categoria não encontrada.");
             }
@@ -174,7 +174,7 @@ public class CategoryController {
                 }
             }
 
-            boolean result = capacityService.deleteCategory(UUID.fromString(String.valueOf(categoryId)));
+            boolean result = categoryService.delete(UUID.fromString(String.valueOf(categoryId)));
             if(!result) {
                 throw new CapacityException("Erro ao deletar Categoria.");
             }

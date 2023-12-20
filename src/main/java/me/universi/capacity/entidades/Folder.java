@@ -8,7 +8,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.io.Serial;
 import java.io.Serializable;
-import me.universi.capacity.service.CapacityService;
 import me.universi.capacity.service.FolderService;
 import me.universi.group.entities.Group;
 import me.universi.profile.entities.Profile;

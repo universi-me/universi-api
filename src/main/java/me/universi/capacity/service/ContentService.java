@@ -15,19 +15,18 @@ import me.universi.capacity.enums.ContentStatusType;
 import me.universi.capacity.exceptions.CapacityException;
 import me.universi.capacity.repository.ContentRepository;
 import me.universi.capacity.repository.ContentStatusRepository;
-import me.universi.capacity.repository.FolderRepository;
 import me.universi.profile.entities.Profile;
 import me.universi.user.services.UserService;
 
 @Service
 public class ContentService {
-    private final CapacityService capacityService;
+    private final CategoryService categoryService;
     private final ContentRepository contentRepository;
     private final FolderService folderService;
     private final ContentStatusRepository contentStatusRepository;
 
-    public ContentService(CapacityService capacityService, ContentRepository contentRepository, FolderService folderService, ContentStatusRepository contentStatusRepository) {
-        this.capacityService = capacityService;
+    public ContentService(CategoryService categoryService, ContentRepository contentRepository, FolderService folderService, ContentStatusRepository contentStatusRepository) {
+        this.categoryService = categoryService;
         this.contentRepository = contentRepository;
         this.folderService = folderService;
         this.contentStatusRepository = contentStatusRepository;
@@ -57,7 +56,7 @@ public class ContentService {
     }
 
     public List<Content> findByCategory(UUID categoryId) throws CapacityException {
-        Category category = capacityService.findCategoryById(categoryId);
+        Category category = categoryService.findById(categoryId);
         return contentRepository.findByCategories(category);
     }
 
