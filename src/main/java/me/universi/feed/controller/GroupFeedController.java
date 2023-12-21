@@ -45,7 +45,7 @@ public class GroupFeedController {
         return Response.buildResponse(response ->{
             GroupPost createdPost = groupFeedService.createGroupPost(groupId, groupPostDTO);
             response.body.put("createdPost", createdPost);
-            response.message = "Post criado com sucesso";
+            response.message = "Publicação criada com sucesso";
         });
     }
 
@@ -54,19 +54,17 @@ public class GroupFeedController {
         return Response.buildResponse(response ->{
             GroupPost createdPost = groupFeedService.editGroupPost(groupId, postId, groupPostDTO);
             response.body.put("editedPost", createdPost);
-            response.message = "Post editado com sucesso";
+            response.message = "Publicação editada com sucesso";
         });
     }
 
     @DeleteMapping("/{groupId}/posts/{postId}")
     public Response deleteGroupPost(@PathVariable String groupId, @PathVariable String postId) {
         return Response.buildResponse(response-> {
-            boolean success = groupFeedService.deleteGroupPost(groupId, postId);
-            if (success) {
-                response.message = "Post excluído com sucesso";
-                return;
+            if (!groupFeedService.deleteGroupPost(groupId, postId)) {
+                throw  new GroupFeedException("Houve um erro interno ao excluir a publicação");
             }
-            throw  new GroupFeedException("Houve um erro interno ao excluir o post");
+            response.message = "Publicação excluído com sucesso";
         });
     }
 }
