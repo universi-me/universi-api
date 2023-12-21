@@ -64,7 +64,7 @@ public class GroupFeedController {
             if (!groupFeedService.deleteGroupPost(groupId, postId)) {
                 throw  new GroupFeedException("Houve um erro interno ao excluir a publicação");
             }
-            response.message = "Publicação excluído com sucesso";
+            response.message = "Publicação excluída com sucesso";
         });
     }
 }
