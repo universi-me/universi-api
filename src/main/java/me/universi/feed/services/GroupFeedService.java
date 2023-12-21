@@ -26,15 +26,15 @@ public class GroupFeedService {
 
     public List<GroupPost> getGroupPosts(String groupId) {
         Optional<List<GroupPost>> posts = groupPostRepository.findByGroupIdAndDeletedIsFalse(groupId);
-        return posts.orElseThrow(() -> new PostNotFoundException("No posts found for the specified group."));
+        return posts.orElseThrow(() -> new PostNotFoundException("Publicação não foi encontrada."));
     }
 
     public GroupPost createGroupPost(String groupId, GroupPostDTO groupPostDTO) {
         String authorId = String.valueOf(UserService.getInstance().getUserInSession().getProfile().getId());
         if (groupPostDTO.getContent() == null || groupPostDTO.getContent().isEmpty()) {
-            throw new GroupFeedException("O conteúdo do post não pode estar vazio.");
+            throw new GroupFeedException("O conteúdo da publicação não pode estar vazio.");
         } else if(groupPostDTO.getContent().length() > 3000) {
-            throw new GroupFeedException("O conteúdo do post não pode ter mais de 3000 caracteres.");
+            throw new GroupFeedException("O conteúdo da publicação não pode ter mais de 3000 caracteres.");
         }
         GroupPost groupPost = new GroupPost(groupId, groupPostDTO.getContent(), authorId, false);
         return groupPostRepository.save(groupPost);
@@ -45,7 +45,7 @@ public class GroupFeedService {
         if (existingPost.isPresent() && !existingPost.get().isDeleted()) {
             return existingPost.get();
         } else {
-            throw new PostNotFoundException("Post not found or does not belong to the specified group.");
+            throw new PostNotFoundException("Publicação não foi encontrada.");
         }
     }
 
@@ -53,7 +53,7 @@ public class GroupFeedService {
         String authorId = String.valueOf(UserService.getInstance().getUserInSession().getProfile().getId());
         if (!post.getAuthorId().equals(authorId)) {
             if(!UserService.getInstance().isUserAdminSession()) {
-                throw new GroupFeedException("Você não tem permissão para editar este post.");
+                throw new GroupFeedException("Você não tem permissão para editar esta publicação.");
             }
         }
     }
@@ -65,7 +65,7 @@ public class GroupFeedService {
 
         if(groupPostDTO.getContent() != null && !groupPostDTO.getContent().isEmpty()) {
             if(groupPostDTO.getContent().length() > 3000) {
-                throw new GroupFeedException("O conteúdo do post não pode ter mais de 3000 caracteres.");
+                throw new GroupFeedException("O conteúdo da publicação não pode ter mais de 3000 caracteres.");
             }
             post.setContent(groupPostDTO.getContent());
         }
