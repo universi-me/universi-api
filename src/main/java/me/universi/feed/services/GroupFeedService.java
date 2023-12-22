@@ -49,19 +49,23 @@ public class GroupFeedService {
         }
     }
 
-    public void checkPermissionForEdit(GroupPost post) {
+    public void checkPermissionForEdit(GroupPost post, boolean forDelete) {
         String authorId = String.valueOf(UserService.getInstance().getUserInSession().getProfile().getId());
         if (!post.getAuthorId().equals(authorId)) {
-            if(!UserService.getInstance().isUserAdminSession()) {
-                throw new GroupFeedException("Você não tem permissão para editar esta publicação.");
+            if(UserService.getInstance().isUserAdminSession()) {
+                if(forDelete) {
+                    // admin can delete any post
+                    return;
+                }
             }
+            throw new GroupFeedException("Você não tem permissão para editar esta publicação.");
         }
     }
 
     public GroupPost editGroupPost(String groupId, String postId, GroupPostDTO groupPostDTO) {
         GroupPost post = getGroupPost(groupId, postId);
 
-        checkPermissionForEdit(post);
+        checkPermissionForEdit(post, false);
 
         if(groupPostDTO.getContent() != null && !groupPostDTO.getContent().isEmpty()) {
             if(groupPostDTO.getContent().length() > 3000) {
@@ -76,7 +80,7 @@ public class GroupFeedService {
     public boolean deleteGroupPost(String groupId, String postId) {
         GroupPost post = getGroupPost(groupId, postId);
 
-        checkPermissionForEdit(post);
+        checkPermissionForEdit(post, true);
 
         post.setDeleted(true);
         groupPostRepository.save(post);
