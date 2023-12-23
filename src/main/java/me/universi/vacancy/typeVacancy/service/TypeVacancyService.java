@@ -1,15 +1,10 @@
 package me.universi.vacancy.typeVacancy.service;
 
 import me.universi.api.entities.Response;
-import me.universi.curriculum.education.entities.Institution;
 import me.universi.curriculum.education.exceptions.TypeEducationException;
 import me.universi.vacancy.typeVacancy.entities.TypeVacancy;
 import me.universi.vacancy.typeVacancy.repository.TypeVacancyRepository;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
 import java.util.Map;
@@ -19,7 +14,7 @@ import java.util.UUID;
 @Service
 public class TypeVacancyService {
 
-    private TypeVacancyRepository typeVacancyRepository;
+    private final TypeVacancyRepository typeVacancyRepository;
 
     public TypeVacancyService(TypeVacancyRepository typeVacancyRepository){
         this.typeVacancyRepository = typeVacancyRepository;
@@ -35,16 +30,16 @@ public class TypeVacancyService {
     }
 
     public Optional<TypeVacancy> findById(UUID id){
-        return typeVacancyRepository.findById(id);
+        return typeVacancyRepository.findFirstById(id);
     }
 
     public TypeVacancy update(TypeVacancy newTypeVacancy, UUID id) throws Exception{
         return typeVacancyRepository.findById(id).map(typeVacancy -> {
             typeVacancy.setName(newTypeVacancy.getName());
-            return typeVacancyRepository.saveAndFlush(typeVacancy);
+            return save(typeVacancy);
         }).orElseGet(()->{
             try {
-                return typeVacancyRepository.saveAndFlush(newTypeVacancy);
+                return save(newTypeVacancy);
             }catch (Exception e){
                 /*Implementar tratamento de exeptions*/
                 return null;
@@ -68,6 +63,12 @@ public class TypeVacancyService {
             response.success = true;
 
         });
+    }
+
+    public void deleteLogic(UUID id){
+        TypeVacancy typeVacancy = findById(id).get();
+        typeVacancy.setDeleted(true);
+        save(typeVacancy);
     }
 
     public Response get(Map<String, Object> body) {
@@ -106,9 +107,9 @@ public class TypeVacancyService {
                 throw new TypeEducationException("Parametro TypeVacancyId é nulo.");
             }
 
-            typeVacancyRepository.delete(findById(UUID.fromString(id)).get());
+            deleteLogic(UUID.fromString(id));
 
-            response.message = "TypeVacancy removida logicamente";
+            response.message = "Tipo de Vaga removida com sucesso.";
             response.success = true;
 
         });

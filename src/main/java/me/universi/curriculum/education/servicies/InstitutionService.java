@@ -28,7 +28,7 @@ public class InstitutionService {
     }
 
     public Institution save(Institution institution){
-        return institutionRepository.save(institution);
+        return institutionRepository.saveAndFlush(institution);
     }
 
     public List<Institution> findAll(){
@@ -36,7 +36,7 @@ public class InstitutionService {
     }
 
     public Optional<Institution> findById(UUID id){
-        return institutionRepository.findById(id);
+        return institutionRepository.findFirstById(id);
     }
 
     public Institution update(Institution newInstitution, UUID id) throws Exception{
@@ -74,9 +74,9 @@ public class InstitutionService {
             }
 
             Institution newInstitution = new Institution(name, description);
-            institutionRepository.saveAndFlush(newInstitution);
+            save(newInstitution);
 
-            response.message = "Institution criada.";
+            response.message = "Instituição criada com sucesso.";
             response.success = true;
 
         });
@@ -115,13 +115,13 @@ public class InstitutionService {
         return Response.buildResponse(response -> {
 
             String id = (String)body.get("institutionId");
-            if(id.isEmpty()) {
+            if(id == null || id.isEmpty()) {
                 throw new TypeEducationException("Parametro institutionId é nulo.");
             }
 
             deleteLogic(UUID.fromString(id));
 
-            response.message = "institution removida logicamente";
+            response.message = "Instituição removida com sucesso.";
             response.success = true;
 
         });

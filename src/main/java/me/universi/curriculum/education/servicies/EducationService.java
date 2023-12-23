@@ -34,12 +34,11 @@ import java.util.UUID;
 public class EducationService {
     @PersistenceContext
     private EntityManager entityManager;
-    private EducationRepository educationRepository;
-    private UserService userService;
-    private ProfileService profileService;
-
-    private InstitutionService institutionService;
-    private TypeEducationService typeEducationService;
+    private final EducationRepository educationRepository;
+    private final UserService userService;
+    private final ProfileService profileService;
+    private final InstitutionService institutionService;
+    private final TypeEducationService typeEducationService;
 
     public EducationService(EducationRepository educationRepository, UserService userService, ProfileService profileService, TypeEducationService typeEducationService, InstitutionService institutionService){
         this.educationRepository = educationRepository;
@@ -267,7 +266,7 @@ public class EducationService {
 
             deleteLogic(UUID.fromString(id));
 
-            response.message = "Formação removida logicamente";
+            response.message = "Formação removida com sucesso.";
             response.success = true;
 
         });

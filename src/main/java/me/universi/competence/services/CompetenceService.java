@@ -12,7 +12,6 @@ import me.universi.profile.services.ProfileService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.Collection;
 import java.util.List;
@@ -23,11 +22,10 @@ import java.util.UUID;
 
 @Service
 public class CompetenceService {
-
-    private CompetenceRepository competenceRepository;
-    private ProfileService profileService;
-    private UserService userService;
-    private CompetenceTypeService competenceTypeService;
+    private final CompetenceRepository competenceRepository;
+    private final ProfileService profileService;
+    private final UserService userService;
+    private final CompetenceTypeService competenceTypeService;
 
     public CompetenceService(CompetenceRepository competenceRepository, ProfileService profileService, UserService userService, CompetenceTypeService competenceTypeService){
         this.competenceRepository = competenceRepository;
@@ -45,7 +43,7 @@ public class CompetenceService {
         }
     }
 
-    public Competence save(Competence competence) throws Exception {
+    public Competence save(Competence competence) {
         try {
             return competenceRepository.saveAndFlush(competence);
         } catch (Exception e) {
@@ -60,7 +58,7 @@ public class CompetenceService {
 
     public void deleteLogico(Competence competence) {
         competence.setDeleted(true);
-        competenceRepository.saveAndFlush(competence);
+        save(competence);
     }
 
     public List<Competence> findAll() {
@@ -83,8 +81,12 @@ public class CompetenceService {
         }
         return false;
     }
-    public void deleteAll(Collection<Competence> competences){
-        competenceRepository.deleteAll(competences);
+
+    public void deleteAll(Collection<Competence> competences) {
+        for(Competence competence : competences) {
+            competence.setDeleted(true);
+        }
+        competenceRepository.saveAll(competences);
     }
 
     public void addCompetenceInProfile(User user,Competence newCompetence) throws ProfileException {
@@ -94,7 +96,8 @@ public class CompetenceService {
     }
 
     public void delete(UUID id) {
-        competenceRepository.deleteById(id);
+        Competence competence = findFirstById(id);
+        deleteLogico(competence);
     }
 
     public Response create(Map<String, Object> body) {
@@ -127,7 +130,7 @@ public class CompetenceService {
             newCompetence.setDescription(description);
             newCompetence.setLevel(Level.valueOf(level));
 
-            competenceRepository.saveAndFlush(newCompetence);
+            save(newCompetence);
 
             /*Essa linha vai dar problema quando for para adicionar nas vagas a competence
             * esta adicionando na conta do usuario dieretamente*/
@@ -172,7 +175,7 @@ public class CompetenceService {
                 competence.setLevel(Level.valueOf(level));
             }
 
-            competenceRepository.saveAndFlush(competence);
+            save(competence);
 
             response.message = "Competência atualizada";
             response.success = true;

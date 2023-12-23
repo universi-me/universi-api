@@ -28,17 +28,16 @@ import java.util.UUID;
 @Service
 public class ExperienceService {
 
-    private ExperienceRepository experienceRepository;
-    private UserService userService;
-    private ProfileService profileService;
-    private TypeExperienceService typeExperienceService;
+    private final ExperienceRepository experienceRepository;
+    private final UserService userService;
+    private final ProfileService profileService;
+    private final TypeExperienceService typeExperienceService;
 
 
-    public ExperienceService(ExperienceRepository experienceRepository, UserService userService, ProfileService profileService
-            , TypeExperienceService typeExperienceService){
+    public ExperienceService(ExperienceRepository experienceRepository, UserService userService, ProfileService profileService, TypeExperienceService typeExperienceService){
         this.experienceRepository = experienceRepository;
         this.userService = userService;
-        this.profileService =profileService;
+        this.profileService = profileService;
         this.typeExperienceService = typeExperienceService;
     }
 
@@ -56,7 +55,7 @@ public class ExperienceService {
     }
 
     public Optional<Experience> findById(UUID id){
-        return experienceRepository.findById(id);
+        return experienceRepository.findFirstById(id);
     }
 
     public Experience update(Experience newExperience, UUID id) throws Exception{
@@ -67,10 +66,10 @@ public class ExperienceService {
             experience.setStartDate(newExperience.getStartDate());
             experience.setEndDate(newExperience.getEndDate());
             experience.setPresentDate(newExperience.getPresentDate());
-            return experienceRepository.saveAndFlush(experience);
+            return save(experience);
         }).orElseGet(()->{
             try {
-                return experienceRepository.saveAndFlush(newExperience);
+                return save(newExperience);
             }catch (Exception e){
                 return null;
             }
@@ -139,7 +138,7 @@ public class ExperienceService {
             save(experience);
             addExperienceInProfile(user, experience);
 
-            response.message = "Experiencia criada.";
+            response.message = "Experiencia criada com sucesso.";
             response.success = true;
 
         });
@@ -197,7 +196,7 @@ public class ExperienceService {
 
             update(experience, experience.getId());
 
-            response.message = "Experience atualizada";
+            response.message = "Experiencia atualizada com sucesso.";
             response.success = true;
 
         });
@@ -219,7 +218,7 @@ public class ExperienceService {
 
             deleteLogic(experience.getId());
 
-            response.message = "profileExperience removida logicamente";
+            response.message = "Experiencia removida com sucesso.";
             response.success = true;
 
         });

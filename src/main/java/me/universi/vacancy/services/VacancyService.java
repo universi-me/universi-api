@@ -34,17 +34,14 @@ import java.util.UUID;
 
 @Service
 public class VacancyService {
+    private final VacancyRepository vacancyRepository;
+    private final ProfileService profileService;
+    private final UserService userService;
+    private final CompetenceService competenceService;
+    private final TypeVacancyService typeVacancyService;
+    private final CompetenceTypeService competenceTypeService;
 
-    private VacancyRepository vacancyRepository;
-
-    public ProfileService profileService;
-    public UserService userService;
-    private CompetenceService competenceService;
-    private TypeVacancyService typeVacancyService;
-    private CompetenceTypeService competenceTypeService;
-
-    public VacancyService(VacancyRepository vacancyRepository, ProfileService profileService, UserService userService, CompetenceService competenceService,
-                          TypeVacancyService typeVacancyService, CompetenceTypeService competenceTypeService){
+    public VacancyService(VacancyRepository vacancyRepository, ProfileService profileService, UserService userService, CompetenceService competenceService, TypeVacancyService typeVacancyService, CompetenceTypeService competenceTypeService){
         this.vacancyRepository = vacancyRepository;
         this.profileService = profileService;
         this.userService = userService;
@@ -77,11 +74,11 @@ public class VacancyService {
 
     public Vacancy addCompetenceInVacancy(UUID id, Competence newCompetence){
         try {
-            Vacancy vacancy = vacancyRepository.findFirstById(id);
+            Vacancy vacancy = findFirstById(id);
             /*Implementar execetion para quando nao existir vaga com o id passado*/
             competenceService.save(newCompetence);
             vacancy.getCompetenceRequired().add(newCompetence);
-            return vacancyRepository.saveAndFlush(vacancy);
+            return save(vacancy);
         }catch (Exception e){
             return null;
         }
@@ -184,7 +181,7 @@ public class VacancyService {
             newVacancy.setRegistrationDate(registrationDate);
             newVacancy.setEndRegistrationDate(endRegistrationDate);
 
-            vacancyRepository.saveAndFlush(newVacancy);
+            save(newVacancy);
 
             response.message = "Vaga Criada";
             response.success = true;
@@ -239,7 +236,7 @@ public class VacancyService {
                 vacancy.setEndRegistrationDate(endRegistrationDate);
             }
 
-            vacancyRepository.saveAndFlush(vacancy);
+            save(vacancy);
 
             response.message = "Vaga atualizada";
             response.success = true;

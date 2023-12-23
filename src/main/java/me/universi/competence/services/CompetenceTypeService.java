@@ -1,17 +1,11 @@
 package me.universi.competence.services;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import me.universi.api.entities.Response;
 import me.universi.competence.entities.CompetenceType;
 import me.universi.competence.exceptions.CompetenceException;
 import me.universi.competence.repositories.CompetenceTypeRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
 import java.util.Map;
@@ -20,8 +14,11 @@ import java.util.UUID;
 
 @Service
 public class CompetenceTypeService {
-    @Autowired
-    private CompetenceTypeRepository competenceTypeRepository;
+    private final CompetenceTypeRepository competenceTypeRepository;
+
+    public CompetenceTypeService(CompetenceTypeRepository competenceTypeRepository) {
+        this.competenceTypeRepository = competenceTypeRepository;
+    }
 
     public CompetenceType findFirstById(UUID id) {
         Optional<CompetenceType> optionalCompetenceType = competenceTypeRepository.findFirstById(id);
@@ -50,7 +47,8 @@ public class CompetenceTypeService {
     }
 
     public void delete(CompetenceType competenceType) {
-        competenceTypeRepository.delete(competenceType);
+        competenceType.setDeleted(true);
+        save(competenceType);
     }
 
     public List<CompetenceType> findAll() {
@@ -58,12 +56,12 @@ public class CompetenceTypeService {
     }
 
     public CompetenceType update(CompetenceType newCompetenceType, UUID id) throws Exception{
-        return competenceTypeRepository.findById(id).map(competenceType -> {
+        return competenceTypeRepository.findFirstById(id).map(competenceType -> {
             competenceType.setName(newCompetenceType.getName());
-            return competenceTypeRepository.saveAndFlush(competenceType);
+            return save(competenceType);
         }).orElseGet(()->{
             try {
-                return competenceTypeRepository.saveAndFlush(newCompetenceType);
+                return save(newCompetenceType);
             }catch (Exception e){
                 return null;
             }
@@ -71,7 +69,8 @@ public class CompetenceTypeService {
     }
 
     public void delete(UUID id) {
-        competenceTypeRepository.deleteById(id);
+        CompetenceType competenceType = findFirstById(id);
+        delete(competenceType);
     }
 
     public Response create(Map<String, Object> body) {
@@ -89,9 +88,9 @@ public class CompetenceTypeService {
             CompetenceType newCompetence = new CompetenceType();
             newCompetence.setName(name);
 
-            competenceTypeRepository.saveAndFlush(newCompetence);
+            save(newCompetence);
 
-            response.message = "Competência Criada";
+            response.message = "Tipo de Competência Criada";
             response.success = true;
 
         });
@@ -109,7 +108,7 @@ public class CompetenceTypeService {
 
             CompetenceType competenceType = findFirstById(id);
             if (competenceType == null) {
-                throw new CompetenceException("Competência não encontrada.");
+                throw new CompetenceException("Tipo de Competência não encontrada.");
             }
 
             if(findFirstByName(name) != null) {
@@ -120,9 +119,9 @@ public class CompetenceTypeService {
                 competenceType.setName(name);
             }
 
-            competenceTypeRepository.saveAndFlush(competenceType);
+            save(competenceType);
 
-            response.message = "Competência atualizada";
+            response.message = "Tipo de Competência atualizada";
             response.success = true;
 
         });
@@ -141,9 +140,9 @@ public class CompetenceTypeService {
                 throw new CompetenceException("Competência não encontrada.");
             }
 
-            competenceTypeRepository.delete(competenceType);
+            delete(competenceType);
 
-            response.message = "Competência removida";
+            response.message = "Tipo de Competência removida";
             response.success = true;
 
         });
@@ -159,7 +158,7 @@ public class CompetenceTypeService {
 
             CompetenceType competenceType = findFirstById(id);
             if (competenceType == null) {
-                throw new CompetenceException("Competência não encontrada.");
+                throw new CompetenceException("Tipo de Competência não encontrada.");
             }
 
             response.body.put("competenceType", competenceType);
