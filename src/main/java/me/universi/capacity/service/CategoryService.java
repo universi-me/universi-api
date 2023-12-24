@@ -49,8 +49,10 @@ public class CategoryService {
         return false;
     }
 
-    public boolean delete(UUID id){
-        categoryRepository.deleteById(id);
+    public boolean delete(UUID id) {
+        Category category = findById(id);
+        category.setDeleted(true);
+        saveOrUpdate(category);
         return true;
     }
 

@@ -50,7 +50,7 @@ public class VacancyService {
         this.competenceTypeService = competenceTypeService;
     }
 
-    public Vacancy save(Vacancy vacancy) throws Exception{
+    public Vacancy save(Vacancy vacancy) {
         try {
             User user = userService.getUserInSession();
             vacancy.setProfile(user.getProfile());
@@ -61,7 +61,7 @@ public class VacancyService {
         }
     }
     public void delete(UUID id) {
-        vacancyRepository.deleteById(id);
+        deleteLogic(id);
     }
 
     public List<Vacancy> findAll() {
@@ -88,7 +88,7 @@ public class VacancyService {
         return findFirstById(UUID.fromString(id));
     }
 
-    public void deleteLogic(UUID id) throws Exception {
+    public void deleteLogic(UUID id) {
         Vacancy vacancy = findFirstById(id);
         vacancy.setDeleted(true);
         save(vacancy);
