@@ -174,7 +174,8 @@ public class EducationService {
 
     private void checkPermissionForEdit(Education education, boolean forDelete) {
         User user = userService.getUserInSession();
-        if(!user.getProfile().getEducations().contains(education)) {
+        Profile profile = profileService.getProfileByUserIdOrUsername(user.getProfile().getId(), user.getUsername());
+        if(!profile.getEducations().contains(education)) {
             if(forDelete) {
                 if(userService.isUserAdminSession()) {
                     return;

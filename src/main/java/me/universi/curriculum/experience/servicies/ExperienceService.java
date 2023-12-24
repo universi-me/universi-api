@@ -207,7 +207,8 @@ public class ExperienceService {
 
     private void checkPermissionForEdit(Experience experience, boolean forDelete) {
         User user = userService.getUserInSession();
-        if(!user.getProfile().getExperiences().contains(experience)) {
+        Profile profile = profileService.getProfileByUserIdOrUsername(user.getProfile().getId(), user.getUsername());
+        if(!profile.getExperiences().contains(experience)) {
             if(forDelete) {
                 if(userService.isUserAdminSession()) {
                     return;

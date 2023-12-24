@@ -187,7 +187,8 @@ public class CompetenceService {
 
     private void checkPermissionForEdit(Competence competence, boolean forDelete) {
         User user = userService.getUserInSession();
-        if(!user.getProfile().getCompetences().contains(competence)) {
+        Profile profile = profileService.getProfileByUserIdOrUsername(user.getProfile().getId(), user.getUsername());
+        if(!profile.getCompetences().contains(competence)) {
             if(forDelete) {
                 if(userService.isUserAdminSession()) {
                     return;
