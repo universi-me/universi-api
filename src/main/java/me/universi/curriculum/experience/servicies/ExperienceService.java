@@ -5,6 +5,7 @@ import me.universi.curriculum.education.exceptions.EducationException;
 import me.universi.curriculum.education.exceptions.TypeEducationException;
 import me.universi.curriculum.experience.entities.Experience;
 import me.universi.curriculum.experience.entities.TypeExperience;
+import me.universi.curriculum.experience.exceptions.ExperienceException;
 import me.universi.curriculum.experience.exceptions.TypeExperienceException;
 import me.universi.curriculum.experience.repositories.ExperienceRepository;
 import me.universi.profile.entities.Profile;
@@ -170,6 +171,8 @@ public class ExperienceService {
                 throw new ProfileException("Experiencia não encontrada.");
             }
 
+            checkPermissionForEdit(experience, false);
+
             if(typeExperienceId != null) {
                 TypeExperience typeExperience = typeExperienceService.findById(UUID.fromString(typeExperienceId)).get();
                 if(typeExperience == null) {
@@ -202,6 +205,20 @@ public class ExperienceService {
         });
     }
 
+    private void checkPermissionForEdit(Experience experience, boolean forDelete) {
+        User user = userService.getUserInSession();
+        if(!user.getProfile().getExperiences().contains(experience)) {
+            if(forDelete) {
+                if(userService.isUserAdminSession()) {
+                    return;
+                }
+            }
+        } else {
+            return;
+        }
+        throw new ExperienceException("Você não tem permissão para editar essa experiencia.");
+    }
+
 
     public Response remove(Map<String, Object> body) {
         return Response.buildResponse(response -> {
@@ -215,6 +232,8 @@ public class ExperienceService {
             if (experience == null) {
                 throw new ProfileException("profileExperience não encontrada.");
             }
+            
+            checkPermissionForEdit(experience, true);
 
             deleteLogic(experience.getId());
 
