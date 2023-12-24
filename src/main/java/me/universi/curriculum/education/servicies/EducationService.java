@@ -62,21 +62,20 @@ public class EducationService {
     }
 
     public Optional<Education> findById(UUID id){
-        return educationRepository.findById(id);
+        return educationRepository.findFirstById(id);
     }
 
-    public Education update(Education newEducation, UUID id) throws Exception{
-        return educationRepository.findById(id).map(education -> {
+    public Education update(Education newEducation, UUID id) {
+        return findById(id).map(education -> {
             education.setTypeEducation(newEducation.getTypeEducation());
             education.setInstitution(newEducation.getInstitution());
             education.setStartDate(newEducation.getStartDate());
             education.setEndDate(newEducation.getEndDate());
             education.setPresentDate(newEducation.getPresentDate());
-            return educationRepository.saveAndFlush(education);
+            return save(education);
         }).orElseGet(()->{
             try {
-                User user = userService.getUserInSession();
-                return educationRepository.saveAndFlush(newEducation);
+                return save(newEducation);
             }catch (Exception e){
                 return null;
             }
@@ -103,10 +102,14 @@ public class EducationService {
         profileService.save(profile);
     }
 
-    public void deleteLogic(UUID id) throws Exception {
-        Education education = findById(id).get();
+    public void delete(Education education) {
         education.setDeleted(true);
-        update(education, id);
+        update(education, education.getId());
+    }
+
+    public void deleteLogic(UUID id) {
+        Education education = findById(id).get();
+        delete(education);
     }
 
     public Response update(@RequestBody Map<String, Object> body) {
@@ -132,6 +135,8 @@ public class EducationService {
             if (education == null) {
                 throw new EducationException("Formação não encontrada.");
             }
+
+            checkPermissionForEdit(education, false);
 
             if(typeEducationId != null) {
                 TypeEducation typeEducation = typeEducationService.findById(UUID.fromString(typeEducationId)).get();
@@ -165,6 +170,20 @@ public class EducationService {
             response.success = true;
 
         });
+    }
+
+    private void checkPermissionForEdit(Education education, boolean forDelete) {
+        User user = userService.getUserInSession();
+        if(!user.getProfile().getEducations().contains(education)) {
+            if(forDelete) {
+                if(userService.isUserAdminSession()) {
+                    return;
+                }
+            }
+        } else {
+            return;
+        }
+        throw new EducationException("Você não tem permissão para editar essa formação.");
     }
 
 
@@ -217,7 +236,8 @@ public class EducationService {
             }else{
                 newEducation.setPresentDate(false);
             }
-            educationRepository.saveAndFlush(newEducation);
+
+            save(newEducation);
 
             addEducationInProfile(user, newEducation);
 
@@ -231,7 +251,7 @@ public class EducationService {
         return Response.buildResponse(response -> {
             String id = (String)body.get("educationId");
 
-            if(id.isEmpty()) {
+            if(id == null || id.isEmpty()) {
                 throw new TypeEducationException("Parametro id é nulo.");
             }
 
@@ -260,11 +280,18 @@ public class EducationService {
         return Response.buildResponse(response -> {
 
             String id = (String)body.get("educationId");
-            if(id.isEmpty()) {
+            if(id == null || id.isEmpty()) {
                 throw new TypeEducationException("Parametro educationId é nulo.");
             }
 
-            deleteLogic(UUID.fromString(id));
+            Optional<Education> education = findById(UUID.fromString(id));
+            if (education.isEmpty()) {
+                throw new EducationException("Formação não encontrada.");
+            }
+
+            checkPermissionForEdit(education.get(), true);
+
+            delete(education.get());
 
             response.message = "Formação removida com sucesso.";
             response.success = true;
