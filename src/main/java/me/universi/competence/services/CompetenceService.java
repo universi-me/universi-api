@@ -161,6 +161,8 @@ public class CompetenceService {
                 throw new CompetenceException("Competência não encontrada.");
             }
 
+            checkPermissionForEdit(competence, false);
+
             if(competenceTypeId != null && !competenceTypeId.isEmpty()) {
                 CompetenceType compT = competenceTypeService.findFirstById(competenceTypeId);
                 if(compT == null) {
@@ -183,6 +185,20 @@ public class CompetenceService {
         });
     }
 
+    private void checkPermissionForEdit(Competence competence, boolean forDelete) {
+        User user = userService.getUserInSession();
+        if(!user.getProfile().getCompetences().contains(competence)) {
+            if(forDelete) {
+                if(userService.isUserAdminSession()) {
+                    return;
+                }
+            }
+        } else {
+            return;
+        }
+        throw new CompetenceException("Você não tem permissão para editar essa competência.");
+    }
+
     public Response remove( Map<String, Object> body) {
         return Response.buildResponse(response -> {
 
@@ -195,6 +211,8 @@ public class CompetenceService {
             if (competence == null) {
                 throw new CompetenceException("Competência não encontrada.");
             }
+
+            checkPermissionForEdit(competence, true);
 
             deleteLogico(competence);
 
