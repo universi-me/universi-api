@@ -144,7 +144,9 @@ public class FolderService {
     }
 
     public boolean delete(UUID id){
-        folderRepository.deleteById(id);
+        Folder folder = findById(id);
+        folder.setDeleted(true);
+        saveOrUpdate(folder);
         return true;
     }
 

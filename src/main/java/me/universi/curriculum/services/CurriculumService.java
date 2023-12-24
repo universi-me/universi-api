@@ -3,14 +3,11 @@ package me.universi.curriculum.services;
 import me.universi.competence.entities.Competence;
 import me.universi.competence.entities.CompetenceType;
 import me.universi.competence.enums.Level;
-import me.universi.competence.services.CompetenceService;
-import me.universi.competence.services.CompetenceTypeService;
 import me.universi.curriculum.education.entities.Education;
 import me.universi.curriculum.education.entities.TypeEducation;
 import me.universi.curriculum.education.servicies.EducationService;
 import me.universi.curriculum.experience.entities.Experience;
 import me.universi.curriculum.experience.entities.TypeExperience;
-import me.universi.curriculum.experience.servicies.ExperienceService;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
 import me.universi.user.entities.User;
@@ -24,24 +21,14 @@ import java.util.UUID;
 
 @Service
 public class CurriculumService {
+    private final ProfileService profileService;
+    private final UserService userService;
+    private final EducationService educationService;
 
-    private ProfileService profileService;
-    private UserService userService;
-    private CompetenceService competenceService;
-    private CompetenceTypeService competenceTypeService;
-    private EducationService educationService;
-
-    private ExperienceService experienceService;
-
-
-    public CurriculumService(ProfileService profileService, UserService userService, CompetenceService competenceService,
-                             CompetenceTypeService competenceTypeService, EducationService educationService, ExperienceService experienceService){
+    public CurriculumService(ProfileService profileService, UserService userService, EducationService educationService) {
         this.profileService = profileService;
         this.userService = userService;
-        this.competenceService = competenceService;
-        this.competenceTypeService = competenceTypeService;
         this.educationService = educationService;
-        this.experienceService = experienceService;
     }
 
 

@@ -2,7 +2,6 @@ package me.universi.competence.controller;
 
 import me.universi.api.entities.Response;
 import me.universi.competence.services.CompetenceTypeService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,8 +10,11 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api")
 public class CompetenceTypeController {
-    @Autowired
-    public CompetenceTypeService competenceTypeService;
+    private final CompetenceTypeService competenceTypeService;
+
+    public CompetenceTypeController(CompetenceTypeService competenceTypeService) {
+        this.competenceTypeService = competenceTypeService;
+    }
 
     @PostMapping(value = "/admin/competencetype/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody

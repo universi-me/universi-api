@@ -25,7 +25,7 @@ public class TypeEducationService {
     }
 
     public TypeEducation save(TypeEducation typeEducation){
-        return typeEducationRepository.save(typeEducation);
+        return typeEducationRepository.saveAndFlush(typeEducation);
     }
 
     public List<TypeEducation> findAll(){
@@ -33,16 +33,16 @@ public class TypeEducationService {
     }
 
     public Optional<TypeEducation> findById(UUID id){
-        return typeEducationRepository.findById(id);
+        return typeEducationRepository.findFirstById(id);
     }
 
     public TypeEducation update(TypeEducation newTypeEducation, UUID id) throws Exception{
         return typeEducationRepository.findById(id).map(typeEducation -> {
             typeEducation.setName(newTypeEducation.getName());
-            return typeEducationRepository.saveAndFlush(typeEducation);
+            return save(typeEducation);
         }).orElseGet(()->{
             try {
-                return typeEducationRepository.saveAndFlush(newTypeEducation);
+                return save(newTypeEducation);
             }catch (Exception e){
                 /*Implementar tratamento de exeptions*/
                 return null;
@@ -66,9 +66,9 @@ public class TypeEducationService {
             }
 
             TypeEducation newTypeEducation = new TypeEducation(name);
-            typeEducationRepository.saveAndFlush(newTypeEducation);
+            save(newTypeEducation);
 
-            response.message = "TypeEducation criada.";
+            response.message = "Tipo de Educação criada com sucesso.";
             response.success = true;
 
         });
@@ -113,7 +113,7 @@ public class TypeEducationService {
 
             deleteLogic(UUID.fromString(id));
 
-            response.message = "TypeEdcation removida logicamente";
+            response.message = "Tipo de Educação removida com sucesso.";
             response.success = true;
 
         });

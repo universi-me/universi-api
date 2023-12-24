@@ -1,5 +1,6 @@
 package me.universi.curriculum.education.repositories;
 
+import java.util.Optional;
 import me.universi.curriculum.education.entities.Education;
 import me.universi.profile.entities.Profile;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,5 +13,6 @@ import java.util.UUID;
 @Repository
 public interface EducationRepository extends JpaRepository<Education, UUID> {
 
+    Optional<Education> findFirstById(UUID id);
 }
 

@@ -1,6 +1,8 @@
 package me.universi.alternative.services;
 
+import java.util.Optional;
 import me.universi.alternative.AlternativeRepository;
+import me.universi.alternative.entities.Alternative;
 import me.universi.alternative.exceptions.AlternativeNotFoundException;
 import me.universi.group.entities.Group;
 import me.universi.group.exceptions.GroupNotFoundException;
@@ -33,6 +35,11 @@ public class DeleteAlternativeServiceImpl implements DeleteAlternativeService {
 
        this.alternativeRepository.findAlternativeByIdAndQuestionIdAndQuestionProfileCreateId(alternativeId, questionId, user.getId())
                 .orElseThrow(AlternativeNotFoundException::new);
-       this.alternativeRepository.deleteById(alternativeId);
+
+        Optional<Alternative> alternative = alternativeRepository.findById(alternativeId);
+        if(alternative.isPresent()) {
+            alternative.get().setDeleted(true);
+            alternativeRepository.save(alternative.get());
+        }
     }
 }

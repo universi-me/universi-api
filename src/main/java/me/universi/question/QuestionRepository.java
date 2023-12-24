@@ -17,8 +17,6 @@ public interface QuestionRepository extends JpaRepository<Question, UUID> {
             "order by random() limit ?2 ",nativeQuery = true)
     List<Question> findAllRandonAndLimited(UUID exerciseId, int amount);
 
-    void deleteById(UUID questionId);
-
     Optional<Question> findFirstById(UUID id);
 
     Optional<Question> findFirstByIdAndExercisesId(UUID questionId, UUID exercisesId);
