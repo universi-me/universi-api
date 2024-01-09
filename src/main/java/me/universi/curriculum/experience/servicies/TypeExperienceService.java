@@ -12,14 +12,14 @@ import java.util.UUID;
 @Service
 public class TypeExperienceService {
 
-    private TypeExperienceRepository typeExperienceRepository;
+    private final TypeExperienceRepository typeExperienceRepository;
 
     public TypeExperienceService(TypeExperienceRepository typeExperienceRepository){
         this.typeExperienceRepository = typeExperienceRepository;
     }
 
     public TypeExperience save(TypeExperience typeExperience){
-        return typeExperienceRepository.save(typeExperience);
+        return typeExperienceRepository.saveAndFlush(typeExperience);
     }
 
     public List<TypeExperience> findAll(){
@@ -27,16 +27,16 @@ public class TypeExperienceService {
     }
 
     public Optional<TypeExperience> findById(UUID id){
-        return typeExperienceRepository.findById(id);
+        return typeExperienceRepository.findFirstById(id);
     }
 
     public TypeExperience update(TypeExperience newTypeExperience, UUID id) throws Exception{
         return typeExperienceRepository.findById(id).map(typeExperience -> {
             typeExperience.setName(newTypeExperience.getName());
-            return typeExperienceRepository.saveAndFlush(typeExperience);
+            return save(typeExperience);
         }).orElseGet(()->{
             try {
-                return typeExperienceRepository.saveAndFlush(newTypeExperience);
+                return save(newTypeExperience);
             }catch (Exception e){
                 return null;
             }

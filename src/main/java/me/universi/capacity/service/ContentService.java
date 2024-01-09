@@ -241,8 +241,8 @@ public class ContentService {
 
         // remove from linked watch`s
         deleteStatus(content.getId());
-
-        contentRepository.deleteById(content.getId());
+        content.setDeleted(true);
+        saveOrUpdate(content);
 
         return true;
     }

@@ -131,6 +131,10 @@ public class GroupController {
                     groupService.addSubGroup(parentGroup, groupNew);
                 }
 
+                // add creator to group participants
+                groupService.addParticipantToGroup(groupNew, groupNew.getAdmin());
+                groupService.addAdministrator(groupNew, groupNew.getAdmin());
+
                 response.message = "Grupo criado com sucesso.";
                 return;
             }

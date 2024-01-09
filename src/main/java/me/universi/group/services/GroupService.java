@@ -31,6 +31,9 @@ public class GroupService {
     private final GroupAdminRepository groupAdminRepository;
     private final GroupEnvironmentRepository groupEnvironmentRepository;
 
+    @Value("${LOCAL_ORGANIZATION_ID_ENABLED}")
+    private boolean localOrganizationIdEnabled;
+
     @Value("${LOCAL_ORGANIZATION_ID}")
     private String localOrganizationId;
 
@@ -407,12 +410,11 @@ public class GroupService {
 
         String organizationId = (domain.contains(".") ? domain.split("\\.")[0] : domain).toLowerCase().trim();
 
-        if(!userService.isProduction()) {
+        if(!userService.isProduction() || localOrganizationIdEnabled) {
             organizationId = localOrganizationId;
         }
 
-        Group organizationG = findFirstByRootGroupAndNicknameIgnoreCase(true, organizationId, false);
-        return organizationG;
+        return findFirstByRootGroupAndNicknameIgnoreCase(true, organizationId, false);
     }
 
     public Group getOrganizationBasedInDomain() {
@@ -739,6 +741,10 @@ public class GroupService {
             return false;
         }
         if(groupAdminRepository.existsByGroupIdAndProfileId(group.getId(), profile.getId())) {
+            // check if has only one admin
+            if(group.getAdministrators() != null && group.getAdministrators().size() <= 1) {
+                throw new GroupException("Não é possível remover o único administrador do grupo.");
+            }
             GroupAdmin groupAdmin = groupAdminRepository.findFirstByGroupIdAndProfileId(group.getId(), profile.getId());
             groupAdmin.setRemoved(ConvertUtil.getDateTimeNow());
             groupAdmin.setDeleted(true);

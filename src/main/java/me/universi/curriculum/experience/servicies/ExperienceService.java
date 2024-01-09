@@ -5,6 +5,7 @@ import me.universi.curriculum.education.exceptions.EducationException;
 import me.universi.curriculum.education.exceptions.TypeEducationException;
 import me.universi.curriculum.experience.entities.Experience;
 import me.universi.curriculum.experience.entities.TypeExperience;
+import me.universi.curriculum.experience.exceptions.ExperienceException;
 import me.universi.curriculum.experience.exceptions.TypeExperienceException;
 import me.universi.curriculum.experience.repositories.ExperienceRepository;
 import me.universi.profile.entities.Profile;
@@ -28,17 +29,16 @@ import java.util.UUID;
 @Service
 public class ExperienceService {
 
-    private ExperienceRepository experienceRepository;
-    private UserService userService;
-    private ProfileService profileService;
-    private TypeExperienceService typeExperienceService;
+    private final ExperienceRepository experienceRepository;
+    private final UserService userService;
+    private final ProfileService profileService;
+    private final TypeExperienceService typeExperienceService;
 
 
-    public ExperienceService(ExperienceRepository experienceRepository, UserService userService, ProfileService profileService
-            , TypeExperienceService typeExperienceService){
+    public ExperienceService(ExperienceRepository experienceRepository, UserService userService, ProfileService profileService, TypeExperienceService typeExperienceService){
         this.experienceRepository = experienceRepository;
         this.userService = userService;
-        this.profileService =profileService;
+        this.profileService = profileService;
         this.typeExperienceService = typeExperienceService;
     }
 
@@ -56,7 +56,7 @@ public class ExperienceService {
     }
 
     public Optional<Experience> findById(UUID id){
-        return experienceRepository.findById(id);
+        return experienceRepository.findFirstById(id);
     }
 
     public Experience update(Experience newExperience, UUID id) throws Exception{
@@ -67,10 +67,10 @@ public class ExperienceService {
             experience.setStartDate(newExperience.getStartDate());
             experience.setEndDate(newExperience.getEndDate());
             experience.setPresentDate(newExperience.getPresentDate());
-            return experienceRepository.saveAndFlush(experience);
+            return save(experience);
         }).orElseGet(()->{
             try {
-                return experienceRepository.saveAndFlush(newExperience);
+                return save(newExperience);
             }catch (Exception e){
                 return null;
             }
@@ -139,7 +139,7 @@ public class ExperienceService {
             save(experience);
             addExperienceInProfile(user, experience);
 
-            response.message = "Experiencia criada.";
+            response.message = "Experiencia criada com sucesso.";
             response.success = true;
 
         });
@@ -171,6 +171,8 @@ public class ExperienceService {
                 throw new ProfileException("Experiencia não encontrada.");
             }
 
+            checkPermissionForEdit(experience, false);
+
             if(typeExperienceId != null) {
                 TypeExperience typeExperience = typeExperienceService.findById(UUID.fromString(typeExperienceId)).get();
                 if(typeExperience == null) {
@@ -197,10 +199,25 @@ public class ExperienceService {
 
             update(experience, experience.getId());
 
-            response.message = "Experience atualizada";
+            response.message = "Experiencia atualizada com sucesso.";
             response.success = true;
 
         });
+    }
+
+    private void checkPermissionForEdit(Experience experience, boolean forDelete) {
+        User user = userService.getUserInSession();
+        Profile profile = profileService.getProfileByUserIdOrUsername(user.getProfile().getId(), user.getUsername());
+        if(!profile.getExperiences().contains(experience)) {
+            if(forDelete) {
+                if(userService.isUserAdminSession()) {
+                    return;
+                }
+            }
+        } else {
+            return;
+        }
+        throw new ExperienceException("Você não tem permissão para editar essa experiencia.");
     }
 
 
@@ -216,10 +233,12 @@ public class ExperienceService {
             if (experience == null) {
                 throw new ProfileException("profileExperience não encontrada.");
             }
+            
+            checkPermissionForEdit(experience, true);
 
             deleteLogic(experience.getId());
 
-            response.message = "profileExperience removida logicamente";
+            response.message = "Experiencia removida com sucesso.";
             response.success = true;
 
         });

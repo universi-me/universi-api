@@ -1,9 +1,11 @@
 package me.universi.question.services;
 
+import java.util.Optional;
 import me.universi.group.entities.Group;
 import me.universi.group.exceptions.GroupNotFoundException;
 import me.universi.group.repositories.GroupRepository;
 import me.universi.question.QuestionRepository;
+import me.universi.question.entities.Question;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import me.universi.util.ExerciseUtil;
@@ -33,6 +35,10 @@ public class DeleteQuestionServiceImpl implements DeleteQuestionService {
 
         ExerciseUtil.checkPermissionExercise(user, group);
 
-        questionRepository.deleteById(questionId);
+        Optional<Question> question = questionRepository.findById(questionId);
+        if(question.isPresent()) {
+            question.get().setDeleted(true);
+            questionRepository.save(question.get());
+        }
     }
 }
