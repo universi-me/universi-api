@@ -117,9 +117,20 @@ public class ExperienceService {
             }
 
             Boolean presentDate = (Boolean) body.get("presentDate");
-            Date endDate = simpleDateFormat.parse((String) body.get("endDate"));
-            if(endDate == null && presentDate == null){
+
+            String endDateString = (String) body.get("endDate");
+            Date endDate = null;
+            if(endDateString == null && presentDate == null){
                 throw new EducationException("Paramentro endDate e presentDate passado é nulo");
+            }
+
+            if(endDateString != null) {
+                endDate = simpleDateFormat.parse(endDateString);
+            }
+            if(endDate != null && startDate != null){
+                if(endDate.before(startDate)) {
+                    throw new EducationException("Data de inicio não pode ser maior que a data de fim.");
+                }
             }
 
             TypeExperience typeExperience = typeExperienceService.findById(UUID.fromString(typeExperienceId)).get();
@@ -139,7 +150,7 @@ public class ExperienceService {
             save(experience);
             addExperienceInProfile(user, experience);
 
-            response.message = "Experiencia criada com sucesso.";
+            response.message = "Experiência criada com sucesso.";
             response.success = true;
 
         });
@@ -161,8 +172,22 @@ public class ExperienceService {
             String local = (String)body.get("local");
             String description = (String) body.get("description");
             Date startDate = simpleDateFormat.parse((String) body.get("startDate"));
-            Date endDate = simpleDateFormat.parse((String) body.get("endDate"));
             Boolean presentDate = (Boolean) body.get("presentDate");
+
+            String endDateString = (String) body.get("endDate");
+            Date endDate = null;
+            if(endDateString == null && presentDate == null){
+                throw new EducationException("Paramentro endDate e presentDate passado é nulo");
+            }
+
+            if(endDateString != null) {
+                endDate = simpleDateFormat.parse(endDateString);
+            }
+            if(endDate != null && startDate != null){
+                if(endDate.before(startDate)) {
+                    throw new EducationException("Data de inicio não pode ser maior que a data de fim.");
+                }
+            }
 
 
 

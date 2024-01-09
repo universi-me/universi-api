@@ -1,0 +1,1 @@
+ALTER TABLE competence_type ADD COLUMN reviewed BOOLEAN DEFAULT FALSE;
