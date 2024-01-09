@@ -126,8 +126,22 @@ public class EducationService {
             String typeEducationId = (String)body.get("typeEducationId");
             String institutionId = (String)body.get("institutionId");
             Date startDate = simpleDateFormat.parse((String) body.get("startDate"));
-            Date endDate = simpleDateFormat.parse((String) body.get("endDate"));
             Boolean presentDate = (Boolean) body.get("presentDate");
+
+            String endDateString = (String) body.get("endDate");
+            Date endDate = null;
+            if(endDateString == null && presentDate == null){
+                throw new EducationException("Paramentro endDate e presentDate passado é nulo");
+            }
+
+            if(endDateString != null) {
+                endDate = simpleDateFormat.parse(endDateString);
+            }
+            if(endDate != null && startDate != null){
+                if(endDate.before(startDate)) {
+                    throw new EducationException("Data de inicio não pode ser maior que a data de fim.");
+                }
+            }
 
 
 
@@ -196,12 +210,12 @@ public class EducationService {
             SimpleDateFormat  simpleDateFormat = new SimpleDateFormat(dateFormat);
 
             String typeEducationId = (String)body.get("typeEducationId");
-            if(typeEducationId.isBlank() || typeEducationId.isEmpty()){
+            if(typeEducationId == null || typeEducationId.isBlank() || typeEducationId.isEmpty()){
                 throw new TypeEducationException("Paramentro typeEducationId passado é nulo");
             }
 
             String institutionId = (String) body.get("institutionId");
-            if(institutionId.isBlank() || institutionId.isEmpty()){
+            if(institutionId == null || institutionId.isBlank() || institutionId.isEmpty()){
                 throw new TypeEducationException("Paramentro institutionId passado é nulo");
             }
 
@@ -211,9 +225,19 @@ public class EducationService {
             }
 
             Boolean presentDate = (Boolean) body.get("presentDate");
-            Date endDate = simpleDateFormat.parse((String) body.get("endDate"));
-            if(endDate == null && presentDate == null){
+            String endDateString = (String) body.get("endDate");
+            Date endDate = null;
+            if(endDateString == null && presentDate == null){
                 throw new EducationException("Paramentro endDate e presentDate passado é nulo");
+            }
+
+            if(endDateString != null) {
+                endDate = simpleDateFormat.parse(endDateString);
+            }
+            if(endDate != null && startDate != null){
+                if(endDate.before(startDate)) {
+                    throw new EducationException("Data de inicio não pode ser maior que a data de fim.");
+                }
             }
 
             TypeEducation typeEducation = typeEducationService.findById(UUID.fromString(typeEducationId)).get();

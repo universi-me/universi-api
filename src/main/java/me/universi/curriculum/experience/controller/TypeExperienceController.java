@@ -71,7 +71,7 @@ public class TypeExperienceController {
 
             typeExperienceService.save(typeExperience);
 
-            response.message = "TypeExperience Criada.";
+            response.message = "Tipo de Experiência Criada.";
             response.success = true;
 
         });
@@ -102,7 +102,7 @@ public class TypeExperienceController {
 
             typeExperienceService.update(typeExperience, typeExperience.getId());
 
-            response.message = "Competência atualizada";
+            response.message = "Tipo de Experiência atualizada";
             response.success = true;
 
         });
@@ -125,7 +125,7 @@ public class TypeExperienceController {
 
             typeExperienceService.deleteLogic(typeExperience.getId());
 
-            response.message = "TypeExperience removida logicamente";
+            response.message = "Tipo de Experiência removida";
             response.success = true;
 
         });
@@ -143,7 +143,7 @@ public class TypeExperienceController {
 
             TypeExperience typeExperience = typeExperienceService.findById(UUID.fromString(id)).get();
             if (typeExperience == null) {
-                throw new TypeEducationException("TypeExperience não encontrada.");
+                throw new TypeEducationException("Tipo de Experiência não encontrada.");
             }
 
             response.body.put("typeExperience", typeExperience);
