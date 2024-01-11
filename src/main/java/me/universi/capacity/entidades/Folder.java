@@ -1,6 +1,8 @@
 package me.universi.capacity.entidades;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -11,6 +13,8 @@ import java.io.Serializable;
 import me.universi.capacity.service.FolderService;
 import me.universi.group.entities.Group;
 import me.universi.profile.entities.Profile;
+import me.universi.user.services.UserService;
+
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Collection;
@@ -205,5 +209,18 @@ public class Folder implements Serializable {
     @Transient
     public boolean isCanEdit() {
         return FolderService.getInstance().hasPermissions(this, true);
+    }
+
+    @Transient
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public Profile getAssignedBy() {
+        FolderProfile assigned = this.assignedUsers.stream()
+            .filter(u -> u.isAssigned() && UserService.getInstance().isSessionOfUser(u.getProfile().getUser()))
+            .findAny()
+            .orElse(null);
+
+        return assigned != null
+            ? assigned.getAuthor()
+            : null;
     }
 }
