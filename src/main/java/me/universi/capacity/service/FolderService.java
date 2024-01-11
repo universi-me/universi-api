@@ -374,4 +374,22 @@ public class FolderService {
             assignToProfile(UUID.fromString(profileId), folder);
         }
     }
+
+    public void unassignFromProfile(UUID profileId, Folder folder) {
+        FolderProfile folderProfile = folderProfileRepository.findFirstByFolderIdAndProfileId(folder.getId(), profileId);
+        if (folderProfile == null)
+            return;
+
+        if (!UserService.getInstance().isSessionOfUser(folderProfile.getAuthor().getUser())) {
+            throw new CapacityException("Apenas quem atribuiu a pasta poderá desatribuir");
+        }
+
+        folderProfileRepository.delete(folderProfile);
+    }
+
+    public void unassignFromMultipleProfiles(Collection<UUID> profilesIds, Folder folder) {
+        for (UUID profileId : profilesIds) {
+            assignToProfile(profileId, folder);
+        }
+    }
 }
