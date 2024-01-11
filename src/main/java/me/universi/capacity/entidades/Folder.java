@@ -215,7 +215,7 @@ public class Folder implements Serializable {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public Profile getAssignedBy() {
         FolderProfile assigned = this.assignedUsers.stream()
-            .filter(u -> UserService.getInstance().isSessionOfUser(u.getProfile().getUser()))
+            .filter(u -> u.isAssigned() && UserService.getInstance().isSessionOfUser(u.getProfile().getUser()))
             .findAny()
             .orElse(null);
 
