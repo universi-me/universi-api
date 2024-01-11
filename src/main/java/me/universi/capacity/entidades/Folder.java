@@ -220,7 +220,7 @@ public class Folder implements Serializable {
             .orElse(null);
 
         return assigned != null
-            ? assigned.getProfile()
+            ? assigned.getAuthor()
             : null;
     }
 }
