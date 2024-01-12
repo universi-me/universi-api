@@ -355,4 +355,41 @@ public class FolderController {
            response.body.put("profilesIds", folderService.findAssignedProfiles((UUID.fromString(String.valueOf(folderId)))));
         });
     }
+
+    @PostMapping(value = "/unassign", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Response unassign(@RequestBody Map<String, Object> body) {
+        return Response.buildResponse(response -> {
+            Object folderId = body.get("folderId");
+            Object profilesIds = body.get("profilesIds");
+
+            if (folderId == null || String.valueOf(folderId).isEmpty())
+                throw new CapacityException("folderId é inválido.");
+
+            Folder folder = folderService.findById(UUID.fromString(String.valueOf(folderId)));
+            if (folder == null)
+                throw new CapacityException("folderId é inválido.");
+
+            boolean nullProfile = profilesIds == null;
+
+            String stringProfile = profilesIds instanceof String
+                ? (String)profilesIds
+                : null;
+
+            Collection<?> collectionProfiles = profilesIds instanceof Collection
+                ? (Collection<?>) profilesIds
+                : null;
+
+            if (nullProfile || (stringProfile != null && stringProfile.isEmpty()) || (collectionProfiles != null && collectionProfiles.isEmpty()))
+                throw new CapacityException("profilesIds é inválido.");
+
+            if (stringProfile != null) {
+                folderService.unassignFromProfile(UUID.fromString(stringProfile), folder);
+            } else if (collectionProfiles != null) {
+                folderService.unassignFromMultipleProfiles(
+                    collectionProfiles.stream().map(p -> UUID.fromString(String.valueOf(p))).toList(),
+                    folder
+                );
+            }
+        });
+    }
 }
