@@ -3,7 +3,6 @@ package me.universi.competence.services;
 import me.universi.api.entities.Response;
 import me.universi.competence.entities.Competence;
 import me.universi.competence.entities.CompetenceType;
-import me.universi.competence.enums.Level;
 import me.universi.competence.exceptions.CompetenceException;
 import me.universi.competence.repositories.CompetenceRepository;
 import me.universi.profile.entities.Profile;
@@ -128,7 +127,7 @@ public class CompetenceService {
             Competence newCompetence = new Competence();
             newCompetence.setCompetenceType(compT);
             newCompetence.setDescription(description);
-            newCompetence.setLevel(Level.valueOf(level));
+            newCompetence.setLevel(Integer.parseInt(level));
 
             save(newCompetence);
 
@@ -174,7 +173,7 @@ public class CompetenceService {
                 competence.setDescription(description);
             }
             if (level != null) {
-                competence.setLevel(Level.valueOf(level));
+                competence.setLevel(Integer.parseInt(level));
             }
 
             save(competence);

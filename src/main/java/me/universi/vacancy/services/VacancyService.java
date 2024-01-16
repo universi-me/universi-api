@@ -3,11 +3,9 @@ package me.universi.vacancy.services;
 import me.universi.api.entities.Response;
 import me.universi.competence.entities.Competence;
 import me.universi.competence.entities.CompetenceType;
-import me.universi.competence.enums.Level;
 import me.universi.competence.exceptions.CompetenceException;
 import me.universi.competence.services.CompetenceService;
 import me.universi.competence.services.CompetenceTypeService;
-import me.universi.curriculum.education.entities.Education;
 import me.universi.curriculum.education.exceptions.EducationException;
 import me.universi.profile.services.ProfileService;
 import me.universi.user.entities.User;
@@ -17,11 +15,7 @@ import me.universi.vacancy.exceptions.VacancyException;
 import me.universi.vacancy.repositories.VacancyRepository;
 import me.universi.vacancy.typeVacancy.entities.TypeVacancy;
 import me.universi.vacancy.typeVacancy.service.TypeVacancyService;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.xml.bind.ValidationException;
 import java.text.SimpleDateFormat;
@@ -29,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -113,11 +106,11 @@ public class VacancyService {
         }
     }
 
-    public List<Vacancy> findByCompetenceTypeAndLevel(CompetenceType competenceType, Level level){
+    public List<Vacancy> findByCompetenceTypeAndLevel(CompetenceType competenceType, Integer level){
         List<Vacancy> vacancies = new ArrayList<>();
         for (Vacancy vacancy: findAllActive()) {
             for (Competence competence : vacancy.getCompetenceRequired()) {
-                if (competence.getCompetenceType().equals(competenceType) && competence.getLevel().equals(level)){
+                if (competence.getCompetenceType().equals(competenceType) && competence.getLevel() == level){
                     vacancies.add(vacancy);
                 }
             }
@@ -320,7 +313,7 @@ public class VacancyService {
                 throw new CompetenceException("Parametro vacancyId é nulo.");
             }
 
-            Level level = (Level)body.get("level");
+            Integer level = (Integer)body.get("level");
             if(level == null) {
                 throw new CompetenceException("Parametro level é nulo.");
             }

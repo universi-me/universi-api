@@ -3,7 +3,6 @@ package me.universi.vacancy.controller;
 import me.universi.api.entities.Response;
 import me.universi.competence.entities.Competence;
 import me.universi.competence.entities.CompetenceType;
-import me.universi.competence.enums.Level;
 import me.universi.competence.exceptions.CompetenceException;
 import me.universi.competence.services.CompetenceTypeService;
 import me.universi.curriculum.education.exceptions.EducationException;
