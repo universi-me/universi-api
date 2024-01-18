@@ -2,7 +2,6 @@ package me.universi.curriculum.controller;
 
 import me.universi.api.entities.Response;
 import me.universi.competence.entities.CompetenceType;
-import me.universi.competence.enums.Level;
 import me.universi.competence.services.CompetenceTypeService;
 import me.universi.curriculum.education.entities.TypeEducation;
 import me.universi.curriculum.education.servicies.TypeEducationService;
@@ -72,7 +71,7 @@ public class CurriculumController {
             String competenceTypeId = (String)body.get("competenceTypeId");
             String typeExperienceId = (String)body.get("typeExperienceId");
             String typeEducationId = (String)body.get("typeEducationIdId");
-            Level level = (Level)body.get("level");
+            Integer level = (Integer)body.get("level");
 
             if(level == null && (typeEducationId == null || typeEducationId.equals("")) &&
                     (typeExperienceId == null || typeEducationId.equals("")) &&

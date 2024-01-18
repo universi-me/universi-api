@@ -2,7 +2,6 @@ package me.universi.curriculum.services;
 
 import me.universi.competence.entities.Competence;
 import me.universi.competence.entities.CompetenceType;
-import me.universi.competence.enums.Level;
 import me.universi.curriculum.education.entities.Education;
 import me.universi.curriculum.education.entities.TypeEducation;
 import me.universi.curriculum.education.servicies.EducationService;
@@ -47,7 +46,7 @@ public class CurriculumService {
         return educationService.findByTypeEducation(idEducation);
     }
 
-    public Collection<Profile> filtrarCurriculum(CompetenceType competenceType, Level level,
+    public Collection<Profile> filtrarCurriculum(CompetenceType competenceType, Integer level,
                                                  TypeExperience typeExperience, TypeEducation typeEducation){
         Collection<Profile> profiles = profileService.findAll();
         Collection<Profile> profilesTemp = new ArrayList<>();
@@ -56,7 +55,7 @@ public class CurriculumService {
             for (Profile profile : profiles) {
                 for (Competence competence : profile.getCompetences()) {
                     if (competence.getCompetenceType().equals(competenceType)){
-                        if(level!=null && competence.getLevel().equals(level)){
+                        if(level!=null && competence.getLevel() == level){
                             profilesTemp.add(profile);
                         }
                     }

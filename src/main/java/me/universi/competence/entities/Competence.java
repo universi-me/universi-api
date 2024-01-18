@@ -14,8 +14,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import me.universi.competence.enums.Level;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
@@ -45,9 +46,10 @@ public class Competence {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "level")
-    private Level level;
+    @Max(3)
+    @Min(0)
+    private int level;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "start_date")
@@ -75,7 +77,7 @@ public class Competence {
 
 
 
-    public Competence(CompetenceType competenceType, String description, String title, Level level, Date startDate, Date endDate) {
+    public Competence(CompetenceType competenceType, String description, String title, int level, Date startDate, Date endDate) {
         this.competenceType = competenceType;
         this.description = description;
         this.title = title;
@@ -84,7 +86,7 @@ public class Competence {
         this.endDate = endDate;
     }
 
-    public Competence(CompetenceType competenceType, String description, String title, Level level, Date startDate, Boolean presentDate) {
+    public Competence(CompetenceType competenceType, String description, String title, int level, Date startDate, Boolean presentDate) {
         this.competenceType = competenceType;
         this.description = description;
         this.title = title;
@@ -94,7 +96,7 @@ public class Competence {
 
     }
 
-    public Competence(CompetenceType competenceType, String title, Level level) {
+    public Competence(CompetenceType competenceType, String title, int level) {
         this.competenceType = competenceType;
         this.title = title;
         this.level = level;
@@ -112,9 +114,9 @@ public class Competence {
         this.description = description;
     }
 
-    public Level getLevel() { return level; }
+    public int getLevel() { return level; }
 
-    public void setLevel(Level level) { this.level = level; }
+    public void setLevel(int level) { this.level = level; }
 
     public Date getCreationDate() {
         return creationDate;
