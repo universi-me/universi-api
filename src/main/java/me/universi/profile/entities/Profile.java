@@ -8,6 +8,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import me.universi.capacity.entidades.ContentStatus;
 import me.universi.capacity.entidades.Folder;
+import me.universi.capacity.entidades.FolderFavorite;
 import me.universi.capacity.entidades.FolderProfile;
 import me.universi.competence.entities.Competence;
 import me.universi.curriculum.education.entities.Education;
@@ -116,6 +117,10 @@ public class Profile implements Serializable {
     @JsonIgnore
     @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL)
     private Collection<FolderProfile> assignedFolders;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL)
+    private Collection<FolderFavorite> favoriteFolders;
 
     public Profile(UUID id, User user, String bio, Collection<Competence> competences, Collection<ProfileGroup> groups, Collection<Link> links, Collection<FolderProfile> assignedFolders) {
         this.id = id;
@@ -277,6 +282,14 @@ public class Profile implements Serializable {
 
     public void setAssignedFolders(Collection<FolderProfile> assignedFolders) {
         this.assignedFolders = assignedFolders;
+    }
+
+    public Collection<FolderFavorite> getFavoriteFolders() {
+        return favoriteFolders;
+    }
+
+    public void setFavoriteFolders(Collection<FolderFavorite> favoriteFolders) {
+        this.favoriteFolders = favoriteFolders;
     }
 
     @Override

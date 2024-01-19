@@ -13,9 +13,11 @@ import me.universi.Sys;
 import me.universi.capacity.entidades.Category;
 import me.universi.capacity.entidades.Content;
 import me.universi.capacity.entidades.Folder;
+import me.universi.capacity.entidades.FolderFavorite;
 import me.universi.capacity.entidades.FolderProfile;
 import me.universi.capacity.exceptions.CapacityException;
 import me.universi.capacity.repository.ContentRepository;
+import me.universi.capacity.repository.FolderFavoriteRepository;
 import me.universi.capacity.repository.FolderProfileRepository;
 import me.universi.capacity.repository.FolderRepository;
 import me.universi.group.entities.Group;
@@ -35,14 +37,16 @@ public class FolderService {
     private final FolderRepository folderRepository;
     private final FolderProfileRepository folderProfileRepository;
     private final ContentRepository contentRepository;
+    private final FolderFavoriteRepository folderFavoriteRepository;
 
-    public FolderService(GroupService groupService, ProfileService profileService, CategoryService categoryService, FolderRepository folderRepository, FolderProfileRepository folderProfileRepository, ContentRepository contentRepository) {
+    public FolderService(GroupService groupService, ProfileService profileService, CategoryService categoryService, FolderRepository folderRepository, FolderProfileRepository folderProfileRepository, ContentRepository contentRepository, FolderFavoriteRepository folderFavoriteRepository) {
         this.groupService = groupService;
         this.profileService = profileService;
         this.categoryService = categoryService;
         this.folderRepository = folderRepository;
         this.folderProfileRepository = folderProfileRepository;
         this.contentRepository = contentRepository;
+        this.folderFavoriteRepository = folderFavoriteRepository;
     }
 
     public static FolderService getInstance() {
@@ -391,5 +395,48 @@ public class FolderService {
         for (UUID profileId : profilesIds) {
             assignToProfile(profileId, folder);
         }
+    }
+
+    public void favorite(UUID folderId) throws CapacityException {
+        Folder folder = findById(folderId);
+
+        Profile currentUser = UserService.getInstance().getUserInSession().getProfile();
+        FolderFavorite folderFavorite = folderFavoriteRepository
+            .findFirstByFolderIdAndProfileId(folder.getId(), currentUser.getId());
+
+        if (folderFavorite != null)
+            return;
+
+        if (!hasPermissions(folder, false))
+            throw new CapacityException("Essa pasta não existe ou você não pode favoritá-la");
+
+        folderFavorite = new FolderFavorite();
+        folderFavorite.setFolder(folder);
+        folderFavorite.setProfile(currentUser);
+
+        folderFavoriteRepository.save(folderFavorite);
+    }
+
+    public void unfavorite(UUID folderId) throws CapacityException {
+        Folder folder = findById(folderId);
+
+        Profile currentUser = UserService.getInstance().getUserInSession().getProfile();
+        FolderFavorite folderFavorite = folderFavoriteRepository
+            .findFirstByFolderIdAndProfileId(folder.getId(), currentUser.getId());
+
+        if (folderFavorite == null)
+            return;
+
+        folderFavoriteRepository.delete(folderFavorite);
+    }
+
+    public Collection<Folder> listFavorites(UUID profileId) throws CapacityException {
+        Profile profile = profileService.findFirstById(profileId);
+        if (profile == null)
+            throw new CapacityException("Usuário não encontrado");
+
+        return profile.getFavoriteFolders().stream()
+            .map(FolderFavorite::getFolder)
+            .toList();
     }
 }
