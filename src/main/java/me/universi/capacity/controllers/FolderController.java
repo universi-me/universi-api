@@ -392,4 +392,34 @@ public class FolderController {
             }
         });
     }
+
+    @PostMapping(value = "/favorite", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Response favorite(@RequestBody Map<String, Object> body) {
+        return Response.buildResponse(response -> {
+            Object folderId = body.get("folderId");
+
+            if (folderId == null || String.valueOf(folderId).isEmpty())
+                throw new CapacityException("folderId é inválido.");
+
+            UUID folderUuid = UUID.fromString(String.valueOf(folderId));
+            folderService.favorite(folderUuid);
+
+            response.message = "Conteúdo favoritado com sucesso!";
+        });
+    }
+
+    @PostMapping(value = "/unfavorite", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Response unfavorite(@RequestBody Map<String, Object> body) {
+        return Response.buildResponse(response -> {
+            Object folderId = body.get("folderId");
+
+            if (folderId == null || String.valueOf(folderId).isEmpty())
+                throw new CapacityException("folderId é inválido.");
+
+            UUID folderUuid = UUID.fromString(String.valueOf(folderId));
+            folderService.unfavorite(folderUuid);
+
+            response.message = "Conteúdo desfavoritado com sucesso!";
+        });
+    }
 }

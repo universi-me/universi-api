@@ -87,6 +87,10 @@ public class Folder implements Serializable {
     @JsonIgnore
     private Collection<FolderProfile> assignedUsers;
 
+    @OneToMany(mappedBy = "folder")
+    @JsonIgnore
+    private Collection<FolderFavorite> favoriteUsers;
+
     @JsonIgnore
     @Column(name = "deleted")
     private boolean deleted = Boolean.FALSE;
@@ -221,6 +225,19 @@ public class Folder implements Serializable {
 
         return assigned != null
             ? assigned.getAuthor()
+            : null;
+    }
+
+    @Transient
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public Boolean isFavorite() {
+        FolderFavorite favorite = this.favoriteUsers.stream()
+            .filter(f -> UserService.getInstance().isSessionOfUser(f.getProfile().getUser()))
+            .findAny()
+            .orElse(null);
+
+        return favorite != null
+            ? true
             : null;
     }
 }

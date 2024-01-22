@@ -1,5 +1,6 @@
 package me.universi.profile.services;
 
+import me.universi.Sys;
 import me.universi.curriculum.education.entities.Education;
 import me.universi.curriculum.experience.entities.Experience;
 import me.universi.profile.entities.Profile;
@@ -19,6 +20,10 @@ public class ProfileService {
 
     @Autowired
     private PerfilRepository perfilRepository;
+
+    public static ProfileService getInstance() {
+        return Sys.context.getBean("profileService", ProfileService.class);
+    }
 
     // Retorna um Perfil passando o id
     public Profile findFirstById(UUID id) {
