@@ -189,9 +189,7 @@ public class FolderController {
             }
             if(description != null) {
                 String descriptionStr = String.valueOf(description);
-                if(!descriptionStr.isEmpty()) {
-                    folder.setDescription(descriptionStr);
-                }
+                folder.setDescription(descriptionStr);
             }
             if(rating != null) {
                 String ratingStr = String.valueOf(rating);
