@@ -46,7 +46,7 @@ public class Content implements Serializable {
     private UUID id;
 
     @Column(name = "url")
-    @Size(max = 100)
+    @Size(max = 2048)
     private String url;
     
     @Column(name = "title")
