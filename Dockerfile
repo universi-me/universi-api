@@ -1,4 +1,4 @@
-FROM openjdk:11-jre-slim
+FROM adoptopenjdk:17-jre-hotspot
 
 EXPOSE 8080
 
