@@ -1,11 +1,9 @@
-FROM openjdk:11-jre-slim
+FROM openjdk:23-slim-bullseye
 
 EXPOSE 8080
 
 ARG JAR_FILE=target/*.jar
 
-COPY ${JAR_FILE} app.jar
+COPY ${JAR_FILE} /app.jar
 
-RUN ls -a
-
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "/app.jar"]
