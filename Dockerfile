@@ -1,15 +1,9 @@
-FROM maven:3.8.4-openjdk-17 as BUILD
+FROM openjdk:23-slim-bullseye
 
 EXPOSE 8080
 
-WORKDIR /opt/universi-api
+ARG JAR_FILE=target/*.jar
 
-COPY pom.xml .
+COPY ${JAR_FILE} /app.jar
 
-RUN mvn dependency:go-offline
-
-COPY . .
-
-RUN mvn clean install -DskipTests
-
-ENTRYPOINT ["java","-jar","/opt/universi-api/target/universi-api-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-jar", "/app.jar"]

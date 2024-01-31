@@ -2,6 +2,7 @@ package me.universi.link.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import me.universi.link.enums.TypeLink;
 import me.universi.profile.entities.Profile;
 
@@ -25,6 +26,7 @@ public class Link {
     @NotNull
     private TypeLink typeLink;
     @Column(name = "url")
+    @Size(max = 2048)
     private String url;
 
     @Column(name = "name")
