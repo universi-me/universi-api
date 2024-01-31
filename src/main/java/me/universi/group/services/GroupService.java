@@ -819,4 +819,19 @@ public class GroupService {
     public GroupEnvironment getOrganizationEnvironment() {
         return getGroupEnvironment(getOrganizationBasedInDomainIfExist());
     }
+
+    public void setupOrganization() {
+        if(localOrganizationIdEnabled) {
+            Optional<Group> organizationOpt = groupRepository.findFirstByRootGroup(true);
+            if(organizationOpt.isPresent()) {
+                Group organization = organizationOpt.get();
+                if(organization.nickname.equals(localOrganizationId)) {
+                    return;
+                }
+                organization.name = localOrganizationId.toUpperCase();
+                organization.nickname = localOrganizationId;
+                save(organization);
+            }
+        }
+    }
 }
