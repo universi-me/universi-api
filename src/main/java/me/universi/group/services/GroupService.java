@@ -8,6 +8,7 @@ import me.universi.group.DTO.CompetenceInfoDTO;
 import me.universi.group.entities.*;
 import me.universi.group.entities.GroupSettings.*;
 import me.universi.group.enums.GroupEmailFilterType;
+import me.universi.group.enums.GroupType;
 import me.universi.group.exceptions.GroupException;
 import me.universi.group.repositories.*;
 import me.universi.profile.entities.Profile;
@@ -858,6 +859,22 @@ public class GroupService {
 
         return groupCompetences;
 
+    }
+
+    public void setupOrganization() {
+        if(localOrganizationIdEnabled) {
+            Optional<Group> organizationOpt = groupRepository.findFirstByRootGroup(true);
+            if(organizationOpt.isPresent()) {
+                Group organization = organizationOpt.get();
+                if(organization.nickname.equals(localOrganizationId)) {
+                    return;
+                }
+                organization.nickname = localOrganizationId;
+                organization.name = localOrganizationId.toUpperCase();
+                organization.setType(GroupType.INSTITUTION);
+                save(organization);
+            }
+        }
     }
 
 }

@@ -18,6 +18,7 @@ public interface GroupRepository extends JpaRepository<Group, UUID> {
     Optional<Group> findFirstById(UUID id);
     Optional<Group> findFirstByNickname(String nickname);
     Optional<Group> findFirstByRootGroupAndNicknameIgnoreCase(boolean rootGroup, String nickname);
+    Optional<Group> findFirstByRootGroup(boolean rootGroup);
     List<Group> findByPublicGroup(boolean grupoPublico);
     @Query(value = "SELECT group_id FROM subgroup WHERE subgroup_id = :GroupId LIMIT 1", nativeQuery = true)
     Optional<Object> findParentGroupId(@Param("GroupId") UUID id);
