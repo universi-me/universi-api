@@ -4,9 +4,8 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
-import me.universi.user.entities.User;
+import me.universi.group.services.GroupService;
 
-import me.universi.user.enums.Authority;
 import me.universi.user.services.UserService;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +19,6 @@ import org.springframework.context.annotation.ImportResource;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @SpringBootApplication
@@ -33,6 +30,8 @@ public class Sys {
     private String PROFILE_ACTIVE;
     @Autowired
     public UserService userService;
+    @Autowired
+    public GroupService groupService;
     public static ApplicationContext context;
 
 
@@ -52,23 +51,12 @@ public class Sys {
         return "Universi.me API – " + PROFILE_ACTIVE.toUpperCase();
     }
 
-//    @Bean
-//    InitializingBean sendDatabase() {
-//        return () -> {
-//            // Criar usuario Admin padrão, obs: alterar senha depois.
-//            if(!userService.usernameExiste("admin")) {
-//                System.out.println("Criando usuário: admin:admin");
-//                User userAdmin = new User("admin", null, userService.codificarSenha("admin"));
-//                try {
-//                    userService.createUser(userAdmin);
-//                    userAdmin.setAuthority(Authority.ROLE_ADMIN);
-//                    userService.save(userAdmin);
-//                } catch (Exception e) {
-//                    throw new RuntimeException(e);
-//                }
-//            }
-//        };
-//    }
+    @Bean
+    InitializingBean sendDatabase() {
+        return () -> {
+            groupService.setupOrganization();
+        };
+    }
 
     @Bean
     public OpenAPI customOpenAPI(@Value("${springdoc.version}") String appVersion) {
