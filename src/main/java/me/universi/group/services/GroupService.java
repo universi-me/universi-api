@@ -3,6 +3,8 @@ package me.universi.group.services;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import me.universi.Sys;
+import me.universi.competence.entities.Competence;
+import me.universi.group.DTO.CompetenceInfoDTO;
 import me.universi.group.entities.*;
 import me.universi.group.entities.GroupSettings.*;
 import me.universi.group.enums.GroupEmailFilterType;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Service
 public class GroupService {
@@ -821,6 +824,43 @@ public class GroupService {
         return getGroupEnvironment(getOrganizationBasedInDomainIfExist());
     }
 
+    public List<CompetenceInfoDTO> getGroupCompetences(Group group){
+
+        List<CompetenceInfoDTO> groupCompetences = new ArrayList<>();
+        List<Profile> groupProfiles = group.getParticipants().stream().map(ProfileGroup::getProfile).collect(Collectors.toList());
+
+        for(Profile profile : groupProfiles){
+            for(Competence competence : profile.getCompetences()) {
+                UUID typeId = competence.getCompetenceType().getId();
+                int level =  competence.getLevel();
+
+                CompetenceInfoDTO currentGroupCompetence = null;
+                for(CompetenceInfoDTO compInfo : groupCompetences){
+                    if(compInfo.competenceTypeId().equals(competence.getCompetenceType().getId()))
+                        currentGroupCompetence = compInfo;
+                }
+
+                if(currentGroupCompetence == null){
+                    currentGroupCompetence = new CompetenceInfoDTO(competence.getCompetenceType().getName(), typeId, new HashMap<>());
+                    currentGroupCompetence.levelInfo().put(level, new ArrayList<>());
+                    currentGroupCompetence.levelInfo().get(level).add(profile);
+                    groupCompetences.add(currentGroupCompetence);
+                }
+                else if(currentGroupCompetence.levelInfo().get(level) == null){
+                    currentGroupCompetence.levelInfo().put(level, new ArrayList<>());
+                    currentGroupCompetence.levelInfo().get(level).add(profile);
+                }
+                else{
+                    currentGroupCompetence.levelInfo().get(level).add(profile);
+                }
+
+            }
+        }
+
+        return groupCompetences;
+
+    }
+
     public void setupOrganization() {
         if(localOrganizationIdEnabled) {
             Optional<Group> organizationOpt = groupRepository.findFirstByRootGroup(true);
@@ -836,4 +876,5 @@ public class GroupService {
             }
         }
     }
+
 }
