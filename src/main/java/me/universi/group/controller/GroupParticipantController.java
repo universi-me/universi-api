@@ -3,6 +3,7 @@ package me.universi.group.controller;
 import java.util.*;
 import java.util.stream.Collectors;
 import me.universi.api.entities.Response;
+import me.universi.group.DTO.CompetenceFilterDTO;
 import me.universi.group.entities.Group;
 import me.universi.group.entities.ProfileGroup;
 import me.universi.group.exceptions.GroupException;
@@ -191,6 +192,17 @@ public class GroupParticipantController {
         });
     }
 
+
+    //Used when filtering participants based on their competences
+    @PostMapping(value = "/filter", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response filterParticipants(@RequestBody CompetenceFilterDTO competenceFilter){
+
+        return Response.buildResponse(response -> {
+            response.body.put("filteredParticipants", groupService.filterProfilesWithCompetences(competenceFilter));
+        });
+    }
+
     @PostMapping("/competences")
     @ResponseBody
     public Response competences(@RequestBody Map<String, Object> body){
@@ -202,5 +214,6 @@ public class GroupParticipantController {
 
             response.body.put("competences", groupService.getGroupCompetences(group));
         });
+
     }
 }

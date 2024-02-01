@@ -4,7 +4,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import me.universi.Sys;
 import me.universi.competence.entities.Competence;
+
+import me.universi.group.DTO.CompetenceFilterDTO;
+import me.universi.group.DTO.CompetenceFilterRequestDTO;
+import me.universi.group.DTO.ProfileWithCompetencesDTO;
 import me.universi.group.DTO.CompetenceInfoDTO;
+
 import me.universi.group.entities.*;
 import me.universi.group.entities.GroupSettings.*;
 import me.universi.group.enums.GroupEmailFilterType;
@@ -823,6 +828,62 @@ public class GroupService {
     public GroupEnvironment getOrganizationEnvironment() {
         return getGroupEnvironment(getOrganizationBasedInDomainIfExist());
     }
+
+
+    public List<ProfileWithCompetencesDTO> filterProfilesWithCompetences(CompetenceFilterDTO competenceFilter){
+
+        List<ProfileWithCompetencesDTO> selectedProfiles = new ArrayList<>();
+
+        Group group = getGroupByGroupIdOrGroupPath(competenceFilter.groupId(), competenceFilter.groupPath());
+
+        Collection<ProfileGroup> participants = group.getParticipants();
+        List<Profile> profiles = participants.stream()
+                .sorted(Comparator.comparing(ProfileGroup::getJoined).reversed())
+                .map(ProfileGroup::getProfile)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        for(Profile p : profiles){
+            ProfileWithCompetencesDTO profile = new ProfileWithCompetencesDTO(
+                    p.getId(),
+                    p.getUser(),
+                    p.getFirstname(),
+                    p.getLastname(),
+                    p.getImage(),
+                    p.getBio(),
+                    p.getGender(),
+                    p.getCreationDate(),
+                    p.getIndicators(),
+                    p.getCompetences()
+            );
+
+
+            boolean hasNecessaryCompetences = false;
+
+            if(competenceFilter.matchEveryCompetence()){
+                hasNecessaryCompetences = true;
+                for(CompetenceFilterRequestDTO competence : competenceFilter.competences()){
+                    if(!profile.hasCompetence(competence.id(), competence.level())) {
+                        hasNecessaryCompetences = false;
+                        break;
+                    }
+                }
+            }
+            else{
+                for(CompetenceFilterRequestDTO competence : competenceFilter.competences()) {
+                    if(profile.hasCompetence(competence.id(), competence.level())) {
+                        hasNecessaryCompetences = true;
+                        break;
+                    }
+                }
+            }
+
+            if(hasNecessaryCompetences)
+                selectedProfiles.add(profile);
+        }
+
+        return selectedProfiles;
+}
 
     public List<CompetenceInfoDTO> getGroupCompetences(Group group){
 
