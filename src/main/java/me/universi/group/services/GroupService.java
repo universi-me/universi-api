@@ -878,7 +878,7 @@ public class GroupService {
                 selectedProfiles.add(profile);
         }
 
-        return selectedProfiles
+        return selectedProfiles;
 
     }
 
