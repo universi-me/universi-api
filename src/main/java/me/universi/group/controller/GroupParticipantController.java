@@ -192,6 +192,7 @@ public class GroupParticipantController {
         });
     }
 
+
     //Used when filtering participants based on their competences
     @PostMapping(value = "/filter", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
@@ -199,6 +200,19 @@ public class GroupParticipantController {
 
         return Response.buildResponse(response -> {
             response.body.put("filteredParticipants", groupService.filterProfilesWithCompetences(competenceFilter));
+        });
+    }
+
+    @PostMapping("/competences")
+    @ResponseBody
+    public Response competences(@RequestBody Map<String, Object> body){
+        return Response.buildResponse(response ->{
+
+            String groupId = (String)body.get("groupId");
+            String groupPath = (String)body.get("groupPath");
+            Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
+
+            response.body.put("competences", groupService.getGroupCompetences(group));
         });
 
     }
