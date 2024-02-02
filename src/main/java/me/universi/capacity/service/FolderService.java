@@ -427,7 +427,7 @@ public class FolderService {
 
     public void unassignFromMultipleProfiles(Collection<UUID> profilesIds, Folder folder) {
         for (UUID profileId : profilesIds) {
-            assignToProfile(profileId, folder);
+            unassignFromProfile(profileId, folder);
         }
     }
 

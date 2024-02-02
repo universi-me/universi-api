@@ -63,7 +63,7 @@ public class Profile implements Serializable {
     private Collection<Competence> competences;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "profile", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "profile", fetch = FetchType.EAGER)
     private Collection<ProfileGroup> groups;
 
     @JsonIgnore

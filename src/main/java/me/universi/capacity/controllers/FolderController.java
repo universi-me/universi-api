@@ -357,7 +357,7 @@ public class FolderController {
         });
     }
 
-    @GetMapping(value = "/assigned", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/assigned", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Response usersAssigned(@RequestBody Map<String, Object> body){
         return Response.buildResponse(response -> {
 
