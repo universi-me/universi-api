@@ -14,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface FolderRepository extends JpaRepository<Folder, UUID> {
     Folder findFirstById(UUID id);
+    Folder findFirstByReference(String reference);
+    Folder findFirstByIdOrReference(UUID id, String reference);
 
     List<Folder> findByName(String name);
 

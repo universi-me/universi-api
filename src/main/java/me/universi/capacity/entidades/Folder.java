@@ -36,6 +36,11 @@ public class Folder implements Serializable {
     @Column(name = "id")
     private UUID id;
 
+    public static final int FOLDER_REFERENCE_SIZE = 15;
+    public static final String FOLDER_REFERENCE_AVAILABLE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    @Column(name = "reference", unique = true, length = FOLDER_REFERENCE_SIZE)
+    private String reference;
+
     @Column
     @Size(max = 100)
     private String name;
@@ -208,6 +213,14 @@ public class Folder implements Serializable {
 
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;
+    }
+
+    public String getReference() {
+        return reference;
+    }
+
+    public void setReference(String reference) {
+        this.reference = reference;
     }
 
     @Transient

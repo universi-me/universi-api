@@ -46,11 +46,13 @@ public class FolderController {
         return Response.buildResponse(response -> {
 
             Object folderId = body.get("id");
-            if(folderId == null || String.valueOf(folderId).isEmpty()) {
-                throw new CapacityException("ID da pasta não informado.");
+            Object folderReference = body.get("reference");
+            if((folderId == null || String.valueOf(folderId).isEmpty()) && (folderReference == null || String.valueOf(folderReference).isEmpty())) {
+                throw new CapacityException("ID e referência da pasta não informados.");
             }
 
-            response.body.put("contents", contentService.findByFolder(String.valueOf(folderId)));
+            Folder folder = folderService.findByIdOrReference(folderId, folderReference);
+            response.body.put("contents", contentService.findByFolder(folder.getId()));
         });
     }
 
@@ -59,11 +61,13 @@ public class FolderController {
         return Response.buildResponse(response -> {
 
             Object folderId = body.get("id");
-            if(folderId == null || String.valueOf(folderId).isEmpty()) {
-                throw new CapacityException("ID da pasta não informado.");
+            Object folderReference = body.get("reference");
+
+            if((folderId == null || String.valueOf(folderId).isEmpty()) && (folderReference == null || String.valueOf(folderReference).isEmpty())) {
+                throw new CapacityException("ID e referência da pasta não informados.");
             }
 
-            Folder folder = folderService.findById(String.valueOf(folderId));
+            Folder folder = folderService.findByIdOrReference(folderId, folderReference);
 
             folderService.checkPermissions(folder, false);
 
@@ -88,7 +92,7 @@ public class FolderController {
             Object addGrantedAccessGroupByIds =    body.get("addGrantedAccessGroupByIds");
 
             if(name == null || String.valueOf(name).isEmpty()) {
-                throw new CapacityException("Parametro name não informado.");
+                throw new CapacityException("Parametro name não informados.");
             }
 
             Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
@@ -139,7 +143,7 @@ public class FolderController {
                 folderService.addOrRemoveGrantedAccessGroup(folder, addGrantedAccessGroupByIds, true);
             }
 
-
+            folder.setReference(folderService.generateAvailableReference());
 
             boolean result = folderService.saveOrUpdate(folder);
             if(!result) {
@@ -155,8 +159,10 @@ public class FolderController {
         return Response.buildResponse(response -> {
 
             Object folderId = body.get("id");
-            if(folderId == null || String.valueOf(folderId).isEmpty()) {
-                throw new CapacityException("ID da pasta não informado.");
+            Object folderReference = body.get("reference");
+
+            if((folderId == null || String.valueOf(folderId).isEmpty()) && (folderReference == null || String.valueOf(folderReference).isEmpty())) {
+                throw new CapacityException("ID e referência da pasta não informados.");
             }
 
             Object name =           body.get("name");
@@ -171,7 +177,7 @@ public class FolderController {
             Object addGrantedAccessGroupByIds =    body.get("addGrantedAccessGroupByIds");
             Object removeGrantedAccessGroupByIds = body.get("removeGrantedAccessGroupByIds");
 
-            Folder folder = folderService.findById(String.valueOf(folderId));
+            Folder folder = folderService.findByIdOrReference(folderId, folderReference);
 
             folderService.checkPermissions(folder, true);
 
@@ -232,11 +238,13 @@ public class FolderController {
         return Response.buildResponse(response -> {
 
             Object folderId = body.get("id");
-            if(folderId == null || String.valueOf(folderId).isEmpty()) {
-                throw new CapacityException("ID da pasta não informado.");
+            Object folderReference = body.get("reference");
+
+            if((folderId == null || String.valueOf(folderId).isEmpty()) && (folderReference == null || String.valueOf(folderReference).isEmpty())) {
+                throw new CapacityException("ID nem referência da pasta não informados.");
             }
 
-            Folder folder = folderService.findById(UUID.fromString(String.valueOf(folderId)));
+            Folder folder = folderService.findByIdOrReference(folderId, folderReference);
 
             folderService.checkPermissions(folder, true);
 
@@ -254,18 +262,20 @@ public class FolderController {
         return Response.buildResponse(response -> {
 
             Object folderId = body.get("id");
+            Object folderReference = body.get("reference");
 
             // id or array of ids
             Object contentIds    = body.get("contentIds");
 
-            if(folderId == null || String.valueOf(folderId).isEmpty()) {
-                throw new CapacityException("ID da pasta não informado.");
+            if((folderId == null || String.valueOf(folderId).isEmpty()) && (folderReference == null || String.valueOf(folderReference).isEmpty())) {
+                throw new CapacityException("ID e referência da pasta não informados.");
             }
             if(contentIds == null) {
                 throw new CapacityException("ID do conteúdo não informado.");
             }
 
-            folderService.addOrRemoveContent(folderId, contentIds, true);
+            Folder folder = folderService.findByIdOrReference(folderId, folderReference);
+            folderService.addOrRemoveContent(folder.getId().toString(), contentIds, true);
 
             response.message = "Conteúdo adicionado a pasta com sucesso.";
         });
@@ -276,18 +286,20 @@ public class FolderController {
         return Response.buildResponse(response -> {
 
             Object folderId = body.get("id");
+            Object folderReference = body.get("reference");
 
             // id or array of ids
             Object contentIds    = body.get("contentIds");
 
-            if(folderId == null || String.valueOf(folderId).isEmpty()) {
-                throw new CapacityException("ID da pasta não informado.");
+            if((folderId == null || String.valueOf(folderId).isEmpty()) && (folderReference == null || String.valueOf(folderReference).isEmpty())) {
+                throw new CapacityException("ID e referência da pasta não informados.");
             }
             if(contentIds == null) {
                 throw new CapacityException("ID do conteúdo não informado.");
             }
 
-            folderService.addOrRemoveContent(folderId, contentIds, false);
+            Folder folder = folderService.findByIdOrReference(folderId, folderReference);
+            folderService.addOrRemoveContent(folder.getId().toString(), contentIds, false);
 
             response.message = "Conteúdo removido da pasta com sucesso.";
         });
@@ -297,11 +309,12 @@ public class FolderController {
     public Response moveContent(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
             Object folderId = body.get("folderId");
+            Object folderReference = body.get("reference");
             Object contentId = body.get("contentId");
             Object toIndex = body.get("toIndex");
 
-            if(folderId == null || String.valueOf(folderId).isEmpty()) {
-                throw new CapacityException("ID da pasta não informado.");
+            if((folderId == null || String.valueOf(folderId).isEmpty()) && (folderReference == null || String.valueOf(folderReference).isEmpty())) {
+                throw new CapacityException("ID e referência da pasta não informados.");
             }
             if(contentId == null || String.valueOf(contentId).isEmpty()) {
                 throw new CapacityException("ID do conteúdo não informado.");
@@ -312,7 +325,8 @@ public class FolderController {
 
             int toIndexInt = Integer.parseInt(String.valueOf(toIndex));
 
-            folderService.setNewPositionOfContent(folderId, contentId, toIndexInt);
+            Folder folder = folderService.findByIdOrReference(folderId, folderReference);
+            folderService.setNewPositionOfContent(folder.getId().toString(), contentId, toIndexInt);
 
             response.message = "Conteúdo ordenado na pasta com sucesso.";
         });
@@ -323,13 +337,15 @@ public class FolderController {
         return Response.buildResponse( response -> {
             Object profilesIds = body.get("profilesIds");
             Object folderId = body.get("folderId");
+            Object folderReference = body.get("reference");
 
             if (profilesIds == null || String.valueOf(profilesIds).isEmpty())
                 throw new CapacityException("profilesIds é inválido.");
-            if (folderId == null || String.valueOf(folderId).isEmpty())
-                throw new CapacityException("folderId é inválido.");
+            if((folderId == null || String.valueOf(folderId).isEmpty()) && (folderReference == null || String.valueOf(folderReference).isEmpty())) {
+                throw new CapacityException("ID e referência da pasta não informados.");
+            }
 
-            Folder folder = folderService.findById(String.valueOf(folderId));
+            Folder folder = folderService.findByIdOrReference(folderId, folderReference);
             if (folder == null)
                 throw new CapacityException("folderId é inválido");
 
@@ -346,11 +362,13 @@ public class FolderController {
         return Response.buildResponse(response -> {
 
             Object folderId = body.get("folderId");
+            Object folderReference = body.get("reference");
 
-            if(folderId == null || String.valueOf(folderId).isEmpty() || folderService.findById((UUID.fromString(String.valueOf(folderId)))) == null)
-                throw new CapacityException("folderId é inválido.");
+            if(((folderId == null || String.valueOf(folderId).isEmpty()) && (folderReference == null || String.valueOf(folderReference).isEmpty())) || folderService.findByIdOrReference(folderId, folderReference) == null)
+                throw new CapacityException("folderId e reference são inválido.");
 
-           response.body.put("profilesIds", folderService.findAssignedProfiles((UUID.fromString(String.valueOf(folderId)))));
+            Folder folder = folderService.findByIdOrReference(folderId, folderReference);
+            response.body.put("profilesIds", folderService.findAssignedProfiles(folder.getId()));
         });
     }
 
@@ -358,14 +376,13 @@ public class FolderController {
     public Response unassign(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
             Object folderId = body.get("folderId");
+            Object folderReference = body.get("reference");
             Object profilesIds = body.get("profilesIds");
 
-            if (folderId == null || String.valueOf(folderId).isEmpty())
-                throw new CapacityException("folderId é inválido.");
+            if ((folderId == null || String.valueOf(folderId).isEmpty()) && (folderReference == null || String.valueOf(folderReference).isEmpty()))
+                throw new CapacityException("folderId e reference são inválidos.");
 
-            Folder folder = folderService.findById(UUID.fromString(String.valueOf(folderId)));
-            if (folder == null)
-                throw new CapacityException("folderId é inválido.");
+            Folder folder = folderService.findByIdOrReference(folderId, folderReference);
 
             boolean nullProfile = profilesIds == null;
 
@@ -395,12 +412,13 @@ public class FolderController {
     public Response favorite(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
             Object folderId = body.get("folderId");
+            Object folderReference = body.get("reference");
 
-            if (folderId == null || String.valueOf(folderId).isEmpty())
-                throw new CapacityException("folderId é inválido.");
+            if ((folderId == null || String.valueOf(folderId).isEmpty()) && (folderReference == null || String.valueOf(folderReference).isEmpty()))
+                throw new CapacityException("folderId e reference são inválidos.");
 
-            UUID folderUuid = UUID.fromString(String.valueOf(folderId));
-            folderService.favorite(folderUuid);
+            Folder folder = folderService.findByIdOrReference(folderId, folderReference);
+            folderService.favorite(folder);
 
             response.message = "Conteúdo favoritado com sucesso!";
         });
@@ -410,12 +428,13 @@ public class FolderController {
     public Response unfavorite(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
             Object folderId = body.get("folderId");
+            Object folderReference = body.get("reference");
 
-            if (folderId == null || String.valueOf(folderId).isEmpty())
+            if ((folderId == null || String.valueOf(folderId).isEmpty()) && (folderReference == null || String.valueOf(folderReference).isEmpty()))
                 throw new CapacityException("folderId é inválido.");
 
-            UUID folderUuid = UUID.fromString(String.valueOf(folderId));
-            folderService.unfavorite(folderUuid);
+            Folder folder = folderService.findByIdOrReference(folderId, folderReference);
+            folderService.unfavorite(folder);
 
             response.message = "Conteúdo desfavoritado com sucesso!";
         });
