@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
+import me.universi.util.RandomUtil;
 
 @Service
 public class FolderService {
@@ -125,6 +127,38 @@ public class FolderService {
 
     public Folder findById(String folderId) throws CapacityException {
         return findById(UUID.fromString(folderId));
+    }
+
+    public Folder findByReference(String folderReference) throws CapacityException {
+        Folder folder = folderRepository.findFirstByReference(folderReference);
+        if(folder == null) {
+            throw new CapacityException("Pasta não encontrada.");
+        }
+        return folder;
+    }
+
+    public Folder findByIdOrReference(Object folderId, Object folderReference) throws CapacityException {
+        String id = folderId == null ? null : String.valueOf(folderId);
+        String reference = folderReference == null ? null : String.valueOf(folderReference);
+
+        return findByIdOrReference(id, reference);
+    }
+
+    public Folder findByIdOrReference(String folderId, String folderReference) throws CapacityException {
+        if (folderId == null && folderReference == null)
+            throw new CapacityException("Pasta não encontrada");
+
+        return folderId == null
+            ? findByReference(folderReference)
+            : findByIdOrReference(UUID.fromString(folderId), folderReference);
+    }
+
+    public Folder findByIdOrReference(UUID folderId, String folderReference) throws CapacityException {
+        Folder folder = folderRepository.findFirstByIdOrReference(folderId, folderReference);
+        if(folder == null) {
+            throw new CapacityException("Pasta não encontrada.");
+        }
+        return folder;
     }
 
     public List<Folder> findByCategory(UUID categoryId) throws CapacityException {
@@ -397,6 +431,10 @@ public class FolderService {
         }
     }
 
+    public void favorite(Folder folder) throws CapacityException {
+        favorite(folder.getId());
+    }
+
     public void favorite(UUID folderId) throws CapacityException {
         Folder folder = findById(folderId);
 
@@ -415,6 +453,10 @@ public class FolderService {
         folderFavorite.setProfile(currentUser);
 
         folderFavoriteRepository.save(folderFavorite);
+    }
+
+    public void unfavorite(Folder folder) throws CapacityException {
+        unfavorite(folder.getId());
     }
 
     public void unfavorite(UUID folderId) throws CapacityException {
@@ -438,5 +480,21 @@ public class FolderService {
         return profile.getFavoriteFolders().stream()
             .map(FolderFavorite::getFolder)
             .toList();
+    }
+
+    public String generateAvailableReference() {
+        Folder folder = null;
+        String reference = "";
+
+        do {
+            reference = RandomUtil.randomString(
+                Folder.FOLDER_REFERENCE_SIZE,
+                Folder.FOLDER_REFERENCE_AVAILABLE_CHARS
+            );
+
+            folder = folderRepository.findFirstByReference(reference);
+        } while (folder != null);
+
+        return reference;
     }
 }
