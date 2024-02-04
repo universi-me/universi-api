@@ -435,8 +435,12 @@ public class FolderService {
     }
 
     public List<FolderProfile> getAssignedBy(Object profileId, Object username) {
-        UserService userService = UserService.getInstance();
         Profile profile = profileService.getProfileByUserIdOrUsername(profileId, username);
+        return getAssignedBy(profile);
+    }
+
+    public List<FolderProfile> getAssignedBy(Profile profile) {
+        UserService userService = UserService.getInstance();
 
         if (!userService.isUserAdmin(userService.getUserInSession()) || !userService.isSessionOfUser(profile.getUser())) {
             throw new CapacityException("Você não pode acessar os conteúdos atribuídos por outro usuário.");
@@ -517,5 +521,27 @@ public class FolderService {
             .map(c -> contentStatusRepository.findByProfileIdAndContentId(profile.getId(), c.getId()))
             .filter(Objects::nonNull)
             .toList();
+    }
+
+    public boolean canCheckProfileProgress(Object profileId, Object profileUsername, Object folderId, Object folderReference) {
+        return canCheckProfileProgress(
+            ProfileService.getInstance().getProfileByUserIdOrUsername(profileId, profileUsername),
+            findByIdOrReference(folderId, folderReference)
+        );
+    }
+
+    public boolean canCheckProfileProgress(Profile profile, Folder folder) {
+        if (profile == null)
+            return false;
+
+        UserService userService = UserService.getInstance();
+
+        return userService.isUserAdminSession()
+            || userService.isSessionOfUser(profile.getUser())
+            || getAssignedBy(userService.getUserInSession().getProfile()) // has assigned that folder to that user
+            .stream()
+            .filter(fp -> Objects.equals(profile.getId(), fp.getProfile().getId())
+                && Objects.equals(folder.getId(), fp.getFolder().getId()))
+            .count() > 0;
     }
 }
