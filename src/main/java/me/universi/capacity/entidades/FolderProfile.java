@@ -120,7 +120,7 @@ public class FolderProfile implements Serializable {
     }
 
     @Transient
-    public int getDoneUtilNow() {
+    public int getDoneUntilNow() {
         return FolderService.getInstance().getStatuses(profile, folder).stream()
             .filter(cs -> cs.getStatus().equals(ContentStatusType.DONE))
             .toList()
