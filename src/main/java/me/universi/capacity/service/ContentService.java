@@ -153,6 +153,10 @@ public class ContentService {
         Profile profile = ProfileService.getInstance().getProfileByUserIdOrUsername(profileId, profileUsername);
         Content content = findById(contentId);
 
+        return getProfileProgress(content, profile);
+    }
+
+    public ContentStatusType getProfileProgress(Content content, Profile profile) throws CapacityException {
         ContentStatus status = contentStatusRepository.findByProfileIdAndContentId(profile.getId(), content.getId());
 
         return status != null

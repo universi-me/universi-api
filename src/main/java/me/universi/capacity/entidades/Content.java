@@ -26,8 +26,13 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.UUID;
+
+import me.universi.capacity.enums.ContentStatusType;
 import me.universi.capacity.enums.ContentType;
+import me.universi.capacity.service.ContentService;
 import me.universi.profile.entities.Profile;
+import me.universi.user.services.UserService;
+
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
@@ -193,4 +198,9 @@ public class Content implements Serializable {
         this.deleted = deleted;
     }
 
+    @Transient
+    public ContentStatusType getStatus() {
+        return ContentService.getInstance()
+            .getProfileProgress(this, UserService.getInstance().getUserInSession().getProfile());
+    }
 }
