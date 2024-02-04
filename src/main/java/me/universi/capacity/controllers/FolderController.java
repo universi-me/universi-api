@@ -408,6 +408,16 @@ public class FolderController {
         });
     }
 
+    @PostMapping(value = "/assigned-by", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Response assignedBy(@RequestBody Map<String, Object> body) {
+        return Response.buildResponse(response -> {
+            Object profileId = body.get("profileId");
+            Object profileUsername = body.get("username");
+
+            response.body.put("folders", folderService.getAssignedBy(profileId, profileUsername));
+        });
+    }
+
     @PostMapping(value = "/favorite", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Response favorite(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {

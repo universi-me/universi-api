@@ -431,6 +431,17 @@ public class FolderService {
         }
     }
 
+    public List<FolderProfile> getAssignedBy(Object profileId, Object username) {
+        UserService userService = UserService.getInstance();
+        Profile profile = profileService.getProfileByUserIdOrUsername(profileId, username);
+
+        if (!userService.isUserAdmin(userService.getUserInSession()) || !userService.isSessionOfUser(profile.getUser())) {
+            throw new CapacityException("Você não pode acessar os conteúdos atribuídos por outro usuário.");
+        }
+
+        return folderProfileRepository.findByAuthorId(profile.getId());
+    }
+
     public void favorite(Folder folder) throws CapacityException {
         favorite(folder.getId());
     }

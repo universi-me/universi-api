@@ -42,19 +42,16 @@ public class FolderProfile implements Serializable {
     @Column(name = "deleted")
     public boolean deleted = Boolean.FALSE;
 
-    @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER)
     @PrimaryKeyJoinColumn(name="author_id")
     @NotNull
     public Profile author;
 
-    @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER)
     @PrimaryKeyJoinColumn(name="profile_id")
     @NotNull
     public Profile profile;
 
-    @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER)
     @PrimaryKeyJoinColumn(name="folder_id")
     @NotNull
