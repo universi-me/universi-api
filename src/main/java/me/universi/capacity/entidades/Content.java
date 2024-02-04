@@ -96,9 +96,6 @@ public class Content implements Serializable {
     @Column(name = "deleted")
     private boolean deleted = Boolean.FALSE;
 
-    @Transient
-    public ContentStatus contentStatus;
-
     public Content() {
     }
 

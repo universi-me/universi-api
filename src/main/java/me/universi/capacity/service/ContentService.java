@@ -75,16 +75,7 @@ public class ContentService {
     public List<Content> findByFolder(UUID folderId) throws CapacityException {
         Folder folder = folderService.findById(folderId);
 
-        List<Content> contents = contentRepository.findContentsInFolderByOrderPosition(folder.getId());
-
-        for(Content content : contents) {
-            ContentStatus contentStatus = findStatusById(content.getId());
-            if(contentStatus != null) {
-                content.contentStatus = contentStatus;
-            }
-        }
-
-        return contents;
+        return contentRepository.findContentsInFolderByOrderPosition(folder.getId());
     }
 
     public List<Content> findByFolder(String folderId) throws CapacityException {
