@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -13,11 +12,13 @@ import org.springframework.stereotype.Service;
 import me.universi.Sys;
 import me.universi.capacity.entidades.Category;
 import me.universi.capacity.entidades.Content;
+import me.universi.capacity.entidades.ContentStatus;
 import me.universi.capacity.entidades.Folder;
 import me.universi.capacity.entidades.FolderFavorite;
 import me.universi.capacity.entidades.FolderProfile;
 import me.universi.capacity.exceptions.CapacityException;
 import me.universi.capacity.repository.ContentRepository;
+import me.universi.capacity.repository.ContentStatusRepository;
 import me.universi.capacity.repository.FolderFavoriteRepository;
 import me.universi.capacity.repository.FolderProfileRepository;
 import me.universi.capacity.repository.FolderRepository;
@@ -40,8 +41,9 @@ public class FolderService {
     private final FolderProfileRepository folderProfileRepository;
     private final ContentRepository contentRepository;
     private final FolderFavoriteRepository folderFavoriteRepository;
+    private final ContentStatusRepository contentStatusRepository;
 
-    public FolderService(GroupService groupService, ProfileService profileService, CategoryService categoryService, FolderRepository folderRepository, FolderProfileRepository folderProfileRepository, ContentRepository contentRepository, FolderFavoriteRepository folderFavoriteRepository) {
+    public FolderService(GroupService groupService, ProfileService profileService, CategoryService categoryService, FolderRepository folderRepository, FolderProfileRepository folderProfileRepository, ContentRepository contentRepository, FolderFavoriteRepository folderFavoriteRepository, ContentStatusRepository contentStatusRepository) {
         this.groupService = groupService;
         this.profileService = profileService;
         this.categoryService = categoryService;
@@ -49,6 +51,7 @@ public class FolderService {
         this.folderProfileRepository = folderProfileRepository;
         this.contentRepository = contentRepository;
         this.folderFavoriteRepository = folderFavoriteRepository;
+        this.contentStatusRepository = contentStatusRepository;
     }
 
     public static FolderService getInstance() {
@@ -507,5 +510,12 @@ public class FolderService {
         } while (folder != null);
 
         return reference;
+    }
+
+    public List<ContentStatus> getStatuses(Profile profile, Folder folder) {
+        return folder.getContents().stream()
+            .map(c -> contentStatusRepository.findByProfileIdAndContentId(profile.getId(), c.getId()))
+            .filter(Objects::nonNull)
+            .toList();
     }
 }

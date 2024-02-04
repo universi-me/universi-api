@@ -16,6 +16,7 @@ import me.universi.capacity.exceptions.CapacityException;
 import me.universi.capacity.repository.ContentRepository;
 import me.universi.capacity.repository.ContentStatusRepository;
 import me.universi.profile.entities.Profile;
+import me.universi.profile.services.ProfileService;
 import me.universi.user.services.UserService;
 
 @Service
@@ -49,6 +50,13 @@ public class ContentService {
             throw new CapacityException("Conteúdo não encontrada.");
         }
         return content;
+    }
+
+    public Content findById(Object contentId) throws CapacityException {
+        if (contentId == null)
+            throw new CapacityException("Conteúdo não encontrado.");
+
+        return findById(String.valueOf(contentId));
     }
 
     public Content findById(String contentId) throws CapacityException {
@@ -139,5 +147,16 @@ public class ContentService {
 
     public void deleteStatus(UUID contentId) {
         contentStatusRepository.deleteByContentId(contentId);
+    }
+
+    public ContentStatusType getProfileProgress(Object contentId, Object profileId, Object profileUsername) throws CapacityException {
+        Profile profile = ProfileService.getInstance().getProfileByUserIdOrUsername(profileId, profileUsername);
+        Content content = findById(contentId);
+
+        ContentStatus status = contentStatusRepository.findByProfileIdAndContentId(profile.getId(), content.getId());
+
+        return status != null
+            ? status.getStatus()
+            : ContentStatusType.NOT_VIEWED;
     }
 }

@@ -8,6 +8,9 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
+
+import me.universi.capacity.enums.ContentStatusType;
+import me.universi.capacity.service.FolderService;
 import me.universi.profile.entities.Profile;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLDelete;
@@ -109,5 +112,18 @@ public class FolderProfile implements Serializable {
 
     public void setAssigned(boolean assigned) {
         this.assigned = assigned;
+    }
+
+    @Transient
+    public int getFolderSize() {
+        return this.folder.getContents().size();
+    }
+
+    @Transient
+    public int getDoneUtilNow() {
+        return FolderService.getInstance().getStatuses(profile, folder).stream()
+            .filter(cs -> cs.getStatus().equals(ContentStatusType.DONE))
+            .toList()
+            .size();
     }
 }
