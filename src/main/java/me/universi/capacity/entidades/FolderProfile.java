@@ -8,6 +8,9 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
+
+import me.universi.capacity.enums.ContentStatusType;
+import me.universi.capacity.service.FolderService;
 import me.universi.profile.entities.Profile;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLDelete;
@@ -42,19 +45,16 @@ public class FolderProfile implements Serializable {
     @Column(name = "deleted")
     public boolean deleted = Boolean.FALSE;
 
-    @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER)
     @PrimaryKeyJoinColumn(name="author_id")
     @NotNull
     public Profile author;
 
-    @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER)
     @PrimaryKeyJoinColumn(name="profile_id")
     @NotNull
     public Profile profile;
 
-    @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER)
     @PrimaryKeyJoinColumn(name="folder_id")
     @NotNull
@@ -112,5 +112,18 @@ public class FolderProfile implements Serializable {
 
     public void setAssigned(boolean assigned) {
         this.assigned = assigned;
+    }
+
+    @Transient
+    public int getFolderSize() {
+        return this.folder.getContents().size();
+    }
+
+    @Transient
+    public int getDoneUntilNow() {
+        return FolderService.getInstance().getStatuses(profile, folder).stream()
+            .filter(cs -> cs.getStatus().equals(ContentStatusType.DONE))
+            .toList()
+            .size();
     }
 }

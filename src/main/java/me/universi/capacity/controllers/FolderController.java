@@ -1,6 +1,7 @@
 package me.universi.capacity.controllers;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -12,12 +13,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import me.universi.api.entities.Response;
+import me.universi.capacity.dto.WatchProfileProgressDTO;
 import me.universi.capacity.entidades.Folder;
 import me.universi.capacity.exceptions.CapacityException;
 import me.universi.capacity.service.ContentService;
 import me.universi.capacity.service.FolderService;
 import me.universi.group.entities.Group;
 import me.universi.group.services.GroupService;
+import me.universi.profile.entities.Profile;
+import me.universi.profile.services.ProfileService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 
@@ -357,7 +361,7 @@ public class FolderController {
         });
     }
 
-    @GetMapping(value = "/assigned", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/assigned", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Response usersAssigned(@RequestBody Map<String, Object> body){
         return Response.buildResponse(response -> {
 
@@ -408,6 +412,16 @@ public class FolderController {
         });
     }
 
+    @PostMapping(value = "/assigned-by", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Response assignedBy(@RequestBody Map<String, Object> body) {
+        return Response.buildResponse(response -> {
+            Object profileId = body.get("profileId");
+            Object profileUsername = body.get("username");
+
+            response.body.put("folders", folderService.getAssignedBy(profileId, profileUsername));
+        });
+    }
+
     @PostMapping(value = "/favorite", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Response favorite(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
@@ -437,6 +451,27 @@ public class FolderController {
             folderService.unfavorite(folder);
 
             response.message = "Conteúdo desfavoritado com sucesso!";
+        });
+    }
+
+    @PostMapping(value = "/watch", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Response watch(@RequestBody Map<String, Object> body) {
+        return Response.buildResponse(response -> {
+            Profile profile = ProfileService.getInstance().getProfileByUserIdOrUsername(body.get("profileId"), body.get("username"));
+            Folder folder = folderService.findByIdOrReference(body.get("folderId"), body.get("folderReference"));
+
+            if (!folderService.canCheckProfileProgress(profile, folder)) {
+                response.status = 403;
+                throw new CapacityException("Você não pode checar o progresso desse usuário para esse conteúdo");
+            }
+
+            List<WatchProfileProgressDTO> contentWatches = folder.getContents().stream()
+                .map(c -> new WatchProfileProgressDTO(profile, c))
+                .toList();
+
+            response.body.put("watching", profile);
+            response.body.put("folder", folder);
+            response.body.put("contentWatches", contentWatches);
         });
     }
 }

@@ -16,4 +16,6 @@ public interface ContentStatusRepository extends JpaRepository<ContentStatus, UU
     @Transactional
     @Query(value = "UPDATE contentstatus SET deleted=true WHERE content_id = :ContentId", nativeQuery = true)
     void deleteByContentId(@Param("ContentId") UUID contentId);
+
+    ContentStatus findByProfileIdAndContentId(UUID profileId, UUID contentId);
 }

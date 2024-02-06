@@ -2,6 +2,7 @@ package me.universi.capacity.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import me.universi.capacity.exceptions.CapacityException;
 import me.universi.capacity.repository.ContentRepository;
 import me.universi.capacity.repository.ContentStatusRepository;
 import me.universi.profile.entities.Profile;
+import me.universi.profile.services.ProfileService;
 import me.universi.user.services.UserService;
 
 @Service
@@ -51,6 +53,13 @@ public class ContentService {
         return content;
     }
 
+    public Content findById(Object contentId) throws CapacityException {
+        if (contentId == null)
+            throw new CapacityException("Conteúdo não encontrado.");
+
+        return findById(String.valueOf(contentId));
+    }
+
     public Content findById(String contentId) throws CapacityException {
         return findById(UUID.fromString(contentId));
     }
@@ -67,16 +76,7 @@ public class ContentService {
     public List<Content> findByFolder(UUID folderId) throws CapacityException {
         Folder folder = folderService.findById(folderId);
 
-        List<Content> contents = contentRepository.findContentsInFolderByOrderPosition(folder.getId());
-
-        for(Content content : contents) {
-            ContentStatus contentStatus = findStatusById(content.getId());
-            if(contentStatus != null) {
-                content.contentStatus = contentStatus;
-            }
-        }
-
-        return contents;
+        return contentRepository.findContentsInFolderByOrderPosition(folder.getId());
     }
 
     public List<Content> findByFolder(String folderId) throws CapacityException {
@@ -139,5 +139,20 @@ public class ContentService {
 
     public void deleteStatus(UUID contentId) {
         contentStatusRepository.deleteByContentId(contentId);
+    }
+
+    public ContentStatusType getProfileProgress(Object contentId, Object profileId, Object profileUsername) throws CapacityException {
+        Profile profile = ProfileService.getInstance().getProfileByUserIdOrUsername(profileId, profileUsername);
+        Content content = findById(contentId);
+
+        return getProfileProgress(content, profile);
+    }
+
+    public ContentStatusType getProfileProgress(Content content, Profile profile) throws CapacityException {
+        ContentStatus status = contentStatusRepository.findByProfileIdAndContentId(profile.getId(), content.getId());
+
+        return status != null
+            ? status.getStatus()
+            : ContentStatusType.NOT_VIEWED;
     }
 }

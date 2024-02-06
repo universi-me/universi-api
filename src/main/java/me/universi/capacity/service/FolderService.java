@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -13,11 +12,13 @@ import org.springframework.stereotype.Service;
 import me.universi.Sys;
 import me.universi.capacity.entidades.Category;
 import me.universi.capacity.entidades.Content;
+import me.universi.capacity.entidades.ContentStatus;
 import me.universi.capacity.entidades.Folder;
 import me.universi.capacity.entidades.FolderFavorite;
 import me.universi.capacity.entidades.FolderProfile;
 import me.universi.capacity.exceptions.CapacityException;
 import me.universi.capacity.repository.ContentRepository;
+import me.universi.capacity.repository.ContentStatusRepository;
 import me.universi.capacity.repository.FolderFavoriteRepository;
 import me.universi.capacity.repository.FolderProfileRepository;
 import me.universi.capacity.repository.FolderRepository;
@@ -40,8 +41,9 @@ public class FolderService {
     private final FolderProfileRepository folderProfileRepository;
     private final ContentRepository contentRepository;
     private final FolderFavoriteRepository folderFavoriteRepository;
+    private final ContentStatusRepository contentStatusRepository;
 
-    public FolderService(GroupService groupService, ProfileService profileService, CategoryService categoryService, FolderRepository folderRepository, FolderProfileRepository folderProfileRepository, ContentRepository contentRepository, FolderFavoriteRepository folderFavoriteRepository) {
+    public FolderService(GroupService groupService, ProfileService profileService, CategoryService categoryService, FolderRepository folderRepository, FolderProfileRepository folderProfileRepository, ContentRepository contentRepository, FolderFavoriteRepository folderFavoriteRepository, ContentStatusRepository contentStatusRepository) {
         this.groupService = groupService;
         this.profileService = profileService;
         this.categoryService = categoryService;
@@ -49,6 +51,7 @@ public class FolderService {
         this.folderProfileRepository = folderProfileRepository;
         this.contentRepository = contentRepository;
         this.folderFavoriteRepository = folderFavoriteRepository;
+        this.contentStatusRepository = contentStatusRepository;
     }
 
     public static FolderService getInstance() {
@@ -427,8 +430,23 @@ public class FolderService {
 
     public void unassignFromMultipleProfiles(Collection<UUID> profilesIds, Folder folder) {
         for (UUID profileId : profilesIds) {
-            assignToProfile(profileId, folder);
+            unassignFromProfile(profileId, folder);
         }
+    }
+
+    public List<FolderProfile> getAssignedBy(Object profileId, Object username) {
+        Profile profile = profileService.getProfileByUserIdOrUsername(profileId, username);
+        return getAssignedBy(profile);
+    }
+
+    public List<FolderProfile> getAssignedBy(Profile profile) {
+        UserService userService = UserService.getInstance();
+
+        if (!userService.isUserAdmin(userService.getUserInSession()) && !userService.isSessionOfUser(profile.getUser())) {
+            throw new CapacityException("Você não pode acessar os conteúdos atribuídos por outro usuário.");
+        }
+
+        return folderProfileRepository.findByAuthorId(profile.getId());
     }
 
     public void favorite(Folder folder) throws CapacityException {
@@ -496,5 +514,34 @@ public class FolderService {
         } while (folder != null);
 
         return reference;
+    }
+
+    public List<ContentStatus> getStatuses(Profile profile, Folder folder) {
+        return folder.getContents().stream()
+            .map(c -> contentStatusRepository.findByProfileIdAndContentId(profile.getId(), c.getId()))
+            .filter(Objects::nonNull)
+            .toList();
+    }
+
+    public boolean canCheckProfileProgress(Object profileId, Object profileUsername, Object folderId, Object folderReference) {
+        return canCheckProfileProgress(
+            ProfileService.getInstance().getProfileByUserIdOrUsername(profileId, profileUsername),
+            findByIdOrReference(folderId, folderReference)
+        );
+    }
+
+    public boolean canCheckProfileProgress(Profile profile, Folder folder) {
+        if (profile == null)
+            return false;
+
+        UserService userService = UserService.getInstance();
+
+        return userService.isUserAdminSession()
+            || userService.isSessionOfUser(profile.getUser())
+            || getAssignedBy(userService.getUserInSession().getProfile()) // has assigned that folder to that user
+            .stream()
+            .filter(fp -> Objects.equals(profile.getId(), fp.getProfile().getId())
+                && Objects.equals(folder.getId(), fp.getFolder().getId()))
+            .count() > 0;
     }
 }
