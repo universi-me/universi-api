@@ -100,7 +100,15 @@ public class UserController {
     public Response available_username_check(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
             String username = (String)body.get("username");
-            response.success = userService.usernameRegex(username) && !userService.usernameExist(username);
+
+            boolean usernameRegex = userService.usernameRegex(username);
+            boolean usernameExist = userService.usernameExist(username);
+
+            response.success = usernameRegex && !usernameExist;
+
+            response.body.put("reason", !usernameRegex ? "Verifique o formato do nome de usuário." :
+                                        usernameExist ? "Este nome de usuário está em uso." :
+                                                "Usuário Disponível para uso.");
         });
     }
 
@@ -109,7 +117,17 @@ public class UserController {
     public Response available_email_check(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
             String email = (String)body.get("email");
-            response.success = userService.emailRegex(email) && !userService.emailExist(email) && GroupService.getInstance().emailAvailableForOrganization(email);
+
+            boolean emailRegex = userService.emailRegex(email);
+            boolean emailExist = userService.emailExist(email);
+            boolean emailAvailableForOrganization = GroupService.getInstance().emailAvailableForOrganization(email);
+
+            response.success = emailRegex && !emailExist && emailAvailableForOrganization;
+
+            response.body.put("reason", !emailRegex ? "Verifique o formato do email." :
+                                        emailExist ? "Este email já está em uso." :
+                                        !emailAvailableForOrganization ? "Email não autorizado.\nUtilize seu email corporativo." :
+                                                "Email Disponível para uso.");
         });
     }
 
