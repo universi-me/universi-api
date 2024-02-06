@@ -442,7 +442,7 @@ public class FolderService {
     public List<FolderProfile> getAssignedBy(Profile profile) {
         UserService userService = UserService.getInstance();
 
-        if (!userService.isUserAdmin(userService.getUserInSession()) || !userService.isSessionOfUser(profile.getUser())) {
+        if (!userService.isUserAdmin(userService.getUserInSession()) && !userService.isSessionOfUser(profile.getUser())) {
             throw new CapacityException("Você não pode acessar os conteúdos atribuídos por outro usuário.");
         }
 
