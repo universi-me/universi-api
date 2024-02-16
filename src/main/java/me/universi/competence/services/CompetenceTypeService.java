@@ -1,14 +1,18 @@
 package me.universi.competence.services;
 
+import me.universi.Sys;
 import me.universi.api.entities.Response;
 import me.universi.competence.entities.CompetenceType;
 import me.universi.competence.exceptions.CompetenceException;
 import me.universi.competence.repositories.CompetenceTypeRepository;
+import me.universi.profile.services.ProfileService;
 import me.universi.user.services.UserService;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -19,6 +23,10 @@ public class CompetenceTypeService {
 
     public CompetenceTypeService(CompetenceTypeRepository competenceTypeRepository) {
         this.competenceTypeRepository = competenceTypeRepository;
+    }
+
+    public static CompetenceTypeService getInstance() {
+        return Sys.context.getBean("competenceTypeService", CompetenceTypeService.class);
     }
 
     public CompetenceType findFirstById(UUID id) {
@@ -40,13 +48,17 @@ public class CompetenceTypeService {
     }
 
     public CompetenceType findFirstByName(String name) {
-        CompetenceType competenceType = competenceTypeRepository.findFirstByName(name).orElse(null);
+        CompetenceType competenceType = findFirstByNameIgnoringAccess(name);
 
         if (hasAccessToCompetenceType(competenceType)) {
             return competenceType;
         }else{
             return null;
         }
+    }
+
+    private CompetenceType findFirstByNameIgnoringAccess(String name) {
+        return competenceTypeRepository.findFirstByName(name).orElse(null);
     }
 
     private CompetenceType save(CompetenceType competenceType) {
@@ -83,18 +95,25 @@ public class CompetenceTypeService {
                 throw new CompetenceException("Parâmetro nome é nulo.");
             }
 
-            if(findFirstByName(name) != null) {
-                throw new CompetenceException("Tipo de competência já existe.");
+            CompetenceType competenceType = findFirstByNameIgnoringAccess(name);
+            if(competenceType != null) {
+                if (!hasAccessToCompetenceType(competenceType)) {
+                    competenceType.addProfileWithAccess(ProfileService.getInstance().getProfileInSession());
+                }
+            } else {
+                competenceType = new CompetenceType();
+                competenceType.setName(name);
+                competenceType.setProfilesWithAccess(Arrays.asList(
+                    ProfileService.getInstance().getProfileInSession()
+                ));
             }
 
-            CompetenceType newCompetence = new CompetenceType();
-            newCompetence.setName(name);
-
-            save(newCompetence);
+            save(competenceType);
 
             response.message = "Tipo de Competência Criada";
             response.success = true;
-
+            response.body.put("competenceType", competenceType);
+            response.status = HttpStatus.CREATED.value();
         });
     }
 
@@ -124,6 +143,11 @@ public class CompetenceTypeService {
 
             if(name != null) {
                 competenceType.setName(name);
+            }
+
+            if (competenceType.isReviewed()) {
+                // Delete the profiles with access now that every profile has access to it
+                competenceType.setProfilesWithAccess(Arrays.asList());
             }
 
             save(competenceType);
@@ -196,6 +220,13 @@ public class CompetenceTypeService {
     public boolean hasAccessToCompetenceType(CompetenceType competence) {
         if (competence == null) return false;
 
-        return competence.isReviewed() || UserService.getInstance().isUserAdminSession();
+        UserService userService = UserService.getInstance();
+        var currentUser = userService.getUserInSession();
+
+        return competence.isReviewed()
+            || userService.isUserAdmin(currentUser)
+            || competence.getProfilesWithAccess()
+                .stream()
+                .anyMatch(p -> p.getId().equals(currentUser.getProfile().getId()));
     }
 }
