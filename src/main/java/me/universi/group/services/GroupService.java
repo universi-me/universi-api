@@ -280,7 +280,9 @@ public class GroupService {
 
         if(group.subGroups != null) {
             for(Subgroup groupNow : group.subGroups) {
-                this.deleteRecursive(groupNow.subgroup, true);
+                if(groupNow.subgroup != null) {
+                    this.deleteRecursive(groupNow.subgroup, true);
+                }
             }
         }
 
