@@ -4,12 +4,13 @@ import me.universi.api.entities.Response;
 import me.universi.competence.entities.CompetenceType;
 import me.universi.competence.exceptions.CompetenceException;
 import me.universi.competence.repositories.CompetenceTypeRepository;
+import me.universi.user.services.UserService;
+
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -21,41 +22,47 @@ public class CompetenceTypeService {
     }
 
     public CompetenceType findFirstById(UUID id) {
-        Optional<CompetenceType> optionalCompetenceType = competenceTypeRepository.findFirstById(id);
-        if(optionalCompetenceType.isPresent()){
-            return optionalCompetenceType.get();
+        CompetenceType competenceType = competenceTypeRepository.findFirstById(id).orElse(null);
+
+        if(hasAccessToCompetenceType(competenceType)){
+            return competenceType;
         }else{
             return null;
         }
     }
 
     public CompetenceType findFirstById(String id) {
-        return findFirstById(UUID.fromString(id));
+        try {
+            return findFirstById(UUID.fromString(id));
+        } catch (IllegalArgumentException invalidUUID) {
+            return null;
+        }
     }
 
     public CompetenceType findFirstByName(String name) {
-        Optional<CompetenceType> optionalCompetenceType = competenceTypeRepository.findFirstByName(name);
-        if(optionalCompetenceType.isPresent()){
-            return optionalCompetenceType.get();
+        CompetenceType competenceType = competenceTypeRepository.findFirstByName(name).orElse(null);
+
+        if (hasAccessToCompetenceType(competenceType)) {
+            return competenceType;
         }else{
             return null;
         }
     }
 
-    public CompetenceType save(CompetenceType competenceType) {
+    private CompetenceType save(CompetenceType competenceType) {
         return competenceTypeRepository.saveAndFlush(competenceType);
     }
 
-    public void delete(CompetenceType competenceType) {
+    private void delete(CompetenceType competenceType) {
         competenceType.setDeleted(true);
         save(competenceType);
     }
 
-    public List<CompetenceType> findAll() {
+    private List<CompetenceType> findAll() {
         return competenceTypeRepository.findAll();
     }
 
-    public CompetenceType update(CompetenceType newCompetenceType, UUID id) throws Exception{
+    public CompetenceType update(CompetenceType newCompetenceType, UUID id) {
         return competenceTypeRepository.findFirstById(id).map(competenceType -> {
             competenceType.setName(newCompetenceType.getName());
             return save(competenceType);
@@ -66,11 +73,6 @@ public class CompetenceTypeService {
                 return null;
             }
         });
-    }
-
-    public void delete(UUID id) {
-        CompetenceType competenceType = findFirstById(id);
-        delete(competenceType);
     }
 
     public Response create(Map<String, Object> body) {
@@ -98,6 +100,11 @@ public class CompetenceTypeService {
 
     public Response update(Map<String, Object> body) {
         return Response.buildResponse(response -> {
+
+            if (!UserService.getInstance().isUserAdminSession()) {
+                response.status = 403;
+                throw new CompetenceException("Esta operação não é permitida para este usuário.");
+            }
 
             String id = (String)body.get("competenceTypeId");
             if(id == null) {
@@ -130,6 +137,11 @@ public class CompetenceTypeService {
     public Response remove(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
 
+            if (!UserService.getInstance().isUserAdminSession()) {
+                response.status = 403;
+                throw new CompetenceException("Esta operação não é permitida para este usuário.");
+            }
+
             String id = (String)body.get("competenceTypeId");
             if(id == null) {
                 throw new CompetenceException("Parâmetro competenceTypeId é nulo.");
@@ -157,7 +169,7 @@ public class CompetenceTypeService {
             }
 
             CompetenceType competenceType = findFirstById(id);
-            if (competenceType == null) {
+            if (competenceType == null || !hasAccessToCompetenceType(competenceType)) {
                 throw new CompetenceException("Tipo de Competência não encontrada.");
             }
 
@@ -170,11 +182,20 @@ public class CompetenceTypeService {
     public Response findAll(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
 
-            List<CompetenceType> competences = findAll();
+            List<CompetenceType> competences = findAll()
+                .stream()
+                .filter(this::hasAccessToCompetenceType)
+                .toList();
 
             response.body.put("list", competences);
             response.success = true;
 
         });
+    }
+
+    public boolean hasAccessToCompetenceType(CompetenceType competence) {
+        if (competence == null) return false;
+
+        return competence.isReviewed() || UserService.getInstance().isUserAdminSession();
     }
 }
