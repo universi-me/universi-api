@@ -7,6 +7,8 @@ import me.universi.user.exceptions.ExceptionResponse;
 import me.universi.user.services.UserService;
 import me.universi.util.ConvertUtil;
 import java.util.HashMap;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -49,6 +51,15 @@ public class Response {
         body = new HashMap<>();
         alertOptions = new HashMap<>();
         status = null;
+    }
+
+    public void setStatus(Integer statusCode) {
+        this.status = statusCode;
+    }
+
+    public void setStatus(HttpStatus httpStatus) {
+        if (httpStatus != null)
+            this.status = httpStatus.value();
     }
 
     /**
