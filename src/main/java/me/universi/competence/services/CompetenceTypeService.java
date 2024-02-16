@@ -1,15 +1,16 @@
 package me.universi.competence.services;
 
-import me.universi.api.entities.Response;
+import me.universi.Sys;
 import me.universi.competence.entities.CompetenceType;
 import me.universi.competence.exceptions.CompetenceException;
 import me.universi.competence.repositories.CompetenceTypeRepository;
-import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
+import me.universi.profile.services.ProfileService;
+import me.universi.user.services.UserService;
 
+import org.springframework.stereotype.Service;
+
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -20,161 +21,132 @@ public class CompetenceTypeService {
         this.competenceTypeRepository = competenceTypeRepository;
     }
 
+    public static CompetenceTypeService getInstance() {
+        return Sys.context.getBean("competenceTypeService", CompetenceTypeService.class);
+    }
+
     public CompetenceType findFirstById(UUID id) {
-        Optional<CompetenceType> optionalCompetenceType = competenceTypeRepository.findFirstById(id);
-        if(optionalCompetenceType.isPresent()){
-            return optionalCompetenceType.get();
+        CompetenceType competenceType = competenceTypeRepository.findFirstById(id).orElse(null);
+
+        if(hasAccessToCompetenceType(competenceType)){
+            return competenceType;
         }else{
             return null;
         }
     }
 
     public CompetenceType findFirstById(String id) {
-        return findFirstById(UUID.fromString(id));
+        try {
+            return findFirstById(UUID.fromString(id));
+        } catch (IllegalArgumentException invalidUUID) {
+            return null;
+        }
     }
 
     public CompetenceType findFirstByName(String name) {
-        Optional<CompetenceType> optionalCompetenceType = competenceTypeRepository.findFirstByName(name);
-        if(optionalCompetenceType.isPresent()){
-            return optionalCompetenceType.get();
+        CompetenceType competenceType = findFirstByNameIgnoringAccess(name);
+
+        if (hasAccessToCompetenceType(competenceType)) {
+            return competenceType;
         }else{
             return null;
         }
     }
 
-    public CompetenceType save(CompetenceType competenceType) {
+    private CompetenceType findFirstByNameIgnoringAccess(String name) {
+        return competenceTypeRepository.findFirstByName(name).orElse(null);
+    }
+
+    private CompetenceType save(CompetenceType competenceType) {
         return competenceTypeRepository.saveAndFlush(competenceType);
     }
 
-    public void delete(CompetenceType competenceType) {
+    public void delete(UUID id) throws CompetenceException {
+        delete(findFirstById(id));
+    }
+
+    public void delete(CompetenceType competenceType) throws CompetenceException {
+        if (!UserService.getInstance().isUserAdminSession()) {
+            throw new CompetenceException("Esta operação não é permitida para este usuário.");
+        }
+
+        if (competenceType == null) {
+            throw new CompetenceException("Competência não encontrada.");
+        }
+
         competenceType.setDeleted(true);
         save(competenceType);
     }
 
     public List<CompetenceType> findAll() {
-        return competenceTypeRepository.findAll();
+        return competenceTypeRepository.findAll()
+            .stream()
+            .filter(this::hasAccessToCompetenceType)
+            .toList();
     }
 
-    public CompetenceType update(CompetenceType newCompetenceType, UUID id) throws Exception{
-        return competenceTypeRepository.findFirstById(id).map(competenceType -> {
-            competenceType.setName(newCompetenceType.getName());
-            return save(competenceType);
-        }).orElseGet(()->{
-            try {
-                return save(newCompetenceType);
-            }catch (Exception e){
-                return null;
-            }
-        });
+    public CompetenceType update(CompetenceType competenceType) throws CompetenceException {
+        return this.update(competenceType, competenceType.getId());
     }
 
-    public void delete(UUID id) {
-        CompetenceType competenceType = findFirstById(id);
-        delete(competenceType);
+    public CompetenceType update(CompetenceType updateTo, UUID id) throws CompetenceException {
+        if (!UserService.getInstance().isUserAdminSession()) {
+            throw new CompetenceException("Esta operação não é permitida para este usuário.");
+        }
+
+        var existingCompetenceType = competenceTypeRepository.findById(id)
+            .orElseThrow(() -> new CompetenceException("Tipo de competência não encontrado."));
+
+        if (updateTo.getName() != null) {
+            var competenceWithName = findFirstByNameIgnoringAccess(updateTo.getName());
+
+            if (competenceWithName != null && !competenceWithName.getId().equals(existingCompetenceType.getId())) {
+                throw new CompetenceException("Já existe um tipo de competência já existe.");
+            }
+
+            existingCompetenceType.setName(updateTo.getName());
+        }
+
+        if (!existingCompetenceType.isReviewed() && updateTo.isReviewed()) {
+            existingCompetenceType.setReviewed(updateTo.isReviewed());
+
+            // Delete the profiles with access now that every profile has access to it
+            existingCompetenceType.setProfilesWithAccess(Arrays.asList());
+        }
+
+        return save(existingCompetenceType);
     }
 
-    public Response create(Map<String, Object> body) {
-        return Response.buildResponse(response -> {
+    public CompetenceType create(CompetenceType competenceType) {
+        CompetenceType existingCompetenceType = findFirstByNameIgnoringAccess(competenceType.getName());
 
-            String name = (String)body.get("name");
-            if(name == null) {
-                throw new CompetenceException("Parâmetro nome é nulo.");
+        if(existingCompetenceType != null) {
+            if (!hasAccessToCompetenceType(existingCompetenceType)) {
+                existingCompetenceType.addProfileWithAccess(ProfileService.getInstance().getProfileInSession());
             }
+        } else {
+            existingCompetenceType = new CompetenceType();
+            existingCompetenceType.setName(competenceType.getName());
+            existingCompetenceType.setReviewed(false);
 
-            if(findFirstByName(name) != null) {
-                throw new CompetenceException("Tipo de competência já existe.");
-            }
+            existingCompetenceType.setProfilesWithAccess(Arrays.asList(
+                ProfileService.getInstance().getProfileInSession()
+            ));
+        }
 
-            CompetenceType newCompetence = new CompetenceType();
-            newCompetence.setName(name);
-
-            save(newCompetence);
-
-            response.message = "Tipo de Competência Criada";
-            response.success = true;
-
-        });
+        return save(existingCompetenceType);
     }
 
-    public Response update(Map<String, Object> body) {
-        return Response.buildResponse(response -> {
+    public boolean hasAccessToCompetenceType(CompetenceType competence) {
+        if (competence == null) return false;
 
-            String id = (String)body.get("competenceTypeId");
-            if(id == null) {
-                throw new CompetenceException("Parâmetro competenceTypeId é nulo.");
-            }
+        UserService userService = UserService.getInstance();
+        var currentUser = userService.getUserInSession();
 
-            String name = (String)body.get("name");
-
-            CompetenceType competenceType = findFirstById(id);
-            if (competenceType == null) {
-                throw new CompetenceException("Tipo de Competência não encontrada.");
-            }
-
-            if(findFirstByName(name) != null) {
-                throw new CompetenceException("Tipo de competência já existe.");
-            }
-
-            if(name != null) {
-                competenceType.setName(name);
-            }
-
-            save(competenceType);
-
-            response.message = "Tipo de Competência atualizada";
-            response.success = true;
-
-        });
-    }
-
-    public Response remove(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-
-            String id = (String)body.get("competenceTypeId");
-            if(id == null) {
-                throw new CompetenceException("Parâmetro competenceTypeId é nulo.");
-            }
-
-            CompetenceType competenceType = findFirstById(id);
-            if (competenceType == null) {
-                throw new CompetenceException("Competência não encontrada.");
-            }
-
-            delete(competenceType);
-
-            response.message = "Tipo de Competência removida";
-            response.success = true;
-
-        });
-    }
-
-    public Response get(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-
-            String id = (String)body.get("competenceTypeId");
-            if(id == null) {
-                throw new CompetenceException("Parâmetro competenceTypeId é nulo.");
-            }
-
-            CompetenceType competenceType = findFirstById(id);
-            if (competenceType == null) {
-                throw new CompetenceException("Tipo de Competência não encontrada.");
-            }
-
-            response.body.put("competenceType", competenceType);
-            response.success = true;
-
-        });
-    }
-
-    public Response findAll(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-
-            List<CompetenceType> competences = findAll();
-
-            response.body.put("list", competences);
-            response.success = true;
-
-        });
+        return competence.isReviewed()
+            || userService.isUserAdmin(currentUser)
+            || competence.getProfilesWithAccess()
+                .stream()
+                .anyMatch(p -> p.getId().equals(currentUser.getProfile().getId()));
     }
 }

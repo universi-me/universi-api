@@ -101,4 +101,8 @@ public class ProfileService {
 
     // search the first 5 containing the string uppercase or lowercase
     public Collection<Profile> findTop5ByNameContainingIgnoreCase(String nome){ return perfilRepository.findTop5ByFirstnameContainingIgnoreCase(nome); }
+
+    public Profile getProfileInSession() {
+        return findFirstById(UserService.getInstance().getUserInSession().getProfile().getId());
+    }
 }
