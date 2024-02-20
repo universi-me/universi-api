@@ -725,7 +725,7 @@ public class UserService implements UserDetailsService {
 
     public String getBuildHash() {
         if(BUILD_HASH == null || BUILD_HASH.isEmpty() || "development".equals(BUILD_HASH)) {
-            String jarPath = new File(UserService.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getPath();
+            String jarPath = new File(".").getPath();
             String filePath = Paths.get(jarPath, "build.hash").toString();
             Resource resource = new FileSystemResource(filePath);
             try (InputStreamReader reader = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8)) {
