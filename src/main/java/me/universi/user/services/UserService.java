@@ -729,6 +729,7 @@ public class UserService implements UserDetailsService {
             try (InputStreamReader reader = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8)) {
                 BUILD_HASH = FileCopyUtils.copyToString(reader);
             } catch (IOException ignored) {
+                ignored.printStackTrace();
             }
         }
         return BUILD_HASH;
