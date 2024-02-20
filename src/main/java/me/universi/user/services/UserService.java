@@ -28,8 +28,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
@@ -65,7 +63,6 @@ public class UserService implements UserDetailsService {
     private final JavaMailSender emailSender;
     private final Executor emailExecutor;
 
-    @Value("${BUILD_HASH}")
     public String BUILD_HASH;
 
     @Value("${RECAPTCHA_API_KEY}")
@@ -724,15 +721,14 @@ public class UserService implements UserDetailsService {
         return organization == null ? userRepository.findAll() : userRepository.findAllByOrganizationId(organization.getId());
     }
 
-    public String getBuildHash() throws RuntimeException {
+    public String getBuildHash() {
         if(BUILD_HASH == null || BUILD_HASH.isEmpty() || "development".equals(BUILD_HASH)) {
             String jarPath = UserService.class.getProtectionDomain().getCodeSource().getLocation().getPath();
             String filePath = jarPath + "build.hash";
             Resource resource = new FileSystemResource(filePath);
             try (InputStreamReader reader = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8)) {
                 BUILD_HASH = FileCopyUtils.copyToString(reader);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            } catch (IOException ignored) {
             }
         }
         return BUILD_HASH;
