@@ -2,10 +2,12 @@ package me.universi.user.services;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.util.*;
 import java.util.concurrent.Executor;
@@ -723,8 +725,8 @@ public class UserService implements UserDetailsService {
 
     public String getBuildHash() {
         if(BUILD_HASH == null || BUILD_HASH.isEmpty() || "development".equals(BUILD_HASH)) {
-            String jarPath = UserService.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-            String filePath = jarPath + "build.hash";
+            String jarPath = new File(UserService.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getParent();
+            String filePath = Paths.get(jarPath, "build.hash").toString();
             Resource resource = new FileSystemResource(filePath);
             try (InputStreamReader reader = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8)) {
                 BUILD_HASH = FileCopyUtils.copyToString(reader);
