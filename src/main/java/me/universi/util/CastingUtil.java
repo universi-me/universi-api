@@ -24,4 +24,11 @@ public class CastingUtil {
             return Optional.empty();
         }
     }
+
+    public static Optional<Boolean> getBoolean(Object obj) {
+        if (obj instanceof Boolean)
+            return Optional.of((Boolean) obj);
+
+        return Optional.empty();
+    }
 }
