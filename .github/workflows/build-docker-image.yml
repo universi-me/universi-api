@@ -38,6 +38,7 @@ jobs:
         docker buildx create --use
         tag_name=$(echo "${{ github.ref }}" | sed 's/refs\/heads\///')
         [ "$tag_name" == "prod" ] && tag_name='latest'
+        echo "${{ github.sha }}" > ./build.hash
         docker buildx build \
           --platform linux/amd64,linux/arm64 \
           --build-arg BUILD_HASH=${{ github.sha }} \
