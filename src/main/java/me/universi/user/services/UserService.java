@@ -26,6 +26,7 @@ import me.universi.user.repositories.UserRepository;
 import me.universi.util.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -725,11 +726,11 @@ public class UserService implements UserDetailsService {
 
     public String getBuildHash() throws RuntimeException {
         if(BUILD_HASH == null || BUILD_HASH.isEmpty() || "development".equals(BUILD_HASH)) {
-            ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-            Resource resource = resolver.getResource("classpath:build.hash");
+            String jarPath = UserService.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+            String filePath = jarPath + "build.hash";
+            Resource resource = new FileSystemResource(filePath);
             try (InputStreamReader reader = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8)) {
-                String fileContent = FileCopyUtils.copyToString(reader);
-                BUILD_HASH = fileContent;
+                BUILD_HASH = FileCopyUtils.copyToString(reader);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
