@@ -65,7 +65,7 @@ public class UserService implements UserDetailsService {
     private final JavaMailSender emailSender;
     private final Executor emailExecutor;
 
-    public String BUILD_HASH;
+    public String BUILD_HASH = "development";
 
     @Value("${RECAPTCHA_API_KEY}")
     public String recaptchaApiKey;
@@ -731,7 +731,6 @@ public class UserService implements UserDetailsService {
             try (InputStreamReader reader = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8)) {
                 BUILD_HASH = FileCopyUtils.copyToString(reader);
             } catch (IOException ignored) {
-                ignored.printStackTrace();
             }
         }
         return BUILD_HASH;
