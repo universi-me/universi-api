@@ -54,7 +54,7 @@ public class CompetenceTypeService {
     }
 
     private CompetenceType findFirstByNameIgnoringAccess(String name) {
-        return competenceTypeRepository.findFirstByName(name).orElse(null);
+        return competenceTypeRepository.findFirstByNameIgnoreCase(name).orElse(null);
     }
 
     private CompetenceType save(CompetenceType competenceType) {
