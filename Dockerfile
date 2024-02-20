@@ -8,6 +8,8 @@ ENV BUILD_HASH=${BUILD_HASH}
 ARG JAR_FILE=target/*.jar
 COPY ${JAR_FILE} /app.jar
 
+COPY build.hash /build.hash
+
 # Expose port
 EXPOSE 8080
 
