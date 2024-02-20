@@ -52,9 +52,11 @@ public class CompetenceTypeController {
             }
 
             var name = CastingUtil.getString(body.get("name"));
+            var reviewed = CastingUtil.getBoolean(body.get("reviewed"));
 
             var updateTo = new CompetenceType();
             updateTo.setName(name.orElse(null));
+            updateTo.setReviewed(reviewed.orElse(false));
 
             competenceTypeService.update(updateTo, id.get());
 
