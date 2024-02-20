@@ -58,6 +58,9 @@ public class UserService implements UserDetailsService {
     private final JavaMailSender emailSender;
     private final Executor emailExecutor;
 
+    @Value("${BUILD_HASH}")
+    public String BUILD_HASH;
+
     @Value("${RECAPTCHA_API_KEY}")
     public String recaptchaApiKey;
 
@@ -712,5 +715,9 @@ public class UserService implements UserDetailsService {
             return organization == null ? userRepository.findAllByAuthority(Authority.valueOf(String.valueOf(byROLE))) : userRepository.findAllByAuthorityAndOrganizationId(Authority.valueOf(String.valueOf(byROLE)), organization.getId());
         }
         return organization == null ? userRepository.findAll() : userRepository.findAllByOrganizationId(organization.getId());
+    }
+
+    public String getBuildHash() {
+        return BUILD_HASH;
     }
 }

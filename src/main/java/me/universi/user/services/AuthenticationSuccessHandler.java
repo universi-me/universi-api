@@ -60,7 +60,7 @@ public class AuthenticationSuccessHandler extends SavedRequestAwareAuthenticatio
                 else
                     r.message = "Boas vindas, "+user.getName()+".";
                 r.redirectTo = userService.getUrlWhenLogin();
-                r.token = jwtService.buildTokenForUser(user);
+                r.token = jwtService.ENABLED ? jwtService.buildTokenForUser(user) : null;
                 r.body.put("user", user);
             });
 

@@ -9,17 +9,18 @@ spring:
     port: ${API_MAIL_PORT:587}
     username: ${API_MAIL_USERNAME:username}
     password: ${API_MAIL_PASSWORD:password}
-    tls: true
+    tls: ${API_MAIL_TLS:true}
     properties:
       mail:
         smtp:
           ssl:
             trust: ${API_MAIL_HOST:smtp.gmail.com}
-          auth: true
+          auth: ${API_MAIL_AUTH:true}
           starttls:
-            enable: true
+            enable: ${API_MAIL_STARTTLS:true}
 
 jwt:
+  enabled: ${API_JWT_ENABLED:false}
   secret:
     key: ${API_JWT_SECRET_KEY:test_key}
 
@@ -71,6 +72,9 @@ springdoc:
   swagger-ui:
     enabled: ${API_SWAGGER_ENABLED:true}
     path: /api/swagger-ui.html
+
+# BUILD HASH
+BUILD_HASH: ${API_BUILD_HASH:development}
 
 # GOOGLE API AUTH
 GOOGLE_CLIENT_ID: ${API_GOOGLE_CLIENT_ID:110833050076-ib680ela4hfqr2c0lhc9h19snrsvltnd.apps.googleusercontent.com}

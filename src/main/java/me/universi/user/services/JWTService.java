@@ -12,6 +12,8 @@ import java.util.Date;
 
 @Service
 public class JWTService {
+    @Value("${jwt.enabled}")
+    public boolean ENABLED;
     @Value("${jwt.secret.key}")
     private String SECRET_KEY;
     private final UserService userService;
