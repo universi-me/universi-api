@@ -13,6 +13,7 @@ import me.universi.group.enums.GroupType;
 import me.universi.group.services.GroupService;
 import me.universi.profile.entities.Profile;
 import me.universi.user.services.JsonUserLoggedFilter;
+import me.universi.user.services.UserService;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Collection;
@@ -363,5 +364,14 @@ public class Group implements Serializable {
 
     public void setEveryoneCanPost(boolean everyoneCanPost) {
         this.everyoneCanPost = everyoneCanPost;
+    }
+
+    @Transient
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public String getBuildHash() {
+        if(!this.rootGroup) {
+            return null;
+        }
+        return UserService.getInstance().getBuildHash();
     }
 }

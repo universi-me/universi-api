@@ -2,8 +2,12 @@ package me.universi.user.services;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.util.*;
 import java.util.concurrent.Executor;
@@ -24,6 +28,8 @@ import me.universi.user.repositories.UserRepository;
 import me.universi.util.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
@@ -44,6 +50,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -57,6 +64,8 @@ public class UserService implements UserDetailsService {
     private final SessionRegistry sessionRegistry;
     private final JavaMailSender emailSender;
     private final Executor emailExecutor;
+
+    public String BUILD_HASH = "development";
 
     @Value("${RECAPTCHA_API_KEY}")
     public String recaptchaApiKey;
@@ -712,5 +721,18 @@ public class UserService implements UserDetailsService {
             return organization == null ? userRepository.findAllByAuthority(Authority.valueOf(String.valueOf(byROLE))) : userRepository.findAllByAuthorityAndOrganizationId(Authority.valueOf(String.valueOf(byROLE)), organization.getId());
         }
         return organization == null ? userRepository.findAll() : userRepository.findAllByOrganizationId(organization.getId());
+    }
+
+    public String getBuildHash() {
+        if(BUILD_HASH == null || BUILD_HASH.isEmpty() || "development".equals(BUILD_HASH)) {
+            String jarPath = new File(".").getPath();
+            String filePath = Paths.get(jarPath, "build.hash").toString();
+            Resource resource = new FileSystemResource(filePath);
+            try (InputStreamReader reader = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8)) {
+                BUILD_HASH = FileCopyUtils.copyToString(reader);
+            } catch (IOException ignored) {
+            }
+        }
+        return BUILD_HASH;
     }
 }
