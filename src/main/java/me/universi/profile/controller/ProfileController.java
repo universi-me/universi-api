@@ -32,21 +32,22 @@ import java.net.URI;
 @RestController
 @RequestMapping(value = "/api/profile")
 public class ProfileController {
-    @Autowired
-    public UserService userService;
+    private final  UserService userService;
+    private final  ProfileService profileService;
+    private final  FolderService folderService;
 
-    @Autowired
-    public ProfileService profileService;
-
-    @Autowired
-    public FolderService folderService;
+    public ProfileController(UserService userService,  ProfileService profileService,  FolderService folderService) {
+        this.userService = userService;
+        this.profileService = profileService;
+        this.folderService = folderService;
+    }
 
     @GetMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response profile() {
         return Response.buildResponse(response -> {
 
-            User userSession = userService.getUserInSession();
+            User userSession = (User) userService.findFirstById(userService.getUserInSession().getId());
 
             Profile userProfile = userSession.getProfile();
             if(userProfile == null) {

@@ -2,6 +2,7 @@ package me.universi.profile.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
@@ -17,6 +18,7 @@ import me.universi.group.entities.Group;
 import me.universi.group.entities.ProfileGroup;
 import me.universi.indicators.entities.Indicators;
 import me.universi.link.entities.Link;
+import me.universi.papers.entities.Paper;
 import me.universi.profile.enums.Gender;
 import me.universi.recommendation.entities.Recommendation;
 import me.universi.user.entities.User;
@@ -121,6 +123,10 @@ public class Profile implements Serializable {
     @JsonIgnore
     @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL)
     private Collection<FolderFavorite> favoriteFolders;
+
+    @Transient
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public Paper paper;
 
     public Profile(UUID id, User user, String bio, Collection<Competence> competences, Collection<ProfileGroup> groups, Collection<Link> links, Collection<FolderProfile> assignedFolders) {
         this.id = id;

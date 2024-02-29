@@ -14,6 +14,9 @@ import me.universi.group.enums.GroupType;
 import me.universi.group.exceptions.GroupException;
 import me.universi.group.services.GroupService;
 
+import me.universi.papers.enums.FeaturesTypes;
+import me.universi.papers.enums.Permission;
+import me.universi.papers.services.PaperService;
 import me.universi.profile.entities.Profile;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
@@ -357,6 +360,9 @@ public class GroupController {
             String groupPath = (String)body.get("groupPath");
 
             Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
+
+            // check permission contents
+            PaperService.getInstance().checkPermission(group, FeaturesTypes.CONTENT, Permission.READ);
 
             response.body.put("folders", group.getFolders());
 
