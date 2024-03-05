@@ -1,6 +1,12 @@
 package me.universi.image.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.minio.GetObjectArgs;
+import io.minio.GetPresignedObjectUrlArgs;
+import io.minio.MinioClient;
+import io.minio.PutObjectArgs;
+
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -25,6 +31,8 @@ import org.springframework.web.multipart.MultipartFile;
 public class ImageService {
     private final  ImageRepository imageRepository;
 
+    private final MinioClient minioClient;
+
     @Value("${SAVE_IMAGE_LOCAL}")
     public boolean saveImageLocal;
 
@@ -37,9 +45,11 @@ public class ImageService {
     @Value("${IMGUR_CLIENT_ID}")
     public String imgurClientId;
 
-    @Autowired
-    public ImageService(ImageRepository imageRepository) {
+
+    
+    public ImageService(ImageRepository imageRepository, MinioClient minioClient) {
         this.imageRepository = imageRepository;
+        this.minioClient = minioClient;
     }
 
     public Image findFirstById(UUID id) {
@@ -51,8 +61,8 @@ public class ImageService {
     }
 
     public String saveImageFromMultipartFile(MultipartFile image) throws Exception {
-        // check if save image in local or database.
-        return isSaveImageLocal() ? saveImageInFilesystem(image) : saveImageInDatabase(image);
+        // check if save image in local or minIO
+        return isSaveImageLocal() ? saveImageInFilesystem(image) : saveImageInMinIO(image);
     }
 
     public String saveImageInFilesystem(MultipartFile image) throws Exception {
@@ -103,6 +113,34 @@ public class ImageService {
         }
 
         throw new ImageException("Falha ao salvar imagem.");
+    }
+    
+    public String saveImageInMinIO(MultipartFile image) throws ImageException {
+        try {
+            //Valida o tamanho da imagem
+            if (image.getSize() > 1024 * 1024 * getImageUploadLimit()) {
+                throw new ImageException("Imagem muito grande.");
+            }
+
+            //Gera um novo nome para o arquivo jpg
+            String objectName = UUID.randomUUID().toString() + ".jpg";
+
+            //Faz o upload da imagem para o MinIO
+            try (InputStream inputStream = image.getInputStream()) {
+                minioClient.putObject(PutObjectArgs.builder()
+                        .bucket("universime")
+                        .object(objectName)
+                        .stream(inputStream, image.getSize(), -1)
+                        .contentType(image.getContentType())
+                        .build());
+            }
+
+            //Retorna o nome do objeto salvo
+            return objectName;
+            
+        } catch (Exception e) {
+            throw new ImageException("Erro ao salvar imagem no MinIO: " + e.getMessage());
+        }
     }
 
     public Resource getImageFromFilesystem(String filename) throws Exception {

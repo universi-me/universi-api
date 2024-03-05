@@ -24,6 +24,17 @@ jwt:
   secret:
     key: ${API_JWT_SECRET_KEY:test_key}
 
+#Configurações do MinIO
+minio:
+  url: ${MINIO_URL:http://localhost:9000}
+  username: ${MINIO_USERNAME:admin}
+  password: ${MINIO_PASSWORD:password}
+  accessKey: ${MINIO_ACESSKEY:9JwDwrutRQrywpBFH9ks}
+  secretKey: ${MINIO_SECRET:kEtizmyDs70XSm0JVIbLACH2zDv1TOeCawhZ7qWb}
+  bucket: ${MINIO_BUCKET:universime}
+  region: ${MINIO_REGION:us-east-1}
+  policy: ${MINIO_POLICY:public}
+
 # DATABASE ENV VARIABLES
 database:
   name: ${API_DB_NAME:universime_api}
