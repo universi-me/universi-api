@@ -1,29 +1,29 @@
-package me.universi.papers.controllers;
+package me.universi.roles.controllers;
 
 import java.util.Map;
 import me.universi.api.entities.Response;
-import me.universi.papers.entities.Paper;
-import me.universi.papers.entities.PaperFeature;
-import me.universi.papers.exceptions.PaperException;
-import me.universi.papers.services.PaperService;
+import me.universi.roles.entities.Roles;
+import me.universi.roles.entities.RolesFeature;
+import me.universi.roles.exceptions.RolesException;
+import me.universi.roles.services.RolesService;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(value = "/api/paper")
-public class PaperController {
-    private final PaperService paperService;
+@RequestMapping(value = "/api/roles")
+public class RolesController {
+    private final RolesService rolesService;
 
-    public PaperController(PaperService paperService) {
-        this.paperService = paperService;
+    public RolesController(RolesService rolesService) {
+        this.rolesService = rolesService;
     }
 
     @PostMapping(value = "/create", consumes = "application/json", produces = "application/json")
     @ResponseBody
     public Response paper_create(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
-            Paper paper = paperService.createPaper(body);
-            response.body.put("paper", paper);
-            response.message = "Papel \"" + paper.name + "\" criado com sucesso.";
+            Roles roles = rolesService.createRole(body);
+            response.body.put("roles", roles);
+            response.message = "Papel \"" + roles.name + "\" criado com sucesso.";
         });
     }
 
@@ -31,7 +31,7 @@ public class PaperController {
     @ResponseBody
     public Response paper_edit(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
-            response.body.put("paper", paperService.editPaper(body));
+            response.body.put("roles", rolesService.editRole(body));
             response.message = "Papel editado com sucesso.";
         });
     }
@@ -40,7 +40,7 @@ public class PaperController {
     @ResponseBody
     public Response paper_list(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
-            response.body.put("papers", paperService.listPaper(body));
+            response.body.put("roles", rolesService.listRolesGroup(body));
         });
     }
 
@@ -48,9 +48,9 @@ public class PaperController {
     @ResponseBody
     public Response paper_feature_active(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
-            PaperFeature paperFeature = paperService.setValuePaperFeature(body);
-            response.message = "Funcionalidade \"" + paperFeature.featureType.label + "\" foi alterada " +
-                               " com sucesso para \"" + paperFeature.paper.name + "\".";
+            RolesFeature rolesFeature = rolesService.setRolesFeatureValue(body);
+            response.message = "Funcionalidade \"" + rolesFeature.featureType.label + "\" foi alterada " +
+                               " com sucesso para \"" + rolesFeature.roles.name + "\".";
         });
     }
 
@@ -59,10 +59,10 @@ public class PaperController {
     @ResponseBody
     public Response paper_assign(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
-            if(paperService.assignPaper(body)) {
+            if(rolesService.assignRole(body)) {
                 response.message = "Papel atribuído com sucesso.";
             } else {
-                throw new PaperException("Não foi possível atribuir papel.");
+                throw new RolesException("Não foi possível atribuir papel.");
             }
         });
     }
@@ -72,7 +72,7 @@ public class PaperController {
     @ResponseBody
     public Response paper_assigned(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
-            response.body.put("paper", paperService.getAssignedPaper(body));
+            response.body.put("roles", rolesService.getAssignedPaper(body));
         });
     }
 
@@ -81,7 +81,16 @@ public class PaperController {
     @ResponseBody
     public Response paper_profile_list(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
-            response.body.put("participants", paperService.listPaperProfile(body));
+            response.body.put("participants", rolesService.listPaperProfile(body));
+        });
+    }
+
+    // list all my roles
+    @GetMapping(value = "", produces = "application/json")
+    @ResponseBody
+    public Response all_my_roles() {
+        return Response.buildResponse(response -> {
+            response.body.put("roles", rolesService.getAllRolesSession());
         });
     }
 

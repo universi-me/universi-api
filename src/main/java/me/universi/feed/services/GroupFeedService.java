@@ -6,12 +6,9 @@ import me.universi.feed.exceptions.GroupFeedException;
 import me.universi.feed.exceptions.PostNotFoundException;
 import me.universi.feed.entities.GroupPost;
 import me.universi.feed.repositories.GroupPostRepository;
-import me.universi.group.entities.Group;
-import me.universi.group.services.GroupService;
-import me.universi.papers.enums.FeaturesTypes;
-import me.universi.papers.enums.Permission;
-import me.universi.papers.services.PaperService;
-import me.universi.profile.entities.Profile;
+import me.universi.roles.enums.FeaturesTypes;
+import me.universi.roles.enums.Permission;
+import me.universi.roles.services.RolesService;
 import me.universi.user.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,7 +29,7 @@ public class GroupFeedService {
     public List<GroupPost> getGroupPosts(String groupId) {
 
         // check permission post
-        PaperService.getInstance().checkPermission(groupId, FeaturesTypes.FEED, Permission.READ);
+        RolesService.getInstance().checkPermission(groupId, FeaturesTypes.FEED, Permission.READ);
 
         Optional<List<GroupPost>> posts = groupPostRepository.findByGroupIdAndDeletedIsFalse(groupId);
         return posts.orElseThrow(() -> new PostNotFoundException("Publicação não foi encontrada."));
@@ -41,7 +38,7 @@ public class GroupFeedService {
     public GroupPost createGroupPost(String groupId, GroupPostDTO groupPostDTO) {
 
         // check permission post
-        PaperService.getInstance().checkPermission(groupId, FeaturesTypes.FEED, Permission.READ_WRITE);
+        RolesService.getInstance().checkPermission(groupId, FeaturesTypes.FEED, Permission.READ_WRITE);
 
         String authorId = String.valueOf(UserService.getInstance().getUserInSession().getProfile().getId());
         if (groupPostDTO.getContent() == null || groupPostDTO.getContent().isEmpty()) {
@@ -56,7 +53,7 @@ public class GroupFeedService {
     public GroupPost getGroupPost(String groupId, String postId) {
 
         // check permission post
-        PaperService.getInstance().checkPermission(groupId, FeaturesTypes.FEED, Permission.READ);
+        RolesService.getInstance().checkPermission(groupId, FeaturesTypes.FEED, Permission.READ);
 
         Optional<GroupPost> existingPost = groupPostRepository.findFirstByGroupIdAndId(groupId, postId);
         if (existingPost.isPresent() && !existingPost.get().isDeleted()) {
@@ -82,7 +79,7 @@ public class GroupFeedService {
     public GroupPost editGroupPost(String groupId, String postId, GroupPostDTO groupPostDTO) {
 
         // check permission post
-        PaperService.getInstance().checkPermission(groupId, FeaturesTypes.FEED, Permission.READ_WRITE);
+        RolesService.getInstance().checkPermission(groupId, FeaturesTypes.FEED, Permission.READ_WRITE);
 
         GroupPost post = getGroupPost(groupId, postId);
 
@@ -101,7 +98,7 @@ public class GroupFeedService {
     public boolean deleteGroupPost(String groupId, String postId) {
 
         // check permission post
-        PaperService.getInstance().checkPermission(groupId, FeaturesTypes.FEED, Permission.READ_WRITE_DELETE);
+        RolesService.getInstance().checkPermission(groupId, FeaturesTypes.FEED, Permission.READ_WRITE_DELETE);
 
         GroupPost post = getGroupPost(groupId, postId);
 

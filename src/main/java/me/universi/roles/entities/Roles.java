@@ -1,6 +1,7 @@
-package me.universi.papers.entities;
+package me.universi.roles.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
@@ -14,10 +15,10 @@ import java.util.UUID;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
-@Entity(name = "paper")
-@SQLDelete(sql = "UPDATE paper SET deleted = true WHERE id=?")
+@Entity(name = "roles")
+@SQLDelete(sql = "UPDATE roles SET deleted = true WHERE id=?")
 @Where(clause = "deleted=false")
-public class Paper implements Serializable {
+public class Roles implements Serializable {
 
     @Serial
     private static final long serialVersionUID = -7368873462832313132L;
@@ -54,10 +55,10 @@ public class Paper implements Serializable {
     @NotNull
     public Group group;
 
-    @OneToMany(mappedBy = "paper")
-    public Collection<PaperFeature> paperFeatures;
+    @OneToMany(mappedBy = "roles", fetch = FetchType.EAGER)
+    public Collection<RolesFeature> rolesFeatures;
 
-    public Paper() {
+    public Roles() {
     }
 
     @Override

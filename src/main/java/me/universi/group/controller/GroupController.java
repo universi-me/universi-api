@@ -5,19 +5,15 @@ import java.util.*;
 import java.util.stream.Collectors;
 import me.universi.api.entities.Response;
 import me.universi.group.entities.Group;
-import me.universi.group.entities.GroupAdmin;
-import me.universi.group.entities.GroupSettings.GroupFeatures;
 import me.universi.group.entities.GroupSettings.GroupSettings;
-import me.universi.group.entities.ProfileGroup;
 import me.universi.group.entities.Subgroup;
 import me.universi.group.enums.GroupType;
 import me.universi.group.exceptions.GroupException;
 import me.universi.group.services.GroupService;
 
-import me.universi.papers.enums.FeaturesTypes;
-import me.universi.papers.enums.Permission;
-import me.universi.papers.services.PaperService;
-import me.universi.profile.entities.Profile;
+import me.universi.roles.enums.FeaturesTypes;
+import me.universi.roles.enums.Permission;
+import me.universi.roles.services.RolesService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 
@@ -362,7 +358,7 @@ public class GroupController {
             Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
 
             // check permission contents
-            PaperService.getInstance().checkPermission(group, FeaturesTypes.CONTENT, Permission.READ);
+            RolesService.getInstance().checkPermission(group, FeaturesTypes.CONTENT, Permission.READ);
 
             response.body.put("folders", group.getFolders());
 

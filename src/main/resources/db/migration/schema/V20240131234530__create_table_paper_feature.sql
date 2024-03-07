@@ -1,5 +1,5 @@
 
-CREATE TABLE paper
+CREATE TABLE roles
 (
     id              UUID NOT NULL DEFAULT uuid_generate_v4(),
 
@@ -11,10 +11,10 @@ CREATE TABLE paper
     description     VARCHAR(130),
     group_id        UUID NOT NULL,
 
-    CONSTRAINT pk_paper PRIMARY KEY (id)
+    CONSTRAINT pk_roles PRIMARY KEY (id)
 );
 
-CREATE TABLE paper_profile
+CREATE TABLE roles_profile
 (
     id              UUID NOT NULL DEFAULT uuid_generate_v4(),
 
@@ -22,17 +22,17 @@ CREATE TABLE paper_profile
     created         TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     removed         TIMESTAMP WITHOUT TIME ZONE,
 
-    paper_id        UUID NOT NULL,
+    roles_id        UUID NOT NULL,
     profile_id      UUID NOT NULL,
     group_id        UUID NOT NULL,
 
-    CONSTRAINT pk_paper_profile PRIMARY KEY (id),
-    CONSTRAINT fk_paper_profile_paper FOREIGN KEY (paper_id) REFERENCES paper (id),
-    CONSTRAINT fk_paper_profile_profile FOREIGN KEY (profile_id) REFERENCES profile (id),
-    CONSTRAINT fk_paper_profile_group FOREIGN KEY (group_id) REFERENCES system_group (id)
+    CONSTRAINT pk_roles_profile PRIMARY KEY (id),
+    CONSTRAINT fk_roles_profile_paper FOREIGN KEY (roles_id) REFERENCES roles (id),
+    CONSTRAINT fk_roles_profile_profile FOREIGN KEY (profile_id) REFERENCES profile (id),
+    CONSTRAINT fk_roles_profile_group FOREIGN KEY (group_id) REFERENCES system_group (id)
 );
 
-CREATE TABLE paper_feature
+CREATE TABLE roles_feature
 (
     id                         UUID NOT NULL DEFAULT uuid_generate_v4(),
 
@@ -40,11 +40,11 @@ CREATE TABLE paper_feature
     created                    TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     removed                    TIMESTAMP WITHOUT TIME ZONE,
 
-    paper_id                   UUID NOT NULL,
+    roles_id                   UUID NOT NULL,
     feature                    VARCHAR(30) NOT NULL,
 
     permission                 INT NOT NULL DEFAULT 0,
 
-    CONSTRAINT pk_paper_feature PRIMARY KEY (id),
-    CONSTRAINT fk_paper_feature_paper FOREIGN KEY (paper_id) REFERENCES paper (id)
+    CONSTRAINT pk_roles_feature PRIMARY KEY (id),
+    CONSTRAINT fk_roles_feature_paper FOREIGN KEY (roles_id) REFERENCES roles (id)
 );

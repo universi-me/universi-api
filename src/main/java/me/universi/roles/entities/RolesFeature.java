@@ -1,4 +1,4 @@
-package me.universi.papers.entities;
+package me.universi.roles.entities;
 
 import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
@@ -9,15 +9,16 @@ import java.util.Date;
 import java.util.UUID;
 import me.universi.group.entities.Group;
 import me.universi.profile.entities.Profile;
+import me.universi.roles.enums.FeaturesTypes;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
-@Entity(name = "paper_profile")
-@SQLDelete(sql = "UPDATE paper_profile SET deleted = true WHERE id=?")
+@Entity(name = "roles_feature")
+@SQLDelete(sql = "UPDATE roles_feature SET deleted = true WHERE id=?")
 @Where(clause = "deleted=false")
 @JsonIgnoreProperties({"hibernateLazyInitializer"})
-public class PaperProfile implements Serializable {
+public class RolesFeature implements Serializable {
 
     @Serial
     private static final long serialVersionUID = -31637842245354343L;
@@ -45,23 +46,18 @@ public class PaperProfile implements Serializable {
     @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
     @JsonIdentityReference(alwaysAsId = true)
     @ManyToOne(fetch = FetchType.EAGER)
-    @PrimaryKeyJoinColumn(name="paper_id")
+    @JoinColumn(name="roles_id")
     @NotNull
-    public Paper paper;
+    public Roles roles;
 
-    @JsonIgnore
-    @JoinColumn(name= "group_id")
-    @OneToOne(fetch = FetchType.EAGER)
-    @NotNull
-    public Group group;
+    @Column(name= "feature")
+    @Enumerated(EnumType.STRING)
+    public FeaturesTypes featureType;
 
-    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-    @JsonIdentityReference(alwaysAsId = true)
-    @JoinColumn(name="profile_id")
-    @OneToOne(fetch = FetchType.EAGER)
-    @NotNull
-    public Profile profile;
+    @Column(name= "permission")
+    public int permission = 0;
 
-    public PaperProfile() {
+    public RolesFeature() {
     }
+
 }

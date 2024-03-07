@@ -8,17 +8,15 @@ import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
 import me.universi.capacity.entidades.ContentStatus;
-import me.universi.capacity.entidades.Folder;
 import me.universi.capacity.entidades.FolderFavorite;
 import me.universi.capacity.entidades.FolderProfile;
 import me.universi.competence.entities.Competence;
 import me.universi.curriculum.education.entities.Education;
 import me.universi.curriculum.experience.entities.Experience;
-import me.universi.group.entities.Group;
 import me.universi.group.entities.ProfileGroup;
 import me.universi.indicators.entities.Indicators;
 import me.universi.link.entities.Link;
-import me.universi.papers.entities.Paper;
+import me.universi.roles.entities.Roles;
 import me.universi.profile.enums.Gender;
 import me.universi.recommendation.entities.Recommendation;
 import me.universi.user.entities.User;
@@ -126,7 +124,7 @@ public class Profile implements Serializable {
 
     @Transient
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    public Paper paper;
+    public Roles roles;
 
     public Profile(UUID id, User user, String bio, Collection<Competence> competences, Collection<ProfileGroup> groups, Collection<Link> links, Collection<FolderProfile> assignedFolders) {
         this.id = id;
