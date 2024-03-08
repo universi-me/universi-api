@@ -6,7 +6,6 @@ import me.universi.roles.entities.Roles;
 import me.universi.roles.entities.RolesFeature;
 import me.universi.roles.entities.RolesProfile;
 import me.universi.roles.enums.Permission;
-import me.universi.roles.exceptions.RolesException;
 import me.universi.roles.services.RolesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +22,7 @@ public class RolesController {
 
     @PostMapping(value = "/create", consumes = "application/json", produces = "application/json")
     @ResponseBody
-    public Response paper_create(@RequestBody Map<String, Object> body) {
+    public Response roles_create(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
             Roles roles = rolesService.createRole(body);
             response.body.put("roles", roles);
@@ -33,7 +32,7 @@ public class RolesController {
 
     @PostMapping(value = "/edit", consumes = "application/json", produces = "application/json")
     @ResponseBody
-    public Response paper_edit(@RequestBody Map<String, Object> body) {
+    public Response roles_edit(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
             Roles roles = rolesService.editRole(body);
             response.body.put("roles", roles);
@@ -43,7 +42,7 @@ public class RolesController {
 
     @PostMapping(value = "/list", produces = "application/json")
     @ResponseBody
-    public Response paper_list(@RequestBody Map<String, Object> body) {
+    public Response roles_list(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
             response.body.put("roles", rolesService.listRolesGroup(body));
         });
@@ -51,7 +50,7 @@ public class RolesController {
 
     @PostMapping(value = "/feature/toggle", consumes = "application/json", produces = "application/json")
     @ResponseBody
-    public Response paper_feature_active(@RequestBody Map<String, Object> body) {
+    public Response roles_feature_active(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
             RolesFeature rolesFeature = rolesService.setRolesFeatureValue(body);
             response.message = "Funcionalidade " + rolesFeature.featureType.label + " foi alterada " +
@@ -59,31 +58,31 @@ public class RolesController {
         });
     }
 
-    // assign paper
+    // assign roles
     @PostMapping(value = "/assign", consumes = "application/json", produces = "application/json")
     @ResponseBody
-    public Response paper_assign(@RequestBody Map<String, Object> body) {
+    public Response roles_assign(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
             RolesProfile rolesProfile = rolesService.assignRole(body);
             response.message = "Papel \""+ rolesProfile.roles.name +"\" atribuído com sucesso para \""+ rolesProfile.profile.getFirstname() +"\".";
         });
     }
 
-    // assigned paper
+    // assigned roles
     @PostMapping(value = "/assigned", consumes = "application/json", produces = "application/json")
     @ResponseBody
-    public Response paper_assigned(@RequestBody Map<String, Object> body) {
+    public Response roles_assigned(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
-            response.body.put("roles", rolesService.getAssignedPaper(body));
+            response.body.put("roles", rolesService.getAssignedRoles(body));
         });
     }
 
-    // list paper profiles by group
+    // list roles profiles by group
     @PostMapping(value = "/participants/list", consumes = "application/json", produces = "application/json")
     @ResponseBody
-    public Response paper_profile_list(@RequestBody Map<String, Object> body) {
+    public Response roles_profile_list(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
-            response.body.put("participants", rolesService.listPaperProfile(body));
+            response.body.put("participants", rolesService.listRolesProfile(body));
         });
     }
 

@@ -1,7 +1,6 @@
 package me.universi.roles.services;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 import me.universi.Sys;
 import me.universi.group.entities.Group;
 import me.universi.group.entities.GroupAdmin;
@@ -119,15 +118,15 @@ public class RolesService {
             throw new RolesException("Usuário não possui permissão para editar um papel de usuário.");
         }
 
-        Object paperId = body.get("rolesId");
+        Object rolesId = body.get("rolesId");
         Object name = body.get("name");
         Object description = body.get("description");
 
-        if (paperId == null) {
-            throw new RolesException("Parâmetro paperId é nulo.");
+        if (rolesId == null) {
+            throw new RolesException("Parâmetro rolesId é nulo.");
         }
 
-        Roles roles = rolesRepository.findFirstById(UUID.fromString(paperId.toString())).orElse(null);
+        Roles roles = rolesRepository.findFirstById(UUID.fromString(rolesId.toString())).orElse(null);
         if(roles == null) {
             throw new RolesException("Papel não encontrado.");
         }
@@ -205,7 +204,7 @@ public class RolesService {
             throw new RolesException("Usuário não possui permissão para alterar status de uma feature.");
         }
 
-        Object paperId = body.get("rolesId");
+        Object rolesId = body.get("rolesId");
         Object featureString = body.get("feature");
 
         Object value = body.get("value");
@@ -216,8 +215,8 @@ public class RolesService {
 
         RolesFeature rolesFeature = null;
 
-        if(rolesFeature == null && paperId != null && featureString != null) {
-            Roles roles = rolesRepository.findFirstById(UUID.fromString(paperId.toString())).orElse(null);
+        if(rolesFeature == null && rolesId != null && featureString != null) {
+            Roles roles = rolesRepository.findFirstById(UUID.fromString(rolesId.toString())).orElse(null);
             if(roles == null) {
                 throw new RolesException("Papel de usuário não encontrado.");
             }
@@ -291,15 +290,15 @@ public class RolesService {
                     }
 
                 } else {
-                    //throw new PaperException("Funcionalidade não encontrada.");
+                    //throw new RolesException("Funcionalidade não encontrada.");
                 }
 
             } else {
-                //throw new PaperException("Papel não encontrado.");
+                //throw new RolesException("Papel não encontrado.");
             }
 
         } else {
-            //throw new PaperException("Perfil não possui papel no grupo.");
+            //throw new RolesException("Perfil não possui papel no grupo.");
         }
     }
 
@@ -320,7 +319,7 @@ public class RolesService {
         );
     }
 
-    public Collection<Profile> listPaperProfile(Map<String, Object> body) {
+    public Collection<Profile> listRolesProfile(Map<String, Object> body) {
         Object groupId = body.get("groupId");
 
         if(groupId == null) {
@@ -330,13 +329,13 @@ public class RolesService {
 
 
         Collection<ProfileGroup> participants = group.participants;
-        Collection<RolesProfile> papers = rolesProfileRepository.findAllByGroup(group);
+        Collection<RolesProfile> roles = rolesProfileRepository.findAllByGroup(group);
 
         Collection<Profile> profiles = new ArrayList<>();
 
         for(ProfileGroup profileGroup : participants) {
             Profile profile = profileGroup.profile;
-            for(RolesProfile rolesProfile : papers) {
+            for(RolesProfile rolesProfile : roles) {
                 if(rolesProfile.profile.equals(profile)) {
                     profile.roles = rolesProfile.roles;
                     break;
@@ -354,7 +353,7 @@ public class RolesService {
         return profiles;
     }
 
-    public Roles getAssignedPaper(Map<String, Object> body) {
+    public Roles getAssignedRoles(Map<String, Object> body) {
         Object profileId = body.get("profileId");
         Object groupId = body.get("groupId");
 
@@ -401,6 +400,37 @@ public class RolesService {
             }
             roleDTOs.add(roleDTO);
         }
+
+        RoleDTO roleAdminDTO = new RoleDTO();
+        roleAdminDTO.id = adminRoles.id;
+        roleAdminDTO.name = adminRoles.name;
+        roleAdminDTO.profile = profile.getId();
+        Collection<FeatureDTO> features = new ArrayList<>();
+        for(RolesFeature rolesFeature : adminRoles.rolesFeatures) {
+            FeatureDTO feature = new FeatureDTO();
+            feature.id = rolesFeature.id;
+            feature.featureType = rolesFeature.featureType;
+            feature.permission = rolesFeature.permission;
+            features.add(feature);
+            roleAdminDTO.features = features;
+        }
+        roleDTOs.add(roleAdminDTO);
+
+        RoleDTO roleUserDTO = new RoleDTO();
+        roleUserDTO.id = userRoles.id;
+        roleUserDTO.name = userRoles.name;
+        roleUserDTO.profile = profile.getId();
+        Collection<FeatureDTO> featuresUser = new ArrayList<>();
+        for(RolesFeature rolesFeature : userRoles.rolesFeatures) {
+            FeatureDTO feature = new FeatureDTO();
+            feature.id = rolesFeature.id;
+            feature.featureType = rolesFeature.featureType;
+            feature.permission = rolesFeature.permission;
+            featuresUser.add(feature);
+            roleUserDTO.features = featuresUser;
+        }
+        roleDTOs.add(roleUserDTO);
+
 
         return roleDTOs;
     }

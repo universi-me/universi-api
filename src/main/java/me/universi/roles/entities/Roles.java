@@ -67,7 +67,7 @@ public class Roles implements Serializable {
 
     @Override
     public String toString() {
-        return "\nPaper[" +
+        return "\nRoles[" +
                 "id='" + id + '\'' +
                 ", name='" + name + "']\n";
     }

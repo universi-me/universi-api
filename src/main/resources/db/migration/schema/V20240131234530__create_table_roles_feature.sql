@@ -29,7 +29,7 @@ CREATE TABLE roles_profile
     default_role    INTEGER NOT NULL DEFAULT 0,
 
     CONSTRAINT pk_roles_profile PRIMARY KEY (id),
-    CONSTRAINT fk_roles_profile_paper FOREIGN KEY (roles_id) REFERENCES roles (id),
+    CONSTRAINT fk_roles_profile_roles FOREIGN KEY (roles_id) REFERENCES roles (id),
     CONSTRAINT fk_roles_profile_profile FOREIGN KEY (profile_id) REFERENCES profile (id),
     CONSTRAINT fk_roles_profile_group FOREIGN KEY (group_id) REFERENCES system_group (id)
 );
@@ -48,5 +48,5 @@ CREATE TABLE roles_feature
     permission                 INT NOT NULL DEFAULT 0,
 
     CONSTRAINT pk_roles_feature PRIMARY KEY (id),
-    CONSTRAINT fk_roles_feature_paper FOREIGN KEY (roles_id) REFERENCES roles (id)
+    CONSTRAINT fk_roles_feature_roles FOREIGN KEY (roles_id) REFERENCES roles (id)
 );
