@@ -3,6 +3,7 @@ package me.universi.competence.services;
 import me.universi.Sys;
 import me.universi.competence.entities.CompetenceType;
 import me.universi.competence.exceptions.CompetenceException;
+import me.universi.competence.repositories.CompetenceRepository;
 import me.universi.competence.repositories.CompetenceTypeRepository;
 import me.universi.profile.services.ProfileService;
 import me.universi.user.services.UserService;
@@ -16,9 +17,11 @@ import java.util.UUID;
 @Service
 public class CompetenceTypeService {
     private final CompetenceTypeRepository competenceTypeRepository;
+    private final CompetenceRepository competenceRepository;
 
-    public CompetenceTypeService(CompetenceTypeRepository competenceTypeRepository) {
+    public CompetenceTypeService(CompetenceTypeRepository competenceTypeRepository, CompetenceRepository competenceRepository) {
         this.competenceTypeRepository = competenceTypeRepository;
+        this.competenceRepository = competenceRepository;
     }
 
     public static CompetenceTypeService getInstance() {
@@ -135,6 +138,22 @@ public class CompetenceTypeService {
         }
 
         return save(existingCompetenceType);
+    }
+
+    public void merge(CompetenceType removedTypeCompetence, CompetenceType remainingCompetenceType) throws CompetenceException {
+        if (removedTypeCompetence == null || remainingCompetenceType == null) {
+            throw new CompetenceException("Tipo de competência não encontrado.");
+        }
+
+        var updateCompetences = competenceRepository.findAll().stream()
+            .filter(c -> c.getCompetenceType().getId().equals(removedTypeCompetence.getId()))
+            .toList();
+
+        updateCompetences.forEach(c -> c.setCompetenceType(remainingCompetenceType));
+        competenceRepository.saveAll(updateCompetences);
+
+        removedTypeCompetence.setProfilesWithAccess(Arrays.asList());
+        competenceTypeRepository.delete(removedTypeCompetence);
     }
 
     public boolean hasAccessToCompetenceType(CompetenceType competence) {
