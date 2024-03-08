@@ -65,7 +65,7 @@ public class Group implements Serializable {
     @NotNull
     public Profile admin;
 
-    @JsonIgnore
+    //@JsonIgnore
     @OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
     public Collection<GroupAdmin> administrators;
 

@@ -191,9 +191,21 @@ public class RolesService {
             rolesProfile.defaultRole = Objects.equals(UUID.fromString((String) rolesId), adminRoles.id) ? 1 : 0;
         }
 
+        // update administrators
+        if(rolesProfile.roles == null) {
+            if(rolesProfile.defaultRole == 1) {
+                GroupService.getInstance().addAdministrator(group, profile);
+            } else {
+                GroupService.getInstance().removeAdministrator(group, profile);
+            }
+        }
+
         rolesProfileRepository.save(rolesProfile);
 
+        // return set mock roles
         rolesProfile.roles = rolesProfile.defaultRole == 1 ? adminRoles : userRoles;
+
+
 
         return rolesProfile;
     }
