@@ -4,8 +4,11 @@ import java.util.Map;
 import me.universi.api.entities.Response;
 import me.universi.roles.entities.Roles;
 import me.universi.roles.entities.RolesFeature;
+import me.universi.roles.entities.RolesProfile;
+import me.universi.roles.enums.Permission;
 import me.universi.roles.exceptions.RolesException;
 import me.universi.roles.services.RolesService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -13,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 public class RolesController {
     private final RolesService rolesService;
 
+    @Autowired
     public RolesController(RolesService rolesService) {
         this.rolesService = rolesService;
     }
@@ -31,8 +35,9 @@ public class RolesController {
     @ResponseBody
     public Response paper_edit(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
-            response.body.put("roles", rolesService.editRole(body));
-            response.message = "Papel editado com sucesso.";
+            Roles roles = rolesService.editRole(body);
+            response.body.put("roles", roles);
+            response.message = "Papel \""+ roles.name +"\" editado com sucesso.";
         });
     }
 
@@ -49,8 +54,8 @@ public class RolesController {
     public Response paper_feature_active(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
             RolesFeature rolesFeature = rolesService.setRolesFeatureValue(body);
-            response.message = "Funcionalidade \"" + rolesFeature.featureType.label + "\" foi alterada " +
-                               " com sucesso para \"" + rolesFeature.roles.name + "\".";
+            response.message = "Funcionalidade " + rolesFeature.featureType.label + " foi alterada " +
+                               " com sucesso para "+ Permission.getPermissionName(rolesFeature.permission) +" em \"" + rolesFeature.roles.name + "\".";
         });
     }
 
@@ -59,11 +64,8 @@ public class RolesController {
     @ResponseBody
     public Response paper_assign(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
-            if(rolesService.assignRole(body)) {
-                response.message = "Papel atribuído com sucesso.";
-            } else {
-                throw new RolesException("Não foi possível atribuir papel.");
-            }
+            RolesProfile rolesProfile = rolesService.assignRole(body);
+            response.message = "Papel \""+ rolesProfile.roles.name +"\" atribuído com sucesso para \""+ rolesProfile.profile.getFirstname() +"\".";
         });
     }
 

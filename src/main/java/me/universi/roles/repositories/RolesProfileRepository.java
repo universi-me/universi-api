@@ -20,4 +20,6 @@ public interface RolesProfileRepository extends JpaRepository<RolesProfile, UUID
     Optional<RolesProfile> findFirstByRolesAndProfileAndGroup(Roles roles, Profile profile, Group group);
 
     Collection<RolesProfile> findAllByProfile(Profile profile);
+
+    void deleteAllByProfileAndGroup(Profile profile, Group group);
 }

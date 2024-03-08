@@ -22,9 +22,11 @@ CREATE TABLE roles_profile
     created         TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     removed         TIMESTAMP WITHOUT TIME ZONE,
 
-    roles_id        UUID NOT NULL,
+    roles_id        UUID,
     profile_id      UUID NOT NULL,
     group_id        UUID NOT NULL,
+
+    default_role    INTEGER NOT NULL DEFAULT 0,
 
     CONSTRAINT pk_roles_profile PRIMARY KEY (id),
     CONSTRAINT fk_roles_profile_paper FOREIGN KEY (roles_id) REFERENCES roles (id),

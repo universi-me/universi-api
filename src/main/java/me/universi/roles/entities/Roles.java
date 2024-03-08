@@ -1,7 +1,7 @@
 package me.universi.roles.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
@@ -57,6 +57,10 @@ public class Roles implements Serializable {
 
     @OneToMany(mappedBy = "roles", fetch = FetchType.EAGER)
     public Collection<RolesFeature> rolesFeatures;
+
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+    @Transient
+    public boolean isDefault = false;
 
     public Roles() {
     }

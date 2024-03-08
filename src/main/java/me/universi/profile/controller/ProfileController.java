@@ -49,6 +49,12 @@ public class ProfileController {
 
             User userSession = (User) userService.findFirstById(userService.getUserInSession().getId());
 
+            if(userSession == null) {
+                // force login
+                userService.logout();
+                throw new ProfileException("Usuário não logado.");
+            }
+
             Profile userProfile = userSession.getProfile();
             if(userProfile == null) {
                 throw new ProfileException("Perfil não encontrado.");

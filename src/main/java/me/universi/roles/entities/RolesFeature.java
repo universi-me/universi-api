@@ -59,5 +59,4 @@ public class RolesFeature implements Serializable {
 
     public RolesFeature() {
     }
-
 }

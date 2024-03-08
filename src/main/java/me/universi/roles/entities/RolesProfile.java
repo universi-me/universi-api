@@ -48,7 +48,6 @@ public class RolesProfile implements Serializable {
     //@JsonIgnoreProperties({"rolesFeatures"})
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="roles_id")
-    @NotNull
     public Roles roles;
 
     @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
@@ -64,6 +63,10 @@ public class RolesProfile implements Serializable {
     @OneToOne(fetch = FetchType.EAGER)
     @NotNull
     public Profile profile;
+
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+    @Column(name = "default_role")
+    public int defaultRole = 0;
 
     public RolesProfile() {
     }
