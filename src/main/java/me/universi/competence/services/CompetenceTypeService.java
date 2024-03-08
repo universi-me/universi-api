@@ -141,6 +141,10 @@ public class CompetenceTypeService {
     }
 
     public void merge(CompetenceType removedTypeCompetence, CompetenceType remainingCompetenceType) throws CompetenceException {
+        if (!UserService.getInstance().isUserAdminSession()) {
+            throw new CompetenceException("Esta operação não é permitida para este usuário.");
+        }
+
         if (removedTypeCompetence == null || remainingCompetenceType == null) {
             throw new CompetenceException("Tipo de competência não encontrado.");
         }
