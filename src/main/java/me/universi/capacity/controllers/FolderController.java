@@ -154,6 +154,8 @@ public class FolderController {
                 throw new CapacityException("Erro ao salvar o pasta.");
             }
 
+            response.body.put("contentId", folder.getId());
+
             response.message = "Pasta criada com sucesso.";
         });
     }
