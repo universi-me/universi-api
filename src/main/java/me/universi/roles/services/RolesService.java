@@ -50,7 +50,7 @@ public class RolesService {
     public void createDefaultRoles() {
         adminRoles = new Roles();
         adminRoles.isDefault = true;
-        adminRoles.id = UUID.randomUUID();
+        adminRoles.id = UUID.fromString("00000000-0000-0000-0000-000000000001");
         adminRoles.name = "Administrador";
         Collection<RolesFeature> adminRolesFeatures = new ArrayList<>();
         for(FeaturesTypes feature : FeaturesTypes.values()) {
@@ -64,7 +64,7 @@ public class RolesService {
 
         userRoles = new Roles();
         userRoles.isDefault = true;
-        userRoles.id = UUID.randomUUID();
+        userRoles.id = UUID.fromString("00000000-0000-0000-0000-000000000002");
         userRoles.name = "Usuário";
         Collection<RolesFeature> userRolesFeatures = new ArrayList<>();
         for(FeaturesTypes feature : FeaturesTypes.values()) {
@@ -276,6 +276,31 @@ public class RolesService {
         return roles;
     }
 
+    public void checkIsAdmin(Profile profile, Group group) {
+        if (profile == null) {
+            throw new RolesException("Perfil não encontrado.");
+        }
+        if (group == null) {
+            throw new RolesException("Grupo não encontrado.");
+        }
+
+        RolesProfile rolesProfile = rolesProfileRepository.findFirstByProfileAndGroup(profile, group).orElse(null);
+
+        Roles roles = rolesProfile != null ? rolesProfile.roles : getDefaultRolesForProfile(profile, group);
+
+        if (!Objects.equals(roles.id,  adminRoles.id)) {
+            throw new RolesException("Você precisa ser administrador para executar esta ação.");
+        }
+    }
+
+    public void checkIsAdmin(Group group) {
+        checkIsAdmin(UserService.getInstance().getUserInSession().getProfile(), group);
+    }
+
+    public void checkIsAdmin(String groupId) {
+        checkIsAdmin(GroupService.getInstance().getGroupByGroupIdOrGroupPath(groupId, null));
+    }
+
     public void checkPermission(Profile profile, Group group, FeaturesTypes feature, int forPermission) {
         if (profile == null) {
             throw new RolesException("Perfil não encontrado.");
@@ -298,7 +323,7 @@ public class RolesService {
                 if (rolesFeature != null) {
 
                     if (rolesFeature.permission < forPermission) {
-                        throw new RolesException("Você não possui permissão para acessar a funcionalidade \""+ feature.label +"\".");
+                        throw new RolesException("Você precisa de permissão para executar esta ação em \""+ feature.label +"\".");
                     }
 
                 } else {

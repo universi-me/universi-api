@@ -165,6 +165,8 @@ public class GroupController {
 
             Group groupEdit = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
 
+            RolesService.getInstance().checkPermission(groupEdit, FeaturesTypes.GROUP, Permission.READ_WRITE);
+
             User user = userService.getUserInSession();
 
             if(groupService.verifyPermissionToEditGroup(groupEdit, user)) {
@@ -221,6 +223,8 @@ public class GroupController {
 
             Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
 
+            RolesService.getInstance().checkPermission(group, FeaturesTypes.GROUP, Permission.READ_WRITE_DELETE);
+
             String groupIdRemove = (String)body.get("groupIdRemove");
             if(groupIdRemove == null) {
                 throw new GroupException("Parâmetro groupIdRemove é nulo.");
@@ -257,7 +261,11 @@ public class GroupController {
             String groupId = (String)body.get("groupId");
             String groupPath = (String)body.get("groupPath");
 
+
+
             Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
+
+            RolesService.getInstance().checkPermission(group, FeaturesTypes.GROUP, Permission.READ_WRITE_DELETE);
 
             User user = userService.getUserInSession();
 
@@ -314,6 +322,8 @@ public class GroupController {
             String groupPath = (String)body.get("groupPath");
 
             Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
+
+            RolesService.getInstance().checkPermission(group, FeaturesTypes.GROUP, Permission.READ);
 
             if(group != null) {
                 Collection<Subgroup> subgroupList = group.getSubGroups();

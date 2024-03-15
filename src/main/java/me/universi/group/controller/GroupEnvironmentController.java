@@ -5,6 +5,9 @@ import me.universi.api.entities.Response;
 import me.universi.group.entities.Group;
 import me.universi.group.exceptions.GroupException;
 import me.universi.group.services.GroupService;
+import me.universi.roles.enums.FeaturesTypes;
+import me.universi.roles.enums.Permission;
+import me.universi.roles.services.RolesService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import org.springframework.http.MediaType;
@@ -28,6 +31,8 @@ public class GroupEnvironmentController {
         return Response.buildResponse(response -> {
 
             Group group = groupService.getOrganizationBasedInDomainIfExist();
+
+            RolesService.getInstance().checkIsAdmin(group);
 
             if(group != null) {
                 User user = userService.getUserInSession();
@@ -59,6 +64,8 @@ public class GroupEnvironmentController {
         return Response.buildResponse(response -> {
 
             Group group = groupService.getOrganizationBasedInDomainIfExist();
+
+            RolesService.getInstance().checkIsAdmin(group);
 
             if(group != null) {
                 User user = userService.getUserInSession();

@@ -5,6 +5,9 @@ import me.universi.api.entities.Response;
 import me.universi.group.entities.Group;
 import me.universi.group.exceptions.GroupException;
 import me.universi.group.services.GroupService;
+import me.universi.roles.enums.FeaturesTypes;
+import me.universi.roles.enums.Permission;
+import me.universi.roles.services.RolesService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import org.springframework.http.MediaType;
@@ -54,6 +57,8 @@ public class GroupThemeController {
             String rank_color                = (String)body.get("rank_color");
 
             Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
+
+            RolesService.getInstance().checkIsAdmin(group);
 
             if(group != null) {
                 User user = userService.getUserInSession();

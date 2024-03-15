@@ -8,6 +8,9 @@ import me.universi.group.entities.GroupSettings.GroupEmailFilter;
 import me.universi.group.exceptions.GroupException;
 import me.universi.group.services.GroupService;
 
+import me.universi.roles.enums.FeaturesTypes;
+import me.universi.roles.enums.Permission;
+import me.universi.roles.services.RolesService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import org.springframework.http.MediaType;
@@ -39,6 +42,8 @@ public class GroupEmailFilterController {
             Object type = body.get("type");
 
             Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
+
+            RolesService.getInstance().checkIsAdmin(group);
 
             if(group != null) {
                 User user = userService.getUserInSession();
@@ -75,6 +80,8 @@ public class GroupEmailFilterController {
 
             Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
 
+            RolesService.getInstance().checkIsAdmin(group);
+
             if(group != null) {
                 User user = userService.getUserInSession();
 
@@ -106,6 +113,8 @@ public class GroupEmailFilterController {
 
             Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
 
+            RolesService.getInstance().checkIsAdmin(group);
+
             if(group != null) {
                 User user = userService.getUserInSession();
 
@@ -132,6 +141,8 @@ public class GroupEmailFilterController {
             Object groupPath = body.get("groupPath");
 
             Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
+
+            RolesService.getInstance().checkIsAdmin(group);
 
             if(group != null) {
 
