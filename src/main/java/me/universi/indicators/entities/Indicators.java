@@ -17,6 +17,8 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Set;
 import java.util.UUID;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
@@ -38,6 +40,7 @@ public class Indicators implements Serializable {
     private Long score;
 
     @ManyToMany(fetch = FetchType.EAGER, mappedBy = "indicators")
+    @NotFound(action = NotFoundAction.IGNORE)
     private Set<Achievement> achievements;
 
     @OneToOne

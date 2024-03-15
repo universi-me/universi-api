@@ -10,9 +10,7 @@ import java.util.Date;
 import java.util.UUID;
 import me.universi.group.entities.Group;
 import me.universi.profile.entities.Profile;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.*;
 
 @Entity(name = "roles_profile")
 @SQLDelete(sql = "UPDATE roles_profile SET deleted = true WHERE id=?")
@@ -48,6 +46,7 @@ public class RolesProfile implements Serializable {
     //@JsonIgnoreProperties({"rolesFeatures"})
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="roles_id")
+    @NotFound(action = NotFoundAction.IGNORE)
     public Roles roles;
 
     @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")

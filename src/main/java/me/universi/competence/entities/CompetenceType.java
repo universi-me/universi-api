@@ -21,6 +21,8 @@ import me.universi.profile.entities.Profile;
 
 import java.util.Collection;
 import java.util.UUID;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
@@ -52,6 +54,7 @@ public class CompetenceType {
         joinColumns = @JoinColumn(name = "competence_type_id"),
         inverseJoinColumns = @JoinColumn(name = "profile_id")
     )
+    @NotFound(action = NotFoundAction.IGNORE)
     private Collection<Profile> profilesWithAccess;
 
     public UUID getId() {

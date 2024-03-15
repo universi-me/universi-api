@@ -87,10 +87,6 @@ public class RolesService {
 
     public Roles createRole(Map<String, Object> body) {
 
-        if(!userService.isUserAdminSession()) {
-            throw new RolesException("Usuário não possui permissão para criar um papel de usuário.");
-        }
-
         Object name = body.get("name");
         Object description = body.get("description");
         Object groupId = body.get("groupId");
@@ -104,6 +100,8 @@ public class RolesService {
         }
         Group group = groupService.getGroupByGroupIdOrGroupPath(groupId.toString(), null);
 
+        checkIsAdmin(group);
+
         Roles roles = new Roles();
         roles.name = name.toString();
         roles.description = description != null ? description.toString() : null;
@@ -113,10 +111,6 @@ public class RolesService {
     }
 
     public Roles editRole(Map<String, Object> body) {
-
-        if(!userService.isUserAdminSession()) {
-            throw new RolesException("Usuário não possui permissão para editar um papel de usuário.");
-        }
 
         Object rolesId = body.get("rolesId");
         Object name = body.get("name");
@@ -135,6 +129,8 @@ public class RolesService {
             throw new RolesException("Papel não pode ser editado.");
         }
 
+        checkIsAdmin(roles.group);
+
         if (name != null) {
             roles.name = name.toString();
         }
@@ -146,10 +142,6 @@ public class RolesService {
     }
 
     public RolesProfile assignRole(Map<String, Object> body) {
-
-        if(!userService.isUserAdminSession()) {
-            throw new RolesException("Usuário não possui permissão para atribuir um papel de usuário.");
-        }
 
         Object rolesId = body.get("rolesId");
         Object groupId = body.get("groupId");
@@ -167,6 +159,8 @@ public class RolesService {
         }
 
         Group group = groupService.getGroupByGroupIdOrGroupPath(groupId.toString(), null);
+
+        checkIsAdmin(group);
 
         Profile profile = profileService.findFirstById(UUID.fromString(profileId.toString()));
         if(profile == null) {
@@ -286,7 +280,7 @@ public class RolesService {
 
         RolesProfile rolesProfile = rolesProfileRepository.findFirstByProfileAndGroup(profile, group).orElse(null);
 
-        Roles roles = rolesProfile != null ? rolesProfile.roles : getDefaultRolesForProfile(profile, group);
+        Roles roles = (rolesProfile != null && rolesProfile.roles != null) ? rolesProfile.roles : getDefaultRolesForProfile(profile, group);
 
         if (!Objects.equals(roles.id,  adminRoles.id)) {
             throw new RolesException("Você precisa ser administrador para executar esta ação.");
@@ -482,11 +476,12 @@ public class RolesService {
         Roles retRoles = userRoles;
 
         // get if is admin
-        for(GroupAdmin admin : group.administrators) {
-            if (admin.profile.equals(profile)) {
-                retRoles = adminRoles;
-                break;
-            }
+        if(group.administrators.stream().anyMatch(admin -> admin.profile.equals(profile))) {
+            retRoles = adminRoles;
+        }
+
+        if(Objects.equals(group.admin.getId(), profile.getId())) {
+            retRoles = adminRoles;
         }
 
         // get if has set default role

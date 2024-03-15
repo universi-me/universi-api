@@ -18,6 +18,8 @@ import java.io.Serializable;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
@@ -49,6 +51,7 @@ public class Achievement implements Serializable {
     @JoinTable(name="indicators_achievement", joinColumns=
             {@JoinColumn(name="indicators_id")}, inverseJoinColumns=
             {@JoinColumn(name="achievement_id")})
+    @NotFound(action = NotFoundAction.IGNORE)
     private Set<Indicators> indicators;
 
     @JsonIgnore

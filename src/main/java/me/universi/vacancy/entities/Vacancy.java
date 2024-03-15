@@ -17,13 +17,11 @@ import jakarta.validation.constraints.NotNull;
 import me.universi.competence.entities.Competence;
 import me.universi.profile.entities.Profile;
 import me.universi.vacancy.typeVacancy.entities.TypeVacancy;
-import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.*;
 
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
 
 @Entity(name="vacancy")
 @SQLDelete(sql = "UPDATE vacancy SET deleted = true WHERE id=?")
@@ -68,6 +66,7 @@ public class Vacancy {
             joinColumns = @JoinColumn(name = "vacancy_id"),
             inverseJoinColumns = @JoinColumn(name = "competence_id")
     )
+    @NotFound(action = NotFoundAction.IGNORE)
     private List<Competence> competenceRequired;
 
     @CreationTimestamp
