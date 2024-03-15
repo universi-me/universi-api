@@ -188,9 +188,13 @@ public class RolesService {
         // update administrators
         if(rolesProfile.roles == null) {
             if(rolesProfile.defaultRole == 1) {
-                GroupService.getInstance().addAdministrator(group, profile);
+                if (!isAdmin(profile, group)) {
+                    GroupService.getInstance().addAdministrator(group, profile);
+                }
             } else {
-                GroupService.getInstance().removeAdministrator(group, profile);
+                if (isAdmin(profile, group)) {
+                    GroupService.getInstance().removeAdministrator(group, profile);
+                }
             }
         }
 
@@ -270,7 +274,7 @@ public class RolesService {
         return roles;
     }
 
-    public void checkIsAdmin(Profile profile, Group group) {
+    public boolean isAdmin(Profile profile, Group group) {
         if (profile == null) {
             throw new RolesException("Perfil não encontrado.");
         }
@@ -282,7 +286,11 @@ public class RolesService {
 
         Roles roles = (rolesProfile != null && rolesProfile.roles != null) ? rolesProfile.roles : getDefaultRolesForProfile(profile, group);
 
-        if (!Objects.equals(roles.id,  adminRoles.id)) {
+        return Objects.equals(roles.id, adminRoles.id);
+    }
+
+    public void checkIsAdmin(Profile profile, Group group) {
+        if (!isAdmin(profile,  group)) {
             throw new RolesException("Você precisa ser administrador para executar esta ação.");
         }
     }
@@ -479,7 +487,6 @@ public class RolesService {
         if(group.administrators.stream().anyMatch(admin -> admin.profile.equals(profile))) {
             retRoles = adminRoles;
         }
-
         if(Objects.equals(group.admin.getId(), profile.getId())) {
             retRoles = adminRoles;
         }
