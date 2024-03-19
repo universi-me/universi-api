@@ -1,10 +1,8 @@
 package me.universi.capacity.controllers;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
+import me.universi.capacity.entidades.Content;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -474,6 +472,55 @@ public class FolderController {
             response.body.put("watching", profile);
             response.body.put("folder", folder);
             response.body.put("contentWatches", contentWatches);
+        });
+    }
+
+    @PostMapping(value = "/duplicate", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Response duplicate(@RequestBody Map<String, Object> body) {
+        return Response.buildResponse(response -> {
+           Object folderId = body.get("contentId");
+           Object targetGroupId = body.get("targetGroupId");
+           Object targetGroupPath = body.get("targetGroupPath");
+
+           if(folderId == null)
+               throw new CapacityException("O id do conteúdo informado é inválido");
+
+           if(targetGroupId == null && targetGroupPath == null)
+               throw new CapacityException("O id e caminho do grupo alvo informado é inválido");
+
+            Folder originalfolder = folderService.findById(UUID.fromString(String.valueOf(folderId)));
+            Group targetGroup = groupService.getGroupByGroupIdOrGroupPath(targetGroupId, targetGroupPath);
+
+            User user = UserService.getInstance().getUserInSession();
+
+            groupService.verifyPermissionToEditGroup(targetGroup, user);
+
+            Folder folder = new Folder();
+
+            folder.setName("Cópia de "+originalfolder.getName());
+            folder.setAuthor(user.getProfile());
+            folder.setOwnerGroup(targetGroup);
+            folder.setImage(originalfolder.getImage());
+            folder.setDescription(originalfolder.getDescription());
+            folder.setPublicFolder(originalfolder.isPublicFolder());
+            folder.setReference(folderService.generateAvailableReference());
+            folder.setRating(0);
+
+            boolean saveResult = folderService.saveOrUpdate(folder);
+            if(!saveResult)
+                throw new CapacityException("Houve um erro ao salvar a cópia do conteúdo");
+
+            if(originalfolder.getContents() != null && !originalfolder.getContents().isEmpty())
+                for(Content c : originalfolder.getContents()){
+                    if(folder.getContents() == null)
+                        folder.setContents(new ArrayList<>());
+                    folder.getContents().add(c);
+                    c.getFolders().add(folder);
+                    contentService.saveOrUpdate(c);
+                    folderService.saveOrUpdate(folder);
+                }
+
+           response.message = "Conteúdo salvo com sucesso!";
         });
     }
 }
