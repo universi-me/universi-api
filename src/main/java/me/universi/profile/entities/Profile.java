@@ -128,7 +128,11 @@ public class Profile implements Serializable {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public Roles roles;
 
-    public Profile(UUID id, User user, String bio, Collection<Competence> competences, Collection<ProfileGroup> groups, Collection<Link> links, Collection<FolderProfile> assignedFolders) {
+    @JsonIgnore
+    @Column(name = "hidden")
+    private boolean hidden = Boolean.FALSE;
+
+    public Profile(UUID id, User user, String bio, Collection<Competence> competences, Collection<ProfileGroup> groups, Collection<Link> links, Collection<FolderProfile> assignedFolders, Collection<FolderFavorite> favoriteFolders, boolean hidden) {
         this.id = id;
         this.user = user;
         this.bio = bio;
@@ -136,6 +140,8 @@ public class Profile implements Serializable {
         this.groups = groups;
         this.links = links;
         this.assignedFolders = assignedFolders;
+        this.favoriteFolders = favoriteFolders;
+        this.hidden = hidden;
     }
 
     public Profile(){
@@ -296,6 +302,14 @@ public class Profile implements Serializable {
 
     public void setFavoriteFolders(Collection<FolderFavorite> favoriteFolders) {
         this.favoriteFolders = favoriteFolders;
+    }
+
+    public boolean isHidden() {
+        return hidden;
+    }
+
+    public void setHidden(boolean hidden) {
+        this.hidden = hidden;
     }
 
     @Override

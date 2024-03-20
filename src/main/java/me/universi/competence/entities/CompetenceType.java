@@ -48,7 +48,7 @@ public class CompetenceType {
     private boolean reviewed = Boolean.FALSE;
 
     @JsonIgnore
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "competence_type_profiles_with_access",
         joinColumns = @JoinColumn(name = "competence_type_id"),

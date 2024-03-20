@@ -183,7 +183,7 @@ public class GroupParticipantController {
                 List<Profile> profiles = participants.stream()
                         .sorted(Comparator.comparing(ProfileGroup::getJoined).reversed())
                         .map(ProfileGroup::getProfile)
-                        .filter(Objects::nonNull)
+                        .filter(p -> p != null && !p.isHidden())
                         .collect(Collectors.toList());
 
                 response.body.put("participants", profiles);
