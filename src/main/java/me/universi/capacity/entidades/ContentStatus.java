@@ -8,9 +8,7 @@ import java.util.Date;
 import java.util.UUID;
 import me.universi.capacity.enums.ContentStatusType;
 import me.universi.profile.entities.Profile;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.*;
 
 @Entity(name="contentstatus")
 @SQLDelete(sql = "UPDATE contentstatus SET deleted = true WHERE id=?")
@@ -38,6 +36,7 @@ public class ContentStatus implements Serializable {
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name="profile_id")
+    @NotFound(action = NotFoundAction.IGNORE)
     private Profile profile;
 
     @CreationTimestamp

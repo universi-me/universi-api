@@ -7,9 +7,7 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.UUID;
 import me.universi.profile.entities.Profile;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.*;
 
 @Entity(name = "image")
 @SQLDelete(sql = "UPDATE image SET deleted = true WHERE id=?")
@@ -35,6 +33,7 @@ public class Image {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profile_id")
+    @NotFound(action = NotFoundAction.IGNORE)
     private Profile author;
 
     @JsonIgnore

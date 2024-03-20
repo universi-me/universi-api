@@ -13,6 +13,8 @@ import me.universi.profile.entities.Profile;
 import me.universi.user.enums.Authority;
 import me.universi.user.services.JsonEmailOwnerSessionFilter;
 import me.universi.user.services.UserService;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 import org.springframework.security.core.GrantedAuthority;
@@ -99,6 +101,7 @@ public class User implements UserDetails, Serializable {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "organization")
     @NotNull
+    @NotFound(action = NotFoundAction.IGNORE)
     private Group organization;
 
     @JsonIgnore

@@ -751,11 +751,13 @@ public class GroupService {
         if(group == null || profile == null) {
             return false;
         }
+
+        // check if has only one admin
+        if(group.getAdministrators() == null || group.getAdministrators().isEmpty() || (group.getAdministrators().size() <= 1)) {
+            throw new GroupException("Não é possível remover o único administrador do grupo.");
+        }
+
         if(groupAdminRepository.existsByGroupIdAndProfileId(group.getId(), profile.getId())) {
-            // check if has only one admin
-            if(group.getAdministrators() != null && group.getAdministrators().size() <= 1) {
-                throw new GroupException("Não é possível remover o único administrador do grupo.");
-            }
             GroupAdmin groupAdmin = groupAdminRepository.findFirstByGroupIdAndProfileId(group.getId(), profile.getId());
             groupAdmin.setRemoved(ConvertUtil.getDateTimeNow());
             groupAdmin.setDeleted(true);

@@ -2,31 +2,30 @@ package me.universi.profile.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
 import me.universi.capacity.entidades.ContentStatus;
-import me.universi.capacity.entidades.Folder;
 import me.universi.capacity.entidades.FolderFavorite;
 import me.universi.capacity.entidades.FolderProfile;
 import me.universi.competence.entities.Competence;
 import me.universi.curriculum.education.entities.Education;
 import me.universi.curriculum.experience.entities.Experience;
-import me.universi.group.entities.Group;
 import me.universi.group.entities.ProfileGroup;
 import me.universi.indicators.entities.Indicators;
 import me.universi.link.entities.Link;
+import me.universi.roles.entities.Roles;
 import me.universi.profile.enums.Gender;
 import me.universi.recommendation.entities.Recommendation;
 import me.universi.user.entities.User;
-import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.*;
 
 import java.util.Collection;
 import java.util.Date;
 import java.util.UUID;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
 
 @Entity(name = "profile")
 @SQLDelete(sql = "UPDATE profile SET deleted = true WHERE id=?")
@@ -60,6 +59,7 @@ public class Profile implements Serializable {
             joinColumns = @JoinColumn(name = "profile_id"),
             inverseJoinColumns = @JoinColumn(name = "competence_id")
     )
+    @NotFound(action = NotFoundAction.IGNORE)
     private Collection<Competence> competences;
 
     @JsonIgnore
@@ -73,6 +73,7 @@ public class Profile implements Serializable {
             joinColumns = @JoinColumn(name = "profile_id"),
             inverseJoinColumns = @JoinColumn(name = "education_id")
     )
+    @NotFound(action = NotFoundAction.IGNORE)
     private Collection<Education> educations;
 
     @JsonIgnore
@@ -82,6 +83,7 @@ public class Profile implements Serializable {
             joinColumns = @JoinColumn(name = "profile_id"),
             inverseJoinColumns = @JoinColumn(name = "experience_id")
     )
+    @NotFound(action = NotFoundAction.IGNORE)
     private Collection<Experience> experiences;
 
     @JsonIgnore
@@ -121,6 +123,10 @@ public class Profile implements Serializable {
     @JsonIgnore
     @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL)
     private Collection<FolderFavorite> favoriteFolders;
+
+    @Transient
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public Roles roles;
 
     @JsonIgnore
     @Column(name = "hidden")
