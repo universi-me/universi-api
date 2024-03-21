@@ -169,7 +169,10 @@ public class RolesService {
 
         Roles roles = rolesRepository.findFirstById(UUID.fromString(rolesId.toString())).orElse(null);
 
-        if(roles == null && !(Objects.equals(UUID.fromString((String) rolesId), adminRoles.id) || Objects.equals(UUID.fromString((String) rolesId), userRoles.id))) {
+        boolean isRolesAdmin = Objects.equals(UUID.fromString((String) rolesId), adminRoles.id);
+        boolean isRolesUser = Objects.equals(UUID.fromString((String) rolesId), userRoles.id);
+
+        if(roles == null && !(isRolesAdmin || isRolesUser)) {
             throw new RolesException("Papel não encontrado.");
         }
 
@@ -182,19 +185,15 @@ public class RolesService {
         rolesProfile.profile = profile;
 
         if(roles == null) {
-            rolesProfile.defaultRole = Objects.equals(UUID.fromString((String) rolesId), adminRoles.id) ? 1 : 0;
+            rolesProfile.defaultRole = isRolesAdmin ? 1 : 0;
         }
 
         // update administrators
         if(rolesProfile.roles == null) {
             if(rolesProfile.defaultRole == 1) {
-                if (!isAdmin(profile, group)) {
-                    GroupService.getInstance().addAdministrator(group, profile);
-                }
+                GroupService.getInstance().addAdministrator(group, profile);
             } else {
-                if (isAdmin(profile, group)) {
-                    GroupService.getInstance().removeAdministrator(group, profile);
-                }
+                GroupService.getInstance().removeAdministrator(group, profile);
             }
         }
 
@@ -209,11 +208,6 @@ public class RolesService {
     }
 
     public RolesFeature setRolesFeatureValue(Map<String, Object> body) {
-
-        if(!userService.isUserAdminSession()) {
-            throw new RolesException("Usuário não possui permissão para alterar status de uma feature.");
-        }
-
         Object rolesId = body.get("rolesId");
         Object featureString = body.get("feature");
 
@@ -249,22 +243,22 @@ public class RolesService {
             throw new RolesException("Papel não pode ser editado.");
         }
 
+        checkIsAdmin(rolesFeature.roles.group);
+
         rolesFeature.permission = Integer.parseInt(value.toString());
 
         return rolesFeatureRepository.save(rolesFeature);
     }
 
     public Collection<Roles> listRolesGroup(Map<String, Object> body) {
-        if(!userService.isUserAdminSession()) {
-            throw new RolesException("Você não possui permissão para listar papéis.");
-        }
-
         Object groupId = body.get("groupId");
 
         if(groupId == null) {
             throw new RolesException("Parâmetro groupId é nulo.");
         }
         Group group = groupService.getGroupByGroupIdOrGroupPath(groupId.toString(), null);
+
+        checkIsAdmin(group);
 
         Collection<Roles> roles = rolesRepository.findAllByGroup(group);
 
@@ -290,6 +284,9 @@ public class RolesService {
     }
 
     public void checkIsAdmin(Profile profile, Group group) {
+        if(userService.isUserAdminSession()) {
+            return;
+        }
         if (!isAdmin(profile,  group)) {
             throw new RolesException("Você precisa ser administrador para executar esta ação.");
         }
@@ -341,6 +338,15 @@ public class RolesService {
         }
     }
 
+    public boolean hasPermission(Profile profile, Group group, FeaturesTypes feature, int forPermission) {
+        try {
+            checkPermission(profile, group, feature, forPermission);
+            return true;
+        } catch (RolesException e) {
+            return false;
+        }
+    }
+
     public void checkPermission(Group group, FeaturesTypes feature, int forPermission) {
         checkPermission(
                 UserService.getInstance().getUserInSession().getProfile(),
@@ -350,8 +356,25 @@ public class RolesService {
         );
     }
 
+    public boolean hasPermission(Group group, FeaturesTypes feature, int forPermission) {
+        return hasPermission(
+                UserService.getInstance().getUserInSession().getProfile(),
+                group,
+                feature,
+                forPermission
+        );
+    }
+
     public void checkPermission(String groupId, FeaturesTypes feature, int forPermission) {
         checkPermission(
+                GroupService.getInstance().getGroupByGroupIdOrGroupPath(groupId, null),
+                feature,
+                forPermission
+        );
+    }
+
+    public boolean hasPermission(String groupId, FeaturesTypes feature, int forPermission) {
+        return hasPermission(
                 GroupService.getInstance().getGroupByGroupIdOrGroupPath(groupId, null),
                 feature,
                 forPermission
@@ -483,11 +506,10 @@ public class RolesService {
     public Roles getDefaultRolesForProfile(Profile profile, Group group) {
         Roles retRoles = userRoles;
 
-        // get if is admin
-        if(group.administrators.stream().anyMatch(admin -> admin.profile.equals(profile))) {
-            retRoles = adminRoles;
-        }
-        if(Objects.equals(group.admin.getId(), profile.getId())) {
+        // check possibles for admin
+        if(group.administrators.stream().anyMatch(admin -> admin.profile.equals(profile)) ||
+                Objects.equals(group.admin.getId(), profile.getId()) ||
+                userService.isUserAdminSession()) {
             retRoles = adminRoles;
         }
 

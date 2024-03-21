@@ -177,6 +177,8 @@ public class GroupParticipantController {
 
             Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
 
+            RolesService.getInstance().checkPermission(group, FeaturesTypes.PEOPLE, Permission.READ);
+
             if(group != null) {
                 Collection<ProfileGroup> participants = group.getParticipants();
 
