@@ -82,6 +82,11 @@ public class Folder implements Serializable {
     public boolean publicFolder;
 
     @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(
+        name = "folder_granted_access_groups",
+        joinColumns = @JoinColumn(name = "folder_id"),
+        inverseJoinColumns = @JoinColumn(name = "granted_access_groups_id")
+    )
     @NotFound(action = NotFoundAction.IGNORE)
     private Collection<Group> grantedAccessGroups;
 
