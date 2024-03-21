@@ -423,7 +423,10 @@ public class UserService implements UserDetailsService {
             if(checkAdmin && isUserAdmin(user)) {
                 return false;
             }
-            return (user.getProfile() == null || user.getProfile().getFirstname() == null);
+            return user.getProfile() == null
+                || user.getProfile().getFirstname() == null
+                || user.getProfile().getLastname() == null
+                || user.getProfile().getImage() == null;
         } catch (Exception e) {
             return true;
         }
