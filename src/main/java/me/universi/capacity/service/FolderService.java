@@ -316,6 +316,7 @@ public class FolderService {
                 } else {
                     folder.getGrantedAccessGroups().remove(group);
                 }
+                folderRepository.save(folder);
             }
         }
     }

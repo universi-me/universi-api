@@ -5,18 +5,15 @@ import java.util.*;
 import java.util.stream.Collectors;
 import me.universi.api.entities.Response;
 import me.universi.group.entities.Group;
-import me.universi.group.entities.GroupAdmin;
-import me.universi.group.entities.GroupSettings.GroupFeatures;
 import me.universi.group.entities.GroupSettings.GroupSettings;
-import me.universi.group.entities.ProfileGroup;
 import me.universi.group.entities.Subgroup;
 import me.universi.group.enums.GroupType;
 import me.universi.group.exceptions.GroupException;
 import me.universi.group.services.GroupService;
 
-import me.universi.profile.entities.Profile;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
+import me.universi.util.CastingUtil;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -353,12 +350,17 @@ public class GroupController {
     public Response list_folders(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
 
-            String groupId = (String)body.get("groupId");
-            String groupPath = (String)body.get("groupPath");
+            var groupId = CastingUtil.getUUID(body.get("groupId"));
+            var groupPath = CastingUtil.getString(body.get("groupPath"));
 
-            Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
+            if (groupPath.isEmpty() && groupId.isEmpty()) {
+                response.setStatus(HttpStatus.BAD_REQUEST);
+                throw new GroupException("Parâmetros 'groupId' e 'groupPath' não informados.");
+            }
 
-            response.body.put("folders", group.getFolders());
+            Group group = groupService.getGroupByGroupIdOrGroupPath(groupId.orElse(null), groupPath.orElse(null));
+
+            response.body.put("folders", group.getAllFolders());
 
         });
     }
