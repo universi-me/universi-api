@@ -17,12 +17,10 @@ import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.*;
 
 import java.util.Date;
 import java.util.UUID;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
 
 @Entity(name = "competence")
 @SQLDelete(sql = "UPDATE competence SET deleted = true WHERE id=?")
@@ -38,6 +36,7 @@ public class Competence {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "competence_type_id")
+    @NotFound(action = NotFoundAction.IGNORE)
     private CompetenceType competenceType;
 
     @Column(name = "title")

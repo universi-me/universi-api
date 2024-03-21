@@ -8,6 +8,7 @@ import me.universi.group.entities.GroupAdmin;
 import me.universi.group.exceptions.GroupException;
 import me.universi.group.services.GroupService;
 import me.universi.profile.entities.Profile;
+import me.universi.roles.services.RolesService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import org.springframework.http.MediaType;
@@ -46,6 +47,8 @@ public class GroupAdminController {
             }
 
             Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
+
+            RolesService.getInstance().checkIsAdmin(group);
 
             if(group != null) {
                 User user = userService.getUserInSession();
@@ -87,6 +90,8 @@ public class GroupAdminController {
             }
 
             Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
+
+            RolesService.getInstance().checkIsAdmin(group);
 
             if(group != null) {
                 User user = userService.getUserInSession();

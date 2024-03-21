@@ -3,7 +3,7 @@ package me.universi.recommendation.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import me.universi.competence.entities.CompetenceType;
 import me.universi.profile.entities.Profile;
-import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.*;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -18,8 +18,6 @@ import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.UUID;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
 
 @Entity(name = "recommendation")
 @SQLDelete(sql = "UPDATE recommendation SET deleted = true WHERE id=?")
@@ -33,14 +31,17 @@ public class Recommendation {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profile_origin_id")
     @NotNull
+    @NotFound(action = NotFoundAction.IGNORE)
     private Profile origin;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profile_destiny_id")
     @NotNull
+    @NotFound(action = NotFoundAction.IGNORE)
     private Profile destiny;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "competence_type_id")
     @NotNull
+    @NotFound(action = NotFoundAction.IGNORE)
     private CompetenceType competenceType;
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;

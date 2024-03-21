@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -15,13 +16,11 @@ import me.universi.group.entities.Group;
 import me.universi.profile.entities.Profile;
 import me.universi.user.services.UserService;
 
-import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.*;
 
 import java.util.Collection;
 import java.util.Date;
 import java.util.UUID;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
 
 @Entity(name="folder")
 @SQLDelete(sql = "UPDATE folder SET deleted = true WHERE id=?")
@@ -63,6 +62,7 @@ public class Folder implements Serializable {
 
     @ManyToMany(cascade = CascadeType.ALL)
     @JsonIgnore
+    @NotFound(action = NotFoundAction.IGNORE)
     private Collection<Content> contents;
 
     @Column
@@ -74,6 +74,7 @@ public class Folder implements Serializable {
     @ManyToOne
     @JoinColumn(name="profile_id")
     @NotNull
+    @NotFound(action = NotFoundAction.IGNORE)
     private Profile author;
 
     @Column(name = "public_folder")
@@ -86,11 +87,13 @@ public class Folder implements Serializable {
         joinColumns = @JoinColumn(name = "folder_id"),
         inverseJoinColumns = @JoinColumn(name = "granted_access_groups_id")
     )
+    @NotFound(action = NotFoundAction.IGNORE)
     private Collection<Group> grantedAccessGroups;
 
     @ManyToOne
     @JoinColumn(name = "owner_group_id")
     @NotNull
+    @NotFound(action = NotFoundAction.IGNORE)
     private Group ownerGroup;
 
     @OneToMany(mappedBy = "folder")

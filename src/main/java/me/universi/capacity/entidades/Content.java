@@ -33,9 +33,7 @@ import me.universi.capacity.service.ContentService;
 import me.universi.profile.entities.Profile;
 import me.universi.user.services.UserService;
 
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.*;
 
 @Entity(name="content")
 @SQLDelete(sql = "UPDATE content SET deleted = true WHERE id=?")
@@ -70,6 +68,7 @@ public class Content implements Serializable {
     private Collection<Category> categories;
 
     @ManyToMany(mappedBy = "contents")
+    @NotFound(action = NotFoundAction.IGNORE)
     private Collection<Folder> folders;
     
     @Column(name = "rating")
@@ -86,6 +85,7 @@ public class Content implements Serializable {
     @ManyToOne
     @JoinColumn(name="profile_id")
     @NotNull
+    @NotFound(action = NotFoundAction.IGNORE)
     private Profile author;
 
     @Column(name = "type")

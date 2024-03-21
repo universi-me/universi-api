@@ -13,6 +13,7 @@ import me.universi.api.entities.Response;
 import me.universi.group.services.GroupService;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
+import me.universi.roles.services.RolesService;
 import me.universi.user.entities.User;
 import me.universi.user.enums.Authority;
 import me.universi.user.exceptions.UserException;
@@ -53,6 +54,7 @@ public class UserController {
             if(userService.userIsLoggedIn()) {
                 response.success = true;
                 response.body.put("user", userService.getUserInSession());
+                response.body.put("roles", RolesService.getInstance().getAllRolesSession());
             } else {
                 response.success = false;
                 response.status = 401;

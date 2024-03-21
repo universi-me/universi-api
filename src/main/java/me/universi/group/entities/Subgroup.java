@@ -8,9 +8,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.*;
 
 
 @Entity(name = "subgroup")
@@ -42,12 +40,14 @@ public class Subgroup implements Serializable {
     @ManyToOne(fetch = FetchType.EAGER)
     @PrimaryKeyJoinColumn(name="group_id")
     @NotNull
+    @NotFound(action = NotFoundAction.IGNORE)
     public Group group;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER)
     @PrimaryKeyJoinColumn(name="subgroup_id")
     @NotNull
+    @NotFound(action = NotFoundAction.IGNORE)
     public Group subgroup;
 
     @JsonIgnore

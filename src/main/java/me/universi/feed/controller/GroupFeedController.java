@@ -5,12 +5,11 @@ import me.universi.feed.dto.GroupGetDTO;
 import me.universi.feed.dto.GroupPostDTO;
 import me.universi.feed.entities.GroupPost;
 import me.universi.feed.exceptions.GroupFeedException;
-import me.universi.feed.exceptions.PostNotFoundException;
 import me.universi.feed.services.GroupFeedService;
+import me.universi.roles.enums.FeaturesTypes;
+import me.universi.roles.enums.Permission;
+import me.universi.roles.services.RolesService;
 import me.universi.profile.services.ProfileService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -31,6 +30,10 @@ public class GroupFeedController {
     @GetMapping("/{groupId}/posts")
     public Response getGroupPosts(@PathVariable String groupId) {
         return Response.buildResponse(response -> {
+
+            // check permission post
+            RolesService.getInstance().checkPermission(groupId, FeaturesTypes.FEED, Permission.READ);
+
             List<GroupPost> groupPosts = groupFeedService.getGroupPosts(groupId);
             List<GroupGetDTO> groupGetDTOS = new ArrayList<>();
             for(GroupPost post : groupPosts){

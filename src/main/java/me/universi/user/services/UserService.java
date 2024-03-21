@@ -67,6 +67,9 @@ public class UserService implements UserDetailsService {
 
     public String BUILD_HASH = "development";
 
+    @Value("${BUILD_HASH}")
+    public String BUILD_HASH_ENV;
+
     @Value("${RECAPTCHA_API_KEY}")
     public String recaptchaApiKey;
 
@@ -732,6 +735,9 @@ public class UserService implements UserDetailsService {
                 BUILD_HASH = FileCopyUtils.copyToString(reader);
             } catch (IOException ignored) {
             }
+        }
+        if("development".equals(BUILD_HASH) && BUILD_HASH_ENV != null && !BUILD_HASH_ENV.isEmpty()) {
+            return BUILD_HASH_ENV;
         }
         return BUILD_HASH;
     }

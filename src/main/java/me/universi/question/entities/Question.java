@@ -27,6 +27,8 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
@@ -52,6 +54,7 @@ public class Question implements Serializable {
     @NotNull(message = "Profile is mandatory")
     @JoinColumn(name = "profile_id")
     @ManyToOne
+    @NotFound(action = NotFoundAction.IGNORE)
     private Profile profileCreate;
 
     @OneToOne(cascade= CascadeType.ALL)
@@ -60,6 +63,7 @@ public class Question implements Serializable {
 
     @ManyToMany(mappedBy = "questions", cascade = CascadeType.REFRESH)
     @JsonBackReference
+    @NotFound(action = NotFoundAction.IGNORE)
     private List<Exercise> exercises;
 
     @JsonIgnore

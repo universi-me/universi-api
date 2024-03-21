@@ -9,6 +9,9 @@ import me.universi.group.entities.ProfileGroup;
 import me.universi.group.exceptions.GroupException;
 import me.universi.group.services.GroupService;
 import me.universi.profile.entities.Profile;
+import me.universi.roles.enums.FeaturesTypes;
+import me.universi.roles.enums.Permission;
+import me.universi.roles.services.RolesService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import org.springframework.http.MediaType;
@@ -174,6 +177,8 @@ public class GroupParticipantController {
 
             Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
 
+            RolesService.getInstance().checkPermission(group, FeaturesTypes.PEOPLE, Permission.READ);
+
             if(group != null) {
                 Collection<ProfileGroup> participants = group.getParticipants();
 
@@ -210,6 +215,9 @@ public class GroupParticipantController {
 
             String groupId = (String)body.get("groupId");
             String groupPath = (String)body.get("groupPath");
+
+            RolesService.getInstance().checkPermission(groupId, FeaturesTypes.COMPETENCE, Permission.READ);
+
             Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
 
             response.body.put("competences", groupService.getGroupCompetences(group));
