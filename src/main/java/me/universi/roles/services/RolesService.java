@@ -338,6 +338,15 @@ public class RolesService {
         }
     }
 
+    public boolean hasPermission(Profile profile, Group group, FeaturesTypes feature, int forPermission) {
+        try {
+            checkPermission(profile, group, feature, forPermission);
+            return true;
+        } catch (RolesException e) {
+            return false;
+        }
+    }
+
     public void checkPermission(Group group, FeaturesTypes feature, int forPermission) {
         checkPermission(
                 UserService.getInstance().getUserInSession().getProfile(),
@@ -347,8 +356,25 @@ public class RolesService {
         );
     }
 
+    public boolean hasPermission(Group group, FeaturesTypes feature, int forPermission) {
+        return hasPermission(
+                UserService.getInstance().getUserInSession().getProfile(),
+                group,
+                feature,
+                forPermission
+        );
+    }
+
     public void checkPermission(String groupId, FeaturesTypes feature, int forPermission) {
         checkPermission(
+                GroupService.getInstance().getGroupByGroupIdOrGroupPath(groupId, null),
+                feature,
+                forPermission
+        );
+    }
+
+    public boolean hasPermission(String groupId, FeaturesTypes feature, int forPermission) {
+        return hasPermission(
                 GroupService.getInstance().getGroupByGroupIdOrGroupPath(groupId, null),
                 feature,
                 forPermission

@@ -72,6 +72,12 @@ public class GroupFeedService {
                     return;
                 }
             }
+
+            if(forDelete && RolesService.getInstance().hasPermission(post.getGroupId(), FeaturesTypes.FEED, Permission.READ_WRITE_DELETE)) {
+                // user with permission can delete any post
+                return;
+            }
+
             throw new GroupFeedException("Você não tem permissão para editar esta publicação.");
         }
     }
