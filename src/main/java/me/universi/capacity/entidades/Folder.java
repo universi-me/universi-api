@@ -90,12 +90,6 @@ public class Folder implements Serializable {
     @NotFound(action = NotFoundAction.IGNORE)
     private Collection<Group> grantedAccessGroups;
 
-    @ManyToOne
-    @JoinColumn(name = "owner_group_id")
-    @NotNull
-    @NotFound(action = NotFoundAction.IGNORE)
-    private Group ownerGroup;
-
     @OneToMany(mappedBy = "folder")
     @JsonIgnore
     private Collection<FolderProfile> assignedUsers;
@@ -197,14 +191,6 @@ public class Folder implements Serializable {
 
     public void setGrantedAccessGroups(Collection<Group> grantedAccessGroups) {
         this.grantedAccessGroups = grantedAccessGroups;
-    }
-
-    public Group getOwnerGroup() {
-        return this.ownerGroup;
-    }
-
-    public void setOwnerGroup(Group ownerGroup) {
-        this.ownerGroup = ownerGroup;
     }
 
     public Collection<FolderProfile> getAssignedUsers() {

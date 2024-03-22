@@ -92,14 +92,8 @@ public class FolderService {
 
         Collection<ProfileGroup> userGroups = userSession.getProfile().getGroups();
         Collection<Group> folderGroups = folder.getGrantedAccessGroups();
-        UUID folderOwnerId = folder.getOwnerGroup().getId();
 
         for(ProfileGroup userGroupNow : userGroups) {
-            if (userGroupNow.group != null && Objects.equals(folderOwnerId, userGroupNow.group.getId())) {
-                /* User is in the owner group of the folder */
-                return;
-            }
-
             for(Group folderGroupNow : folderGroups) {
                 if(userGroupNow.group != null && Objects.equals(folderGroupNow.getId(), userGroupNow.group.getId())) {
                     /* User is in a group with access to the folder */
