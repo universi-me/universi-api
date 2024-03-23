@@ -110,6 +110,7 @@ public class FolderController {
 
             folder.setName(String.valueOf(name));
             folder.setAuthor(user.getProfile());
+            folder.setGrantedAccessGroups(Arrays.asList(group));
 
             if(image != null) {
                 String imageStr = String.valueOf(image);
