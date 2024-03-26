@@ -16,10 +16,8 @@ import me.universi.user.services.JsonUserLoggedFilter;
 import me.universi.user.services.UserService;
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
@@ -124,10 +122,6 @@ public class Group implements Serializable {
     @Column(name = "public_group")
     @NotNull
     public boolean publicGroup;
-
-    @OneToMany(mappedBy = "ownerGroup", fetch = FetchType.EAGER)
-    @JsonIgnore
-    private Collection<Folder> folders;
 
     @ManyToMany(mappedBy = "grantedAccessGroups", fetch = FetchType.EAGER)
     @JsonIgnore
@@ -290,15 +284,6 @@ public class Group implements Serializable {
     }
 
     @Transient
-    public Collection<Folder> getFolders() {
-        return this.folders;
-    }
-
-    public void setFolders(Collection<Folder> folders) {
-        this.folders = folders;
-    }
-
-    @Transient
     public String getPath() {
         return GroupService.getInstance().getGroupPath(this.id);
     }
@@ -378,15 +363,6 @@ public class Group implements Serializable {
 
     public void setFoldersGrantedAccess(Collection<Folder> foldersGrantedAccess) {
         this.foldersGrantedAccess = foldersGrantedAccess;
-    }
-
-    @Transient
-    @JsonIgnore
-    public List<Folder> getAllFolders() {
-        var allFolders = new ArrayList<>(this.folders);
-        allFolders.addAll(this.foldersGrantedAccess);
-
-        return allFolders;
     }
 
     @Transient

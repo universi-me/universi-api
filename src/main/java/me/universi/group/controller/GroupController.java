@@ -376,7 +376,7 @@ public class GroupController {
             // check permission contents
             RolesService.getInstance().checkPermission(group, FeaturesTypes.CONTENT, Permission.READ);
 
-            response.body.put("folders", group.getAllFolders());
+            response.body.put("folders", group.getFoldersGrantedAccess());
 
         });
     }

@@ -110,7 +110,7 @@ public class FolderController {
 
             folder.setName(String.valueOf(name));
             folder.setAuthor(user.getProfile());
-            folder.setOwnerGroup(group);
+            folder.setGrantedAccessGroups(Arrays.asList(group));
 
             if(image != null) {
                 String imageStr = String.valueOf(image);
@@ -499,7 +499,6 @@ public class FolderController {
 
             folder.setName("Cópia de "+originalfolder.getName());
             folder.setAuthor(user.getProfile());
-            folder.setOwnerGroup(targetGroup);
             folder.setImage(originalfolder.getImage());
             folder.setDescription(originalfolder.getDescription());
             folder.setPublicFolder(originalfolder.isPublicFolder());
