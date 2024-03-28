@@ -837,7 +837,7 @@ public class UserService implements UserDetailsService {
     }
 
     public String keycloakLoginUrl() {
-        return  KEYCLOAK_URL + "/realms/external/protocol/openid-connect/auth?client_id=" + KEYCLOAK_CLIENT_ID + "&redirect_uri="+ getKeycloakRedirectUrl() +"&response_type=code";
+        return  getKeycloakUrl() + "/realms/external/protocol/openid-connect/auth?client_id=" + getKeycloakClientId() + "&redirect_uri="+ getKeycloakRedirectUrl() +"&response_type=code";
     }
 
     public String getKeycloakRedirectUrl() {
