@@ -878,7 +878,7 @@ public class UserService implements UserDetailsService {
     public String getKeycloakUrl() {
         GroupEnvironment envG = GroupService.getInstance().getOrganizationEnvironment();
         if(envG != null && envG.keycloak_url != null && !envG.keycloak_url.isEmpty()) {
-            return envG.keycloak_url;
+            return envG.keycloak_url.replaceAll("/$", "");
         }
         return KEYCLOAK_URL;
     }
