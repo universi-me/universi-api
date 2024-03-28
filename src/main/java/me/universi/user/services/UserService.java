@@ -67,6 +67,9 @@ public class UserService implements UserDetailsService {
 
     public String BUILD_HASH = "development";
 
+    @Value("${PUBLIC_URL}")
+    public String PUBLIC_URL;
+
     @Value("${BUILD_HASH}")
     public String BUILD_HASH_ENV;
 
@@ -823,6 +826,9 @@ public class UserService implements UserDetailsService {
 
     public String getPublicUrl() {
         try {
+            if(PUBLIC_URL != null && !PUBLIC_URL.isEmpty()) {
+                return PUBLIC_URL;
+            }
             URL requestUrl = new URL(getRequest().getRequestURL().toString());
             return requestUrl.getProtocol() + "://" + requestUrl.getHost() + (requestUrl.getPort() > 0 ? ":"+requestUrl.getPort() : "");
         } catch (Exception e) {
@@ -831,7 +837,7 @@ public class UserService implements UserDetailsService {
     }
 
     public String keycloakRedirectUrl() {
-        if(KEYCLOAK_REDIRECT_URL != null) {
+        if(KEYCLOAK_REDIRECT_URL != null && !KEYCLOAK_REDIRECT_URL.isEmpty()){
             return KEYCLOAK_REDIRECT_URL;
         }
         return getPublicUrl() + "/keycloak-oauth-redirect";

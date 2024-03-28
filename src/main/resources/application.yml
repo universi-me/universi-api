@@ -84,6 +84,8 @@ springdoc:
 # BUILD HASH
 BUILD_HASH: ${API_BUILD_HASH:development}
 
+PUBLIC_URL: ${API_PUBLIC_URL:}
+
 # GOOGLE API AUTH
 GOOGLE_CLIENT_ID: ${API_GOOGLE_CLIENT_ID:110833050076-ib680ela4hfqr2c0lhc9h19snrsvltnd.apps.googleusercontent.com}
 

@@ -372,44 +372,52 @@ public class UserController {
                 throw new UserException("Parametro code é nulo.");
             }
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("Content-Type", MediaType.APPLICATION_FORM_URLENCODED.toString());
-            headers.add("Accept", MediaType.APPLICATION_JSON.toString());
+            try {
+                HttpHeaders headers = new HttpHeaders();
+                headers.add("Content-Type", MediaType.APPLICATION_FORM_URLENCODED.toString());
+                headers.add("Accept", MediaType.APPLICATION_JSON.toString());
 
-            MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<String, String>();
-            requestBody.add("client_id", userService.KEYCLOAK_CLIENT_ID);
-            requestBody.add("grant_type", "authorization_code");
-            requestBody.add("redirect_uri", userService.keycloakRedirectUrl());
-            requestBody.add("client_secret", userService.KEYCLOAK_CLIENT_SECRET);
-            requestBody.add("code", code);
-            HttpEntity formEntity = new HttpEntity<MultiValueMap<String, String>>(requestBody, headers);
+                MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<String, String>();
+                requestBody.add("client_id", userService.KEYCLOAK_CLIENT_ID);
+                requestBody.add("grant_type", "authorization_code");
+                requestBody.add("redirect_uri", userService.keycloakRedirectUrl());
+                requestBody.add("client_secret", userService.KEYCLOAK_CLIENT_SECRET);
+                requestBody.add("code", code);
+                HttpEntity formEntity = new HttpEntity<MultiValueMap<String, String>>(requestBody, headers);
 
-            RestTemplate restTemplate = new RestTemplate();
-            HashMap<String, Object> token = restTemplate.postForObject(userService.KEYCLOAK_URL + "/realms/"+ userService.KEYCLOAK_REALM +"/protocol/openid-connect/token", formEntity, HashMap.class);
+                RestTemplate restTemplate = new RestTemplate();
+                HashMap<String, Object> token = restTemplate.postForObject(userService.KEYCLOAK_URL + "/realms/" + userService.KEYCLOAK_REALM + "/protocol/openid-connect/token", formEntity, HashMap.class);
 
-            // returned secured token
-            String accessToken = (String)token.get("access_token");
+                // returned secured token
+                String accessToken = (String) token.get("access_token");
 
-            Map<String, Object> decodedToken = Jwts.parser()
-                    .parseClaimsJwt(accessToken.substring(0, accessToken.lastIndexOf('.') + 1))
-                    .getBody();
+                Map<String, Object> decodedToken = Jwts.parser()
+                        .parseClaimsJwt(accessToken.substring(0, accessToken.lastIndexOf('.') + 1))
+                        .getBody();
 
-            String email = (String)decodedToken.get("email");
-            String username = (String)decodedToken.get("preferred_username");
-            String name = (String)decodedToken.get("name");
-            String pictureUrl = null;
+                String email = (String) decodedToken.get("email");
+                String username = (String) decodedToken.get("preferred_username");
+                String name = (String) decodedToken.get("name");
+                String pictureUrl = null;
 
-            User user = userService.configureLoginForOAuth(name, username, email, pictureUrl);
+                User user = userService.configureLoginForOAuth(name, username, email, pictureUrl);
 
-            if(user != null) {
-                response.success = true;
-                response.redirectTo = userService.getUrlWhenLogin();
-                response.message = "Usuário Logado com sucesso.";
+                if (user != null) {
+                    response.success = true;
+                    response.redirectTo = userService.getUrlWhenLogin();
+                    response.message = "Usuário Logado com sucesso.";
 
-                response.token = jwtService.buildTokenForUser(user);
+                    response.token = jwtService.buildTokenForUser(user);
 
-                response.body.put("user", user);
+                    response.body.put("user", user);
 
+                    return;
+                }
+            }catch (Exception e) {
+                if(e.getClass() == UserException.class) {
+                    throw e;
+                }
+                response.success = false;
                 return;
             }
 
