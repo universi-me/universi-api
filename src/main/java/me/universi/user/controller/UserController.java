@@ -363,7 +363,7 @@ public class UserController {
     @ResponseBody
     public Response oauth_keycloak_session(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
-            if(!userService.KEYCLOAK_ENABLED) {
+            if(!userService.isKeycloakEnabled()) {
                 throw new UserException("Keycloak desabilitado!");
             }
 
@@ -378,15 +378,15 @@ public class UserController {
                 headers.add("Accept", MediaType.APPLICATION_JSON.toString());
 
                 MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<String, String>();
-                requestBody.add("client_id", userService.KEYCLOAK_CLIENT_ID);
+                requestBody.add("client_id", userService.getKeycloakClientId());
                 requestBody.add("grant_type", "authorization_code");
-                requestBody.add("redirect_uri", userService.keycloakRedirectUrl());
-                requestBody.add("client_secret", userService.KEYCLOAK_CLIENT_SECRET);
+                requestBody.add("redirect_uri", userService.getKeycloakRedirectUrl());
+                requestBody.add("client_secret", userService.getKeycloakClientSecret());
                 requestBody.add("code", code);
                 HttpEntity formEntity = new HttpEntity<MultiValueMap<String, String>>(requestBody, headers);
 
                 RestTemplate restTemplate = new RestTemplate();
-                HashMap<String, Object> token = restTemplate.postForObject(userService.KEYCLOAK_URL + "/realms/" + userService.KEYCLOAK_REALM + "/protocol/openid-connect/token", formEntity, HashMap.class);
+                HashMap<String, Object> token = restTemplate.postForObject(userService.getKeycloakUrl() + "/realms/" + userService.getKeycloakRealm() + "/protocol/openid-connect/token", formEntity, HashMap.class);
 
                 // returned secured token
                 String accessToken = (String) token.get("access_token");
@@ -429,7 +429,7 @@ public class UserController {
     @GetMapping(value = "/login/keycloak/auth")
     @ResponseBody
     public ResponseEntity<Void> keycloak_login() {
-        if(!userService.KEYCLOAK_ENABLED) {
+        if(!userService.isKeycloakEnabled()) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "denied access to keycloak login");
         }
         return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(userService.keycloakLoginUrl())).build();

@@ -58,6 +58,20 @@ public class GroupEnvironment implements Serializable {
     @Column(name = "recaptcha_site_key")
     public String recaptcha_site_key;
 
+    /** Keycloak **/
+    @Column(name = "keycloak_enabled")
+    public boolean keycloak_enabled = Boolean.FALSE;
+    @Column(name = "keycloak_client_id")
+    public String keycloak_client_id;
+    @Column(name = "keycloak_client_secret")
+    public String keycloak_client_secret;
+    @Column(name = "keycloak_realm")
+    public String keycloak_realm;
+    @Column(name = "keycloak_url")
+    public String keycloak_url;
+    @Column(name = "keycloak_redirect_url")
+    public String keycloak_redirect_url;
+
     @JsonIgnore
     @CreationTimestamp
     @Column(name = "added")

@@ -101,17 +101,17 @@ public class UserService implements UserDetailsService {
     public String activeProfile;
 
     @Value("${keycloak.enabled}")
-    public boolean KEYCLOAK_ENABLED;
+    boolean KEYCLOAK_ENABLED;
     @Value("${keycloak.auth-server-url}")
-    public String KEYCLOAK_URL;
+    String KEYCLOAK_URL;
     @Value("${keycloak.redirect-url}")
-    public String KEYCLOAK_REDIRECT_URL;
+    String KEYCLOAK_REDIRECT_URL;
     @Value("${keycloak.realm}")
-    public String KEYCLOAK_REALM;
+    String KEYCLOAK_REALM;
     @Value("${keycloak.client-id}")
-    public String KEYCLOAK_CLIENT_ID;
+    String KEYCLOAK_CLIENT_ID;
     @Value("${keycloak.client-secret}")
-    public String KEYCLOAK_CLIENT_SECRET;
+    String KEYCLOAK_CLIENT_SECRET;
 
     @Autowired
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, ProfileService profileService, RoleHierarchyImpl roleHierarchy, SessionRegistry sessionRegistry, JavaMailSender emailSender) {
@@ -836,14 +836,59 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    public String keycloakRedirectUrl() {
+    public String keycloakLoginUrl() {
+        return  KEYCLOAK_URL + "/realms/external/protocol/openid-connect/auth?client_id=" + KEYCLOAK_CLIENT_ID + "&redirect_uri="+ getKeycloakRedirectUrl() +"&response_type=code";
+    }
+
+    public String getKeycloakRedirectUrl() {
+        GroupEnvironment envG = GroupService.getInstance().getOrganizationEnvironment();
+        if(envG != null) {
+            return envG.keycloak_redirect_url;
+        }
         if(KEYCLOAK_REDIRECT_URL != null && !KEYCLOAK_REDIRECT_URL.isEmpty()){
             return KEYCLOAK_REDIRECT_URL;
         }
         return getPublicUrl() + "/keycloak-oauth-redirect";
     }
 
-    public String keycloakLoginUrl() {
-        return  KEYCLOAK_URL + "/realms/external/protocol/openid-connect/auth?client_id=" + KEYCLOAK_CLIENT_ID + "&redirect_uri="+ keycloakRedirectUrl() +"&response_type=code";
+    public String getKeycloakClientId() {
+        GroupEnvironment envG = GroupService.getInstance().getOrganizationEnvironment();
+        if(envG != null) {
+            return envG.keycloak_client_id;
+        }
+        return KEYCLOAK_CLIENT_ID;
     }
+
+    public String getKeycloakClientSecret() {
+        GroupEnvironment envG = GroupService.getInstance().getOrganizationEnvironment();
+        if(envG != null) {
+            return envG.keycloak_client_secret;
+        }
+        return KEYCLOAK_CLIENT_SECRET;
+    }
+
+    public String getKeycloakRealm() {
+        GroupEnvironment envG = GroupService.getInstance().getOrganizationEnvironment();
+        if(envG != null) {
+            return envG.keycloak_realm;
+        }
+        return KEYCLOAK_REALM;
+    }
+
+    public String getKeycloakUrl() {
+        GroupEnvironment envG = GroupService.getInstance().getOrganizationEnvironment();
+        if(envG != null) {
+            return envG.keycloak_url;
+        }
+        return KEYCLOAK_URL;
+    }
+
+    public boolean isKeycloakEnabled() {
+        GroupEnvironment envG = GroupService.getInstance().getOrganizationEnvironment();
+        if(envG != null) {
+            return envG.keycloak_enabled;
+        }
+        return KEYCLOAK_ENABLED;
+    }
+
 }
