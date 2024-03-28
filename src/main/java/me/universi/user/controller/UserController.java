@@ -3,15 +3,13 @@ package me.universi.user.controller;
 import java.net.URI;
 import java.net.URL;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
-
-import jakarta.servlet.http.HttpSession;
 
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import me.universi.api.entities.Response;
 import me.universi.group.services.GroupService;
-import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
 import me.universi.roles.services.RolesService;
 import me.universi.user.entities.User;
@@ -20,15 +18,19 @@ import me.universi.user.exceptions.UserException;
 import me.universi.user.services.JWTService;
 import me.universi.user.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
+
+import io.jsonwebtoken.Jwts;
 
 @RestController
 @RequestMapping(value = "/api")
@@ -357,6 +359,74 @@ public class UserController {
         });
     }
 
+    @PostMapping(value = "/login/keycloak", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Response oauth_keycloak_session(@RequestBody Map<String, Object> body) {
+        return Response.buildResponse(response -> {
+            if(!userService.KEYCLOAK_ENABLED) {
+                throw new UserException("Keycloak desabilitado!");
+            }
+
+            String code = (String)body.get("code");
+            if(code == null) {
+                throw new UserException("Parametro code é nulo.");
+            }
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Content-Type", MediaType.APPLICATION_FORM_URLENCODED.toString());
+            headers.add("Accept", MediaType.APPLICATION_JSON.toString());
+
+            MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<String, String>();
+            requestBody.add("client_id", userService.KEYCLOAK_CLIENT_ID);
+            requestBody.add("grant_type", "authorization_code");
+            requestBody.add("redirect_uri", userService.keycloakRedirectUrl());
+            requestBody.add("client_secret", userService.KEYCLOAK_CLIENT_SECRET);
+            requestBody.add("code", code);
+            HttpEntity formEntity = new HttpEntity<MultiValueMap<String, String>>(requestBody, headers);
+
+            RestTemplate restTemplate = new RestTemplate();
+            HashMap<String, Object> token = restTemplate.postForObject(userService.KEYCLOAK_URL + "/realms/"+ userService.KEYCLOAK_REALM +"/protocol/openid-connect/token", formEntity, HashMap.class);
+
+            // returned secured token
+            String accessToken = (String)token.get("access_token");
+
+            Map<String, Object> decodedToken = Jwts.parser()
+                    .parseClaimsJwt(accessToken.substring(0, accessToken.lastIndexOf('.') + 1))
+                    .getBody();
+
+            String email = (String)decodedToken.get("email");
+            String username = (String)decodedToken.get("preferred_username");
+            String name = (String)decodedToken.get("name");
+            String pictureUrl = null;
+
+            User user = userService.configureLoginForOAuth(name, username, email, pictureUrl);
+
+            if(user != null) {
+                response.success = true;
+                response.redirectTo = userService.getUrlWhenLogin();
+                response.message = "Usuário Logado com sucesso.";
+
+                response.token = jwtService.buildTokenForUser(user);
+
+                response.body.put("user", user);
+
+                return;
+            }
+
+            throw new UserException("Falha ao fazer login com Keycloak.");
+
+        });
+    }
+
+    @GetMapping(value = "/login/keycloak/auth")
+    @ResponseBody
+    public ResponseEntity<Void> keycloak_login() {
+        if(!userService.KEYCLOAK_ENABLED) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "denied access to keycloak login");
+        }
+        return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(userService.keycloakLoginUrl())).build();
+    }
+
     @PostMapping(value = "/login/google", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response login_google(@RequestBody Map<String, Object> body) {
@@ -379,81 +449,18 @@ public class UserController {
 
             GoogleIdToken idToken = verifier.verify(idTokenString);
 
-            HttpSession sessionReq = userService.getActiveSession();
-
             if (idToken != null) {
                 Payload payload = idToken.getPayload();
 
-                //String userId = payload.getSubject();
-
                 String email = payload.getEmail();
-                if(email == null) {
-                    throw new UserException("Não foi possível obter Email.");
-                }
-
-                if(!GroupService.getInstance().emailAvailableForOrganization(email)) {
-                    throw new UserException("Email \""+email+"\" não esta disponível para cadastro!");
-                }
-                
-                //boolean emailVerified = Boolean.valueOf(payload.getEmailVerified());
                 String name = (String) payload.get("name");
                 String pictureUrl = (String) payload.get("picture");
-                //String locale = (String) payload.get("locale");
-                //String familyName = (String) payload.get("family_name");
-                //String givenName = (String) payload.get("given_name");
 
-                User user;
+                String username = email.split("@")[0].trim();
 
-                try {
-                    user = (User) userService.findFirstByEmail(email);
-                } catch (UserException e) {
-                    // register user with DCX account, with secure payload information
-
-                    // create username from email DCX
-                    String newUsername = email.split("@")[0].trim();
-                    if(!userService.usernameExist(newUsername)) {
-
-                        user = new User();
-                        user.setName(newUsername);
-                        user.setEmail(email.trim());
-                        userService.createUser(user, null, null);
-
-                        Profile profile = user.getProfile();
-
-                        if(name != null) {
-                            // if have space, extract first name and last name
-                            if(name.contains(" ")) {
-                                String[] nameArr = name.split(" ");
-                                profile.setFirstname((nameArr[0]).trim());
-                                profile.setLastname(name.substring(nameArr[0].length()).trim());
-                            } else {
-                                profile.setFirstname(name.trim());
-                            }
-                        }
-                        if(pictureUrl != null) {
-                            profile.setImage(pictureUrl.trim());
-                        }
-
-                        profileService.save(profile);
-
-                        userService.saveInSession("novoUsuario", true);
-
-                    } else {
-                        throw new UserException("Usúario \""+newUsername+"\" já existe.");
-                    }
-                }
+                User user = userService.configureLoginForOAuth(name, username, email, pictureUrl);
 
                 if(user != null) {
-                    
-                    // enable verified seal on account
-                    if(!user.isEmail_verified()) {
-                        user.setEmail_verified(true);
-                        userService.save(user);
-                    }
-
-                    userService.saveInSession("loginViaGoogle", true);
-
-                    userService.configureSessionForUser(user, authenticationManager);
 
                     response.success = true;
                     response.redirectTo = userService.getUrlWhenLogin();
