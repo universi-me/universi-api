@@ -842,7 +842,7 @@ public class UserService implements UserDetailsService {
 
     public String getKeycloakRedirectUrl() {
         GroupEnvironment envG = GroupService.getInstance().getOrganizationEnvironment();
-        if(envG != null) {
+        if(envG != null && envG.keycloak_redirect_url != null && !envG.keycloak_redirect_url.isEmpty()) {
             return envG.keycloak_redirect_url;
         }
         if(KEYCLOAK_REDIRECT_URL != null && !KEYCLOAK_REDIRECT_URL.isEmpty()){
@@ -853,7 +853,7 @@ public class UserService implements UserDetailsService {
 
     public String getKeycloakClientId() {
         GroupEnvironment envG = GroupService.getInstance().getOrganizationEnvironment();
-        if(envG != null) {
+        if(envG != null && envG.keycloak_client_id != null && !envG.keycloak_client_id.isEmpty()) {
             return envG.keycloak_client_id;
         }
         return KEYCLOAK_CLIENT_ID;
@@ -861,7 +861,7 @@ public class UserService implements UserDetailsService {
 
     public String getKeycloakClientSecret() {
         GroupEnvironment envG = GroupService.getInstance().getOrganizationEnvironment();
-        if(envG != null) {
+        if(envG != null && envG.keycloak_client_secret != null && !envG.keycloak_client_secret.isEmpty()) {
             return envG.keycloak_client_secret;
         }
         return KEYCLOAK_CLIENT_SECRET;
@@ -869,7 +869,7 @@ public class UserService implements UserDetailsService {
 
     public String getKeycloakRealm() {
         GroupEnvironment envG = GroupService.getInstance().getOrganizationEnvironment();
-        if(envG != null) {
+        if(envG != null && envG.keycloak_realm != null && !envG.keycloak_realm.isEmpty()) {
             return envG.keycloak_realm;
         }
         return KEYCLOAK_REALM;
@@ -877,7 +877,7 @@ public class UserService implements UserDetailsService {
 
     public String getKeycloakUrl() {
         GroupEnvironment envG = GroupService.getInstance().getOrganizationEnvironment();
-        if(envG != null) {
+        if(envG != null && envG.keycloak_url != null && !envG.keycloak_url.isEmpty()) {
             return envG.keycloak_url;
         }
         return KEYCLOAK_URL;
