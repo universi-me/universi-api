@@ -830,7 +830,7 @@ public class UserService implements UserDetailsService {
                 return PUBLIC_URL;
             }
             URL requestUrl = new URL(getRequest().getRequestURL().toString());
-            return requestUrl.getProtocol() + "://" + requestUrl.getHost() + (requestUrl.getPort() > 0 ? ":"+requestUrl.getPort() : "");
+            return requestUrl.getProtocol() + "://" + requestUrl.getHost() + ((requestUrl.getPort() > 0 && requestUrl.getPort() != 80 && requestUrl.getPort() != 443)  ? ":"+requestUrl.getPort() : "");
         } catch (Exception e) {
             return null;
         }
