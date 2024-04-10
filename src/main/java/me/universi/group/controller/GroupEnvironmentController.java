@@ -42,7 +42,10 @@ public class GroupEnvironmentController {
                             (Boolean)body.get("signup_enabled"), (Boolean)body.get("signup_confirm_account_enabled"),
                             (Boolean)body.get("login_google_enabled"), (String)body.get("google_client_id"),
                             (Boolean)body.get("recaptcha_enabled"), (String)body.get("recaptcha_api_key"),
-                            (String)body.get("recaptcha_api_project_id"), (String)body.get("recaptcha_site_key")
+                            (String)body.get("recaptcha_api_project_id"), (String)body.get("recaptcha_site_key"),
+                            (Boolean)body.get("keycloak_enabled"), (String)body.get("keycloak_client_id"),
+                            (String)body.get("keycloak_client_secret"), (String)body.get("keycloak_realm"),
+                            (String)body.get("keycloak_url"), (String)body.get("keycloak_redirect_url")
                     )) {
                         response.message = "Variáveis Ambiente atualizada com sucesso.";
                         return;

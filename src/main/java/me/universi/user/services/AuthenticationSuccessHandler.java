@@ -14,7 +14,6 @@ import org.springframework.security.web.authentication.SavedRequestAwareAuthenti
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.security.Principal;
 
@@ -60,7 +59,7 @@ public class AuthenticationSuccessHandler extends SavedRequestAwareAuthenticatio
                 else
                     r.message = "Boas vindas, "+user.getName()+".";
                 r.redirectTo = userService.getUrlWhenLogin();
-                r.token = jwtService.ENABLED ? jwtService.buildTokenForUser(user) : null;
+                r.token = jwtService.buildTokenForUser(user);
                 r.body.put("user", user);
             });
 

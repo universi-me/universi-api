@@ -67,6 +67,9 @@ public class UserService implements UserDetailsService {
 
     public String BUILD_HASH = "development";
 
+    @Value("${PUBLIC_URL}")
+    public String PUBLIC_URL;
+
     @Value("${BUILD_HASH}")
     public String BUILD_HASH_ENV;
 
@@ -96,6 +99,19 @@ public class UserService implements UserDetailsService {
 
     @Value("${spring.profiles.active}")
     public String activeProfile;
+
+    @Value("${keycloak.enabled}")
+    boolean KEYCLOAK_ENABLED;
+    @Value("${keycloak.auth-server-url}")
+    String KEYCLOAK_URL;
+    @Value("${keycloak.redirect-url}")
+    String KEYCLOAK_REDIRECT_URL;
+    @Value("${keycloak.realm}")
+    String KEYCLOAK_REALM;
+    @Value("${keycloak.client-id}")
+    String KEYCLOAK_CLIENT_ID;
+    @Value("${keycloak.client-secret}")
+    String KEYCLOAK_CLIENT_SECRET;
 
     @Autowired
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, ProfileService profileService, RoleHierarchyImpl roleHierarchy, SessionRegistry sessionRegistry, JavaMailSender emailSender) {
@@ -568,11 +584,10 @@ public class UserService implements UserDetailsService {
     // send recovery password email to user
     public void sendRecoveryPasswordEmail(User user) throws Exception {
         String userIp = getRequest().getHeader("X-Forwarded-For");
-        URL requestUrl = new URL(getRequest().getRequestURL().toString());
 
         String token = generateRecoveryPasswordToken(user);
 
-        String url = "https://" + requestUrl.getHost() + "/recovery-password/" + token;
+        String url = getPublicUrl() + "/recovery-password/" + token;
         String subject = "Universi.me - Recuperação de Senha";
         String text = "Olá " + user.getUsername() + ",\n\n" +
                 "Você solicitou a recuperação de senha para sua conta no Universi.me.\n" +
@@ -592,11 +607,10 @@ public class UserService implements UserDetailsService {
     //send confirmation signup account email to user
     public void sendConfirmAccountEmail(User user, boolean signup) throws Exception {
         String userIp = getRequest().getHeader("X-Forwarded-For");
-        URL requestUrl = new URL(getRequest().getRequestURL().toString());
 
         String token = generateRecoveryPasswordToken(user);
 
-        String url = "https://" + requestUrl.getHost() + "/api/confirm-account/" + token;
+        String url = getPublicUrl() + "/api/confirm-account/" + token;
         String subject = "Universi.me - Confirmação de Conta";
         String messageExplain = (signup) ? "Seja bem-vindo(a) ao Universi.me, para continuar com o seu cadastro precisamos confirmar a sua conta do Universi.me." : "Você solicitou a confirmação de sua conta no Universi.me.";
         String text = "Olá " + user.getUsername() + ",\n\n" +
@@ -659,7 +673,7 @@ public class UserService implements UserDetailsService {
             boolean isTokenValid = false;
 
             try {
-                isTokenValid = (((Double)((Map)responseCaptcha.get("riskAnalysis")).get("score")) >= 0.5);
+                isTokenValid = (((Double)((Map)responseCaptcha.get("riskAnalysis")).get("score")) >= 0.3);
             } catch (Exception ignored) {
             }
 
@@ -741,4 +755,140 @@ public class UserService implements UserDetailsService {
         }
         return BUILD_HASH;
     }
+
+    public User configureLoginForOAuth(String name, String username, String email, String pictureUrl) throws Exception {
+        if(email == null) {
+            throw new UserException("Não foi possível obter Email.");
+        }
+        if(username == null) {
+            throw new UserException("Não foi possível obter Nome de Usuário.");
+        }
+
+        if(!GroupService.getInstance().emailAvailableForOrganization(email)) {
+            throw new UserException("Email \""+email+"\" não esta disponível para cadastro!");
+        }
+
+        User user;
+
+        try {
+            user = (User)findFirstByEmail(email);
+        } catch (UserException e) {
+            // register user
+            if(!usernameExist(username.trim())) {
+
+                user = new User();
+                user.setName(username.trim());
+                user.setEmail(email.trim());
+                createUser(user, null, null);
+
+                Profile profile = user.getProfile();
+
+                if(name != null) {
+                    // if have space, extract first name and last name
+                    if(name.contains(" ")) {
+                        String[] nameArr = name.split(" ");
+                        profile.setFirstname((nameArr[0]).trim());
+                        profile.setLastname(name.substring(nameArr[0].length()).trim());
+                    } else {
+                        profile.setFirstname(name.trim());
+                    }
+                }
+                if(pictureUrl != null) {
+                    profile.setImage(pictureUrl.trim());
+                }
+
+                profileService.save(profile);
+
+                saveInSession("novoUsuario", true);
+
+            } else {
+                throw new UserException("Usúario \""+username+"\" já existe.");
+            }
+        }
+
+        if(user != null) {
+
+            // enable verified seal on account
+            if(!user.isEmail_verified()) {
+                user.setEmail_verified(true);
+                save(user);
+            }
+
+            saveInSession("loginViaGoogle", true);
+
+            configureSessionForUser(user, Sys.context.getBean("authenticationManager", AuthenticationManager.class));
+
+            return user;
+        }
+
+        return null;
+    }
+
+    public String getPublicUrl() {
+        try {
+            if(PUBLIC_URL != null && !PUBLIC_URL.isEmpty()) {
+                return PUBLIC_URL;
+            }
+            URL requestUrl = new URL(getRequest().getRequestURL().toString());
+            return requestUrl.getProtocol() + "://" + requestUrl.getHost() + ((requestUrl.getPort() > 0 && requestUrl.getPort() != 80 && requestUrl.getPort() != 443)  ? ":"+requestUrl.getPort() : "");
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public String keycloakLoginUrl() {
+        return  getKeycloakUrl() + "/realms/" + getKeycloakRealm() + "/protocol/openid-connect/auth?client_id=" + getKeycloakClientId() + "&redirect_uri="+ getKeycloakRedirectUrl() +"&response_type=code";
+    }
+
+    public String getKeycloakRedirectUrl() {
+        GroupEnvironment envG = GroupService.getInstance().getOrganizationEnvironment();
+        if(envG != null && envG.keycloak_redirect_url != null && !envG.keycloak_redirect_url.isEmpty()) {
+            return envG.keycloak_redirect_url;
+        }
+        if(KEYCLOAK_REDIRECT_URL != null && !KEYCLOAK_REDIRECT_URL.isEmpty()){
+            return KEYCLOAK_REDIRECT_URL;
+        }
+        return getPublicUrl() + "/keycloak-oauth-redirect";
+    }
+
+    public String getKeycloakClientId() {
+        GroupEnvironment envG = GroupService.getInstance().getOrganizationEnvironment();
+        if(envG != null && envG.keycloak_client_id != null && !envG.keycloak_client_id.isEmpty()) {
+            return envG.keycloak_client_id;
+        }
+        return KEYCLOAK_CLIENT_ID;
+    }
+
+    public String getKeycloakClientSecret() {
+        GroupEnvironment envG = GroupService.getInstance().getOrganizationEnvironment();
+        if(envG != null && envG.keycloak_client_secret != null && !envG.keycloak_client_secret.isEmpty()) {
+            return envG.keycloak_client_secret;
+        }
+        return KEYCLOAK_CLIENT_SECRET;
+    }
+
+    public String getKeycloakRealm() {
+        GroupEnvironment envG = GroupService.getInstance().getOrganizationEnvironment();
+        if(envG != null && envG.keycloak_realm != null && !envG.keycloak_realm.isEmpty()) {
+            return envG.keycloak_realm;
+        }
+        return KEYCLOAK_REALM;
+    }
+
+    public String getKeycloakUrl() {
+        GroupEnvironment envG = GroupService.getInstance().getOrganizationEnvironment();
+        if(envG != null && envG.keycloak_url != null && !envG.keycloak_url.isEmpty()) {
+            return envG.keycloak_url.replaceAll("/$", "");
+        }
+        return KEYCLOAK_URL;
+    }
+
+    public boolean isKeycloakEnabled() {
+        GroupEnvironment envG = GroupService.getInstance().getOrganizationEnvironment();
+        if(envG != null) {
+            return envG.keycloak_enabled;
+        }
+        return KEYCLOAK_ENABLED;
+    }
+
 }

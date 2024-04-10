@@ -19,6 +19,14 @@ spring:
           starttls:
             enable: ${API_MAIL_STARTTLS:true}
 
+keycloak:
+  enabled: ${API_KEYCLOAK_ENABLED:false}
+  auth-server-url: ${API_KEYCLOAK_AUTH_SERVER_URL:}
+  redirect-url: ${API_KEYCLOAK_REDIRECT_URL:}
+  realm: ${API_KEYCLOAK_REALM:}
+  client-id: ${API_KEYCLOAK_CLIENT_ID:}
+  client-secret: ${API_KEYCLOAK_CLIENT_SECRET:}
+
 jwt:
   enabled: ${API_JWT_ENABLED:false}
   secret:
@@ -75,6 +83,8 @@ springdoc:
 
 # BUILD HASH
 BUILD_HASH: ${API_BUILD_HASH:development}
+
+PUBLIC_URL: ${API_PUBLIC_URL:}
 
 # GOOGLE API AUTH
 GOOGLE_CLIENT_ID: ${API_GOOGLE_CLIENT_ID:110833050076-ib680ela4hfqr2c0lhc9h19snrsvltnd.apps.googleusercontent.com}
