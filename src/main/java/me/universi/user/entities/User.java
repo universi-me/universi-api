@@ -12,6 +12,7 @@ import me.universi.group.entities.Group;
 import me.universi.profile.entities.Profile;
 import me.universi.user.enums.Authority;
 import me.universi.user.services.JsonEmailOwnerSessionFilter;
+import me.universi.user.services.JsonUserAdminFilter;
 import me.universi.user.services.UserService;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
@@ -72,7 +73,7 @@ public class User implements UserDetails, Serializable {
     @NotNull
     private boolean expired_user;
 
-    @JsonIgnore
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserAdminFilter.class)
     @Column(name = "blocked_account")
     @NotNull
     private boolean blocked_account;
