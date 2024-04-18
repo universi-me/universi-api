@@ -507,9 +507,9 @@ public class RolesService {
         Roles retRoles = userRoles;
 
         // check possibles for admin
-        if(group.administrators.stream().anyMatch(admin -> admin.profile.equals(profile)) ||
+        if(group.administrators.stream().anyMatch(admin -> Objects.equals(admin.profile.getId(), profile.getId())) ||
                 Objects.equals(group.admin.getId(), profile.getId()) ||
-                userService.isUserAdminSession()) {
+                userService.isUserAdmin(profile.getUser())) {
             retRoles = adminRoles;
         }
 
