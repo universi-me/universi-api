@@ -3,6 +3,8 @@ package me.universi.capacity.controllers;
 import java.util.*;
 
 import me.universi.capacity.entidades.Content;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,6 +24,7 @@ import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
+import me.universi.util.CastingUtil;
 
 @RestController
 @RequestMapping("/api/capacity/folder")
@@ -520,6 +523,38 @@ public class FolderController {
                 }
 
            response.message = "Conteúdo salvo com sucesso!";
+        });
+    }
+
+    @PostMapping(value = "/move-to-folder", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Response moveToFolder(@RequestBody Map<String, Object> body) {
+        return Response.buildResponse(response -> {
+            var folderReference = CastingUtil.getString(body.get("folderReference"));
+            var originalGroupPath = CastingUtil.getString(body.get("originalGroupPath"));
+            var newGroupPath = CastingUtil.getString(body.get("newGroupPath"));
+
+            if (folderReference.isEmpty()) {
+                response.setStatus(HttpStatus.BAD_REQUEST);
+                throw new CapacityException("O conteúdo que deveria ser movido não foi informado");
+            }
+
+            if (originalGroupPath.isEmpty()) {
+                response.setStatus(HttpStatus.BAD_REQUEST);
+                throw new CapacityException("O grupo com o conteúdo não foi informado");
+            }
+
+            if (newGroupPath.isEmpty()) {
+                response.setStatus(HttpStatus.BAD_REQUEST);
+                throw new CapacityException("O novo grupo para o conteúdo não foi informado");
+            }
+
+            var folder = folderService.findByReference(folderReference.get());
+            var originalGroup = groupService.getGroupFromPath(originalGroupPath.get());
+            var newGroup = groupService.getGroupFromPath(newGroupPath.get());
+
+            folderService.moveToGroup(folder, originalGroup, newGroup);
+
+            response.message = "Conteúdo movido com sucesso";
         });
     }
 }
