@@ -195,6 +195,9 @@ public class RolesService {
             } else {
                 GroupService.getInstance().removeAdministrator(group, profile);
             }
+        } else {
+            // update administrators if not default role
+            GroupService.getInstance().removeAdministrator(group, profile);
         }
 
         rolesProfileRepository.save(rolesProfile);
