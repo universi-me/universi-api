@@ -18,7 +18,7 @@ public final class RestAuthenticationEntryPoint implements AuthenticationEntryPo
         Response responseBuild = Response.buildResponse(r -> {
             r.status = 401;
             r.redirectTo = "/login";
-            throw new UserException("Usuário não esta logado.");
+            //throw new UserException("Usuário não esta logado.");
         });
 
         response.setHeader("Content-Type", "application/json; charset=utf-8");

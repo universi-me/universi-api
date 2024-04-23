@@ -572,6 +572,15 @@ public class UserService implements UserDetailsService {
 
     // generate recovery password token sha256 for user
     public String generateRecoveryPasswordToken(User user) throws Exception {
+
+        //check recovery date token if less than 15min
+        if(user.getRecoveryPasswordTokenDate() != null) {
+            long diff = ConvertUtil.getDateTimeNow().getTime() - user.getRecoveryPasswordTokenDate().getTime();
+            if(diff < 900000) {
+                throw new UserException("Um email de recuperação de senha já foi enviado, por favor tente novamente mais tarde.");
+            }
+        }
+
         String tokenRandom = UUID.randomUUID().toString();
 
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -579,14 +588,41 @@ public class UserService implements UserDetailsService {
         String tokenString = ConvertUtil.bytesToHex(encodedHash);
 
         user.setRecoveryPasswordToken(tokenString);
+        user.setRecoveryPasswordTokenDate(ConvertUtil.getDateTimeNow());
         save(user);
 
         return tokenString;
     }
 
+    private static final String[] IP_HEADER_CANDIDATES = {
+            "X-Forwarded-For",
+            "Proxy-Client-IP",
+            "WL-Proxy-Client-IP",
+            "HTTP_X_FORWARDED_FOR",
+            "HTTP_X_FORWARDED",
+            "HTTP_X_CLUSTER_CLIENT_IP",
+            "HTTP_CLIENT_IP",
+            "HTTP_FORWARDED_FOR",
+            "HTTP_FORWARDED",
+            "HTTP_VIA",
+            "REMOTE_ADDR"
+    };
+
+    public String getClientIpAddress() {
+        HttpServletRequest request = getRequest();
+        for (String header: IP_HEADER_CANDIDATES) {
+            String ipList = request.getHeader(header);
+            if (ipList != null && ipList.length() != 0 && !"unknown".equalsIgnoreCase(ipList)) {
+                String ip = ipList.split(",")[0];
+                return ip;
+            }
+        }
+        return getRequest().getRemoteAddr();
+    }
+
     // send recovery password email to user
     public void sendRecoveryPasswordEmail(User user) throws Exception {
-        String userIp = getRequest().getHeader("X-Forwarded-For");
+        String userIp = getClientIpAddress();
 
         String token = generateRecoveryPasswordToken(user);
 

@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
 
+import java.util.Date;
 import me.universi.group.entities.Group;
 import me.universi.profile.entities.Profile;
 import me.universi.user.enums.Authority;
@@ -58,6 +59,12 @@ public class User implements UserDetails, Serializable {
     @JsonIgnore
     @Column(name = "recovery_token")
     private String recoveryPasswordToken;
+
+    @JsonIgnore
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "recovery_token_date")
+    private Date recoveryPasswordTokenDate;
+
 
     @JsonIgnore
     @OneToOne(mappedBy = "user", cascade = CascadeType.DETACH, fetch = FetchType.LAZY)
@@ -173,6 +180,14 @@ public class User implements UserDetails, Serializable {
 
     public void setRecoveryPasswordToken(String recoveryPasswordToken) {
         this.recoveryPasswordToken = recoveryPasswordToken;
+    }
+
+    public Date getRecoveryPasswordTokenDate() {
+        return recoveryPasswordTokenDate;
+    }
+
+    public void setRecoveryPasswordTokenDate(Date recoveryPasswordTokenDate) {
+        this.recoveryPasswordTokenDate = recoveryPasswordTokenDate;
     }
 
     public boolean isExpired_user() {
