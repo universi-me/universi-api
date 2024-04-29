@@ -112,4 +112,35 @@ public class CompetenceTypeController {
             response.body.put("list", competenceTypeService.findAll());
         });
     }
+
+    @PostMapping(value = "/admin/competencetype/merge", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Response merge(@RequestBody Map<String, Object> body) {
+        return Response.buildResponse(response -> {
+
+            var removedCompetenceTypeUuid = CastingUtil
+                .getUUID(body.get("removedCompetenceTypeId"))
+                .orElseThrow(() -> {
+                    response.setStatus(HttpStatus.BAD_REQUEST);
+                    return new CompetenceException("Parâmetro removedCompetenceType é nulo");
+                });
+
+            var remainingCompetenceTypeUuid = CastingUtil
+                .getUUID(body.get("remainingCompetenceTypeId"))
+                .orElseThrow(() -> {
+                    response.setStatus(HttpStatus.BAD_REQUEST);
+                    return new CompetenceException("Parâmetro remainingCompetenceType é nulo");
+                });
+
+            var removedCompetenceType = competenceTypeService.findFirstById(removedCompetenceTypeUuid);
+            var remainingCompetenceType = competenceTypeService.findFirstById(remainingCompetenceTypeUuid);
+
+            if (removedCompetenceType == null || remainingCompetenceType == null) {
+                response.setStatus(HttpStatus.NOT_FOUND);
+                throw new CompetenceException("Tipo de competência não encontrada.");
+            }
+
+            competenceTypeService.merge(removedCompetenceType, remainingCompetenceType);
+            response.message = "Tipo de Competências foram fundidas";
+        });
+    }
 }

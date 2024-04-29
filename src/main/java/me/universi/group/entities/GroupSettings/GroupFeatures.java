@@ -8,9 +8,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.*;
 
 @Entity(name = "group_features")
 @SQLDelete(sql = "UPDATE group_features SET deleted = true WHERE id=?")
@@ -35,6 +33,7 @@ public class GroupFeatures  implements Serializable {
     @JoinColumn(name="group_settings_id")
     @ManyToOne(fetch = FetchType.EAGER)
     @NotNull
+    @NotFound(action = NotFoundAction.IGNORE)
     public GroupSettings groupSettings;
 
     @Column(name = "name")

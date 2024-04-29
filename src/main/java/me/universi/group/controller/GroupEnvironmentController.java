@@ -5,6 +5,9 @@ import me.universi.api.entities.Response;
 import me.universi.group.entities.Group;
 import me.universi.group.exceptions.GroupException;
 import me.universi.group.services.GroupService;
+import me.universi.roles.enums.FeaturesTypes;
+import me.universi.roles.enums.Permission;
+import me.universi.roles.services.RolesService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import org.springframework.http.MediaType;
@@ -29,6 +32,8 @@ public class GroupEnvironmentController {
 
             Group group = groupService.getOrganizationBasedInDomainIfExist();
 
+            RolesService.getInstance().checkIsAdmin(group);
+
             if(group != null) {
                 User user = userService.getUserInSession();
 
@@ -37,7 +42,10 @@ public class GroupEnvironmentController {
                             (Boolean)body.get("signup_enabled"), (Boolean)body.get("signup_confirm_account_enabled"),
                             (Boolean)body.get("login_google_enabled"), (String)body.get("google_client_id"),
                             (Boolean)body.get("recaptcha_enabled"), (String)body.get("recaptcha_api_key"),
-                            (String)body.get("recaptcha_api_project_id"), (String)body.get("recaptcha_site_key")
+                            (String)body.get("recaptcha_api_project_id"), (String)body.get("recaptcha_site_key"),
+                            (Boolean)body.get("keycloak_enabled"), (String)body.get("keycloak_client_id"),
+                            (String)body.get("keycloak_client_secret"), (String)body.get("keycloak_realm"),
+                            (String)body.get("keycloak_url"), (String)body.get("keycloak_redirect_url")
                     )) {
                         response.message = "Variáveis Ambiente atualizada com sucesso.";
                         return;
@@ -59,6 +67,8 @@ public class GroupEnvironmentController {
         return Response.buildResponse(response -> {
 
             Group group = groupService.getOrganizationBasedInDomainIfExist();
+
+            RolesService.getInstance().checkIsAdmin(group);
 
             if(group != null) {
                 User user = userService.getUserInSession();

@@ -28,6 +28,9 @@ import me.universi.group.exceptions.GroupException;
 import me.universi.group.services.GroupService;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
+import me.universi.roles.enums.FeaturesTypes;
+import me.universi.roles.enums.Permission;
+import me.universi.roles.services.RolesService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import me.universi.util.RandomUtil;
@@ -92,14 +95,8 @@ public class FolderService {
 
         Collection<ProfileGroup> userGroups = userSession.getProfile().getGroups();
         Collection<Group> folderGroups = folder.getGrantedAccessGroups();
-        UUID folderOwnerId = folder.getOwnerGroup().getId();
 
         for(ProfileGroup userGroupNow : userGroups) {
-            if (userGroupNow.group != null && Objects.equals(folderOwnerId, userGroupNow.group.getId())) {
-                /* User is in the owner group of the folder */
-                return;
-            }
-
             for(Group folderGroupNow : folderGroups) {
                 if(userGroupNow.group != null && Objects.equals(folderGroupNow.getId(), userGroupNow.group.getId())) {
                     /* User is in a group with access to the folder */
@@ -316,6 +313,7 @@ public class FolderService {
                 } else {
                     folder.getGrantedAccessGroups().remove(group);
                 }
+                folderRepository.save(folder);
             }
         }
     }
@@ -543,5 +541,22 @@ public class FolderService {
             .filter(fp -> Objects.equals(profile.getId(), fp.getProfile().getId())
                 && Objects.equals(folder.getId(), fp.getFolder().getId()))
             .count() > 0;
+    }
+
+    public void moveToGroup(Folder folder, Group originalGroup, Group newGroup) {
+        if (folder == null)
+            throw new CapacityException("O conteúdo que deveria ser movido não foi encontrado");
+
+        if (originalGroup == null)
+            throw new CapacityException("O grupo contendo o conteúdo não foi encontrado");
+
+        if (newGroup == null)
+            throw new CapacityException("O novo grupo para o conteúdo não foi encontrado");
+
+        RolesService.getInstance().checkPermission(originalGroup, FeaturesTypes.CONTENT, Permission.READ_WRITE_DELETE);
+        RolesService.getInstance().checkPermission(newGroup, FeaturesTypes.CONTENT, Permission.READ_WRITE);
+
+        addOrRemoveGrantedAccessGroup(folder, newGroup.getId().toString(), true);
+        addOrRemoveGrantedAccessGroup(folder, originalGroup.getId().toString(), false);
     }
 }

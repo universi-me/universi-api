@@ -24,6 +24,9 @@ public class JWTService {
     }
 
     public String buildTokenForUser(User user) {
+        if(!ENABLED) {
+            return null;
+        }
         String token = null;
         try {
             long timeNow = System.currentTimeMillis();

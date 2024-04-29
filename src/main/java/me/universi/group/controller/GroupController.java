@@ -5,18 +5,18 @@ import java.util.*;
 import java.util.stream.Collectors;
 import me.universi.api.entities.Response;
 import me.universi.group.entities.Group;
-import me.universi.group.entities.GroupAdmin;
-import me.universi.group.entities.GroupSettings.GroupFeatures;
 import me.universi.group.entities.GroupSettings.GroupSettings;
-import me.universi.group.entities.ProfileGroup;
 import me.universi.group.entities.Subgroup;
 import me.universi.group.enums.GroupType;
 import me.universi.group.exceptions.GroupException;
 import me.universi.group.services.GroupService;
 
-import me.universi.profile.entities.Profile;
+import me.universi.roles.enums.FeaturesTypes;
+import me.universi.roles.enums.Permission;
+import me.universi.roles.services.RolesService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
+import me.universi.util.CastingUtil;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -166,6 +166,8 @@ public class GroupController {
 
             Group groupEdit = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
 
+            RolesService.getInstance().checkPermission(groupEdit, FeaturesTypes.GROUP, Permission.READ_WRITE);
+
             User user = userService.getUserInSession();
 
             if(groupService.verifyPermissionToEditGroup(groupEdit, user)) {
@@ -222,6 +224,8 @@ public class GroupController {
 
             Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
 
+            RolesService.getInstance().checkPermission(group, FeaturesTypes.GROUP, Permission.READ_WRITE_DELETE);
+
             String groupIdRemove = (String)body.get("groupIdRemove");
             if(groupIdRemove == null) {
                 throw new GroupException("Parâmetro groupIdRemove é nulo.");
@@ -258,7 +262,11 @@ public class GroupController {
             String groupId = (String)body.get("groupId");
             String groupPath = (String)body.get("groupPath");
 
+
+
             Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
+
+            RolesService.getInstance().checkPermission(group, FeaturesTypes.GROUP, Permission.READ_WRITE_DELETE);
 
             User user = userService.getUserInSession();
 
@@ -316,6 +324,8 @@ public class GroupController {
 
             Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
 
+            RolesService.getInstance().checkPermission(group, FeaturesTypes.GROUP, Permission.READ);
+
             if(group != null) {
                 Collection<Subgroup> subgroupList = group.getSubGroups();
 
@@ -353,12 +363,20 @@ public class GroupController {
     public Response list_folders(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
 
-            String groupId = (String)body.get("groupId");
-            String groupPath = (String)body.get("groupPath");
+            var groupId = CastingUtil.getUUID(body.get("groupId"));
+            var groupPath = CastingUtil.getString(body.get("groupPath"));
 
-            Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
+            if (groupPath.isEmpty() && groupId.isEmpty()) {
+                response.setStatus(HttpStatus.BAD_REQUEST);
+                throw new GroupException("Parâmetros 'groupId' e 'groupPath' não informados.");
+            }
 
-            response.body.put("folders", group.getFolders());
+            Group group = groupService.getGroupByGroupIdOrGroupPath(groupId.orElse(null), groupPath.orElse(null));
+
+            // check permission contents
+            RolesService.getInstance().checkPermission(group, FeaturesTypes.CONTENT, Permission.READ);
+
+            response.body.put("folders", group.getFoldersGrantedAccess());
 
         });
     }

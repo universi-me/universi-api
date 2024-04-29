@@ -13,6 +13,8 @@ import jakarta.persistence.ManyToOne;
 import me.universi.alternative.dto.AlternativeCreateDTO;
 import me.universi.question.entities.Question;
 import org.hibernate.Hibernate;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 import org.springframework.beans.factory.annotation.Value;
@@ -49,6 +51,7 @@ public class Alternative implements Serializable {
     @JoinColumn(name = "question_id")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JsonBackReference
+    @NotFound(action = NotFoundAction.IGNORE)
     private Question question;
 
     @JsonIgnore

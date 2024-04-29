@@ -65,7 +65,7 @@ public class Group implements Serializable {
     @NotNull
     public Profile admin;
 
-    @JsonIgnore
+    //@JsonIgnore
     @OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
     public Collection<GroupAdmin> administrators;
 
@@ -123,9 +123,9 @@ public class Group implements Serializable {
     @NotNull
     public boolean publicGroup;
 
-    @OneToMany(mappedBy = "ownerGroup", fetch = FetchType.EAGER)
+    @ManyToMany(mappedBy = "grantedAccessGroups", fetch = FetchType.EAGER)
     @JsonIgnore
-    private Collection<Folder> folders;
+    private Collection<Folder> foldersGrantedAccess;
 
     /*Attribute indicates that the group must be part of the person's resume*/
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
@@ -284,15 +284,6 @@ public class Group implements Serializable {
     }
 
     @Transient
-    public Collection<Folder> getFolders() {
-        return this.folders;
-    }
-
-    public void setFolders(Collection<Folder> folders) {
-        this.folders = folders;
-    }
-
-    @Transient
     public String getPath() {
         return GroupService.getInstance().getGroupPath(this.id);
     }
@@ -364,6 +355,14 @@ public class Group implements Serializable {
 
     public void setEveryoneCanPost(boolean everyoneCanPost) {
         this.everyoneCanPost = everyoneCanPost;
+    }
+
+    public Collection<Folder> getFoldersGrantedAccess() {
+        return foldersGrantedAccess;
+    }
+
+    public void setFoldersGrantedAccess(Collection<Folder> foldersGrantedAccess) {
+        this.foldersGrantedAccess = foldersGrantedAccess;
     }
 
     @Transient

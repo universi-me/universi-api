@@ -12,9 +12,7 @@ import java.util.UUID;
 import me.universi.capacity.enums.ContentStatusType;
 import me.universi.capacity.service.FolderService;
 import me.universi.profile.entities.Profile;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.*;
 
 @Entity(name = "folder_profile")
 @SQLDelete(sql = "UPDATE folder_profile SET deleted = true WHERE id=?")
@@ -48,16 +46,19 @@ public class FolderProfile implements Serializable {
     @ManyToOne(fetch = FetchType.EAGER)
     @PrimaryKeyJoinColumn(name="author_id")
     @NotNull
+    @NotFound(action = NotFoundAction.IGNORE)
     public Profile author;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @PrimaryKeyJoinColumn(name="profile_id")
     @NotNull
+    @NotFound(action = NotFoundAction.IGNORE)
     public Profile profile;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @PrimaryKeyJoinColumn(name="folder_id")
     @NotNull
+    @NotFound(action = NotFoundAction.IGNORE)
     public Folder folder;
 
     @Column(name = "assigned")

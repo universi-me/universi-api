@@ -21,6 +21,8 @@ import me.universi.profile.entities.Profile;
 
 import java.util.Collection;
 import java.util.UUID;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
@@ -46,12 +48,13 @@ public class CompetenceType {
     private boolean reviewed = Boolean.FALSE;
 
     @JsonIgnore
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "competence_type_profiles_with_access",
         joinColumns = @JoinColumn(name = "competence_type_id"),
         inverseJoinColumns = @JoinColumn(name = "profile_id")
     )
+    @NotFound(action = NotFoundAction.IGNORE)
     private Collection<Profile> profilesWithAccess;
 
     public UUID getId() {

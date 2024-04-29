@@ -23,6 +23,8 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
@@ -48,6 +50,7 @@ public class Exercise implements Serializable {
     @JoinTable(name="exercise_question",
             joinColumns={@JoinColumn(name="exercise_id")},
             inverseJoinColumns={@JoinColumn(name="question_id")})
+    @NotFound(action = NotFoundAction.IGNORE)
     private List<Question> questions;
 
     @JsonIgnore
@@ -57,6 +60,7 @@ public class Exercise implements Serializable {
     private Group group;
 
     @Column(columnDefinition = "boolean default false")
+    @NotFound(action = NotFoundAction.IGNORE)
     private boolean inactivate;
 
     @JsonIgnore

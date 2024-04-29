@@ -10,9 +10,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
 import me.universi.profile.entities.Profile;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.*;
 
 @Entity(name = "group_admin")
 @SQLDelete(sql = "UPDATE group_admin SET deleted = true WHERE id=?")
@@ -43,12 +41,14 @@ public class GroupAdmin implements Serializable {
     @ManyToOne(fetch = FetchType.EAGER)
     @PrimaryKeyJoinColumn(name="profile_id")
     @NotNull
+    @NotFound(action = NotFoundAction.IGNORE)
     public Profile profile;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER)
     @PrimaryKeyJoinColumn(name="group_id")
     @NotNull
+    @NotFound(action = NotFoundAction.IGNORE)
     public Group group;
 
     @JsonIgnore

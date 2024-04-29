@@ -8,11 +8,15 @@ import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
 
+import java.util.Date;
 import me.universi.group.entities.Group;
 import me.universi.profile.entities.Profile;
 import me.universi.user.enums.Authority;
 import me.universi.user.services.JsonEmailOwnerSessionFilter;
+import me.universi.user.services.JsonUserAdminFilter;
 import me.universi.user.services.UserService;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 import org.springframework.security.core.GrantedAuthority;
@@ -57,6 +61,12 @@ public class User implements UserDetails, Serializable {
     private String recoveryPasswordToken;
 
     @JsonIgnore
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "recovery_token_date")
+    private Date recoveryPasswordTokenDate;
+
+
+    @JsonIgnore
     @OneToOne(mappedBy = "user", cascade = CascadeType.DETACH, fetch = FetchType.LAZY)
     private Profile profile;
 
@@ -70,7 +80,7 @@ public class User implements UserDetails, Serializable {
     @NotNull
     private boolean expired_user;
 
-    @JsonIgnore
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserAdminFilter.class)
     @Column(name = "blocked_account")
     @NotNull
     private boolean blocked_account;
@@ -99,6 +109,7 @@ public class User implements UserDetails, Serializable {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "organization")
     @NotNull
+    @NotFound(action = NotFoundAction.IGNORE)
     private Group organization;
 
     @JsonIgnore
@@ -169,6 +180,14 @@ public class User implements UserDetails, Serializable {
 
     public void setRecoveryPasswordToken(String recoveryPasswordToken) {
         this.recoveryPasswordToken = recoveryPasswordToken;
+    }
+
+    public Date getRecoveryPasswordTokenDate() {
+        return recoveryPasswordTokenDate;
+    }
+
+    public void setRecoveryPasswordTokenDate(Date recoveryPasswordTokenDate) {
+        this.recoveryPasswordTokenDate = recoveryPasswordTokenDate;
     }
 
     public boolean isExpired_user() {

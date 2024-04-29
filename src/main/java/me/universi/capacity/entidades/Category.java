@@ -15,12 +15,10 @@ import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
 import me.universi.profile.entities.Profile;
-import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.*;
 
 import java.util.Date;
 import java.util.UUID;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
 
 @Entity(name="category")
 @SQLDelete(sql = "UPDATE category SET deleted = true WHERE id=?")
@@ -53,6 +51,7 @@ public class Category implements Serializable {
     @ManyToOne
     @JoinColumn(name="profile_id")
     @NotNull
+    @NotFound(action = NotFoundAction.IGNORE)
     private Profile author;
 
     @JsonIgnore

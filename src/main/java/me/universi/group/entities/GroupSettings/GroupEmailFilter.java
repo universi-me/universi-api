@@ -10,9 +10,7 @@ import java.util.Date;
 import java.util.UUID;
 import me.universi.group.enums.GroupEmailFilterType;
 import me.universi.group.enums.GroupType;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.*;
 
 
 @Entity(name = "group_email_filter")
@@ -54,6 +52,7 @@ public class GroupEmailFilter implements Serializable {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="group_settings_id")
     @NotNull
+    @NotFound(action = NotFoundAction.IGNORE)
     public GroupSettings groupSettings;
 
     @JsonIgnore
