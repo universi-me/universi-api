@@ -45,17 +45,17 @@ public class MinioConfig {
     InvalidResponseException, NoSuchAlgorithmException, ServerException, XmlParserException, IllegalArgumentException, IOException {
         MinioClient minioClient =
                 MinioClient.builder()
-                        .credentials("9JwDwrutRQrywpBFH9ks", "kEtizmyDs70XSm0JVIbLACH2zDv1TOeCawhZ7qWb")
-                        .endpoint("http://localhost:9000")
+                        .credentials("vaaYAjlfJQEDs9H6BTc9", "ZLv4X1DbzWRVQ5qMCt0reqQhP7cNjhLtiG6lMlhc")
+                        .endpoint("https://minio.universi.me")
                         .region("us-east-1")
                         .build();
+                        
         if(!minioClient.bucketExists(BucketExistsArgs.builder().bucket("universime").build()))
         {
             minioClient.makeBucket(MakeBucketArgs.builder().bucket("universime").region("us-east-1").build());
             minioClient.setBucketPolicy(SetBucketPolicyArgs.builder().bucket("universime").config("public").build());
         }
-        
+
         return minioClient;
     }
 }
-

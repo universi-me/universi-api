@@ -122,7 +122,7 @@ public class ImageService {
                 throw new ImageException("Imagem muito grande.");
             }
 
-            //Gera um novo nome para o arquivo jpg
+            //Gera um novo nome para o arquivo
             String objectName = UUID.randomUUID().toString() + ".jpg";
 
             //Faz o upload da imagem para o MinIO
