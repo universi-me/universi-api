@@ -441,8 +441,7 @@ public class UserService implements UserDetailsService {
             }
             return user.getProfile() == null
                 || user.getProfile().getFirstname() == null
-                || user.getProfile().getLastname() == null
-                || user.getProfile().getImage() == null;
+                || user.getProfile().getLastname() == null;
         } catch (Exception e) {
             return true;
         }
