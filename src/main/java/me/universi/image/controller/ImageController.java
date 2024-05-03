@@ -44,24 +44,8 @@ public class ImageController {
         this.minioClient = minioClient;
     }
 
-    // @PostMapping(value = "/imagem/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    // public Response upload_of_image(@RequestParam("imagem") MultipartFile image) {
-    //     return Response.buildResponse(response -> {
-    //
-    //         String link = imageService.saveImageFromMultipartFile(image);
-    //         if(link != null) {
-    //             response.body.put("link", link.toString());
-    //             return;
-    //         }
-    //
-    //         throw  new ImageException("Falha ao salvar imagem.");
-    //
-    //     });
-    // }
-
-    // post image from minIO
     @PostMapping(value = "/imagem/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Response uploadImageMinIO(@RequestParam("imagem") MultipartFile image) {
+    public Response upload_of_image(@RequestParam("imagem") MultipartFile image) {
         return Response.buildResponse(response -> {
 
             String link = imageService.saveImageFromMultipartFile(image);
@@ -73,7 +57,6 @@ public class ImageController {
             throw  new ImageException("Falha ao salvar imagem.");
         });
     }
-    
 
     // get image from minIO
     @GetMapping(value = "/img/minio/{imageId}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
