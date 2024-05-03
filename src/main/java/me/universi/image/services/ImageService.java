@@ -17,10 +17,13 @@ import java.util.Map;
 import java.util.UUID;
 import me.universi.image.entities.Image;
 import me.universi.image.exceptions.ImageException;
+import me.universi.minioConfig.MinioConfig;
+import me.universi.minioConfig.MinioEnabledCondition;
 import me.universi.user.services.UserService;
 import me.universi.util.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -29,8 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class ImageService {
-    private final  ImageRepository imageRepository;
-
+    private final ImageRepository imageRepository;
     private final MinioClient minioClient;
 
     @Value("${SAVE_IMAGE_LOCAL}")
@@ -47,7 +49,7 @@ public class ImageService {
 
 
     
-    public ImageService(ImageRepository imageRepository, MinioClient minioClient) {
+    public ImageService(ImageRepository imageRepository, @Autowired(required = false) MinioClient minioClient) {
         this.imageRepository = imageRepository;
         this.minioClient = minioClient;
     }
@@ -62,10 +64,15 @@ public class ImageService {
 
     public String saveImageFromMultipartFile(MultipartFile image) throws Exception {
         // check if save image in local or minIO
-        return isSaveImageLocal() ? saveImageInFilesystem(image) : saveImageInMinIO(image);
+        if(MinioConfig.getConfig().enabled) {
+            return saveImageInMinIO(image);
+        }
+        return isSaveImageLocal() ? saveImageInFilesystem(image) : saveImageInDatabase(image);
     }
 
     public String saveImageInFilesystem(MultipartFile image) throws Exception {
+
+        checkImageSize(image.getBytes().length);
 
         String tokenRandom = UUID.randomUUID().toString();
 
@@ -93,10 +100,7 @@ public class ImageService {
 
     public String saveImageInDatabase(MultipartFile image) throws Exception {
 
-        // image big than 1MB.
-        if(image.getBytes().length > 1024 * 1024 * getImageUploadLimit()) {
-            throw new ImageException("Imagem muito grande.");
-        }
+        checkImageSize(image.getBytes().length);
 
         Image img = new Image();
         img.setData(image.getBytes());
@@ -118,9 +122,7 @@ public class ImageService {
     public String saveImageInMinIO(MultipartFile image) throws ImageException {
         try {
             //Valida o tamanho da imagem
-            if (image.getSize() > 1024 * 1024 * getImageUploadLimit()) {
-                throw new ImageException("Imagem muito grande.");
-            }
+            checkImageSize(image.getSize());
 
             //Gera um novo nome para o arquivo
             String objectName = UUID.randomUUID().toString() + ".jpg";
@@ -128,7 +130,7 @@ public class ImageService {
             //Faz o upload da imagem para o MinIO
             try (InputStream inputStream = image.getInputStream()) {
                 minioClient.putObject(PutObjectArgs.builder()
-                        .bucket("universime")
+                        .bucket(MinioConfig.getConfig().bucketName)
                         .object(objectName)
                         .stream(inputStream, image.getSize(), -1)
                         .contentType(image.getContentType())
@@ -200,6 +202,12 @@ public class ImageService {
 
     public String getImgurClientId() {
         return imgurClientId;
+    }
+
+    public void checkImageSize(long imageSize) throws ImageException {
+        if (imageSize > 1024 * 1024 * getImageUploadLimit()) {
+            throw new ImageException("Imagem muito grande.");
+        }
     }
 
 }

@@ -8,6 +8,8 @@ import me.universi.image.entities.Image;
 import me.universi.image.exceptions.ImageException;
 import me.universi.image.services.ImageService;
 
+import me.universi.minioConfig.MinioConfig;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -35,10 +37,9 @@ import io.minio.errors.MinioException;
 public class ImageController {
 
     private final ImageService imageService;
+    private final MinioClient minioClient;
 
-    private MinioClient minioClient;
-
-    public ImageController(ImageService imageService, MinioClient minioClient) {
+    public ImageController(ImageService imageService, @Autowired(required = false) MinioClient minioClient) {
         this.imageService = imageService;
         this.minioClient = minioClient;
     }
@@ -81,7 +82,7 @@ public class ImageController {
             //Recupera a imagem do MinIO
             InputStream stream = minioClient.getObject(
                 GetObjectArgs.builder()
-                    .bucket("universime")
+                    .bucket(MinioConfig.getConfig().bucketName)
                     .object(imageId)
                     .build()
             );

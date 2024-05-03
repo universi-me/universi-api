@@ -4,8 +4,12 @@ import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
+import me.universi.Sys;
+import me.universi.user.services.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 
 import io.minio.BucketExistsArgs;
@@ -20,40 +24,42 @@ import io.minio.errors.ServerException;
 import io.minio.errors.XmlParserException;
 
 @Configuration
+@Conditional(MinioEnabledCondition.class)
 public class MinioConfig {
 
-    // @Value("${MINIO_ACESSKEY}")
-    // private String accessKey;
+    @Value("${minio.enabled}")
+    public boolean enabled;
+    @Value("${minio.accessKey}")
+    private String accessKey;
+    @Value("${minio.secretKey}")
+    private String secretKey;
+    @Value("${minio.url}")
+    private String minioUrl;
+    @Value("${minio.bucket}")
+    public String bucketName;
+    @Value("${minio.region}")
+    private String region;
+    @Value("${minio.policy}")
+    private String policy;
 
-    // @Value("${MINIO_SECRET}")
-    // private String secretKey;
-
-    // @Value("${MINIO_URL}")
-    // private String minioUrl;
-
-    // @Value("${MINIO_BUCKET}")
-    // private String bucketName;
-
-    // @Value("${MINIO_REGION}")
-    // private String region;
-
-    // @Value("$MINIO_POLICY")
-    // private String policy;
+    public static MinioConfig getConfig() {
+        return Sys.context.getBean("minioConfig", MinioConfig.class);
+    }
 
     @Bean
-    public MinioClient minioClient() throws InvalidKeyException, ErrorResponseException, InsufficientDataException, InternalException, 
+    public MinioClient minioClient() throws InvalidKeyException, ErrorResponseException, InsufficientDataException, InternalException,
     InvalidResponseException, NoSuchAlgorithmException, ServerException, XmlParserException, IllegalArgumentException, IOException {
         MinioClient minioClient =
                 MinioClient.builder()
-                        .credentials("vaaYAjlfJQEDs9H6BTc9", "ZLv4X1DbzWRVQ5qMCt0reqQhP7cNjhLtiG6lMlhc")
-                        .endpoint("https://minio.universi.me")
-                        .region("us-east-1")
+                        .credentials(accessKey, secretKey)
+                        .endpoint(minioUrl)
+                        .region(region)
                         .build();
                         
-        if(!minioClient.bucketExists(BucketExistsArgs.builder().bucket("universime").build()))
+        if(!minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build()))
         {
-            minioClient.makeBucket(MakeBucketArgs.builder().bucket("universime").region("us-east-1").build());
-            minioClient.setBucketPolicy(SetBucketPolicyArgs.builder().bucket("universime").config("public").build());
+            minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).region(region).build());
+            minioClient.setBucketPolicy(SetBucketPolicyArgs.builder().bucket(bucketName).config(policy).build());
         }
 
         return minioClient;
