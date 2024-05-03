@@ -2,8 +2,6 @@ package me.universi.image.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.minio.GetObjectArgs;
-import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 
@@ -15,15 +13,14 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Map;
 import java.util.UUID;
+import me.universi.Sys;
 import me.universi.image.entities.Image;
 import me.universi.image.exceptions.ImageException;
 import me.universi.minioConfig.MinioConfig;
-import me.universi.minioConfig.MinioEnabledCondition;
 import me.universi.user.services.UserService;
 import me.universi.util.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Conditional;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -33,7 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class ImageService {
     private final ImageRepository imageRepository;
-    private final MinioClient minioClient;
+    public final MinioClient minioClient;
 
     @Value("${SAVE_IMAGE_LOCAL}")
     public boolean saveImageLocal;
@@ -54,6 +51,10 @@ public class ImageService {
         this.minioClient = minioClient;
     }
 
+    public static ImageService getInstance() {
+        return Sys.context.getBean("imageService", ImageService.class);
+    }
+
     public Image findFirstById(UUID id) {
         return imageRepository.findFirstById(id).orElse(null);
     }
@@ -64,7 +65,7 @@ public class ImageService {
 
     public String saveImageFromMultipartFile(MultipartFile image) throws Exception {
         // check if save image in local or minIO
-        if(MinioConfig.getConfig().enabled) {
+        if(MinioConfig.getInstance().enabled) {
             return saveImageInMinIO(image);
         }
         return isSaveImageLocal() ? saveImageInFilesystem(image) : saveImageInDatabase(image);
@@ -130,7 +131,7 @@ public class ImageService {
             //Faz o upload da imagem para o MinIO
             try (InputStream inputStream = image.getInputStream()) {
                 minioClient.putObject(PutObjectArgs.builder()
-                        .bucket(MinioConfig.getConfig().bucketName)
+                        .bucket(MinioConfig.getInstance().bucketName)
                         .object(objectName)
                         .stream(inputStream, image.getSize(), -1)
                         .contentType(image.getContentType())

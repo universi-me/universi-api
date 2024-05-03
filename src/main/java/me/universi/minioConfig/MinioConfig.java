@@ -5,8 +5,6 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
 import me.universi.Sys;
-import me.universi.user.services.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
@@ -42,7 +40,7 @@ public class MinioConfig {
     @Value("${minio.policy}")
     private String policy;
 
-    public static MinioConfig getConfig() {
+    public static MinioConfig getInstance() {
         return Sys.context.getBean("minioConfig", MinioConfig.class);
     }
 

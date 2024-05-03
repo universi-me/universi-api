@@ -9,18 +9,15 @@ import me.universi.image.exceptions.ImageException;
 import me.universi.image.services.ImageService;
 
 import me.universi.minioConfig.MinioConfig;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.CacheControl;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -28,8 +25,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
 import io.minio.GetObjectArgs;
-import io.minio.MinioClient;
-import io.minio.errors.MinioException;
 
 
 @RestController
@@ -37,11 +32,9 @@ import io.minio.errors.MinioException;
 public class ImageController {
 
     private final ImageService imageService;
-    private final MinioClient minioClient;
 
-    public ImageController(ImageService imageService, @Autowired(required = false) MinioClient minioClient) {
+    public ImageController(ImageService imageService) {
         this.imageService = imageService;
-        this.minioClient = minioClient;
     }
 
     @PostMapping(value = "/imagem/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -63,9 +56,9 @@ public class ImageController {
     public ResponseEntity<byte[]> getImageFromMinio(@PathVariable("imageId") String imageId) {
         try {
             //Recupera a imagem do MinIO
-            InputStream stream = minioClient.getObject(
+            InputStream stream = imageService.minioClient.getObject(
                 GetObjectArgs.builder()
-                    .bucket(MinioConfig.getConfig().bucketName)
+                    .bucket(MinioConfig.getInstance().bucketName)
                     .object(imageId)
                     .build()
             );
