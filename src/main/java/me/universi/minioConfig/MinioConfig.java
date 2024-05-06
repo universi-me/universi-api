@@ -41,7 +41,15 @@ public class MinioConfig {
     private String policy;
 
     public static MinioConfig getInstance() {
-        return Sys.context.getBean("minioConfig", MinioConfig.class);
+        try {
+            return Sys.context.getBean("minioConfig", MinioConfig.class);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public static boolean isMinioEnabled() {
+        return getInstance() != null && getInstance().enabled;
     }
 
     @Bean

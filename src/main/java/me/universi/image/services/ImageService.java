@@ -65,7 +65,7 @@ public class ImageService {
 
     public String saveImageFromMultipartFile(MultipartFile image) throws Exception {
         // check if save image in local or minIO
-        if(MinioConfig.getInstance().enabled) {
+        if(MinioConfig.isMinioEnabled()) {
             return saveImageInMinIO(image);
         }
         return isSaveImageLocal() ? saveImageInFilesystem(image) : saveImageInDatabase(image);
