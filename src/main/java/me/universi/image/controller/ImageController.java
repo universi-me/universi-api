@@ -1,12 +1,14 @@
 package me.universi.image.controller;
 
+import java.io.InputStream;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import me.universi.api.entities.Response;
 import me.universi.image.entities.Image;
 import me.universi.image.exceptions.ImageException;
 import me.universi.image.services.ImageService;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import me.universi.minioConfig.MinioConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -22,13 +24,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
+import io.minio.GetObjectArgs;
+
+
 @RestController
 @RequestMapping("/api")
 public class ImageController {
 
     private final ImageService imageService;
 
-    @Autowired
     public ImageController(ImageService imageService) {
         this.imageService = imageService;
     }
@@ -44,8 +48,35 @@ public class ImageController {
             }
 
             throw  new ImageException("Falha ao salvar imagem.");
-
         });
+    }
+
+    // get image from minIO
+    @GetMapping(value = "/img/minio/{imageId}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    public ResponseEntity<byte[]> getImageFromMinio(@PathVariable("imageId") String imageId) {
+        try {
+            //Recupera a imagem do MinIO
+            InputStream stream = imageService.minioClient.getObject(
+                GetObjectArgs.builder()
+                    .bucket(MinioConfig.getInstance().bucketName)
+                    .object(imageId)
+                    .build()
+            );
+
+            //Lê os bytes da imagem do stream
+            byte[] imageBytes = stream.readAllBytes();
+
+            //Fecha o stream de entrada
+            stream.close();
+
+            //Retorna os bytes da imagem com um status HTTP 200 OK
+            return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(imageBytes);
+        } catch (Exception e) {
+            //Se ocorrer um erro ao recuperar a imagem, retorna um status HTTP 404 Not Found
+            return ResponseEntity.notFound().build();
+        }
     }
 
     // get image from filesystem

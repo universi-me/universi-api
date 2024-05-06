@@ -1,6 +1,10 @@
 package me.universi.image.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.minio.MinioClient;
+import io.minio.PutObjectArgs;
+
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -9,8 +13,10 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Map;
 import java.util.UUID;
+import me.universi.Sys;
 import me.universi.image.entities.Image;
 import me.universi.image.exceptions.ImageException;
+import me.universi.minioConfig.MinioConfig;
 import me.universi.user.services.UserService;
 import me.universi.util.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +29,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class ImageService {
-    private final  ImageRepository imageRepository;
+    private final ImageRepository imageRepository;
+    public final MinioClient minioClient;
 
     @Value("${SAVE_IMAGE_LOCAL}")
     public boolean saveImageLocal;
@@ -37,9 +44,15 @@ public class ImageService {
     @Value("${IMGUR_CLIENT_ID}")
     public String imgurClientId;
 
-    @Autowired
-    public ImageService(ImageRepository imageRepository) {
+
+    
+    public ImageService(ImageRepository imageRepository, @Autowired(required = false) MinioClient minioClient) {
         this.imageRepository = imageRepository;
+        this.minioClient = minioClient;
+    }
+
+    public static ImageService getInstance() {
+        return Sys.context.getBean("imageService", ImageService.class);
     }
 
     public Image findFirstById(UUID id) {
@@ -51,11 +64,16 @@ public class ImageService {
     }
 
     public String saveImageFromMultipartFile(MultipartFile image) throws Exception {
-        // check if save image in local or database.
+        // check if save image in local or minIO
+        if(MinioConfig.getInstance().enabled) {
+            return saveImageInMinIO(image);
+        }
         return isSaveImageLocal() ? saveImageInFilesystem(image) : saveImageInDatabase(image);
     }
 
     public String saveImageInFilesystem(MultipartFile image) throws Exception {
+
+        checkImageSize(image.getBytes().length);
 
         String tokenRandom = UUID.randomUUID().toString();
 
@@ -83,10 +101,7 @@ public class ImageService {
 
     public String saveImageInDatabase(MultipartFile image) throws Exception {
 
-        // image big than 1MB.
-        if(image.getBytes().length > 1024 * 1024 * getImageUploadLimit()) {
-            throw new ImageException("Imagem muito grande.");
-        }
+        checkImageSize(image.getBytes().length);
 
         Image img = new Image();
         img.setData(image.getBytes());
@@ -103,6 +118,32 @@ public class ImageService {
         }
 
         throw new ImageException("Falha ao salvar imagem.");
+    }
+    
+    public String saveImageInMinIO(MultipartFile image) throws ImageException {
+        try {
+            //Valida o tamanho da imagem
+            checkImageSize(image.getSize());
+
+            //Gera um novo nome para o arquivo
+            String objectName = UUID.randomUUID().toString() + ".jpg";
+
+            //Faz o upload da imagem para o MinIO
+            try (InputStream inputStream = image.getInputStream()) {
+                minioClient.putObject(PutObjectArgs.builder()
+                        .bucket(MinioConfig.getInstance().bucketName)
+                        .object(objectName)
+                        .stream(inputStream, image.getSize(), -1)
+                        .contentType(image.getContentType())
+                        .build());
+            }
+
+            //Retorna o nome do objeto salvo
+            return "/img/minio/" + objectName;
+            
+        } catch (Exception e) {
+            throw new ImageException("Erro ao salvar imagem no MinIO: " + e.getMessage());
+        }
     }
 
     public Resource getImageFromFilesystem(String filename) throws Exception {
@@ -162,6 +203,12 @@ public class ImageService {
 
     public String getImgurClientId() {
         return imgurClientId;
+    }
+
+    public void checkImageSize(long imageSize) throws ImageException {
+        if (imageSize > 1024 * 1024 * getImageUploadLimit()) {
+            throw new ImageException("Imagem muito grande.");
+        }
     }
 
 }
