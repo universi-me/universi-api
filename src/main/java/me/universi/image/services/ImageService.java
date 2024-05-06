@@ -139,7 +139,7 @@ public class ImageService {
             }
 
             //Retorna o nome do objeto salvo
-            return objectName;
+            return "/img/minio/" + objectName;
             
         } catch (Exception e) {
             throw new ImageException("Erro ao salvar imagem no MinIO: " + e.getMessage());
