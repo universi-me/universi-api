@@ -52,14 +52,14 @@ public class ImageController {
     }
 
     // get image from minIO
-    @GetMapping(value = "/img/minio/{imageId:.+}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    @GetMapping(value = "/img/minio/{imageId}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public ResponseEntity<byte[]> getImageFromMinio(@PathVariable("imageId") String imageId) {
         try {
             //Recupera a imagem do MinIO
             InputStream stream = imageService.minioClient.getObject(
                 GetObjectArgs.builder()
                     .bucket(MinioConfig.getInstance().bucketName)
-                    .object(imageId)
+                    .object(imageId + ".jpg")
                     .build()
             );
 

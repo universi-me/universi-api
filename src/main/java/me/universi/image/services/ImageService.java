@@ -126,13 +126,13 @@ public class ImageService {
             checkImageSize(image.getSize());
 
             //Gera um novo nome para o arquivo
-            String objectName = UUID.randomUUID().toString() + ".jpg";
+            String objectName = UUID.randomUUID().toString();
 
             //Faz o upload da imagem para o MinIO
             try (InputStream inputStream = image.getInputStream()) {
                 minioClient.putObject(PutObjectArgs.builder()
                         .bucket(MinioConfig.getInstance().bucketName)
-                        .object(objectName)
+                        .object(objectName + ".jpg")
                         .stream(inputStream, image.getSize(), -1)
                         .contentType(image.getContentType())
                         .build());
