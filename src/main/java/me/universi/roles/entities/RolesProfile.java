@@ -63,10 +63,6 @@ public class RolesProfile implements Serializable {
     @NotNull
     public Profile profile;
 
-    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
-    @Column(name = "default_role")
-    public int defaultRole = 0;
-
     public RolesProfile() {
     }
 

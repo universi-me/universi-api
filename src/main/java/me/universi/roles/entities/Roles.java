@@ -1,13 +1,14 @@
 package me.universi.roles.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collection;
 import me.universi.group.entities.Group;
+import me.universi.roles.enums.RoleType;
+
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
@@ -58,9 +59,10 @@ public class Roles implements Serializable {
     @OneToMany(mappedBy = "roles", fetch = FetchType.EAGER)
     public Collection<RolesFeature> rolesFeatures;
 
-    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
-    @Transient
-    public boolean isDefault = false;
+    @Column(name = "role_type")
+    @Enumerated(EnumType.STRING)
+    @NotNull
+    private RoleType roleType;
 
     public Roles() {
     }
@@ -70,5 +72,23 @@ public class Roles implements Serializable {
         return "\nRoles[" +
                 "id='" + id + '\'' +
                 ", name='" + name + "']\n";
+    }
+
+    public RoleType getRoleType() {
+        return roleType;
+    }
+
+    public void setRoleType(RoleType roleType) {
+        this.roleType = roleType;
+    }
+
+    @Transient
+    public boolean isCanBeEdited() {
+        return this.roleType == RoleType.CUSTOM;
+    }
+
+    @Transient
+    public boolean isCanBeAssigned() {
+        return this.roleType != RoleType.VISITOR;
     }
 }

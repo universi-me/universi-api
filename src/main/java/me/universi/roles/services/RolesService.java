@@ -12,6 +12,7 @@ import me.universi.roles.entities.RolesProfile;
 import me.universi.roles.entities.Roles;
 import me.universi.roles.enums.FeaturesTypes;
 import me.universi.roles.enums.Permission;
+import me.universi.roles.enums.RoleType;
 import me.universi.roles.repositories.RolesFeatureRepository;
 import me.universi.profile.entities.Profile;
 import me.universi.roles.entities.RolesFeature;
@@ -20,6 +21,8 @@ import me.universi.roles.repositories.RolesProfileRepository;
 import me.universi.roles.repositories.RolesRepository;
 import me.universi.profile.services.ProfileService;
 import me.universi.user.services.UserService;
+import me.universi.util.CastingUtil;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,9 +35,6 @@ public class RolesService {
     private final RolesProfileRepository rolesProfileRepository;
     private final RolesFeatureRepository rolesFeatureRepository;
 
-    private static Roles adminRoles;
-    private static Roles userRoles;
-
     @Autowired
     public RolesService(UserService userService, ProfileService profileService, GroupService groupService, RolesRepository rolesRepository, RolesProfileRepository rolesProfileRepository, RolesFeatureRepository rolesFeatureRepository) {
         this.userService = userService;
@@ -43,38 +43,6 @@ public class RolesService {
         this.rolesRepository = rolesRepository;
         this.rolesProfileRepository = rolesProfileRepository;
         this.rolesFeatureRepository = rolesFeatureRepository;
-
-        createDefaultRoles();
-    }
-
-    public void createDefaultRoles() {
-        adminRoles = new Roles();
-        adminRoles.isDefault = true;
-        adminRoles.id = UUID.fromString("00000000-0000-0000-0000-000000000001");
-        adminRoles.name = "Administrador";
-        Collection<RolesFeature> adminRolesFeatures = new ArrayList<>();
-        for(FeaturesTypes feature : FeaturesTypes.values()) {
-            RolesFeature rolesFeature = new RolesFeature();
-            rolesFeature.roles = adminRoles;
-            rolesFeature.featureType = feature;
-            rolesFeature.permission = Permission.READ_WRITE_DELETE;
-            adminRolesFeatures.add(rolesFeature);
-        }
-        adminRoles.rolesFeatures = adminRolesFeatures;
-
-        userRoles = new Roles();
-        userRoles.isDefault = true;
-        userRoles.id = UUID.fromString("00000000-0000-0000-0000-000000000002");
-        userRoles.name = "Usuário";
-        Collection<RolesFeature> userRolesFeatures = new ArrayList<>();
-        for(FeaturesTypes feature : FeaturesTypes.values()) {
-            RolesFeature rolesFeature = new RolesFeature();
-            rolesFeature.roles = userRoles;
-            rolesFeature.featureType = feature;
-            rolesFeature.permission = Permission.READ;
-            userRolesFeatures.add(rolesFeature);
-        }
-        userRoles.rolesFeatures = userRolesFeatures;
     }
 
     public static RolesService getInstance() {
@@ -110,102 +78,57 @@ public class RolesService {
         return saveRole(roles);
     }
 
-    public Roles editRole(Map<String, Object> body) {
-
-        Object rolesId = body.get("rolesId");
-        Object name = body.get("name");
-        Object description = body.get("description");
-
+    public Roles editRole(UUID rolesId, String name, String description) {
         if (rolesId == null) {
             throw new RolesException("Parâmetro rolesId é nulo.");
         }
 
-        Roles roles = rolesRepository.findFirstById(UUID.fromString(rolesId.toString())).orElse(null);
-        if(roles == null) {
-            throw new RolesException("Papel não encontrado.");
-        }
+        Roles roles = rolesRepository.findFirstById(rolesId)
+            .orElseThrow(() -> new RolesException("Papel não encontrado."));
 
-        if(roles.isDefault) {
+        if(!roles.isCanBeEdited()) {
             throw new RolesException("Papel não pode ser editado.");
         }
 
         checkIsAdmin(roles.group);
 
-        if (name != null) {
-            roles.name = name.toString();
-        }
-        if (description != null) {
-            roles.description = description.toString();
-        }
+        if (name != null)
+            roles.name = name;
+
+        if (description != null)
+            roles.description = description;
 
         return saveRole(roles);
     }
 
-    public RolesProfile assignRole(Map<String, Object> body) {
-
-        Object rolesId = body.get("rolesId");
-        Object groupId = body.get("groupId");
-        Object profileId = body.get("profileId");
-
-
-        if (rolesId == null) {
-            throw new RolesException("Parâmetro rolesId é nulo.");
-        }
-        if (groupId == null) {
-            throw new RolesException("Parâmetro groupId é nulo.");
-        }
-        if (profileId == null) {
-            throw new RolesException("Parâmetro profileId é nulo.");
-        }
-
+    public RolesProfile assignRole(UUID roleId, UUID groupId, UUID profileId) {
         Group group = groupService.getGroupByGroupIdOrGroupPath(groupId.toString(), null);
 
         checkIsAdmin(group);
 
-        Profile profile = profileService.findFirstById(UUID.fromString(profileId.toString()));
+        Profile profile = profileService.findFirstById(profileId);
         if(profile == null) {
             throw new RolesException("Perfil não encontrado.");
         }
 
-        Roles roles = rolesRepository.findFirstById(UUID.fromString(rolesId.toString())).orElse(null);
+        Roles roles = rolesRepository.findById(roleId).orElseThrow(() -> {
+            return new RolesException("Papel não encontrado.");
+        });
 
-        boolean isRolesAdmin = Objects.equals(UUID.fromString((String) rolesId), adminRoles.id);
-        boolean isRolesUser = Objects.equals(UUID.fromString((String) rolesId), userRoles.id);
-
-        if(roles == null && !(isRolesAdmin || isRolesUser)) {
-            throw new RolesException("Papel não encontrado.");
+        if(!roles.isCanBeAssigned()) {
+            throw new RolesException("O papel de visitante não pode ser colocado em um participante.");
         }
 
-        RolesProfile rolesProfile = rolesProfileRepository.findFirstByProfileAndGroup(profile, roles==null ? group : roles.group).orElse(null);
+        RolesProfile rolesProfile = rolesProfileRepository.findFirstByProfileAndGroup(profile, group).orElse(null);
         if(rolesProfile == null) {
             rolesProfile = new RolesProfile();
         }
+
         rolesProfile.roles = roles;
-        rolesProfile.group = roles==null ? group : roles.group;
+        rolesProfile.group = group;
         rolesProfile.profile = profile;
 
-        if(roles == null) {
-            rolesProfile.defaultRole = isRolesAdmin ? 1 : 0;
-        }
-
-        // update administrators
-        if(rolesProfile.roles == null) {
-            if(rolesProfile.defaultRole == 1) {
-                GroupService.getInstance().addAdministrator(group, profile);
-            } else {
-                GroupService.getInstance().removeAdministrator(group, profile);
-            }
-        } else {
-            // update administrators if not default role
-            GroupService.getInstance().removeAdministrator(group, profile);
-        }
-
         rolesProfileRepository.save(rolesProfile);
-
-        // return set mock roles
-        rolesProfile.roles = rolesProfile.defaultRole == 1 ? adminRoles : userRoles;
-
-
 
         return rolesProfile;
     }
@@ -242,7 +165,7 @@ public class RolesService {
             throw new RolesException("Feature não encontrada.");
         }
 
-        if(rolesFeature.roles.isDefault) {
+        if(!rolesFeature.roles.isCanBeEdited()) {
             throw new RolesException("Papel não pode ser editado.");
         }
 
@@ -263,12 +186,7 @@ public class RolesService {
 
         checkIsAdmin(group);
 
-        Collection<Roles> roles = rolesRepository.findAllByGroup(group);
-
-        roles.add(adminRoles);
-        roles.add(userRoles);
-
-        return roles;
+        return rolesRepository.findAllByGroup(group);
     }
 
     public boolean isAdmin(Profile profile, Group group) {
@@ -279,11 +197,7 @@ public class RolesService {
             throw new RolesException("Grupo não encontrado.");
         }
 
-        RolesProfile rolesProfile = rolesProfileRepository.findFirstByProfileAndGroup(profile, group).orElse(null);
-
-        Roles roles = (rolesProfile != null && rolesProfile.roles != null) ? rolesProfile.roles : getDefaultRolesForProfile(profile, group);
-
-        return Objects.equals(roles.id, adminRoles.id);
+        return getAssignedRoles(profile.getId(), group.getId()).getRoleType().equals(RoleType.ADMINISTRATOR);
     }
 
     public void checkIsAdmin(Profile profile, Group group) {
@@ -314,31 +228,15 @@ public class RolesService {
             throw new RolesException("Funcionalidade não encontrada.");
         }
 
-        RolesProfile rolesProfile = rolesProfileRepository.findFirstByProfileAndGroup(profile, group).orElse(null);
+        var roles = getAssignedRoles(profile.getId(), group.getId());
+        var rolesFeature = rolesFeatureRepository.findFirstByRolesAndFeatureType(roles, feature);
 
-        if (rolesProfile != null) {
+        var permission = rolesFeature.isPresent()
+            ? rolesFeature.get().permission
+            : Permission.NONE;
 
-            Roles roles = rolesProfile.roles;
-            if (roles != null) {
-                RolesFeature rolesFeature = rolesFeatureRepository.findFirstByRolesAndFeatureType(roles, feature).orElse(getDefaultRolesForProfile(profile, group).rolesFeatures.stream().filter(f -> f.featureType == feature).findFirst().orElse(null));
-
-                if (rolesFeature != null) {
-
-                    if (rolesFeature.permission < forPermission) {
-                        throw new RolesException("Você precisa de permissão para executar esta ação em \""+ feature.label +"\".");
-                    }
-
-                } else {
-                    //throw new RolesException("Funcionalidade não encontrada.");
-                }
-
-            } else {
-                //throw new RolesException("Papel não encontrado.");
-            }
-
-        } else {
-            //throw new RolesException("Perfil não possui papel no grupo.");
-        }
+        if (permission < forPermission)
+            throw new RolesException("Você precisa de permissão para executar esta ação em \""+ feature.label +"\".");
     }
 
     public boolean hasPermission(Profile profile, Group group, FeaturesTypes feature, int forPermission) {
@@ -409,12 +307,6 @@ public class RolesService {
             profiles.add(profileGroup.profile);
         }
 
-        for(Profile profile : profiles) {
-            if(profile.roles == null) {
-                profile.roles = getDefaultRolesForProfile(profile, group);
-            }
-        }
-
         return profiles;
     }
 
@@ -437,9 +329,28 @@ public class RolesService {
             throw new RolesException("Grupo não encontrado.");
         }
 
-        RolesProfile rolesProfile = rolesProfileRepository.findFirstByProfileAndGroup(profile, group).orElse(null);
+        return getAssignedRoles(profile.getId(), group.getId());
+    }
 
-        return rolesProfile == null ? getDefaultRolesForProfile(profile, group) : rolesProfile.roles;
+    public Roles getAssignedRoles(UUID profileId, UUID groupId) {
+        if(profileId == null)
+            throw new RolesException("Parâmetro profileId é nulo.");
+
+        if(groupId == null)
+            throw new RolesException("Parâmetro groupId é nulo.");
+
+        Profile profile = profileService.findFirstById(profileId);
+        if(profile == null)
+            throw new RolesException("Perfil não encontrado.");
+
+        Group group = groupService.findFirstById(groupId);
+        if(group == null)
+            throw new RolesException("Grupo não encontrado.");
+
+        var profileRole = rolesProfileRepository.findFirstByProfileAndGroup(profile, group);
+        return profileRole.isPresent()
+            ? profileRole.get().roles
+            : rolesRepository.findFirstByGroupIdAndRoleType(groupId, RoleType.VISITOR);
     }
 
     public Collection<RoleDTO> getAllRolesByProfile(Profile profile) {
@@ -449,7 +360,7 @@ public class RolesService {
         Collection<RoleDTO> roleDTOs = new ArrayList<>();
         for(RolesProfile role : roles) {
             RoleDTO roleDTO = new RoleDTO();
-            Roles roles1 = role.roles == null ? role.defaultRole==1?adminRoles:userRoles : role.roles;
+            Roles roles1 = role.roles;
             roleDTO.id = roles1.id;
             roleDTO.name = roles1.name;
             roleDTO.profile = profile.getId();
@@ -466,62 +377,11 @@ public class RolesService {
             roleDTOs.add(roleDTO);
         }
 
-        RoleDTO roleAdminDTO = new RoleDTO();
-        roleAdminDTO.id = adminRoles.id;
-        roleAdminDTO.name = adminRoles.name;
-        roleAdminDTO.profile = profile.getId();
-        Collection<FeatureDTO> features = new ArrayList<>();
-        for(RolesFeature rolesFeature : adminRoles.rolesFeatures) {
-            FeatureDTO feature = new FeatureDTO();
-            feature.id = rolesFeature.id;
-            feature.featureType = rolesFeature.featureType;
-            feature.permission = rolesFeature.permission;
-            features.add(feature);
-            roleAdminDTO.features = features;
-        }
-        roleDTOs.add(roleAdminDTO);
-
-        RoleDTO roleUserDTO = new RoleDTO();
-        roleUserDTO.id = userRoles.id;
-        roleUserDTO.name = userRoles.name;
-        roleUserDTO.profile = profile.getId();
-        Collection<FeatureDTO> featuresUser = new ArrayList<>();
-        for(RolesFeature rolesFeature : userRoles.rolesFeatures) {
-            FeatureDTO feature = new FeatureDTO();
-            feature.id = rolesFeature.id;
-            feature.featureType = rolesFeature.featureType;
-            feature.permission = rolesFeature.permission;
-            featuresUser.add(feature);
-            roleUserDTO.features = featuresUser;
-        }
-        roleDTOs.add(roleUserDTO);
-
-
         return roleDTOs;
     }
 
     // get all roles for user in session
     public Collection<RoleDTO> getAllRolesSession() {
         return getAllRolesByProfile(UserService.getInstance().getUserInSession().getProfile());
-    }
-
-    // get default role based in profile and group
-    public Roles getDefaultRolesForProfile(Profile profile, Group group) {
-        Roles retRoles = userRoles;
-
-        // check possibles for admin
-        if(group.administrators.stream().anyMatch(admin -> Objects.equals(admin.profile.getId(), profile.getId())) ||
-                Objects.equals(group.admin.getId(), profile.getId()) ||
-                userService.isUserAdmin(profile.getUser())) {
-            retRoles = adminRoles;
-        }
-
-        // get if has set default role
-        Optional<RolesProfile> rolesProfile = rolesProfileRepository.findFirstByProfileAndGroup(profile, group);
-        if(rolesProfile.isPresent()) {
-            retRoles = rolesProfile.get().defaultRole == 1 ? adminRoles : userRoles;
-        }
-
-        return retRoles;
     }
 }
