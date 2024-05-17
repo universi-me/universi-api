@@ -555,10 +555,14 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    public void sendSystemEmailToUser(UserDetails user, String subject, String text) throws UserException {
+    public void sendSystemEmailToUser(UserDetails user, String subject, String text, boolean ignoreEmail) throws UserException {
         String email = ((User) user).getEmail();
         if (email == null) {
-            throw new UserException("Usuário não possui um email.");
+            if(ignoreEmail) {
+                return;
+            } else {
+                throw new UserException("Usuário não possui um email.");
+            }
         }
         emailExecutor.execute(() -> {
             SimpleMailMessage message = new SimpleMailMessage();
@@ -635,7 +639,7 @@ public class UserService implements UserDetailsService {
                 "Endereço IP: " + userIp + "\n\n" +
                 "Atenciosamente,\n" +
                 "Equipe Universi.me";
-        sendSystemEmailToUser(user, subject, text);
+        sendSystemEmailToUser(user, subject, text, false);
     }
 
     public User getUserByRecoveryPasswordToken(String token) {
@@ -660,7 +664,7 @@ public class UserService implements UserDetailsService {
                 "Atenciosamente,\n" +
                 "Equipe Universi.me";
 
-        sendSystemEmailToUser(user, subject, text);
+        sendSystemEmailToUser(user, subject, text, false);
     }
 
     public String getRecaptchaApiKey() {
