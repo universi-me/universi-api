@@ -998,6 +998,16 @@ public class GroupService {
         }
     }
 
+    // replace placeholders in a template {{ key }} with values
+    public String replacePlaceholders(String template, Map<String, String> values) {
+        String result = template;
+        for (Map.Entry<String, String> entry : values.entrySet()) {
+            // Create a pattern that ignores spaces within the curly braces
+            result = result.replaceAll("\\{\\{\\s*" + entry.getKey() + "\\s*\\}\\}", entry.getValue());
+        }
+        return result;
+    }
+
     public String getMessageTemplateForNewContentInGroup(Group group, Folder folder) {
         if(group == null || folder == null) {
             return null;
@@ -1009,33 +1019,28 @@ public class GroupService {
 
         String message = getOrganizationEnvironment().groupSettings.environment.message_template_new_content;
         if(message == null || message.isEmpty()) {
-            message = "Olá, $groupName tem um novo conteúdo: $contentName.\nAcesse: $contentUrl";
+            message = "Olá, {{ groupName }} tem um novo conteúdo: {{ contentName }}.\nAcesse: {{ contentUrl }}";
         }
 
-        message = message.replace("$groupName", groupName);
-        message = message.replace("$contentName", contentName);
-        message = message.replace("$contentUrl", contentUrl);
-
-        return message;
+        return replacePlaceholders(message, Map.of("groupName", groupName, "contentName", contentName, "contentUrl", contentUrl));
     }
 
-    public String getMessageTemplateForContentAssigned(Profile profile, Folder folder) {
+    public String getMessageTemplateForContentAssigned(Profile fromProfile, Profile profile, Folder folder) {
         if(profile == null || folder == null) {
             return null;
         }
 
+        String fromUser = fromProfile.getFirstname();
+        String toUser = profile.getFirstname();
         String contentName = folder.getName();
         String contentUrl = userService.getPublicUrl() + "/content/" + folder.getReference();
 
         String message = getOrganizationEnvironment().groupSettings.environment.message_template_assigned_content;
         if(message == null || message.isEmpty()) {
-            message = "Olá, você tem um novo conteúdo atribuído: $contentName.\nAcesse: $contentUrl";
+            message = "Olá {{ toUser }}, você recebeu um novo conteúdo de {{ fromUser }}: {{ contentName }}.\nAcesse: {{ contentUrl }}";
         }
 
-        message = message.replace("$contentName", contentName);
-        message = message.replace("$contentUrl", contentUrl);
-
-        return message;
+        return replacePlaceholders(message, Map.of("fromUser", fromUser, "toUser", toUser, "contentName", contentName, "contentUrl", contentUrl));
     }
 
     // alert all users in group for a new content in group
@@ -1054,7 +1059,7 @@ public class GroupService {
     }
 
     // alert user for content assigned
-    public void alertUserForContentAssigned(Profile profile, Folder folder) {
+    public void alertUserForContentAssigned(Profile fromUser, Profile profile, Folder folder) {
         if(profile == null || folder == null) {
             return;
         }
@@ -1064,7 +1069,7 @@ public class GroupService {
         }
 
         String subject = "Conteúdo atribuído";
-        String message = getMessageTemplateForContentAssigned(profile, folder);
+        String message = getMessageTemplateForContentAssigned(fromUser, profile, folder);
 
         userService.sendSystemEmailToUser(profile.getUser(), subject, message, true);
     }
