@@ -17,6 +17,7 @@ import me.universi.group.enums.GroupType;
 import me.universi.group.exceptions.GroupException;
 import me.universi.group.repositories.*;
 import me.universi.profile.entities.Profile;
+import me.universi.roles.services.RolesService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import me.universi.util.ConvertUtil;
@@ -198,13 +199,16 @@ public class GroupService {
         if(profile == null) {
             throw new GroupException("Parametro Perfil é nulo.");
         }
+
         if(!profileGroupRepository.existsByGroupIdAndProfileId(group.getId(), profile.getId())) {
             ProfileGroup profileGroup = new ProfileGroup();
             profileGroup.profile = profile;
             profileGroup.group = group;
+            profileGroup.role = RolesService.getInstance().getGroupVisitorRole(group);
             profileGroupRepository.save(profileGroup);
             return true;
         }
+
         return false;
     }
 

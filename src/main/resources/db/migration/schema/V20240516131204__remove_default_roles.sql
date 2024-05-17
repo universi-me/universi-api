@@ -18,23 +18,23 @@ INSERT INTO roles (removed, "name", description, group_id, role_type)
     SELECT NULL AS "removed", 'Visitante' AS "name", '' AS "description", id AS group_id, 'VISITOR' AS role_type FROM system_group sg;
 
 INSERT INTO roles_feature (removed, roles_id, feature, "permission")
-    SELECT NULL AS "removed", r.id AS roles_id, 'FEED' AS "feature", CASE WHEN r.role_type = 'ADMINISTRATOR' THEN 4 ELSE 1 END AS "permission"
+    SELECT NULL AS "removed", r.id AS roles_id, 'FEED' AS "feature", CASE WHEN r.role_type = 'ADMINISTRATOR' THEN 4 ELSE 2 END AS "permission"
     FROM roles r
     WHERE r.role_type IN ('ADMINISTRATOR', 'PARTICIPANT', 'VISITOR');
 INSERT INTO roles_feature (removed, roles_id, feature, "permission")
-    SELECT NULL AS "removed", r.id AS roles_id, 'CONTENT' AS "feature", CASE WHEN r.role_type = 'ADMINISTRATOR' THEN 4 ELSE 1 END AS "permission"
+    SELECT NULL AS "removed", r.id AS roles_id, 'CONTENT' AS "feature", CASE WHEN r.role_type = 'ADMINISTRATOR' THEN 4 ELSE 2 END AS "permission"
     FROM roles r
     WHERE r.role_type IN ('ADMINISTRATOR', 'PARTICIPANT', 'VISITOR');
 INSERT INTO roles_feature (removed, roles_id, feature, "permission")
-    SELECT NULL AS "removed", r.id AS roles_id, 'GROUP' AS "feature", CASE WHEN r.role_type = 'ADMINISTRATOR' THEN 4 ELSE 1 END AS "permission"
+    SELECT NULL AS "removed", r.id AS roles_id, 'GROUP' AS "feature", CASE WHEN r.role_type = 'ADMINISTRATOR' THEN 4 ELSE 2 END AS "permission"
     FROM roles r
     WHERE r.role_type IN ('ADMINISTRATOR', 'PARTICIPANT', 'VISITOR');
 INSERT INTO roles_feature (removed, roles_id, feature, "permission")
-    SELECT NULL AS "removed", r.id AS roles_id, 'PEOPLE' AS "feature", CASE WHEN r.role_type = 'ADMINISTRATOR' THEN 4 ELSE 1 END AS "permission"
+    SELECT NULL AS "removed", r.id AS roles_id, 'PEOPLE' AS "feature", CASE WHEN r.role_type = 'ADMINISTRATOR' THEN 4 ELSE 2 END AS "permission"
     FROM roles r
     WHERE r.role_type IN ('ADMINISTRATOR', 'PARTICIPANT', 'VISITOR');
 INSERT INTO roles_feature (removed, roles_id, feature, "permission")
-    SELECT NULL AS "removed", r.id AS roles_id, 'COMPETENCE' AS "feature", CASE WHEN r.role_type = 'ADMINISTRATOR' THEN 4 ELSE 1 END AS "permission"
+    SELECT NULL AS "removed", r.id AS roles_id, 'COMPETENCE' AS "feature", CASE WHEN r.role_type = 'ADMINISTRATOR' THEN 4 ELSE 2 END AS "permission"
     FROM roles r
     WHERE r.role_type IN ('ADMINISTRATOR', 'PARTICIPANT', 'VISITOR');
 

@@ -5,7 +5,6 @@ import java.util.Map;
 import me.universi.api.entities.Response;
 import me.universi.roles.entities.Roles;
 import me.universi.roles.entities.RolesFeature;
-import me.universi.roles.entities.RolesProfile;
 import me.universi.roles.enums.Permission;
 import me.universi.roles.exceptions.RolesException;
 import me.universi.roles.services.RolesService;
@@ -99,8 +98,8 @@ public class RolesController {
                 return new RolesException("Parâmetro profileId é nulo.");
             });
 
-            RolesProfile rolesProfile = rolesService.assignRole(roleId, groupId, profileId);
-            response.message = "Papel \""+ rolesProfile.roles.name +"\" atribuído com sucesso para \""+ rolesProfile.profile.getFirstname() +"\".";
+            Roles rolesProfile = rolesService.assignRole(roleId, groupId, profileId);
+            response.message = "Papel \""+ rolesProfile.name +"\" atribuído com sucesso.";
         });
     }
 
