@@ -106,10 +106,21 @@ public class RolesController {
 
     // assigned roles
     @PostMapping(value = "/assigned", consumes = "application/json", produces = "application/json")
-    @ResponseBody
     public Response roles_assigned(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
-            response.body.put("roles", rolesService.getAssignedRoles(body));
+            var profileId = CastingUtil.getUUID(body.get("profileId"))
+                .orElseThrow(() -> {
+                    response.setStatus(HttpStatus.BAD_REQUEST);
+                    return new RolesException("Parâmetro 'profileId' não informado.");
+                });
+
+            var groupId = CastingUtil.getUUID(body.get("groupId"))
+                .orElseThrow(() -> {
+                    response.setStatus(HttpStatus.BAD_REQUEST);
+                    return new RolesException("Parâmetro 'groupId' não informado.");
+                });
+
+            response.body.put("roles", rolesService.getAssignedRoles(profileId, groupId));
         });
     }
 

@@ -7,6 +7,8 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collection;
 import me.universi.group.entities.Group;
+import me.universi.roles.enums.FeaturesTypes;
+import me.universi.roles.enums.Permission;
 import me.universi.roles.enums.RoleType;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -90,5 +92,19 @@ public class Roles implements Serializable {
     @Transient
     public boolean isCanBeAssigned() {
         return this.roleType != RoleType.VISITOR;
+    }
+
+    @Transient
+    @JsonIgnore
+    public int getPermissionForFeature(FeaturesTypes feature) {
+        var featureType = this.rolesFeatures.stream()
+            .filter(ft -> ft.featureType == feature)
+            .findFirst();
+
+        if (featureType.isPresent())
+            return featureType.get().permission;
+
+        else
+            return Permission.NONE;
     }
 }

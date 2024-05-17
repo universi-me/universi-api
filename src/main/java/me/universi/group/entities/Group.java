@@ -12,13 +12,21 @@ import me.universi.group.entities.GroupSettings.GroupSettings;
 import me.universi.group.enums.GroupType;
 import me.universi.group.services.GroupService;
 import me.universi.profile.entities.Profile;
+import me.universi.profile.services.ProfileService;
+import me.universi.roles.entities.Roles;
+import me.universi.roles.enums.FeaturesTypes;
+import me.universi.roles.services.RolesService;
 import me.universi.user.services.JsonUserLoggedFilter;
 import me.universi.user.services.UserService;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
@@ -372,5 +380,17 @@ public class Group implements Serializable {
             return null;
         }
         return UserService.getInstance().getBuildHash();
+    }
+
+    @Transient
+    public Map<FeaturesTypes, Integer> getPermissions() {
+        Roles role = RolesService.getInstance().getAssignedRoles(
+            ProfileService.getInstance().getProfileInSession().getId(),
+            this.id
+        );
+
+        return Arrays.asList(FeaturesTypes.values())
+            .stream()
+            .collect(Collectors.toMap(ft -> ft, role::getPermissionForFeature));
     }
 }

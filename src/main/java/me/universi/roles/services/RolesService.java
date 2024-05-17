@@ -310,28 +310,6 @@ public class RolesService {
         return profiles;
     }
 
-    public Roles getAssignedRoles(Map<String, Object> body) {
-        Object profileId = body.get("profileId");
-        Object groupId = body.get("groupId");
-
-        if(profileId == null) {
-            throw new RolesException("Parâmetro profileId é nulo.");
-        }
-        if(groupId == null) {
-            throw new RolesException("Parâmetro groupId é nulo.");
-        }
-        Profile profile = profileService.findFirstById(UUID.fromString(profileId.toString()));
-        if(profile == null) {
-            throw new RolesException("Perfil não encontrado.");
-        }
-        Group group = groupService.getGroupByGroupIdOrGroupPath(groupId.toString(), null);
-        if(group == null) {
-            throw new RolesException("Grupo não encontrado.");
-        }
-
-        return getAssignedRoles(profile.getId(), group.getId());
-    }
-
     public Roles getAssignedRoles(UUID profileId, UUID groupId) {
         if(profileId == null)
             throw new RolesException("Parâmetro profileId é nulo.");
