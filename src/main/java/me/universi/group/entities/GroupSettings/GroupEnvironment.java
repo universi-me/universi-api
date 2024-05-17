@@ -39,16 +39,19 @@ public class GroupEnvironment implements Serializable {
     @NotNull
     public GroupSettings groupSettings;
 
+    /** Signup **/
     @Column(name = "signup_enabled")
     public boolean signup_enabled = Boolean.TRUE;
     @Column(name = "signup_confirm_account_enabled")
     public boolean signup_confirm_account_enabled = Boolean.FALSE;
 
+    /** Google Oauth Login **/
     @Column(name = "login_google_enabled")
     public boolean login_google_enabled = Boolean.FALSE;
     @Column(name = "google_client_id")
     public String google_client_id;
 
+    /** Google Recaptcha **/
     @Column(name = "recaptcha_enabled")
     public boolean recaptcha_enabled = Boolean.FALSE;
     @Column(name = "recaptcha_api_key")
@@ -71,6 +74,16 @@ public class GroupEnvironment implements Serializable {
     public String keycloak_url;
     @Column(name = "keycloak_redirect_url")
     public String keycloak_redirect_url;
+
+    /** Email **/
+    @Column(name = "message_new_content_enabled")
+    public boolean alert_new_content_enabled = Boolean.TRUE;
+    @Column(name = "message_template_new_content")
+    public String message_template_new_content;
+    @Column(name = "message_assigned_content_enabled")
+    public boolean alert_assigned_content_enabled = Boolean.TRUE;
+    @Column(name = "message_template_assigned_content")
+    public String message_template_assigned_content;
 
     @JsonIgnore
     @CreationTimestamp

@@ -406,6 +406,8 @@ public class FolderService {
         folderProfile.setProfile(profile);
         folderProfile.setAssigned(true);
         folderProfileRepository.save(folderProfile);
+
+        groupService.alertUserForContentAssigned(UserService.getInstance().getUserInSession().getProfile(), profile, folder);
     }
 
     public void assignToMultipleProfiles(Collection<String> profileIds, Folder folder) {
