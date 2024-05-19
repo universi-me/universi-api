@@ -76,10 +76,35 @@ public class RolesService {
         return saveRole(roles);
     }
 
-    public Roles assignRole(UUID roleId, UUID groupId, UUID profileId) {
-        Group group = groupService.getGroupByGroupIdOrGroupPath(groupId.toString(), null);
-
+    public Roles assignRole(@NotNull Roles roles, @NotNull Group group, @NotNull Profile profile) {
         checkIsAdmin(group);
+
+        if (!group.getId().equals(roles.group.getId()))
+            throw new RolesException("Você só pode atribuir um papel que pertença ao grupo");
+
+        if(profileService.isSessionOfProfile(profile))
+            throw new RolesException("Você não pode alterar seu próprio papel");
+
+        if(!roles.isCanBeAssigned()) {
+            throw new RolesException("O papel de visitante não pode ser colocado em um participante.");
+        }
+
+        ProfileGroup profileGroup = profileGroupRepository.findFirstByGroupAndProfile(group, profile);
+        if (profileGroup == null) {
+            throw new RolesException("Você só pode atribuir o papel à um membro do grupo");
+        }
+
+        profileGroup.role = roles;
+        profileGroupRepository.save(profileGroup);
+
+        return roles;
+    }
+
+    public Roles assignRole(@NotNull UUID roleId, @NotNull UUID groupId, @NotNull UUID profileId) {
+        Group group = groupService.getGroupByGroupIdOrGroupPath(groupId.toString(), null);
+        if(group == null) {
+            throw new RolesException("Grupo não encontrado.");
+        }
 
         Profile profile = profileService.findFirstById(profileId);
         if(profile == null) {
@@ -90,19 +115,7 @@ public class RolesService {
             return new RolesException("Papel não encontrado.");
         });
 
-        if(!roles.isCanBeAssigned()) {
-            throw new RolesException("O papel de visitante não pode ser colocado em um participante.");
-        }
-
-        ProfileGroup profileGroup = profileGroupRepository.findFirstByGroupAndProfile(group, profile);
-        if (profileGroup == null) {
-            throw new RolesException("Só pode atribuir o papel à um membro do grupo");
-        }
-
-        profileGroup.role = roles;
-        profileGroupRepository.save(profileGroup);
-
-        return roles;
+        return assignRole(roles, group, profile);
     }
 
     public Roles setRolesFeatureValue(@NotNull UUID rolesId, @NotNull FeaturesTypes feature, @NotNull int permission) {

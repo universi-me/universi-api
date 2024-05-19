@@ -1,9 +1,7 @@
 package me.universi.group.repositories;
 
-import jakarta.transaction.Transactional;
 import me.universi.group.entities.Group;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -28,6 +26,4 @@ public interface GroupRepository extends JpaRepository<Group, UUID> {
     Optional<Group> findFirstByIdAndAdminId(UUID groupId, UUID profileId);
 
     Boolean existsByIdAndParticipantsId(UUID groupId, UUID profileId);
-
-    boolean existsByAdministratorsIdAndId(UUID id, UUID id1);
 }

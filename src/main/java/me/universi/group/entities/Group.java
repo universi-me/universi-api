@@ -73,10 +73,6 @@ public class Group implements Serializable {
     @NotNull
     public Profile admin;
 
-    //@JsonIgnore
-    @OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
-    public Collection<GroupAdmin> administrators;
-
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="group_settings_id")
     @NotNull
@@ -339,14 +335,6 @@ public class Group implements Serializable {
 
     public void setGroupSettings(GroupSettings groupSettings) {
         this.groupSettings = groupSettings;
-    }
-
-    public Collection<GroupAdmin> getAdministrators() {
-        return administrators;
-    }
-
-    public void setAdministrators(Collection<GroupAdmin> administrators) {
-        this.administrators = administrators;
     }
 
     public String getHeaderImage() {

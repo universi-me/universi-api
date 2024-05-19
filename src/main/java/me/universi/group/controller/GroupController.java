@@ -134,7 +134,6 @@ public class GroupController {
                 // add creator to group participants
                 RolesService.getInstance().createBaseRoles(groupNew);
                 groupService.addParticipantToGroup(groupNew, groupNew.getAdmin(), RolesService.getInstance().getGroupAdminRole(groupNew));
-                groupService.addAdministrator(groupNew, groupNew.getAdmin());
 
                 response.message = "Grupo criado com sucesso.";
                 return;

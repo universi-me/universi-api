@@ -18,6 +18,7 @@ import me.universi.group.exceptions.GroupException;
 import me.universi.group.repositories.*;
 import me.universi.profile.entities.Profile;
 import me.universi.roles.entities.Roles;
+import me.universi.roles.enums.RoleType;
 import me.universi.roles.services.RolesService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
@@ -41,7 +42,6 @@ public class GroupService {
     private final GroupEmailFilterRepository groupEmailFilterRepository;
     private final GroupThemeRepository groupThemeRepository;
     private final GroupFeaturesRepository groupFeaturesRepository;
-    private final GroupAdminRepository groupAdminRepository;
     private final GroupEnvironmentRepository groupEnvironmentRepository;
 
     @Value("${LOCAL_ORGANIZATION_ID_ENABLED}")
@@ -50,7 +50,7 @@ public class GroupService {
     @Value("${LOCAL_ORGANIZATION_ID}")
     private String localOrganizationId;
 
-    public GroupService(UserService userService, GroupRepository groupRepository, ProfileGroupRepository profileGroupRepository, SubgroupRepository subgroupRepository, GroupSettingsRepository groupSettingsRepository, GroupEmailFilterRepository groupEmailFilterRepository, GroupThemeRepository groupThemeRepository, GroupFeaturesRepository groupFeaturesRepository, GroupAdminRepository groupAdminRepository, GroupEnvironmentRepository groupEnvironmentRepository) {
+    public GroupService(UserService userService, GroupRepository groupRepository, ProfileGroupRepository profileGroupRepository, SubgroupRepository subgroupRepository, GroupSettingsRepository groupSettingsRepository, GroupEmailFilterRepository groupEmailFilterRepository, GroupThemeRepository groupThemeRepository, GroupFeaturesRepository groupFeaturesRepository, GroupEnvironmentRepository groupEnvironmentRepository) {
         this.userService = userService;
         this.groupRepository = groupRepository;
         this.profileGroupRepository = profileGroupRepository;
@@ -59,7 +59,6 @@ public class GroupService {
         this.groupEmailFilterRepository = groupEmailFilterRepository;
         this.groupThemeRepository = groupThemeRepository;
         this.groupFeaturesRepository = groupFeaturesRepository;
-        this.groupAdminRepository = groupAdminRepository;
         this.groupEnvironmentRepository = groupEnvironmentRepository;
     }
 
@@ -162,8 +161,8 @@ public class GroupService {
             return true;
         }
 
-        for(GroupAdmin groupAdminNow : group.getAdministrators()) {
-            if(groupAdminNow.profile != null && Objects.equals(groupAdminNow.profile.getId(), profile.getId())) {
+        for(ProfileGroup groupAdminNow : getAdministrators(group)) {
+            if(groupAdminNow != null && Objects.equals(groupAdminNow.profile.getId(), profile.getId())) {
                 return true;
             }
         }
@@ -744,41 +743,6 @@ public class GroupService {
         return editFeature(group, UUID.fromString(groupFeatureId), enabled, description);
     }
 
-    public boolean addAdministrator(Group group, Profile profile) {
-        if(group == null || profile == null) {
-            return false;
-        }
-        if(!groupAdminRepository.existsByGroupIdAndProfileId(group.getId(), profile.getId())) {
-            GroupAdmin groupAdmin = new GroupAdmin();
-            groupAdmin.group = group;
-            groupAdmin.profile = profile;
-            groupAdminRepository.save(groupAdmin);
-            return true;
-        }
-        return false;
-    }
-
-    public boolean removeAdministrator(Group group, Profile profile) {
-        if(group == null || profile == null) {
-            return false;
-        }
-
-        if(groupAdminRepository.existsByGroupIdAndProfileId(group.getId(), profile.getId())) {
-            // check if has only one admin
-            if (group.getAdministrators() == null || group.getAdministrators().isEmpty() || (group.getAdministrators().size() <= 1)) {
-                throw new GroupException("Não é possível remover o único administrador do grupo.");
-            }
-
-            GroupAdmin groupAdmin = groupAdminRepository.findFirstByGroupIdAndProfileId(group.getId(), profile.getId());
-            groupAdmin.setRemoved(ConvertUtil.getDateTimeNow());
-            groupAdmin.setDeleted(true);
-            groupAdminRepository.save(groupAdmin);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     // edit group environment
     public boolean editEnvironment(Group group, Boolean signup_enabled, Boolean signup_confirm_account_enabled,
                                    Boolean login_google_enabled, String google_client_id, Boolean recaptcha_enabled,
@@ -975,5 +939,11 @@ public class GroupService {
                 save(organization);
             }
         }
+    }
+
+    public Collection<ProfileGroup> getAdministrators(@NotNull Group group) {
+        return group.participants.stream()
+            .filter(pg -> pg.role.getRoleType() == RoleType.ADMINISTRATOR)
+            .toList();
     }
 }
