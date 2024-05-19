@@ -3,6 +3,7 @@ package me.universi.group.services;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import me.universi.Sys;
+import me.universi.capacity.entidades.Folder;
 import me.universi.competence.entities.Competence;
 
 import me.universi.group.DTO.CompetenceFilterDTO;
@@ -748,7 +749,9 @@ public class GroupService {
                                    Boolean login_google_enabled, String google_client_id, Boolean recaptcha_enabled,
                                    String recaptcha_api_key, String recaptcha_api_project_id, String recaptcha_site_key,
                                    Boolean keycloak_enabled, String keycloak_client_id, String keycloak_client_secret,
-                                   String keycloak_realm, String keycloak_url, String keycloak_redirect_url) {
+                                   String keycloak_realm, String keycloak_url, String keycloak_redirect_url,
+                                   Boolean alert_new_content_enabled, String message_template_new_content,
+                                   Boolean alert_assigned_content_enabled, String message_template_assigned_content) {
         if(group == null) {
             return false;
         }
@@ -808,6 +811,19 @@ public class GroupService {
             groupEnvironment.keycloak_redirect_url = keycloak_redirect_url.isEmpty() ? null : keycloak_redirect_url;
         }
 
+        if(alert_new_content_enabled != null) {
+            groupEnvironment.alert_new_content_enabled = alert_new_content_enabled;
+        }
+        if(message_template_new_content != null) {
+            groupEnvironment.message_template_new_content = message_template_new_content.isEmpty() ? null : message_template_new_content;
+        }
+        if(alert_assigned_content_enabled != null) {
+            groupEnvironment.alert_assigned_content_enabled = alert_assigned_content_enabled;
+        }
+        if(message_template_assigned_content != null) {
+            groupEnvironment.message_template_assigned_content = message_template_assigned_content.isEmpty() ? null : message_template_assigned_content;
+        }
+
         groupEnvironmentRepository.save(groupEnvironment);
         return true;
     }
@@ -822,7 +838,9 @@ public class GroupService {
         }
         GroupEnvironment groupEnvironment = groupSettings.environment;
         if(groupEnvironment == null) {
-            return null;
+            groupEnvironment = new GroupEnvironment();
+            groupEnvironment.groupSettings = groupSettings;
+            groupEnvironment = groupEnvironmentRepository.save(groupEnvironment);
         }
         return groupEnvironment;
     }
@@ -939,6 +957,96 @@ public class GroupService {
                 save(organization);
             }
         }
+    }
+
+    // send email for all users in group
+    public void sendEmailForAllUsersInGroup(Group group, String subject, String message) {
+        if(group == null || subject == null || message == null) {
+            return;
+        }
+        Collection<ProfileGroup> participants = group.getParticipants();
+        for(ProfileGroup profileGroup : participants) {
+            Profile profile = profileGroup.profile;
+            if(profile != null && profile.getUser() != null) {
+                userService.sendSystemEmailToUser(profile.getUser(), subject, message, true);
+            }
+        }
+    }
+
+    // replace placeholders in a template {{ key }} with values
+    public String replacePlaceholders(String template, Map<String, String> values) {
+        String result = template;
+        for (Map.Entry<String, String> entry : values.entrySet()) {
+            // Create a pattern that ignores spaces within the curly braces
+            result = result.replaceAll("\\{\\{\\s*" + entry.getKey() + "\\s*\\}\\}", entry.getValue());
+        }
+        return result;
+    }
+
+    public String getMessageTemplateForNewContentInGroup(Group group, Folder folder) {
+        if(group == null || folder == null) {
+            return null;
+        }
+
+        String groupName = group.getName();
+        String contentName = folder.getName();
+        String contentUrl = userService.getPublicUrl() + "/group" + group.getPath() + "#" + "/contents/" + folder.getId();
+
+        String message = getOrganizationEnvironment().groupSettings.environment.message_template_new_content;
+        if(message == null || message.isEmpty()) {
+            message = "Olá, {{ groupName }} tem um novo conteúdo: {{ contentName }}.\nAcesse: {{ contentUrl }}";
+        }
+
+        return replacePlaceholders(message, Map.of("groupName", groupName, "contentName", contentName, "contentUrl", contentUrl));
+    }
+
+    public String getMessageTemplateForContentAssigned(Profile fromProfile, Profile profile, Folder folder) {
+        if(profile == null || folder == null) {
+            return null;
+        }
+
+        String fromUser = fromProfile.getFirstname();
+        String toUser = profile.getFirstname();
+        String contentName = folder.getName();
+        String contentUrl = userService.getPublicUrl() + "/content/" + folder.getReference();
+
+        String message = getOrganizationEnvironment().groupSettings.environment.message_template_assigned_content;
+        if(message == null || message.isEmpty()) {
+            message = "Olá {{ toUser }}, você recebeu um novo conteúdo de {{ fromUser }}: {{ contentName }}.\nAcesse: {{ contentUrl }}";
+        }
+
+        return replacePlaceholders(message, Map.of("fromUser", fromUser, "toUser", toUser, "contentName", contentName, "contentUrl", contentUrl));
+    }
+
+    // alert all users in group for a new content in group
+    public void alertAllUsersInGroupForNewContent(Group group, Folder folder) {
+        if(group == null || folder == null) {
+            return;
+        }
+
+        if(!getOrganizationEnvironment().groupSettings.environment.alert_new_content_enabled) {
+            return;
+        }
+
+        String subject = "Novo conteúdo em " + group.getName();
+        String message = getMessageTemplateForNewContentInGroup(group, folder);
+        sendEmailForAllUsersInGroup(group, subject, message);
+    }
+
+    // alert user for content assigned
+    public void alertUserForContentAssigned(Profile fromUser, Profile profile, Folder folder) {
+        if(profile == null || folder == null) {
+            return;
+        }
+
+        if(!getOrganizationEnvironment().groupSettings.environment.alert_assigned_content_enabled) {
+            return;
+        }
+
+        String subject = "Conteúdo atribuído";
+        String message = getMessageTemplateForContentAssigned(fromUser, profile, folder);
+
+        userService.sendSystemEmailToUser(profile.getUser(), subject, message, true);
     }
 
     public Collection<ProfileGroup> getAdministrators(@NotNull Group group) {

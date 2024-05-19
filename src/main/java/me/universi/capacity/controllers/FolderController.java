@@ -158,6 +158,8 @@ public class FolderController {
             response.body.put("contentId", folder.getId());
 
             response.message = "Pasta criada com sucesso.";
+
+            groupService.alertAllUsersInGroupForNewContent(group, folder);
         });
     }
 
