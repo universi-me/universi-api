@@ -31,4 +31,31 @@ public class CastingUtil {
 
         return Optional.empty();
     }
+
+    public static Optional<Integer> getInteger(Object obj) {
+        if (obj instanceof Integer)
+            return Optional.of((Integer) obj);
+
+        else if (obj == null)
+            return Optional.empty();
+
+        try {
+            return Optional.of(Integer.parseInt(getString(obj).get()));
+        } catch (NumberFormatException e) {
+            return Optional.empty();
+        }
+    }
+
+    public static <T extends Enum<T>> Optional<T> getEnum(Class<T> enumeration, Object obj) {
+        if (enumeration == null || obj == null)
+            return Optional.empty();
+
+        String value = getString(obj).get();
+
+        try {
+            return Optional.ofNullable(Enum.valueOf(enumeration, value));
+        } catch (IllegalArgumentException e) {
+            return Optional.empty();
+        }
+    }
 }

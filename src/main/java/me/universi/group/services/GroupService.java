@@ -17,12 +17,15 @@ import me.universi.group.enums.GroupType;
 import me.universi.group.exceptions.GroupException;
 import me.universi.group.repositories.*;
 import me.universi.profile.entities.Profile;
+import me.universi.roles.entities.Roles;
 import me.universi.roles.services.RolesService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import me.universi.util.ConvertUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import jakarta.validation.constraints.NotNull;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -195,16 +198,20 @@ public class GroupService {
         }
     }
 
-    public boolean addParticipantToGroup(Group group, Profile profile) throws GroupException {
-        if(profile == null) {
-            throw new GroupException("Parametro Perfil é nulo.");
-        }
+    public boolean addParticipantToGroup(@NotNull Group group, @NotNull Profile profile) throws GroupException {
+        return addParticipantToGroup(
+            group,
+            profile,
+            RolesService.getInstance().getGroupMemberRole(group)
+        );
+    }
 
+    public boolean addParticipantToGroup(@NotNull Group group, @NotNull Profile profile, Roles roles) throws GroupException {
         if(!profileGroupRepository.existsByGroupIdAndProfileId(group.getId(), profile.getId())) {
             ProfileGroup profileGroup = new ProfileGroup();
             profileGroup.profile = profile;
             profileGroup.group = group;
-            profileGroup.role = RolesService.getInstance().getGroupVisitorRole(group);
+            profileGroup.role = roles;
             profileGroupRepository.save(profileGroup);
             return true;
         }
@@ -969,5 +976,4 @@ public class GroupService {
             }
         }
     }
-
 }
