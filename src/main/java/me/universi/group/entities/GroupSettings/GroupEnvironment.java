@@ -76,6 +76,20 @@ public class GroupEnvironment implements Serializable {
     public String keycloak_redirect_url;
 
     /** Email **/
+    @Column(name = "email_enabled")
+    public boolean email_enabled = Boolean.FALSE;
+    @Column(name = "email_host")
+    public String email_host;
+    @Column(name = "email_port")
+    public String email_port;
+    @Column(name = "email_protocol")
+    public String email_protocol;
+    @Column(name = "email_username")
+    public String email_username;
+    @Column(name = "email_password")
+    public String email_password;
+
+    /** Email Notifications **/
     @Column(name = "message_new_content_enabled")
     public boolean alert_new_content_enabled = Boolean.TRUE;
     @Column(name = "message_template_new_content")

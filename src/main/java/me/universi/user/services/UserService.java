@@ -32,6 +32,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
@@ -62,7 +63,7 @@ public class UserService implements UserDetailsService {
     private final ProfileService profileService;
     private final RoleHierarchyImpl roleHierarchy;
     private final SessionRegistry sessionRegistry;
-    private final JavaMailSender emailSender;
+    private JavaMailSender emailSender;
     private final Executor emailExecutor;
 
     public String BUILD_HASH = "development";
@@ -114,13 +115,12 @@ public class UserService implements UserDetailsService {
     String KEYCLOAK_CLIENT_SECRET;
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, ProfileService profileService, RoleHierarchyImpl roleHierarchy, SessionRegistry sessionRegistry, JavaMailSender emailSender) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, ProfileService profileService, RoleHierarchyImpl roleHierarchy, SessionRegistry sessionRegistry) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.profileService = profileService;
         this.roleHierarchy = roleHierarchy;
         this.sessionRegistry = sessionRegistry;
-        this.emailSender = emailSender;
         this.emailExecutor = Executors.newFixedThreadPool(5);
     }
 
@@ -555,21 +555,31 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    public void sendSystemEmailToUser(UserDetails user, String subject, String text, boolean ignoreEmail) throws UserException {
+    public void sendSystemEmailToUser(UserDetails user, String subject, String text, boolean ignoreEmailUnavailable) throws UserException {
+
+        if(getEmailSender() == null) {
+            return;
+        }
+
         String email = ((User) user).getEmail();
         if (email == null) {
-            if(ignoreEmail) {
+            if(ignoreEmailUnavailable) {
                 return;
             } else {
                 throw new UserException("Usuário não possui um email.");
             }
         }
+
         emailExecutor.execute(() -> {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setTo(((User) user).getEmail());
-            message.setSubject(subject);
-            message.setText(text);
-            emailSender.send(message);
+            try {
+                SimpleMailMessage message = new SimpleMailMessage();
+                message.setTo(((User) user).getEmail());
+                message.setSubject(subject);
+                message.setText(text);
+                getEmailSender().send(message);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         });
     }
 
@@ -931,6 +941,53 @@ public class UserService implements UserDetailsService {
             return envG.keycloak_enabled;
         }
         return KEYCLOAK_ENABLED;
+    }
+
+    public void setupEmailSender() {
+        GroupEnvironment envG = GroupService.getInstance().getOrganizationEnvironment();
+        if(envG != null && envG.email_enabled) {
+            JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+            mailSender.setHost(envG.email_host);
+            mailSender.setPort(Integer.parseInt(envG.email_port == null ? "587" : envG.email_port));
+            mailSender.setUsername(envG.email_username);
+            mailSender.setPassword(envG.email_password);
+
+            Properties props = System.getProperties();
+            props.remove("mail.transport.protocol");
+            props.remove("mail.smtp.ssl.trust");
+            props.remove("mail.smtp.auth");
+            props.remove("mail.smtp.starttls.enable");
+            props.put("mail.transport.protocol", envG.email_protocol == null ? "smtp" : envG.email_protocol);
+            props.put("mail.smtp.ssl.trust", mailSender.getHost());
+            props.put("mail.smtp.auth", "true");
+            props.put("mail.smtp.starttls.enable", "true");
+
+            mailSender.setJavaMailProperties(props);
+
+            emailSender = (JavaMailSender) mailSender;
+        } else {
+            emailSender = null;
+        }
+        //JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+        //mailSender.setHost("smtp.gmail.com");
+        //mailSender.setPort(587);
+        //mailSender.setUsername("no.reply.universi.me@gmail.com");
+        //mailSender.setPassword("scrh knzt rkkw lqbt");
+        //Properties props = System.getProperties();
+        //props.put("mail.transport.protocol", "smtp");
+        //props.put("mail.smtp.ssl.trust", mailSender.getHost());
+        //props.put("mail.smtp.auth", "true");
+        //props.put("mail.smtp.starttls.enable", "true");
+        ////props.put("mail.debug", siteConfig.isSmtpDebug());
+        //mailSender.setJavaMailProperties(props);
+        //emailSender = (JavaMailSender) mailSender;
+    }
+
+    public JavaMailSender getEmailSender() {
+        if(emailSender == null) {
+            setupEmailSender();
+        }
+        return emailSender;
     }
 
 }
