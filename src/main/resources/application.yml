@@ -3,21 +3,6 @@ spring:
     active: ${API_PROFILE_ACTIVE:dev}
   flyway:
     out-of-order: true
-  # EMAIL
-  mail:
-    host: ${API_MAIL_HOST:smtp.gmail.com}
-    port: ${API_MAIL_PORT:587}
-    username: ${API_MAIL_USERNAME:username}
-    password: ${API_MAIL_PASSWORD:password}
-    tls: ${API_MAIL_TLS:true}
-    properties:
-      mail:
-        smtp:
-          ssl:
-            trust: ${API_MAIL_HOST:smtp.gmail.com}
-          auth: ${API_MAIL_AUTH:true}
-          starttls:
-            enable: ${API_MAIL_STARTTLS:true}
 
 keycloak:
   enabled: ${API_KEYCLOAK_ENABLED:false}

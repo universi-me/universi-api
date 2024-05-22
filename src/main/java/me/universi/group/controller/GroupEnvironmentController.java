@@ -47,7 +47,10 @@ public class GroupEnvironmentController {
                             (String)body.get("keycloak_client_secret"), (String)body.get("keycloak_realm"),
                             (String)body.get("keycloak_url"), (String)body.get("keycloak_redirect_url"),
                             (Boolean)body.get("alert_new_content_enabled"), (String)body.get("message_template_new_content"),
-                            (Boolean)body.get("alert_assigned_content_enabled"), (String)body.get("message_template_assigned_content")
+                            (Boolean)body.get("alert_assigned_content_enabled"), (String)body.get("message_template_assigned_content"),
+                            (Boolean)body.get("email_enabled"), (String)body.get("email_host"),
+                            (String)body.get("email_port"), (String)body.get("email_protocol"),
+                            (String)body.get("email_username"), (String)body.get("email_password")
                     )) {
                         response.message = "Variáveis Ambiente atualizada com sucesso.";
                         return;

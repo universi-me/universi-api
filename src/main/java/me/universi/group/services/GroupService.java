@@ -776,7 +776,9 @@ public class GroupService {
                                    Boolean keycloak_enabled, String keycloak_client_id, String keycloak_client_secret,
                                    String keycloak_realm, String keycloak_url, String keycloak_redirect_url,
                                    Boolean alert_new_content_enabled, String message_template_new_content,
-                                   Boolean alert_assigned_content_enabled, String message_template_assigned_content) {
+                                   Boolean alert_assigned_content_enabled, String message_template_assigned_content,
+                                   Boolean email_enabled, String email_host, String email_port, String email_protocol,
+                                   String email_username, String email_password) {
         if(group == null) {
             return false;
         }
@@ -849,7 +851,41 @@ public class GroupService {
             groupEnvironment.message_template_assigned_content = message_template_assigned_content.isEmpty() ? null : message_template_assigned_content;
         }
 
+        boolean needUpdateEmailConfiguration = false;
+        if(email_enabled != null && email_enabled != groupEnvironment.email_enabled ||
+                email_host != null && !email_host.equals(groupEnvironment.email_host) ||
+                email_port != null && !email_port.equals(groupEnvironment.email_port) ||
+                email_protocol != null && !email_protocol.equals(groupEnvironment.email_protocol) ||
+                email_username != null && !email_username.equals(groupEnvironment.email_username) ||
+                email_password != null && !email_password.equals(groupEnvironment.email_password)) {
+            needUpdateEmailConfiguration = true;
+        }
+
+        if(email_enabled != null) {
+            groupEnvironment.email_enabled = email_enabled;
+        }
+        if(email_host != null) {
+            groupEnvironment.email_host = email_host.isEmpty() ? null : email_host;
+        }
+        if(email_port != null) {
+            groupEnvironment.email_port = email_port.isEmpty() ? null : email_port;
+        }
+        if(email_protocol != null) {
+            groupEnvironment.email_protocol = email_protocol.isEmpty() ? null : email_protocol;
+        }
+        if(email_username != null) {
+            groupEnvironment.email_username = email_username.isEmpty() ? null : email_username;
+        }
+        if(email_password != null) {
+            groupEnvironment.email_password = email_password.isEmpty() ? null : email_password;
+        }
+
         groupEnvironmentRepository.save(groupEnvironment);
+
+        if(needUpdateEmailConfiguration) {
+            userService.setupEmailSender();
+        }
+
         return true;
     }
 
@@ -1015,7 +1051,7 @@ public class GroupService {
 
         String groupName = group.getName();
         String contentName = folder.getName();
-        String contentUrl = userService.getPublicUrl() + "/group" + group.getPath() + "#" + "/contents/" + folder.getId();
+        String contentUrl = userService.getPublicUrl() + "/group" + group.getPath() + "#" + "contents/" + folder.getId();
 
         String message = getOrganizationEnvironment().groupSettings.environment.message_template_new_content;
         if(message == null || message.isEmpty()) {
