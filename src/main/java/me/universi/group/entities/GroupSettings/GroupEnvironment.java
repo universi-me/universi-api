@@ -9,6 +9,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
+import me.universi.user.services.JsonUserAdminFilter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
@@ -66,6 +67,7 @@ public class GroupEnvironment implements Serializable {
     public boolean keycloak_enabled = Boolean.FALSE;
     @Column(name = "keycloak_client_id")
     public String keycloak_client_id;
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserAdminFilter.class)
     @Column(name = "keycloak_client_secret")
     public String keycloak_client_secret;
     @Column(name = "keycloak_realm")
@@ -86,6 +88,8 @@ public class GroupEnvironment implements Serializable {
     public String email_protocol;
     @Column(name = "email_username")
     public String email_username;
+
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserAdminFilter.class)
     @Column(name = "email_password")
     public String email_password;
 

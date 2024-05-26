@@ -842,12 +842,18 @@ public class GroupService {
             groupEnvironment.alert_new_content_enabled = alert_new_content_enabled;
         }
         if(message_template_new_content != null) {
+            if(message_template_new_content.length() > 255) {
+                throw new GroupException("O template de mensagem para novo conteúdo não pode ter mais de 255 caracteres.");
+            }
             groupEnvironment.message_template_new_content = message_template_new_content.isEmpty() ? null : message_template_new_content;
         }
         if(alert_assigned_content_enabled != null) {
             groupEnvironment.alert_assigned_content_enabled = alert_assigned_content_enabled;
         }
         if(message_template_assigned_content != null) {
+            if(message_template_assigned_content.length() > 255) {
+                throw new GroupException("O template de mensagem para conteúdo atribuído não pode ter mais de 255 caracteres.");
+            }
             groupEnvironment.message_template_assigned_content = message_template_assigned_content.isEmpty() ? null : message_template_assigned_content;
         }
 
@@ -1055,7 +1061,7 @@ public class GroupService {
 
         String message = getOrganizationEnvironment().groupSettings.environment.message_template_new_content;
         if(message == null || message.isEmpty()) {
-            message = "Olá, {{ groupName }} tem um novo conteúdo: {{ contentName }}.\nAcesse: {{ contentUrl }}";
+            message = "Olá, {{ groupName }} tem um novo conteúdo: {{ contentName }}.<br/><br/>Acesse: {{ contentUrl }}";
         }
 
         return replacePlaceholders(message, Map.of("groupName", groupName, "contentName", contentName, "contentUrl", contentUrl));
@@ -1073,7 +1079,7 @@ public class GroupService {
 
         String message = getOrganizationEnvironment().groupSettings.environment.message_template_assigned_content;
         if(message == null || message.isEmpty()) {
-            message = "Olá {{ toUser }}, você recebeu um novo conteúdo de {{ fromUser }}: {{ contentName }}.\nAcesse: {{ contentUrl }}";
+            message = "Olá {{ toUser }}, você recebeu um novo conteúdo de {{ fromUser }}: {{ contentName }}.<br/><br/>Acesse: {{ contentUrl }}";
         }
 
         return replacePlaceholders(message, Map.of("fromUser", fromUser, "toUser", toUser, "contentName", contentName, "contentUrl", contentUrl));

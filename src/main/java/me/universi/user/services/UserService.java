@@ -1,5 +1,6 @@
 package me.universi.user.services;
 
+import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import java.io.File;
@@ -33,6 +34,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
@@ -570,12 +572,17 @@ public class UserService implements UserDetailsService {
             }
         }
 
+        sendEmail(email, subject, text);
+    }
+
+    private void sendEmail(String email, String subject, String htmlContent) {
         emailExecutor.execute(() -> {
             try {
-                SimpleMailMessage message = new SimpleMailMessage();
-                message.setTo(((User) user).getEmail());
-                message.setSubject(subject);
-                message.setText(text);
+                MimeMessage message = getEmailSender().createMimeMessage();
+                MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+                helper.setTo(email);
+                helper.setSubject(subject);
+                helper.setText(htmlContent, true);
                 getEmailSender().send(message);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -584,13 +591,13 @@ public class UserService implements UserDetailsService {
     }
 
     // generate recovery password token sha256 for user
-    public String generateRecoveryPasswordToken(User user) throws Exception {
+    public String generateRecoveryPasswordToken(User user, boolean useIntervalCheck) throws Exception {
 
         //check recovery date token if less than 15min
-        if(user.getRecoveryPasswordTokenDate() != null) {
+        if(useIntervalCheck && user.getRecoveryPasswordTokenDate() != null) {
             long diff = ConvertUtil.getDateTimeNow().getTime() - user.getRecoveryPasswordTokenDate().getTime();
             if(diff < 900000) {
-                throw new UserException("Um email de recuperação de senha já foi enviado, por favor tente novamente mais tarde.");
+                throw new UserException("Um email de recuperação de senha já foi enviado para esta conta, por favor tente novamente mais tarde.");
             }
         }
 
@@ -601,7 +608,10 @@ public class UserService implements UserDetailsService {
         String tokenString = ConvertUtil.bytesToHex(encodedHash);
 
         user.setRecoveryPasswordToken(tokenString);
-        user.setRecoveryPasswordTokenDate(ConvertUtil.getDateTimeNow());
+        if(useIntervalCheck) {
+            user.setRecoveryPasswordTokenDate(ConvertUtil.getDateTimeNow());
+        }
+
         save(user);
 
         return tokenString;
@@ -637,18 +647,19 @@ public class UserService implements UserDetailsService {
     public void sendRecoveryPasswordEmail(User user) throws Exception {
         String userIp = getClientIpAddress();
 
-        String token = generateRecoveryPasswordToken(user);
+        String token = generateRecoveryPasswordToken(user, true);
 
         String url = getPublicUrl() + "/recovery-password/" + token;
         String subject = "Universi.me - Recuperação de Senha";
-        String text = "Olá " + user.getUsername() + ",\n\n" +
-                "Você solicitou a recuperação de senha para sua conta no Universi.me.\n" +
-                "Para recuperar sua senha, clique no link abaixo:\n\n" +
-                url + "\n\n" +
-                "Se você não solicitou a recuperação de senha, por favor, ignore este email.\n\n" +
-                "Endereço IP: " + userIp + "\n\n" +
-                "Atenciosamente,\n" +
+        String text = "Olá " + user.getUsername() + ",<br/><br/>\n\n" +
+                "Você solicitou a recuperação de senha para sua conta no Universi.me.<br/>\n" +
+                "Para recuperar sua senha, clique no link abaixo:<br/><br/>\n\n" +
+                url + "<br/><br/>\n\n" +
+                "Se você não solicitou a recuperação de senha, por favor, ignore este email.<br/><br/>\n\n" +
+                "Endereço IP: " + userIp + "<br/><br/>\n\n" +
+                "Atenciosamente,<br/>\n" +
                 "Equipe Universi.me";
+
         sendSystemEmailToUser(user, subject, text, false);
     }
 
@@ -658,20 +669,20 @@ public class UserService implements UserDetailsService {
 
     //send confirmation signup account email to user
     public void sendConfirmAccountEmail(User user, boolean signup) throws Exception {
-        String userIp = getRequest().getHeader("X-Forwarded-For");
+        String userIp = getClientIpAddress();
 
-        String token = generateRecoveryPasswordToken(user);
+        String token = generateRecoveryPasswordToken(user, false);
 
         String url = getPublicUrl() + "/api/confirm-account/" + token;
         String subject = "Universi.me - Confirmação de Conta";
         String messageExplain = (signup) ? "Seja bem-vindo(a) ao Universi.me, para continuar com o seu cadastro precisamos confirmar a sua conta do Universi.me." : "Você solicitou a confirmação de sua conta no Universi.me.";
-        String text = "Olá " + user.getUsername() + ",\n\n" +
-                messageExplain + "\n\n" +
-                "Para confirmar sua conta, clique no link abaixo:\n\n" +
-                url + "\n\n" +
-                "Se você não solicitou a confirmação de conta, por favor, ignore este email.\n\n" +
-                "Endereço IP: " + userIp + "\n\n" +
-                "Atenciosamente,\n" +
+        String text = "Olá " + user.getUsername() + ",<br/><br/>\n\n" +
+                messageExplain + "<br/><br/>\n\n" +
+                "Para confirmar sua conta, clique no link abaixo:<br/><br/>\n\n" +
+                url + "<br/><br/>\n\n" +
+                "Se você não solicitou a confirmação de conta, por favor, ignore este email.<br/><br/>\n\n" +
+                "Endereço IP: " + userIp + "<br/><br/>\n\n" +
+                "Atenciosamente,<br/>\n" +
                 "Equipe Universi.me";
 
         sendSystemEmailToUser(user, subject, text, false);
