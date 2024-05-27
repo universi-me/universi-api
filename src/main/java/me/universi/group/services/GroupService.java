@@ -6,6 +6,9 @@ import me.universi.Sys;
 import me.universi.capacity.entidades.Folder;
 import me.universi.competence.entities.Competence;
 
+import me.universi.feed.dto.GroupPostDTO;
+import me.universi.feed.entities.GroupPost;
+import me.universi.feed.services.GroupFeedService;
 import me.universi.group.DTO.CompetenceFilterDTO;
 import me.universi.group.DTO.CompetenceFilterRequestDTO;
 import me.universi.group.DTO.ProfileWithCompetencesDTO;
@@ -31,6 +34,7 @@ import java.util.stream.Collectors;
 @Service
 public class GroupService {
     private final UserService userService;
+    private final GroupFeedService groupFeedService;
     private final GroupRepository groupRepository;
     private final ProfileGroupRepository profileGroupRepository;
     private final SubgroupRepository subgroupRepository;
@@ -47,8 +51,9 @@ public class GroupService {
     @Value("${LOCAL_ORGANIZATION_ID}")
     private String localOrganizationId;
 
-    public GroupService(UserService userService, GroupRepository groupRepository, ProfileGroupRepository profileGroupRepository, SubgroupRepository subgroupRepository, GroupSettingsRepository groupSettingsRepository, GroupEmailFilterRepository groupEmailFilterRepository, GroupThemeRepository groupThemeRepository, GroupFeaturesRepository groupFeaturesRepository, GroupAdminRepository groupAdminRepository, GroupEnvironmentRepository groupEnvironmentRepository) {
+    public GroupService(UserService userService, GroupFeedService groupFeedService, GroupRepository groupRepository, ProfileGroupRepository profileGroupRepository, SubgroupRepository subgroupRepository, GroupSettingsRepository groupSettingsRepository, GroupEmailFilterRepository groupEmailFilterRepository, GroupThemeRepository groupThemeRepository, GroupFeaturesRepository groupFeaturesRepository, GroupAdminRepository groupAdminRepository, GroupEnvironmentRepository groupEnvironmentRepository) {
         this.userService = userService;
+        this.groupFeedService = groupFeedService;
         this.groupRepository = groupRepository;
         this.profileGroupRepository = profileGroupRepository;
         this.subgroupRepository = subgroupRepository;
@@ -1085,8 +1090,43 @@ public class GroupService {
         return replacePlaceholders(message, Map.of("fromUser", fromUser, "toUser", toUser, "contentName", contentName, "contentUrl", contentUrl));
     }
 
+    public void didImportContentToGroup(Group group, Folder folder) {
+        didAddNewContentToGroup(group, folder);
+    }
+
+    public void didAddNewContentToGroup(Group group, Folder folder) {
+        if(group == null || folder == null) {
+            return;
+        }
+
+        try {
+            alertAllUserInGroupForNewContent(group, folder);
+        } catch (Exception ignored) {
+        }
+
+        try {
+            postFeedMessageInGroupForNewContent(group, folder);
+        } catch (Exception ignored) {
+        }
+    }
+
+    public void postFeedMessageInGroupForNewContent(Group group, Folder folder) {
+        if(group == null || folder == null) {
+            return;
+        }
+
+        String link = "/group" + group.getPath() + "#" + "contents/" + folder.getId();
+        String message = "<p>Conteúdo adicionado: <a href=\"" + link + "\">" + folder.getName() + "</a><p/>";
+
+        GroupPostDTO groupPostDTO = new GroupPostDTO();
+        groupPostDTO.setContent(message);
+        groupPostDTO.setAuthorId(userService.getUserInSession().getId().toString());
+
+        groupFeedService.createGroupPost(group.getId().toString(), groupPostDTO);
+    }
+
     // alert all users in group for a new content in group
-    public void alertAllUsersInGroupForNewContent(Group group, Folder folder) {
+    public void alertAllUserInGroupForNewContent(Group group, Folder folder) {
         if(group == null || folder == null) {
             return;
         }
@@ -1097,6 +1137,7 @@ public class GroupService {
 
         String subject = "Novo conteúdo em " + group.getName();
         String message = getMessageTemplateForNewContentInGroup(group, folder);
+
         sendEmailForAllUsersInGroup(group, subject, message);
     }
 
@@ -1115,5 +1156,4 @@ public class GroupService {
 
         userService.sendSystemEmailToUser(profile.getUser(), subject, message, true);
     }
-
 }

@@ -303,17 +303,22 @@ public class FolderService {
                 if(group == null) {
                     continue;
                 }
+                boolean hasAdded = false;
                 if(folder.getGrantedAccessGroups() == null) {
                     folder.setGrantedAccessGroups(new ArrayList<>());
                 }
                 if(isAdding) {
                     if(!folder.getGrantedAccessGroups().contains(group)) {
                         folder.getGrantedAccessGroups().add(group);
+                        hasAdded = true;
                     }
                 } else {
                     folder.getGrantedAccessGroups().remove(group);
                 }
                 folderRepository.save(folder);
+                if(hasAdded) {
+                    groupService.didImportContentToGroup(group, folder);
+                }
             }
         }
     }
