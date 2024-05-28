@@ -1,13 +1,17 @@
 package me.universi.roles.controllers;
 
 import java.util.Map;
+
 import me.universi.api.entities.Response;
 import me.universi.roles.entities.Roles;
-import me.universi.roles.entities.RolesFeature;
-import me.universi.roles.entities.RolesProfile;
+import me.universi.roles.enums.FeaturesTypes;
 import me.universi.roles.enums.Permission;
+import me.universi.roles.exceptions.RolesException;
 import me.universi.roles.services.RolesService;
+import me.universi.util.CastingUtil;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -24,7 +28,20 @@ public class RolesController {
     @ResponseBody
     public Response roles_create(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
-            Roles roles = rolesService.createRole(body);
+            var name = CastingUtil.getString(body.get("name")).orElseThrow(() -> {
+                response.setStatus(HttpStatus.BAD_REQUEST);
+                return new RolesException("Parâmetro 'name' não informado");
+            });
+
+            var description = CastingUtil.getString(body.get("description"))
+                .orElse(null);
+
+            var groupId = CastingUtil.getUUID(body.get("groupId")).orElseThrow(() -> {
+                response.setStatus(HttpStatus.BAD_REQUEST);
+                return new RolesException("Parâmetro 'groupId' não informado ou inválido");
+            });
+
+            Roles roles = rolesService.createRole(name, description, groupId);
             response.body.put("roles", roles);
             response.message = "Papel \"" + roles.name + "\" criado com sucesso.";
         });
@@ -34,7 +51,19 @@ public class RolesController {
     @ResponseBody
     public Response roles_edit(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
-            Roles roles = rolesService.editRole(body);
+            var roleId = CastingUtil.getUUID(body.get("rolesId"))
+                .orElseThrow(() -> {
+                    response.setStatus(HttpStatus.BAD_REQUEST);
+                    throw new RolesException("ID de papel não informado.");
+                });
+
+            String name = CastingUtil.getString(body.get("name"))
+                .orElse(null);
+
+            String description = CastingUtil.getString(body.get("description"))
+                .orElse(null);
+
+            Roles roles = rolesService.editRole(roleId, name, description);
             response.body.put("roles", roles);
             response.message = "Papel \""+ roles.name +"\" editado com sucesso.";
         });
@@ -52,9 +81,25 @@ public class RolesController {
     @ResponseBody
     public Response roles_feature_active(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
-            RolesFeature rolesFeature = rolesService.setRolesFeatureValue(body);
-            response.message = "Funcionalidade " + rolesFeature.featureType.label + " foi alterada " +
-                               " com sucesso para "+ Permission.getPermissionName(rolesFeature.permission) +" em \"" + rolesFeature.roles.name + "\".";
+            var rolesId = CastingUtil.getUUID(body.get("rolesId")).orElseThrow(() -> {
+                response.setStatus(HttpStatus.BAD_REQUEST);
+                return new RolesException("Parâmetro 'rolesId' não informado ou inválido.");
+            });
+
+            var feature = CastingUtil.getEnum(FeaturesTypes.class, body.get("feature")).orElseThrow(() -> {
+                response.setStatus(HttpStatus.BAD_REQUEST);
+                return new RolesException("Parâmetro 'feature' não informado ou inválido.");
+            });
+
+            var permission = CastingUtil.getInteger(body.get("value")).orElseThrow(() -> {
+                response.setStatus(HttpStatus.BAD_REQUEST);
+                return new RolesException("Parâmetro 'value' não informado ou inválido.");
+            });
+
+            var roles = rolesService.setRolesFeatureValue(rolesId, feature, permission);
+
+            response.message = "Funcionalidade " + feature.label + " foi alterada " +
+                               " com sucesso para "+ Permission.getPermissionName(permission) +" em \"" + roles.name + "\".";
         });
     }
 
@@ -63,17 +108,47 @@ public class RolesController {
     @ResponseBody
     public Response roles_assign(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
-            RolesProfile rolesProfile = rolesService.assignRole(body);
-            response.message = "Papel \""+ rolesProfile.roles.name +"\" atribuído com sucesso para \""+ rolesProfile.profile.getFirstname() +"\".";
+            var roleIdOpt = CastingUtil.getUUID(body.get("rolesId"));
+            var groupIdOpt = CastingUtil.getUUID(body.get("groupId"));
+            var profileIdOpt = CastingUtil.getUUID(body.get("profileId"));
+
+            var roleId = roleIdOpt.orElseThrow(() -> {
+                response.setStatus(HttpStatus.BAD_REQUEST);
+                return new RolesException("Parâmetro rolesId é nulo.");
+            });
+
+            var groupId = groupIdOpt.orElseThrow(() -> {
+                response.setStatus(HttpStatus.BAD_REQUEST);
+                return new RolesException("Parâmetro groupId é nulo.");
+            });
+
+            var profileId = profileIdOpt.orElseThrow(() -> {
+                response.setStatus(HttpStatus.BAD_REQUEST);
+                return new RolesException("Parâmetro profileId é nulo.");
+            });
+
+            Roles rolesProfile = rolesService.assignRole(roleId, groupId, profileId);
+            response.message = "Papel \""+ rolesProfile.name +"\" atribuído com sucesso.";
         });
     }
 
     // assigned roles
     @PostMapping(value = "/assigned", consumes = "application/json", produces = "application/json")
-    @ResponseBody
     public Response roles_assigned(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
-            response.body.put("roles", rolesService.getAssignedRoles(body));
+            var profileId = CastingUtil.getUUID(body.get("profileId"))
+                .orElseThrow(() -> {
+                    response.setStatus(HttpStatus.BAD_REQUEST);
+                    return new RolesException("Parâmetro 'profileId' não informado.");
+                });
+
+            var groupId = CastingUtil.getUUID(body.get("groupId"))
+                .orElseThrow(() -> {
+                    response.setStatus(HttpStatus.BAD_REQUEST);
+                    return new RolesException("Parâmetro 'groupId' não informado.");
+                });
+
+            response.body.put("roles", rolesService.getAssignedRoles(profileId, groupId));
         });
     }
 

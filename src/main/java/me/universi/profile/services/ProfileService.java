@@ -11,6 +11,8 @@ import me.universi.user.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import jakarta.validation.constraints.NotNull;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
@@ -104,5 +106,9 @@ public class ProfileService {
 
     public Profile getProfileInSession() {
         return findFirstById(UserService.getInstance().getUserInSession().getProfile().getId());
+    }
+
+    public boolean isSessionOfProfile(@NotNull Profile profile) {
+        return profile.getId().equals(getProfileInSession().getId());
     }
 }

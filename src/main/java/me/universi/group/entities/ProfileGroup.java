@@ -9,6 +9,8 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
 import me.universi.profile.entities.Profile;
+import me.universi.roles.entities.Roles;
+
 import org.hibernate.annotations.*;
 
 
@@ -54,6 +56,11 @@ public class ProfileGroup implements Serializable {
     @JsonIgnore
     @Column(name = "deleted")
     public boolean deleted = Boolean.FALSE;
+
+    @ManyToOne
+    @NotNull
+    @PrimaryKeyJoinColumn(name="role_id")
+    public Roles role;
 
     public ProfileGroup() {
     }
