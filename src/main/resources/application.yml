@@ -4,6 +4,12 @@ spring:
   flyway:
     out-of-order: true
 
+logging:
+  level:
+    root: INFO
+  file:
+    name: spring.log
+
 keycloak:
   enabled: ${API_KEYCLOAK_ENABLED:false}
   auth-server-url: ${API_KEYCLOAK_AUTH_SERVER_URL:}
