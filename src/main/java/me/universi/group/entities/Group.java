@@ -372,6 +372,11 @@ public class Group implements Serializable {
 
     @Transient
     public Map<FeaturesTypes, Integer> getPermissions() {
+
+        if(!UserService.getInstance().userIsLoggedIn()) {
+            return null;
+        }
+
         Roles role = RolesService.getInstance().getAssignedRoles(
             ProfileService.getInstance().getProfileInSession().getId(),
             this.id
