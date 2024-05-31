@@ -38,3 +38,5 @@ src/main/resources/static/img/imagem/*
 ### Mac OS
 *.DS_Store
 SESSIONS.ser
+spring.log
+build.hash
