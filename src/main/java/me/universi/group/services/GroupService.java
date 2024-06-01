@@ -821,8 +821,8 @@ public class GroupService {
             groupEnvironment.alert_new_content_enabled = alert_new_content_enabled;
         }
         if(message_template_new_content != null) {
-            if(message_template_new_content.length() > 255) {
-                throw new GroupException("O template de mensagem para novo conteúdo não pode ter mais de 255 caracteres.");
+            if(message_template_new_content.length() > 6000) {
+                throw new GroupException("O template de mensagem para novo conteúdo não pode ter mais de 6000 caracteres.");
             }
             groupEnvironment.message_template_new_content = message_template_new_content.isEmpty() ? null : message_template_new_content;
         }
@@ -830,8 +830,8 @@ public class GroupService {
             groupEnvironment.alert_assigned_content_enabled = alert_assigned_content_enabled;
         }
         if(message_template_assigned_content != null) {
-            if(message_template_assigned_content.length() > 255) {
-                throw new GroupException("O template de mensagem para conteúdo atribuído não pode ter mais de 255 caracteres.");
+            if(message_template_assigned_content.length() > 6000) {
+                throw new GroupException("O template de mensagem para conteúdo atribuído não pode ter mais de 6000 caracteres.");
             }
             groupEnvironment.message_template_assigned_content = message_template_assigned_content.isEmpty() ? null : message_template_assigned_content;
         }
