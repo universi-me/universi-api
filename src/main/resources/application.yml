@@ -8,7 +8,7 @@ logging:
   level:
     root: INFO
   file:
-    name: spring.log
+    name: ${API_DEBUG_FILE:spring.log}
 
 keycloak:
   enabled: ${API_KEYCLOAK_ENABLED:false}
