@@ -1,5 +1,6 @@
 package me.universi.user.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.net.URL;
 import java.util.Collections;
@@ -29,8 +30,6 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
-
-import io.jsonwebtoken.Jwts;
 
 @RestController
 @RequestMapping(value = "/api")
@@ -391,9 +390,14 @@ public class UserController {
                 // returned secured token
                 String accessToken = (String) token.get("access_token");
 
-                Map<String, Object> decodedToken = Jwts.parser()
-                        .parseClaimsJwt(accessToken.substring(0, accessToken.lastIndexOf('.') + 1))
-                        .getBody();
+                // Split the JWT into its parts
+                String[] parts = accessToken.split("\\.");
+                if (parts.length != 3) {
+                    throw new IllegalArgumentException("Invalid JWT token");
+                }
+
+                String bodyJson = new String(java.util.Base64.getUrlDecoder().decode(parts[1]));
+                Map<String, Object> decodedToken = new ObjectMapper().readValue(bodyJson, Map.class);
 
                 String email = (String) decodedToken.get("email");
                 String username = (String) decodedToken.get("preferred_username");
