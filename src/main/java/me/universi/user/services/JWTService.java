@@ -55,7 +55,7 @@ public class JWTService {
     };
 
     public User getUserFromToken(String token) throws Exception {
-        Jws<Claims> jws = Jwts.parser().setSigningKeyResolver(signingKeyResolver).parseClaimsJws(token);
+        Jws<Claims> jws = Jwts.parser().setSigningKeyResolver(signingKeyResolver).build().parseSignedClaims(token);
         // If integrity checks don't throw continue
         if(jws.getBody().getExpiration().before(new Date())) {
             throw new UserException("JWT Token Expired");
