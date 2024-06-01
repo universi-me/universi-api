@@ -9,7 +9,7 @@ RUN jdeps --ignore-missing-deps -q  \
     --print-module-deps  \
     /app.jar > deps.info
 RUN jlink \
-    --add-modules $(cat deps.info),java.xml,jdk.unsupported,java.sql,java.naming,java.desktop,java.management,java.security.jgss,java.instrument \
+    --add-modules $(cat deps.info),java.xml,jdk.unsupported,java.sql,java.naming,java.desktop,java.management,java.security.jgss,java.instrument,jdk.crypto.ec \
     --strip-debug \
     --compress 2 \
     --no-header-files \
