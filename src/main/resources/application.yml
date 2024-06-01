@@ -3,6 +3,7 @@ spring:
     active: ${API_PROFILE_ACTIVE:dev}
   flyway:
     out-of-order: true
+    ignore-migration-patterns: "*:missing"
 
 logging:
   level:
