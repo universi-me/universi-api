@@ -103,7 +103,6 @@ public class Folder implements Serializable {
     @Column(name = "deleted")
     private boolean deleted = Boolean.FALSE;
 
-    @JsonIgnore
     @ManyToMany
     @JoinTable(
         name = "folder_competences",

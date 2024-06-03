@@ -1,5 +1,7 @@
 package me.universi.util;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -57,5 +59,15 @@ public class CastingUtil {
         } catch (IllegalArgumentException e) {
             return Optional.empty();
         }
+    }
+
+    public static Optional<ArrayList<Object>> getList(Object obj) {
+        if (obj == null) return Optional.empty();
+
+        if (obj instanceof Collection) {
+            return Optional.of( new ArrayList<>( (Collection<?>) obj ) );
+        }
+
+        return Optional.empty();
     }
 }

@@ -95,6 +95,7 @@ public class FolderController {
             // id or array of ids
             Object addCategoriesByIds =            body.get("addCategoriesByIds");
             Object addGrantedAccessGroupByIds =    body.get("addGrantedAccessGroupByIds");
+            var addCompetenceTypeBadgeIds =        CastingUtil.getList(body.get("addCompetenceTypeBadgeIds"));
 
             if(name == null || String.valueOf(name).isEmpty()) {
                 throw new CapacityException("Parametro name não informados.");
@@ -148,6 +149,17 @@ public class FolderController {
                 folderService.addOrRemoveGrantedAccessGroup(folder, addGrantedAccessGroupByIds, true);
             }
 
+            if (addCompetenceTypeBadgeIds.isPresent()) {
+                folderService.addGrantCompetenceBadge(
+                    folder,
+                    addCompetenceTypeBadgeIds.get()
+                        .stream()
+                        .map(obj -> CastingUtil.getUUID(obj).orElse(null))
+                        .filter(Objects::nonNull)
+                        .toList()
+                );
+            }
+
             folder.setReference(folderService.generateAvailableReference());
 
             boolean result = folderService.saveOrUpdate(folder);
@@ -185,6 +197,9 @@ public class FolderController {
             Object removeCategoriesByIds =         body.get("removeCategoriesByIds");
             Object addGrantedAccessGroupByIds =    body.get("addGrantedAccessGroupByIds");
             Object removeGrantedAccessGroupByIds = body.get("removeGrantedAccessGroupByIds");
+
+            var addCompetenceTypeBadgeIds = CastingUtil.getList(body.get("addCompetenceTypeBadgeIds"));
+            var removeCompetenceTypeBadgeIds = CastingUtil.getList(body.get("removeCompetenceTypeBadgeIds"));
 
             Folder folder = folderService.findByIdOrReference(folderId, folderReference);
 
@@ -231,6 +246,28 @@ public class FolderController {
             }
             if(removeGrantedAccessGroupByIds != null) {
                 folderService.addOrRemoveGrantedAccessGroup(folder, removeGrantedAccessGroupByIds, false);
+            }
+
+            if (removeCompetenceTypeBadgeIds.isPresent()) {
+                folderService.removeGrantCompetenceBadge(
+                    folder,
+                    removeCompetenceTypeBadgeIds.get()
+                        .stream()
+                        .map(obj -> CastingUtil.getUUID(obj).orElse(null))
+                        .filter(Objects::nonNull)
+                        .toList()
+                );
+            }
+
+            if (addCompetenceTypeBadgeIds.isPresent()) {
+                folderService.addGrantCompetenceBadge(
+                    folder,
+                    addCompetenceTypeBadgeIds.get()
+                        .stream()
+                        .map(obj -> CastingUtil.getUUID(obj).orElse(null))
+                        .filter(Objects::nonNull)
+                        .toList()
+                );
             }
 
             boolean result = folderService.saveOrUpdate(folder);

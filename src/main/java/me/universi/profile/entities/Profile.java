@@ -330,6 +330,11 @@ public class Profile implements Serializable {
         this.competenceBadges = competenceBadges;
     }
 
+    @Transient
+    public boolean hasBadge(@NotNull CompetenceType competenceType) {
+        return this.competenceBadges.stream().anyMatch(ct -> ct.getId().equals(competenceType.getId()));
+    }
+
     @Override
     public String toString() {
         return "\nProfile[" +

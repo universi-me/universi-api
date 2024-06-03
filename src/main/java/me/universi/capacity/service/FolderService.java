@@ -25,6 +25,7 @@ import me.universi.capacity.repository.FolderFavoriteRepository;
 import me.universi.capacity.repository.FolderProfileRepository;
 import me.universi.capacity.repository.FolderRepository;
 import me.universi.competence.services.CompetenceService;
+import me.universi.competence.services.CompetenceTypeService;
 import me.universi.group.entities.Group;
 import me.universi.group.entities.ProfileGroup;
 import me.universi.group.exceptions.GroupException;
@@ -570,6 +571,25 @@ public class FolderService {
         addOrRemoveGrantedAccessGroup(folder, originalGroup.getId().toString(), false);
     }
 
+    public void addGrantCompetenceBadge(@NotNull Folder folder, @NotNull Collection<UUID> competenceTypesIds) {
+        var competenceTypeService = CompetenceTypeService.getInstance();
+
+        var competenceTypes = competenceTypesIds.stream()
+            .map(competenceTypeService::findFirstById)
+            .filter(ct -> ct != null && !folder.getGrantsBadgeToCompetences().contains(ct))
+            .toList();
+
+        folder.getGrantsBadgeToCompetences().addAll(competenceTypes);
+        saveOrUpdate(folder);
+    }
+
+    public void removeGrantCompetenceBadge(@NotNull Folder folder, @NotNull Collection<UUID> competenceTypesIds) {
+        folder.getGrantsBadgeToCompetences()
+            .removeIf(ct -> competenceTypesIds.contains(ct.getId()));
+
+        saveOrUpdate(folder);
+    }
+
     public void grantCompetenceBadge(@NotNull Collection<Folder> folder) {
         folder.forEach(this::grantCompetenceBadge);
     }
@@ -582,11 +602,11 @@ public class FolderService {
         Profile profile = profileService.getProfileInSession();
 
         folder.getGrantsBadgeToCompetences().forEach(competenceType -> {
-            profile.getCompetenceBadges().add(competenceType);
+            if (!profile.hasBadge(competenceType))
+                profile.getCompetenceBadges().add(competenceType);
 
             if (!CompetenceService.getInstance().profileHasCompetence(profile, competenceType)) {
-                var competence = CompetenceService.getInstance().create(competenceType, "", 0);
-                profile.getCompetences().add(competence);
+                CompetenceService.getInstance().create(competenceType, "", 0);
             }
         });
 
