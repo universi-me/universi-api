@@ -12,10 +12,10 @@ import me.universi.competence.entities.CompetenceType;
 import me.universi.profile.entities.Profile;
 
 public class CompetenceProfileDTO {
-    @JsonIgnore private Competence competence;
-    @JsonIgnore private Profile profile;
+    @JsonIgnore private @NotNull Competence competence;
+    @JsonIgnore private @NotNull Profile profile;
 
-    public CompetenceProfileDTO(Competence competence, Profile profile) {
+    public CompetenceProfileDTO(@NotNull Competence competence, @NotNull Profile profile) {
         this.competence = competence;
         this.profile = profile;
     }
