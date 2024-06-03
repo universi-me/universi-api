@@ -1,5 +1,6 @@
 package me.universi.competence.services;
 
+import me.universi.Sys;
 import me.universi.api.entities.Response;
 import me.universi.competence.entities.Competence;
 import me.universi.competence.entities.CompetenceType;
@@ -12,10 +13,11 @@ import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import org.springframework.stereotype.Service;
 
+import jakarta.validation.constraints.NotNull;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -31,6 +33,10 @@ public class CompetenceService {
         this.profileService = profileService;
         this.userService = userService;
         this.competenceTypeService = competenceTypeService;
+    }
+
+    public static CompetenceService getInstance() {
+        return Sys.context.getBean("competenceService", CompetenceService.class);
     }
 
     public Competence findFirstById(UUID id) {
@@ -66,19 +72,10 @@ public class CompetenceService {
 
     public void update(Competence competence){ competenceRepository.saveAndFlush(competence); }
 
-    public boolean profileHasCompetence(Profile profile, Competence competence) {
-        try {
-            if(profile.getCompetences() != null) {
-                for(Competence compNow : profile.getCompetences()) {
-                    if(Objects.equals(competence.getId(), compNow.getId())) {
-                        return true;
-                    }
-                }
-            }
-        }catch (Exception e) {
-            return false;
-        }
-        return false;
+    public boolean profileHasCompetence(@NotNull Profile profile, @NotNull CompetenceType competenceType) {
+        return profile.getCompetences()
+            .stream()
+            .anyMatch(c -> c.getCompetenceType().getId().equals(competenceType.getId()));
     }
 
     public void deleteAll(Collection<Competence> competences) {
@@ -99,46 +96,29 @@ public class CompetenceService {
         deleteLogico(competence);
     }
 
-    public Response create(Map<String, Object> body) {
-        return Response.buildResponse(response -> {
+    public Competence create(@NotNull UUID competenceTypeId, @NotNull String description, @NotNull Integer level) {
+        CompetenceType compT = competenceTypeService.findFirstById(competenceTypeId);
+        if(compT == null)
+            throw new CompetenceException("Tipo de Competência não encontrado.");
 
-            User user = userService.getUserInSession();
+        return create(compT, description, level);
+    }
 
-            String competenceTypeId = (String)body.get("competenciatipoId");
-            if(competenceTypeId == null) {
-                throw new CompetenceException("Parametro competenciatipoId é nulo.");
-            }
+    public Competence create(@NotNull CompetenceType competenceType, @NotNull String description, @NotNull Integer level) {
+        User user = userService.getUserInSession();
 
-            String description = (String)body.get("descricao");
-            if(description == null) {
-                throw new CompetenceException("Parametro descricao é nulo.");
-            }
+        Competence newCompetence = new Competence();
+        newCompetence.setCompetenceType(competenceType);
+        newCompetence.setDescription(description);
+        newCompetence.setLevel(level);
 
-            String level = (String)body.get("nivel");
-            if(level == null) {
-                throw new CompetenceException("Parametro nivel é nulo.");
-            }
+        newCompetence = save(newCompetence);
 
-            CompetenceType compT = competenceTypeService.findFirstById(competenceTypeId);
-            if(compT == null) {
-                throw new CompetenceException("Tipo de Competência não encontrado.");
-            }
+        // Essa linha vai dar problema quando for para adicionar nas vagas a competence
+        // está adicionando na conta do usuário diretamente
+        addCompetenceInProfile(user, newCompetence);
 
-            Competence newCompetence = new Competence();
-            newCompetence.setCompetenceType(compT);
-            newCompetence.setDescription(description);
-            newCompetence.setLevel(Integer.parseInt(level));
-
-            save(newCompetence);
-
-            /*Essa linha vai dar problema quando for para adicionar nas vagas a competence
-            * esta adicionando na conta do usuario dieretamente*/
-            addCompetenceInProfile(user, newCompetence);
-
-            response.message = "Competência Criada e adicionado ao perfil";
-            response.success = true;
-
-        });
+        return newCompetence;
     }
 
     public Response update( Map<String, Object> body) {

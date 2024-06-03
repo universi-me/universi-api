@@ -24,6 +24,7 @@ import me.universi.capacity.repository.ContentStatusRepository;
 import me.universi.capacity.repository.FolderFavoriteRepository;
 import me.universi.capacity.repository.FolderProfileRepository;
 import me.universi.capacity.repository.FolderRepository;
+import me.universi.competence.services.CompetenceService;
 import me.universi.group.entities.Group;
 import me.universi.group.entities.ProfileGroup;
 import me.universi.group.exceptions.GroupException;
@@ -582,6 +583,11 @@ public class FolderService {
 
         folder.getGrantsBadgeToCompetences().forEach(competenceType -> {
             profile.getCompetenceBadges().add(competenceType);
+
+            if (!CompetenceService.getInstance().profileHasCompetence(profile, competenceType)) {
+                var competence = CompetenceService.getInstance().create(competenceType, "", 0);
+                profile.getCompetences().add(competence);
+            }
         });
 
         profileService.save(profile);
