@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import jakarta.validation.constraints.NotNull;
 import me.universi.Sys;
 import me.universi.capacity.entidades.Category;
 import me.universi.capacity.entidades.Content;
@@ -16,6 +17,7 @@ import me.universi.capacity.entidades.ContentStatus;
 import me.universi.capacity.entidades.Folder;
 import me.universi.capacity.entidades.FolderFavorite;
 import me.universi.capacity.entidades.FolderProfile;
+import me.universi.capacity.enums.ContentStatusType;
 import me.universi.capacity.exceptions.CapacityException;
 import me.universi.capacity.repository.ContentRepository;
 import me.universi.capacity.repository.ContentStatusRepository;
@@ -565,5 +567,23 @@ public class FolderService {
 
         addOrRemoveGrantedAccessGroup(folder, newGroup.getId().toString(), true);
         addOrRemoveGrantedAccessGroup(folder, originalGroup.getId().toString(), false);
+    }
+
+    public void grantCompetenceBadge(@NotNull Collection<Folder> folder) {
+        folder.forEach(this::grantCompetenceBadge);
+    }
+
+    public void grantCompetenceBadge(@NotNull Folder folder) {
+        boolean folderComplete = folder.getContents().stream()
+            .allMatch(c -> c.getStatus() == ContentStatusType.DONE);
+
+        if (!folderComplete) return;
+        Profile profile = profileService.getProfileInSession();
+
+        folder.getGrantsBadgeToCompetences().forEach(competenceType -> {
+            profile.getCompetenceBadges().add(competenceType);
+        });
+
+        profileService.save(profile);
     }
 }

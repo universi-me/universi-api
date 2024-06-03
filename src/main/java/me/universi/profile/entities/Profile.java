@@ -12,6 +12,7 @@ import me.universi.capacity.entidades.ContentStatus;
 import me.universi.capacity.entidades.FolderFavorite;
 import me.universi.capacity.entidades.FolderProfile;
 import me.universi.competence.entities.Competence;
+import me.universi.competence.entities.CompetenceType;
 import me.universi.curriculum.education.entities.Education;
 import me.universi.curriculum.experience.entities.Experience;
 import me.universi.group.entities.ProfileGroup;
@@ -131,6 +132,15 @@ public class Profile implements Serializable {
     @JsonIgnore
     @Column(name = "hidden")
     private boolean hidden = Boolean.FALSE;
+
+    @JsonIgnore
+    @OneToMany
+    @JoinTable(
+        name = "profile_competence_badges",
+        joinColumns = @JoinColumn(name = "profile_id"),
+        inverseJoinColumns = @JoinColumn(name = "competence_type_id")
+    )
+    private Collection<CompetenceType> competenceBadges;
 
     public Profile(UUID id, User user, String bio, Collection<Competence> competences, Collection<ProfileGroup> groups, Collection<Link> links, Collection<FolderProfile> assignedFolders, Collection<FolderFavorite> favoriteFolders, boolean hidden) {
         this.id = id;
@@ -310,6 +320,14 @@ public class Profile implements Serializable {
 
     public void setHidden(boolean hidden) {
         this.hidden = hidden;
+    }
+
+    public Collection<CompetenceType> getCompetenceBadges() {
+        return competenceBadges;
+    }
+
+    public void setCompetenceBadges(Collection<CompetenceType> competenceBadges) {
+        this.competenceBadges = competenceBadges;
     }
 
     @Override

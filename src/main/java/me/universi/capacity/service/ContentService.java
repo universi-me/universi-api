@@ -2,7 +2,6 @@ package me.universi.capacity.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -128,7 +127,11 @@ public class ContentService {
         if(contentStatus.getStatus() != status) {
             contentStatus.setStatus(status);
             contentStatus.setUpdatedAt(new java.util.Date());
-            return contentStatusRepository.save(contentStatus);
+
+            contentStatus = contentStatusRepository.save(contentStatus);
+            folderService.grantCompetenceBadge(contentStatus.getContent().getFolders());
+
+            return contentStatus;
         }
         return contentStatus;
     }
