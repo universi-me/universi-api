@@ -41,6 +41,10 @@ public class ProfileService {
         perfilRepository.saveAndFlush(profile);
     }
 
+    public void saveAll(Collection<Profile> profile) {
+        perfilRepository.saveAllAndFlush(profile);
+    }
+
     public void update(Profile profile) {
         perfilRepository.saveAndFlush(profile);
     }

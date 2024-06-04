@@ -581,6 +581,8 @@ public class FolderService {
 
         folder.getGrantsBadgeToCompetences().addAll(competenceTypes);
         saveOrUpdate(folder);
+
+        grantCompetenceBadge(folder, profileService.findAll());
     }
 
     public void removeGrantCompetenceBadge(@NotNull Folder folder, @NotNull Collection<UUID> competenceTypesIds) {
@@ -590,26 +592,44 @@ public class FolderService {
         saveOrUpdate(folder);
     }
 
-    public void grantCompetenceBadge(@NotNull Collection<Folder> folder) {
-        folder.forEach(this::grantCompetenceBadge);
+    public void grantCompetenceBadge(@NotNull Collection<Folder> folder, @NotNull Collection<@NotNull Profile> profile) {
+        for (var f : folder)
+            for (var p : profile)
+                grantCompetenceBadgeToProfile(f, p);
+
+        profileService.saveAll(profile);
     }
 
-    public void grantCompetenceBadge(@NotNull Folder folder) {
-        boolean folderComplete = folder.getContents().stream()
+    public void grantCompetenceBadge(@NotNull Folder folder, @NotNull Collection<@NotNull Profile> profile) {
+        for (var p : profile) grantCompetenceBadgeToProfile(folder, p);
+
+        profileService.saveAll(profile);
+    }
+
+    public void grantCompetenceBadge(@NotNull Collection<Folder> folder, @NotNull Profile profile) {
+        for (var f : folder) grantCompetenceBadgeToProfile(f, profile);
+
+        profileService.save(profile);
+    }
+
+    public void grantCompetenceBadge(@NotNull Folder folder, @NotNull Profile profile) {
+        grantCompetenceBadgeToProfile(folder, profile);
+        profileService.save(profile);
+    }
+
+    private void grantCompetenceBadgeToProfile(@NotNull Folder folder, @NotNull Profile profile) {
+        boolean folderComplete = getStatuses(profile, folder).stream()
             .allMatch(c -> c.getStatus() == ContentStatusType.DONE);
 
         if (!folderComplete) return;
-        Profile profile = profileService.getProfileInSession();
 
-        folder.getGrantsBadgeToCompetences().forEach(competenceType -> {
+        for (var competenceType : folder.getGrantsBadgeToCompetences()) {
             if (!profile.hasBadge(competenceType))
                 profile.getCompetenceBadges().add(competenceType);
 
             if (!CompetenceService.getInstance().profileHasCompetence(profile, competenceType)) {
                 CompetenceService.getInstance().create(competenceType, "", 0);
             }
-        });
-
-        profileService.save(profile);
+        }
     }
 }

@@ -129,7 +129,7 @@ public class ContentService {
             contentStatus.setUpdatedAt(new java.util.Date());
 
             contentStatus = contentStatusRepository.save(contentStatus);
-            folderService.grantCompetenceBadge(contentStatus.getContent().getFolders());
+            folderService.grantCompetenceBadge(contentStatus.getContent().getFolders(), contentStatus.getProfile());
 
             return contentStatus;
         }
