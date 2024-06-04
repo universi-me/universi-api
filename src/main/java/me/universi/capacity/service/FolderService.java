@@ -623,12 +623,18 @@ public class FolderService {
 
         if (!folderComplete) return;
 
+        var competenceTypeService = CompetenceTypeService.getInstance();
+
         for (var competenceType : folder.getGrantsBadgeToCompetences()) {
             if (!profile.hasBadge(competenceType))
                 profile.getCompetenceBadges().add(competenceType);
 
             if (!CompetenceService.getInstance().profileHasCompetence(profile, competenceType)) {
                 CompetenceService.getInstance().create(competenceType, "", 0);
+            }
+
+            if (!competenceTypeService.hasAccessToCompetenceType(competenceType, profile)) {
+                competenceTypeService.grantAccessToProfile(competenceType, profile);
             }
         }
     }
