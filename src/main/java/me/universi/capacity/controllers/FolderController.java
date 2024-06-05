@@ -18,6 +18,7 @@ import me.universi.capacity.entidades.Folder;
 import me.universi.capacity.exceptions.CapacityException;
 import me.universi.capacity.service.ContentService;
 import me.universi.capacity.service.FolderService;
+import me.universi.competence.services.CompetenceTypeService;
 import me.universi.group.entities.Group;
 import me.universi.group.services.GroupService;
 import me.universi.profile.entities.Profile;
@@ -32,11 +33,13 @@ public class FolderController {
     private final GroupService groupService;
     private final ContentService contentService;
     private final FolderService folderService;
+    private final CompetenceTypeService competenceTypeService;
 
-    public FolderController(GroupService groupService, ContentService contentService, FolderService folderService) {
+    public FolderController(GroupService groupService, ContentService contentService, FolderService folderService, CompetenceTypeService competenceTypeService) {
         this.groupService = groupService;
         this.contentService = contentService;
         this.folderService = folderService;
+        this.competenceTypeService = competenceTypeService;
     }
 
     @GetMapping("/all")
@@ -150,13 +153,12 @@ public class FolderController {
             }
 
             if (addCompetenceTypeBadgeIds.isPresent()) {
-                folderService.addGrantCompetenceBadge(
-                    folder,
+                folder.setGrantsBadgeToCompetences(
                     addCompetenceTypeBadgeIds.get()
-                        .stream()
-                        .map(obj -> CastingUtil.getUUID(obj).orElse(null))
-                        .filter(Objects::nonNull)
-                        .toList()
+                    .stream()
+                    .map(obj -> competenceTypeService.findFirstById(CastingUtil.getUUID(obj).orElse(null)))
+                    .filter(Objects::nonNull)
+                    .toList()
                 );
             }
 
