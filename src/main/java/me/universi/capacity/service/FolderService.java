@@ -532,6 +532,15 @@ public class FolderService {
             .toList();
     }
 
+    public boolean isComplete(@NotNull Profile profile, @NotNull Folder folder) {
+        var statuses = getStatuses(profile, folder);
+
+        return !folder.getContents().isEmpty()
+            && statuses.size() == folder.getContents().size()
+            && statuses.stream()
+                .allMatch(cs -> cs.getStatus() == ContentStatusType.DONE);
+    }
+
     public boolean canCheckProfileProgress(Object profileId, Object profileUsername, Object folderId, Object folderReference) {
         return canCheckProfileProgress(
             ProfileService.getInstance().getProfileByUserIdOrUsername(profileId, profileUsername),
@@ -618,10 +627,7 @@ public class FolderService {
     }
 
     private void grantCompetenceBadgeToProfile(@NotNull Folder folder, @NotNull Profile profile) {
-        boolean folderComplete = getStatuses(profile, folder).stream()
-            .allMatch(c -> c.getStatus() == ContentStatusType.DONE);
-
-        if (!folderComplete) return;
+        if (!isComplete(profile, folder)) return;
 
         var competenceTypeService = CompetenceTypeService.getInstance();
 
