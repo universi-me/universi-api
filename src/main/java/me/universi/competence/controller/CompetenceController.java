@@ -3,6 +3,7 @@ package me.universi.competence.controller;
 import me.universi.api.entities.Response;
 import me.universi.competence.exceptions.CompetenceException;
 import me.universi.competence.services.CompetenceService;
+import me.universi.profile.services.ProfileService;
 import me.universi.util.CastingUtil;
 
 import org.springframework.http.HttpStatus;
@@ -43,7 +44,7 @@ public class CompetenceController {
                 return new CompetenceException("Parâmetro 'nivel' não informado ou inválido.");
             });
 
-            competenceService.create(competenceTypeId, description, level);
+            competenceService.create(competenceTypeId, description, level, ProfileService.getInstance().getProfileInSession());
             response.message = "Competência Criada e adicionado ao perfil";
         });
     }

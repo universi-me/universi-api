@@ -85,8 +85,7 @@ public class CompetenceService {
         competenceRepository.saveAll(competences);
     }
 
-    public void addCompetenceInProfile(User user,Competence newCompetence) throws ProfileException {
-        Profile profile = profileService.getProfileByUserIdOrUsername(user.getProfile().getId(), user.getUsername());
+    public void addCompetenceInProfile(@NotNull Profile profile,Competence newCompetence) throws ProfileException {
         profile.getCompetences().add(newCompetence);
         profileService.save(profile);
     }
@@ -96,27 +95,22 @@ public class CompetenceService {
         deleteLogico(competence);
     }
 
-    public Competence create(@NotNull UUID competenceTypeId, @NotNull String description, @NotNull Integer level) {
+    public Competence create(@NotNull UUID competenceTypeId, @NotNull String description, @NotNull Integer level, @NotNull Profile profile) {
         CompetenceType compT = competenceTypeService.findFirstById(competenceTypeId);
         if(compT == null)
             throw new CompetenceException("Tipo de Competência não encontrado.");
 
-        return create(compT, description, level);
+        return create(compT, description, level, profile);
     }
 
-    public Competence create(@NotNull CompetenceType competenceType, @NotNull String description, @NotNull Integer level) {
-        User user = userService.getUserInSession();
-
+    public Competence create(@NotNull CompetenceType competenceType, @NotNull String description, @NotNull Integer level, @NotNull Profile profile) {
         Competence newCompetence = new Competence();
         newCompetence.setCompetenceType(competenceType);
         newCompetence.setDescription(description);
         newCompetence.setLevel(level);
 
         newCompetence = save(newCompetence);
-
-        // Essa linha vai dar problema quando for para adicionar nas vagas a competence
-        // está adicionando na conta do usuário diretamente
-        addCompetenceInProfile(user, newCompetence);
+        addCompetenceInProfile(profile, newCompetence);
 
         return newCompetence;
     }

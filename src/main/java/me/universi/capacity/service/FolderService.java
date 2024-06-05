@@ -630,7 +630,7 @@ public class FolderService {
                 profile.getCompetenceBadges().add(competenceType);
 
             if (!CompetenceService.getInstance().profileHasCompetence(profile, competenceType)) {
-                CompetenceService.getInstance().create(competenceType, "", 0);
+                CompetenceService.getInstance().create(competenceType, "", 0, profile);
             }
 
             if (!competenceTypeService.hasAccessToCompetenceType(competenceType, profile)) {
