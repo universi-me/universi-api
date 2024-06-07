@@ -1,20 +1,18 @@
 package me.universi.profile.controller;
 
-import com.google.common.collect.Lists;
 import java.util.*;
 import java.util.stream.Collectors;
 import me.universi.api.entities.Response;
 import me.universi.capacity.service.FolderService;
+import me.universi.competence.dto.CompetenceProfileDTO;
 import me.universi.group.entities.Group;
 import me.universi.group.entities.ProfileGroup;
-import me.universi.group.entities.Subgroup;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.enums.Gender;
 import me.universi.profile.exceptions.ProfileException;
 import me.universi.profile.services.ProfileService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -208,7 +206,7 @@ public class ProfileController {
 
             Profile profileGet = profileService.getProfileByUserIdOrUsername(body.get("profileId"), body.get("username"));
 
-            response.body.put("competences", profileGet.getCompetences());
+            response.body.put("competences", CompetenceProfileDTO.allFromProfile(profileGet));
 
         });
     }

@@ -5,10 +5,13 @@ import me.universi.competence.entities.CompetenceType;
 import me.universi.competence.exceptions.CompetenceException;
 import me.universi.competence.repositories.CompetenceRepository;
 import me.universi.competence.repositories.CompetenceTypeRepository;
+import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
 import me.universi.user.services.UserService;
 
 import org.springframework.stereotype.Service;
+
+import jakarta.validation.constraints.NotNull;
 
 import java.util.Arrays;
 import java.util.List;
@@ -161,15 +164,21 @@ public class CompetenceTypeService {
     }
 
     public boolean hasAccessToCompetenceType(CompetenceType competence) {
-        if (competence == null) return false;
+        return hasAccessToCompetenceType(competence, UserService.getInstance().getUserInSession().getProfile());
+    }
 
-        UserService userService = UserService.getInstance();
-        var currentUser = userService.getUserInSession();
+    public boolean hasAccessToCompetenceType(@NotNull CompetenceType competence, @NotNull Profile profile) {
+        var currentUser = profile.getUser();
 
         return competence.isReviewed()
-            || userService.isUserAdmin(currentUser)
+            || UserService.getInstance().isUserAdmin(currentUser)
             || competence.getProfilesWithAccess()
                 .stream()
-                .anyMatch(p -> p.getId().equals(currentUser.getProfile().getId()));
+                .anyMatch(p -> p.getId().equals(profile.getId()));
+    }
+
+    public void grantAccessToProfile(@NotNull CompetenceType competenceType, @NotNull Profile profile) {
+        competenceType.getProfilesWithAccess().add(profile);
+        save(competenceType);
     }
 }

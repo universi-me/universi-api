@@ -12,6 +12,7 @@ import jakarta.validation.constraints.Size;
 import java.io.Serial;
 import java.io.Serializable;
 import me.universi.capacity.service.FolderService;
+import me.universi.competence.entities.CompetenceType;
 import me.universi.group.entities.Group;
 import me.universi.profile.entities.Profile;
 import me.universi.user.services.UserService;
@@ -101,6 +102,14 @@ public class Folder implements Serializable {
     @JsonIgnore
     @Column(name = "deleted")
     private boolean deleted = Boolean.FALSE;
+
+    @ManyToMany
+    @JoinTable(
+        name = "folder_competences",
+        joinColumns = @JoinColumn(name = "folder_id"),
+        inverseJoinColumns = @JoinColumn(name = "competence_type_id")
+    )
+    private Collection<CompetenceType> grantsBadgeToCompetences;
 
     public Folder() {
     }
@@ -215,6 +224,14 @@ public class Folder implements Serializable {
 
     public void setReference(String reference) {
         this.reference = reference;
+    }
+
+    public Collection<CompetenceType> getGrantsBadgeToCompetences() {
+        return grantsBadgeToCompetences;
+    }
+
+    public void setGrantsBadgeToCompetences(Collection<CompetenceType> grantsBadgeToCompetences) {
+        this.grantsBadgeToCompetences = grantsBadgeToCompetences;
     }
 
     @Transient

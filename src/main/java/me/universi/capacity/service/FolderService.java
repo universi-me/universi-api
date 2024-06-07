@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import jakarta.validation.constraints.NotNull;
 import me.universi.Sys;
 import me.universi.capacity.entidades.Category;
 import me.universi.capacity.entidades.Content;
@@ -16,12 +17,15 @@ import me.universi.capacity.entidades.ContentStatus;
 import me.universi.capacity.entidades.Folder;
 import me.universi.capacity.entidades.FolderFavorite;
 import me.universi.capacity.entidades.FolderProfile;
+import me.universi.capacity.enums.ContentStatusType;
 import me.universi.capacity.exceptions.CapacityException;
 import me.universi.capacity.repository.ContentRepository;
 import me.universi.capacity.repository.ContentStatusRepository;
 import me.universi.capacity.repository.FolderFavoriteRepository;
 import me.universi.capacity.repository.FolderProfileRepository;
 import me.universi.capacity.repository.FolderRepository;
+import me.universi.competence.services.CompetenceService;
+import me.universi.competence.services.CompetenceTypeService;
 import me.universi.group.entities.Group;
 import me.universi.group.entities.ProfileGroup;
 import me.universi.group.exceptions.GroupException;
@@ -528,6 +532,15 @@ public class FolderService {
             .toList();
     }
 
+    public boolean isComplete(@NotNull Profile profile, @NotNull Folder folder) {
+        var statuses = getStatuses(profile, folder);
+
+        return !folder.getContents().isEmpty()
+            && statuses.size() == folder.getContents().size()
+            && statuses.stream()
+                .allMatch(cs -> cs.getStatus() == ContentStatusType.DONE);
+    }
+
     public boolean canCheckProfileProgress(Object profileId, Object profileUsername, Object folderId, Object folderReference) {
         return canCheckProfileProgress(
             ProfileService.getInstance().getProfileByUserIdOrUsername(profileId, profileUsername),
@@ -565,5 +578,70 @@ public class FolderService {
 
         addOrRemoveGrantedAccessGroup(folder, newGroup.getId().toString(), true);
         addOrRemoveGrantedAccessGroup(folder, originalGroup.getId().toString(), false);
+    }
+
+    public void addGrantCompetenceBadge(@NotNull Folder folder, @NotNull Collection<UUID> competenceTypesIds) {
+        var competenceTypeService = CompetenceTypeService.getInstance();
+
+        var competenceTypes = competenceTypesIds.stream()
+            .map(competenceTypeService::findFirstById)
+            .filter(ct -> ct != null && !folder.getGrantsBadgeToCompetences().contains(ct))
+            .toList();
+
+        folder.getGrantsBadgeToCompetences().addAll(competenceTypes);
+        saveOrUpdate(folder);
+
+        grantCompetenceBadge(folder, profileService.findAll());
+    }
+
+    public void removeGrantCompetenceBadge(@NotNull Folder folder, @NotNull Collection<UUID> competenceTypesIds) {
+        folder.getGrantsBadgeToCompetences()
+            .removeIf(ct -> competenceTypesIds.contains(ct.getId()));
+
+        saveOrUpdate(folder);
+    }
+
+    public void grantCompetenceBadge(@NotNull Collection<Folder> folder, @NotNull Collection<@NotNull Profile> profile) {
+        for (var f : folder)
+            for (var p : profile)
+                grantCompetenceBadgeToProfile(f, p);
+
+        profileService.saveAll(profile);
+    }
+
+    public void grantCompetenceBadge(@NotNull Folder folder, @NotNull Collection<@NotNull Profile> profile) {
+        for (var p : profile) grantCompetenceBadgeToProfile(folder, p);
+
+        profileService.saveAll(profile);
+    }
+
+    public void grantCompetenceBadge(@NotNull Collection<Folder> folder, @NotNull Profile profile) {
+        for (var f : folder) grantCompetenceBadgeToProfile(f, profile);
+
+        profileService.save(profile);
+    }
+
+    public void grantCompetenceBadge(@NotNull Folder folder, @NotNull Profile profile) {
+        grantCompetenceBadgeToProfile(folder, profile);
+        profileService.save(profile);
+    }
+
+    private void grantCompetenceBadgeToProfile(@NotNull Folder folder, @NotNull Profile profile) {
+        if (!isComplete(profile, folder)) return;
+
+        var competenceTypeService = CompetenceTypeService.getInstance();
+
+        for (var competenceType : folder.getGrantsBadgeToCompetences()) {
+            if (!profile.hasBadge(competenceType))
+                profile.getCompetenceBadges().add(competenceType);
+
+            if (!CompetenceService.getInstance().profileHasCompetence(profile, competenceType)) {
+                CompetenceService.getInstance().create(competenceType, "", 0, profile);
+            }
+
+            if (!competenceTypeService.hasAccessToCompetenceType(competenceType, profile)) {
+                competenceTypeService.grantAccessToProfile(competenceType, profile);
+            }
+        }
     }
 }
