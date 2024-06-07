@@ -13,12 +13,10 @@ import me.universi.profile.exceptions.ProfileException;
 import me.universi.profile.services.ProfileService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
-import org.springframework.http.MediaType;
-import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
+import me.universi.util.CastingUtil;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -30,16 +28,18 @@ import java.util.UUID;
 public class ExperienceService {
 
     private final ExperienceRepository experienceRepository;
+    private final ExperienceLocalService experienceLocalService;
     private final UserService userService;
     private final ProfileService profileService;
     private final TypeExperienceService typeExperienceService;
 
 
-    public ExperienceService(ExperienceRepository experienceRepository, UserService userService, ProfileService profileService, TypeExperienceService typeExperienceService){
+    public ExperienceService(ExperienceRepository experienceRepository, UserService userService, ProfileService profileService, TypeExperienceService typeExperienceService, ExperienceLocalService experienceLocalService){
         this.experienceRepository = experienceRepository;
         this.userService = userService;
         this.profileService = profileService;
         this.typeExperienceService = typeExperienceService;
+        this.experienceLocalService = experienceLocalService;
     }
 
     public Experience save(Experience experience){
@@ -101,10 +101,15 @@ public class ExperienceService {
                 throw new ProfileException("Paramentro typeExperienceId passado é nulo");
             }
 
-            String local = (String) body.get("local");
-            if(local.isBlank() || local.isEmpty()){
-                throw new TypeEducationException("Paramentro local passado é nulo");
-            }
+            var localId = CastingUtil.getUUID(body.get("localId")).orElseThrow(() -> {
+                response.setStatus(HttpStatus.BAD_REQUEST);
+                return new TypeEducationException("Parâmetro 'localId' inválido ou não informado.");
+            });
+
+            var local = experienceLocalService.findById(localId).orElseThrow(() -> {
+                response.setStatus(HttpStatus.BAD_REQUEST);
+                return new TypeEducationException("Local com id '" + localId.toString() + "' não encontrado.");
+            });
 
             String description = (String) body.get("description");
             if(description.isBlank() || description.isEmpty()){
@@ -169,7 +174,7 @@ public class ExperienceService {
             }
 
             String typeExperienceId = (String)body.get("typeExperienceId");
-            String local = (String)body.get("local");
+            var localId = CastingUtil.getUUID(body.get("localId"));
             String description = (String) body.get("description");
             Date startDate = simpleDateFormat.parse((String) body.get("startDate"));
             Boolean presentDate = (Boolean) body.get("presentDate");
@@ -206,7 +211,12 @@ public class ExperienceService {
                 experience.setTypeExperience(typeExperience);
             }
 
-            if (local != null) {
+            if (localId.isPresent()) {
+                var local = experienceLocalService.findById(localId.get()).orElseThrow(() -> {
+                    response.setStatus(HttpStatus.BAD_REQUEST);
+                    return new TypeEducationException("Local com id '" + localId.toString() + "' não encontrado.");
+                });
+
                 experience.setLocal(local);
             }
             if (description != null) {

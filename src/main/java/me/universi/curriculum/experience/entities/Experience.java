@@ -9,6 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
@@ -35,9 +36,9 @@ public class Experience {
     @JoinColumn(name = "type_experience_id")
     private TypeExperience typeExperience;
 
-    /*Criar tipo local ?*/
-    @Column(name = "local")
-    private String local;
+    @ManyToOne
+    @JoinColumn(name = "local", nullable = false)
+    private ExperienceLocal local;
 
     @Column(name = "description")
     private String description;
@@ -66,7 +67,7 @@ public class Experience {
 
     }
 
-    public Experience(TypeExperience typeExperience, String local, String description, Date startDate, Date endDate, Boolean presentDate) {
+    public Experience(TypeExperience typeExperience, ExperienceLocal local, String description, Date startDate, Date endDate, Boolean presentDate) {
         this.typeExperience = typeExperience;
         this.local = local;
         this.description = description;
@@ -75,7 +76,7 @@ public class Experience {
         this.presentDate = presentDate;
     }
 
-    public Experience(TypeExperience typeExperience, String local, String description, Date startDate, Date endDate) {
+    public Experience(TypeExperience typeExperience, ExperienceLocal local, String description, Date startDate, Date endDate) {
         this.typeExperience = typeExperience;
         this.local = local;
         this.description = description;
@@ -88,11 +89,11 @@ public class Experience {
         return id;
     }
 
-    public String getLocal() {
+    public ExperienceLocal getLocal() {
         return local;
     }
 
-    public void setLocal(String local) {
+    public void setLocal(ExperienceLocal local) {
         this.local = local;
     }
 
