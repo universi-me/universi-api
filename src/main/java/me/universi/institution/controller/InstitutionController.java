@@ -1,4 +1,4 @@
-package me.universi.curriculum.experience.controller;
+package me.universi.institution.controller;
 
 import java.util.Map;
 
@@ -10,70 +10,70 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import me.universi.api.entities.Response;
-import me.universi.curriculum.experience.exceptions.ExperienceException;
-import me.universi.curriculum.experience.servicies.ExperienceLocalService;
+import me.universi.institution.exceptions.InstitutionException;
+import me.universi.institution.services.InstitutionService;
 import me.universi.util.CastingUtil;
 
 @RestController
-@RequestMapping(value = "/api/curriculum/experience/local")
-public class ExperienceLocalController {
-    private ExperienceLocalService experienceLocalService;
+@RequestMapping(value = "/api/institution")
+public class InstitutionController {
+    private InstitutionService institutionService;
 
-    public ExperienceLocalController(ExperienceLocalService experienceLocalService) {
-        this.experienceLocalService = experienceLocalService;
+    public InstitutionController(InstitutionService institutionService) {
+        this.institutionService = institutionService;
     }
 
     @PostMapping(value = "/list", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Response listLocal(@RequestBody Map<String, Object> body) {
+    public Response listAll(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
-            response.body.put("list", experienceLocalService.findAll());
+            response.body.put("list", institutionService.findAll());
         });
     }
 
     @PostMapping(value = "/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Response createLocal(@RequestBody Map<String, Object> body) {
+    public Response create(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
             var name = CastingUtil.getString(body.get("name")).orElseThrow(() -> {
                 response.setStatus(HttpStatus.BAD_REQUEST);
-                return new ExperienceException("Parâmetro 'name' inválido ou não informado.");
+                return new InstitutionException("Parâmetro 'name' inválido ou não informado.");
             });
 
-            var local = experienceLocalService.create(name);
+            var institution = institutionService.create(name);
 
             response.setStatus(HttpStatus.CREATED);
-            response.message = "Local '" + name + "' criado com sucesso";
-            response.body.put("experienceLocal", local);
+            response.message = "Instituição '" + name + "' criado com sucesso";
+            response.body.put("institution", institution);
         });
     }
 
     @PostMapping(value = "/edit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Response editLocal(@RequestBody Map<String, Object> body) {
+    public Response edit(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
             var id = CastingUtil.getUUID(body.get("id")).orElseThrow(() -> {
                 response.setStatus(HttpStatus.BAD_REQUEST);
-                return new ExperienceException("Parâmetro 'id' inválido ou não informado.");
+                return new InstitutionException("Parâmetro 'id' inválido ou não informado.");
             });
 
             var name = CastingUtil.getString(body.get("name")).orElse(null);
 
-            var local = experienceLocalService.edit(id, name);
+            var institution = institutionService.edit(id, name);
 
             response.setStatus(HttpStatus.CREATED);
-            response.message = "Local '" + name + "' alterado com sucesso";
-            response.body.put("experienceLocal", local);
+            response.message = "Instituição '" + name + "' alterado com sucesso";
+            response.body.put("institution", institution);
         });
     }
 
     @PostMapping(value = "/delete", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Response deleteLocal(@RequestBody Map<String, Object> body) {
+    public Response delete(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
             var id = CastingUtil.getUUID(body.get("id")).orElseThrow(() -> {
                 response.setStatus(HttpStatus.BAD_REQUEST);
-                return new ExperienceException("Parâmetro 'id' inválido ou não informado.");
+                return new InstitutionException("Parâmetro 'id' inválido ou não informado.");
             });
 
-            experienceLocalService.delete(id);
-            response.message = "Local deletado com sucesso";
+            institutionService.delete(id);
+            response.message = "Instituição deletado com sucesso";
         });
     }
 }

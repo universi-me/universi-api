@@ -13,6 +13,8 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.NotNull;
+import me.universi.institution.entities.Institution;
+
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;

@@ -1,4 +1,4 @@
-package me.universi.curriculum.experience.entities;
+package me.universi.institution.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -18,11 +18,11 @@ import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-@Entity(name = "ExperienceLocal")
-@Table(name = "experience_local")
-@SQLDelete(sql = "UPDATE experience_local SET deleted = true WHERE id=?")
+@Entity(name = "Institution")
+@Table(name = "institution")
+@SQLDelete(sql = "UPDATE institution SET deleted = true WHERE id=?")
 @Where(clause = "deleted=false")
-public class ExperienceLocal {
+public class Institution {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", nullable = false)
@@ -40,9 +40,9 @@ public class ExperienceLocal {
     @Column(name = "deleted")
     private boolean deleted = Boolean.FALSE;
 
-    public ExperienceLocal() { }
+    public Institution() { }
 
-    public ExperienceLocal(UUID id, String name) {
+    public Institution(UUID id, String name) {
         this.id = id;
         this.name = name;
     }

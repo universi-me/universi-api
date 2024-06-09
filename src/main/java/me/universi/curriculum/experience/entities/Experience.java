@@ -14,6 +14,8 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.NotNull;
+import me.universi.institution.entities.Institution;
+
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
@@ -37,8 +39,8 @@ public class Experience {
     private TypeExperience typeExperience;
 
     @ManyToOne
-    @JoinColumn(name = "local", nullable = false)
-    private ExperienceLocal local;
+    @JoinColumn(name = "institution_id", nullable = false)
+    private Institution institution;
 
     @Column(name = "description")
     private String description;
@@ -67,18 +69,18 @@ public class Experience {
 
     }
 
-    public Experience(TypeExperience typeExperience, ExperienceLocal local, String description, Date startDate, Date endDate, Boolean presentDate) {
+    public Experience(TypeExperience typeExperience, Institution institution, String description, Date startDate, Date endDate, Boolean presentDate) {
         this.typeExperience = typeExperience;
-        this.local = local;
+        this.institution = institution;
         this.description = description;
         this.startDate = startDate;
         this.endDate = endDate;
         this.presentDate = presentDate;
     }
 
-    public Experience(TypeExperience typeExperience, ExperienceLocal local, String description, Date startDate, Date endDate) {
+    public Experience(TypeExperience typeExperience, Institution institution, String description, Date startDate, Date endDate) {
         this.typeExperience = typeExperience;
-        this.local = local;
+        this.institution = institution;
         this.description = description;
         this.startDate = startDate;
         this.endDate = endDate;
@@ -89,12 +91,12 @@ public class Experience {
         return id;
     }
 
-    public ExperienceLocal getLocal() {
-        return local;
+    public Institution getInstitution() {
+        return institution;
     }
 
-    public void setLocal(ExperienceLocal local) {
-        this.local = local;
+    public void setInstitution(Institution institution) {
+        this.institution = institution;
     }
 
     public String getDescription() {
