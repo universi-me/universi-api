@@ -66,6 +66,9 @@ public class Job {
     @Column(name = "closed", nullable = false)
     private boolean closed;
 
+    @Column(name = "deleted", nullable = false)
+    private boolean deleted;
+
     @Transient
     public boolean isOpen() {
         return !isClosed();
@@ -100,4 +103,7 @@ public class Job {
 
     public boolean isClosed() { return closed; }
     public void setClosed(boolean closed) { this.closed = closed; }
+
+    public boolean isDeleted() { return deleted; }
+    public void setDeleted(boolean deleted) { this.deleted = deleted; }
 }
