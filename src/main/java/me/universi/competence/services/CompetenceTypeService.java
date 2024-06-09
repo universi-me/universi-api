@@ -14,7 +14,9 @@ import org.springframework.stereotype.Service;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -47,6 +49,14 @@ public class CompetenceTypeService {
         } catch (IllegalArgumentException invalidUUID) {
             return null;
         }
+    }
+
+    public List<CompetenceType> findAllById(@NotNull @NotNull Collection<@NotNull UUID> ids) {
+        return ids
+            .stream()
+            .map(this::findFirstById)
+            .filter(Objects::nonNull)
+            .toList();
     }
 
     public CompetenceType findFirstByName(String name) {
