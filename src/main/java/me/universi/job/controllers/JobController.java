@@ -133,7 +133,7 @@ public class JobController {
             );
 
             response.setStatus(HttpStatus.CREATED);
-            response.message = "Vaga criada com sucesso.";
+            response.message = "Vaga atualizada com sucesso.";
             response.body.put("job", job);
         });
     }

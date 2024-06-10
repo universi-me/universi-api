@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import jakarta.validation.constraints.NotNull;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -52,11 +53,12 @@ public class CompetenceTypeService {
     }
 
     public List<CompetenceType> findAllById(@NotNull @NotNull Collection<@NotNull UUID> ids) {
-        return ids
+        return new ArrayList<>(ids
             .stream()
             .map(this::findFirstById)
             .filter(Objects::nonNull)
-            .toList();
+            .toList()
+        );
     }
 
     public CompetenceType findFirstByName(String name) {
