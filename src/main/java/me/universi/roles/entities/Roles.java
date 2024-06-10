@@ -78,6 +78,9 @@ public class Roles implements Serializable {
     @Column(name= "competence_permission") @JsonIgnore
     @Min(0) @NotNull public int competencePermission = 0;
 
+    @Column(name= "job_permission") @JsonIgnore
+    @Min(0) @NotNull public int jobPermission = 0;
+
     @Column(name = "role_type")
     @Enumerated(EnumType.STRING)
     @NotNull
@@ -145,6 +148,7 @@ public class Roles implements Serializable {
             case GROUP:      return this.groupPermission;
             case PEOPLE:     return this.peoplePermission;
             case COMPETENCE: return this.competencePermission;
+            case JOBS:       return this.jobPermission;
 
             // default case is necessary for compilation
             // If another FeatureTypes is added, add a case above
@@ -168,6 +172,9 @@ public class Roles implements Serializable {
 
         else if (feature == FeaturesTypes.COMPETENCE)
             this.competencePermission = permission;
+
+        else if (feature == FeaturesTypes.JOBS)
+            this.jobPermission = permission;
 
         else
             throw new RolesException("FeaturesTypes '" + feature + "' não existe");

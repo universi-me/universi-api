@@ -7,7 +7,8 @@ public enum FeaturesTypes {
     CONTENT("Conteúdo"),
     GROUP("Grupo"),
     PEOPLE("Pessoas"),
-    COMPETENCE("Competência");
+    COMPETENCE("Competência"),
+    JOBS("Vagas");
 
     public final String label;
 

@@ -7,6 +7,7 @@ import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
+import org.hibernate.validator.constraints.Length;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -19,7 +20,6 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
-import jakarta.validation.constraints.Max;
 import me.universi.competence.entities.CompetenceType;
 import me.universi.institution.entities.Institution;
 import me.universi.profile.entities.Profile;
@@ -40,7 +40,7 @@ public class Job {
     private String title;
 
     @Column(name = "short_description", nullable = false, length = SHORT_DESCRIPTION_MAX_LENGTH)
-    @Max(SHORT_DESCRIPTION_MAX_LENGTH)
+    @Length(max = SHORT_DESCRIPTION_MAX_LENGTH)
     private String shortDescription;
 
     @Column(name = "long_description", nullable = false)
