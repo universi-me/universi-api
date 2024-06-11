@@ -11,6 +11,9 @@ import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import me.universi.Sys;
 import me.universi.competence.services.CompetenceTypeService;
+import me.universi.feed.dto.GroupPostDTO;
+import me.universi.feed.services.GroupFeedService;
+import me.universi.group.services.GroupService;
 import me.universi.institution.services.InstitutionService;
 import me.universi.job.entities.Job;
 import me.universi.job.exceptions.JobException;
@@ -63,7 +66,17 @@ public class JobService {
         job.setClosed(false);
         job.setAuthor(ProfileService.getInstance().getProfileInSession());
 
-        return save(job);
+        job = save(job);
+
+        var organizationId = UserService.getInstance().getUserInSession().getOrganization().getId().toString();
+        // TODO: group environment variable for message
+        var postMessage = "Nova vaga cadastrada para a instituição " + job.getInstitution().getName() + ": <strong>" + job.getTitle() + "</strong>";
+
+        var groupPostDto = new GroupPostDTO(postMessage, job.getAuthor().getId().toString());
+
+        GroupFeedService.getInstance().createGroupPost(organizationId, groupPostDto);
+
+        return job;
     }
 
     public Job edit(@NotNull UUID jobId, String title, String shortDescription, String longDescription, Collection<UUID> requiredCompetencesIds) throws JobException {

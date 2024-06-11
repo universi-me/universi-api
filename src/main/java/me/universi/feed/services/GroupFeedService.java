@@ -1,6 +1,7 @@
 package me.universi.feed.services;
 
 
+import me.universi.Sys;
 import me.universi.feed.dto.GroupPostDTO;
 import me.universi.feed.exceptions.GroupFeedException;
 import me.universi.feed.exceptions.PostNotFoundException;
@@ -24,6 +25,10 @@ public class GroupFeedService {
     @Autowired
     public GroupFeedService(GroupPostRepository groupPostRepository) {
         this.groupPostRepository = groupPostRepository;
+    }
+
+    public static GroupFeedService getInstance() {
+        return Sys.context.getBean("groupFeedService", GroupFeedService.class);
     }
 
     public List<GroupPost> getGroupPosts(String groupId) {
