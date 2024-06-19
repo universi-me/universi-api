@@ -31,6 +31,15 @@ public class CastingUtil {
         if (obj instanceof Boolean)
             return Optional.of((Boolean) obj);
 
+        if (obj instanceof String) {
+            String objString = (String) obj;
+            if (objString.equalsIgnoreCase("true"))
+                return Optional.of(true);
+
+            else if (objString.equalsIgnoreCase("false"))
+                return Optional.of(false);
+        }
+
         return Optional.empty();
     }
 

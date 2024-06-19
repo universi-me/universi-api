@@ -8,17 +8,16 @@ import me.universi.curriculum.experience.entities.TypeExperience;
 import me.universi.curriculum.experience.exceptions.ExperienceException;
 import me.universi.curriculum.experience.exceptions.TypeExperienceException;
 import me.universi.curriculum.experience.repositories.ExperienceRepository;
+import me.universi.institution.services.InstitutionService;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.exceptions.ProfileException;
 import me.universi.profile.services.ProfileService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
-import org.springframework.http.MediaType;
-import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
+import me.universi.util.CastingUtil;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -30,16 +29,18 @@ import java.util.UUID;
 public class ExperienceService {
 
     private final ExperienceRepository experienceRepository;
+    private final InstitutionService institutionService;
     private final UserService userService;
     private final ProfileService profileService;
     private final TypeExperienceService typeExperienceService;
 
 
-    public ExperienceService(ExperienceRepository experienceRepository, UserService userService, ProfileService profileService, TypeExperienceService typeExperienceService){
+    public ExperienceService(ExperienceRepository experienceRepository, UserService userService, ProfileService profileService, TypeExperienceService typeExperienceService, InstitutionService institutionService){
         this.experienceRepository = experienceRepository;
         this.userService = userService;
         this.profileService = profileService;
         this.typeExperienceService = typeExperienceService;
+        this.institutionService = institutionService;
     }
 
     public Experience save(Experience experience){
@@ -62,7 +63,7 @@ public class ExperienceService {
     public Experience update(Experience newExperience, UUID id) throws Exception{
         return experienceRepository.findById(id).map(experience -> {
             experience.setTypeExperience(newExperience.getTypeExperience());
-            experience.setLocal(newExperience.getLocal());
+            experience.setInstitution(newExperience.getInstitution());
             experience.setDescription(newExperience.getDescription());
             experience.setStartDate(newExperience.getStartDate());
             experience.setEndDate(newExperience.getEndDate());
@@ -101,10 +102,15 @@ public class ExperienceService {
                 throw new ProfileException("Paramentro typeExperienceId passado é nulo");
             }
 
-            String local = (String) body.get("local");
-            if(local.isBlank() || local.isEmpty()){
-                throw new TypeEducationException("Paramentro local passado é nulo");
-            }
+            var institutionId = CastingUtil.getUUID(body.get("institutionId")).orElseThrow(() -> {
+                response.setStatus(HttpStatus.BAD_REQUEST);
+                return new TypeEducationException("Parâmetro 'institutionId' inválido ou não informado.");
+            });
+
+            var institution = institutionService.findById(institutionId).orElseThrow(() -> {
+                response.setStatus(HttpStatus.BAD_REQUEST);
+                return new TypeEducationException("Instituição com id '" + institutionId.toString() + "' não encontrado.");
+            });
 
             String description = (String) body.get("description");
             if(description.isBlank() || description.isEmpty()){
@@ -140,7 +146,7 @@ public class ExperienceService {
 
             Experience experience = new Experience();
             experience.setTypeExperience(typeExperience);
-            experience.setLocal(local);
+            experience.setInstitution(institution);
             experience.setDescription(description);
             experience.setStartDate(startDate);
             experience.setEndDate(endDate);
@@ -169,7 +175,7 @@ public class ExperienceService {
             }
 
             String typeExperienceId = (String)body.get("typeExperienceId");
-            String local = (String)body.get("local");
+            var institutionId = CastingUtil.getUUID(body.get("institutionId"));
             String description = (String) body.get("description");
             Date startDate = simpleDateFormat.parse((String) body.get("startDate"));
             Boolean presentDate = (Boolean) body.get("presentDate");
@@ -206,8 +212,13 @@ public class ExperienceService {
                 experience.setTypeExperience(typeExperience);
             }
 
-            if (local != null) {
-                experience.setLocal(local);
+            if (institutionId.isPresent()) {
+                var institution = institutionService.findById(institutionId.get()).orElseThrow(() -> {
+                    response.setStatus(HttpStatus.BAD_REQUEST);
+                    return new TypeEducationException("Instituição com id '" + institutionId.toString() + "' não encontrado.");
+                });
+
+                experience.setInstitution(institution);
             }
             if (description != null) {
                 experience.setDescription(description);
