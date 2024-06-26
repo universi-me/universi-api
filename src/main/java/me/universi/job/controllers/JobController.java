@@ -1,6 +1,8 @@
 package me.universi.job.controllers;
 
+import java.util.ArrayList;
 import java.util.Map;
+import java.util.Objects;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -44,7 +46,23 @@ public class JobController {
     @PostMapping(value = "/list", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Response listAll(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
-            response.body.put("list", jobService.findAll());
+            var filtersOpt = CastingUtil.getMap(body.get("filters"));
+
+            if (filtersOpt.isEmpty()) {
+                response.body.put("list", jobService.findAll());
+            }
+
+            else {
+                var filters = filtersOpt.get();
+                var onlyOpen = CastingUtil.getBoolean(filters.get("onlyOpen")).orElse(false);
+                var competenceTypesIds = CastingUtil.getList(filters.get("competenceTypesIds")).orElse(new ArrayList<>())
+                    .stream()
+                    .map(c -> CastingUtil.getUUID(c).orElse(null))
+                    .filter(Objects::nonNull)
+                    .toList();
+
+                response.body.put("list", jobService.findFiltered(onlyOpen, competenceTypesIds));
+            }
         });
     }
 

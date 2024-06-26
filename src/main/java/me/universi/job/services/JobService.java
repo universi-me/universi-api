@@ -149,4 +149,19 @@ public class JobService {
 
         return shortDescription;
     }
+
+    public List<Job> findFiltered(boolean onlyOpen, @NotNull List<@NotNull UUID> competenceTypesIds) {
+        var filterCompetences = !competenceTypesIds.isEmpty();
+
+        return findAll()
+            .stream()
+            .filter(job -> (!onlyOpen || job.isOpen())
+                && ( !filterCompetences || competenceTypesIds
+                    .stream()
+                    .allMatch(ct -> job.getRequiredCompetences()
+                        .stream()
+                        .anyMatch(jct -> jct.getId().equals(ct)))
+                ))
+            .toList();
+    }
 }
