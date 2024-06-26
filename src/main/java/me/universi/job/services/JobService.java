@@ -70,7 +70,8 @@ public class JobService {
 
         var organizationId = UserService.getInstance().getUserInSession().getOrganization().getId().toString();
         // TODO: group environment variable for message
-        var postMessage = "Nova vaga cadastrada para a instituição " + job.getInstitution().getName() + ": <strong>" + job.getTitle() + "</strong>";
+        var postMessage = "Nova vaga cadastrada para a instituição " + job.getInstitution().getName()
+            + ": <a href=\"/job/" + job.getId() + "\"><strong>" + job.getTitle() + "</strong></a>";
 
         var groupPostDto = new GroupPostDTO(postMessage, job.getAuthor().getId().toString());
 
