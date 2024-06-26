@@ -66,13 +66,6 @@ public class JobController {
         });
     }
 
-    @PostMapping(value = "/list-open", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Response listOpen(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-            response.body.put("list", jobService.findAllOpen());
-        });
-    }
-
     @PostMapping(value = "/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Response create(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
