@@ -142,8 +142,8 @@ public class JobService {
         return shortDescription;
     }
 
-    public List<Job> findFiltered(boolean onlyOpen, @NotNull List<@NotNull UUID> competenceTypesIds) {
-        var filterCompetences = !competenceTypesIds.isEmpty();
+    public List<Job> findFiltered(boolean onlyOpen, @Nullable List<@NotNull UUID> competenceTypesIds) {
+        var filterCompetences = competenceTypesIds != null && !competenceTypesIds.isEmpty();
 
         return findAll()
             .stream()
