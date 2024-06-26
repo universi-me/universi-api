@@ -9,7 +9,6 @@ public class GroupPostReaction {
 
     @Id
     private String id;
-    private String groupId;
     private String groupPostId;
     private String reaction;
     private String authorId;
@@ -18,8 +17,7 @@ public class GroupPostReaction {
     public GroupPostReaction() {
     }
 
-    public GroupPostReaction(String groupId, String groupPostId, String reaction, String author, boolean deleted) {
-        this.groupId = groupId;
+    public GroupPostReaction(String groupPostId, String reaction, String author, boolean deleted) {
         this.groupPostId = groupPostId;
         this.reaction = reaction;
         this.authorId = author;
@@ -30,14 +28,6 @@ public class GroupPostReaction {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public String getGroupId() {
-        return groupId;
-    }
-
-    public void setGroupId(String groupId) {
-        this.groupId = groupId;
     }
 
     public String getGroupPostId() {

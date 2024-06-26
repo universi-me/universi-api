@@ -64,7 +64,7 @@ public class GroupFeedService {
         // check permission post
         RolesService.getInstance().checkPermission(groupId, FeaturesTypes.FEED, Permission.READ);
 
-        Optional<GroupPost> existingPost = groupPostRepository.findFirstByGroupIdAndId(groupId, postId);
+        Optional<GroupPost> existingPost = groupPostRepository.findFirstByGroupIdAndIdAndDeletedIsFalse(groupId, postId);
         if (existingPost.isPresent() && !existingPost.get().isDeleted()) {
             return existingPost.get();
         } else {
@@ -125,20 +125,22 @@ public class GroupFeedService {
         return true;
     }
 
-    public List<GroupPostReaction> getGroupPostReactions(String groupId, String groupPostId) {
+    public List<GroupPostReaction> getGroupPostReactions(String groupPostId) {
         Optional<List<GroupPostReaction>> reactions = groupPostReactionRepository.findByGroupPostIdAndDeletedIsFalse(groupPostId);
         return reactions.orElse(null);
     }
 
-    public GroupPostReaction setGroupPostReaction(String groupId, String groupPostId, String reaction) {
+    public GroupPostReaction setGroupPostReaction(String groupPostId, String reaction) {
         String authorId = String.valueOf(UserService.getInstance().getUserInSession().getProfile().getId());
+        GroupPost post = groupPostRepository.findFirstByIdAndDeletedIsFalse(groupPostId).orElseThrow(() -> new PostNotFoundException("Publicação não foi encontrada."));
+
         Optional<GroupPostReaction> existingReaction = groupPostReactionRepository.findFirstByGroupPostIdAndAuthorIdAndDeletedIsFalse(groupPostId, authorId);
         if(existingReaction.isPresent()) {
             GroupPostReaction reactionObj = existingReaction.get();
             reactionObj.setReaction(reaction);
             return groupPostReactionRepository.save(reactionObj);
         } else {
-            GroupPostReaction reactionObj = new GroupPostReaction(groupId, groupPostId, reaction, authorId, false);
+            GroupPostReaction reactionObj = new GroupPostReaction(post.getId(), reaction, authorId, false);
             return groupPostReactionRepository.save(reactionObj);
         }
     }
