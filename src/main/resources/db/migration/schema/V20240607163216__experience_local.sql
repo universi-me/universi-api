@@ -23,6 +23,9 @@ UPDATE experience
         LIMIT 1
     );
 
+DELETE FROM experience
+    WHERE local_tmp IS NULL;
+
 ALTER TABLE experience
     DROP COLUMN local,
     ALTER COLUMN local_tmp SET NOT NULL;
