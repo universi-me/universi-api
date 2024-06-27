@@ -8,5 +8,7 @@ import java.util.List;
 public interface GroupPostRepository extends MongoRepository<GroupPost, String> {
     Optional<List<GroupPost>> findByGroupIdAndDeletedIsFalse(String groupId);
 
-    Optional<GroupPost> findFirstByGroupIdAndId(String groupId, String postId);
+    Optional<GroupPost> findFirstByIdAndDeletedIsFalse(String postId);
+
+    Optional<GroupPost> findFirstByGroupIdAndIdAndDeletedIsFalse(String groupId, String postId);
 }
