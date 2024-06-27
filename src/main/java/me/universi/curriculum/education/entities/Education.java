@@ -2,6 +2,7 @@ package me.universi.curriculum.education.entities;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -38,6 +39,7 @@ public class Education {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "institution_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Institution institution;
 
     @Temporal(TemporalType.DATE)
