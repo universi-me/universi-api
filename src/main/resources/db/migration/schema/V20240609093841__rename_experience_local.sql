@@ -1,13 +1,13 @@
--- Create a temporary table to hold unique institution data
-CREATE TEMPORARY TABLE temp_institution AS
-SELECT DISTINCT ON (name) *
-FROM institution
-ORDER BY name, id;
 
--- Insert unique institution data into experience_local
+-- Insert unique rows from institution to experience_local where name does not already exist
 INSERT INTO experience_local (id, name, created_at, deleted)
 SELECT id, name, created_at, deleted
-FROM temp_institution;
+FROM institution
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM experience_local
+    WHERE experience_local.name = institution.name
+);
 
 ALTER TABLE education
     DROP CONSTRAINT fk_education_institution;
