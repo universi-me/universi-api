@@ -13,7 +13,6 @@ import me.universi.Sys;
 import me.universi.competence.services.CompetenceTypeService;
 import me.universi.feed.dto.GroupPostDTO;
 import me.universi.feed.services.GroupFeedService;
-import me.universi.group.services.GroupService;
 import me.universi.institution.services.InstitutionService;
 import me.universi.job.entities.Job;
 import me.universi.job.exceptions.JobException;
@@ -38,13 +37,6 @@ public class JobService {
 
     public List<Job> findAll() {
         return jobRepository.findAll();
-    }
-
-    public List<Job> findAllOpen() {
-        return jobRepository.findAll()
-            .stream()
-            .filter(j -> !j.isClosed())
-            .toList();
     }
 
     public Job create(@NotNull String title, @NotNull String shortDescription, @NotNull String longDescription, @NotNull UUID institutionId, @NotNull Collection<UUID> requiredCompetencesIds) throws JobException {
@@ -149,5 +141,20 @@ public class JobService {
             throw new JobException("O resumo da vaga não pode ter mais de " + Job.SHORT_DESCRIPTION_MAX_LENGTH + " caracteres.");
 
         return shortDescription;
+    }
+
+    public List<Job> findFiltered(boolean onlyOpen, @Nullable List<@NotNull UUID> competenceTypesIds) {
+        var filterCompetences = competenceTypesIds != null && !competenceTypesIds.isEmpty();
+
+        return findAll()
+            .stream()
+            .filter(job -> (!onlyOpen || job.isOpen())
+                && ( !filterCompetences || competenceTypesIds
+                    .stream()
+                    .allMatch(ct -> job.getRequiredCompetences()
+                        .stream()
+                        .anyMatch(jct -> jct.getId().equals(ct)))
+                ))
+            .toList();
     }
 }

@@ -2,8 +2,12 @@ package me.universi.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class CastingUtil {
     private CastingUtil() {}
@@ -75,6 +79,27 @@ public class CastingUtil {
 
         if (obj instanceof Collection) {
             return Optional.of( new ArrayList<>( (Collection<?>) obj ) );
+        }
+
+        return Optional.empty();
+    }
+
+    public static Optional<HashMap<Object, Object>> getMap(Object obj) {
+        if (obj == null) return Optional.empty();
+
+        if (obj instanceof Map) {
+            return Optional.of( new HashMap<>((Map<?, ?>) obj) );
+        }
+
+        if (obj instanceof List) {
+            var list = (List<?>) obj;
+            var map = new HashMap<>();
+
+            for (int i = 0; i < list.size(); i++) {
+                map.put(i, list.get(i));
+            }
+
+            return Optional.of(map);
         }
 
         return Optional.empty();
