@@ -23,6 +23,16 @@ UPDATE experience
         LIMIT 1
     );
 
+-- Ensure no rows have NULL local_tmp values
+-- Create a temporary table to hold rows with NULL local_tmp
+CREATE TEMP TABLE experience_tmp AS
+SELECT * FROM experience WHERE local_tmp IS NULL;
+
+-- Now delete rows with NULL local_tmp from experience_profile to avoid foreign key constraint issues
+DELETE FROM experience_profile
+WHERE experience_id IN (SELECT id FROM experience_tmp);
+
+-- Delete rows with NULL local_tmp from experience table
 DELETE FROM experience
     WHERE local_tmp IS NULL;
 
