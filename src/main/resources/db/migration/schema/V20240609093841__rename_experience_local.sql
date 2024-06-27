@@ -12,6 +12,17 @@ WHERE NOT EXISTS (
 ALTER TABLE education
     DROP CONSTRAINT fk_education_institution;
 
+UPDATE education
+    SET institution_id = (
+        SELECT id
+        FROM experience_local el
+        WHERE el.name = (
+            SELECT name
+            FROM institution i
+            WHERE i.name = el.name AND i.id = institution_id
+        )
+    );
+
 DROP TABLE institution;
 
 ALTER TABLE experience_local
