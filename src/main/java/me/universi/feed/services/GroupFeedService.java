@@ -3,9 +3,11 @@ package me.universi.feed.services;
 
 import me.universi.Sys;
 import me.universi.feed.dto.GroupPostDTO;
+import me.universi.feed.entities.GroupPostReaction;
 import me.universi.feed.exceptions.GroupFeedException;
 import me.universi.feed.exceptions.PostNotFoundException;
 import me.universi.feed.entities.GroupPost;
+import me.universi.feed.repositories.GroupPostReactionRepository;
 import me.universi.feed.repositories.GroupPostRepository;
 import me.universi.roles.enums.FeaturesTypes;
 import me.universi.roles.enums.Permission;
@@ -21,10 +23,12 @@ import java.util.Optional;
 public class GroupFeedService {
 
     private final GroupPostRepository groupPostRepository;
+    private final GroupPostReactionRepository groupPostReactionRepository;
 
     @Autowired
-    public GroupFeedService(GroupPostRepository groupPostRepository) {
+    public GroupFeedService(GroupPostRepository groupPostRepository, GroupPostReactionRepository groupPostReactionRepository) {
         this.groupPostRepository = groupPostRepository;
+        this.groupPostReactionRepository = groupPostReactionRepository;
     }
 
     public static GroupFeedService getInstance() {
@@ -60,7 +64,7 @@ public class GroupFeedService {
         // check permission post
         RolesService.getInstance().checkPermission(groupId, FeaturesTypes.FEED, Permission.READ);
 
-        Optional<GroupPost> existingPost = groupPostRepository.findFirstByGroupIdAndId(groupId, postId);
+        Optional<GroupPost> existingPost = groupPostRepository.findFirstByGroupIdAndIdAndDeletedIsFalse(groupId, postId);
         if (existingPost.isPresent() && !existingPost.get().isDeleted()) {
             return existingPost.get();
         } else {
@@ -120,4 +124,25 @@ public class GroupFeedService {
 
         return true;
     }
+
+    public List<GroupPostReaction> getGroupPostReactions(String groupPostId) {
+        Optional<List<GroupPostReaction>> reactions = groupPostReactionRepository.findByGroupPostIdAndDeletedIsFalse(groupPostId);
+        return reactions.orElse(null);
+    }
+
+    public GroupPostReaction setGroupPostReaction(String groupPostId, String reaction) {
+        String authorId = String.valueOf(UserService.getInstance().getUserInSession().getProfile().getId());
+        GroupPost post = groupPostRepository.findFirstByIdAndDeletedIsFalse(groupPostId).orElseThrow(() -> new PostNotFoundException("Publicação não foi encontrada."));
+
+        Optional<GroupPostReaction> existingReaction = groupPostReactionRepository.findFirstByGroupPostIdAndAuthorIdAndDeletedIsFalse(groupPostId, authorId);
+        if(existingReaction.isPresent()) {
+            GroupPostReaction reactionObj = existingReaction.get();
+            reactionObj.setReaction(reaction);
+            return groupPostReactionRepository.save(reactionObj);
+        } else {
+            GroupPostReaction reactionObj = new GroupPostReaction(post.getId(), reaction, authorId, false);
+            return groupPostReactionRepository.save(reactionObj);
+        }
+    }
+
 }

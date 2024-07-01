@@ -37,7 +37,9 @@ public class GroupFeedController {
             List<GroupPost> groupPosts = groupFeedService.getGroupPosts(groupId);
             List<GroupGetDTO> groupGetDTOS = new ArrayList<>();
             for(GroupPost post : groupPosts){
-                groupGetDTOS.add(new GroupGetDTO(post.getContent(), profileService.findFirstById(post.getAuthorId()), post.getId(), post.getGroupId()));
+                GroupGetDTO groupGet = new GroupGetDTO(post.getContent(), profileService.findFirstById(post.getAuthorId()), post.getId(), post.getGroupId());
+                groupGet.reactions = groupFeedService.getGroupPostReactions(post.getId());
+                groupGetDTOS.add(groupGet);
             }
             response.body.put("posts", groupGetDTOS);
         });
