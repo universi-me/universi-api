@@ -208,7 +208,7 @@ public class GroupFeedService {
 
         existingComment.setDeleted(true);
         groupPostCommentRepository.save(existingComment);
-        
+
         return true;
     }
 

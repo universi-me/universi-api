@@ -18,20 +18,29 @@ public class GroupFeedCommentController {
         this.groupFeedService = groupFeedService;
     }
 
-    @GetMapping("/posts/{groupPostId}/comments")
-    public Response getGroupPostComments(@PathVariable String groupPostId) {
-        return Response.buildResponse(response -> {
-            List<GroupPostCommentDTO> groupPosts = groupFeedService.getGroupPostComments(groupPostId);
-            response.body.put("comments", groupPosts);
-        });
-    }
-
     @PostMapping("/posts/{groupPostId}/comments")
     public Response setGroupPostComment(@PathVariable String groupPostId, @RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
             GroupPostComment commentSet = groupFeedService.createGroupPostComment(groupPostId, body.get("content").toString());
             response.body.put("comments", commentSet);
             response.message = "Você comentou a publicação";
+        });
+    }
+
+    @PostMapping("/comments/{commentId}/edit")
+    public Response editGroupPostComment(@PathVariable String commentId, @RequestBody Map<String, Object> body) {
+        return Response.buildResponse(response -> {
+            GroupPostComment commentSet = groupFeedService.editGroupPostComment(commentId, body.get("content").toString());
+            response.body.put("comments", commentSet);
+            response.message = "Comentário editado com sucesso";
+        });
+    }
+
+    @DeleteMapping("/comments/{commentId}")
+    public Response deleteGroupPostComment(@PathVariable String commentId) {
+        return Response.buildResponse(response -> {
+            groupFeedService.deleteGroupPostComment(commentId);
+            response.message = "Comentário deletado com sucesso";
         });
     }
 }
