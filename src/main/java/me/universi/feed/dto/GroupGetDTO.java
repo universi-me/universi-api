@@ -1,17 +1,18 @@
 package me.universi.feed.dto;
 
 import java.util.List;
+import me.universi.feed.entities.GroupPostComment;
 import me.universi.feed.entities.GroupPostReaction;
 import me.universi.profile.entities.Profile;
 
 public class GroupGetDTO {
-
     private String content;
     private Profile author;
     private String postId;
     private String groupId;
 
     public List<GroupPostReaction> reactions;
+    public List<GroupPostCommentDTO> comments;
 
     public GroupGetDTO(String content, Profile author, String postId, String groupId) {
         this.content = content;

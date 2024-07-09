@@ -1,14 +1,19 @@
 package me.universi.feed.services;
 
 
+import java.util.ArrayList;
 import me.universi.Sys;
+import me.universi.feed.dto.GroupPostCommentDTO;
 import me.universi.feed.dto.GroupPostDTO;
+import me.universi.feed.entities.GroupPostComment;
 import me.universi.feed.entities.GroupPostReaction;
 import me.universi.feed.exceptions.GroupFeedException;
 import me.universi.feed.exceptions.PostNotFoundException;
 import me.universi.feed.entities.GroupPost;
+import me.universi.feed.repositories.GroupPostCommentRepository;
 import me.universi.feed.repositories.GroupPostReactionRepository;
 import me.universi.feed.repositories.GroupPostRepository;
+import me.universi.profile.services.ProfileService;
 import me.universi.roles.enums.FeaturesTypes;
 import me.universi.roles.enums.Permission;
 import me.universi.roles.services.RolesService;
@@ -24,11 +29,13 @@ public class GroupFeedService {
 
     private final GroupPostRepository groupPostRepository;
     private final GroupPostReactionRepository groupPostReactionRepository;
+    private final GroupPostCommentRepository groupPostCommentRepository;
 
     @Autowired
-    public GroupFeedService(GroupPostRepository groupPostRepository, GroupPostReactionRepository groupPostReactionRepository) {
+    public GroupFeedService(GroupPostRepository groupPostRepository, GroupPostReactionRepository groupPostReactionRepository, GroupPostCommentRepository groupPostCommentRepository) {
         this.groupPostRepository = groupPostRepository;
         this.groupPostReactionRepository = groupPostReactionRepository;
+        this.groupPostCommentRepository = groupPostCommentRepository;
     }
 
     public static GroupFeedService getInstance() {
@@ -91,6 +98,27 @@ public class GroupFeedService {
         }
     }
 
+    public void checkPermissionForEditComment(GroupPostComment post, boolean forDelete) {
+        String authorId = String.valueOf(UserService.getInstance().getUserInSession().getProfile().getId());
+        if (!post.getAuthorId().equals(authorId)) {
+            if(UserService.getInstance().isUserAdminSession()) {
+                if(forDelete) {
+                    // admin can delete any post
+                    return;
+                }
+            }
+
+            String groupId = groupPostRepository.findFirstByIdAndDeletedIsFalse(post.getGroupPostId()).get().getGroupId();
+
+            if(forDelete && RolesService.getInstance().hasPermission(groupId, FeaturesTypes.FEED, Permission.READ_WRITE_DELETE)) {
+                // user with permission can delete any post
+                return;
+            }
+
+            throw new GroupFeedException("Você não tem permissão para editar este comentário.");
+        }
+    }
+
     public GroupPost editGroupPost(String groupId, String postId, GroupPostDTO groupPostDTO) {
 
         // check permission post
@@ -143,6 +171,54 @@ public class GroupFeedService {
             GroupPostReaction reactionObj = new GroupPostReaction(post.getId(), reaction, authorId, false);
             return groupPostReactionRepository.save(reactionObj);
         }
+    }
+
+    public List<GroupPostCommentDTO> getGroupPostComments(String groupPostId) {
+        Optional<List<GroupPostComment>> comments = groupPostCommentRepository.findByGroupPostIdAndDeletedIsFalse(groupPostId);
+        if(comments.isPresent()) {
+            List<GroupPostCommentDTO> commentsDTO = new ArrayList<GroupPostCommentDTO>();
+            for(GroupPostComment comment : comments.get()) {
+                GroupPostCommentDTO commentObj = new GroupPostCommentDTO();
+                commentObj.setId(comment.getId());
+                commentObj.setContent(comment.getContent());
+                commentObj.setAuthorId(comment.getAuthorId());
+                commentObj.setAuthor(ProfileService.getInstance().findFirstById(comment.getAuthorId()));
+                commentsDTO.add(commentObj);
+            }
+
+            return commentsDTO;
+        }
+        return null;
+    }
+
+    public GroupPostComment editGroupPostComment(String commentId, String comment) {
+        GroupPostComment existingComment = groupPostCommentRepository.findFirstByIdAndDeletedFalse(commentId).orElseThrow(() -> new PostNotFoundException("Comentário não foi encontrado."));
+
+        checkPermissionForEditComment(existingComment, false);
+
+        existingComment.setContent(comment);
+        return groupPostCommentRepository.save(existingComment);
+
+    }
+
+    public boolean deleteGroupPostComment(String commentId) {
+        GroupPostComment existingComment = groupPostCommentRepository.findFirstByIdAndDeletedFalse(commentId).orElseThrow(() -> new PostNotFoundException("Comentário não foi encontrado."));
+
+        checkPermissionForEditComment(existingComment, true);
+
+        existingComment.setDeleted(true);
+        groupPostCommentRepository.save(existingComment);
+        
+        return true;
+    }
+
+    public GroupPostComment createGroupPostComment(String groupPostId, String comment) {
+        String authorId = String.valueOf(UserService.getInstance().getUserInSession().getProfile().getId());
+        GroupPostComment commentObj = new GroupPostComment();
+        commentObj.setGroupPostId(groupPostId);
+        commentObj.setContent(comment);
+        commentObj.setAuthorId(authorId);
+        return groupPostCommentRepository.save(commentObj);
     }
 
 }

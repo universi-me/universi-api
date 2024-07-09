@@ -39,6 +39,7 @@ public class GroupFeedController {
             for(GroupPost post : groupPosts){
                 GroupGetDTO groupGet = new GroupGetDTO(post.getContent(), profileService.findFirstById(post.getAuthorId()), post.getId(), post.getGroupId());
                 groupGet.reactions = groupFeedService.getGroupPostReactions(post.getId());
+                groupGet.comments = groupFeedService.getGroupPostComments(post.getId());
                 groupGetDTOS.add(groupGet);
             }
             response.body.put("posts", groupGetDTOS);
