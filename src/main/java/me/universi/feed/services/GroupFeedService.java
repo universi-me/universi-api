@@ -159,6 +159,9 @@ public class GroupFeedService {
     }
 
     public GroupPostReaction setGroupPostReaction(String groupPostId, String reaction) {
+
+        checkAccessToGroupPost(groupPostId);
+
         String authorId = String.valueOf(UserService.getInstance().getUserInSession().getProfile().getId());
         GroupPost post = groupPostRepository.findFirstByIdAndDeletedIsFalse(groupPostId).orElseThrow(() -> new PostNotFoundException("Publicação não foi encontrada."));
 
