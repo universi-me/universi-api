@@ -23,7 +23,7 @@ public class GroupFeedCommentController {
         return Response.buildResponse(response -> {
             GroupPostComment commentSet = groupFeedService.createGroupPostComment(groupPostId, body.get("content").toString());
             response.body.put("comments", commentSet);
-            response.message = "Você comentou a publicação";
+            response.message = "Comentário publicado com sucesso";
         });
     }
 

@@ -191,8 +191,27 @@ public class GroupFeedService {
         return null;
     }
 
+    private void checkCommentContent(String comment) {
+        if(comment == null || comment.isEmpty()) {
+            throw new GroupFeedException("O conteúdo do comentário não pode estar vazio.");
+        } else if(comment.length() > 2000) {
+            throw new GroupFeedException("O conteúdo do comentário não pode ter mais de 3000 caracteres.");
+        }
+    }
+
+    private void checkAccessToGroupPost(String groupPostId) {
+        // check permission post for read
+        String groupId = groupPostRepository.findFirstByIdAndDeletedIsFalse(groupPostId).get().getGroupId();
+        RolesService.getInstance().checkPermission(groupId, FeaturesTypes.FEED, Permission.READ);
+    }
+
     public GroupPostComment editGroupPostComment(String commentId, String comment) {
+
+        checkCommentContent(comment);
+
         GroupPostComment existingComment = groupPostCommentRepository.findFirstByIdAndDeletedFalse(commentId).orElseThrow(() -> new PostNotFoundException("Comentário não foi encontrado."));
+
+        checkAccessToGroupPost(existingComment.getGroupPostId());
 
         checkPermissionForEditComment(existingComment, false);
 
@@ -204,6 +223,8 @@ public class GroupFeedService {
     public boolean deleteGroupPostComment(String commentId) {
         GroupPostComment existingComment = groupPostCommentRepository.findFirstByIdAndDeletedFalse(commentId).orElseThrow(() -> new PostNotFoundException("Comentário não foi encontrado."));
 
+        checkAccessToGroupPost(existingComment.getGroupPostId());
+
         checkPermissionForEditComment(existingComment, true);
 
         existingComment.setDeleted(true);
@@ -213,6 +234,11 @@ public class GroupFeedService {
     }
 
     public GroupPostComment createGroupPostComment(String groupPostId, String comment) {
+
+        checkCommentContent(comment);
+
+        checkAccessToGroupPost(groupPostId);
+
         String authorId = String.valueOf(UserService.getInstance().getUserInSession().getProfile().getId());
         GroupPostComment commentObj = new GroupPostComment();
         commentObj.setGroupPostId(groupPostId);
