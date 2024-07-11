@@ -162,6 +162,10 @@ public class GroupFeedService {
 
         checkAccessToGroupPost(groupPostId);
 
+        if(reaction == null || reaction.isEmpty() || reaction.length() > 20) {
+            throw new GroupFeedException("Reação inválida.");
+        }
+
         String authorId = String.valueOf(UserService.getInstance().getUserInSession().getProfile().getId());
         GroupPost post = groupPostRepository.findFirstByIdAndDeletedIsFalse(groupPostId).orElseThrow(() -> new PostNotFoundException("Publicação não foi encontrada."));
 
