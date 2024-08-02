@@ -55,8 +55,6 @@ public class GroupTheme  implements Serializable {
     @Column(name = "skills_1_color")
     public String skills1Color;
     @Column(name = "wave_color")
-    public String waveColor;
-    @Column(name = "button_hover_color")
     public String buttonHoverColor;
     @Column(name = "alert_color")
     public String alertColor;
@@ -64,8 +62,6 @@ public class GroupTheme  implements Serializable {
     public String successColor;
     @Column(name = "wrong_invalid_color")
     public String wrongInvalidColor;
-    @Column(name = "rank_color")
-    public String rankColor;
 
     @JsonIgnore
     @Column(name = "deleted")
