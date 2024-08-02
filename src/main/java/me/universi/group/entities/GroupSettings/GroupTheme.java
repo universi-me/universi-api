@@ -54,7 +54,7 @@ public class GroupTheme  implements Serializable {
     public String fontColorDisabled;
     @Column(name = "skills_1_color")
     public String skills1Color;
-    @Column(name = "wave_color")
+    @Column(name = "button_hover_color")
     public String buttonHoverColor;
     @Column(name = "font_color_alert")
     public String fontColorAlert;
