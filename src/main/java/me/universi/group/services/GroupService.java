@@ -587,7 +587,7 @@ public class GroupService {
         groupSettingsRepository.save(gSettings);
     }
 
-    public boolean editTheme(Group group, String primaryColor, String secondaryColor, String tertiaryColor, String backgroundColor, String cardBackgroundColor, String cardItemColor, String fontColorV1, String fontColorV2, String fontColorV3, String fontColorV4, String fontColorV5, String fontColorV6, String fontDisabledColor, String formsColor, String skills1Color, String waveColor, String buttonYellowHoverColor, String buttonHoverColor, String alertColor, String successColor, String wrongInvalidColor, String rankColor) {
+    public boolean editTheme(Group group, String primaryColor, String secondaryColor, String tertiaryColor, String backgroundColor, String cardBackgroundColor, String cardItemColor, String fontColorV1, String fontColorV2, String fontColorV3, String fontColorV4, String fontColorV5, String fontDisabledColor, String skills1Color, String buttonHoverColor, String alertColor, String successColor, String wrongInvalidColor) {
         if(group == null) {
             return false;
         }
@@ -634,38 +634,23 @@ public class GroupService {
         if(fontColorV5 != null) {
             groupTheme.fontColorV5 = fontColorV5.isEmpty() ? null : fontColorV5;
         }
-        if(fontColorV6 != null) {
-            groupTheme.fontColorV6 = fontColorV6.isEmpty() ? null : fontColorV6;
-        }
         if(fontDisabledColor != null) {
-            groupTheme.fontDisabledColor = fontDisabledColor.isEmpty() ? null : fontDisabledColor;
-        }
-        if(formsColor != null) {
-            groupTheme.formsColor = formsColor.isEmpty() ? null : formsColor;
+            groupTheme.fontColorDisabled = fontDisabledColor.isEmpty() ? null : fontDisabledColor;
         }
         if(skills1Color != null) {
             groupTheme.skills1Color = skills1Color.isEmpty() ? null : skills1Color;
-        }
-        if(waveColor != null) {
-            groupTheme.waveColor = waveColor.isEmpty() ? null : waveColor;
-        }
-        if(buttonYellowHoverColor != null) {
-            groupTheme.buttonYellowHoverColor = buttonYellowHoverColor.isEmpty() ? null : buttonYellowHoverColor;
         }
         if(buttonHoverColor != null) {
             groupTheme.buttonHoverColor = buttonHoverColor.isEmpty() ? null : buttonHoverColor;
         }
         if(alertColor != null) {
-            groupTheme.alertColor = alertColor.isEmpty() ? null : alertColor;
+            groupTheme.fontColorAlert = alertColor.isEmpty() ? null : alertColor;
         }
         if(successColor != null) {
-            groupTheme.successColor = successColor.isEmpty() ? null : successColor;
+            groupTheme.fontColorSuccess = successColor.isEmpty() ? null : successColor;
         }
         if(wrongInvalidColor != null) {
             groupTheme.wrongInvalidColor = wrongInvalidColor.isEmpty() ? null : wrongInvalidColor;
-        }
-        if(rankColor != null) {
-            groupTheme.rankColor = rankColor.isEmpty() ? null : rankColor;
         }
         groupThemeRepository.save(groupTheme);
         return true;

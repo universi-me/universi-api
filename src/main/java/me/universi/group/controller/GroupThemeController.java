@@ -44,17 +44,12 @@ public class GroupThemeController {
             String font_color_v3             = (String)body.get("font_color_v3");
             String font_color_v4             = (String)body.get("font_color_v4");
             String font_color_v5             = (String)body.get("font_color_v5");
-            String font_color_v6             = (String)body.get("font_color_v6");
             String font_disabled_color       = (String)body.get("font_disabled_color");
-            String forms_color               = (String)body.get("forms_color");
             String skills_1_color            = (String)body.get("skills_1_color");
-            String wave_color                = (String)body.get("wave_color");
-            String button_yellow_hover_color = (String)body.get("button_yellow_hover_color");
             String button_hover_color        = (String)body.get("button_hover_color");
             String alert_color               = (String)body.get("alert_color");
             String success_color             = (String)body.get("success_color");
             String wrong_invalid_color       = (String)body.get("wrong_invalid_color");
-            String rank_color                = (String)body.get("rank_color");
 
             Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
 
@@ -76,17 +71,12 @@ public class GroupThemeController {
                             font_color_v3,
                             font_color_v4,
                             font_color_v5,
-                            font_color_v6,
                             font_disabled_color,
-                            forms_color,
                             skills_1_color,
-                            wave_color,
-                            button_yellow_hover_color,
                             button_hover_color,
                             alert_color,
                             success_color,
-                            wrong_invalid_color,
-                            rank_color
+                            wrong_invalid_color
                     )) {
                         response.message = "Tema editado com sucesso.";
                         return;
