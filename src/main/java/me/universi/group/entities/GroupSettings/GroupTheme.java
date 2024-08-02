@@ -48,8 +48,6 @@ public class GroupTheme  implements Serializable {
     public String fontColorV3;
     @Column(name = "font_color_v4")
     public String fontColorV4;
-    @Column(name = "font_color_v5")
-    public String fontColorV5;
     @Column(name = "font_color_disabled")
     public String fontColorDisabled;
     @Column(name = "skills_1_color")
