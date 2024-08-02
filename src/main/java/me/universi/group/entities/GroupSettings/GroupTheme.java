@@ -32,8 +32,6 @@ public class GroupTheme  implements Serializable {
     public String primaryColor;
     @Column(name = "secondary_color")
     public String secondaryColor;
-    @Column(name = "tertiary_color")
-    public String tertiaryColor;
     @Column(name = "background_color")
     public String backgroundColor;
     @Column(name = "card_background_color")

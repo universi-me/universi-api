@@ -587,7 +587,7 @@ public class GroupService {
         groupSettingsRepository.save(gSettings);
     }
 
-    public boolean editTheme(Group group, String primaryColor, String secondaryColor, String tertiaryColor, String backgroundColor, String cardBackgroundColor, String cardItemColor, String fontColorV1, String fontColorV2, String fontColorV3, String fontColorLinks, String fontDisabledColor, String buttonHoverColor, String alertColor, String successColor, String wrongInvalidColor) {
+    public boolean editTheme(Group group, String primaryColor, String secondaryColor, String backgroundColor, String cardBackgroundColor, String cardItemColor, String fontColorV1, String fontColorV2, String fontColorV3, String fontColorLinks, String fontDisabledColor, String buttonHoverColor, String alertColor, String successColor, String wrongInvalidColor) {
         if(group == null) {
             return false;
         }
@@ -606,9 +606,6 @@ public class GroupService {
         }
         if(secondaryColor != null) {
             groupTheme.secondaryColor = secondaryColor.isEmpty() ? null : secondaryColor;
-        }
-        if(tertiaryColor != null) {
-            groupTheme.tertiaryColor = tertiaryColor.isEmpty() ? null : tertiaryColor;
         }
         if(backgroundColor != null) {
             groupTheme.backgroundColor = backgroundColor.isEmpty() ? null : backgroundColor;

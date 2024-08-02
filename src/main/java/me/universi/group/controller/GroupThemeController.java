@@ -36,7 +36,6 @@ public class GroupThemeController {
 
             String primaryColor             = CastingUtil.getString("primary_color").orElse(null);
             String secondaryColor           = CastingUtil.getString("secondary_color").orElse(null);
-            String tertiaryColor            = CastingUtil.getString("tertiary_color").orElse(null);
             String backgroundColor          = CastingUtil.getString("background_color").orElse(null);
             String cardBackgroundColor      = CastingUtil.getString("card_background_color").orElse(null);
             String cardItemColor            = CastingUtil.getString("card_item_color").orElse(null);
@@ -61,7 +60,6 @@ public class GroupThemeController {
                     if(groupService.editTheme(group,
                             primaryColor,
                             secondaryColor,
-                            tertiaryColor,
                             backgroundColor,
                             cardBackgroundColor,
                             cardItemColor,
