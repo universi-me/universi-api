@@ -43,7 +43,7 @@ public class GroupThemeController {
             String fontColorV1              = CastingUtil.getString("font_color_v1").orElse(null);
             String fontColorV2              = CastingUtil.getString("font_color_v2").orElse(null);
             String fontColorV3              = CastingUtil.getString("font_color_v3").orElse(null);
-            String fontColorV4              = CastingUtil.getString("font_color_v4").orElse(null);
+            String fontColorLinks           = CastingUtil.getString("font_color_links").orElse(null);
             String fontColorDisabled        = CastingUtil.getString("font_color_disabled").orElse(null);
             String skills1Color             = CastingUtil.getString("skills_1_color").orElse(null);
             String buttonHoverColor         = CastingUtil.getString("button_hover_color").orElse(null);
@@ -69,7 +69,7 @@ public class GroupThemeController {
                             fontColorV1,
                             fontColorV2,
                             fontColorV3,
-                            fontColorV4,
+                            fontColorLinks,
                             fontColorDisabled,
                             skills1Color,
                             buttonHoverColor,
