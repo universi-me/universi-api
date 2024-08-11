@@ -1,15 +1,17 @@
 package me.universi.group.controller;
 
 import java.util.Map;
+import java.util.UUID;
+
 import me.universi.api.entities.Response;
 import me.universi.group.entities.Group;
 import me.universi.group.exceptions.GroupException;
 import me.universi.group.services.GroupService;
-import me.universi.roles.enums.FeaturesTypes;
-import me.universi.roles.enums.Permission;
 import me.universi.roles.services.RolesService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
+import me.universi.util.CastingUtil;
+
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,35 +28,26 @@ public class GroupThemeController {
 
     // edit group theme
     @PostMapping(value = "/edit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response theme_edit(@RequestBody Map<String, Object> body) {
+    public Response themeEdit(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
 
-            Object groupId =   body.get("groupId");
-            Object groupPath = body.get("groupPath");
+            UUID groupId =   CastingUtil.getUUID("groupId").orElse(null);
+            String groupPath = CastingUtil.getString("groupPath").orElse(null);
 
-            String primary_color             = (String)body.get("primary_color");
-            String secondary_color           = (String)body.get("secondary_color");
-            String tertiary_color            = (String)body.get("tertiary_color");
-            String background_color          = (String)body.get("background_color");
-            String card_background_color     = (String)body.get("card_background_color");
-            String card_item_color           = (String)body.get("card_item_color");
-            String font_color_v1             = (String)body.get("font_color_v1");
-            String font_color_v2             = (String)body.get("font_color_v2");
-            String font_color_v3             = (String)body.get("font_color_v3");
-            String font_color_v4             = (String)body.get("font_color_v4");
-            String font_color_v5             = (String)body.get("font_color_v5");
-            String font_color_v6             = (String)body.get("font_color_v6");
-            String font_disabled_color       = (String)body.get("font_disabled_color");
-            String forms_color               = (String)body.get("forms_color");
-            String skills_1_color            = (String)body.get("skills_1_color");
-            String wave_color                = (String)body.get("wave_color");
-            String button_yellow_hover_color = (String)body.get("button_yellow_hover_color");
-            String button_hover_color        = (String)body.get("button_hover_color");
-            String alert_color               = (String)body.get("alert_color");
-            String success_color             = (String)body.get("success_color");
-            String wrong_invalid_color       = (String)body.get("wrong_invalid_color");
-            String rank_color                = (String)body.get("rank_color");
+            String primaryColor             = CastingUtil.getString("primary_color").orElse(null);
+            String secondaryColor           = CastingUtil.getString("secondary_color").orElse(null);
+            String backgroundColor          = CastingUtil.getString("background_color").orElse(null);
+            String cardBackgroundColor      = CastingUtil.getString("card_background_color").orElse(null);
+            String cardItemColor            = CastingUtil.getString("card_item_color").orElse(null);
+            String fontColorV1              = CastingUtil.getString("font_color_v1").orElse(null);
+            String fontColorV2              = CastingUtil.getString("font_color_v2").orElse(null);
+            String fontColorV3              = CastingUtil.getString("font_color_v3").orElse(null);
+            String fontColorLinks           = CastingUtil.getString("font_color_links").orElse(null);
+            String fontColorDisabled        = CastingUtil.getString("font_color_disabled").orElse(null);
+            String buttonHoverColor         = CastingUtil.getString("button_hover_color").orElse(null);
+            String fontColorAlert           = CastingUtil.getString("font_color_alert").orElse(null);
+            String fontColorSuccess         = CastingUtil.getString("font_color_success").orElse(null);
+            String wrongInvalidColor        = CastingUtil.getString("wrong_invalid_color").orElse(null);
 
             Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
 
@@ -65,28 +58,20 @@ public class GroupThemeController {
 
                 if(groupService.verifyPermissionToEditGroup(group, user)) {
                     if(groupService.editTheme(group,
-                            primary_color,
-                            secondary_color,
-                            tertiary_color,
-                            background_color,
-                            card_background_color,
-                            card_item_color,
-                            font_color_v1,
-                            font_color_v2,
-                            font_color_v3,
-                            font_color_v4,
-                            font_color_v5,
-                            font_color_v6,
-                            font_disabled_color,
-                            forms_color,
-                            skills_1_color,
-                            wave_color,
-                            button_yellow_hover_color,
-                            button_hover_color,
-                            alert_color,
-                            success_color,
-                            wrong_invalid_color,
-                            rank_color
+                            primaryColor,
+                            secondaryColor,
+                            backgroundColor,
+                            cardBackgroundColor,
+                            cardItemColor,
+                            fontColorV1,
+                            fontColorV2,
+                            fontColorV3,
+                            fontColorLinks,
+                            fontColorDisabled,
+                            buttonHoverColor,
+                            fontColorAlert,
+                            fontColorSuccess,
+                            wrongInvalidColor
                     )) {
                         response.message = "Tema editado com sucesso.";
                         return;
