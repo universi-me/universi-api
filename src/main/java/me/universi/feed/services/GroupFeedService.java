@@ -31,6 +31,9 @@ public class GroupFeedService {
     private final GroupPostReactionRepository groupPostReactionRepository;
     private final GroupPostCommentRepository groupPostCommentRepository;
 
+    private static final Integer MAX_CONTENT_LENGTH = 3000;
+    private static final Integer MAX_COMMENT_LENGTH = 2000;
+
     @Autowired
     public GroupFeedService(GroupPostRepository groupPostRepository, GroupPostReactionRepository groupPostReactionRepository, GroupPostCommentRepository groupPostCommentRepository) {
         this.groupPostRepository = groupPostRepository;
@@ -59,8 +62,8 @@ public class GroupFeedService {
         String authorId = String.valueOf(UserService.getInstance().getUserInSession().getProfile().getId());
         if (groupPostDTO.getContent() == null || groupPostDTO.getContent().isEmpty()) {
             throw new GroupFeedException("O conteúdo da publicação não pode estar vazio.");
-        } else if(groupPostDTO.getContent().length() > 3000) {
-            throw new GroupFeedException("O conteúdo da publicação não pode ter mais de 3000 caracteres.");
+        } else if(groupPostDTO.getContent().length() > MAX_CONTENT_LENGTH) {
+            throw new GroupFeedException("O conteúdo da publicação não pode ter mais de "+MAX_CONTENT_LENGTH+" caracteres.");
         }
         GroupPost groupPost = new GroupPost(groupId, groupPostDTO.getContent(), authorId, false);
         return groupPostRepository.save(groupPost);
@@ -129,8 +132,8 @@ public class GroupFeedService {
         checkPermissionForEdit(post, false);
 
         if(groupPostDTO.getContent() != null && !groupPostDTO.getContent().isEmpty()) {
-            if(groupPostDTO.getContent().length() > 3000) {
-                throw new GroupFeedException("O conteúdo da publicação não pode ter mais de 3000 caracteres.");
+            if(groupPostDTO.getContent().length() > MAX_CONTENT_LENGTH) {
+                throw new GroupFeedException("O conteúdo da publicação não pode ter mais de "+MAX_CONTENT_LENGTH+" caracteres.");
             }
             post.setContent(groupPostDTO.getContent());
         }
@@ -179,7 +182,6 @@ public class GroupFeedService {
             return groupPostReactionRepository.save(reactionObj);
         }
     }
-
     public List<GroupPostCommentDTO> getGroupPostComments(String groupPostId) {
         Optional<List<GroupPostComment>> comments = groupPostCommentRepository.findByGroupPostIdAndDeletedIsFalse(groupPostId);
         if(comments.isPresent()) {
@@ -201,8 +203,8 @@ public class GroupFeedService {
     private void checkCommentContent(String comment) {
         if(comment == null || comment.isEmpty()) {
             throw new GroupFeedException("O conteúdo do comentário não pode estar vazio.");
-        } else if(comment.length() > 2000) {
-            throw new GroupFeedException("O conteúdo do comentário não pode ter mais de 3000 caracteres.");
+        } else if(comment.length() > MAX_COMMENT_LENGTH) {
+            throw new GroupFeedException("O conteúdo do comentário não pode ter mais de "+MAX_COMMENT_LENGTH+" caracteres.");
         }
     }
 
