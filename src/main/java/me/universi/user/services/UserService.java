@@ -401,9 +401,10 @@ public class UserService implements UserDetailsService {
             preAuthenticatedAuthenticationToken.setDetails(new WebAuthenticationDetails(request));
             preAuthenticatedAuthenticationToken.setAuthenticated(false);
             Authentication authentication = authenticationManager.authenticate(preAuthenticatedAuthenticationToken);
-            SecurityContext securityContext = SecurityContextHolder.getContext();
+            SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
             securityContext.setAuthentication(authentication);
             session.setAttribute("SPRING_SECURITY_CONTEXT", securityContext);
+            SecurityContextHolder.setContext(securityContext);
         }
     }
 
