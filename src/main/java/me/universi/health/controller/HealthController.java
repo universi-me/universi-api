@@ -1,16 +1,16 @@
 package me.universi.health.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestClient;
 
-import io.minio.MinioClient;
 import jakarta.persistence.EntityManager;
 import jakarta.validation.constraints.NotNull;
 import me.universi.health.dto.HealthResponseDTO;
+import me.universi.minioConfig.MinioConfig;
 
 @RestController
 @RequestMapping(
@@ -21,16 +21,16 @@ import me.universi.health.dto.HealthResponseDTO;
 public class HealthController {
     private EntityManager entityManager;
     private MongoTemplate mongoTemplate;
-    private MinioClient minioClient;
+    private MinioConfig minioConfig;
 
     public HealthController(
         EntityManager entityManager,
         MongoTemplate mongoTemplate,
-        @Autowired( required = false ) MinioClient minioClient
+        MinioConfig minioConfig
     ) {
         this.entityManager = entityManager;
         this.mongoTemplate = mongoTemplate;
-        this.minioClient = minioClient;
+        this.minioConfig = minioConfig;
     }
 
     @GetMapping( "/api" )
@@ -68,11 +68,28 @@ public class HealthController {
 
     @GetMapping( "/minio" )
     public @NotNull HealthResponseDTO minIoHealth() {
-        boolean clientExists = this.minioClient != null;
+        if (!this.minioConfig.enabled)
+            return new HealthResponseDTO(false, "Serviço desativado");
 
-        return new HealthResponseDTO(
-            clientExists,
-            clientExists ? null : "Servidor inativo"
-        );
+        try {
+            var response = RestClient.builder( )
+                .baseUrl( minioConfig.getUrl() )
+                .build( )
+                .get( )
+                .uri("/minio/health/cluster")
+                .retrieve( )
+                .toEntity(String.class);
+
+            boolean reached = response.getStatusCode().value() == 200;
+
+            return new HealthResponseDTO(
+                reached,
+                reached ? null : "Serviço inacessível"
+            );
+        }
+
+        catch (Exception e) {
+            return new HealthResponseDTO(false, "Serviço offline");
+        }
     }
 }
