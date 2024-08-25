@@ -1,5 +1,6 @@
 package me.universi.health.controller;
 
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,9 +18,11 @@ import me.universi.health.dto.HealthResponseDTO;
 )
 public class HealthController {
     private EntityManager entityManager;
+    private MongoTemplate mongoTemplate;
 
-    public HealthController(EntityManager entityManager) {
+    public HealthController(EntityManager entityManager, MongoTemplate mongoTemplate) {
         this.entityManager = entityManager;
+        this.mongoTemplate = mongoTemplate;
     }
 
     @GetMapping( "/api" )
@@ -45,8 +48,14 @@ public class HealthController {
 
     @GetMapping( "/mongodb" )
     public @NotNull HealthResponseDTO mongoDbHealth() {
-        // todo
-        return new HealthResponseDTO(true, null);
+        try {
+            var db = this.mongoTemplate.getDb();
+            if (db == null) throw new Exception();
+
+            return new HealthResponseDTO(true, null);
+        } catch (Exception e) {
+            return new HealthResponseDTO(false, "Base de dados MongoDB inacessível");
+        }
     }
 
     @GetMapping( "/minio" )
