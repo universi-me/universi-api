@@ -1,6 +1,11 @@
 package me.universi.health.controller;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+
 import org.bson.Document;
+import org.hibernate.Session;
+import org.hibernate.jdbc.Work;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,10 +49,17 @@ public class HealthController {
     public @NotNull HealthResponseDTO databaseHealth() {
         try {
             boolean open = this.entityManager.isOpen();
-            return new HealthResponseDTO(
-                open,
-                open ? null : "Sessão não está aberta"
-            );
+            if (!open)
+                return new HealthResponseDTO( false, "Nenhuma sessão aberta" );
+
+            var session = entityManager.unwrap(Session.class);
+            session.doWork( new Work() {
+                @Override public void execute( Connection connection ) throws SQLException {
+                    connection.createStatement().execute("SELECT 1");
+                }
+            });
+
+            return new HealthResponseDTO( true, null );
         }
 
         catch (Exception err) {
