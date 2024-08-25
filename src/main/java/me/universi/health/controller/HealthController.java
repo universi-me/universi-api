@@ -1,11 +1,13 @@
 package me.universi.health.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.minio.MinioClient;
 import jakarta.persistence.EntityManager;
 import jakarta.validation.constraints.NotNull;
 import me.universi.health.dto.HealthResponseDTO;
@@ -19,10 +21,16 @@ import me.universi.health.dto.HealthResponseDTO;
 public class HealthController {
     private EntityManager entityManager;
     private MongoTemplate mongoTemplate;
+    private MinioClient minioClient;
 
-    public HealthController(EntityManager entityManager, MongoTemplate mongoTemplate) {
+    public HealthController(
+        EntityManager entityManager,
+        MongoTemplate mongoTemplate,
+        @Autowired( required = false ) MinioClient minioClient
+    ) {
         this.entityManager = entityManager;
         this.mongoTemplate = mongoTemplate;
+        this.minioClient = minioClient;
     }
 
     @GetMapping( "/api" )
@@ -60,7 +68,11 @@ public class HealthController {
 
     @GetMapping( "/minio" )
     public @NotNull HealthResponseDTO minIoHealth() {
-        // todo
-        return new HealthResponseDTO(true, null);
+        boolean clientExists = this.minioClient != null;
+
+        return new HealthResponseDTO(
+            clientExists,
+            clientExists ? null : "Servidor inativo"
+        );
     }
 }
