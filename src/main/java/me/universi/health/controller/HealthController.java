@@ -1,5 +1,6 @@
 package me.universi.health.controller;
 
+import org.bson.Document;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -58,7 +59,7 @@ public class HealthController {
     public @NotNull HealthResponseDTO mongoDbHealth() {
         try {
             var db = this.mongoTemplate.getDb();
-            if (db == null) throw new Exception();
+            db.runCommand( new Document().append("ping", 1) );
 
             return new HealthResponseDTO(true, null);
         } catch (Exception e) {
