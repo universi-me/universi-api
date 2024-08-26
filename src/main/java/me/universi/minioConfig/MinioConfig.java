@@ -70,4 +70,6 @@ public class MinioConfig {
 
         return minioClient;
     }
+
+    public String getUrl() { return this.minioUrl; }
 }
