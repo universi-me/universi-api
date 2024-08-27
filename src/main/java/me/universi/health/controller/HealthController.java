@@ -30,7 +30,7 @@ public class HealthController {
     public @NotNull Response allHealth() {
         return Response.buildResponse(response -> {
             var healths = healthService.allHealth();
-            var servicesDown = healths.stream().filter(h -> !h.isUp()).toList();
+            var servicesDown = healths.stream().filter(h -> !(h.isUp() || (!h.isUp() && h.isDisabled()))).toList();
             response.success = servicesDown.isEmpty();
 
             response.status = response.success

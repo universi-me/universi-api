@@ -44,7 +44,7 @@ public class HealthService {
 
     public @NotNull HealthResponseDTO apiHealth() {
         // If this is running then API is up
-        return new HealthResponseDTO(true, "API", null, null);
+        return new HealthResponseDTO(true, false, "API", null, null);
     }
 
     private static final String DATABASE_SERVICE_ID = "DATABASE";
@@ -52,7 +52,7 @@ public class HealthService {
         try {
             boolean open = this.entityManager.isOpen();
             if (!open)
-                return new HealthResponseDTO( false, DATABASE_SERVICE_ID, "Nenhuma sessão aberta", null);
+                return new HealthResponseDTO( false, false, DATABASE_SERVICE_ID, "Nenhuma sessão aberta", null);
 
             var session = entityManager.unwrap(Session.class);
             session.doWork( new Work() {
@@ -61,11 +61,11 @@ public class HealthService {
                 }
             });
 
-            return new HealthResponseDTO( true, DATABASE_SERVICE_ID, null , null);
+            return new HealthResponseDTO( true, false, DATABASE_SERVICE_ID, null , null);
         }
 
         catch (Exception err) {
-            return new HealthResponseDTO( false, DATABASE_SERVICE_ID, "Erro ao buscar sessão" , err.getMessage());
+            return new HealthResponseDTO( false, false, DATABASE_SERVICE_ID, "Erro ao buscar sessão" , err.getMessage());
         }
     }
 
@@ -75,16 +75,16 @@ public class HealthService {
             var db = this.mongoTemplate.getDb();
             db.runCommand( new Document().append("ping", 1) );
 
-            return new HealthResponseDTO(true, MONGODB_SERVICE_ID, null, null);
+            return new HealthResponseDTO(true, false, MONGODB_SERVICE_ID, null, null);
         } catch (Exception e) {
-            return new HealthResponseDTO(false, MONGODB_SERVICE_ID, "Base de dados MongoDB inacessível", e.getMessage());
+            return new HealthResponseDTO(false, false, MONGODB_SERVICE_ID, "Base de dados MongoDB inacessível", e.getMessage());
         }
     }
 
     private static final String MINIO_SERVICE_ID = "MINIO";
     public @NotNull HealthResponseDTO minIoHealth() {
         if (!MinioConfig.isMinioEnabled())
-            return new HealthResponseDTO(false, MINIO_SERVICE_ID, "Serviço desativado", null);
+            return new HealthResponseDTO(false, true, MINIO_SERVICE_ID, "Serviço desativado", null);
 
         try {
             var response = RestClient.builder( )
@@ -98,14 +98,14 @@ public class HealthService {
             boolean reached = response.getStatusCode().value() == 200;
 
             return new HealthResponseDTO(
-                reached, MINIO_SERVICE_ID,
+                reached, false, MINIO_SERVICE_ID,
                 reached ? null : "Serviço inacessível",
                     null
             );
         }
 
         catch (Exception e) {
-            return new HealthResponseDTO(false, MINIO_SERVICE_ID, "Serviço offline", e.getMessage());
+            return new HealthResponseDTO(false, false, MINIO_SERVICE_ID, "Serviço offline", e.getMessage());
         }
     }
 }
