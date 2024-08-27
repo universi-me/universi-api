@@ -10,15 +10,20 @@ public class HealthResponseDTO {
     private @NotNull String name;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private @Nullable String message;
+    private @Nullable String statusMessage;
 
-    public HealthResponseDTO(@NotNull boolean up, @NotNull String name, @Nullable String message) {
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private @Nullable String exceptionMessage;
+
+    public HealthResponseDTO(@NotNull boolean up, @NotNull String name, @Nullable String statusMessage, @Nullable String exceptionMessage) {
         this.up = up;
         this.name = name;
-        this.message = message;
+        this.statusMessage = statusMessage;
+        this.exceptionMessage = exceptionMessage;
     }
 
     public boolean isUp() { return up; }
     public String getName() { return name; }
-    public String getMessage() { return message; }
+    public String getStatusMessage() { return statusMessage; }
+    public String getExceptionMessage() { return exceptionMessage; }
 }
