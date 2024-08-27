@@ -1,5 +1,6 @@
 package me.universi.health.services;
 
+import jakarta.validation.constraints.Min;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -21,16 +22,13 @@ import me.universi.minioConfig.MinioConfig;
 public class HealthService {
     private EntityManager entityManager;
     private MongoTemplate mongoTemplate;
-    private MinioConfig minioConfig;
 
     public HealthService(
         EntityManager entityManager,
-        MongoTemplate mongoTemplate,
-        MinioConfig minioConfig
+        MongoTemplate mongoTemplate
     ) {
         this.entityManager = entityManager;
         this.mongoTemplate = mongoTemplate;
-        this.minioConfig = minioConfig;
     }
 
     public @NotNull List<@NotNull HealthResponseDTO> allHealth() {
@@ -46,7 +44,7 @@ public class HealthService {
 
     public @NotNull HealthResponseDTO apiHealth() {
         // If this is running then API is up
-        return new HealthResponseDTO(true, "API", null);
+        return new HealthResponseDTO(true, false, "API", null, null);
     }
 
     private static final String DATABASE_SERVICE_ID = "DATABASE";
@@ -54,7 +52,7 @@ public class HealthService {
         try {
             boolean open = this.entityManager.isOpen();
             if (!open)
-                return new HealthResponseDTO( false, DATABASE_SERVICE_ID, "Nenhuma sessão aberta" );
+                return new HealthResponseDTO( false, false, DATABASE_SERVICE_ID, "Nenhuma sessão aberta", null);
 
             var session = entityManager.unwrap(Session.class);
             session.doWork( new Work() {
@@ -63,11 +61,11 @@ public class HealthService {
                 }
             });
 
-            return new HealthResponseDTO( true, DATABASE_SERVICE_ID, null );
+            return new HealthResponseDTO( true, false, DATABASE_SERVICE_ID, null , null);
         }
 
         catch (Exception err) {
-            return new HealthResponseDTO( false, DATABASE_SERVICE_ID, "Erro ao buscar sessão" );
+            return new HealthResponseDTO( false, false, DATABASE_SERVICE_ID, "Erro ao buscar sessão" , err.getMessage());
         }
     }
 
@@ -77,20 +75,20 @@ public class HealthService {
             var db = this.mongoTemplate.getDb();
             db.runCommand( new Document().append("ping", 1) );
 
-            return new HealthResponseDTO(true, MONGODB_SERVICE_ID, null);
+            return new HealthResponseDTO(true, false, MONGODB_SERVICE_ID, null, null);
         } catch (Exception e) {
-            return new HealthResponseDTO(false, MONGODB_SERVICE_ID, "Base de dados MongoDB inacessível");
+            return new HealthResponseDTO(false, false, MONGODB_SERVICE_ID, "Base de dados MongoDB inacessível", e.getMessage());
         }
     }
 
     private static final String MINIO_SERVICE_ID = "MINIO";
     public @NotNull HealthResponseDTO minIoHealth() {
-        if (!this.minioConfig.enabled)
-            return new HealthResponseDTO(false, MINIO_SERVICE_ID, "Serviço desativado");
+        if (!MinioConfig.isMinioEnabled())
+            return new HealthResponseDTO(false, true, MINIO_SERVICE_ID, "Serviço desativado", null);
 
         try {
             var response = RestClient.builder( )
-                .baseUrl( minioConfig.getUrl() )
+                .baseUrl( MinioConfig.getInstance().getUrl() )
                 .build( )
                 .get( )
                 .uri("/minio/health/cluster")
@@ -100,13 +98,14 @@ public class HealthService {
             boolean reached = response.getStatusCode().value() == 200;
 
             return new HealthResponseDTO(
-                reached, MINIO_SERVICE_ID,
-                reached ? null : "Serviço inacessível"
+                reached, false, MINIO_SERVICE_ID,
+                reached ? null : "Serviço inacessível",
+                    null
             );
         }
 
         catch (Exception e) {
-            return new HealthResponseDTO(false, MINIO_SERVICE_ID, "Serviço offline");
+            return new HealthResponseDTO(false, false, MINIO_SERVICE_ID, "Serviço offline", e.getMessage());
         }
     }
 }
