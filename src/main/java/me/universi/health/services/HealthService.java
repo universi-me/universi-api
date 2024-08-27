@@ -1,5 +1,6 @@
 package me.universi.health.services;
 
+import jakarta.validation.constraints.Min;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -21,16 +22,13 @@ import me.universi.minioConfig.MinioConfig;
 public class HealthService {
     private EntityManager entityManager;
     private MongoTemplate mongoTemplate;
-    private MinioConfig minioConfig;
 
     public HealthService(
         EntityManager entityManager,
-        MongoTemplate mongoTemplate,
-        MinioConfig minioConfig
+        MongoTemplate mongoTemplate
     ) {
         this.entityManager = entityManager;
         this.mongoTemplate = mongoTemplate;
-        this.minioConfig = minioConfig;
     }
 
     public @NotNull List<@NotNull HealthResponseDTO> allHealth() {
@@ -85,12 +83,12 @@ public class HealthService {
 
     private static final String MINIO_SERVICE_ID = "MINIO";
     public @NotNull HealthResponseDTO minIoHealth() {
-        if (!this.minioConfig.enabled)
+        if (!MinioConfig.isMinioEnabled())
             return new HealthResponseDTO(false, MINIO_SERVICE_ID, "Serviço desativado", null);
 
         try {
             var response = RestClient.builder( )
-                .baseUrl( minioConfig.getUrl() )
+                .baseUrl( MinioConfig.getInstance().getUrl() )
                 .build( )
                 .get( )
                 .uri("/minio/health/cluster")
