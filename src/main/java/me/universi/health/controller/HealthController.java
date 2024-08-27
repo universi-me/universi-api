@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestClient;
 
+import io.jsonwebtoken.lang.Arrays;
 import jakarta.persistence.EntityManager;
 import jakarta.validation.constraints.NotNull;
 import me.universi.health.dto.HealthResponseDTO;
@@ -39,18 +40,46 @@ public class HealthController {
         this.minioConfig = minioConfig;
     }
 
+    @GetMapping( "/all" )
+    public @NotNull HealthResponseDTO allHealth() {
+        HealthResponseDTO[] healthArray = {
+            apiHealth(),
+            databaseHealth(),
+            mongoDbHealth(),
+            minIoHealth(),
+        };
+
+        var healths = Arrays.asList(healthArray);
+        var servicesDown = healths.stream().filter(h -> !h.isUp()).toList();
+
+        var allOk = servicesDown.isEmpty();
+        String message = null;
+
+        if (!allOk) {
+            message = String.join( "; ",
+                servicesDown
+                .stream()
+                .map(h -> h.getName() + ": " + h.getMessage())
+                .toList()
+            );
+        }
+
+        return new HealthResponseDTO( allOk, "Todos os Serviços", message );
+    }
+
     @GetMapping( "/api" )
     public @NotNull HealthResponseDTO apiHealth() {
         // If this is running then API is up
-        return new HealthResponseDTO(true, null);
+        return new HealthResponseDTO(true, "API", null);
     }
 
+    private static final String DATABASE_SERVICE_NAME = "Base de Dados";
     @GetMapping( "/database" )
     public @NotNull HealthResponseDTO databaseHealth() {
         try {
             boolean open = this.entityManager.isOpen();
             if (!open)
-                return new HealthResponseDTO( false, "Nenhuma sessão aberta" );
+                return new HealthResponseDTO( false, DATABASE_SERVICE_NAME, "Nenhuma sessão aberta" );
 
             var session = entityManager.unwrap(Session.class);
             session.doWork( new Work() {
@@ -59,30 +88,32 @@ public class HealthController {
                 }
             });
 
-            return new HealthResponseDTO( true, null );
+            return new HealthResponseDTO( true, DATABASE_SERVICE_NAME, null );
         }
 
         catch (Exception err) {
-            return new HealthResponseDTO( false, "Erro ao buscar sessão" );
+            return new HealthResponseDTO( false, DATABASE_SERVICE_NAME, "Erro ao buscar sessão" );
         }
     }
-
+    
+    private static final String MONGODB_SERVICE_NAME = "MongoDB";
     @GetMapping( "/mongodb" )
     public @NotNull HealthResponseDTO mongoDbHealth() {
         try {
             var db = this.mongoTemplate.getDb();
             db.runCommand( new Document().append("ping", 1) );
 
-            return new HealthResponseDTO(true, null);
+            return new HealthResponseDTO(true, MONGODB_SERVICE_NAME, null);
         } catch (Exception e) {
-            return new HealthResponseDTO(false, "Base de dados MongoDB inacessível");
+            return new HealthResponseDTO(false, MONGODB_SERVICE_NAME, "Base de dados MongoDB inacessível");
         }
     }
 
+    private static final String MINIO_SERVICE_NAME = "MinIO";
     @GetMapping( "/minio" )
     public @NotNull HealthResponseDTO minIoHealth() {
         if (!this.minioConfig.enabled)
-            return new HealthResponseDTO(false, "Serviço desativado");
+            return new HealthResponseDTO(false, MINIO_SERVICE_NAME, "Serviço desativado");
 
         try {
             var response = RestClient.builder( )
@@ -96,13 +127,13 @@ public class HealthController {
             boolean reached = response.getStatusCode().value() == 200;
 
             return new HealthResponseDTO(
-                reached,
+                reached, MINIO_SERVICE_NAME,
                 reached ? null : "Serviço inacessível"
             );
         }
 
         catch (Exception e) {
-            return new HealthResponseDTO(false, "Serviço offline");
+            return new HealthResponseDTO(false, MINIO_SERVICE_NAME, "Serviço offline");
         }
     }
 }
