@@ -53,6 +53,8 @@ public class ImageController {
 
     // get image from minIO
     @GetMapping(value = "/img/minio/{imageId}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    @ResponseBody
+    @Cacheable("img")
     public ResponseEntity<byte[]> getImageFromMinio(@PathVariable("imageId") String imageId) {
         try {
             //Recupera a imagem do MinIO
@@ -70,9 +72,12 @@ public class ImageController {
             stream.close();
 
             //Retorna os bytes da imagem com um status HTTP 200 OK
-            return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(imageBytes);
+            return ResponseEntity
+                    .ok()
+                    .contentLength(imageBytes.length)
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .cacheControl(CacheControl.maxAge(365, TimeUnit.DAYS))
+                    .body(imageBytes);
         } catch (Exception e) {
             //Se ocorrer um erro ao recuperar a imagem, retorna um status HTTP 404 Not Found
             return ResponseEntity.notFound().build();
