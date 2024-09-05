@@ -71,6 +71,8 @@ public class Response {
             response.success = true;
             completionHandler.accept(response);
         } catch (Exception e) {
+            // log error
+            e.printStackTrace();
             response.success = false;
             if(e.getClass().getPackageName().startsWith("me.universi")) { // is exception from this project
                 response.message = e.getMessage();
