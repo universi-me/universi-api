@@ -31,23 +31,23 @@ public class GroupThemeController {
     public Response themeEdit(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
 
-            UUID groupId =   CastingUtil.getUUID("groupId").orElse(null);
-            String groupPath = CastingUtil.getString("groupPath").orElse(null);
+            UUID groupId = CastingUtil.getUUID(body.get("groupId")).orElse(null);
+            String groupPath = CastingUtil.getString(body.get("groupPath")).orElse(null);
 
-            String primaryColor             = CastingUtil.getString("primary_color").orElse(null);
-            String secondaryColor           = CastingUtil.getString("secondary_color").orElse(null);
-            String backgroundColor          = CastingUtil.getString("background_color").orElse(null);
-            String cardBackgroundColor      = CastingUtil.getString("card_background_color").orElse(null);
-            String cardItemColor            = CastingUtil.getString("card_item_color").orElse(null);
-            String fontColorV1              = CastingUtil.getString("font_color_v1").orElse(null);
-            String fontColorV2              = CastingUtil.getString("font_color_v2").orElse(null);
-            String fontColorV3              = CastingUtil.getString("font_color_v3").orElse(null);
-            String fontColorLinks           = CastingUtil.getString("font_color_links").orElse(null);
-            String fontColorDisabled        = CastingUtil.getString("font_color_disabled").orElse(null);
-            String buttonHoverColor         = CastingUtil.getString("button_hover_color").orElse(null);
-            String fontColorAlert           = CastingUtil.getString("font_color_alert").orElse(null);
-            String fontColorSuccess         = CastingUtil.getString("font_color_success").orElse(null);
-            String wrongInvalidColor        = CastingUtil.getString("wrong_invalid_color").orElse(null);
+            String primaryColor        = CastingUtil.getString(body.get("primary_color")).orElse(null);
+            String secondaryColor      = CastingUtil.getString(body.get("secondary_color")).orElse(null);
+            String backgroundColor     = CastingUtil.getString(body.get("background_color")).orElse(null);
+            String cardBackgroundColor = CastingUtil.getString(body.get("card_background_color")).orElse(null);
+            String cardItemColor       = CastingUtil.getString(body.get("card_item_color")).orElse(null);
+            String fontColorV1         = CastingUtil.getString(body.get("font_color_v1")).orElse(null);
+            String fontColorV2         = CastingUtil.getString(body.get("font_color_v2")).orElse(null);
+            String fontColorV3         = CastingUtil.getString(body.get("font_color_v3")).orElse(null);
+            String fontColorLinks      = CastingUtil.getString(body.get("font_color_links")).orElse(null);
+            String fontColorDisabled   = CastingUtil.getString(body.get("font_color_disabled")).orElse(null);
+            String buttonHoverColor    = CastingUtil.getString(body.get("button_hover_color")).orElse(null);
+            String fontColorAlert      = CastingUtil.getString(body.get("font_color_alert")).orElse(null);
+            String fontColorSuccess    = CastingUtil.getString(body.get("font_color_success")).orElse(null);
+            String wrongInvalidColor   = CastingUtil.getString(body.get("wrong_invalid_color")).orElse(null);
 
             Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
 
