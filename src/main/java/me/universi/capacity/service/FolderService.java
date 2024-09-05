@@ -49,8 +49,10 @@ public class FolderService {
     private final ContentRepository contentRepository;
     private final FolderFavoriteRepository folderFavoriteRepository;
     private final ContentStatusRepository contentStatusRepository;
+    private final CompetenceTypeService competenceTypeService;
+    private final CompetenceService competenceService;
 
-    public FolderService(GroupService groupService, ProfileService profileService, CategoryService categoryService, FolderRepository folderRepository, FolderProfileRepository folderProfileRepository, ContentRepository contentRepository, FolderFavoriteRepository folderFavoriteRepository, ContentStatusRepository contentStatusRepository) {
+    public FolderService(GroupService groupService, ProfileService profileService, CategoryService categoryService, FolderRepository folderRepository, FolderProfileRepository folderProfileRepository, ContentRepository contentRepository, FolderFavoriteRepository folderFavoriteRepository, ContentStatusRepository contentStatusRepository, CompetenceTypeService competenceTypeService, CompetenceService competenceService) {
         this.groupService = groupService;
         this.profileService = profileService;
         this.categoryService = categoryService;
@@ -59,6 +61,8 @@ public class FolderService {
         this.contentRepository = contentRepository;
         this.folderFavoriteRepository = folderFavoriteRepository;
         this.contentStatusRepository = contentStatusRepository;
+        this.competenceTypeService = competenceTypeService;
+        this.competenceService = competenceService;
     }
 
     public static FolderService getInstance() {
@@ -581,8 +585,6 @@ public class FolderService {
     }
 
     public void addGrantCompetenceBadge(@NotNull Folder folder, @NotNull Collection<UUID> competenceTypesIds) {
-        var competenceTypeService = CompetenceTypeService.getInstance();
-
         var competenceTypes = competenceTypesIds.stream()
             .map(competenceTypeService::findFirstById)
             .filter(ct -> ct != null && !folder.getGrantsBadgeToCompetences().contains(ct))
@@ -629,14 +631,12 @@ public class FolderService {
     private void grantCompetenceBadgeToProfile(@NotNull Folder folder, @NotNull Profile profile) {
         if (!isComplete(profile, folder)) return;
 
-        var competenceTypeService = CompetenceTypeService.getInstance();
-
         for (var competenceType : folder.getGrantsBadgeToCompetences()) {
             if (!profile.hasBadge(competenceType))
                 profile.getCompetenceBadges().add(competenceType);
 
-            if (!CompetenceService.getInstance().profileHasCompetence(profile, competenceType)) {
-                CompetenceService.getInstance().create(competenceType, "", 0, profile);
+            if (!competenceService.profileHasCompetence(profile, competenceType)) {
+                competenceService.create(competenceType, "", 0, profile);
             }
 
             if (!competenceTypeService.hasAccessToCompetenceType(competenceType, profile)) {
