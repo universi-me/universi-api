@@ -85,6 +85,9 @@ public class RolesService {
         if(profileService.isSessionOfProfile(profile))
             throw new RolesException("Você não pode alterar seu próprio papel");
 
+        if ( group.getAdmin().getId().equals(profile.getId()) )
+            throw new RolesException("O papel do dono do grupo não pode ser alterado");
+
         if(!roles.isCanBeAssigned()) {
             throw new RolesException("O papel de visitante não pode ser colocado em um participante.");
         }
