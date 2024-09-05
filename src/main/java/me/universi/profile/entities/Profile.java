@@ -54,7 +54,7 @@ public class Profile implements Serializable {
     @Column(name = "bio", columnDefinition = "TEXT")
     private String bio;
     @JsonIgnore
-    @ManyToMany
+    @ManyToMany( fetch = FetchType.EAGER )
     @JoinTable(
             name = "competence_profile",
             joinColumns = @JoinColumn(name = "profile_id"),
@@ -134,7 +134,7 @@ public class Profile implements Serializable {
     private boolean hidden = Boolean.FALSE;
 
     @JsonIgnore
-    @OneToMany
+    @OneToMany( fetch = FetchType.EAGER )
     @JoinTable(
         name = "profile_competence_badges",
         joinColumns = @JoinColumn(name = "profile_id"),
@@ -332,7 +332,7 @@ public class Profile implements Serializable {
 
     @Transient
     public boolean hasBadge(@NotNull CompetenceType competenceType) {
-        return this.competenceBadges.stream().anyMatch(ct -> ct.getId().equals(competenceType.getId()));
+        return this.getCompetenceBadges().stream().anyMatch(ct -> ct.getId().equals(competenceType.getId()));
     }
 
     @Override
