@@ -425,16 +425,39 @@ public class UserService implements UserDetailsService {
         return reachableRoles.contains(new SimpleGrantedAuthority(authority.toString()));
     }
 
-    public boolean isUserAdmin(User userSession) {
+    // check if user has equal authority
+    public boolean userHasAuthority(User user, Authority authority, boolean equal) {
+        if(equal) {
+            return user.getAuthority().equals(authority);
+        }
+        return userHasAuthority(user, authority);
+    }
+
+    public boolean isUserRole(User user, Authority role, boolean equal) {
         try {
-            return userHasAuthority(userSession, Authority.ROLE_ADMIN);
+            if(equal) {
+                return userHasAuthority(user, role, true);
+            }
+            return userHasAuthority(user, role);
         } catch (Exception e) {
             return false;
         }
     }
 
+    public boolean isUserAdmin(User userSession) {
+        return isUserRole(userSession, Authority.ROLE_ADMIN, false);
+    }
+
+    public boolean isUserDev(User userSession) {
+        return isUserRole(userSession, Authority.ROLE_DEV, true);
+    }
+
     public boolean isUserAdminSession() {
         return isUserAdmin(getUserInSession());
+    }
+
+    public boolean isUserDevSession() {
+        return isUserDev(getUserInSession());
     }
 
     public boolean userNeedAnProfile(User user, boolean checkAdmin) {
