@@ -420,25 +420,17 @@ public class UserService implements UserDetailsService {
     }
 
     // check if user has authority following springsecurity hierarchy
-    public boolean userHasAuthority(User user, Authority authority) {
-        Collection<? extends GrantedAuthority> reachableRoles = roleHierarchy.getReachableGrantedAuthorities(user.getAuthorities());
-        return reachableRoles.contains(new SimpleGrantedAuthority(authority.toString()));
-    }
-
-    // check if user has equal authority
     public boolean userHasAuthority(User user, Authority authority, boolean equal) {
         if(equal) {
             return user.getAuthority().equals(authority);
         }
-        return userHasAuthority(user, authority);
+        Collection<? extends GrantedAuthority> reachableRoles = roleHierarchy.getReachableGrantedAuthorities(user.getAuthorities());
+        return reachableRoles.contains(new SimpleGrantedAuthority(authority.toString()));
     }
 
     public boolean isUserRole(User user, Authority role, boolean equal) {
         try {
-            if(equal) {
-                return userHasAuthority(user, role, true);
-            }
-            return userHasAuthority(user, role);
+            return userHasAuthority(user, role, equal);
         } catch (Exception e) {
             return false;
         }
@@ -449,7 +441,7 @@ public class UserService implements UserDetailsService {
     }
 
     public boolean isUserDev(User userSession) {
-        return isUserRole(userSession, Authority.ROLE_DEV, true);
+        return isUserRole(userSession, Authority.ROLE_DEV, false);
     }
 
     public boolean isUserAdminSession() {
