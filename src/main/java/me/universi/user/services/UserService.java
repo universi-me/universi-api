@@ -809,7 +809,11 @@ public class UserService implements UserDetailsService {
             String jarPath = new File(".").getPath();
             String filePath = Paths.get(jarPath, "build.hash").toString();
             Resource resource = new FileSystemResource(filePath);
-            try (InputStreamReader reader = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8)) {
+            try {
+                if(resource.contentLength() == 0) {
+                    return "development";
+                }
+                InputStreamReader reader = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8);
                 BUILD_HASH = FileCopyUtils.copyToString(reader);
             } catch (IOException ignored) {
             }

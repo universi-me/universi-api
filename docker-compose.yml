@@ -1,4 +1,3 @@
-version: '3.5'
 
 services:
     universi-me:
@@ -11,13 +10,14 @@ services:
         ports:
             - "8080:8080"
         volumes:
-            - universi-me-login-session:/var/lib/login-sesion/data
+            - universi-me-login-session:/var/lib/login-session/data
         depends_on:
             - universi-me-db
             - universi-me-mongo
         environment:
             API_DB_DOMAIN: universi-me-db
             API_DB_MONGO_HOST: universi-me-mongo
+            API_SERVER_SESSION_STORE_DIR: /var/lib/login-session/data
         env_file:
             - .env
 
@@ -27,8 +27,6 @@ services:
         restart: unless-stopped
         networks:
             - universi-me-network
-        ports:
-            - "5432:5432"
         volumes:
             - universi-me-postgres:/var/lib/postgresql/data
         environment:
@@ -45,8 +43,6 @@ services:
         restart: unless-stopped
         networks:
             - universi-me-network
-        ports:
-            - "27017:27017"
         volumes:
             - universi-me-mongo-data:/data/db
         env_file:
