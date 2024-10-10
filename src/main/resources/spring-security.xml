@@ -123,7 +123,7 @@
     <beans:bean id="roleHierarchy" class="org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl">
         <beans:property name="hierarchy">
             <beans:value>
-                ROLE_ADMIN > ROLE_DEV > ROLE_USER
+                ROLE_DEV > ROLE_ADMIN > ROLE_USER
             </beans:value>
         </beans:property>
     </beans:bean>
