@@ -34,10 +34,10 @@ COPY --from=build /myjre $JAVA_HOME
 ARG BUILD_HASH
 ENV BUILD_HASH=${BUILD_HASH}
 
-# Copy the application jar
+# Copy the application jar & run script from the build image
 COPY --from=build /app.jar /app.jar
-COPY build*.hash /build.hash
-COPY entrypoint.sh /entrypoint.sh
+COPY --from=build build*.hash /build.hash
+COPY --from=build entrypoint.sh /entrypoint.sh
 
 # Install curl
 RUN apt-get update && apt-get install -y curl
