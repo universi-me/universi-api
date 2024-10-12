@@ -44,6 +44,20 @@ public class CompetenceProfileService {
             .findAny();
     }
 
+    public List<Competence> findCompetenceByProfile( @NotNull Profile profile ) {
+        return findByProfile(profile).stream()
+            .map( CompetenceProfile::getCompetence )
+            .toList();
+    }
+
+    public Optional<Competence> findCompetenceByProfile( @NotNull Profile profile, @NotNull CompetenceType competenceType ) {
+        var competenceProfile = findByProfile(profile, competenceType);
+
+        return competenceProfile.isPresent()
+            ? Optional.of( competenceProfile.get().getCompetence() )
+            : Optional.empty();
+    }
+
     public @NotNull CompetenceProfile addToProfile( @NotNull Profile profile, @NotNull Competence competence ) {
         return competenceProfileRepository.saveAndFlush( new CompetenceProfile( profile, competence ) );
     }

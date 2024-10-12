@@ -3,6 +3,7 @@ package me.universi;
 import me.universi.competence.entities.Competence;
 import me.universi.competence.entities.CompetenceType;
 import me.universi.competence.repositories.CompetenceTypeRepository;
+import me.universi.competence.services.CompetenceProfileService;
 import me.universi.competence.services.CompetenceService;
 import me.universi.group.services.GroupService;
 import me.universi.profile.entities.Profile;
@@ -42,6 +43,9 @@ public class CompetenciaTest {
 
     @Autowired
     CompetenceTypeRepository competenciaTipoRepository;
+
+    @Autowired
+    CompetenceProfileService competenceProfileService;
     @Test
     void create() throws Exception {
         String nome = "competenciaTest";
@@ -87,8 +91,8 @@ public class CompetenciaTest {
         Collection<Competence> competencias = new ArrayList<Competence>();
         competencias.add(competencia1);
         competencias.add(competencia2);
-        admin_profile.setCompetences(competencias);
-        comum_profile.setCompetences(competencias);
+        competenceProfileService.addToProfile(admin_profile, competencias);
+        competenceProfileService.addToProfile(comum_profile, competencias);
 
         competenciaService.save(competencia1);
         competenciaService.save(competencia2);
@@ -144,8 +148,8 @@ public class CompetenciaTest {
         Collection<Competence> competencias = new ArrayList<Competence>();
         competencias.add(competencia1);
         competencias.add(competencia2);
-        admin_profile.setCompetences(competencias);
-        comum_profile.setCompetences(competencias);
+        competenceProfileService.addToProfile(admin_profile, competencias);
+        competenceProfileService.addToProfile(comum_profile, competencias);
 
         competenciaService.save(competencia1);
         competenciaService.save(competencia2);
@@ -207,8 +211,8 @@ public class CompetenciaTest {
         Collection<Competence> competencias = new ArrayList<Competence>();
         competencias.add(competencia1);
         competencias.add(competencia2);
-        admin_profile.setCompetences(competencias);
-        comum_profile.setCompetences(competencias);
+        competenceProfileService.addToProfile(admin_profile, competencias);
+        competenceProfileService.addToProfile(comum_profile, competencias);
 
         competenciaService.save(competencia1);
         competenciaService.save(competencia2);
@@ -271,8 +275,8 @@ public class CompetenciaTest {
         Collection<Competence> competencias = new ArrayList<Competence>();
         competencias.add(competencia1);
         competencias.add(competencia2);
-        admin_profile.setCompetences(competencias);
-        comum_profile.setCompetences(competencias);
+        competenceProfileService.addToProfile(admin_profile, competencias);
+        competenceProfileService.addToProfile(comum_profile, competencias);
 
         competenciaService.save(competencia1);
         competenciaService.save(competencia2);
