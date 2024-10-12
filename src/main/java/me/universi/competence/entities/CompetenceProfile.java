@@ -28,6 +28,12 @@ public class CompetenceProfile {
     @ManyToOne( optional = false )
     private Competence competence;
 
+    public CompetenceProfile( ) { }
+    public CompetenceProfile(Profile profile, Competence competence) {
+        this.profile = profile;
+        this.competence = competence;
+    }
+
     public UUID getId() { return id; }
     public void setId(@NotNull UUID id) { this.id = id; }
 
