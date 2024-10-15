@@ -3,6 +3,7 @@ package me.universi;
 import me.universi.competence.entities.Competence;
 import me.universi.competence.entities.CompetenceType;
 import me.universi.competence.repositories.CompetenceTypeRepository;
+import me.universi.competence.services.CompetenceProfileService;
 import me.universi.competence.services.CompetenceService;
 import me.universi.group.services.GroupService;
 import me.universi.profile.entities.Profile;
@@ -43,6 +44,9 @@ public class ProfileTest {
 
     @Autowired
     CompetenceTypeRepository competenciaTipoRepository;
+
+    @Autowired
+    CompetenceProfileService competenceProfileService;
 
     @Test
     void create() throws Exception {
@@ -115,7 +119,8 @@ public class ProfileTest {
         Collection<Competence> competencias = new ArrayList<Competence>();
         competencias.add(competenciaNew);
         competencias.add(competenciaNew1);
-        admin_profile.setCompetences(competencias);
+        competenceProfileService.addToProfile(admin_profile, competencias);
+
 
         return admin_profile;
     }

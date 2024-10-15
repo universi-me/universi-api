@@ -53,15 +53,6 @@ public class Profile implements Serializable {
     private String image;
     @Column(name = "bio", columnDefinition = "TEXT")
     private String bio;
-    @JsonIgnore
-    @ManyToMany( fetch = FetchType.EAGER )
-    @JoinTable(
-            name = "competence_profile",
-            joinColumns = @JoinColumn(name = "profile_id"),
-            inverseJoinColumns = @JoinColumn(name = "competence_id")
-    )
-    @NotFound(action = NotFoundAction.IGNORE)
-    private Collection<Competence> competences;
 
     @JsonIgnore
     @OneToMany(mappedBy = "profile", fetch = FetchType.EAGER)
@@ -142,11 +133,10 @@ public class Profile implements Serializable {
     )
     private Collection<CompetenceType> competenceBadges;
 
-    public Profile(UUID id, User user, String bio, Collection<Competence> competences, Collection<ProfileGroup> groups, Collection<Link> links, Collection<FolderProfile> assignedFolders, Collection<FolderFavorite> favoriteFolders, boolean hidden) {
+    public Profile(UUID id, User user, String bio, Collection<ProfileGroup> groups, Collection<Link> links, Collection<FolderProfile> assignedFolders, Collection<FolderFavorite> favoriteFolders, boolean hidden) {
         this.id = id;
         this.user = user;
         this.bio = bio;
-        this.competences = competences;
         this.groups = groups;
         this.links = links;
         this.assignedFolders = assignedFolders;
@@ -168,14 +158,6 @@ public class Profile implements Serializable {
 
     public void setBio(String bio) {
         this.bio = bio;
-    }
-
-    public Collection<Competence> getCompetences() {
-        return competences;
-    }
-
-    public void setCompetences(Collection<Competence> competences) {
-        this.competences = competences;
     }
 
     public Collection<ProfileGroup> getGroups() {

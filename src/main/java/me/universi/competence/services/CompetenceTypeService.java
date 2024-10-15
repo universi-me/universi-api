@@ -193,4 +193,8 @@ public class CompetenceTypeService {
         competenceType.getProfilesWithAccess().add(profile);
         save(competenceType);
     }
+
+    public boolean validate( CompetenceType competenceType ) {
+        return competenceType != null;
+    }
 }

@@ -1,7 +1,7 @@
 package me.universi.curriculum.services;
 
-import me.universi.competence.entities.Competence;
 import me.universi.competence.entities.CompetenceType;
+import me.universi.competence.services.CompetenceProfileService;
 import me.universi.curriculum.education.entities.Education;
 import me.universi.curriculum.education.entities.TypeEducation;
 import me.universi.curriculum.education.servicies.EducationService;
@@ -23,16 +23,13 @@ public class CurriculumService {
     private final ProfileService profileService;
     private final UserService userService;
     private final EducationService educationService;
+    private final CompetenceProfileService competenceProfileService;
 
-    public CurriculumService(ProfileService profileService, UserService userService, EducationService educationService) {
+    public CurriculumService(ProfileService profileService, UserService userService, EducationService educationService, CompetenceProfileService competenceProfileService) {
         this.profileService = profileService;
         this.userService = userService;
         this.educationService = educationService;
-    }
-
-
-    public Collection<Competence> findByProfile(Profile profile){
-        return profile.getCompetences();
+        this.competenceProfileService = competenceProfileService;
     }
 
     public List<List> mountCurriculum(){
@@ -51,14 +48,12 @@ public class CurriculumService {
         Collection<Profile> profiles = profileService.findAll();
         Collection<Profile> profilesTemp = new ArrayList<>();
         /*Otimizar essa busca para que so busque de acordo com o grupo*/
-        if(competenceType!=null) {
+        if( competenceType != null && level != null ) {
             for (Profile profile : profiles) {
-                for (Competence competence : profile.getCompetences()) {
-                    if (competence.getCompetenceType().equals(competenceType)){
-                        if(level!=null && competence.getLevel() == level){
-                            profilesTemp.add(profile);
-                        }
-                    }
+                var competenceProfile = competenceProfileService.findCompetenceByProfile(profile, competenceType);
+
+                if ( competenceProfile.isPresent() && competenceProfile.get().getLevel() == level ) {
+                        profilesTemp.add(profile);
                 }
             }
             profiles = profilesTemp;

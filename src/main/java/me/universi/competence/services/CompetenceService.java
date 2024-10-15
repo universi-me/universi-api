@@ -27,12 +27,14 @@ public class CompetenceService {
     private final ProfileService profileService;
     private final UserService userService;
     private final CompetenceTypeService competenceTypeService;
+    private final CompetenceProfileService competenceProfileService;
 
-    public CompetenceService(CompetenceRepository competenceRepository, ProfileService profileService, UserService userService, CompetenceTypeService competenceTypeService){
+    public CompetenceService(CompetenceRepository competenceRepository, ProfileService profileService, UserService userService, CompetenceTypeService competenceTypeService, CompetenceProfileService competenceProfileService){
         this.competenceRepository = competenceRepository;
         this.profileService = profileService;
         this.userService = userService;
         this.competenceTypeService = competenceTypeService;
+        this.competenceProfileService = competenceProfileService;
     }
 
     public static CompetenceService getInstance() {
@@ -73,7 +75,7 @@ public class CompetenceService {
     public void update(Competence competence){ competenceRepository.saveAndFlush(competence); }
 
     public boolean profileHasCompetence(@NotNull Profile profile, @NotNull CompetenceType competenceType) {
-        return profile.getCompetences()
+        return competenceProfileService.findCompetenceByProfile(profile)
             .stream()
             .anyMatch(c -> c.getCompetenceType().getId().equals(competenceType.getId()));
     }
@@ -86,8 +88,7 @@ public class CompetenceService {
     }
 
     public void addCompetenceInProfile(@NotNull Profile profile,Competence newCompetence) throws ProfileException {
-        profile.getCompetences().add(newCompetence);
-        profileService.save(profile);
+        competenceProfileService.addToProfile( profile, newCompetence );
     }
 
     public void delete(UUID id) {
@@ -161,7 +162,9 @@ public class CompetenceService {
     private void checkPermissionForEdit(Competence competence, boolean forDelete) {
         User user = userService.getUserInSession();
         Profile profile = profileService.getProfileByUserIdOrUsername(user.getProfile().getId(), user.getUsername());
-        if(!profile.getCompetences().contains(competence)) {
+        var hasCompetence = competenceProfileService.findByProfile( profile, competence.getCompetenceType() ).isPresent();
+
+        if(!hasCompetence) {
             if(forDelete) {
                 if(userService.isUserAdminSession()) {
                     return;
@@ -228,4 +231,8 @@ public class CompetenceService {
         });
     }
 
+    public boolean validate( Competence competence ) {
+        return competence != null
+            && competenceTypeService.validate( competence.getCompetenceType() );
+    }
 }
