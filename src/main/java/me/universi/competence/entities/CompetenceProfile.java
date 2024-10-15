@@ -21,11 +21,11 @@ public class CompetenceProfile {
     private @NotNull UUID id;
 
     @JoinColumn( name = "profile_id" )
-    @ManyToOne( optional = false )
+    @ManyToOne
     private Profile profile;
 
     @JoinColumn( name = "competence_id" )
-    @ManyToOne( optional = false )
+    @ManyToOne
     private Competence competence;
 
     public CompetenceProfile( ) { }
