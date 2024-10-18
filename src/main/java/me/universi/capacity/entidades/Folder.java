@@ -15,7 +15,7 @@ import me.universi.capacity.service.FolderService;
 import me.universi.competence.entities.CompetenceType;
 import me.universi.group.entities.Group;
 import me.universi.profile.entities.Profile;
-import me.universi.user.services.UserService;
+import me.universi.profile.services.ProfileService;
 
 import org.hibernate.annotations.*;
 
@@ -244,8 +244,8 @@ public class Folder implements Serializable {
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public List<Profile> getAssignedBy() {
         return this.assignedUsers.stream()
-            .filter(u -> u.isAssigned() && UserService.getInstance().isSessionOfUser(u.getProfile().getUser()))
-            .map( fp -> fp.getAuthor() )
+            .filter(u -> ProfileService.getInstance().isSessionOfProfile(u.getAssignedTo()))
+            .map( fp -> fp.getAssignedBy() )
             .toList();
     }
 
@@ -253,7 +253,7 @@ public class Folder implements Serializable {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public Boolean isFavorite() {
         FolderFavorite favorite = this.favoriteUsers.stream()
-            .filter(f -> UserService.getInstance().isSessionOfUser(f.getProfile().getUser()))
+            .filter(f -> ProfileService.getInstance().isSessionOfProfile(f.getProfile()))
             .findAny()
             .orElse(null);
 

@@ -10,11 +10,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface FolderProfileRepository extends JpaRepository<FolderProfile, UUID> {
     FolderProfile findFirstById(UUID id);
 
-    List<FolderProfile> findByProfileIdAndAssigned(UUID profileId, boolean assigned);
+    List<FolderProfile> findByAssignedToId(UUID assignedToId);
 
-    List<FolderProfile> findByFolderIdAndAssignedAndAuthorId(UUID folderId, boolean assigned, UUID authorId);
+    List<FolderProfile> findByFolderIdAndAssignedById(UUID folderId, UUID assignedById);
 
-    List<FolderProfile> findByAuthorId(UUID authorId);
+    List<FolderProfile> findByAssignedById(UUID assignedById);
 
-    Optional<FolderProfile> findByFolderIdAndProfileIdAndAuthorId( UUID folderId, UUID profileId, UUID authorId );
+    Optional<FolderProfile> findByFolderIdAndAssignedToIdAndAssignedById( UUID folderId, UUID assignedToId, UUID assignedById );
 }

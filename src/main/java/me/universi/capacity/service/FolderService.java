@@ -372,31 +372,25 @@ public class FolderService {
         }
     }
 
-    public List<Folder> findFoldersByProfile(UUID profileId) {
-        return findByProfile(profileId, false);
-    }
+    public List<Folder> getAssignedTo(UUID profileId) {
+        List<FolderProfile> assignedFolders = folderProfileRepository.findByAssignedToId(profileId);
 
-    public List<Folder> findByProfile(UUID profileId, boolean assignedOnly) {
-        List<FolderProfile> assignedFolders = folderProfileRepository.findByProfileIdAndAssigned(profileId, assignedOnly);
-
-        List<Folder> folders = assignedFolders.stream()
+        return assignedFolders.stream()
                 .sorted(Comparator.comparing(FolderProfile::getCreated).reversed())
                 .map(FolderProfile::getFolder)
                 .filter(Objects::nonNull)
                 .toList();
-
-        return folders;
     }
 
     // find profiles assigned to a folder
-    public List<Profile> findAssignedProfiles(UUID folderId, UUID authorId) {
-        List<FolderProfile> assignedProfiles = folderProfileRepository.findByFolderIdAndAssignedAndAuthorId(
-            folderId, true, authorId
+    public List<Profile> findAssignedProfiles(UUID folderId, UUID assignedBy) {
+        List<FolderProfile> assignedProfiles = folderProfileRepository.findByFolderIdAndAssignedById(
+            folderId, assignedBy
         );
 
         return assignedProfiles.stream()
                 .sorted(Comparator.comparing(FolderProfile::getCreated).reversed())
-                .map(FolderProfile::getProfile)
+                .map(FolderProfile::getAssignedTo)
                 .filter(Objects::nonNull)
                 .toList();
     }
@@ -413,7 +407,7 @@ public class FolderService {
 
         var currentProfile = profileService.getProfileInSession();
 
-        var existingFolderProfile = folderProfileRepository.findByFolderIdAndProfileIdAndAuthorId(
+        var existingFolderProfile = folderProfileRepository.findByFolderIdAndAssignedToIdAndAssignedById(
             folder.getId(), profileId, currentProfile.getId()
         );
 
@@ -422,10 +416,9 @@ public class FolderService {
         }
 
         FolderProfile folderProfile = new FolderProfile();
-        folderProfile.setAuthor(currentProfile);
+        folderProfile.setAssignedBy(currentProfile);
         folderProfile.setFolder(folder);
-        folderProfile.setProfile(profile);
-        folderProfile.setAssigned(true);
+        folderProfile.setAssignedTo(profile);
         folderProfileRepository.save(folderProfile);
 
         groupService.alertUserForContentAssigned(currentProfile, profile, folder);
@@ -438,7 +431,7 @@ public class FolderService {
     }
 
     public void unassignFromProfile(UUID profileId, Folder folder) {
-        var folderProfile = folderProfileRepository.findByFolderIdAndProfileIdAndAuthorId(
+        var folderProfile = folderProfileRepository.findByFolderIdAndAssignedToIdAndAssignedById(
             folder.getId(), profileId, profileService.getProfileInSession().getId()
         );
 
@@ -464,7 +457,7 @@ public class FolderService {
             throw new CapacityException("Você não pode acessar os conteúdos atribuídos por outro usuário.");
         }
 
-        return folderProfileRepository.findByAuthorId(profile.getId());
+        return folderProfileRepository.findByAssignedById(profile.getId());
     }
 
     public void favorite(Folder folder) throws CapacityException {
@@ -567,7 +560,7 @@ public class FolderService {
             || userService.isSessionOfUser(profile.getUser())
             || getAssignedBy(userService.getUserInSession().getProfile()) // has assigned that folder to that user
             .stream()
-            .filter(fp -> Objects.equals(profile.getId(), fp.getProfile().getId())
+            .filter(fp -> Objects.equals(profile.getId(), fp.getAssignedTo().getId())
                 && Objects.equals(folder.getId(), fp.getFolder().getId()))
             .count() > 0;
     }

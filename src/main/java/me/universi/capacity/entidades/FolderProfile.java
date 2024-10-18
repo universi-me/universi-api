@@ -44,25 +44,22 @@ public class FolderProfile implements Serializable {
     public boolean deleted = Boolean.FALSE;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @PrimaryKeyJoinColumn(name="author_id")
+    @PrimaryKeyJoinColumn(name="assigned_by_id")
     @NotNull
     @NotFound(action = NotFoundAction.IGNORE)
-    public Profile author;
+    public Profile assignedBy;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @PrimaryKeyJoinColumn(name="profile_id")
+    @PrimaryKeyJoinColumn(name="assigned_to_id")
     @NotNull
     @NotFound(action = NotFoundAction.IGNORE)
-    public Profile profile;
+    public Profile assignedTo;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @PrimaryKeyJoinColumn(name="folder_id")
     @NotNull
     @NotFound(action = NotFoundAction.IGNORE)
     public Folder folder;
-
-    @Column(name = "assigned")
-    public boolean assigned = Boolean.FALSE;
 
     public FolderProfile() {
     }
@@ -83,20 +80,20 @@ public class FolderProfile implements Serializable {
         this.deleted = deleted;
     }
 
-    public Profile getAuthor() {
-        return author;
+    public Profile getAssignedBy() {
+        return assignedBy;
     }
 
-    public void setAuthor(Profile author) {
-        this.author = author;
+    public void setAssignedBy(Profile assignedBy) {
+        this.assignedBy = assignedBy;
     }
 
-    public Profile getProfile() {
-        return profile;
+    public Profile getAssignedTo() {
+        return assignedTo;
     }
 
-    public void setProfile(Profile profile) {
-        this.profile = profile;
+    public void setAssignedTo(Profile assignedTo) {
+        this.assignedTo = assignedTo;
     }
 
     public Folder getFolder() {
@@ -107,14 +104,6 @@ public class FolderProfile implements Serializable {
         this.folder = folder;
     }
 
-    public boolean isAssigned() {
-        return assigned;
-    }
-
-    public void setAssigned(boolean assigned) {
-        this.assigned = assigned;
-    }
-
     @Transient
     public int getFolderSize() {
         return this.folder.getContents().size();
@@ -122,7 +111,7 @@ public class FolderProfile implements Serializable {
 
     @Transient
     public int getDoneUntilNow() {
-        return FolderService.getInstance().getStatuses(profile, folder).stream()
+        return FolderService.getInstance().getStatuses(assignedTo, folder).stream()
             .filter(cs -> cs.getStatus().equals(ContentStatusType.DONE))
             .toList()
             .size();
