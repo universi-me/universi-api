@@ -389,16 +389,16 @@ public class FolderService {
     }
 
     // find profiles assigned to a folder
-    public Collection<Profile> findAssignedProfiles(UUID folderId) {
-        List<FolderProfile> assignedProfiles = folderProfileRepository.findByFolderIdAndAssigned(folderId, true);
+    public List<Profile> findAssignedProfiles(UUID folderId, UUID authorId) {
+        List<FolderProfile> assignedProfiles = folderProfileRepository.findByFolderIdAndAssignedAndAuthorId(
+            folderId, true, authorId
+        );
 
-        List<Profile> profiles = assignedProfiles.stream()
+        return assignedProfiles.stream()
                 .sorted(Comparator.comparing(FolderProfile::getCreated).reversed())
                 .map(FolderProfile::getProfile)
                 .filter(Objects::nonNull)
                 .toList();
-
-        return profiles;
     }
 
     // assign one folder to a profile
@@ -410,17 +410,25 @@ public class FolderService {
         if(folder == null) {
             throw new CapacityException("Pasta não encontrada.");
         }
-        if(folderProfileRepository.existsByFolderIdAndProfileId(folder.getId(), profileId)) {
-            throw new CapacityException("Pasta já foi atribuida ao perfil.");
+
+        var currentProfile = profileService.getProfileInSession();
+
+        var existingFolderProfile = folderProfileRepository.findByFolderIdAndProfileIdAndAuthorId(
+            folder.getId(), profileId, currentProfile.getId()
+        );
+
+        if( existingFolderProfile.isPresent() ) {
+            throw new CapacityException("O conteúdo já foi atribuído ao perfil.");
         }
+
         FolderProfile folderProfile = new FolderProfile();
-        folderProfile.setAuthor(UserService.getInstance().getUserInSession().getProfile());
+        folderProfile.setAuthor(currentProfile);
         folderProfile.setFolder(folder);
         folderProfile.setProfile(profile);
         folderProfile.setAssigned(true);
         folderProfileRepository.save(folderProfile);
 
-        groupService.alertUserForContentAssigned(UserService.getInstance().getUserInSession().getProfile(), profile, folder);
+        groupService.alertUserForContentAssigned(currentProfile, profile, folder);
     }
 
     public void assignToMultipleProfiles(Collection<UUID> profileIds, Folder folder) {
@@ -430,15 +438,12 @@ public class FolderService {
     }
 
     public void unassignFromProfile(UUID profileId, Folder folder) {
-        FolderProfile folderProfile = folderProfileRepository.findFirstByFolderIdAndProfileId(folder.getId(), profileId);
-        if (folderProfile == null)
-            return;
+        var folderProfile = folderProfileRepository.findByFolderIdAndProfileIdAndAuthorId(
+            folder.getId(), profileId, profileService.getProfileInSession().getId()
+        );
 
-        if (!UserService.getInstance().isSessionOfUser(folderProfile.getAuthor().getUser())) {
-            throw new CapacityException("Apenas quem atribuiu a pasta poderá desatribuir");
-        }
-
-        folderProfileRepository.delete(folderProfile);
+        if ( folderProfile.isPresent() )
+            folderProfileRepository.delete( folderProfile.get() );
     }
 
     public void unassignFromMultipleProfiles(Collection<UUID> profilesIds, Folder folder) {

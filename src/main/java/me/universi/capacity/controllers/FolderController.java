@@ -34,12 +34,14 @@ public class FolderController {
     private final ContentService contentService;
     private final FolderService folderService;
     private final CompetenceTypeService competenceTypeService;
+    private final ProfileService profileService;
 
-    public FolderController(GroupService groupService, ContentService contentService, FolderService folderService, CompetenceTypeService competenceTypeService) {
+    public FolderController(GroupService groupService, ContentService contentService, FolderService folderService, CompetenceTypeService competenceTypeService, ProfileService profileService) {
         this.groupService = groupService;
         this.contentService = contentService;
         this.folderService = folderService;
         this.competenceTypeService = competenceTypeService;
+        this.profileService = profileService;
     }
 
     @GetMapping("/all")
@@ -420,15 +422,16 @@ public class FolderController {
     @PostMapping(value = "/assigned", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Response usersAssigned(@RequestBody Map<String, Object> body){
         return Response.buildResponse(response -> {
+            var folderId = CastingUtil.getUUID(body.get("folderId"));
+            var folderReference = CastingUtil.getString(body.get("reference"));
 
-            Object folderId = body.get("folderId");
-            Object folderReference = body.get("reference");
+            if ( folderId.isEmpty() && folderReference.isEmpty() ) {
+                response.setStatus(HttpStatus.BAD_REQUEST);
+                throw new CapacityException("Parâmetros 'folderId' e 'reference' não informados ou inválidos.");
+            }
 
-            if(((folderId == null || String.valueOf(folderId).isEmpty()) && (folderReference == null || String.valueOf(folderReference).isEmpty())) || folderService.findByIdOrReference(folderId, folderReference) == null)
-                throw new CapacityException("folderId e reference são inválido.");
-
-            Folder folder = folderService.findByIdOrReference(folderId, folderReference);
-            response.body.put("profilesIds", folderService.findAssignedProfiles(folder.getId()));
+            Folder folder = folderService.findByIdOrReference(folderId.orElse(null), folderReference.orElse(null));
+            response.body.put("profilesIds", folderService.findAssignedProfiles(folder.getId(), profileService.getProfileInSession().getId()));
         });
     }
 

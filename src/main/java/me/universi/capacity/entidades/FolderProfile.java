@@ -15,8 +15,8 @@ import me.universi.profile.entities.Profile;
 import org.hibernate.annotations.*;
 
 @Entity(name = "folder_profile")
-@SQLDelete(sql = "UPDATE folder_profile SET deleted = true WHERE id=?")
-@Where(clause = "deleted=false")
+@SQLDelete( sql = "UPDATE folder_profile SET deleted = true, removed = CURRENT_TIMESTAMP WHERE id=?" )
+@SQLRestriction( "NOT deleted" )
 @JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class FolderProfile implements Serializable {
 

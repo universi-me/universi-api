@@ -21,11 +21,12 @@ import org.hibernate.annotations.*;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @Entity(name="folder")
 @SQLDelete(sql = "UPDATE folder SET deleted = true WHERE id=?")
-@Where(clause = "deleted=false")
+@SQLRestriction( value = "NOT deleted" )
 public class Folder implements Serializable {
 
     @Serial
@@ -240,16 +241,12 @@ public class Folder implements Serializable {
     }
 
     @Transient
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    public Profile getAssignedBy() {
-        FolderProfile assigned = this.assignedUsers.stream()
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    public List<Profile> getAssignedBy() {
+        return this.assignedUsers.stream()
             .filter(u -> u.isAssigned() && UserService.getInstance().isSessionOfUser(u.getProfile().getUser()))
-            .findAny()
-            .orElse(null);
-
-        return assigned != null
-            ? assigned.getAuthor()
-            : null;
+            .map( fp -> fp.getAuthor() )
+            .toList();
     }
 
     @Transient
