@@ -423,9 +423,9 @@ public class FolderService {
         groupService.alertUserForContentAssigned(UserService.getInstance().getUserInSession().getProfile(), profile, folder);
     }
 
-    public void assignToMultipleProfiles(Collection<String> profileIds, Folder folder) {
-        for(String profileId : profileIds){
-            assignToProfile(UUID.fromString(profileId), folder);
+    public void assignToMultipleProfiles(Collection<UUID> profileIds, Folder folder) {
+        for ( var profileId : profileIds ) {
+            assignToProfile(profileId, folder);
         }
     }
 
