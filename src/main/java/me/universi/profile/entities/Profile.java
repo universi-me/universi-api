@@ -109,7 +109,7 @@ public class Profile implements Serializable {
     private boolean deleted = Boolean.FALSE;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "assignedTo", cascade = CascadeType.ALL)
     private Collection<FolderProfile> assignedFolders;
 
     @JsonIgnore

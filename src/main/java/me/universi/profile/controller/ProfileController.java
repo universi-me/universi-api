@@ -218,14 +218,13 @@ public class ProfileController {
 
             Object profileId = body.get("profileId");
             Object username = body.get("username");
-            Object assignedOnly = body.get("assignedOnly");
 
             if (profileId == null && username == null) {
                 throw new IllegalArgumentException("Parâmetro profileId ou username devem ser informados");
             }
 
             Profile profile = profileService.getProfileByUserIdOrUsername(profileId, username);
-            response.body.put("folders", folderService.findByProfile(profile.getId(), Boolean.valueOf(String.valueOf(assignedOnly))));
+            response.body.put("folders", folderService.getAssignedTo(profile.getId()));
             response.body.put("favorites", folderService.listFavorites(profile.getId()));
         });
     }

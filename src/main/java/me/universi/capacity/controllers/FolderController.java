@@ -34,12 +34,14 @@ public class FolderController {
     private final ContentService contentService;
     private final FolderService folderService;
     private final CompetenceTypeService competenceTypeService;
+    private final ProfileService profileService;
 
-    public FolderController(GroupService groupService, ContentService contentService, FolderService folderService, CompetenceTypeService competenceTypeService) {
+    public FolderController(GroupService groupService, ContentService contentService, FolderService folderService, CompetenceTypeService competenceTypeService, ProfileService profileService) {
         this.groupService = groupService;
         this.contentService = contentService;
         this.folderService = folderService;
         this.competenceTypeService = competenceTypeService;
+        this.profileService = profileService;
     }
 
     @GetMapping("/all")
@@ -383,76 +385,90 @@ public class FolderController {
     @PostMapping(value = "/assign", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Response assign(@RequestBody Map<String, Object> body){
         return Response.buildResponse( response -> {
-            Object profilesIds = body.get("profilesIds");
-            Object folderId = body.get("folderId");
-            Object folderReference = body.get("reference");
+            var profilesIdSingle = CastingUtil.getUUID(body.get("profilesIds"));
+            var profilesIdMulti = CastingUtil.getList(body.get("profilesIds"));
 
-            if (profilesIds == null || String.valueOf(profilesIds).isEmpty())
-                throw new CapacityException("profilesIds é inválido.");
-            if((folderId == null || String.valueOf(folderId).isEmpty()) && (folderReference == null || String.valueOf(folderReference).isEmpty())) {
-                throw new CapacityException("ID e referência da pasta não informados.");
+            if ( profilesIdSingle.isEmpty() && profilesIdMulti.isEmpty() ) {
+                response.setStatus(HttpStatus.BAD_REQUEST);
+                throw new CapacityException("Parâmetro 'profilesIds' não informado ou inválido.");
             }
 
-            Folder folder = folderService.findByIdOrReference(folderId, folderReference);
-            if (folder == null)
-                throw new CapacityException("folderId é inválido");
+            var folderId = CastingUtil.getUUID(body.get("folderId"));
+            var folderReference = CastingUtil.getString(body.get("reference"));
 
-            if (profilesIds instanceof Collection) {
-                folderService.assignToMultipleProfiles((Collection<String>) profilesIds, folder);
-            } else {
-                folderService.assignToProfile(UUID.fromString(String.valueOf(profilesIds)) , folder);
+            if ( folderId.isEmpty() && folderReference.isEmpty() ) {
+                response.setStatus(HttpStatus.BAD_REQUEST);
+                throw new CapacityException("Parâmetros 'folderId' e 'reference' não informados ou inválidos.");
             }
+
+            Folder folder = folderService.findByIdOrReference(folderId.orElse(null), folderReference.orElse(null));
+
+            if ( profilesIdSingle.isPresent() )
+                folderService.assignToProfile(profilesIdSingle.get(), folder);
+
+            else if ( profilesIdMulti.isPresent() )
+                folderService.assignToMultipleProfiles(
+                    profilesIdMulti.get().stream()
+                        .map( p -> CastingUtil.getUUID(p).orElseThrow( () -> {
+                            response.setStatus(HttpStatus.BAD_REQUEST);
+                            return new CapacityException("Id de perfil '" + p.toString() + "' inválido.");
+                        } ) )
+                        .toList(),
+                    folder
+                );
         });
     }
 
     @PostMapping(value = "/assigned", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Response usersAssigned(@RequestBody Map<String, Object> body){
         return Response.buildResponse(response -> {
+            var folderId = CastingUtil.getUUID(body.get("folderId"));
+            var folderReference = CastingUtil.getString(body.get("reference"));
 
-            Object folderId = body.get("folderId");
-            Object folderReference = body.get("reference");
+            if ( folderId.isEmpty() && folderReference.isEmpty() ) {
+                response.setStatus(HttpStatus.BAD_REQUEST);
+                throw new CapacityException("Parâmetros 'folderId' e 'reference' não informados ou inválidos.");
+            }
 
-            if(((folderId == null || String.valueOf(folderId).isEmpty()) && (folderReference == null || String.valueOf(folderReference).isEmpty())) || folderService.findByIdOrReference(folderId, folderReference) == null)
-                throw new CapacityException("folderId e reference são inválido.");
-
-            Folder folder = folderService.findByIdOrReference(folderId, folderReference);
-            response.body.put("profilesIds", folderService.findAssignedProfiles(folder.getId()));
+            Folder folder = folderService.findByIdOrReference(folderId.orElse(null), folderReference.orElse(null));
+            response.body.put("profilesIds", folderService.findAssignedProfiles(folder.getId(), profileService.getProfileInSession().getId()));
         });
     }
 
     @PostMapping(value = "/unassign", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Response unassign(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
-            Object folderId = body.get("folderId");
-            Object folderReference = body.get("reference");
-            Object profilesIds = body.get("profilesIds");
+            var folderId = CastingUtil.getUUID(body.get("folderId"));
+            var folderReference = CastingUtil.getString(body.get("reference"));
 
-            if ((folderId == null || String.valueOf(folderId).isEmpty()) && (folderReference == null || String.valueOf(folderReference).isEmpty()))
-                throw new CapacityException("folderId e reference são inválidos.");
+            if ( folderId.isEmpty() && folderReference.isEmpty() ) {
+                response.setStatus(HttpStatus.BAD_REQUEST);
+                throw new CapacityException("Parâmetros 'folderId' e 'reference' não informados ou inválidos.");
+            }
 
-            Folder folder = folderService.findByIdOrReference(folderId, folderReference);
+            var profilesIdSingle = CastingUtil.getUUID(body.get("profilesIds"));
+            var profilesIdMulti = CastingUtil.getList(body.get("profilesIds"));
 
-            boolean nullProfile = profilesIds == null;
+            if ( profilesIdSingle.isEmpty() && profilesIdMulti.isEmpty() ) {
+                response.setStatus(HttpStatus.BAD_REQUEST);
+                throw new CapacityException("Parâmetro 'profilesIds' não informado ou inválido.");
+            }
 
-            String stringProfile = profilesIds instanceof String
-                ? (String)profilesIds
-                : null;
+            Folder folder = folderService.findByIdOrReference(folderId.orElse(null), folderReference.orElse(null));
 
-            Collection<?> collectionProfiles = profilesIds instanceof Collection
-                ? (Collection<?>) profilesIds
-                : null;
+            if ( profilesIdSingle.isPresent() )
+                folderService.unassignFromProfile(profilesIdSingle.get(), folder);
 
-            if (nullProfile || (stringProfile != null && stringProfile.isEmpty()) || (collectionProfiles != null && collectionProfiles.isEmpty()))
-                throw new CapacityException("profilesIds é inválido.");
-
-            if (stringProfile != null) {
-                folderService.unassignFromProfile(UUID.fromString(stringProfile), folder);
-            } else if (collectionProfiles != null) {
+            else if ( profilesIdMulti.isPresent() )
                 folderService.unassignFromMultipleProfiles(
-                    collectionProfiles.stream().map(p -> UUID.fromString(String.valueOf(p))).toList(),
+                    profilesIdMulti.get().stream()
+                        .map( p -> CastingUtil.getUUID(p).orElseThrow( () -> {
+                            response.setStatus(HttpStatus.BAD_REQUEST);
+                            return new CapacityException("Id de perfil '" + p.toString() + "' inválido.");
+                        } ) )
+                        .toList(),
                     folder
                 );
-            }
         });
     }
 
