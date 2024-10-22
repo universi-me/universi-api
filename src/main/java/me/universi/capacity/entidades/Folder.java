@@ -15,17 +15,18 @@ import me.universi.capacity.service.FolderService;
 import me.universi.competence.entities.CompetenceType;
 import me.universi.group.entities.Group;
 import me.universi.profile.entities.Profile;
-import me.universi.user.services.UserService;
+import me.universi.profile.services.ProfileService;
 
 import org.hibernate.annotations.*;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @Entity(name="folder")
 @SQLDelete(sql = "UPDATE folder SET deleted = true WHERE id=?")
-@Where(clause = "deleted=false")
+@SQLRestriction( value = "NOT deleted" )
 public class Folder implements Serializable {
 
     @Serial
@@ -240,23 +241,19 @@ public class Folder implements Serializable {
     }
 
     @Transient
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    public Profile getAssignedBy() {
-        FolderProfile assigned = this.assignedUsers.stream()
-            .filter(u -> u.isAssigned() && UserService.getInstance().isSessionOfUser(u.getProfile().getUser()))
-            .findAny()
-            .orElse(null);
-
-        return assigned != null
-            ? assigned.getAuthor()
-            : null;
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    public List<Profile> getAssignedBy() {
+        return this.assignedUsers.stream()
+            .filter(u -> ProfileService.getInstance().isSessionOfProfile(u.getAssignedTo()))
+            .map( fp -> fp.getAssignedBy() )
+            .toList();
     }
 
     @Transient
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public Boolean isFavorite() {
         FolderFavorite favorite = this.favoriteUsers.stream()
-            .filter(f -> UserService.getInstance().isSessionOfUser(f.getProfile().getUser()))
+            .filter(f -> ProfileService.getInstance().isSessionOfProfile(f.getProfile()))
             .findAny()
             .orElse(null);
 
