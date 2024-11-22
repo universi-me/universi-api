@@ -86,7 +86,16 @@ public class Response {
                 }
             } else {
                 // unknown exception occurred
-                response.message = "Ocorreu um erro interno por parte do servidor." + ((UserService.getInstance().isProduction() || !UserService.getInstance().isUserDevSession()) ? "" : "\n (" + e.getMessage() + ")");
+                String messageExp = "";
+                if(UserService.getInstance().isProduction()) {
+                    if(UserService.getInstance().isUserDevSession()) { // user is developer
+                        messageExp = "\n (" + e.getMessage() + ")";
+                    }
+                } else {
+                    // not in production
+                    messageExp = "\n (" + e.getMessage() + ")";
+                }
+                response.message = "Ocorreu um erro interno por parte do servidor." + messageExp;
                 response.alertOptions.put("html", response.message + "<br/><br/><img src=\"https://i.imgur.com/OWV6eKo.gif\" width='70%'/>");
             }
 
