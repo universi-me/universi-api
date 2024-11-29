@@ -1,6 +1,5 @@
 package me.universi.exercise.service;
 
-import me.universi.IndicatorsBuilder;
 import me.universi.exercise.ExerciseRepository;
 import me.universi.exercise.builder.ExerciseBuilder;
 import me.universi.exercise.dto.AnswerDTO;
@@ -8,8 +7,6 @@ import me.universi.exercise.dto.ExerciseAnswersDTO;
 import me.universi.exercise.entities.Exercise;
 import me.universi.exercise.exception.ExerciseNotFoundException;
 import me.universi.exercise.services.ValuerExerciseServiceImpl;
-import me.universi.indicators.IndicatorsRepository;
-import me.universi.indicators.entities.Indicators;
 import me.universi.question.builder.QuestionBuilder;
 import me.universi.user.UserBuilder;
 import me.universi.user.entities.User;
@@ -27,18 +24,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @Tag("Service")
 @ExtendWith(MockitoExtension.class)
 public class ValuerExerciseServiceTest {
-    @Mock
-    private IndicatorsRepository indicatorsRepository;
-
     @Mock
     private UserService userService;
 
@@ -49,7 +40,7 @@ public class ValuerExerciseServiceTest {
 
     @BeforeEach
     public void setup() {
-        this.valuerExerciseService = new ValuerExerciseServiceImpl(indicatorsRepository, userService, exerciseRepository);
+        this.valuerExerciseService = new ValuerExerciseServiceImpl(userService, exerciseRepository);
     }
 
     @Test
@@ -72,15 +63,12 @@ public class ValuerExerciseServiceTest {
 
         when(userService.getUserInSession()).thenReturn(user);
         when(exerciseRepository.findFirstByIdAndGroupId(exerciseId, groupId)).thenReturn(Optional.of(exercise));
-        when(indicatorsRepository.findByProfileId(user.getId())).thenReturn(IndicatorsBuilder.createIndicators());
 
         ExerciseAnswersDTO result = valuerExerciseService.exercisesAnswers(groupId, exerciseId, answers);
 
         assertEquals(10, result.getScore());
         verify(userService).getUserInSession();
         verify(exerciseRepository).findFirstByIdAndGroupId(exerciseId, groupId);
-        verify(indicatorsRepository).findByProfileId(user.getId());
-        verify(indicatorsRepository).save(any(Indicators.class));
     }
 
     @Test
@@ -106,7 +94,5 @@ public class ValuerExerciseServiceTest {
 
         verify(userService).getUserInSession();
         verify(exerciseRepository).findFirstByIdAndGroupId(exerciseId, groupId);
-        verify(indicatorsRepository, never()).findByProfileId(any(UUID.class));
-        verify(indicatorsRepository, never()).save(any(Indicators.class));
     }
 }

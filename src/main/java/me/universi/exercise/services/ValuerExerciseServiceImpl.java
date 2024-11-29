@@ -5,8 +5,6 @@ import me.universi.exercise.dto.AnswerDTO;
 import me.universi.exercise.dto.ExerciseAnswersDTO;
 import me.universi.exercise.entities.Exercise;
 import me.universi.exercise.exception.ExerciseNotFoundException;
-import me.universi.indicators.IndicatorsRepository;
-import me.universi.indicators.entities.Indicators;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,13 +18,11 @@ import java.util.UUID;
 @Service
 public class ValuerExerciseServiceImpl implements ValuerExerciseService {
 
-    private final IndicatorsRepository indicatorsRepository;
     private final UserService userService;
     private final ExerciseRepository exerciseRepository;
 
     @Autowired
-    public ValuerExerciseServiceImpl(IndicatorsRepository indicatorsRepository, UserService userService, ExerciseRepository exerciseRepository) {
-        this.indicatorsRepository = indicatorsRepository;
+    public ValuerExerciseServiceImpl(UserService userService, ExerciseRepository exerciseRepository) {
         this.userService = userService;
         this.exerciseRepository = exerciseRepository;
     }
@@ -36,7 +32,6 @@ public class ValuerExerciseServiceImpl implements ValuerExerciseService {
     public ExerciseAnswersDTO exercisesAnswers(UUID groupId, UUID exerciseid, List<AnswerDTO> answers) {
         User user = this.userService.getUserInSession();
         Exercise exercise = this.exerciseRepository.findFirstByIdAndGroupId(exerciseid, groupId).orElseThrow(ExerciseNotFoundException::new);
-        Indicators indicators = this.indicatorsRepository.findByProfileId(user.getId());
 
         long score = 0;
 
@@ -47,8 +42,6 @@ public class ValuerExerciseServiceImpl implements ValuerExerciseService {
             ids.add(answerDTO.getQuestion().getId());
 
         }
-        indicators.setScore(indicators.getScore() + score);
-        indicatorsRepository.save(indicators);
         simulatedAnswersDTO.setScore(score);
 
         return simulatedAnswersDTO;
