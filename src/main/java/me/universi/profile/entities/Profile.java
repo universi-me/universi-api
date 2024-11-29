@@ -16,7 +16,6 @@ import me.universi.competence.entities.CompetenceType;
 import me.universi.curriculum.education.entities.Education;
 import me.universi.curriculum.experience.entities.Experience;
 import me.universi.group.entities.ProfileGroup;
-import me.universi.indicators.entities.Indicators;
 import me.universi.link.entities.Link;
 import me.universi.roles.entities.Roles;
 import me.universi.profile.enums.Gender;
@@ -99,10 +98,6 @@ public class Profile implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at")
     private Date creationDate;
-
-    @OneToOne(cascade = CascadeType.ALL)
-    @JsonBackReference
-    private Indicators indicators;
 
     @JsonIgnore
     @Column(name = "deleted")
@@ -250,14 +245,6 @@ public class Profile implements Serializable {
 
     public void setId(UUID id) {
         this.id = id;
-    }
-
-    public Indicators getIndicators() {
-        return indicators;
-    }
-
-    public void setIndicators(Indicators indicators) {
-        this.indicators = indicators;
     }
 
     public Collection<Education> getEducations() {

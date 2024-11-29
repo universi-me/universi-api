@@ -1,7 +1,6 @@
 package me.universi.group.DTO;
 
 import me.universi.competence.entities.Competence;
-import me.universi.indicators.entities.Indicators;
 import me.universi.profile.enums.Gender;
 import me.universi.user.entities.User;
 
@@ -18,7 +17,6 @@ public record ProfileWithCompetencesDTO(
         String bio,
         Gender gender,
         Date creationDate,
-        Indicators indicators,
         Collection<Competence> competences
 ) {
 
