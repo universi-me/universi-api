@@ -1,7 +1,5 @@
 package me.universi.exercise.services;
 
-import me.universi.alternative.AlternativeRepository;
-import me.universi.alternative.entities.Alternative;
 import me.universi.group.entities.Group;
 import me.universi.group.exceptions.GroupNotFoundException;
 import me.universi.group.repositories.GroupRepository;
@@ -21,14 +19,12 @@ import java.util.UUID;
 @Service
 public class ListQuestionsWithAlternativesServiceImpl implements ListQuestionsWithAlternativesService {
 
-    private final AlternativeRepository alternativeRepository;
     private final QuestionRepository questionRepository;
     private final GroupRepository groupRepository;
     private final UserService userService;
 
     @Autowired
-    public ListQuestionsWithAlternativesServiceImpl(AlternativeRepository alternativeRepository, QuestionRepository questionRepository, GroupRepository groupRepository, UserService userService) {
-        this.alternativeRepository = alternativeRepository;
+    public ListQuestionsWithAlternativesServiceImpl(QuestionRepository questionRepository, GroupRepository groupRepository, UserService userService) {
         this.questionRepository = questionRepository;
         this.groupRepository = groupRepository;
         this.userService = userService;
@@ -48,7 +44,6 @@ public class ListQuestionsWithAlternativesServiceImpl implements ListQuestionsWi
 
         List<Question> questions = questionRepository.findAllRandonAndLimited(exerciseId, amount);
         List <UUID> ids = questions.stream().map(Question::getId).toList();
-        List<Alternative> alternatives = alternativeRepository.findAllByQuestionWithAlternatives(ids);
 
         List<QuestionWithAlternativesDTO> questionWithAlternatives = new ArrayList<>();
 
@@ -56,12 +51,6 @@ public class ListQuestionsWithAlternativesServiceImpl implements ListQuestionsWi
             QuestionWithAlternativesDTO questionComplete = new QuestionWithAlternativesDTO();
             questionComplete.setQuestion(question);
 
-            // TODO   aprimorar código
-            for (Alternative alternative : alternatives){
-                if (alternative.getQuestion().getId().equals(question.getId())){
-                    questionComplete.getAlternatives().add(alternative);
-                }
-            }
             questionWithAlternatives.add(questionComplete);
         }
 
