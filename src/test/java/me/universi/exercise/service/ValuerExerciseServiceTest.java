@@ -1,7 +1,6 @@
 package me.universi.exercise.service;
 
 import me.universi.IndicatorsBuilder;
-import me.universi.alternative.AlternativeBuilder;
 import me.universi.exercise.ExerciseRepository;
 import me.universi.exercise.builder.ExerciseBuilder;
 import me.universi.exercise.dto.AnswerDTO;
@@ -69,8 +68,6 @@ public class ValuerExerciseServiceTest {
         List<AnswerDTO> answers = new ArrayList<>();
         AnswerDTO answer1 = new AnswerDTO();
         answer1.setQuestion(QuestionBuilder.createQuestion());
-        answer1.setAlternativeSelected(AlternativeBuilder.createAlternative());
-        answer1.getAlternativeSelected().setCorrect(true);
         answers.add(answer1);
 
         when(userService.getUserInSession()).thenReturn(user);

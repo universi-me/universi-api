@@ -2,7 +2,6 @@ package me.universi.exercise.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import me.universi.alternative.entities.Alternative;
 import me.universi.question.entities.Question;
 
 import java.io.Serial;
@@ -19,14 +18,11 @@ public class QuestionWithAlternativesDTO implements Serializable {
 
     private Question question;
 
-    private List<Alternative> alternatives = new ArrayList<>();
-
     public QuestionWithAlternativesDTO() {
     }
 
-    public QuestionWithAlternativesDTO(Question question, List<Alternative> alternatives) {
+    public QuestionWithAlternativesDTO(Question question) {
         this.question = question;
-        this.alternatives = alternatives;
     }
 
     public Question getQuestion() {
@@ -35,13 +31,5 @@ public class QuestionWithAlternativesDTO implements Serializable {
 
     public void setQuestion(Question question) {
         this.question = question;
-    }
-
-    public List<Alternative> getAlternatives() {
-        return alternatives;
-    }
-
-    public void setAlternatives(List<Alternative> alternatives) {
-        this.alternatives = alternatives;
     }
 }

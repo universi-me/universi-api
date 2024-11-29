@@ -46,9 +46,6 @@ public class ValuerExerciseServiceImpl implements ValuerExerciseService {
         for (AnswerDTO answerDTO : answers){
             ids.add(answerDTO.getQuestion().getId());
 
-            if (answerDTO.getAlternativeSelected().getCorrect()){
-                score+=10;
-            }
         }
         indicators.setScore(indicators.getScore() + score);
         indicatorsRepository.save(indicators);
