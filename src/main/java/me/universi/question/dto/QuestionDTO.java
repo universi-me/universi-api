@@ -7,7 +7,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import me.universi.exercise.entities.Exercise;
-import me.universi.feedback.entities.Feedback;
 import me.universi.profile.entities.Profile;
 import me.universi.question.entities.Question;
 import me.universi.user.entities.User;
@@ -34,16 +33,13 @@ public class QuestionDTO implements Serializable {
     @NotNull(message = "user is mandatory")
     private Profile profileCreate;
 
-    private Feedback feedback;
-
     private List<Exercise> exercises;
 
 
-    public QuestionDTO(UUID id, String title, Profile profileCreate, Feedback feedback, List<Exercise> exercises) {
+    public QuestionDTO(UUID id, String title, Profile profileCreate, List<Exercise> exercises) {
         this.id = id;
         this.title = title;
         this.profileCreate = profileCreate;
-        this.feedback = feedback;
         this.exercises = exercises;
     }
 
@@ -52,7 +48,6 @@ public class QuestionDTO implements Serializable {
                 question.getId(),
                 question.getTitle(),
                 question.getProfileCreate(),
-                question.getFeedback(),
                 question.getExercises());
     }
 
@@ -78,14 +73,6 @@ public class QuestionDTO implements Serializable {
 
     public void setProfileCreate(Profile profileCreate) {
         this.profileCreate = profileCreate;
-    }
-
-    public Feedback getFeedback() {
-        return feedback;
-    }
-
-    public void setFeedback(Feedback feedback) {
-        this.feedback = feedback;
     }
 
     public List<Exercise> getExercises() {

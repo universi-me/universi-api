@@ -10,13 +10,11 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import jakarta.persistence.CascadeType;
 import me.universi.exercise.entities.Exercise;
-import me.universi.feedback.entities.Feedback;
 import me.universi.profile.entities.Profile;
 import me.universi.question.dto.QuestionCreateDTO;
 import me.universi.question.dto.QuestionDTO;
@@ -57,10 +55,6 @@ public class Question implements Serializable {
     @NotFound(action = NotFoundAction.IGNORE)
     private Profile profileCreate;
 
-    @OneToOne(cascade= CascadeType.ALL)
-    @JoinColumn(name = "feedback_id")
-    private Feedback feedback;
-
     @ManyToMany(mappedBy = "questions", cascade = CascadeType.REFRESH)
     @JsonBackReference
     @NotFound(action = NotFoundAction.IGNORE)
@@ -73,18 +67,16 @@ public class Question implements Serializable {
     public Question() {
     }
 
-    public Question(UUID id, String title, Profile profileCreate, Feedback feedback, List<Exercise> exercises) {
+    public Question(UUID id, String title, Profile profileCreate, List<Exercise> exercises) {
         this.id = id;
         this.title = title;
         this.profileCreate = profileCreate;
-        this.feedback = feedback;
         this.exercises = exercises;
     }
 
-    public Question(String title, Profile profileCreate, Feedback feedback) {
+    public Question(String title, Profile profileCreate) {
         this.title = title;
         this.profileCreate = profileCreate;
-        this.feedback = feedback;
     }
 
     public static Question from(QuestionDTO questionDTO) {
@@ -92,15 +84,13 @@ public class Question implements Serializable {
                 questionDTO.getId(),
                 questionDTO.getTitle(),
                 questionDTO.getProfileCreate(),
-                questionDTO.getFeedback(),
                 questionDTO.getExercises());
     }
 
     public static Question from(QuestionCreateDTO questionDTO) {
         return new Question(
                 questionDTO.getTitle(),
-                questionDTO.getProfileCreate(),
-                questionDTO.getFeedback());
+                questionDTO.getProfileCreate());
     }
 
     public UUID getId() {
@@ -133,14 +123,6 @@ public class Question implements Serializable {
 
     public void setProfileCreate(Profile profileCreate) {
         this.profileCreate = profileCreate;
-    }
-
-    public Feedback getFeedback() {
-        return feedback;
-    }
-
-    public void setFeedback(Feedback feedback) {
-        this.feedback = feedback;
     }
 
     public boolean isDeleted() { return deleted; }
