@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import me.universi.feedback.entities.Feedback;
 import me.universi.profile.entities.Profile;
 import me.universi.question.entities.Question;
 import me.universi.user.entities.User;
@@ -26,20 +25,15 @@ public class QuestionCreateDTO implements Serializable {
     @Size(min = 15, max = 512)
     private String title;
 
-    @NotNull(message = "Feedback is mandatory!")
-    private Feedback feedback;
-
     private Profile profileCreate;
 
-    public QuestionCreateDTO(String title, Feedback feedback) {
+    public QuestionCreateDTO(String title) {
         this.title = title;
-        this.feedback = feedback;
     }
 
     public static QuestionCreateDTO from (Question question){
         return new QuestionCreateDTO(
-                question.getTitle(),
-                question.getFeedback());
+                question.getTitle());
     }
 
     public String getTitle() {
@@ -48,14 +42,6 @@ public class QuestionCreateDTO implements Serializable {
 
     public void setTitle(String title) {
         this.title = title;
-    }
-
-    public Feedback getFeedback() {
-        return feedback;
-    }
-
-    public void setFeedback(Feedback feedback) {
-        this.feedback = feedback;
     }
 
     public Profile getProfileCreate() {

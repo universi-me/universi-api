@@ -325,150 +325,6 @@ paths:
                 type: "array"
                 items:
                   $ref: "#/components/schemas/Indicators"
-  /api/group/{groupId}/exercise/{exerciseId}/question/{questionId}/alternative/{alternativeId}:
-    put:
-      summary: "PUT api/group/{groupId}/exercise/{exerciseId}/question/{questionId}/alternative/{alternativeId}"
-      operationId: "updateAlternative"
-      parameters:
-        - name: "groupId"
-          in: "path"
-          required: true
-          schema:
-            type: "integer"
-            format: "int64"
-        - name: "exerciseId"
-          in: "path"
-          required: true
-          schema:
-            type: "integer"
-            format: "int64"
-        - name: "questionId"
-          in: "path"
-          required: true
-          schema:
-            type: "integer"
-            format: "int64"
-        - name: "alternativeId"
-          in: "path"
-          required: true
-          schema:
-            type: "integer"
-            format: "int64"
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/AlternativeUpdateDTO"
-        required: true
-      responses:
-        "200":
-          description: "OK"
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/Alternative"
-    get:
-      summary: "GET api/group/{groupId}/exercise/{exerciseId}/question/{questionId}/alternative/{alternativeId}"
-      operationId: "getAlternative"
-      parameters:
-        - name: "groupId"
-          in: "path"
-          required: true
-          schema:
-            type: "integer"
-            format: "int64"
-        - name: "exerciseId"
-          in: "path"
-          required: true
-          schema:
-            type: "integer"
-            format: "int64"
-        - name: "questionId"
-          in: "path"
-          required: true
-          schema:
-            type: "integer"
-            format: "int64"
-        - name: "alternativeId"
-          in: "path"
-          required: true
-          schema:
-            type: "integer"
-            format: "int64"
-      responses:
-        "200":
-          description: "OK"
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/Alternative"
-  /api/group/{groupId}/exercise/{exerciseId}/question/{questionId}/alternative:
-    post:
-      summary: "POST api/group/{groupId}/exercise/{exerciseId}/question/{questionId}/alternative"
-      operationId: "createAlternative"
-      parameters:
-        - name: "groupId"
-          in: "path"
-          required: true
-          schema:
-            type: "integer"
-            format: "int64"
-        - name: "exerciseId"
-          in: "path"
-          required: true
-          schema:
-            type: "integer"
-            format: "int64"
-        - name: "questionId"
-          in: "path"
-          required: true
-          schema:
-            type: "integer"
-            format: "int64"
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/AlternativeCreateDTO"
-        required: true
-      responses:
-        "201":
-          description: "Created"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Alternative"
-    get:
-      summary: "GET api/group/{groupId}/exercise/{exerciseId}/question/{questionId}/alternative"
-      operationId: "listAlternative"
-      parameters:
-        - name: "groupId"
-          in: "path"
-          required: true
-          schema:
-            type: "integer"
-            format: "int64"
-        - name: "exerciseId"
-          in: "path"
-          required: true
-          schema:
-            type: "integer"
-            format: "int64"
-        - name: "questionId"
-          in: "path"
-          required: true
-          schema:
-            type: "integer"
-            format: "int64"
-      responses:
-        "200":
-          description: "OK"
-          content:
-            '*/*':
-              schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/Alternative"
   /exit:
     get:
       summary: "GET exit"
@@ -1228,18 +1084,6 @@ components:
       properties:
         title:
           type: "string"
-    Achievement:
-      type: "object"
-      properties:
-        id:
-          type: "integer"
-          format: "int64"
-        icon:
-          type: "string"
-        title:
-          type: "string"
-        description:
-          type: "string"
     Indicators:
       type: "object"
       properties:
@@ -1249,10 +1093,6 @@ components:
         score:
           type: "integer"
           format: "int64"
-        achievements:
-          type: "array"
-          items:
-            $ref: "#/components/schemas/Achievement"
         user:
           $ref: "#/components/schemas/User"
     User:
@@ -1265,18 +1105,6 @@ components:
           type: "string"
         indicators:
           $ref: "#/components/schemas/Indicators"
-    Feedback:
-      type: "object"
-      properties:
-        id:
-          type: "integer"
-          format: "int64"
-        link:
-          type: "string"
-        feedbackText:
-          type: "string"
-        question:
-          $ref: "#/components/schemas/Question"
     Question:
       type: "object"
       properties:
@@ -1287,8 +1115,6 @@ components:
           type: "string"
         userCreate:
           $ref: "#/components/schemas/User"
-        feedback:
-          $ref: "#/components/schemas/Feedback"
         exercises:
           type: "array"
           items:
@@ -1305,25 +1131,11 @@ components:
           type: "array"
           items:
             $ref: "#/components/schemas/Question"
-    Alternative:
-      type: "object"
-      properties:
-        id:
-          type: "integer"
-          format: "int64"
-        title:
-          type: "string"
-        correct:
-          type: "boolean"
-        question:
-          $ref: "#/components/schemas/Question"
     AnswerDTO:
       type: "object"
       properties:
         question:
           $ref: "#/components/schemas/Question"
-        alternativeSelected:
-          $ref: "#/components/schemas/Alternative"
     ExerciseAnswersDTO:
       type: "object"
       properties:
@@ -1521,42 +1333,18 @@ components:
       properties:
         question:
           $ref: "#/components/schemas/Question"
-        alternatives:
-          type: "array"
-          items:
-            $ref: "#/components/schemas/Alternative"
     QuestionUpdateDTO:
       type: "object"
       properties:
         title:
           type: "string"
-        feedback:
-          $ref: "#/components/schemas/Feedback"
     QuestionCreateDTO:
       type: "object"
       properties:
         title:
           type: "string"
-        feedback:
-          $ref: "#/components/schemas/Feedback"
         userCreate:
           $ref: "#/components/schemas/User"
-    AlternativeUpdateDTO:
-      type: "object"
-      properties:
-        title:
-          type: "string"
-        correct:
-          type: "boolean"
-    AlternativeCreateDTO:
-      type: "object"
-      properties:
-        title:
-          type: "string"
-        correct:
-          type: "boolean"
-        question:
-          $ref: "#/components/schemas/Question"
     ArrayList:
       type: "object"
       properties: { }

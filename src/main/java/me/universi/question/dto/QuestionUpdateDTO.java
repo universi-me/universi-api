@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import me.universi.feedback.entities.Feedback;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -22,11 +21,8 @@ public class QuestionUpdateDTO implements Serializable {
     @Size(min = 15, max = 512)
     private String title;
 
-    private Feedback feedback;
-
-    public QuestionUpdateDTO(String title, Feedback feedback) {
+    public QuestionUpdateDTO(String title) {
         this.title = title;
-        this.feedback = feedback;
     }
 
     public String getTitle() {
@@ -35,13 +31,5 @@ public class QuestionUpdateDTO implements Serializable {
 
     public void setTitle(String title) {
         this.title = title;
-    }
-
-    public Feedback getFeedback() {
-        return feedback;
-    }
-
-    public void setFeedback(Feedback feedback) {
-        this.feedback = feedback;
     }
 }
