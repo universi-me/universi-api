@@ -7,19 +7,24 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class LinkService {
     @Autowired
     private LinkRepository linkRepository;
 
-    public Link findFirstById(Long id) {
+    public Link findFirstById(UUID id) {
         Optional<Link> competenciaOptional = linkRepository.findFirstById(id);
         if(competenciaOptional.isPresent()){
             return competenciaOptional.get();
         }else{
             return null;
         }
+    }
+
+    public Link findFirstById(String id) {
+        return findFirstById(UUID.fromString(id));
     }
 
     public void save(Link competencia) {

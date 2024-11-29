@@ -1,0 +1,4 @@
+
+ALTER TABLE content
+    ALTER COLUMN "type" TYPE VARCHAR(20);
+

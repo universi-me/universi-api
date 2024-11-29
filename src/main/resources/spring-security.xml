@@ -11,37 +11,57 @@
         http://www.springframework.org/schema/security/spring-security.xsd">
 
 
-    <http use-expressions="true" auto-config="true">
+    <http use-expressions="true" auto-config="true" entry-point-ref="restAuthenticationEntryPoint">
         <expression-handler ref="defaultWebSecurityExpressionHandler"/>
         <csrf disabled="true"/>
 
         <intercept-url pattern="/" access="permitAll"/>
-        <intercept-url pattern="/equipe" access="permitAll"/>
-        <intercept-url pattern="/login" access="permitAll"/>
-        <intercept-url pattern="/login/google" access="permitAll"/>
-        <intercept-url pattern="/registrar" access="permitAll"/>
+        <intercept-url pattern="/api" access="permitAll"/>
+        <intercept-url pattern="/api/" access="permitAll"/>
+        <intercept-url pattern="/api/health/**" access="permitAll"/>
 
-        <intercept-url pattern="/css/**" access="permitAll"/>
-        <intercept-url pattern="/js/**" access="permitAll"/>
-        <intercept-url pattern="/img/**" access="permitAll"/>
-        <intercept-url pattern="/favicon.ico" access="permitAll"/>
+        <intercept-url pattern="/api/login" access="permitAll"/>
+        <intercept-url pattern="/api/login/google" access="permitAll"/>
+        <intercept-url pattern="/api/login/keycloak" access="permitAll"/>
+        <intercept-url pattern="/api/login/keycloak/auth" access="permitAll"/>
+        <intercept-url pattern="/api/signup" access="permitAll"/>
+        <intercept-url pattern="/api/account" access="permitAll"/>
+
+        <intercept-url pattern="/api/username-available" access="permitAll"/>
+        <intercept-url pattern="/api/email-available" access="permitAll"/>
+        <intercept-url pattern="/api/recovery-password" access="permitAll"/>
+        <intercept-url pattern="/api/new-password" access="permitAll"/>
+        <intercept-url pattern="/api/confirm-account/*" access="permitAll"/>
+
+        <intercept-url pattern="/api/group/current-organization" access="permitAll"/>
+
+
+        <intercept-url pattern="/api/swagger-ui.html" access="permitAll"/>
+        <intercept-url pattern="/api/swagger-ui/**" access="permitAll"/>
+        <intercept-url pattern="/api/v3/api-docs/**" access="permitAll"/>
 
         <!-- Admin rules -->
-        <intercept-url pattern="/admin/**" access="hasRole('ADMIN')"/>
-        <intercept-url pattern="/exit" access="hasRole('ADMIN')"/>
+        <intercept-url pattern="/api/admin/**" access="hasRole('ADMIN')"/>
 
         <!-- Perimitir acesso ao H2-console -->
-        <intercept-url pattern="/h2-console/**" access="hasRole('ADMIN')"/>
+        <intercept-url pattern="/api/h2-console/**" access="('${spring.profiles.active}' == 'test')"/>
 
-        <intercept-url pattern="/**" access="isAuthenticated()"/>
+        <intercept-url pattern="/api/**" access="isAuthenticated()"/>
+
+        <intercept-url pattern="/**" access="permitAll"/>
 
         <custom-filter position="CONCURRENT_SESSION_FILTER" ref="concurrencyFilter" />
+        <custom-filter ref="customCorsFilter" before="CONCURRENT_SESSION_FILTER"/>
+        <custom-filter ref="jwtFilter" before="FORM_LOGIN_FILTER"/>
         <custom-filter ref="customUsernamePasswordAuthenticationFilter" after="FORM_LOGIN_FILTER"/>
+
 
         <session-management session-authentication-strategy-ref="sas"/>
 
-        <form-login login-page="/login" authentication-failure-url="/login?error" authentication-success-handler-ref="autenticacaoValidaHandler"/>
-        <logout logout-success-url="/login?logout" invalidate-session="true" />
+        <form-login login-page="/login" authentication-failure-url="/login" authentication-success-handler-ref="authenticationSuccessHandler"/>
+        <logout logout-success-url="/login" invalidate-session="true" />
+
+        <access-denied-handler ref="customAccessDeniedHandler"/>
 
 
         <!-- Corrigir H2-console -->
@@ -50,12 +70,16 @@
         </headers>
     </http>
 
-    <beans:bean id="customUsernamePasswordAuthenticationFilter" class="me.universi.usuario.services.CustomUsernamePasswordAuthenticationFilter">
-		<beans:property name="sessionAuthenticationStrategy" ref="sas"/>
+    <beans:bean id="jwtFilter" class="me.universi.user.services.JWTFilter"/>
+
+    <beans:bean id="customCorsFilter" class="me.universi.user.services.CustomCorsFilter"/>
+
+    <beans:bean id="customUsernamePasswordAuthenticationFilter" class="me.universi.user.services.CustomUsernamePasswordAuthenticationFilter">
+        <beans:property name="sessionAuthenticationStrategy" ref="sas"/>
         <beans:property name="authenticationManager" ref="authenticationManager"/>
-        <beans:property name="authenticationSuccessHandler" ref="autenticacaoValidaHandler"/>
-        <beans:property name="authenticationFailureHandler" ref="autenticacaofalhaHandler"/>
-        <beans:property name="filterProcessesUrl" value="/login.js"/>
+        <beans:property name="authenticationSuccessHandler" ref="authenticationSuccessHandler"/>
+        <beans:property name="authenticationFailureHandler" ref="authenticationFailedHandler"/>
+        <beans:property name="filterProcessesUrl" value="/api/signin"/>
         <beans:property name="usernameParameter" value="username"/>
         <beans:property name="passwordParameter" value="password"/>
     </beans:bean>
@@ -93,20 +117,20 @@
         <authentication-provider ref="authenticationProvider"/>
     </authentication-manager>
 
-    <beans:bean id="autenticacaofalhaHandler" class="me.universi.usuario.services.AutenticacaoFalhaHandler"/>
-    <beans:bean id="autenticacaoValidaHandler" class="me.universi.usuario.services.AutenticacaoValidaHandler"/>
+    <beans:bean id="authenticationFailedHandler" class="me.universi.user.services.AuthenticationFailedHandler"/>
+    <beans:bean id="authenticationSuccessHandler" class="me.universi.user.services.AuthenticationSuccessHandler"/>
 
     <beans:bean id="roleHierarchy" class="org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl">
         <beans:property name="hierarchy">
             <beans:value>
-                ROLE_ADMIN > ROLE_DEV > ROLE_USER
+                ROLE_DEV > ROLE_ADMIN > ROLE_USER
             </beans:value>
         </beans:property>
     </beans:bean>
     <beans:bean id="methodSecurityExpressionHandler" class="org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler">
         <beans:property name="roleHierarchy" ref="roleHierarchy"/>
     </beans:bean>
-    <beans:bean id="defaultWebSecurityExpressionHandler" class="org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler">
+    <beans:bean id="defaultWebSecurityExpressionHandler" class="org.springframework.security.web.access.expression.DefaultHttpSecurityExpressionHandler">
         <beans:property name="roleHierarchy" ref="roleHierarchy"/>
     </beans:bean>
     <beans:bean id="accessDecisionManager" class="org.springframework.security.access.vote.AffirmativeBased">
@@ -124,15 +148,18 @@
 
     <beans:bean class="org.springframework.security.web.session.HttpSessionEventPublisher"/>
 
-    <beans:bean id="SecurityUserDetailsService" class="me.universi.usuario.services.UsuarioService"/>
+    <beans:bean id="userServices" class="me.universi.user.services.UserService"/>
     <beans:bean id="encoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
+
+    <beans:bean name="customAccessDeniedHandler" class="me.universi.user.services.CustomAccessDeniedHandler"/>
+    <beans:bean name="restAuthenticationEntryPoint" class="me.universi.user.services.RestAuthenticationEntryPoint"/>
 
     <beans:bean id="authenticationProvider" class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
         <beans:property name="passwordEncoder" ref="encoder"/>
-        <beans:property name="userDetailsService" ref="SecurityUserDetailsService"/>
+        <beans:property name="userDetailsService" ref="userServices"/>
     </beans:bean>
 
-    <beans:bean id="authUser" class="me.universi.usuario.services.PreAuthUsuarioService"/>
+    <beans:bean id="authUser" class="me.universi.user.services.PreAuthUsuarioService"/>
 
     <beans:bean id="preAuthenticatedAuthenticationProvider" class="org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider">
         <beans:property name="preAuthenticatedUserDetailsService" ref="authUser" />

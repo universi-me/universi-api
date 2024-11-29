@@ -1,0 +1,251 @@
+spring:
+  profiles:
+    active: ${API_PROFILE_ACTIVE:dev}
+  flyway:
+    out-of-order: true
+    ignore-migration-patterns: "*:missing"
+
+logging:
+  level:
+    root: INFO
+  file:
+    name: ${API_DEBUG_FILE:spring.log}
+
+keycloak:
+  enabled: ${API_KEYCLOAK_ENABLED:false}
+  auth-server-url: ${API_KEYCLOAK_AUTH_SERVER_URL:}
+  redirect-url: ${API_KEYCLOAK_REDIRECT_URL:}
+  realm: ${API_KEYCLOAK_REALM:}
+  client-id: ${API_KEYCLOAK_CLIENT_ID:}
+  client-secret: ${API_KEYCLOAK_CLIENT_SECRET:}
+
+jwt:
+  enabled: ${API_JWT_ENABLED:false}
+  secret:
+    key: ${API_JWT_SECRET_KEY:test_key}
+
+# MinIO
+minio:
+  enabled: ${API_MINIO_ENABLED:false}
+  url: ${API_MINIO_URL:http://localhost:9000}
+  accessKey: ${API_MINIO_ACESSKEY:9JwDwrutRQrywpBFH9ks}
+  secretKey: ${API_MINIO_SECRET:kEtizmyDs70XSm0JVIbLACH2zDv1TOeCawhZ7qWb}
+  bucket: ${API_MINIO_BUCKET:universime}
+  region: ${API_MINIO_REGION:us-east-1}
+  policy: ${API_MINIO_POLICY:public}
+
+# DATABASE ENV VARIABLES
+database:
+  name: ${API_DB_NAME:universime_api}
+  port: ${API_DB_PORT:5432}
+  domain: ${API_DB_DOMAIN:localhost}
+  url: ${API_DB_URL:jdbc:postgresql://${database.domain}:${database.port}/${database.name}}
+  username: ${API_DB_USER:postgres}
+  password: ${API_DB_PASS:postgres}
+  flyway:
+    url: ${API_DB_FLY_URL:${database.url}}
+    username: ${API_DB_FLY_USER:${database.username}}
+    password: ${API_DB_FLY_PASS:${database.password}}
+  mongo:
+    name: ${API_DB_MONGO_NAME:${database.name}}
+    host: ${API_DB_MONGO_HOST:${database.domain}}
+    port: ${API_DB_MONGO_PORT:27017}
+    uri: ${API_DB_MONGO_URI:mongodb://${database.mongo.host}:${database.mongo.port}/${database.mongo.name}}
+
+# SERVER
+server:
+  port: ${API_SERVER_PORT:8080}
+  servlet:
+    session:
+      timeout: ${API_SERVER_SESSION_TIMEOUT:31536000} # 1 year
+      persistent: ${API_SERVER_SESSION_PERSISTENT:true}
+      store-dir: ${API_SERVER_SESSION_STORE_DIR:}
+      cookie:
+        http-only: ${API_SERVER_SESSION_COOKIE_HTTP_ONLY:true}
+        secure: ${API_SERVER_SESSION_COOKIE_SECURE:false}
+        same-site: ${API_SERVER_SESSION_COOKIE_SAME_SITE:strict}
+        name: ${API_SERVER_SESSION_COOKIE_NAME:UNIVERSIME_SESSION}
+        max-age: ${API_SERVER_SESSION_TIMEOUT:31536000} # 1 year
+    multipart:
+      enabled: true
+      max-file-size: 200MB
+      max-request-size: 200MB
+  tomcat:
+    max-http-form-post-size: 200MB
+
+
+# SPRINGDOC
+springdoc:
+  version: 1.0
+  api-docs:
+    path: /api/v3/api-docs
+  swagger-ui:
+    enabled: ${API_SWAGGER_ENABLED:true}
+    path: /api/swagger-ui.html
+
+# BUILD HASH
+BUILD_HASH: ${API_BUILD_HASH:development}
+
+PUBLIC_URL: ${API_PUBLIC_URL:}
+
+# GOOGLE API AUTH
+GOOGLE_CLIENT_ID: ${API_GOOGLE_CLIENT_ID:110833050076-ib680ela4hfqr2c0lhc9h19snrsvltnd.apps.googleusercontent.com}
+
+# IMAGEM CONFIG
+SAVE_IMAGE_LOCAL: ${API_SAVE_IMAGE_LOCAL:false}
+PATH_IMAGE_SAVE: ${API_PATH_IMAGE_SAVE:src/main/resources/static/img/imagem/}
+
+# IMGUR API CLIENT-ID
+IMGUR_CLIENT_ID: ${API_IMGUR_CLIENT_ID:e4f58fc81daec99}
+
+# LOGIN CONFIG
+SIGNUP_ENABLED: ${API_SIGNUP_ENABLED:true}
+SIGNUP_CONFIRMATION_ENABLED: ${API_SIGNUP_CONFIRMATION_ENABLED:false}
+LOGIN_GOOGLE_ENABLED: ${API_LOGIN_GOOGLE_ENABLED:true}
+
+RECAPTCHA_ENABLED: ${API_RECAPTCHA_ENABLED:false}
+RECAPTCHA_API_KEY: ${API_RECAPTCHA_API_KEY:}
+RECAPTCHA_API_PROJECT_ID: ${API_RECAPTCHA_API_PROJECT_ID:}
+RECAPTCHA_SITE_KEY: ${API_RECAPTCHA_SITE_KEY:}
+
+# IMAGE UPLOAD LIMIT (SIZE MB)
+IMAGE_UPLOAD_LIMIT: ${API_IMAGE_UPLOAD_LIMIT:1}
+
+# GROUP
+LOCAL_ORGANIZATION_ID_ENABLED: ${API_LOCAL_ORGANIZATION_ID_ENABLED:false}
+LOCAL_ORGANIZATION_ID: ${API_LOCAL_ORGANIZATION_ID:ccae}
+
+# TEST Profile
+---
+spring:
+  config:
+    activate:
+      on-profile: test
+  # Flyway
+  flyway:
+    enabled: true
+    init-sqls:
+      - CREATE ALIAS IF NOT EXISTS uuid_generate_v4 AS 'UUID ez_uuid() { return UUID.randomUUID(); }';
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+    url: jdbc:h2:mem:test;DATABASE_TO_UPPER=false;DB_CLOSE_DELAY=-1;
+    password:
+    user: sa
+  datasource:
+    url: jdbc:h2:mem:test;DATABASE_TO_UPPER=false;DB_CLOSE_DELAY=-1;
+    driverClassName: org.h2.Driver
+    continue-on-error: true
+    username: sa
+    password:
+  # H2 Console
+  h2:
+    console:
+      enabled: true
+      path: /api/h2-console
+  # JPA
+  jpa:
+    show-sql: true
+    format_sql: true
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+        dialect: org.hibernate.dialect.H2Dialect
+        show_sql: true
+        format_sql: true
+logging:
+  level:
+    org:
+      springframework:
+        web: DEBUG
+
+# DEV Profile
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  # MongoDB
+  data:
+    mongodb:
+      uri: ${database.mongo.uri}
+  # POSTGRES
+  datasource:
+    url: ${database.url}
+    username: ${database.username}
+    password: ${database.password}
+  #JPA
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  # Flyway
+  flyway:
+    enabled: true
+    init-sqls:
+      - CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+    url: ${database.flyway.url}
+    user: ${database.flyway.username}
+    password: ${database.flyway.password}
+  # H2 Console
+  h2:
+    console:
+      enabled: false
+
+
+# PROD Profile
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  web:
+    resources:
+      cache:
+        period: 3600
+  # MongoDB
+  data:
+    mongodb:
+      uri: ${database.mongo.uri}
+  # POSTGRES
+  datasource:
+    url: ${database.url}
+    username: ${database.username}
+    password: ${database.password}
+  #JPA
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  # Flyway
+  flyway:
+    enabled: true
+    init-sqls:
+      - CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+    url: ${database.flyway.url}
+    user: ${database.flyway.username}
+    password: ${database.flyway.password}
+  # H2 Console
+  h2:
+    console:
+      enabled: false

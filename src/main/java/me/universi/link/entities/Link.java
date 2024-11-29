@@ -1,44 +1,63 @@
 package me.universi.link.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import me.universi.link.enums.TipoLink;
-import me.universi.perfil.entities.Perfil;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import me.universi.link.enums.TypeLink;
+import me.universi.profile.entities.Profile;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
+
+import java.util.UUID;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 @Entity(name = "link")
+@SQLDelete(sql = "UPDATE link SET deleted = true WHERE id=?")
+@Where(clause = "deleted=false")
 public class Link {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_link")
-    private long id;
-    @Column(name = "tipo")
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id")
+    @NotNull
+    private UUID id;
+    @Column(name = "type_link")
     @Enumerated(EnumType.STRING)
-    private TipoLink tipo;
+    @NotNull
+    private TypeLink typeLink;
     @Column(name = "url")
+    @Size(max = 2048)
     private String url;
 
-    @Column(name = "nome")
-    private String nome;
+    @Column(name = "name")
+    private String name;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_perfil")
-    private Perfil perfil;
+    @JoinColumn(name = "profile_id")
+    @NotNull
+    @NotFound(action = NotFoundAction.IGNORE)
+    private Profile profile;
 
-    public Link(TipoLink tipo, String url){
-        this.tipo = tipo;
+    @JsonIgnore
+    @Column(name = "deleted")
+    private boolean deleted = Boolean.FALSE;
+
+    public Link(TypeLink typeLink, String url){
+        this.typeLink = typeLink;
         this.url = url;
     }
 
     public Link() {}
 
-    public TipoLink getTipo() {
-        return tipo;
+    public TypeLink getTypeLink() {
+        return typeLink;
     }
 
-    public void setTipo(TipoLink tipo) {
-        this.tipo = tipo;
+    public void setTypeLink(TypeLink typeLink) {
+        this.typeLink = typeLink;
     }
 
     public String getUrl() {
@@ -49,23 +68,27 @@ public class Link {
         this.url = url;
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public Perfil getPerfil() {
-        return perfil;
+    public Profile getProfile() {
+        return profile;
     }
 
-    public void setPerfil(Perfil perfil) {
-        this.perfil = perfil;
+    public void setProfile(Profile profile) {
+        this.profile = profile;
     }
 
-    public String getNome() {
-        return nome;
+    public String getName() {
+        return name;
     }
 
-    public void setNome(String nome) {
-        this.nome = nome;
+    public void setName(String name) {
+        this.name = name;
     }
+
+    public boolean isDeleted() { return deleted; }
+
+    public void setDeleted(boolean deleted) { this.deleted = deleted; }
 }
