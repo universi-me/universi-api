@@ -898,7 +898,6 @@ public class GroupService {
                     p.getBio(),
                     p.getGender(),
                     p.getCreationDate(),
-                    p.getIndicators(),
                     competenceProfileService.findCompetenceByProfile(p)
             );
 
