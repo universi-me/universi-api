@@ -41,30 +41,6 @@ paths:
             image/jpeg:
               schema:
                 $ref: "#/components/schemas/ResponseEntity"
-  /api/user/{userId}/subject:
-    post:
-      summary: "POST api/user/{userId}/subject"
-      operationId: "createSubject"
-      parameters:
-        - name: "userId"
-          in: "path"
-          required: true
-          schema:
-            type: "integer"
-            format: "int64"
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Subject"
-        required: true
-      responses:
-        "201":
-          description: "Created"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Subject"
   /api/group/{groupId}/exercise/{exerciseId}:
     put:
       summary: "PUT api/group/{groupId}/exercise/{exerciseId}"
@@ -1071,14 +1047,6 @@ components:
       properties:
         headers:
           $ref: "#/components/schemas/HttpHeaders"
-    Subject:
-      type: "object"
-      properties:
-        id:
-          type: "integer"
-          format: "int64"
-        subject:
-          type: "string"
     ExerciseUpdateDTO:
       type: "object"
       properties:
