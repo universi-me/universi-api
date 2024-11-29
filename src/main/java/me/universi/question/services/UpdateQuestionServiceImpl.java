@@ -1,6 +1,5 @@
 package me.universi.question.services;
 
-import me.universi.feedback.entities.Feedback;
 import me.universi.group.entities.Group;
 import me.universi.group.exceptions.GroupNotFoundException;
 import me.universi.group.repositories.GroupRepository;
@@ -50,19 +49,5 @@ public class UpdateQuestionServiceImpl implements UpdateQuestionService {
         if(!questionUpdateDto.getTitle().equals(question.getTitle())){
             question.setTitle(questionUpdateDto.getTitle());
         }
-
-        if (questionUpdateDto.getFeedback() != null && (!question.getFeedback().getFeedbackText().equals(questionUpdateDto.getFeedback().getFeedbackText())
-                || !question.getFeedback().getLink().equals(questionUpdateDto.getFeedback().getLink()))){
-
-            question.getFeedback().setLink(questionUpdateDto.getFeedback().getLink());
-            question.getFeedback().setFeedbackText(questionUpdateDto.getFeedback().getFeedbackText());
-        }
-
     }
-
-    protected void feedbackUpdate(Feedback feedback, Feedback questionFeedback){
-        feedback.setFeedbackText(questionFeedback.getFeedbackText());
-        feedback.setLink(questionFeedback.getLink());
-    }
-
 }
