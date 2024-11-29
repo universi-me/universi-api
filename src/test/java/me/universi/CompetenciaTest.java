@@ -9,7 +9,6 @@ import me.universi.group.services.GroupService;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.enums.Gender;
 import me.universi.profile.services.ProfileService;
-import me.universi.recommendation.service.RecomendacaoService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import org.junit.jupiter.api.Test;
@@ -19,7 +18,6 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -34,8 +32,6 @@ public class CompetenciaTest {
     GroupService grupoService;
     @Autowired
     CompetenceService competenciaService;
-    @Autowired
-    RecomendacaoService recomendacaoService;
     @Autowired
     ProfileService profileService;
     @Autowired

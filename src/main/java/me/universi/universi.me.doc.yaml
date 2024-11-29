@@ -597,91 +597,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Response"
-  /recomendacao/criar:
-    post:
-      summary: "POST recomendacao/criar"
-      operationId: "create"
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Map"
-        required: true
-      responses:
-        "200":
-          description: "OK"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Response"
-  /recomendacao/atualizar:
-    post:
-      summary: "POST recomendacao/atualizar"
-      operationId: "atualizar"
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Map"
-        required: true
-      responses:
-        "200":
-          description: "OK"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Response"
-  /recomendacao/remover:
-    post:
-      summary: "POST recomendacao/remover"
-      operationId: "remove"
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Map"
-        required: true
-      responses:
-        "200":
-          description: "OK"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Response"
-  /recomendacao/obter:
-    post:
-      summary: "POST recomendacao/obter"
-      operationId: "get"
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Map"
-        required: true
-      responses:
-        "200":
-          description: "OK"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Response"
-  /recomendacao/listar:
-    post:
-      summary: "POST recomendacao/listar"
-      operationId: "getlist"
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Map"
-        required: true
-      responses:
-        "200":
-          description: "OK"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Response"
   /<unknown>:
     get:
       summary: "GET ${..}"
@@ -859,23 +774,6 @@ components:
         creationDate:
           type: "string"
           format: "date-time"
-    Recommendation:
-      type: "object"
-      properties:
-        id:
-          type: "integer"
-          format: "int64"
-        origin:
-          $ref: "#/components/schemas/Profile"
-        destiny:
-          $ref: "#/components/schemas/Profile"
-        competenceType:
-          $ref: "#/components/schemas/CompetenceType"
-        description:
-          type: "string"
-        creationDate:
-          type: "string"
-          format: "date-time"
     Profile:
       type: "object"
       properties:
@@ -904,14 +802,6 @@ components:
           type: "array"
           items:
             $ref: "#/components/schemas/Link"
-        recomendacoesFeitas:
-          type: "array"
-          items:
-            $ref: "#/components/schemas/Recommendation"
-        recomendacoesRecebidas:
-          type: "array"
-          items:
-            $ref: "#/components/schemas/Recommendation"
         creationDate:
           type: "string"
           format: "date-time"
