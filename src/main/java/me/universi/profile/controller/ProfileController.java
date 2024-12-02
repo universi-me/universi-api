@@ -154,19 +154,6 @@ public class ProfileController {
         });
     }
 
-    @PostMapping(value = "/recomendations", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response profile_recomendations(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-
-            Profile profileGet = profileService.getProfileByUserIdOrUsername(body.get("profileId"), body.get("username"));
-
-            response.body.put("recomendationsSend", profileGet.getRecomendationsSend());
-            response.body.put("recomendationsReceived", profileGet.getRecomendationsReceived());
-
-        });
-    }
-
     @PostMapping(value = "/groups", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Response profile_groups(@RequestBody Map<String, Object> body) {

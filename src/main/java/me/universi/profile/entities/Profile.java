@@ -1,6 +1,5 @@
 package me.universi.profile.entities;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
@@ -11,16 +10,13 @@ import java.io.Serializable;
 import me.universi.capacity.entidades.ContentStatus;
 import me.universi.capacity.entidades.FolderFavorite;
 import me.universi.capacity.entidades.FolderProfile;
-import me.universi.competence.entities.Competence;
 import me.universi.competence.entities.CompetenceType;
 import me.universi.curriculum.education.entities.Education;
 import me.universi.curriculum.experience.entities.Experience;
 import me.universi.group.entities.ProfileGroup;
-import me.universi.indicators.entities.Indicators;
 import me.universi.link.entities.Link;
 import me.universi.roles.entities.Roles;
 import me.universi.profile.enums.Gender;
-import me.universi.recommendation.entities.Recommendation;
 import me.universi.user.entities.User;
 import org.hibernate.annotations.*;
 
@@ -84,12 +80,6 @@ public class Profile implements Serializable {
     @Column(name = "gender")
     @Enumerated(EnumType.STRING)
     private Gender gender;
-    @JsonIgnore
-    @OneToMany(mappedBy = "origin")
-    private Collection<Recommendation> recomendationsSend;
-    @JsonIgnore
-    @OneToMany(mappedBy = "destiny")
-    private Collection<Recommendation> recomendationsReceived;
 
     @JsonIgnore
     @OneToMany(mappedBy = "profile", fetch = FetchType.LAZY)
@@ -99,10 +89,6 @@ public class Profile implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at")
     private Date creationDate;
-
-    @OneToOne(cascade = CascadeType.ALL)
-    @JsonBackReference
-    private Indicators indicators;
 
     @JsonIgnore
     @Column(name = "deleted")
@@ -200,14 +186,6 @@ public class Profile implements Serializable {
         this.image = image;
     }
 
-    public Collection<Recommendation> getRecomendationsSend() {
-        return recomendationsSend;
-    }
-
-    public Collection<Recommendation> getRecomendationsReceived() {
-        return recomendationsReceived;
-    }
-
     public Date getCreationDate() {
         return creationDate;
     }
@@ -232,14 +210,6 @@ public class Profile implements Serializable {
         this.gender = gender;
     }
 
-    public void setRecomendationsSend(Collection<Recommendation> recomendationsSend) {
-        this.recomendationsSend = recomendationsSend;
-    }
-
-    public void setRecomendationsReceived(Collection<Recommendation> recomendationsReceived) {
-        this.recomendationsReceived = recomendationsReceived;
-    }
-
     public Collection<ContentStatus> getContentStatus() {
         return contentStatus;
     }
@@ -250,14 +220,6 @@ public class Profile implements Serializable {
 
     public void setId(UUID id) {
         this.id = id;
-    }
-
-    public Indicators getIndicators() {
-        return indicators;
-    }
-
-    public void setIndicators(Indicators indicators) {
-        this.indicators = indicators;
     }
 
     public Collection<Education> getEducations() {
