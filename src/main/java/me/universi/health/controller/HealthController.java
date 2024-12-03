@@ -1,15 +1,17 @@
 package me.universi.health.controller;
 
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.apache.http.HttpStatus;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.constraints.NotNull;
-import me.universi.api.entities.Response;
 import me.universi.health.dto.HealthResponseDTO;
 import me.universi.health.services.HealthService;
 
@@ -26,55 +28,50 @@ public class HealthController {
         this.healthService = healthService;
     }
 
-    @GetMapping( "/all" )
-    public @NotNull Response allHealth() {
-        return Response.buildResponse(response -> {
-            var healths = healthService.allHealth();
-            var servicesDown = healths.stream().filter(h -> !(h.isUp() || (!h.isUp() && h.isDisabled()))).toList();
-            response.success = servicesDown.isEmpty();
+    @GetMapping( "" )
+    public @NotNull ResponseEntity<Map<String, HealthResponseDTO>> allHealth() {
+        var healths = healthService.allHealth();
 
-            response.status = response.success
-                ? HttpStatus.SC_OK
-                : HttpStatus.SC_SERVICE_UNAVAILABLE;
-
-            response.body.put(
-                "status",
-                healths.stream().collect(
-                    Collectors.toMap( h -> h.getName(), h -> h )
-                )
-            );
-        });
+        return new ResponseEntity<>(
+            mapMultipleResponses( healths ),
+            healths.stream().allMatch( h -> healthService.isUp( h ) )
+                ? HttpStatus.OK
+                : HttpStatus.SERVICE_UNAVAILABLE
+        );
     }
 
     @GetMapping( "/api" )
-    public @NotNull Response apiHealth() {
+    public @NotNull ResponseEntity<HealthResponseDTO> apiHealth() {
         return this.responseFromHealthDTO(this.healthService.apiHealth());
     }
 
     @GetMapping( "/database" )
-    public @NotNull Response databaseHealth() {
+    public @NotNull ResponseEntity<HealthResponseDTO> databaseHealth() {
         return this.responseFromHealthDTO(this.healthService.databaseHealth());
     }
 
     @GetMapping( "/mongodb" )
-    public @NotNull Response mongoDbHealth() {
+    public @NotNull ResponseEntity<HealthResponseDTO> mongoDbHealth() {
         return this.responseFromHealthDTO(this.healthService.mongoDbHealth());
     }
 
     @GetMapping( "/minio" )
-    public @NotNull Response minIoHealth() {
+    public @NotNull ResponseEntity<HealthResponseDTO> minIoHealth() {
         return this.responseFromHealthDTO(this.healthService.minIoHealth());
     }
 
-    private @NotNull Response responseFromHealthDTO(@NotNull HealthResponseDTO health) {
-        return Response.buildResponse(response -> {
-            response.success = health.isUp();
+    private @NotNull ResponseEntity<HealthResponseDTO> responseFromHealthDTO(@NotNull HealthResponseDTO health) {
+        return new ResponseEntity<>(
+            health,
+            healthService.isUp( health )
+                ? HttpStatus.OK
+                : HttpStatus.SERVICE_UNAVAILABLE
+        );
+    }
 
-            response.status = response.success
-                ? HttpStatus.SC_OK
-                : HttpStatus.SC_SERVICE_UNAVAILABLE;
-
-            response.body.put( "status", health );
-        });
+    private Map<String, HealthResponseDTO> mapMultipleResponses( @NotNull List<HealthResponseDTO> healths ) {
+        return healths.stream().collect(
+            Collectors.toMap( h -> h.getName(), h -> h )
+        );
     }
 }
