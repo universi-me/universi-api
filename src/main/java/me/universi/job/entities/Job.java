@@ -6,7 +6,7 @@ import java.util.UUID;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.validator.constraints.Length;
 
 import jakarta.persistence.Column;
@@ -27,7 +27,7 @@ import me.universi.profile.entities.Profile;
 @Entity(name = "Job")
 @Table(name = "job")
 @SQLDelete(sql = "UPDATE jobs SET deleted = true WHERE id=?")
-@Where(clause = "deleted=false")
+@SQLRestriction( "NOT deleted" )
 public class Job {
     public static final int SHORT_DESCRIPTION_MAX_LENGTH = 255;
 
