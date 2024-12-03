@@ -22,7 +22,7 @@ import java.util.UUID;
 
 @Entity(name="category")
 @SQLDelete(sql = "UPDATE category SET deleted = true WHERE id=?")
-@Where(clause = "deleted=false")
+@SQLRestriction( "NOT deleted" )
 public class Category implements Serializable {
 
     @Serial

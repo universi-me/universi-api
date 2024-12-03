@@ -64,7 +64,7 @@ public class ContentService {
     }
 
     public List<Content> findByCategory(UUID categoryId) throws CapacityException {
-        Category category = categoryService.findById(categoryId);
+        Category category = categoryService.findOrThrow(categoryId);
         return contentRepository.findByCategories(category);
     }
 

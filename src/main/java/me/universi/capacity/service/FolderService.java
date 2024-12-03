@@ -37,6 +37,7 @@ import me.universi.roles.enums.Permission;
 import me.universi.roles.services.RolesService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
+import me.universi.util.CastingUtil;
 import me.universi.util.RandomUtil;
 
 @Service
@@ -170,7 +171,7 @@ public class FolderService {
     }
 
     public List<Folder> findByCategory(UUID categoryId) throws CapacityException {
-        Category category = categoryService.findById(categoryId);
+        Category category = categoryService.findOrThrow(categoryId);
         return folderRepository.findByCategories(category);
     }
 
@@ -234,7 +235,11 @@ public class FolderService {
                 if(categoryId==null || categoryId.isEmpty()) {
                     continue;
                 }
-                Category category = categoryService.findById(categoryId);
+
+                Category category = categoryService.findOrThrow(
+                    CastingUtil.getUUID( categoryId )
+                        .orElseThrow( () -> new IllegalArgumentException( "ID '" + categoryId +  "' inválido" ) )
+                );
 
                 if(contentOrFolder instanceof Content) {
                     if(((Content)contentOrFolder).getCategories() == null) {

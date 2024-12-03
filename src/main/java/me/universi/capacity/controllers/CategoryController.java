@@ -1,22 +1,30 @@
 package me.universi.capacity.controllers;
 
-import java.util.Map;
+import java.util.List;
 import java.util.UUID;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import me.universi.api.entities.Response;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import me.universi.capacity.dto.CreateCategoryDTO;
+import me.universi.capacity.dto.UpdateCategoryDTO;
 import me.universi.capacity.entidades.Category;
-import me.universi.capacity.exceptions.CapacityException;
+import me.universi.capacity.entidades.Content;
+import me.universi.capacity.entidades.Folder;
 import me.universi.capacity.service.CategoryService;
 import me.universi.capacity.service.ContentService;
 import me.universi.capacity.service.FolderService;
-import me.universi.user.services.UserService;
 
 @RestController
 @RequestMapping("/api/capacity/category")
@@ -31,155 +39,42 @@ public class CategoryController {
         this.folderService = folderService;
     }
 
-    @GetMapping("/all")
-    public Response list() {
-        return Response.buildResponse(response -> {
-            response.body.put("categories", categoryService.findAll());
-        });
+    @GetMapping( path = "", produces = MediaType.APPLICATION_JSON_VALUE )
+    public ResponseEntity<List<Category>> list() {
+        return ResponseEntity.ok( categoryService.findAll() );
     }
 
-    @PostMapping(value = "/contents", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Response contentsByCategory(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-
-            Object categoryId = body.get("id");
-            if(categoryId == null || String.valueOf(categoryId).isEmpty()) {
-                throw new CapacityException("ID da categoria não informado.");
-            }
-
-            response.body.put("contents", contentService.findByCategory(String.valueOf(categoryId)));
-        });
+    @GetMapping( path = "/{id}/contents", produces = MediaType.APPLICATION_JSON_VALUE )
+    public ResponseEntity<List<Content>> contentsByCategory( @Valid @PathVariable @NotNull UUID id ) {
+        return ResponseEntity.ok( contentService.findByCategory( id ) );
     }
 
-    @PostMapping(value = "/folders", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Response foldersByCategory(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-
-            Object categoryId = body.get("id");
-            if(categoryId == null || String.valueOf(categoryId).isEmpty()) {
-                throw new CapacityException("ID da categoria não informado.");
-            }
-
-            response.body.put("folders", folderService.findByCategory(String.valueOf(categoryId)));
-        });
+    @GetMapping( path = "/{id}/folders", produces = MediaType.APPLICATION_JSON_VALUE )
+    public ResponseEntity<List<Folder>> foldersByCategory( @Valid @PathVariable @NotNull UUID id ) {
+        return ResponseEntity.ok( folderService.findByCategory( id ) );
     }
 
-    @PostMapping(value = "/get", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Response get(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-
-            Object categoryId = body.get("id");
-            if(categoryId == null || String.valueOf(categoryId).isEmpty()) {
-                throw new CapacityException("ID da categoria não informado.");
-            }
-
-            response.body.put("category", categoryService.findById(UUID.fromString(String.valueOf(categoryId))));
-        });
+    @GetMapping( path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE )
+    public ResponseEntity<Category> get( @Valid @PathVariable @NotNull UUID id ) {
+        return ResponseEntity.ok( categoryService.findOrThrow( id ) );
     }
 
-    @PostMapping(value = "/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Response create(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-
-            Object name = body.get("name");
-            Object image = body.get("image");
-
-            if(name == null || String.valueOf(name).isEmpty()) {
-                throw new CapacityException("Parametro name não informado.");
-            }
-
-            Category category = new Category();
-            category.setName(String.valueOf(name));
-
-            if(image != null) {
-                String imageStr = String.valueOf(image);
-                if(!imageStr.isEmpty()) {
-                    category.setImage(imageStr);
-                }
-            }
-
-            category.setAuthor(UserService.getInstance().getUserInSession().getProfile());
-
-            boolean result = categoryService.saveOrUpdate(category);
-            if(!result) {
-                throw new CapacityException("Erro ao salvar o categoria.");
-            }
-
-            response.message = "Categoria criada com sucesso.";
-        });
+    @PostMapping( path = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE )
+    public ResponseEntity<Category> create( @Valid @RequestBody CreateCategoryDTO createCategoryDTO ) {
+        return new ResponseEntity<>( categoryService.create( createCategoryDTO ), HttpStatus.CREATED );
     }
 
-    @PostMapping(value = "/edit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Response edit(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-
-            Object categoryId = body.get("id");
-            if(categoryId == null || String.valueOf(categoryId).isEmpty()) {
-                throw new CapacityException("ID da categoria não informado.");
-            }
-
-            Object name =  body.get("name");
-            Object image = body.get("image");
-
-            Category category = categoryService.findById(String.valueOf(categoryId));
-            if(category == null) {
-                throw new CapacityException("Categoria não encontrado.");
-            }
-
-            if(!UserService.getInstance().isSessionOfUser(category.getAuthor().getUser())) {
-                if(!UserService.getInstance().isUserAdmin(UserService.getInstance().getUserInSession())) {
-                    throw new CapacityException("Você não tem permissão para editar esta categoria.");
-                }
-            }
-
-            if(name != null) {
-                String nameStr = String.valueOf(name);
-                if(!nameStr.isEmpty()) {
-                    category.setName(nameStr);
-                }
-            }
-            if(image != null) {
-                String imageStr = String.valueOf(image);
-                if(!imageStr.isEmpty()) {
-                    category.setImage(imageStr);
-                }
-            }
-
-            boolean result = categoryService.saveOrUpdate(category);
-            if(!result) {
-                throw new CapacityException("Erro ao editar o categoria.");
-            }
-
-            response.message = "Categoria atualizada com sucesso.";
-        });
+    @PatchMapping( path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE )
+    public ResponseEntity<Category> update(
+        @Valid @PathVariable @NotNull( message = "ID inválido" ) UUID id,
+        @Valid @RequestBody UpdateCategoryDTO updateCategoryDTO
+    ) {
+        return ResponseEntity.ok( categoryService.update( id, updateCategoryDTO ) );
     }
 
-    @PostMapping(value = "/delete", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Response delete(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-
-            Object categoryId = body.get("id");
-            if(categoryId == null || String.valueOf(categoryId).isEmpty()) {
-                throw new CapacityException("ID da Categoria não informado.");
-            }
-
-            Category category = categoryService.findById(UUID.fromString(String.valueOf(categoryId)));
-            if(category == null) {
-                throw new CapacityException("Categoria não encontrada.");
-            }
-
-            if(!UserService.getInstance().isSessionOfUser(category.getAuthor().getUser())) {
-                if(!UserService.getInstance().isUserAdmin(UserService.getInstance().getUserInSession())) {
-                    throw new CapacityException("Você não tem permissão para editar esta categoria.");
-                }
-            }
-
-            boolean result = categoryService.delete(UUID.fromString(String.valueOf(categoryId)));
-            if(!result) {
-                throw new CapacityException("Erro ao deletar Categoria.");
-            }
-
-            response.message = "Categoria deletada com sucesso.";
-        });
+    @DeleteMapping( path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE )
+    public ResponseEntity<Void> delete( @Valid @PathVariable @NotNull( message = "ID inválido" ) UUID id ) {
+        categoryService.delete( id );
+        return ResponseEntity.noContent().build();
     }
 }
