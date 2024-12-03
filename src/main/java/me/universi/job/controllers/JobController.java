@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -31,14 +31,14 @@ public class JobController {
         this.jobService = jobService;
     }
 
-    @GetMapping(value = "/get/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Job> get(
         @Valid @PathVariable @NotNull( message = "ID inválido" ) UUID id
     ) {
         return ResponseEntity.ok( jobService.findOrThrow( id ) );
     }
 
-    @GetMapping( value = "/list", produces = MediaType.APPLICATION_JSON_VALUE )
+    @GetMapping( value = "", produces = MediaType.APPLICATION_JSON_VALUE )
     public ResponseEntity<List<Job>> list(
         @RequestParam( name = "onlyOpen", defaultValue = "false" ) boolean onlyOpen,
         @RequestParam( name = "competenceTypesIds", required = false ) List<UUID> competenceTypesIds
@@ -46,12 +46,12 @@ public class JobController {
         return ResponseEntity.ok( jobService.findFiltered(onlyOpen, competenceTypesIds) );
     }
 
-    @PostMapping( value = "/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE )
+    @PostMapping( value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE )
     public ResponseEntity<Job> create( @Valid @RequestBody CreateJobDTO createJobDTO ) {
         return new ResponseEntity<>( jobService.create( createJobDTO ), HttpStatus.CREATED );
     }
 
-    @PutMapping( value = "/update/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE )
+    @PatchMapping( value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE )
     public ResponseEntity<Job> update(
         @Valid @PathVariable @NotNull( message = "ID inválido" ) UUID id,
         @Valid @RequestBody UpdateJobDTO updateJobDTO
@@ -59,7 +59,7 @@ public class JobController {
         return ResponseEntity.ok( jobService.edit( id, updateJobDTO ) );
     }
 
-    @PutMapping( value = "/close/{id}", produces = MediaType.APPLICATION_JSON_VALUE )
+    @PatchMapping( value = "/close/{id}", produces = MediaType.APPLICATION_JSON_VALUE )
     public ResponseEntity<Job> close(
         @Valid @PathVariable @NotNull( message = "ID inválido" ) UUID id
     ) {

@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 
@@ -33,12 +33,12 @@ public class LinkController {
         this.linkService = linkService;
     }
 
-    @PostMapping( value = "create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE )
+    @PostMapping( value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE )
     public ResponseEntity<Link> create( @Valid @RequestBody CreateLinkDTO createLinkDTO ) {
         return new ResponseEntity<>( linkService.create( createLinkDTO ), HttpStatus.CREATED );
     }
 
-    @DeleteMapping( value= "/remove/{id}" )
+    @DeleteMapping( value= "/{id}" )
     public ResponseEntity<Void> remove(
         @Valid @PathVariable @NotNull( message = "ID inválido" ) UUID id
     ) {
@@ -46,7 +46,7 @@ public class LinkController {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping( value = "/update/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE )
+    @PatchMapping( value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE )
     public ResponseEntity<Link> update(
         @Valid @PathVariable @NotNull( message = "ID inválido" ) UUID id,
         @Valid @RequestBody UpdateLinkDTO updateLinkDTO
@@ -54,7 +54,7 @@ public class LinkController {
         return ResponseEntity.ok( linkService.update( id, updateLinkDTO ) );
     }
 
-    @GetMapping( value = "/get/{id}", produces = MediaType.APPLICATION_JSON_VALUE )
+    @GetMapping( value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE )
     public ResponseEntity<Link> get(
         @Valid @PathVariable @NotNull( message = "ID inválido" ) UUID id
     ) {
