@@ -37,7 +37,7 @@ public class CompetenceTypeService {
     public CompetenceType findFirstById(UUID id) {
         CompetenceType competenceType = competenceTypeRepository.findFirstById(id).orElse(null);
 
-        if(hasAccessToCompetenceType(competenceType)){
+        if(competenceType != null && hasAccessToCompetenceType(competenceType)){
             return competenceType;
         }else{
             return null;
