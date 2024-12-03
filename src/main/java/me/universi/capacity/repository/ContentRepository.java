@@ -10,7 +10,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface ContentRepository extends JpaRepository<Content, UUID> {
-    Content findFirstById(UUID id);
     boolean existsByTitle(String title);
     boolean existsByUrl(String url);
     List<Content> findByCategories(Category category);

@@ -31,13 +31,13 @@ import me.universi.capacity.enums.ContentStatusType;
 import me.universi.capacity.enums.ContentType;
 import me.universi.capacity.service.ContentService;
 import me.universi.profile.entities.Profile;
-import me.universi.user.services.UserService;
+import me.universi.profile.services.ProfileService;
 
 import org.hibernate.annotations.*;
 
 @Entity(name="content")
 @SQLDelete(sql = "UPDATE content SET deleted = true WHERE id=?")
-@Where(clause = "deleted=false")
+@SQLRestriction( "NOT deleted" )
 public class Content implements Serializable {
 
     @Serial
@@ -198,6 +198,7 @@ public class Content implements Serializable {
     @Transient
     public ContentStatusType getStatus() {
         return ContentService.getInstance()
-            .getProfileProgress(this, UserService.getInstance().getUserInSession().getProfile());
+            .findStatusById( id, ProfileService.getInstance().getProfileInSession().getId() )
+            .getStatus();
     }
 }

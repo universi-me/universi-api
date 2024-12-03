@@ -574,8 +574,6 @@ public class FolderController {
                     if(folder.getContents() == null)
                         folder.setContents(new ArrayList<>());
                     folder.getContents().add(c);
-                    c.getFolders().add(folder);
-                    contentService.saveOrUpdate(c);
                     folderService.saveOrUpdate(folder);
                 }
 

@@ -5,10 +5,12 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotNull;
 import me.universi.Sys;
 import me.universi.capacity.entidades.Category;
@@ -134,8 +136,12 @@ public class FolderService {
         return folder;
     }
 
-    public Folder findById(String folderId) throws CapacityException {
-        return findById(UUID.fromString(folderId));
+    public Optional<Folder> find( UUID id ) {
+        return folderRepository.findById( id );
+    }
+
+    public Folder findOrThrow( UUID id ) throws EntityNotFoundException {
+        return find( id ).orElseThrow( () -> new EntityNotFoundException("Conteúdo com ID '" + id + "' não encontrado") );
     }
 
     public Folder findByReference(String folderReference) throws CapacityException {
@@ -197,7 +203,7 @@ public class FolderService {
         return true;
     }
 
-    public void addOrRemoveContent(Object folderId, Object contentId, boolean isAdding) throws CapacityException {
+    public void addOrRemoveContent(Object folderId, Object contentId, boolean isAdding) throws CapacityException, IllegalArgumentException {
         if(folderId == null) {
             throw new CapacityException("Parametro folderId é nulo.");
         }
@@ -214,13 +220,9 @@ public class FolderService {
                 if (contentIdNow == null || contentIdNow.isEmpty()) {
                     continue;
                 }
-                Content content = ContentService.getInstance().findById(contentIdNow);
+                Content content = ContentService.getInstance().findOrThrow(CastingUtil.getUUID(contentIdNow).orElseThrow(() -> new IllegalArgumentException("ID inválido")));
 
                 addOrRemoveFromContent(content, folderId, isAdding);
-                boolean result = ContentService.getInstance().saveOrUpdate(content);
-                if (!result) {
-                    throw new CapacityException("Erro ao adicionar conteúdo a pasta.");
-                }
             }
         }
     }
@@ -284,7 +286,7 @@ public class FolderService {
                 if(folderId==null || folderId.isEmpty()) {
                     continue;
                 }
-                Folder folder = findById(folderId);
+                Folder folder = findOrThrow(CastingUtil.getUUID( folderId ).orElseThrow( () -> new IllegalArgumentException( "ID inválido" ) ));
 
                 checkPermissions(folder, true);
 
@@ -353,11 +355,11 @@ public class FolderService {
     }
 
     public void setNewPositionOfContent(Object folderId, Object contentId, int toIndex) throws CapacityException {
-        Folder folder = findById((String)folderId);
+        Folder folder = findOrThrow(CastingUtil.getUUID(folderId).orElseThrow(() -> new IllegalArgumentException("ID inválido")));
 
         checkPermissions(folder, true);
 
-        Content content = ContentService.getInstance().findById((String)contentId);
+        Content content = ContentService.getInstance().findOrThrow(CastingUtil.getUUID(contentId).orElseThrow(() -> new IllegalArgumentException("ID inválido")));
 
         // mount ordered list
         List<Content> contentsOrdered = new ArrayList<>();
@@ -534,7 +536,7 @@ public class FolderService {
 
     public List<ContentStatus> getStatuses(Profile profile, Folder folder) {
         return folder.getContents().stream()
-            .map(c -> contentStatusRepository.findByProfileIdAndContentId(profile.getId(), c.getId()))
+            .map(c -> contentStatusRepository.findFirstByProfileIdAndContentId(profile.getId(), c.getId()))
             .filter(Objects::nonNull)
             .toList();
     }
