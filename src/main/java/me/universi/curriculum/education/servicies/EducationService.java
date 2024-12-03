@@ -9,7 +9,6 @@ import me.universi.curriculum.education.entities.Education;
 import me.universi.institution.entities.Institution;
 import me.universi.curriculum.education.entities.TypeEducation;
 import me.universi.curriculum.education.exceptions.EducationException;
-import me.universi.institution.exceptions.InstitutionException;
 import me.universi.institution.services.InstitutionService;
 import me.universi.curriculum.education.exceptions.TypeEducationException;
 import me.universi.curriculum.education.repositories.EducationRepository;
@@ -18,11 +17,8 @@ import me.universi.profile.exceptions.ProfileException;
 import me.universi.profile.services.ProfileService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -162,10 +158,7 @@ public class EducationService {
             }
 
             if(institutionId != null) {
-                Institution institution = institutionService.findById(UUID.fromString(institutionId)).get();
-                if(institution == null) {
-                    throw new EducationException("Institution não encontrada.");
-                }
+                Institution institution = institutionService.findOrThrow(UUID.fromString(institutionId));
                 education.setInstitution(institution);
             }
 
@@ -246,10 +239,7 @@ public class EducationService {
                 throw new TypeEducationException("TypeEducation não encontrado.");
             }
 
-            Institution institution = institutionService.findById(UUID.fromString(institutionId)).get();
-            if(institution == null) {
-                throw new InstitutionException("Institution não encontrado.");
-            }
+            Institution institution = institutionService.findOrThrow(UUID.fromString(institutionId));
 
             Education newEducation = new Education();
             newEducation.setTypeEducation(typeEducation);

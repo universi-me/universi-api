@@ -1,18 +1,26 @@
 package me.universi.institution.controller;
 
-import java.util.Map;
+import java.util.List;
+import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import me.universi.api.entities.Response;
-import me.universi.institution.exceptions.InstitutionException;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import me.universi.institution.dto.CreateInstitutionDTO;
+import me.universi.institution.dto.UpdateInstitutionDTO;
+import me.universi.institution.entities.Institution;
 import me.universi.institution.services.InstitutionService;
-import me.universi.util.CastingUtil;
 
 @RestController
 @RequestMapping(value = "/api/institution")
@@ -23,57 +31,37 @@ public class InstitutionController {
         this.institutionService = institutionService;
     }
 
-    @PostMapping(value = "/list", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Response listAll(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-            response.body.put("list", institutionService.findAll());
-        });
+    @GetMapping( path = "/get/list", produces = MediaType.APPLICATION_JSON_VALUE )
+    public ResponseEntity<List<Institution>> lis() {
+        return this.listAll();
     }
 
-    @PostMapping(value = "/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Response create(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-            var name = CastingUtil.getString(body.get("name")).orElseThrow(() -> {
-                response.setStatus(HttpStatus.BAD_REQUEST);
-                return new InstitutionException("Parâmetro 'name' inválido ou não informado.");
-            });
-
-            var institution = institutionService.create(name);
-
-            response.setStatus(HttpStatus.CREATED);
-            response.message = "Instituição '" + name + "' criado com sucesso";
-            response.body.put("institution", institution);
-        });
+    @GetMapping( path = "/get/{id}", produces = MediaType.APPLICATION_JSON_VALUE )
+    public ResponseEntity<Institution> get( @Valid @PathVariable @NotNull UUID id ) {
+        return ResponseEntity.ok( institutionService.findOrThrow( id ) );
     }
 
-    @PostMapping(value = "/edit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Response edit(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-            var id = CastingUtil.getUUID(body.get("id")).orElseThrow(() -> {
-                response.setStatus(HttpStatus.BAD_REQUEST);
-                return new InstitutionException("Parâmetro 'id' inválido ou não informado.");
-            });
-
-            var name = CastingUtil.getString(body.get("name")).orElse(null);
-
-            var institution = institutionService.edit(id, name);
-
-            response.setStatus(HttpStatus.CREATED);
-            response.message = "Instituição '" + name + "' alterado com sucesso";
-            response.body.put("institution", institution);
-        });
+    @GetMapping( path = "/list", produces = MediaType.APPLICATION_JSON_VALUE )
+    public ResponseEntity<List<Institution>> listAll() {
+        return ResponseEntity.ok( institutionService.findAll() );
     }
 
-    @PostMapping(value = "/delete", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Response delete(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-            var id = CastingUtil.getUUID(body.get("id")).orElseThrow(() -> {
-                response.setStatus(HttpStatus.BAD_REQUEST);
-                return new InstitutionException("Parâmetro 'id' inválido ou não informado.");
-            });
+    @PostMapping( path = "/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE )
+    public ResponseEntity<Institution> create( @Valid @RequestBody CreateInstitutionDTO createInstitutionDTO ) {
+        return new ResponseEntity<>( institutionService.create( createInstitutionDTO ), HttpStatus.CREATED );
+    }
 
-            institutionService.delete(id);
-            response.message = "Instituição deletado com sucesso";
-        });
+    @PutMapping( path = "/edit/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE )
+    public ResponseEntity<Institution> edit(
+        @Valid @PathVariable @NotNull UUID id,
+        @Valid @RequestBody UpdateInstitutionDTO updateInstitutionDTO
+    ) {
+        return ResponseEntity.ok( institutionService.edit( id, updateInstitutionDTO ) );
+    }
+
+    @DeleteMapping( path = "/remove/{id}" )
+    public ResponseEntity<Void> remove( @Valid @PathVariable @NotNull UUID id ) {
+        institutionService.delete( id );
+        return ResponseEntity.noContent().build();
     }
 }

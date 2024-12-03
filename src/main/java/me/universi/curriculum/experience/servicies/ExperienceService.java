@@ -107,7 +107,7 @@ public class ExperienceService {
                 return new TypeEducationException("Parâmetro 'institutionId' inválido ou não informado.");
             });
 
-            var institution = institutionService.findById(institutionId).orElseThrow(() -> {
+            var institution = institutionService.find(institutionId).orElseThrow(() -> {
                 response.setStatus(HttpStatus.BAD_REQUEST);
                 return new TypeEducationException("Instituição com id '" + institutionId.toString() + "' não encontrado.");
             });
@@ -213,7 +213,7 @@ public class ExperienceService {
             }
 
             if (institutionId.isPresent()) {
-                var institution = institutionService.findById(institutionId.get()).orElseThrow(() -> {
+                var institution = institutionService.find(institutionId.get()).orElseThrow(() -> {
                     response.setStatus(HttpStatus.BAD_REQUEST);
                     return new TypeEducationException("Instituição com id '" + institutionId.toString() + "' não encontrado.");
                 });
