@@ -29,13 +29,21 @@ import me.universi.user.services.UserService;
 @Service
 public class JobService {
     private final JobRepository jobRepository;
+    private final CompetenceTypeService competenceTypeService;
+    private final GroupFeedService groupFeedService;
+    private final InstitutionService institutionService;
     private final ProfileService profileService;
     private final RolesService rolesService;
+    private final UserService userService;
 
-    public JobService( JobRepository jobRepository, ProfileService profileService, RolesService rolesService ) {
+    public JobService( JobRepository jobRepository, CompetenceTypeService competenceTypeService, GroupFeedService groupFeedService, InstitutionService institutionService, ProfileService profileService, RolesService rolesService, UserService userService ) {
         this.jobRepository = jobRepository;
+        this.competenceTypeService = competenceTypeService;
+        this.groupFeedService = groupFeedService;
+        this.institutionService = institutionService;
         this.profileService = profileService;
         this.rolesService = rolesService;
+        this.userService = userService;
     }
 
     public static JobService getInstance() { return Sys.context.getBean("jobService", JobService.class); }
@@ -57,11 +65,11 @@ public class JobService {
         var title = checkValidTitle( createJobDTO.title() );
         var shortDescription = checkValidShortDescription( createJobDTO.shortDescription() );
 
-        var institution = InstitutionService.getInstance().findById( createJobDTO.institutionId() ).orElseThrow(() -> {
-            return new JobException("Instituição não encontrada");
-        });
+        var institution = institutionService.findOrThrow( createJobDTO.institutionId() );
 
-        var competencesTypes = CompetenceTypeService.getInstance().findAllById( createJobDTO.requiredCompetencesIds() );
+        var competencesTypes = competenceTypeService.findAllById( createJobDTO.requiredCompetencesIds() );
+
+        var profileInSession = profileService.getProfileInSession();
 
         var job = new Job();
         job.setTitle(title);
@@ -70,26 +78,26 @@ public class JobService {
         job.setInstitution(institution);
         job.setRequiredCompetences(competencesTypes);
         job.setClosed(false);
-        job.setAuthor(ProfileService.getInstance().getProfileInSession());
+        job.setAuthor( profileInSession );
 
         job = save(job);
 
-        var organizationId = UserService.getInstance().getUserInSession().getOrganization().getId().toString();
-        // TODO: group environment variable for message
-        var postMessage = "Nova vaga cadastrada para a instituição " + job.getInstitution().getName()
-            + ": <a href=\"/job/" + job.getId() + "\"><strong>" + job.getTitle() + "</strong></a>";
-
+        var organizationId = profileInSession.getUser().getOrganization().getId().toString();
 
         if ( rolesService.hasPermission( organizationId , FeaturesTypes.FEED, Permission.READ_WRITE) ) {
+            // TODO: group environment variable for message
+            var postMessage = "Nova vaga cadastrada para a instituição " + job.getInstitution().getName()
+                + ": <a href=\"/job/" + job.getId() + "\"><strong>" + job.getTitle() + "</strong></a>";
+
             var groupPostDto = new GroupPostDTO(postMessage, job.getAuthor().getId().toString());
-            GroupFeedService.getInstance().createGroupPost(organizationId, groupPostDto);
+            groupFeedService.createGroupPost(organizationId, groupPostDto);
         }
 
         return job;
     }
 
     public Job edit( UUID id, UpdateJobDTO updateJobDTO ) throws JobException {
-        var job = checkCanEdit( id, ProfileService.getInstance().getProfileInSession() );
+        var job = checkCanEdit( id, profileService.getProfileInSession() );
 
         if ( updateJobDTO.title() != null )
             job.setTitle( checkValidTitle( updateJobDTO.title() ) );
@@ -101,7 +109,7 @@ public class JobService {
             job.setLongDescription( updateJobDTO.longDescription() );
 
         if ( updateJobDTO.requiredCompetencesIds() != null)
-            job.setRequiredCompetences( CompetenceTypeService.getInstance().findAllById( updateJobDTO.requiredCompetencesIds() ) );
+            job.setRequiredCompetences( competenceTypeService.findAllById( updateJobDTO.requiredCompetencesIds() ) );
 
         return save(job);
     }
@@ -124,7 +132,7 @@ public class JobService {
     private Job checkCanEdit(@NotNull UUID jobId, @NotNull Profile profile) throws JobException {
         var job = findOrThrow(jobId);
 
-        var canEdit = UserService.getInstance().isUserAdmin(profile.getUser())
+        var canEdit = userService.isUserAdmin(profile.getUser())
             || job.getAuthor().getId().equals(profile.getId());
 
         if (!canEdit)
