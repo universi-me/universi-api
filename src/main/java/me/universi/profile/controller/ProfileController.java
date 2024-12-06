@@ -211,7 +211,7 @@ public class ProfileController {
             }
 
             Profile profile = profileService.getProfileByUserIdOrUsername(profileId, username);
-            response.body.put("folders", folderService.getAssignedTo(profile.getId()));
+            response.body.put("folders", folderService.getAssignments(null, null, profile.getId().toString()));
             response.body.put("favorites", folderService.listFavorites(profile.getId()));
         });
     }

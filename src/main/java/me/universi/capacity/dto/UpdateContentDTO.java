@@ -29,8 +29,5 @@ public record UpdateContentDTO(
     Integer rating,
 
     @Nullable
-    List<UUID> categoriesIds,
-
-    @Nullable
-    List<UUID> foldersIds
+    List<UUID> categoriesIds
 ) { }

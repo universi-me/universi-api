@@ -11,6 +11,7 @@ import me.universi.user.services.UserService;
 
 import org.springframework.stereotype.Service;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -32,6 +34,22 @@ public class CompetenceTypeService {
 
     public static CompetenceTypeService getInstance() {
         return Sys.context.getBean("competenceTypeService", CompetenceTypeService.class);
+    }
+
+    public Optional<CompetenceType> find( UUID id ) {
+        return competenceTypeRepository.findById( id );
+    }
+
+    public List<Optional<CompetenceType>> find( Collection<UUID> id ) {
+        return id.stream().map( this::find ).toList();
+    }
+
+    public CompetenceType findOrThrow( UUID id ) throws EntityNotFoundException {
+        return find( id ).orElseThrow( () -> new EntityNotFoundException( "Tipo de Competência de ID '" + id + "' não encontrado" ) );
+    }
+
+    public List<CompetenceType> findOrThrow( Collection<UUID> id ) {
+        return id.stream().map( this::findOrThrow ).toList();
     }
 
     public CompetenceType findFirstById(UUID id) {

@@ -19,6 +19,7 @@ import me.universi.profile.services.ProfileService;
 
 import org.hibernate.annotations.*;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -62,10 +63,10 @@ public class Folder implements Serializable {
     @Column(name = "created_at")
     private Date createdAt;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany( mappedBy = "folder" )
     @JsonIgnore
     @NotFound(action = NotFoundAction.IGNORE)
-    private Collection<Content> contents;
+    private Collection<FolderContents> folderContents;
 
     @Column
     @NotNull
@@ -113,6 +114,11 @@ public class Folder implements Serializable {
     private Collection<CompetenceType> grantsBadgeToCompetences;
 
     public Folder() {
+        this.assignedUsers = new ArrayList<>();
+        this.favoriteUsers = new ArrayList<>();
+        this.grantsBadgeToCompetences = new ArrayList<>();
+        this.grantedAccessGroups = new ArrayList<>();
+        this.folderContents = new ArrayList<>();
     }
 
     public void setId(UUID id) {
@@ -163,12 +169,12 @@ public class Folder implements Serializable {
         this.createdAt = createdAt;
     }
 
-    public void setContents(Collection<Content> contents) {
-        this.contents = contents;
+    public void setContents(Collection<FolderContents> folderContents) {
+        this.folderContents = folderContents;
     }
 
-    public Collection<Content> getContents() {
-        return this.contents;
+    public Collection<FolderContents> getFolderContents() {
+        return this.folderContents;
     }
 
     public void setRating(Integer rating) {
@@ -234,6 +240,9 @@ public class Folder implements Serializable {
     public void setGrantsBadgeToCompetences(Collection<CompetenceType> grantsBadgeToCompetences) {
         this.grantsBadgeToCompetences = grantsBadgeToCompetences;
     }
+
+    public Collection<FolderFavorite> getFavoriteUsers() { return favoriteUsers; }
+    public void setFavoriteUsers(Collection<FolderFavorite> favoriteUsers) { this.favoriteUsers = favoriteUsers; }
 
     @Transient
     public boolean isCanEdit() {

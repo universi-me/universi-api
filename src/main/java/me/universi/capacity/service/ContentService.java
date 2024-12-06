@@ -16,11 +16,12 @@ import me.universi.capacity.dto.UpdateContentDTO;
 import me.universi.capacity.entidades.Category;
 import me.universi.capacity.entidades.Content;
 import me.universi.capacity.entidades.ContentStatus;
-import me.universi.capacity.entidades.Folder;
+import me.universi.capacity.entidades.FolderContents;
 import me.universi.capacity.enums.ContentStatusType;
 import me.universi.capacity.exceptions.CapacityException;
 import me.universi.capacity.repository.ContentRepository;
 import me.universi.capacity.repository.ContentStatusRepository;
+import me.universi.capacity.repository.FolderContentsRepository;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
 import me.universi.user.services.UserService;
@@ -33,15 +34,17 @@ public class ContentService {
     private final ContentStatusRepository contentStatusRepository;
     private final ProfileService profileService;
     private final UserService userService;
+    private final FolderContentsRepository folderContentsRepository;
 
 
-    public ContentService(CategoryService categoryService, ContentRepository contentRepository, FolderService folderService, ContentStatusRepository contentStatusRepository, ProfileService profileService, UserService userService) {
+    public ContentService(CategoryService categoryService, ContentRepository contentRepository, FolderService folderService, ContentStatusRepository contentStatusRepository, ProfileService profileService, UserService userService, FolderContentsRepository folderContentsRepository) {
         this.categoryService = categoryService;
         this.contentRepository = contentRepository;
         this.folderService = folderService;
         this.contentStatusRepository = contentStatusRepository;
         this.profileService = profileService;
         this.userService = userService;
+        this.folderContentsRepository = folderContentsRepository;
     }
 
     public static ContentService getInstance() {
@@ -69,9 +72,9 @@ public class ContentService {
     }
 
     public List<Content> findByFolder(UUID folderId) throws CapacityException {
-        Folder folder = folderService.findById(folderId);
-
-        return contentRepository.findContentsInFolderByOrderPosition(folder.getId());
+        return folderContentsRepository.findByFolderIdOrderByOrderNumAsc( folderId ).stream()
+            .map( fc -> fc.getContent() )
+            .toList();
     }
 
     private Content saveOrUpdate(Content content) {
@@ -91,8 +94,24 @@ public class ContentService {
         if ( createContentDTO.categoriesIds() != null )
             content.setCategories( createContentDTO.categoriesIds().stream().map( categoryService::findOrThrow ).toList() );
 
-        if ( createContentDTO.foldersIds() != null )
-            content.setFolders( createContentDTO.foldersIds().stream().map( folderService::findOrThrow ).toList() );
+        if ( createContentDTO.folders() != null ) {
+            var folders = createContentDTO.folders().stream().map( folderService::findByIdOrReferenceOrThrow ).toList();
+            folderService.checkPermissions( folders , true );
+
+            var folderContents = new ArrayList<FolderContents>( folders.size() );
+            var nextIndex = createContentDTO.folders().size();
+
+            for ( var f : folders ) {
+                var fc = new FolderContents();
+                fc.setFolder( f );
+                fc.setContent( content );
+                fc.setOrderNum( nextIndex++ );
+
+                folderContents.add( fc );
+            }
+
+            content.setFolderContents( folderContents );
+        }
 
         return saveOrUpdate( content );
     }
@@ -121,9 +140,6 @@ public class ContentService {
 
         if ( updateContentDTO.categoriesIds() != null )
             content.setCategories( updateContentDTO.categoriesIds().stream().map( categoryService::findOrThrow ).toList() );
-
-        if ( updateContentDTO.foldersIds() != null )
-            content.setFolders( updateContentDTO.foldersIds().stream().map( folderService::findOrThrow ).toList() );
 
         return saveOrUpdate( content );
     }
@@ -160,7 +176,10 @@ public class ContentService {
             contentStatus.setUpdatedAt(new java.util.Date());
 
             contentStatus = contentStatusRepository.save(contentStatus);
-            folderService.grantCompetenceBadge(contentStatus.getContent().getFolders(), contentStatus.getProfile());
+            folderService.grantCompetenceBadge(
+                contentStatus.getContent().getFolderContents().stream().map( fc -> fc.getFolder() ).toList(),
+                contentStatus.getProfile()
+            );
         }
 
         return contentStatus;

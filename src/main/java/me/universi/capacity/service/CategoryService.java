@@ -1,5 +1,6 @@
 package me.universi.capacity.service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -37,6 +38,14 @@ public class CategoryService {
 
     public Optional<Category> find( UUID id ) {
         return categoryRepository.findById( id );
+    }
+
+    public List<Optional<Category>> find( Collection<UUID> id ) {
+        return id.stream().map( this::find ).toList();
+    }
+
+    public List<Category> findOrThrow( Collection<UUID> id ) {
+        return id.stream().map( this::findOrThrow ).toList();
     }
 
     public Category findOrThrow( UUID id ) throws EntityNotFoundException {

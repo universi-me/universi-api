@@ -1,71 +1,89 @@
 package me.universi.capacity.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import jakarta.annotation.Nullable;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.validation.constraints.NotNull;
 import me.universi.Sys;
+import me.universi.capacity.dto.ChangeContentPositionDTO;
+import me.universi.capacity.dto.ChangeFolderAssignmentsDTO;
+import me.universi.capacity.dto.ChangeFolderContentsDTO;
+import me.universi.capacity.dto.CreateFolderDTO;
+import me.universi.capacity.dto.DuplicateFolderDTO;
+import me.universi.capacity.dto.MoveFolderDTO;
+import me.universi.capacity.dto.UpdateFolderDTO;
+import me.universi.capacity.dto.WatchProfileProgressDTO;
 import me.universi.capacity.entidades.Category;
-import me.universi.capacity.entidades.Content;
 import me.universi.capacity.entidades.ContentStatus;
 import me.universi.capacity.entidades.Folder;
+import me.universi.capacity.entidades.FolderContents;
 import me.universi.capacity.entidades.FolderFavorite;
 import me.universi.capacity.entidades.FolderProfile;
 import me.universi.capacity.enums.ContentStatusType;
 import me.universi.capacity.exceptions.CapacityException;
-import me.universi.capacity.repository.ContentRepository;
 import me.universi.capacity.repository.ContentStatusRepository;
+import me.universi.capacity.repository.FolderContentsRepository;
 import me.universi.capacity.repository.FolderFavoriteRepository;
 import me.universi.capacity.repository.FolderProfileRepository;
 import me.universi.capacity.repository.FolderRepository;
+import me.universi.competence.entities.CompetenceType;
 import me.universi.competence.services.CompetenceService;
 import me.universi.competence.services.CompetenceTypeService;
 import me.universi.group.entities.Group;
-import me.universi.group.entities.ProfileGroup;
-import me.universi.group.exceptions.GroupException;
 import me.universi.group.services.GroupService;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
 import me.universi.roles.enums.FeaturesTypes;
 import me.universi.roles.enums.Permission;
 import me.universi.roles.services.RolesService;
-import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import me.universi.util.CastingUtil;
 import me.universi.util.RandomUtil;
 
 @Service
 public class FolderService {
+    @PersistenceContext
+    private EntityManager entityManager;
+
     private final GroupService groupService;
     private final ProfileService profileService;
     private final CategoryService categoryService;
     private final FolderRepository folderRepository;
     private final FolderProfileRepository folderProfileRepository;
-    private final ContentRepository contentRepository;
     private final FolderFavoriteRepository folderFavoriteRepository;
     private final ContentStatusRepository contentStatusRepository;
     private final CompetenceTypeService competenceTypeService;
     private final CompetenceService competenceService;
+    private final UserService userService;
+    private final RolesService rolesService;
+    private final FolderContentsRepository folderContentsRepository;
 
-    public FolderService(GroupService groupService, ProfileService profileService, CategoryService categoryService, FolderRepository folderRepository, FolderProfileRepository folderProfileRepository, ContentRepository contentRepository, FolderFavoriteRepository folderFavoriteRepository, ContentStatusRepository contentStatusRepository, CompetenceTypeService competenceTypeService, CompetenceService competenceService) {
+    public FolderService(GroupService groupService, ProfileService profileService, CategoryService categoryService, FolderRepository folderRepository, FolderProfileRepository folderProfileRepository, FolderFavoriteRepository folderFavoriteRepository, ContentStatusRepository contentStatusRepository, CompetenceTypeService competenceTypeService, CompetenceService competenceService, UserService userService, RolesService rolesService, FolderContentsRepository folderContentsRepository) {
         this.groupService = groupService;
         this.profileService = profileService;
         this.categoryService = categoryService;
         this.folderRepository = folderRepository;
         this.folderProfileRepository = folderProfileRepository;
-        this.contentRepository = contentRepository;
         this.folderFavoriteRepository = folderFavoriteRepository;
         this.contentStatusRepository = contentStatusRepository;
         this.competenceTypeService = competenceTypeService;
         this.competenceService = competenceService;
+        this.userService = userService;
+        this.rolesService = rolesService;
+        this.folderContentsRepository = folderContentsRepository;
     }
 
     public static FolderService getInstance() {
@@ -76,64 +94,59 @@ public class FolderService {
         return folderRepository.findAll();
     }
 
-    public void checkPermissions(Folder folder, boolean forWrite) throws CapacityException {
-        if(folder == null) {
-            /* Folder doesn't exist */
-            throw new CapacityException("Pasta não encontrada.");
-        }
+    public boolean hasPermissions( Folder folder, boolean forWrite ) {
+        final var fetchedFolder = findOrThrow( folder.getId() );
 
-        if (UserService.getInstance().isSessionOfUser(folder.getAuthor().getUser())) {
-            /* Folder author always have access */
-            return;
-        }
-
-        User userSession = UserService.getInstance().getUserInSession();
-
-        if (UserService.getInstance().isUserAdmin(userSession)) {
-            /* Admins always have access */
-            return;
-        }
-
-        if(forWrite) {
-            /* Only admin and author have write access */
-            throw new CapacityException("Você não tem permissão para alterar essa pasta.");
-        }
-
-        if (folder.isPublicFolder()) {
-            /* Everyone has reading access to public folder */
-            return;
-        }
-
-        Collection<ProfileGroup> userGroups = userSession.getProfile().getGroups();
-        Collection<Group> folderGroups = folder.getGrantedAccessGroups();
-
-        for(ProfileGroup userGroupNow : userGroups) {
-            for(Group folderGroupNow : folderGroups) {
-                if(userGroupNow.group != null && Objects.equals(folderGroupNow.getId(), userGroupNow.group.getId())) {
-                    /* User is in a group with access to the folder */
-                    return;
-                }
-            }
-        }
-
-        throw new CapacityException("Você não tem permissão para ver essa pasta.");
-    }
-
-    public boolean hasPermissions(Folder folder, boolean forWrite) {
-        try {
-            checkPermissions(folder, forWrite);
+        if ( profileService.isSessionOfProfile( fetchedFolder.getAuthor() )
+            || userService.isUserAdminSession()
+        ) {
+            /* Folder author and admins always have access */
             return true;
-        } catch (Exception e) {
+        }
+
+        if ( forWrite ) {
+            /* Only admin and author have write access */
             return false;
         }
+
+        if ( fetchedFolder.isPublicFolder() ) {
+            /* Everyone has reading access to public folder */
+            return true;
+        }
+
+        return profileService.getProfileInSession().getGroups().stream().anyMatch( profileGroup ->
+            fetchedFolder.getGrantedAccessGroups().stream().anyMatch(
+                // User is in a group with access to the folder
+                folderGroup -> folderGroup.getId().equals( profileGroup.getGroup().getId() )
+            )
+        );
     }
 
-    public Folder findById(UUID folderId) throws CapacityException {
-        Folder folder = folderRepository.findFirstById(folderId);
-        if(folder == null) {
-            throw new CapacityException("Pasta não encontrada.");
-        }
-        return folder;
+    public List<Boolean> hasPermissions( @NotNull List<Folder> folders, boolean forWrite ) {
+        return folders.stream().map( f -> hasPermissions( f, forWrite ) ).toList();
+    }
+
+    public void checkPermissions( Folder folder, boolean forWrite ) {
+        if ( !hasPermissions( folder, forWrite ) )
+            throw new AccessDeniedException(
+                forWrite
+                    ? "Você não tem permissão para alterar este conteúdo"
+                    : "Você não tem permissão para ver este conteúdo"
+            );
+    }
+
+    public void checkPermissions( @NotNull List<Folder> folders, boolean forWrite ) throws AccessDeniedException {
+            List<String> deniedAccessFolders = new ArrayList<>();
+            for ( var folder : folders ) {
+                if ( !hasPermissions( folder , true ) )
+                    deniedAccessFolders.add( "'" + folder.getId() + "'" );
+            }
+
+            if ( !deniedAccessFolders.isEmpty() )
+                throw new AccessDeniedException(
+                    "Você não tem permissão para alterar o(s) seguinte(s) conteúdo(s): "
+                    + String.join( "," , deniedAccessFolders )
+                );
     }
 
     public Optional<Folder> find( UUID id ) {
@@ -144,36 +157,20 @@ public class FolderService {
         return find( id ).orElseThrow( () -> new EntityNotFoundException("Conteúdo com ID '" + id + "' não encontrado") );
     }
 
-    public Folder findByReference(String folderReference) throws CapacityException {
-        Folder folder = folderRepository.findFirstByReference(folderReference);
-        if(folder == null) {
-            throw new CapacityException("Pasta não encontrada.");
-        }
-        return folder;
+    public Optional<Folder> findByReference(String reference) {
+        return folderRepository.findFirstByReference(reference);
     }
 
-    public Folder findByIdOrReference(Object folderId, Object folderReference) throws CapacityException {
-        String id = folderId == null ? null : String.valueOf(folderId);
-        String reference = folderReference == null ? null : String.valueOf(folderReference);
-
-        return findByIdOrReference(id, reference);
+    public Folder findByReferenceOrThrow( String reference ) throws EntityNotFoundException {
+        return findByReference( reference ).orElseThrow( () -> new EntityNotFoundException("Conteúdo com referência '" + reference + "' não encontrado") );
     }
 
-    public Folder findByIdOrReference(String folderId, String folderReference) throws CapacityException {
-        if (folderId == null && folderReference == null)
-            throw new CapacityException("Pasta não encontrada");
-
-        return folderId == null
-            ? findByReference(folderReference)
-            : findByIdOrReference(UUID.fromString(folderId), folderReference);
+    public Optional<Folder> findByIdOrReference( String idOrReference ) {
+        return folderRepository.findFirstByIdOrReference( CastingUtil.getUUID(idOrReference).orElse(null), idOrReference );
     }
 
-    public Folder findByIdOrReference(UUID folderId, String folderReference) throws CapacityException {
-        Folder folder = folderRepository.findFirstByIdOrReference(folderId, folderReference);
-        if(folder == null) {
-            throw new CapacityException("Pasta não encontrada.");
-        }
-        return folder;
+    public Folder findByIdOrReferenceOrThrow( String idOrReference ) throws EntityNotFoundException {
+        return findByIdOrReference( idOrReference ).orElseThrow( () -> new EntityNotFoundException( "Conteúdo com ID ou referência '" + idOrReference + "' não encontrado" ) );
     }
 
     public List<Folder> findByCategory(UUID categoryId) throws CapacityException {
@@ -185,327 +182,395 @@ public class FolderService {
         return findByCategory(UUID.fromString(categoryId));
     }
 
-    public boolean saveOrUpdate(Folder folder) throws CapacityException {
-
-        Folder updatedFolder = folderRepository.save(folder);
-
-        if (folderRepository.findFirstById(updatedFolder.getId()) != null){
-            return true;
-        }
-
-        return false;
+    private Folder saveOrUpdate( Folder folder ) {
+        return folderRepository.saveAndFlush( folder );
     }
 
-    public boolean delete(UUID id){
-        Folder folder = findById(id);
-        folder.setDeleted(true);
-        saveOrUpdate(folder);
-        return true;
-    }
+    public Folder create( CreateFolderDTO createFolderDTO ) {
+        var folder = new Folder();
+        folder.setName( createFolderDTO.name() );
+        folder.setReference( generateAvailableReference() );
+        folder.setAuthor( profileService.getProfileInSession() );
+        folder.setImage( createFolderDTO.image() );
+        folder.setDescription( createFolderDTO.description() );
+        folder.setRating( createFolderDTO.rating() );
+        folder.setPublicFolder( createFolderDTO.publicFolder() );
+        folder.setCategories( categoryService.findOrThrow(
+            createFolderDTO.categoriesIds() == null ? Arrays.asList() : createFolderDTO.categoriesIds()
+        ) );
 
-    public void addOrRemoveContent(Object folderId, Object contentId, boolean isAdding) throws CapacityException, IllegalArgumentException {
-        if(folderId == null) {
-            throw new CapacityException("Parametro folderId é nulo.");
-        }
-        if(contentId == null) {
-            throw new CapacityException("Parametro contentId é nulo.");
-        }
+        if ( createFolderDTO.grantedAccessGroupsIds() != null ) {
+            List<String> deniedAccessGroups = new ArrayList<>();
+            List<Group> groupsFetched = new ArrayList<>();
 
-        Object contentIds = contentId;
-        if(contentIds instanceof String) {
-            contentIds = new ArrayList<String>() {{ add((String) contentId); }};
-        }
-        if(contentIds instanceof ArrayList) {
-            for (String contentIdNow : (ArrayList<String>) contentIds) {
-                if (contentIdNow == null || contentIdNow.isEmpty()) {
-                    continue;
-                }
-                Content content = ContentService.getInstance().findOrThrow(CastingUtil.getUUID(contentIdNow).orElseThrow(() -> new IllegalArgumentException("ID inválido")));
-
-                addOrRemoveFromContent(content, folderId, isAdding);
-            }
-        }
-    }
-
-    public void addOrRemoveCategoriesFromContentOrFolder(Object contentOrFolder, Object categoriesId, boolean isAdding, boolean removeAllBefore) throws CapacityException {
-        Object categoriesIds = categoriesId;
-        if(categoriesId instanceof String) {
-            categoriesIds = new ArrayList<String>() {{ add((String) categoriesId); }};
-        }
-        if(categoriesIds instanceof ArrayList) {
-            for(String categoryId : (ArrayList<String>) categoriesIds) {
-                if(categoryId==null || categoryId.isEmpty()) {
-                    continue;
-                }
-
-                Category category = categoryService.findOrThrow(
-                    CastingUtil.getUUID( categoryId )
-                        .orElseThrow( () -> new IllegalArgumentException( "ID '" + categoryId +  "' inválido" ) )
+            createFolderDTO.grantedAccessGroupsIds().forEach( g -> {
+                // TODO: GroupService.findByIdOrPathOrElseThrow
+                var group = groupService.getGroupByGroupIdOrGroupPath(
+                    CastingUtil.getUUID( g ).orElse(null),
+                    g
                 );
 
-                if(contentOrFolder instanceof Content) {
-                    if(((Content)contentOrFolder).getCategories() == null) {
-                        ((Content)contentOrFolder).setCategories(new ArrayList<>());
-                    }
-                    if(removeAllBefore) {
-                        ((Content)contentOrFolder).getCategories().clear();
-                    }
-                    if (isAdding) {
-                        if (!((Content)contentOrFolder).getCategories().contains(category)) {
-                            ((Content)contentOrFolder).getCategories().add(category);
-                        }
-                    } else {
-                        ((Content)contentOrFolder).getCategories().remove(category);
-                    }
-                } else if(contentOrFolder instanceof Folder) {
-                    if(((Folder)contentOrFolder).getCategories() == null) {
-                        ((Folder)contentOrFolder).setCategories(new ArrayList<>());
-                    }
-                    if(removeAllBefore) {
-                        ((Folder)contentOrFolder).getCategories().clear();
-                    }
-                    if (isAdding) {
-                        if (!((Folder)contentOrFolder).getCategories().contains(category)) {
-                            ((Folder)contentOrFolder).getCategories().add(category);
-                        }
-                    } else {
-                        ((Folder)contentOrFolder).getCategories().remove(category);
-                    }
-                }
-            }
+                if ( !rolesService.hasPermission( group , FeaturesTypes.CONTENT, Permission.READ_WRITE ) )
+                    deniedAccessGroups.add( "'" + g + "'" );
+
+                groupsFetched.add( group );
+            } );
+
+            if ( !deniedAccessGroups.isEmpty() )
+                throw new AccessDeniedException(
+                    "Você não tem permissão para criar este conteúdo no(s) seguinte(s) grupo(s): "
+                    + String.join( ", " , deniedAccessGroups )
+                );
+
+            else
+                folder.setGrantedAccessGroups( groupsFetched );
         }
-    }
 
-    public void addOrRemoveFromContent(Content content, Object foldersId, boolean isAdding) throws CapacityException {
-        Object foldersIds = foldersId;
-        if(foldersIds instanceof String) {
-            foldersIds = new ArrayList<String>() {{ add((String) foldersId); }};
-        }
-        if(foldersIds instanceof ArrayList) {
-            for(String folderId : (ArrayList<String>)foldersIds) {
-                if(folderId==null || folderId.isEmpty()) {
-                    continue;
-                }
-                Folder folder = findOrThrow(CastingUtil.getUUID( folderId ).orElseThrow( () -> new IllegalArgumentException( "ID inválido" ) ));
-
-                checkPermissions(folder, true);
-
-                if(folder.getContents() == null) {
-                    folder.setContents(new ArrayList<>());
-                }
-                if(isAdding) {
-                    if(!folder.getContents().contains(content)) {
-                        folder.getContents().add(content);
-                    }
-                } else {
-                    folder.getContents().remove(content);
-                }
-            }
-        }
-    }
-
-    public void addOrRemoveGrantedAccessGroup(Folder folder, Object groupsId, boolean isAdding) throws CapacityException, GroupException {
-        Object groupById = groupsId;
-        if(groupById instanceof String) {
-            groupById = new ArrayList<String>() {{ add((String) groupsId); }};
-        }
-        if(groupById instanceof ArrayList) {
-            for(String addGrantedAccessGroupId : (ArrayList<String>)groupById) {
-                if(addGrantedAccessGroupId==null || addGrantedAccessGroupId.isEmpty()) {
-                    continue;
-                }
-                Group group = groupService.getGroupByGroupIdOrGroupPath(addGrantedAccessGroupId, null);
-                if(group == null) {
-                    continue;
-                }
-                boolean hasAdded = false;
-                if(folder.getGrantedAccessGroups() == null) {
-                    folder.setGrantedAccessGroups(new ArrayList<>());
-                }
-                if(isAdding) {
-                    if(!folder.getGrantedAccessGroups().contains(group)) {
-                        folder.getGrantedAccessGroups().add(group);
-                        hasAdded = true;
-                    }
-                } else {
-                    folder.getGrantedAccessGroups().remove(group);
-                }
-                folderRepository.save(folder);
-                if(hasAdded) {
-                    groupService.didImportContentToGroup(group, folder);
-                }
-            }
-        }
-    }
-
-    public void setPositionOfContent(UUID folderId, UUID contentId, int order) throws CapacityException {
-        folderRepository.setPositionOfContentInFolder(folderId, contentId, order);
-    }
-
-    public void setPositionOfContent(Object folderId, Object contentId, int order) throws CapacityException {
-        folderRepository.setPositionOfContentInFolder(UUID.fromString((String)folderId), UUID.fromString((String)contentId), order);
-    }
-
-    public int getPositionOfContent(UUID folderId, UUID contentId) throws CapacityException {
-        return folderRepository.getPositionOfContentInFolder(folderId, contentId);
-    }
-
-    public int getPositionOfContent(Object folderId, Object contentId) throws CapacityException {
-        return folderRepository.getPositionOfContentInFolder(UUID.fromString((String)folderId), UUID.fromString((String)contentId));
-    }
-
-    public void setNewPositionOfContent(Object folderId, Object contentId, int toIndex) throws CapacityException {
-        Folder folder = findOrThrow(CastingUtil.getUUID(folderId).orElseThrow(() -> new IllegalArgumentException("ID inválido")));
-
-        checkPermissions(folder, true);
-
-        Content content = ContentService.getInstance().findOrThrow(CastingUtil.getUUID(contentId).orElseThrow(() -> new IllegalArgumentException("ID inválido")));
-
-        // mount ordered list
-        List<Content> contentsOrdered = new ArrayList<>();
-        for(Content contentNow : contentRepository.findContentsInFolderByOrderPosition(folder.getId())) {
-            if(!Objects.equals(contentNow.getId(), content.getId())) {
-                contentsOrdered.add(contentNow);
-            }
-        }
-        // set in toIndex to move
-        contentsOrdered.add(toIndex, content);
-        // update order in db
-        for(Content contentNow : contentsOrdered) {
-            int newOrder = contentsOrdered.indexOf(contentNow);
-            if(getPositionOfContent(folder.getId(), contentNow.getId()) != newOrder) {
-                setPositionOfContent(folder.getId(), contentNow.getId(), newOrder);
-            }
-        }
-    }
-
-    public List<Folder> getAssignedTo(UUID profileId) {
-        List<FolderProfile> assignedFolders = folderProfileRepository.findByAssignedToId(profileId);
-
-        return assignedFolders.stream()
-                .sorted(Comparator.comparing(FolderProfile::getCreated).reversed())
-                .map(FolderProfile::getFolder)
-                .filter(Objects::nonNull)
-                .toList();
-    }
-
-    // find profiles assigned to a folder
-    public List<Profile> findAssignedProfiles(UUID folderId, UUID assignedBy) {
-        List<FolderProfile> assignedProfiles = folderProfileRepository.findByFolderIdAndAssignedById(
-            folderId, assignedBy
+        folder.setGrantsBadgeToCompetences( competenceTypeService.findOrThrow(
+            createFolderDTO.competenceTypeBadgeIds() == null ? Arrays.asList() : createFolderDTO.competenceTypeBadgeIds() )
         );
 
-        return assignedProfiles.stream()
-                .sorted(Comparator.comparing(FolderProfile::getCreated).reversed())
-                .map(FolderProfile::getAssignedTo)
-                .filter(Objects::nonNull)
-                .toList();
+        final var savedFolder = saveOrUpdate( folder );
+        savedFolder.getGrantedAccessGroups().forEach( g -> groupService.didAddNewContentToGroup( g , savedFolder ) );
+
+        return savedFolder;
     }
 
-    // assign one folder to a profile
-    public void assignToProfile(UUID profileId, Folder folder) {
-        Profile profile = profileService.findFirstById(profileId);
-        if(profile == null) {
-            throw new CapacityException("Perfil não encontrado.");
-        }
-        if(folder == null) {
-            throw new CapacityException("Pasta não encontrada.");
+    public Folder edit( String idOrReference, UpdateFolderDTO updateFolderDTO ) {
+        var folder = findByIdOrReferenceOrThrow( idOrReference );
+        checkPermissions( folder, true );
+
+        if ( updateFolderDTO.name() != null && !updateFolderDTO.name().isBlank() ) {
+            folder.setName( updateFolderDTO.name() );
         }
 
-        var currentProfile = profileService.getProfileInSession();
-
-        var existingFolderProfile = folderProfileRepository.findByFolderIdAndAssignedToIdAndAssignedById(
-            folder.getId(), profileId, currentProfile.getId()
-        );
-
-        if( existingFolderProfile.isPresent() ) {
-            throw new CapacityException("O conteúdo já foi atribuído ao perfil.");
+        if ( updateFolderDTO.image() != null && !updateFolderDTO.image().isBlank() ) {
+            folder.setImage( updateFolderDTO.image() );
         }
 
-        FolderProfile folderProfile = new FolderProfile();
-        folderProfile.setAssignedBy(currentProfile);
-        folderProfile.setFolder(folder);
-        folderProfile.setAssignedTo(profile);
-        folderProfileRepository.save(folderProfile);
-
-        groupService.alertUserForContentAssigned(currentProfile, profile, folder);
-    }
-
-    public void assignToMultipleProfiles(Collection<UUID> profileIds, Folder folder) {
-        for ( var profileId : profileIds ) {
-            assignToProfile(profileId, folder);
-        }
-    }
-
-    public void unassignFromProfile(UUID profileId, Folder folder) {
-        var folderProfile = folderProfileRepository.findByFolderIdAndAssignedToIdAndAssignedById(
-            folder.getId(), profileId, profileService.getProfileInSession().getId()
-        );
-
-        if ( folderProfile.isPresent() )
-            folderProfileRepository.delete( folderProfile.get() );
-    }
-
-    public void unassignFromMultipleProfiles(Collection<UUID> profilesIds, Folder folder) {
-        for (UUID profileId : profilesIds) {
-            unassignFromProfile(profileId, folder);
-        }
-    }
-
-    public List<FolderProfile> getAssignedBy(Object profileId, Object username) {
-        Profile profile = profileService.getProfileByUserIdOrUsername(profileId, username);
-        return getAssignedBy(profile);
-    }
-
-    public List<FolderProfile> getAssignedBy(Profile profile) {
-        UserService userService = UserService.getInstance();
-
-        if (!userService.isUserAdmin(userService.getUserInSession()) && !userService.isSessionOfUser(profile.getUser())) {
-            throw new CapacityException("Você não pode acessar os conteúdos atribuídos por outro usuário.");
+        if ( updateFolderDTO.description() != null && !updateFolderDTO.description().isBlank() ) {
+            folder.setDescription( updateFolderDTO.description() );
         }
 
-        return folderProfileRepository.findByAssignedById(profile.getId());
+        if ( updateFolderDTO.rating() != null ) {
+            folder.setRating( updateFolderDTO.rating() );
+        }
+
+        if ( updateFolderDTO.publicFolder() != null ) {
+            folder.setPublicFolder( updateFolderDTO.publicFolder() );
+        }
+
+        if ( updateFolderDTO.categoriesIds() != null ) {
+            folder.setCategories( categoryService.findOrThrow( updateFolderDTO.categoriesIds() ) );
+        }
+
+        if ( updateFolderDTO.grantedAccessGroups() != null ) {
+            var groups = new ArrayList<Group>( updateFolderDTO.grantedAccessGroups().size() );
+            updateFolderDTO.grantedAccessGroups().forEach( g -> groups.add( groupService.findByIdOrPathOrThrow( g ) ) );
+
+            folder.setGrantedAccessGroups( groups );
+        }
+
+        if ( updateFolderDTO.competenceTypeBadgeIds() != null ) {
+            folder.setGrantsBadgeToCompetences( competenceTypeService.findOrThrow( updateFolderDTO.competenceTypeBadgeIds() ) );
+        }
+
+        return saveOrUpdate( folder );
     }
 
-    public void favorite(Folder folder) throws CapacityException {
-        favorite(folder.getId());
+    public void delete( String idOrReference ) {
+        Folder folder = findByIdOrReferenceOrThrow( idOrReference );
+        checkPermissions( folder, true );
+
+        folderRepository.delete( folder );
     }
 
-    public void favorite(UUID folderId) throws CapacityException {
-        Folder folder = findById(folderId);
+    public void changeContents( String idOrReference, ChangeFolderContentsDTO changeFolderContentsDTO ) {
+        var folder = findByIdOrReferenceOrThrow( idOrReference );
+        checkPermissions( folder, true );
 
-        Profile currentUser = UserService.getInstance().getUserInSession().getProfile();
-        FolderFavorite folderFavorite = folderFavoriteRepository
-            .findFirstByFolderIdAndProfileId(folder.getId(), currentUser.getId());
+        List<FolderContents> newContentList = new ArrayList<>( folder.getFolderContents() );
 
-        if (folderFavorite != null)
+        if ( changeFolderContentsDTO.addContentsIds() != null ) {
+            var nextIndex = folder.getFolderContents().size();
+
+            for ( var cId : changeFolderContentsDTO.addContentsIds() ) {
+                if ( folder.getFolderContents().stream().anyMatch( c -> c.getId().equals( cId ) ) )
+                    // Content already in folder
+                    continue;
+
+                var fc = new FolderContents();
+                fc.setFolder( folder );
+                fc.setContent( ContentService.getInstance().findOrThrow( cId ) );
+                fc.setOrderNum( nextIndex++ );
+
+                newContentList.add( fc );
+            }
+        }
+
+        if ( changeFolderContentsDTO.removeContentsIds() != null )
+            newContentList = newContentList.stream()
+                .filter( fc -> changeFolderContentsDTO.removeContentsIds().stream()
+                    .noneMatch( cId -> fc.getContent().getId().equals( cId ) )
+                ).toList();
+
+        newContentList = folderContentsRepository.saveAllAndFlush( newContentList );
+    }
+
+    public void changeContentPosition( String idOrReference, UUID contentId, ChangeContentPositionDTO changeContentPositionDTO ) throws IllegalArgumentException {
+        var folder = findByIdOrReferenceOrThrow( idOrReference );
+        checkPermissions( folder, true );
+
+        if ( !folderContainsContent( folder.getId(), contentId ) )
+            throw new IllegalArgumentException( "O conteúdo não possui o material informado" );
+
+        var size = folder.getFolderContents().size();
+        if ( changeContentPositionDTO.moveTo() > size )
+            throw new IllegalArgumentException(
+                "O conteúdo possui apenas '" + size + "' materiais. Informada posição '"
+                + changeContentPositionDTO.moveTo() + "'"
+            );
+
+        var folderContents = folderContentsRepository.findByFolderId( folder.getId() );
+        var originalPosition = getPositionOfContent( folder.getId(), contentId );
+
+        if ( changeContentPositionDTO.moveTo().equals( originalPosition ) )
             return;
 
-        if (!hasPermissions(folder, false))
-            throw new CapacityException("Essa pasta não existe ou você não pode favoritá-la");
+        var movingForward = originalPosition < changeContentPositionDTO.moveTo();
+
+        for ( var fc : folderContents ) {
+            if ( fc.getContent().getId().equals( contentId ) )
+                fc.setOrderNum( changeContentPositionDTO.moveTo() );
+
+            else if ( movingForward
+                && fc.getOrderNum() > originalPosition
+                && fc.getOrderNum() <= changeContentPositionDTO.moveTo()
+            ) {
+                fc.setOrderNum( fc.getOrderNum() - 1 );
+            }
+
+            else if ( !movingForward
+                && fc.getOrderNum() >= changeContentPositionDTO.moveTo()
+                && fc.getOrderNum() < originalPosition
+            ) {
+                fc.setOrderNum( fc.getOrderNum() + 1 );
+            }
+        }
+
+        folderContentsRepository.saveAllAndFlush( folderContents );
+    }
+
+    public boolean folderContainsContent( UUID folderId, UUID contentId ) {
+        return folderContentsRepository.findByFolderIdAndContentId( folderId, contentId ).isPresent();
+    }
+
+    public int getPositionOfContent( UUID folderId, UUID contentId ) throws CapacityException {
+        return folderContentsRepository.findByFolderIdAndContentId( folderId, contentId )
+            .orElseThrow( () -> new EntityNotFoundException( "O conteúdo não possui o material informado" ) )
+            .getOrderNum();
+    }
+
+    public void changeAssignments( String idOrReference, ChangeFolderAssignmentsDTO changeFolderAssignmentsDTO ) {
+        var folder = findByIdOrReferenceOrThrow( idOrReference );
+        checkPermissions( folder, true );
+
+        var profileInSession = profileService.getProfileInSession();
+
+        folderProfileRepository.saveAllAndFlush(
+            changeFolderAssignmentsDTO.addProfileIds().stream()
+                .filter( p -> folder.getFolderContents().stream().noneMatch( p2 -> p2.getId().equals( p ) ) )
+                .map( id -> {
+                    var folderProfile = new FolderProfile();
+                    folderProfile.setAssignedBy( profileInSession );
+                    folderProfile.setAssignedTo( profileService.findOrThrow( id ) );
+                    folderProfile.setFolder( folder );
+
+                    return folderProfile;
+                } )
+                .toList()
+        );
+
+        folderProfileRepository.deleteAllById(
+            changeFolderAssignmentsDTO.removeProfileIds().stream().map(
+                id -> folderProfileRepository.findByFolderIdAndAssignedToIdAndAssignedById( folder.getId() , id, profileInSession.getId() )
+            ).filter( Optional::isPresent )
+            .map( fp -> fp.get().id )
+            .toList()
+        );
+    }
+
+    public List<FolderProfile> getAssignments( @Nullable String idOrReference, @Nullable String assignedBy, @Nullable String assignedTo ) throws AccessDeniedException {
+        Profile assignedByProfile = null;
+        Profile assignedToProfile = null;
+
+        if ( !userService.isUserAdminSession() ) {
+            // Validate search for non-admin user
+
+            if ( assignedTo == null && assignedBy == null )
+                // Must specify assignedTo and assignedBy
+                throw new IllegalArgumentException( "Os parâmetros 'assignedBy' e 'assignedTo' não foram informados" );
+
+            if ( assignedTo != null )
+                assignedToProfile = profileService.findByIdOrUsernameOrThrow( assignedTo );
+
+            if ( assignedBy != null )
+                assignedByProfile = profileService.findByIdOrUsernameOrThrow( assignedBy );
+
+            // Checking for assigned by anyone -> Can only check assigned to themselves
+            if ( assignedByProfile == null
+                && assignedToProfile != null
+                && !profileService.isSessionOfProfile( assignedToProfile )
+            )
+                throw new AccessDeniedException( "Você não pode ver atribuições para outros usuários" );
+
+            // Checking for assigned to anyone -> Can only check assigned by themselves
+            else if ( assignedToProfile == null
+                && assignedByProfile != null
+                && !profileService.isSessionOfProfile( assignedByProfile )
+            )
+                throw new AccessDeniedException( "Você não pode ver atribuições de outros usuários" );
+
+            // Checking assigned to and by someone -> Can only check if assigned by or to themselves
+            else if ( assignedToProfile != null
+                && assignedByProfile != null
+                && !profileService.isSessionOfProfile( assignedToProfile )
+                && !profileService.isSessionOfProfile( assignedByProfile )
+            )
+                throw new AccessDeniedException( "Você não pode ver atribuições não relacionadas a você" );
+        }
+
+        var folder = idOrReference != null
+            ? findByIdOrReferenceOrThrow( idOrReference )
+            : null;
+
+        var criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<FolderProfile> query = criteriaBuilder.createQuery( FolderProfile.class );
+        var root = query.from( FolderProfile.class );
+        query.select( root );
+
+        if ( folder != null )
+            query.where( criteriaBuilder.equal( root.get( "folder" ).get( "id" ), folder.getId() ) );
+
+        if ( assignedByProfile != null )
+            query.where( criteriaBuilder.equal( root.get( "assignedBy" ).get( "id" ), assignedByProfile.getId() ) );
+
+        if ( assignedToProfile != null )
+            query.where( criteriaBuilder.equal( root.get( "assignedTo" ).get( "id" ), assignedToProfile.getId() ) );
+
+        return entityManager
+            .createQuery( query )
+            .getResultList();
+    }
+
+    public void favorite( String idOrReference ) throws AccessDeniedException {
+        Folder folder = findByIdOrReferenceOrThrow( idOrReference );
+
+        var profileInSession = profileService.getProfileInSession();
+        var folderFavorite = folderFavoriteRepository
+            .findByFolderIdAndProfileId( folder.getId(), profileInSession.getId() )
+            .orElse( null );
+
+        if ( folderFavorite != null )
+            return;
+
+        if ( !hasPermissions(folder, false) )
+            throw new AccessDeniedException("Essa pasta não existe ou você não pode favoritá-la");
 
         folderFavorite = new FolderFavorite();
         folderFavorite.setFolder(folder);
-        folderFavorite.setProfile(currentUser);
+        folderFavorite.setProfile( profileInSession );
 
-        folderFavoriteRepository.save(folderFavorite);
+        folderFavoriteRepository.saveAndFlush( folderFavorite );
     }
 
-    public void unfavorite(Folder folder) throws CapacityException {
-        unfavorite(folder.getId());
-    }
+    public void unfavorite( String idOrReference ) {
+        var folder = findByIdOrReferenceOrThrow( idOrReference );
 
-    public void unfavorite(UUID folderId) throws CapacityException {
-        Folder folder = findById(folderId);
+        var profileInSession = profileService.getProfileInSession();
+        var folderFavorite = folderFavoriteRepository
+            .findByFolderIdAndProfileId( folder.getId(), profileInSession.getId() );
 
-        Profile currentUser = UserService.getInstance().getUserInSession().getProfile();
-        FolderFavorite folderFavorite = folderFavoriteRepository
-            .findFirstByFolderIdAndProfileId(folder.getId(), currentUser.getId());
-
-        if (folderFavorite == null)
+        if ( folderFavorite.isEmpty() )
             return;
 
-        folderFavoriteRepository.delete(folderFavorite);
+        folderFavoriteRepository.delete( folderFavorite.get() );
+    }
+
+    public List<WatchProfileProgressDTO> watch( String idOrReference, String idOrUsername ) throws AccessDeniedException {
+        var folder = findByIdOrReferenceOrThrow( idOrReference );
+        var profile = profileService.findByIdOrUsernameOrThrow( idOrUsername );
+
+        if ( !canCheckProfileProgress( profile, folder ) )
+            throw new AccessDeniedException( "Você não pode checar o progresso deste usuário para esse conteúdo" );
+
+        return folderContentsRepository.findByFolderIdOrderByOrderNumAsc( folder.getId() ).stream()
+            .map( c -> new WatchProfileProgressDTO( profile , c.getContent() ) )
+            .toList();
+    }
+
+    public Folder duplicate( String idOrReference, DuplicateFolderDTO duplicateFolderDTO ) {
+        var folder = findByIdOrReferenceOrThrow( idOrReference );
+
+        var copy = create( new CreateFolderDTO(
+            folder.getName(),
+            folder.getImage(),
+            folder.getDescription(),
+            folder.getRating(),
+            folder.isPublicFolder(),
+            new ArrayList<>( 
+                folder.getCategories().stream().map( Category::getId ).toList()
+            ),
+            duplicateFolderDTO.groups(),
+            new ArrayList<>(
+                folder.getGrantsBadgeToCompetences().stream().map( CompetenceType::getId ).toList()
+            )
+        ) );
+
+        changeContents( copy.getId().toString(), new ChangeFolderContentsDTO(
+            folder.getFolderContents().stream().map( fc -> fc.getContent().getId() ).toList(),
+            null
+        ) );
+
+        return findOrThrow( copy.getId() );
+    }
+
+    public void moveFolder( String idOrReference, MoveFolderDTO moveFolderDTO ) {
+        var folder = findByIdOrReferenceOrThrow( idOrReference );
+        var originalGroup = groupService.findByIdOrPathOrThrow( moveFolderDTO.originalGroupId() );
+        rolesService.checkPermission(
+            profileService.getProfileInSession(),
+            originalGroup,
+            FeaturesTypes.CONTENT,
+            Permission.READ_WRITE_DELETE
+        );
+
+        var newGroup = groupService.findByIdOrPathOrThrow( moveFolderDTO.newGroupId() );
+        rolesService.checkPermission(
+            profileService.getProfileInSession(),
+            newGroup,
+            FeaturesTypes.CONTENT,
+            Permission.READ_WRITE
+        );
+
+        if ( newGroup.getId().equals( originalGroup.getId() ) )
+            return;
+
+        if ( folder.getGrantedAccessGroups().stream().anyMatch( g -> g.getId().equals( newGroup.getId() ) ) ) {
+            // Group already has this folder
+            // TODO: UniversiInvalidOperationException
+            throw new IllegalStateException( "O grupo já contém o conteúdo" );
+        }
+
+        var newGrantedAccessGroups = folder.getGrantedAccessGroups().stream()
+            .filter( g -> !g.getId().equals( originalGroup.getId() ) )
+            .toList();
+        newGrantedAccessGroups.add( newGroup );
+
+        folder.setGrantedAccessGroups( newGrantedAccessGroups );
+        folder = folderRepository.saveAndFlush( folder );
+
+        groupService.didImportContentToGroup( newGroup, folder );
     }
 
     public Collection<Folder> listFavorites(UUID profileId) throws CapacityException {
@@ -519,7 +584,7 @@ public class FolderService {
     }
 
     public String generateAvailableReference() {
-        Folder folder = null;
+        Optional<Folder> folder;
         String reference = "";
 
         do {
@@ -529,13 +594,13 @@ public class FolderService {
             );
 
             folder = folderRepository.findFirstByReference(reference);
-        } while (folder != null);
+        } while ( folder.isPresent() );
 
         return reference;
     }
 
     public List<ContentStatus> getStatuses(Profile profile, Folder folder) {
-        return folder.getContents().stream()
+        return folder.getFolderContents().stream()
             .map(c -> contentStatusRepository.findFirstByProfileIdAndContentId(profile.getId(), c.getId()))
             .filter(Objects::nonNull)
             .toList();
@@ -544,92 +609,29 @@ public class FolderService {
     public boolean isComplete(@NotNull Profile profile, @NotNull Folder folder) {
         var statuses = getStatuses(profile, folder);
 
-        return !folder.getContents().isEmpty()
-            && statuses.size() == folder.getContents().size()
+        return !folder.getFolderContents().isEmpty()
+            && statuses.size() == folder.getFolderContents().size()
             && statuses.stream()
                 .allMatch(cs -> cs.getStatus() == ContentStatusType.DONE);
-    }
-
-    public boolean canCheckProfileProgress(Object profileId, Object profileUsername, Object folderId, Object folderReference) {
-        return canCheckProfileProgress(
-            ProfileService.getInstance().getProfileByUserIdOrUsername(profileId, profileUsername),
-            findByIdOrReference(folderId, folderReference)
-        );
     }
 
     public boolean canCheckProfileProgress(Profile profile, Folder folder) {
         if (profile == null)
             return false;
 
-        UserService userService = UserService.getInstance();
-
         return userService.isUserAdminSession()
             || userService.isSessionOfUser(profile.getUser())
-            || getAssignedBy(userService.getUserInSession().getProfile()) // has assigned that folder to that user
-            .stream()
-            .filter(fp -> Objects.equals(profile.getId(), fp.getAssignedTo().getId())
-                && Objects.equals(folder.getId(), fp.getFolder().getId()))
-            .count() > 0;
-    }
-
-    public void moveToGroup(Folder folder, Group originalGroup, Group newGroup) {
-        if (folder == null)
-            throw new CapacityException("O conteúdo que deveria ser movido não foi encontrado");
-
-        if (originalGroup == null)
-            throw new CapacityException("O grupo contendo o conteúdo não foi encontrado");
-
-        if (newGroup == null)
-            throw new CapacityException("O novo grupo para o conteúdo não foi encontrado");
-
-        RolesService.getInstance().checkPermission(originalGroup, FeaturesTypes.CONTENT, Permission.READ_WRITE_DELETE);
-        RolesService.getInstance().checkPermission(newGroup, FeaturesTypes.CONTENT, Permission.READ_WRITE);
-
-        addOrRemoveGrantedAccessGroup(folder, newGroup.getId().toString(), true);
-        addOrRemoveGrantedAccessGroup(folder, originalGroup.getId().toString(), false);
-    }
-
-    public void addGrantCompetenceBadge(@NotNull Folder folder, @NotNull Collection<UUID> competenceTypesIds) {
-        var competenceTypes = competenceTypesIds.stream()
-            .map(competenceTypeService::findFirstById)
-            .filter(ct -> ct != null && !folder.getGrantsBadgeToCompetences().contains(ct))
-            .toList();
-
-        folder.getGrantsBadgeToCompetences().addAll(competenceTypes);
-        saveOrUpdate(folder);
-
-        grantCompetenceBadge(folder, profileService.findAll());
-    }
-
-    public void removeGrantCompetenceBadge(@NotNull Folder folder, @NotNull Collection<UUID> competenceTypesIds) {
-        folder.getGrantsBadgeToCompetences()
-            .removeIf(ct -> competenceTypesIds.contains(ct.getId()));
-
-        saveOrUpdate(folder);
-    }
-
-    public void grantCompetenceBadge(@NotNull Collection<Folder> folder, @NotNull Collection<@NotNull Profile> profile) {
-        for (var f : folder)
-            for (var p : profile)
-                grantCompetenceBadgeToProfile(f, p);
-
-        profileService.saveAll(profile);
-    }
-
-    public void grantCompetenceBadge(@NotNull Folder folder, @NotNull Collection<@NotNull Profile> profile) {
-        for (var p : profile) grantCompetenceBadgeToProfile(folder, p);
-
-        profileService.saveAll(profile);
+            // has assigned that folder to that user
+            || !getAssignments(
+                    folder.getId().toString(),
+                    profileService.getProfileInSession().getId().toString(),
+                    profile.getId().toString()
+                ).isEmpty();
     }
 
     public void grantCompetenceBadge(@NotNull Collection<Folder> folder, @NotNull Profile profile) {
         for (var f : folder) grantCompetenceBadgeToProfile(f, profile);
 
-        profileService.save(profile);
-    }
-
-    public void grantCompetenceBadge(@NotNull Folder folder, @NotNull Profile profile) {
-        grantCompetenceBadgeToProfile(folder, profile);
         profileService.save(profile);
     }
 

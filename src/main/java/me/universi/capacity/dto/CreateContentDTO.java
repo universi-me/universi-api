@@ -36,5 +36,5 @@ public record CreateContentDTO(
     List<UUID> categoriesIds,
 
     @Nullable
-    List<UUID> foldersIds
+    List<String> folders
 ) { }

@@ -16,6 +16,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Transient;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.Table;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -23,6 +24,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.UUID;
@@ -35,7 +37,8 @@ import me.universi.profile.services.ProfileService;
 
 import org.hibernate.annotations.*;
 
-@Entity(name="content")
+@Entity(name = "Content")
+@Table( name = "content" )
 @SQLDelete(sql = "UPDATE content SET deleted = true WHERE id=?")
 @SQLRestriction( "NOT deleted" )
 public class Content implements Serializable {
@@ -67,10 +70,11 @@ public class Content implements Serializable {
     @OneToMany(cascade = CascadeType.PERSIST)
     private Collection<Category> categories;
 
-    @ManyToMany(mappedBy = "contents")
+    @ManyToMany(mappedBy = "content")
     @NotFound(action = NotFoundAction.IGNORE)
-    private Collection<Folder> folders;
-    
+    @JsonIgnore
+    private Collection<FolderContents> folderContents;
+
     @Column(name = "rating")
     @NotNull
     @Min(0)
@@ -97,6 +101,8 @@ public class Content implements Serializable {
     private boolean deleted = Boolean.FALSE;
 
     public Content() {
+        this.categories = new ArrayList<>();
+        this.folderContents = new ArrayList<>();
     }
 
     public UUID getId() {
@@ -163,12 +169,12 @@ public class Content implements Serializable {
         this.createdAt = createdAt;
     }
 
-    public Collection<Folder> getFolders() {
-        return folders;
+    public Collection<FolderContents> getFolderContents() {
+        return folderContents;
     }
 
-    public void setFolders(Collection<Folder> folders) {
-        this.folders = folders;
+    public void setFolderContents(Collection<FolderContents> folders) {
+        this.folderContents = folders;
     }
 
     public Profile getAuthor() {

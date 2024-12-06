@@ -8,13 +8,17 @@ import me.universi.profile.exceptions.ProfileException;
 import me.universi.profile.repositories.PerfilRepository;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
+import me.universi.util.CastingUtil;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -25,6 +29,22 @@ public class ProfileService {
 
     public static ProfileService getInstance() {
         return Sys.context.getBean("profileService", ProfileService.class);
+    }
+
+    public Optional<Profile> find( UUID id ) {
+        return perfilRepository.findById( id );
+    }
+
+    public Optional<Profile> findByIdOrUsername( String idOrUsername ) {
+        return perfilRepository.findByIdOrUsername( CastingUtil.getUUID( idOrUsername ).orElse( null ), idOrUsername );
+    }
+
+    public @NotNull Profile findOrThrow( UUID id ) {
+        return find( id ).orElseThrow( () -> new EntityNotFoundException("Perfil com ID '" + id + "' não encontrado") );
+    }
+
+    public @NotNull Profile findByIdOrUsernameOrThrow( String idOrUsername ) {
+        return findByIdOrUsername( idOrUsername ).orElseThrow( () -> new EntityNotFoundException("Perfil com ID ou username'" + idOrUsername + "' não encontrado") );
     }
 
     // Retorna um Perfil passando o id

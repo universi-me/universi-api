@@ -3,6 +3,7 @@ package me.universi.capacity.entidades;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
@@ -14,7 +15,8 @@ import me.universi.capacity.service.FolderService;
 import me.universi.profile.entities.Profile;
 import org.hibernate.annotations.*;
 
-@Entity(name = "folder_profile")
+@Entity(name = "FolderProfile")
+@Table( name = "folder_profile" )
 @SQLDelete( sql = "UPDATE folder_profile SET deleted = true, removed = CURRENT_TIMESTAMP WHERE id=?" )
 @SQLRestriction( "NOT deleted" )
 @JsonIgnoreProperties({"hibernateLazyInitializer"})
@@ -106,7 +108,7 @@ public class FolderProfile implements Serializable {
 
     @Transient
     public int getFolderSize() {
-        return this.folder.getContents().size();
+        return this.folder.getFolderContents().size();
     }
 
     @Transient

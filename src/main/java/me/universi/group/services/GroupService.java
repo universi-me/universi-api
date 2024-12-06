@@ -25,10 +25,12 @@ import me.universi.roles.enums.RoleType;
 import me.universi.roles.services.RolesService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
+import me.universi.util.CastingUtil;
 import me.universi.util.ConvertUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.*;
@@ -93,6 +95,37 @@ public class GroupService {
 
     public Group findFirstById(String id) {
         return findFirstById(UUID.fromString(id));
+    }
+
+    public Optional<Group> find( UUID id ) {
+        return groupRepository.findById( id );
+    }
+
+    public List<Optional<Group>> find( Collection<UUID> id ) {
+        return id.stream().map( this::find ).toList();
+    }
+
+    public Optional<Group> findByIdOrPath( String idOrPath ) {
+        var groupId = CastingUtil.getUUID( idOrPath );
+        if ( groupId.isPresent() ) {
+            return find( groupId.get() );
+        }
+
+        else {
+            return Optional.ofNullable( getGroupFromPath( idOrPath ) );
+        }
+    }
+
+    public @NotNull Group findByIdOrPathOrThrow( String idOrPath ) throws EntityNotFoundException {
+        return findByIdOrPath( idOrPath ).orElseThrow( () -> new EntityNotFoundException( "Grupo com ID ou caminho '" + idOrPath + "' não encontrado" ) );
+    }
+
+    public Group findOrThrow( UUID id ) throws EntityNotFoundException {
+        return find( id ).orElseThrow( () -> new EntityNotFoundException( "Grupo de ID '" + id + "' não encontrado" ) );
+    }
+
+    public List<Group> findOrThrow( Collection<UUID> id ) {
+        return id.stream().map( this::findOrThrow ).toList();
     }
 
     public UUID findParentGroupId(UUID id) {
