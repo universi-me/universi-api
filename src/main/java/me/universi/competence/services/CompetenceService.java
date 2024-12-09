@@ -60,15 +60,12 @@ public class CompetenceService {
     public Competence create( @NotNull CreateCompetenceDTO createCompetenceDTO, @NotNull Profile profile ) {
         var competenceType = competenceTypeService.findOrThrow( createCompetenceDTO.competenceTypeId() );
 
-        var competence = new Competence();
-        competence.setCompetenceType( competenceType );
-        competence.setDescription( createCompetenceDTO.description() );
-        competence.setLevel( createCompetenceDTO.level() );
-        competence.setProfile( profile );
-
-        competence = competenceRepository.saveAndFlush( competence );
-
-        return competence;
+        return competenceRepository.saveAndFlush( new Competence(
+            competenceType,
+            createCompetenceDTO.description(),
+            createCompetenceDTO.level(),
+            profile
+        ) );
     }
 
     public Competence create( @NotNull CreateCompetenceDTO createCompetenceDTO ) {

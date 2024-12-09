@@ -47,9 +47,6 @@ public class Competence {
     @ManyToOne
     private Profile profile;
 
-    @Column(name = "title")
-    private String title;
-
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
@@ -58,17 +55,6 @@ public class Competence {
     @Column(name = "level")
     @Min( MIN_LEVEL ) @Max( MAX_LEVEL )
     private int level;
-
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "start_date")
-    private Date startDate;
-
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "end_date")
-    private Date endDate;
-
-    @Column(name = "present_date")
-    private Boolean presentDate;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
@@ -86,81 +72,28 @@ public class Competence {
 
     public Competence() {}
 
-    public Competence(CompetenceType competenceType, String description, String title, int level, Date startDate, Date endDate) {
+    public Competence( CompetenceType competenceType, String description, int level, Profile profile ) {
         this.competenceType = competenceType;
         this.description = description;
-        this.title = title;
         this.level = level;
-        this.startDate = startDate;
-        this.endDate = endDate;
+        this.profile = profile;
     }
 
-    public Competence(CompetenceType competenceType, String description, String title, int level, Date startDate, Boolean presentDate) {
-        this.competenceType = competenceType;
-        this.description = description;
-        this.title = title;
-        this.level = level;
-        this.startDate = startDate;
-        this.presentDate = presentDate;
+    public UUID getId() { return id; }
 
-    }
-
-    public Competence(CompetenceType competenceType, String title, int level) {
-        this.competenceType = competenceType;
-        this.title = title;
-        this.level = level;
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
     public int getLevel() { return level; }
-
     public void setLevel(int level) { this.level = level; }
 
-    public Date getCreationDate() {
-        return creationDate;
-    }
+    public Date getCreationDate() { return creationDate; }
+    public void setCreationDate(Date creationDate) { this.creationDate = creationDate; }
 
-    public void setCreationDate(Date creationDate) {
-        this.creationDate = creationDate;
-    }
-
-    public CompetenceType getCompetenceType() {
-        return competenceType;
-    }
-
-    public void setCompetenceType(CompetenceType competenceType) {
-        this.competenceType = competenceType;
-    }
-
-    public Date getStartDate() { return startDate; }
-
-    public void setStartDate(Date startDate) { this.startDate = startDate; }
-
-    public Date getEndDate() { return endDate; }
-
-    public void setEndDate(Date endDate) { this.endDate = endDate; }
-
-    public Boolean getPresentDate() { return presentDate; }
-
-    public void setPresentDate(Boolean presentDate) { this.presentDate = presentDate; }
-
-    public String getTitle() { return title; }
-
-    public void setTitle(String title) { this.title = title; }
+    public CompetenceType getCompetenceType() { return competenceType; }
+    public void setCompetenceType(CompetenceType competenceType) { this.competenceType = competenceType; }
 
     public boolean isDeleted() { return deleted; }
-
     public void setDeleted(boolean deleted) { this.deleted = deleted; }
 
     public Profile getProfile() { return profile; }
