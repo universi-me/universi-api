@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 import me.universi.Sys;
 import me.universi.capacity.entidades.Folder;
 import me.universi.competence.entities.Competence;
-import me.universi.competence.services.CompetenceProfileService;
+import me.universi.competence.services.CompetenceService;
 import me.universi.feed.dto.GroupPostDTO;
 import me.universi.feed.services.GroupFeedService;
 import me.universi.group.DTO.CompetenceFilterDTO;
@@ -49,7 +49,7 @@ public class GroupService {
     private final GroupThemeRepository groupThemeRepository;
     private final GroupFeaturesRepository groupFeaturesRepository;
     private final GroupEnvironmentRepository groupEnvironmentRepository;
-    private final CompetenceProfileService competenceProfileService;
+    private final CompetenceService competenceService;
 
     @Value("${LOCAL_ORGANIZATION_ID_ENABLED}")
     private boolean localOrganizationIdEnabled;
@@ -57,7 +57,7 @@ public class GroupService {
     @Value("${LOCAL_ORGANIZATION_ID}")
     private String localOrganizationId;
 
-    public GroupService(UserService userService, GroupFeedService groupFeedService, GroupRepository groupRepository, ProfileGroupRepository profileGroupRepository, SubgroupRepository subgroupRepository, GroupSettingsRepository groupSettingsRepository, GroupEmailFilterRepository groupEmailFilterRepository, GroupThemeRepository groupThemeRepository, GroupFeaturesRepository groupFeaturesRepository, GroupEnvironmentRepository groupEnvironmentRepository, CompetenceProfileService competenceProfileService) {
+    public GroupService(UserService userService, GroupFeedService groupFeedService, GroupRepository groupRepository, ProfileGroupRepository profileGroupRepository, SubgroupRepository subgroupRepository, GroupSettingsRepository groupSettingsRepository, GroupEmailFilterRepository groupEmailFilterRepository, GroupThemeRepository groupThemeRepository, GroupFeaturesRepository groupFeaturesRepository, GroupEnvironmentRepository groupEnvironmentRepository, CompetenceService competenceService) {
         this.userService = userService;
         this.groupFeedService = groupFeedService;
         this.groupRepository = groupRepository;
@@ -68,7 +68,7 @@ public class GroupService {
         this.groupThemeRepository = groupThemeRepository;
         this.groupFeaturesRepository = groupFeaturesRepository;
         this.groupEnvironmentRepository = groupEnvironmentRepository;
-        this.competenceProfileService = competenceProfileService;
+        this.competenceService = competenceService;
     }
 
 
@@ -931,7 +931,7 @@ public class GroupService {
                     p.getBio(),
                     p.getGender(),
                     p.getCreationDate(),
-                    competenceProfileService.findCompetenceByProfileId( p.getId() )
+                    competenceService.findByProfileId( p.getId() )
             );
 
 
@@ -968,7 +968,7 @@ public class GroupService {
         List<Profile> groupProfiles = group.getParticipants().stream().map(ProfileGroup::getProfile).collect(Collectors.toList());
 
         for(Profile profile : groupProfiles){
-            var competences = competenceProfileService.findCompetenceByProfileId( profile.getId() );
+            var competences = competenceService.findByProfileId( profile.getId() );
 
             for ( Competence competence : competences ) {
                 UUID typeId = competence.getCompetenceType().getId();

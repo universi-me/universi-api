@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.Table;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -18,6 +17,8 @@ import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import me.universi.profile.entities.Profile;
+
 import org.hibernate.annotations.*;
 
 import java.util.Date;
@@ -40,6 +41,11 @@ public class Competence {
     @JoinColumn(name = "competence_type_id")
     @NotFound(action = NotFoundAction.IGNORE)
     private CompetenceType competenceType;
+
+    @JoinColumn( name = "profile_id" )
+    @ManyToOne
+    @JsonIgnore
+    private Profile profile;
 
     @Column(name = "title")
     private String title;
@@ -76,8 +82,6 @@ public class Competence {
     public Competence() {
 
     }
-
-
 
     public Competence(CompetenceType competenceType, String description, String title, int level, Date startDate, Date endDate) {
         this.competenceType = competenceType;
@@ -155,4 +159,7 @@ public class Competence {
     public boolean isDeleted() { return deleted; }
 
     public void setDeleted(boolean deleted) { this.deleted = deleted; }
+
+    public Profile getProfile() { return profile; }
+    public void setProfile(Profile profile) { this.profile = profile; }
 }

@@ -42,7 +42,6 @@ import me.universi.capacity.repository.FolderRepository;
 import me.universi.competence.dto.CreateCompetenceDTO;
 import me.universi.competence.entities.Competence;
 import me.universi.competence.entities.CompetenceType;
-import me.universi.competence.services.CompetenceProfileService;
 import me.universi.competence.services.CompetenceService;
 import me.universi.competence.services.CompetenceTypeService;
 import me.universi.group.entities.Group;
@@ -70,12 +69,11 @@ public class FolderService {
     private final ContentStatusRepository contentStatusRepository;
     private final CompetenceTypeService competenceTypeService;
     private final CompetenceService competenceService;
-    private final CompetenceProfileService competenceProfileService;
     private final UserService userService;
     private final RolesService rolesService;
     private final FolderContentsRepository folderContentsRepository;
 
-    public FolderService(GroupService groupService, ProfileService profileService, CategoryService categoryService, FolderRepository folderRepository, FolderProfileRepository folderProfileRepository, FolderFavoriteRepository folderFavoriteRepository, ContentStatusRepository contentStatusRepository, CompetenceTypeService competenceTypeService, CompetenceService competenceService, UserService userService, RolesService rolesService, FolderContentsRepository folderContentsRepository, CompetenceProfileService competenceProfileService) {
+    public FolderService(GroupService groupService, ProfileService profileService, CategoryService categoryService, FolderRepository folderRepository, FolderProfileRepository folderProfileRepository, FolderFavoriteRepository folderFavoriteRepository, ContentStatusRepository contentStatusRepository, CompetenceTypeService competenceTypeService, CompetenceService competenceService, UserService userService, RolesService rolesService, FolderContentsRepository folderContentsRepository) {
         this.groupService = groupService;
         this.profileService = profileService;
         this.categoryService = categoryService;
@@ -88,7 +86,6 @@ public class FolderService {
         this.userService = userService;
         this.rolesService = rolesService;
         this.folderContentsRepository = folderContentsRepository;
-        this.competenceProfileService = competenceProfileService;
     }
 
     public static FolderService getInstance() {
@@ -647,7 +644,12 @@ public class FolderService {
             if (!profile.hasBadge(competenceType))
                 profile.getCompetenceBadges().add(competenceType);
 
-            if ( competenceProfileService.findByProfileId( profile.getId() , competenceType.getId() ).isEmpty() ) {
+            var hasCompetence = !competenceService.findByProfileIdAndCompetenceTypeId(
+                profile.getId(),
+                competenceType.getId()
+            ).isEmpty();
+
+            if ( !hasCompetence ) {
                 competenceService.create(
                     new CreateCompetenceDTO(
                         competenceType.getId(),

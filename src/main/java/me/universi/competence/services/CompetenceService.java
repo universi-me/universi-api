@@ -6,7 +6,6 @@ import me.universi.competence.dto.UpdateCompetenceDTO;
 import me.universi.competence.entities.Competence;
 import me.universi.competence.repositories.CompetenceRepository;
 import me.universi.profile.entities.Profile;
-import me.universi.profile.exceptions.ProfileException;
 import me.universi.profile.services.ProfileService;
 import me.universi.user.services.UserService;
 
@@ -26,14 +25,12 @@ public class CompetenceService {
     private final ProfileService profileService;
     private final UserService userService;
     private final CompetenceTypeService competenceTypeService;
-    private final CompetenceProfileService competenceProfileService;
 
-    public CompetenceService(CompetenceRepository competenceRepository, ProfileService profileService, UserService userService, CompetenceTypeService competenceTypeService, CompetenceProfileService competenceProfileService){
+    public CompetenceService(CompetenceRepository competenceRepository, ProfileService profileService, UserService userService, CompetenceTypeService competenceTypeService){
         this.competenceRepository = competenceRepository;
         this.profileService = profileService;
         this.userService = userService;
         this.competenceTypeService = competenceTypeService;
-        this.competenceProfileService = competenceProfileService;
     }
 
     public static CompetenceService getInstance() {
@@ -48,12 +45,16 @@ public class CompetenceService {
         return find( id ).orElseThrow( () -> new EntityNotFoundException( "Competência de ID '" + id + "' não encontrada" ) );
     }
 
-    public List<Competence> findAll() {
-        return competenceRepository.findAll();
+    public List<Competence> findByProfileId( UUID profileId ) {
+        return competenceRepository.findByProfileId( profileId );
     }
 
-    public void addCompetenceInProfile(@NotNull Profile profile,Competence newCompetence) throws ProfileException {
-        competenceProfileService.addToProfile( profile, newCompetence );
+    public List<Competence> findByProfileIdAndCompetenceTypeId( UUID profileId, UUID competenceTypeId ) {
+        return competenceRepository.findByProfileIdAndCompetenceTypeId( profileId, competenceTypeId );
+    }
+
+    public List<Competence> findAll() {
+        return competenceRepository.findAll();
     }
 
     public Competence create( @NotNull CreateCompetenceDTO createCompetenceDTO, @NotNull Profile profile ) {
@@ -63,9 +64,9 @@ public class CompetenceService {
         competence.setCompetenceType( competenceType );
         competence.setDescription( createCompetenceDTO.description() );
         competence.setLevel( createCompetenceDTO.level() );
+        competence.setProfile( profile );
 
         competence = competenceRepository.saveAndFlush( competence );
-        addCompetenceInProfile( profile , competence );
 
         return competence;
     }
@@ -103,17 +104,17 @@ public class CompetenceService {
             return;
 
         var profile = profileService.getProfileInSession();
-        var hasCompetence = competenceProfileService.findByProfileId( profile.getId() , competence.getCompetenceType().getId() ).isPresent();
 
-        if ( !hasCompetence )
+        if ( !competence.getProfile().getId().equals( profile.getId() ) )
             throw new AccessDeniedException( "Você não tem permissão para alterar esta Competência" );
     }
 
     private void checkPermissionForDelete( @NotNull Competence competence ) throws AccessDeniedException {
         var profile = profileService.getProfileInSession();
-        var hasCompetence = competenceProfileService.findByProfileId( profile.getId() , competence.getCompetenceType().getId() ).isPresent();
 
-        if ( !hasCompetence && !userService.isUserAdminSession() )
+        if ( !competence.getProfile().getId().equals( profile.getId() )
+            && !userService.isUserAdminSession()
+        )
             throw new AccessDeniedException( "Você não tem permissão para deletar esta Competência" );
     }
 

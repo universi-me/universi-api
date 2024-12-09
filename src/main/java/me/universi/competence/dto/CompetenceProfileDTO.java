@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
 import jakarta.validation.constraints.NotNull;
 import me.universi.competence.entities.Competence;
-import me.universi.competence.services.CompetenceProfileService;
+import me.universi.competence.services.CompetenceService;
 import me.universi.profile.entities.Profile;
 
 public class CompetenceProfileDTO {
@@ -20,7 +20,7 @@ public class CompetenceProfileDTO {
     }
 
     public static List<CompetenceProfileDTO> allFromProfile(@NotNull Profile profile) {
-        return CompetenceProfileService.getInstance().findCompetenceByProfileId( profile.getId() )
+        return CompetenceService.getInstance().findByProfileId( profile.getId() )
             .stream()
             .map(c -> new CompetenceProfileDTO(c, profile))
             .toList();

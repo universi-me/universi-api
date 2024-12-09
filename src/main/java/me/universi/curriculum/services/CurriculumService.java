@@ -1,7 +1,7 @@
 package me.universi.curriculum.services;
 
 import me.universi.competence.entities.CompetenceType;
-import me.universi.competence.services.CompetenceProfileService;
+import me.universi.competence.services.CompetenceService;
 import me.universi.curriculum.education.entities.Education;
 import me.universi.curriculum.education.entities.TypeEducation;
 import me.universi.curriculum.education.servicies.EducationService;
@@ -23,13 +23,13 @@ public class CurriculumService {
     private final ProfileService profileService;
     private final UserService userService;
     private final EducationService educationService;
-    private final CompetenceProfileService competenceProfileService;
+    private final CompetenceService competenceService;
 
-    public CurriculumService(ProfileService profileService, UserService userService, EducationService educationService, CompetenceProfileService competenceProfileService) {
+    public CurriculumService(ProfileService profileService, UserService userService, EducationService educationService, CompetenceService competenceService) {
         this.profileService = profileService;
         this.userService = userService;
         this.educationService = educationService;
-        this.competenceProfileService = competenceProfileService;
+        this.competenceService = competenceService;
     }
 
     public List<List> mountCurriculum(){
@@ -50,9 +50,9 @@ public class CurriculumService {
         /*Otimizar essa busca para que so busque de acordo com o grupo*/
         if( competenceType != null && level != null ) {
             for (Profile profile : profiles) {
-                var competenceProfile = competenceProfileService.findCompetenceByProfileId( profile.getId(), competenceType.getId() );
+                var competenceProfile = competenceService.findByProfileIdAndCompetenceTypeId( profile.getId(), competenceType.getId() );
 
-                if ( competenceProfile.isPresent() && competenceProfile.get().getLevel() == level ) {
+                if ( competenceProfile.stream().anyMatch( c -> c.getLevel() == level ) ) {
                         profilesTemp.add(profile);
                 }
             }
