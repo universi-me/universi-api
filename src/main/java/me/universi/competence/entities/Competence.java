@@ -14,6 +14,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -44,7 +45,6 @@ public class Competence {
 
     @JoinColumn( name = "profile_id" )
     @ManyToOne
-    @JsonIgnore
     private Profile profile;
 
     @Column(name = "title")
@@ -79,9 +79,12 @@ public class Competence {
     @Column(name = "deleted")
     private boolean deleted = Boolean.FALSE;
 
-    public Competence() {
-
+    @Transient
+    public boolean isHasBadge() {
+        return this.profile.hasBadge( competenceType );
     }
+
+    public Competence() {}
 
     public Competence(CompetenceType competenceType, String description, String title, int level, Date startDate, Date endDate) {
         this.competenceType = competenceType;

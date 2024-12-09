@@ -4,7 +4,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import me.universi.api.entities.Response;
 import me.universi.capacity.service.FolderService;
-import me.universi.competence.dto.CompetenceProfileDTO;
+import me.universi.competence.services.CompetenceService;
 import me.universi.group.entities.Group;
 import me.universi.group.entities.ProfileGroup;
 import me.universi.profile.entities.Profile;
@@ -193,7 +193,7 @@ public class ProfileController {
 
             Profile profileGet = profileService.getProfileByUserIdOrUsername(body.get("profileId"), body.get("username"));
 
-            response.body.put("competences", CompetenceProfileDTO.allFromProfile(profileGet));
+            response.body.put("competences", CompetenceService.getInstance().findByProfileId( profileGet.getId() ));
 
         });
     }
