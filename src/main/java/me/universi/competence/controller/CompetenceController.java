@@ -1,23 +1,30 @@
 package me.universi.competence.controller;
 
-import me.universi.api.entities.Response;
-import me.universi.competence.exceptions.CompetenceException;
+import me.universi.competence.dto.CreateCompetenceDTO;
+import me.universi.competence.dto.UpdateCompetenceDTO;
+import me.universi.competence.entities.Competence;
 import me.universi.competence.services.CompetenceService;
-import me.universi.profile.services.ProfileService;
-import me.universi.util.CastingUtil;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+
+import java.util.List;
+import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/competencia")
+@RequestMapping("/api/competence")
 public class CompetenceController {
     private final CompetenceService competenceService;
 
@@ -25,52 +32,32 @@ public class CompetenceController {
         this.competenceService = competenceService;
     }
 
-    @PostMapping(value = "/criar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response create(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-            var competenceTypeId = CastingUtil.getUUID(body.get("competenciatipoId")).orElseThrow(() -> {
-                response.setStatus(HttpStatus.BAD_REQUEST);
-                return new CompetenceException("Parâmetro 'competenceiatipoId' não informado ou inválido.");
-            });
-
-            var description = CastingUtil.getString(body.get("descricao")).orElseThrow(() -> {
-                response.setStatus(HttpStatus.BAD_REQUEST);
-                return new CompetenceException("Parâmetro 'descricao' não informado ou inválido.");
-            });
-
-            var level = CastingUtil.getInteger(body.get("nivel")).orElseThrow(() -> {
-                response.setStatus(HttpStatus.BAD_REQUEST);
-                return new CompetenceException("Parâmetro 'nivel' não informado ou inválido.");
-            });
-
-            competenceService.create(competenceTypeId, description, level, ProfileService.getInstance().getProfileInSession());
-            response.message = "Competência Criada e adicionado ao perfil";
-        });
+    @PostMapping( path = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE )
+    public ResponseEntity<Competence> create( @Valid @RequestBody CreateCompetenceDTO createCompetenceDTO ) {
+        return new ResponseEntity<>( competenceService.create( createCompetenceDTO ), HttpStatus.CREATED );
     }
 
-    @PostMapping(value = "/atualizar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response update(@RequestBody Map<String, Object> body) {
-        return competenceService.update(body);
+    @PatchMapping( path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE )
+    public ResponseEntity<Competence> update(
+        @Valid @PathVariable @NotNull UUID id,
+        @Valid @RequestBody UpdateCompetenceDTO updateCompetenceDTO
+    ) {
+        return ResponseEntity.ok( competenceService.update( id, updateCompetenceDTO ) );
     }
 
-    @PostMapping(value = "/remover", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response remove(@RequestBody Map<String, Object> body) {
-        return competenceService.remove(body);
+    @DeleteMapping( path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE )
+    public ResponseEntity<Void> delete( @Valid @PathVariable @NotNull UUID id ) {
+        competenceService.delete( id );
+        return ResponseEntity.noContent().build();
     }
 
-    @PostMapping(value = "/obter", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response get(@RequestBody Map<String, Object> body) {
-        return competenceService.get(body);
+    @GetMapping( path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE )
+    public ResponseEntity<Competence> get( @Valid @PathVariable @NotNull UUID id ) {
+        return ResponseEntity.ok( competenceService.findOrThrow( id ) );
     }
 
-    @PostMapping(value = "/listar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response findAll(@RequestBody Map<String, Object> body) {
-        return competenceService.findAll(body);
+    @GetMapping( path = "", produces = MediaType.APPLICATION_JSON_VALUE )
+    public ResponseEntity<List<Competence>> findAll() {
+        return ResponseEntity.ok( competenceService.findAll() );
     }
-
 }

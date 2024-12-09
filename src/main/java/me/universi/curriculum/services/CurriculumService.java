@@ -50,7 +50,7 @@ public class CurriculumService {
         /*Otimizar essa busca para que so busque de acordo com o grupo*/
         if( competenceType != null && level != null ) {
             for (Profile profile : profiles) {
-                var competenceProfile = competenceProfileService.findCompetenceByProfile(profile, competenceType);
+                var competenceProfile = competenceProfileService.findCompetenceByProfileId( profile.getId(), competenceType.getId() );
 
                 if ( competenceProfile.isPresent() && competenceProfile.get().getLevel() == level ) {
                         profilesTemp.add(profile);

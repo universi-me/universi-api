@@ -20,7 +20,7 @@ public class CompetenceProfileDTO {
     }
 
     public static List<CompetenceProfileDTO> allFromProfile(@NotNull Profile profile) {
-        return CompetenceProfileService.getInstance().findCompetenceByProfile(profile)
+        return CompetenceProfileService.getInstance().findCompetenceByProfileId( profile.getId() )
             .stream()
             .map(c -> new CompetenceProfileDTO(c, profile))
             .toList();

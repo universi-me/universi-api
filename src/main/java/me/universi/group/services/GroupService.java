@@ -931,7 +931,7 @@ public class GroupService {
                     p.getBio(),
                     p.getGender(),
                     p.getCreationDate(),
-                    competenceProfileService.findCompetenceByProfile(p)
+                    competenceProfileService.findCompetenceByProfileId( p.getId() )
             );
 
 
@@ -968,7 +968,7 @@ public class GroupService {
         List<Profile> groupProfiles = group.getParticipants().stream().map(ProfileGroup::getProfile).collect(Collectors.toList());
 
         for(Profile profile : groupProfiles){
-            var competences = competenceProfileService.findCompetenceByProfile( profile );
+            var competences = competenceProfileService.findCompetenceByProfileId( profile.getId() );
 
             for ( Competence competence : competences ) {
                 UUID typeId = competence.getCompetenceType().getId();

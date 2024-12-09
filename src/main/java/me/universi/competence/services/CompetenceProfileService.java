@@ -3,6 +3,7 @@ package me.universi.competence.services;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
@@ -32,26 +33,22 @@ public class CompetenceProfileService {
             .toList();
     }
 
-    public List<CompetenceProfile> findByProfile( @NotNull Profile profile ) {
-        return findAll().stream()
-            .filter( cp -> cp.getProfile().getId().equals( profile.getId() ) )
-            .toList();
+    public List<CompetenceProfile> findByProfileId( @NotNull UUID profileId ) {
+        return competenceProfileRepository.findByProfileId( profileId );
     }
 
-    public Optional<CompetenceProfile> findByProfile( @NotNull Profile profile, @NotNull CompetenceType competenceType ) {
-        return findByProfile( profile ).stream()
-            .filter( cp -> cp.getCompetence().getCompetenceType().getId().equals( competenceType.getId() ) )
-            .findAny();
+    public Optional<CompetenceProfile> findByProfileId( @NotNull UUID profileId, @NotNull UUID competenceTypeId ) {
+        return competenceProfileRepository.findByProfileIdAndCompetenceTypeId(profileId, competenceTypeId );
     }
 
-    public List<Competence> findCompetenceByProfile( @NotNull Profile profile ) {
-        return findByProfile(profile).stream()
+    public List<Competence> findCompetenceByProfileId( @NotNull UUID profileId ) {
+        return findByProfileId( profileId ).stream()
             .map( CompetenceProfile::getCompetence )
             .toList();
     }
 
-    public Optional<Competence> findCompetenceByProfile( @NotNull Profile profile, @NotNull CompetenceType competenceType ) {
-        var competenceProfile = findByProfile(profile, competenceType);
+    public Optional<Competence> findCompetenceByProfileId( @NotNull UUID profileId, @NotNull UUID competenceTypeId ) {
+        var competenceProfile = findByProfileId( profileId, competenceTypeId );
 
         return competenceProfile.isPresent()
             ? Optional.of( competenceProfile.get().getCompetence() )

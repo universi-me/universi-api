@@ -1,5 +1,6 @@
 package me.universi;
 
+import me.universi.competence.dto.CreateCompetenceDTO;
 import me.universi.competence.entities.Competence;
 import me.universi.competence.entities.CompetenceType;
 import me.universi.competence.repositories.CompetenceTypeRepository;
@@ -98,23 +99,26 @@ public class ProfileTest {
         competenciaTipoRepository.save(compTipo1);
         competenciaTipoRepository.save(compTipo2);
 
-        Competence competenciaNew = new Competence();
-        competenciaNew.setCompetenceType(compTipo1);
-        competenciaNew.setTitle("Java - admin"+userNew.getId());
-        competenciaNew.setDescription("Sou top em java - admin"+userNew.getId());
-        competenciaService.save(competenciaNew);
+        var competenciaNew = competenciaService.create(
+            new CreateCompetenceDTO(
+                compTipo1.getId(),
+                "Sou top em java - admin"+userNew.getId(),
+                Competence.MIN_LEVEL
+            ), admin_profile
+        );
 
-        Competence competenciaNew1 = new Competence();
-        competenciaNew1.setCompetenceType(compTipo2);
-        competenciaNew1.setTitle("Java - admin 1"+userNew.getId());
-        competenciaNew1.setDescription("Sou top em java - admin 1"+userNew.getId());
-        competenciaService.save(competenciaNew1);
+        var competenciaNew1 = competenciaService.create(
+            new CreateCompetenceDTO(
+                compTipo1.getId(),
+                "Sou top em java - admin 1"+userNew.getId(),
+                Competence.MIN_LEVEL
+            ), admin_profile
+        );
 
         Collection<Competence> competencias = new ArrayList<Competence>();
         competencias.add(competenciaNew);
         competencias.add(competenciaNew1);
         competenceProfileService.addToProfile(admin_profile, competencias);
-
 
         return admin_profile;
     }

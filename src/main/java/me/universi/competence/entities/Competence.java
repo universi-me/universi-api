@@ -2,6 +2,9 @@ package me.universi.competence.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import jakarta.persistence.Table;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -20,9 +23,10 @@ import org.hibernate.annotations.*;
 import java.util.Date;
 import java.util.UUID;
 
-@Entity(name = "competence")
+@Entity( name = "Competence" )
+@Table( name = "competence" )
 @SQLDelete(sql = "UPDATE competence SET deleted = true WHERE id=?")
-@Where(clause = "deleted=false")
+@SQLRestriction( "NOT deleted")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Competence {
 
@@ -32,7 +36,7 @@ public class Competence {
     @NotNull
     private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne( fetch = FetchType.LAZY )
     @JoinColumn(name = "competence_type_id")
     @NotFound(action = NotFoundAction.IGNORE)
     private CompetenceType competenceType;
@@ -43,9 +47,10 @@ public class Competence {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
+    public static final int MIN_LEVEL = 0;
+    public static final int MAX_LEVEL = 3;
     @Column(name = "level")
-    @Max(3)
-    @Min(0)
+    @Min( MIN_LEVEL ) @Max( MAX_LEVEL )
     private int level;
 
     @Temporal(TemporalType.TIMESTAMP)

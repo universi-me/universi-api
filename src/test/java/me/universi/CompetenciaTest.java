@@ -1,5 +1,7 @@
 package me.universi;
 
+import me.universi.competence.dto.CreateCompetenceDTO;
+import me.universi.competence.dto.UpdateCompetenceDTO;
 import me.universi.competence.entities.Competence;
 import me.universi.competence.entities.CompetenceType;
 import me.universi.competence.repositories.CompetenceTypeRepository;
@@ -64,15 +66,21 @@ public class CompetenciaTest {
         competenciaTipoRepository.save(compTipo1);
         competenciaTipoRepository.save(compTipo2);
 
-        Competence competencia1 = new Competence();
-        competencia1.setCompetenceType(compTipo1);
-        competencia1.setDescription("Sou top em java - teste 1"+userNew.getId());
-        competenciaService.save(competencia1);
+        var competencia1 = competenciaService.create(
+            new CreateCompetenceDTO(
+                compTipo1.getId(),
+                "Sou top em java - teste 1"+userNew.getId(),
+                Competence.MIN_LEVEL
+            ), profile
+        );
 
-        Competence competencia2 = new Competence();
-        competencia2.setCompetenceType(compTipo2);
-        competencia2.setDescription("Sou top em java - teste 2"+userNew.getId());
-        competenciaService.save(competencia2);
+        var competencia2 = competenciaService.create(
+            new CreateCompetenceDTO(
+                compTipo2.getId(),
+                "Sou top em java - teste 2"+userNew.getId(),
+                Competence.MIN_LEVEL
+            ), profile
+        );
 
         Profile admin_profile = userNew.getProfile();
         admin_profile.setFirstname("perfil1");
@@ -90,14 +98,11 @@ public class CompetenciaTest {
         competenceProfileService.addToProfile(admin_profile, competencias);
         competenceProfileService.addToProfile(comum_profile, competencias);
 
-        competenciaService.save(competencia1);
-        competenciaService.save(competencia2);
-
         profileService.update(admin_profile);
         profileService.update(comum_profile);
 
-        assertEquals(competencia1.getId(), competenciaService.findFirstById(competencia1.getId()).getId());
-        assertEquals(competencia2.getId(), competenciaService.findFirstById(competencia2.getId()).getId());
+        assertEquals( competencia1.getId(), competenciaService.findOrThrow(competencia1.getId()).getId() );
+        assertEquals( competencia2.getId(), competenciaService.findOrThrow(competencia2.getId()).getId() );
     }
     @Test
     void update() throws Exception {
@@ -121,15 +126,21 @@ public class CompetenciaTest {
         competenciaTipoRepository.save(compTipo1);
         competenciaTipoRepository.save(compTipo2);
 
-        Competence competencia1 = new Competence();
-        competencia1.setCompetenceType(compTipo1);
-        competencia1.setDescription("Sou top em java - update 1"+userNew.getId());
-        competenciaService.save(competencia1);
+        var competencia1 = competenciaService.create(
+            new CreateCompetenceDTO(
+                compTipo1.getId(),
+                "Sou top em java - update 1"+userNew.getId(),
+                Competence.MIN_LEVEL
+            ), profile
+        );
 
-        Competence competencia2 = new Competence();
-        competencia2.setCompetenceType(compTipo2);
-        competencia2.setDescription("Sou top em java - update 2"+userNew.getId());
-        competenciaService.save(competencia2);
+        var competencia2 = competenciaService.create(
+            new CreateCompetenceDTO(
+                compTipo2.getId(),
+                "Sou top em java - update 2"+userNew.getId(),
+                Competence.MIN_LEVEL
+            ), profile
+        );
 
         Profile admin_profile = userNew.getProfile();
         admin_profile.setFirstname("perfil1");
@@ -147,20 +158,32 @@ public class CompetenciaTest {
         competenceProfileService.addToProfile(admin_profile, competencias);
         competenceProfileService.addToProfile(comum_profile, competencias);
 
-        competenciaService.save(competencia1);
-        competenciaService.save(competencia2);
-
         competencia1.setDescription("alterando descrição1");
         competencia2.setDescription("alterando descrição2");
 
-        competenciaService.update(competencia1);
-        competenciaService.update(competencia2);
+        competenciaService.update(
+            competencia1.getId(),
+            new UpdateCompetenceDTO(
+                null,
+                "alterando descrição1",
+                null
+            )
+        );
+
+        competenciaService.update(
+            competencia1.getId(),
+            new UpdateCompetenceDTO(
+                null,
+                "alterando descrição2",
+                null
+            )
+        );
 
         profileService.update(admin_profile);
         profileService.update(comum_profile);
 
-        assertEquals(competencia1.getDescription(), competenciaService.findFirstById(competencia1.getId()).getDescription());
-        assertEquals(competencia2.getDescription(), competenciaService.findFirstById(competencia2.getId()).getDescription());
+        assertEquals(competencia1.getDescription(), competenciaService.findOrThrow(competencia1.getId()).getDescription());
+        assertEquals(competencia2.getDescription(), competenciaService.findOrThrow(competencia2.getId()).getDescription());
     }
     @Test
     void delete() throws Exception {
@@ -184,15 +207,21 @@ public class CompetenciaTest {
         competenciaTipoRepository.save(compTipo1);
         competenciaTipoRepository.save(compTipo2);
 
-        Competence competencia1 = new Competence();
-        competencia1.setCompetenceType(compTipo1);
-        competencia1.setDescription("Sou top em java - delete 1"+userNew.getId());
-        competenciaService.save(competencia1);
+        var competencia1 = competenciaService.create(
+            new CreateCompetenceDTO(
+                compTipo1.getId(),
+                "Sou top em java - delete 1"+userNew.getId(),
+                Competence.MIN_LEVEL
+            ), profile
+        );
 
-        Competence competencia2 = new Competence();
-        competencia2.setCompetenceType(compTipo2);
-        competencia2.setDescription("Sou top em java - delete 2"+userNew.getId());
-        competenciaService.save(competencia2);
+        var competencia2 = competenciaService.create(
+            new CreateCompetenceDTO(
+                compTipo2.getId(),
+                "Sou top em java - delete 2"+userNew.getId(),
+                Competence.MIN_LEVEL
+            ), profile
+        );
 
         Profile admin_profile = userNew.getProfile();
         admin_profile.setFirstname("perfil1");
@@ -210,22 +239,13 @@ public class CompetenciaTest {
         competenceProfileService.addToProfile(admin_profile, competencias);
         competenceProfileService.addToProfile(comum_profile, competencias);
 
-        competenciaService.save(competencia1);
-        competenciaService.save(competencia2);
+        competenciaService.delete( competencia1.getId() );
+        competenciaService.delete( competencia2.getId() );
 
-        competencia1.setDescription("alterando descrição1");
-        competencia2.setDescription("alterando descrição2");
-
-        profileService.update(admin_profile);
-        profileService.update(comum_profile);
-
-        competenciaService.deleteAll(competencias);
-
-
-
-        assertNull(competenciaService.findFirstById(competencia1.getId()));
-        assertNull(competenciaService.findFirstById(competencia2.getId()));
+        assertTrue( competenciaService.find( competencia1.getId() ).isEmpty() );
+        assertTrue( competenciaService.find( competencia2.getId() ).isEmpty() );
     }
+
     @Test
     void read() throws Exception {
         String nome = "competenciaTestread";
@@ -248,15 +268,21 @@ public class CompetenciaTest {
         competenciaTipoRepository.save(compTipo1);
         competenciaTipoRepository.save(compTipo2);
 
-        Competence competencia1 = new Competence();
-        competencia1.setCompetenceType(compTipo1);
-        competencia1.setDescription("Sou top em java - read 1"+userNew.getId());
-        competenciaService.save(competencia1);
+        var competencia1 = competenciaService.create(
+            new CreateCompetenceDTO(
+                compTipo1.getId(),
+                "Sou top em java - read 1"+userNew.getId(),
+                Competence.MIN_LEVEL
+            ), profile
+        );
 
-        Competence competencia2 = new Competence();
-        competencia2.setCompetenceType(compTipo2);
-        competencia2.setDescription("Sou top em java - read 2"+userNew.getId());
-        competenciaService.save(competencia2);
+        var competencia2 = competenciaService.create(
+            new CreateCompetenceDTO(
+                compTipo2.getId(),
+                "Sou top em java - read 2"+userNew.getId(),
+                Competence.MIN_LEVEL
+            ), profile
+        );
 
         Profile admin_profile = userNew.getProfile();
         admin_profile.setFirstname("perfil1");
@@ -273,10 +299,6 @@ public class CompetenciaTest {
         competencias.add(competencia2);
         competenceProfileService.addToProfile(admin_profile, competencias);
         competenceProfileService.addToProfile(comum_profile, competencias);
-
-        competenciaService.save(competencia1);
-        competenciaService.save(competencia2);
-
 
         assertTrue(competenciaService.findAll().size() >= 2);
 
