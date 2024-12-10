@@ -12,7 +12,7 @@ import org.hibernate.annotations.*;
 
 @Entity(name = "group_features")
 @SQLDelete(sql = "UPDATE group_features SET deleted = true WHERE id=?")
-@Where(clause = "deleted=false")
+@SQLRestriction( value = "NOT deleted" )
 @JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class GroupFeatures  implements Serializable {
 

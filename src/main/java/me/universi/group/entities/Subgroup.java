@@ -13,7 +13,7 @@ import org.hibernate.annotations.*;
 
 @Entity(name = "subgroup")
 @SQLDelete(sql = "UPDATE subgroup SET deleted = true WHERE id=?")
-@Where(clause = "deleted=false")
+@SQLRestriction( value = "NOT deleted" )
 @JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class Subgroup implements Serializable {
 

@@ -15,7 +15,7 @@ import org.hibernate.annotations.*;
 
 @Entity(name = "group_email_filter")
 @SQLDelete(sql = "UPDATE group_email_filter SET deleted = true WHERE id=?")
-@Where(clause = "deleted=false")
+@SQLRestriction( value = "NOT deleted" )
 @JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class GroupEmailFilter implements Serializable {
 

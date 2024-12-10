@@ -26,4 +26,6 @@ public interface GroupRepository extends JpaRepository<Group, UUID> {
     Optional<Group> findFirstByIdAndAdminId(UUID groupId, UUID profileId);
 
     Boolean existsByIdAndParticipantsId(UUID groupId, UUID profileId);
+
+    Group findFirstByGroupSettingsId(UUID groupSettingId);
 }

@@ -12,11 +12,12 @@ import java.util.UUID;
 import me.universi.user.services.JsonUserAdminFilter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.Where;
 
 @Entity(name = "group_environment")
 @SQLDelete(sql = "UPDATE group_environment SET deleted = true WHERE id=?")
-@Where(clause = "deleted=false")
+@SQLRestriction( value = "NOT deleted" )
 @JsonIgnoreProperties({"hibernateLazyInitializer"})
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class GroupEnvironment implements Serializable {

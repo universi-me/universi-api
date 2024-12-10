@@ -28,12 +28,13 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.Where;
 
 
 @Entity(name = "system_group")
 @SQLDelete(sql = "UPDATE system_group SET deleted = true WHERE id=?")
-@Where(clause = "deleted=false")
+@SQLRestriction( value = "NOT deleted" )
 @JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class Group implements Serializable {
 
