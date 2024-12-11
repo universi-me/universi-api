@@ -556,66 +556,6 @@ public class GroupService {
         groupSettingsRepository.save(gSettings);
     }
 
-    public boolean editTheme(Group group, String primaryColor, String secondaryColor, String backgroundColor, String cardBackgroundColor, String cardItemColor, String fontColorV1, String fontColorV2, String fontColorV3, String fontColorLinks, String fontDisabledColor, String buttonHoverColor, String alertColor, String successColor, String wrongInvalidColor) {
-        if(group == null) {
-            return false;
-        }
-        GroupSettings groupSettings = group.getGroupSettings();
-        if(groupSettings == null) {
-            return false;
-        }
-        GroupTheme groupTheme = groupSettings.theme;
-        if(groupTheme == null) {
-            groupTheme = new GroupTheme();
-            groupTheme.groupSettings = groupSettings;
-            groupTheme = groupThemeRepository.save(groupTheme);
-        }
-        if(primaryColor != null) {
-            groupTheme.primaryColor = primaryColor.isEmpty() ? null : primaryColor;
-        }
-        if(secondaryColor != null) {
-            groupTheme.secondaryColor = secondaryColor.isEmpty() ? null : secondaryColor;
-        }
-        if(backgroundColor != null) {
-            groupTheme.backgroundColor = backgroundColor.isEmpty() ? null : backgroundColor;
-        }
-        if(cardBackgroundColor != null) {
-            groupTheme.cardBackgroundColor = cardBackgroundColor.isEmpty() ? null : cardBackgroundColor;
-        }
-        if(cardItemColor != null) {
-            groupTheme.cardItemColor = cardItemColor.isEmpty() ? null : cardItemColor;
-        }
-        if(fontColorV1 != null) {
-            groupTheme.fontColorV1 = fontColorV1.isEmpty() ? null : fontColorV1;
-        }
-        if(fontColorV2 != null) {
-            groupTheme.fontColorV2 = fontColorV2.isEmpty() ? null : fontColorV2;
-        }
-        if(fontColorV3 != null) {
-            groupTheme.fontColorV3 = fontColorV3.isEmpty() ? null : fontColorV3;
-        }
-        if(fontColorLinks != null) {
-            groupTheme.fontColorLinks = fontColorLinks.isEmpty() ? null : fontColorLinks;
-        }
-        if(fontDisabledColor != null) {
-            groupTheme.fontColorDisabled = fontDisabledColor.isEmpty() ? null : fontDisabledColor;
-        }
-        if(buttonHoverColor != null) {
-            groupTheme.buttonHoverColor = buttonHoverColor.isEmpty() ? null : buttonHoverColor;
-        }
-        if(alertColor != null) {
-            groupTheme.fontColorAlert = alertColor.isEmpty() ? null : alertColor;
-        }
-        if(successColor != null) {
-            groupTheme.fontColorSuccess = successColor.isEmpty() ? null : successColor;
-        }
-        if(wrongInvalidColor != null) {
-            groupTheme.wrongInvalidColor = wrongInvalidColor.isEmpty() ? null : wrongInvalidColor;
-        }
-        groupThemeRepository.save(groupTheme);
-        return true;
-    }
-
     public boolean addFeature(Group group, String name, String description, Boolean enabled) {
         if(group == null) {
             return false;
