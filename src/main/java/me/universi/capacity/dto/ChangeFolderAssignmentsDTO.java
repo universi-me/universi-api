@@ -6,9 +6,9 @@ import java.util.UUID;
 import jakarta.validation.constraints.NotNull;
 
 public record ChangeFolderAssignmentsDTO(
-    @NotNull( message = "O parâmetro 'addProfileIds' não foi informado" )
+    @NotNull
     List<UUID> addProfileIds,
 
-    @NotNull( message = "O parâmetro 'removeProfileIds' não foi informado" )
+    @NotNull
     List<UUID> removeProfileIds
 ) { }

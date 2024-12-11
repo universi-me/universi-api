@@ -11,15 +11,13 @@ import jakarta.validation.constraints.NotNull;
 import me.universi.capacity.enums.ContentType;
 
 public record CreateContentDTO(
-    @NotNull( message = "O parâmetro 'url' não foi informado" )
-    @NotBlank( message = "O parâmetro 'url' não pode estar vazio" )
+    @NotBlank
     String url,
 
-    @NotNull( message = "O parâmetro 'title' não foi informado" )
-    @NotBlank( message = "O parâmetro 'title' não pode estar vazio" )
+    @NotBlank
     String title,
 
-    @NotNull( message = "O parâmetro 'type' não foi informado" )
+    @NotNull
     ContentType type,
 
     @Nullable
@@ -28,7 +26,7 @@ public record CreateContentDTO(
     @Nullable
     String description,
 
-    @NotNull( message = "O parâmetro 'rating' não foi informado" )
+    @NotNull
     @Min( 0 ) @Max( 5 )
     Integer rating,
 

@@ -9,14 +9,13 @@ import jakarta.validation.constraints.NotNull;
 import me.universi.competence.entities.Competence;
 
 public record CreateCompetenceDTO(
-    @NotNull( message = "O parâmetro 'competenceTypeId' não foi informado" )
+    @NotNull
     UUID competenceTypeId,
-    
-    @NotNull( message = "O parâmetro 'description' não foi informado" )
-    @NotBlank( message = "O parâmetro 'description' não pode estar vazio" )
+
+    @NotBlank
     String description,
 
-    @NotNull( message = "O parâmetro 'level' não foi informado" )
+    @NotNull
     @Min( Competence.MIN_LEVEL ) @Max( Competence.MAX_LEVEL )
     Integer level
 ) { }

@@ -11,8 +11,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 
 public record CreateFolderDTO(
-    @NotNull( message = "O parâmetro 'name' não foi informado" )
-    @NotBlank( message = "O parâmetro 'name' não pode estar vazio" )
+    @NotBlank
     String name,
 
     @Nullable
@@ -21,7 +20,7 @@ public record CreateFolderDTO(
     @Nullable
     String description,
 
-    @NotNull( message = "O parâmetro 'rating' não foi informado" )
+    @NotNull
     @Min(0) @Max(5)
     Integer rating,
 

@@ -5,7 +5,7 @@ import java.util.List;
 import jakarta.validation.constraints.NotNull;
 
 public record DuplicateFolderDTO(
-    @NotNull( message = "O parâmetro 'groups' não foi informado" )
+    @NotNull
     List<String> groups
 
     // TODO: Add edit folder params to edit duplicate on creation
