@@ -2,9 +2,9 @@ package me.universi.api;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -29,8 +29,9 @@ public class RestExceptionHandler {
         List<String> errorList = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
-                .map(error -> error.getField() + ": " + error.getDefaultMessage())
-                .collect(Collectors.toList());
+                .map( this::invalidArgumentMessage )
+                .toList();
+
         ApiError apiError = ApiError
                 .builder()
                 .timestamp(LocalDateTime.now())
@@ -41,4 +42,10 @@ public class RestExceptionHandler {
         return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
     }
 
+    private String invalidArgumentMessage( FieldError err ) {
+        if ( err.getRejectedValue() == null )
+            return "O parâmetro '" + err.getField() + "' não foi informado";
+
+        return err.getField() + ": " + err.getDefaultMessage();
+    }
 }
