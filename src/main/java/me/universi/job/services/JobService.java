@@ -67,7 +67,7 @@ public class JobService {
 
         var institution = institutionService.findOrThrow( createJobDTO.institutionId() );
 
-        var competencesTypes = competenceTypeService.findAllById( createJobDTO.requiredCompetencesIds() );
+        var competencesTypes = competenceTypeService.findOrThrow( createJobDTO.requiredCompetencesIds() );
 
         var profileInSession = profileService.getProfileInSession();
 
@@ -109,7 +109,7 @@ public class JobService {
             job.setLongDescription( updateJobDTO.longDescription() );
 
         if ( updateJobDTO.requiredCompetencesIds() != null)
-            job.setRequiredCompetences( competenceTypeService.findAllById( updateJobDTO.requiredCompetencesIds() ) );
+            job.setRequiredCompetences( competenceTypeService.findOrThrow( updateJobDTO.requiredCompetencesIds() ) );
 
         return save(job);
     }

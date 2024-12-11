@@ -2,9 +2,7 @@ package me.universi.competence.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -14,9 +12,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.Transient;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
-import me.universi.competence.services.CompetenceTypeService;
 import me.universi.profile.entities.Profile;
 
 import java.util.Collection;
@@ -24,11 +21,12 @@ import java.util.UUID;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.SQLRestriction;
 
-@Entity(name = "competence_type")
+@Entity(name = "CompetenceType")
+@Table( name = "competence_type" )
 @SQLDelete(sql = "UPDATE competence_type SET deleted = true WHERE id=?")
-@Where(clause = "deleted=false")
+@SQLRestriction( "NOT deleted" )
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class CompetenceType {
     @Id

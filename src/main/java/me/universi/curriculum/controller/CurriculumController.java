@@ -11,6 +11,8 @@ import me.universi.curriculum.experience.servicies.TypeExperienceService;
 import me.universi.curriculum.services.CurriculumService;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
+import me.universi.util.CastingUtil;
+
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -68,7 +70,7 @@ public class CurriculumController {
             * */
             Collection<Profile> profiles;
 
-            String competenceTypeId = (String)body.get("competenceTypeId");
+            var competenceTypeId = CastingUtil.getUUID(body.get("competenceTypeId")).orElse(null);
             String typeExperienceId = (String)body.get("typeExperienceId");
             String typeEducationId = (String)body.get("typeEducationIdId");
             Integer level = (Integer)body.get("level");
@@ -79,7 +81,7 @@ public class CurriculumController {
                 throw new CurriculumException("todos os parametros sao nulos.");
             }
 
-            CompetenceType competenceType = competenceTypeService.findFirstById(competenceTypeId);
+            CompetenceType competenceType = competenceTypeService.findOrThrow(competenceTypeId);
             TypeExperience typeExperience = typeExperienceService.findById(UUID.fromString(typeExperienceId)).get();
             TypeEducation typeEducation = typeEducationService.findById(UUID.fromString(typeEducationId)).get();
 
