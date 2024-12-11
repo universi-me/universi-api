@@ -5,10 +5,6 @@ import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 
 public record UpdateEmailFilterDTO(
-    @NotNull( message = "O parâmetro 'groupId' não foi informado" )
-    @NotBlank( message = "O parâmetro 'groupId' não pode estar vazio" )
-    String groupId,
-
     @NotNull( message = "O parâmetro 'groupEmailFilterId' não foi informado" )
     @NotBlank( message = "O parâmetro 'groupEmailFilterId' não pode estar vazio" )
     UUID groupEmailFilterId,

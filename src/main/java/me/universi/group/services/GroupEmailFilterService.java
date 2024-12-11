@@ -58,7 +58,7 @@ public class GroupEmailFilterService {
     }
 
     public GroupEmailFilter updateEmailFilter(UpdateEmailFilterDTO updateEmailFilterDTO) {
-        Group group = groupService.getGroupByGroupIdOrGroupPath(updateEmailFilterDTO.groupId(), null);
+        Group group = getGroupByGroupEmailFilterId(updateEmailFilterDTO.groupEmailFilterId());
 
         RolesService.getInstance().checkIsAdmin(group);
 
@@ -88,15 +88,7 @@ public class GroupEmailFilterService {
     }
 
     public boolean deleteEmailFilter(UUID groupEmailFilterId) {
-
-        Group group = null;
-
-        // determining group by groupEmailFilterId
-        if(groupEmailFilterRepository.existsById(groupEmailFilterId)) {
-            GroupEmailFilter groupEmailFilter = groupEmailFilterRepository.findFirstById(groupEmailFilterId).orElseThrow(() -> new GroupException("Filtro não existe."));
-            UUID groupSettingId = groupEmailFilter.groupSettings.getId();
-            group = groupRepository.findFirstByGroupSettingsId(groupSettingId);
-        }
+        Group group = getGroupByGroupEmailFilterId(groupEmailFilterId);
 
         if(group != null) {
 
@@ -142,5 +134,16 @@ public class GroupEmailFilterService {
         }
 
         throw new GroupException("Falha ao listar filtros de email.");
+    }
+
+    // determining group by groupEmailFilterId
+    public Group getGroupByGroupEmailFilterId(UUID groupEmailFilterId) {
+        GroupEmailFilter groupEmailFilter = groupEmailFilterRepository.findFirstById(groupEmailFilterId).orElseThrow(() -> new GroupException("Filtro não existe."));
+        UUID groupSettingId = groupEmailFilter.groupSettings.getId();
+        Group group = groupRepository.findFirstByGroupSettingsId(groupSettingId);
+        if(group != null) {
+            return group;
+        }
+        throw new GroupException("Falha ao determinar grupo por filtro de email.");
     }
 }
