@@ -23,7 +23,7 @@ import me.universi.institution.entities.Institution;
 import me.universi.institution.services.InstitutionService;
 
 @RestController
-@RequestMapping(value = "/api/institution")
+@RequestMapping( "/api/institutions" )
 public class InstitutionController {
     private InstitutionService institutionService;
 
