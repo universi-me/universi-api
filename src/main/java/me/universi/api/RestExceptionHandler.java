@@ -17,8 +17,7 @@ public class RestExceptionHandler {
         ApiError apiError = ApiError
                 .builder()
                 .timestamp(LocalDateTime.now())
-                .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .status(HttpStatus.INTERNAL_SERVER_ERROR.name())
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .errors(List.of(ex.getMessage()))
                 .build();
         return new ResponseEntity<>(apiError, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -35,8 +34,7 @@ public class RestExceptionHandler {
         ApiError apiError = ApiError
                 .builder()
                 .timestamp(LocalDateTime.now())
-                .code(HttpStatus.BAD_REQUEST.value())
-                .status(HttpStatus.BAD_REQUEST.name())
+                .status(HttpStatus.BAD_REQUEST)
                 .errors(errorList)
                 .build();
         return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
