@@ -1,227 +1,63 @@
 package me.universi.group.controller;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import java.util.*;
-import java.util.stream.Collectors;
-import me.universi.api.entities.Response;
 import me.universi.group.DTO.CompetenceFilterDTO;
-import me.universi.group.entities.Group;
-import me.universi.group.entities.ProfileGroup;
-import me.universi.group.exceptions.GroupException;
-import me.universi.group.services.GroupService;
+import me.universi.group.DTO.CompetenceInfoDTO;
+import me.universi.group.DTO.ProfileWithCompetencesDTO;
+import me.universi.group.DTO.UpdateGroupParticipantDTO;
+import me.universi.group.services.GroupParticipantService;
 import me.universi.profile.entities.Profile;
-import me.universi.roles.enums.FeaturesTypes;
-import me.universi.roles.enums.Permission;
-import me.universi.roles.services.RolesService;
-import me.universi.user.entities.User;
-import me.universi.user.services.UserService;
+import me.universi.group.services.GroupService;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/group/participants")
 public class GroupParticipantController {
     private final GroupService groupService;
-    private final UserService userService;
+    private final GroupParticipantService groupParticipantService;
 
-    public GroupParticipantController(GroupService groupService, UserService userService) {
+    public GroupParticipantController(GroupService groupService, GroupParticipantService groupParticipantService) {
         this.groupService = groupService;
-        this.userService = userService;
+        this.groupParticipantService = groupParticipantService;
     }
 
-    @PostMapping(value = "/enter", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response participant_enter(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-
-            String groupId = (String)body.get("groupId");
-            String groupPath = (String)body.get("groupPath");
-
-            Group groupEdit = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
-
-            if(groupEdit.isRootGroup()) {
-                throw new GroupException("Você não pode sair do Grupo.");
-            }
-
-            if(!groupEdit.isCanEnter()) {
-                throw new GroupException("Grupo não permite entrada de participantes.");
-            }
-
-            User user = userService.getUserInSession();
-
-            if(groupEdit.isCanEnter() || groupService.verifyPermissionToEditGroup(groupEdit, user)) {
-                if(groupService.addParticipantToGroup(groupEdit, user.getProfile())) {
-                    response.message = "Você entrou no Grupo.";
-                    return;
-                } else {
-                    throw new GroupException("Você já esta neste Grupo.");
-                }
-            }
-
-            throw new GroupException("Falha ao entrar ao grupo");
-
-        });
+    @PatchMapping(value = "/join/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Boolean> participant_enter( @Valid @PathVariable @NotNull( message = "ID do grupo inválida" ) UUID id ) {
+        return ResponseEntity.ok( groupParticipantService.joinGroup( id ) );
     }
 
-    @PostMapping(value = "/exit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response participant_exit(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-
-            String groupId = (String)body.get("groupId");
-            String groupPath = (String)body.get("groupPath");
-
-            Group groupEdit = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
-
-            if(groupEdit.isRootGroup()) {
-                throw new GroupException("Você não pode sair do Grupo.");
-            }
-
-            User user = userService.getUserInSession();
-
-            if(groupService.removeParticipantFromGroup(groupEdit, user.getProfile())) {
-                response.message = "Você saiu do Grupo.";
-            } else {
-                throw new GroupException("Você não está neste Grupo.");
-            }
-
-        });
+    @PatchMapping(value = "/leave/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Boolean> participant_exit( @Valid @PathVariable @NotNull( message = "ID do grupo inválida" ) UUID id ) {
+        return ResponseEntity.ok( groupParticipantService.leaveGroup( id ) );
     }
 
-    @PostMapping(value = "/add", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response participant_add(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-
-            String groupId = (String)body.get("groupId");
-            String groupPath = (String)body.get("groupPath");
-
-            String participant = (String)body.get("participant");
-            if(participant == null) {
-                throw new GroupException("Parâmetro participant é nulo.");
-            }
-
-            User participantUser = null;
-            if(participant != null && !participant.isEmpty()) {
-                if (participant.contains("@")) {
-                    participantUser = (User) userService.findFirstByEmail(participant);
-                } else {
-                    participantUser = (User) userService.loadUserByUsername(participant);
-                }
-            }
-
-            Group groupEdit = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
-
-            User user = userService.getUserInSession();
-
-            if(participantUser != null && groupService.verifyPermissionToEditGroup(groupEdit, user)) {
-                if(groupService.addParticipantToGroup(groupEdit, participantUser.getProfile())) {
-                    response.message = "Participante adicionado com sucesso.";
-                    return;
-                } else {
-                    throw new GroupException("Participante já esta neste Grupo.");
-                }
-            }
-
-            throw new GroupException("Falha ao adicionar participante ao grupo");
-
-        });
+    @PatchMapping(value = "/add", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Boolean> participant_add( @Valid @RequestBody UpdateGroupParticipantDTO updateGroupParticipantDTO ) {
+        return ResponseEntity.ok( groupParticipantService.addParticipantGroup( updateGroupParticipantDTO ) );
     }
 
-    @PostMapping(value = "/remove", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response participant_remove(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-
-            String groupId = (String)body.get("groupId");
-            String groupPath = (String)body.get("groupPath");
-
-            String participant = (String)body.get("participant");
-            if(participant == null) {
-                throw new GroupException("Parâmetro participant é nulo.");
-            }
-
-            User participantUser = null;
-            if(participant != null && !participant.isEmpty()) {
-                if (participant.contains("@")) {
-                    participantUser = (User) userService.findFirstByEmail(participant);
-                } else {
-                    participantUser = (User) userService.loadUserByUsername(participant);
-                }
-            }
-
-            Group groupEdit = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
-
-            User user = userService.getUserInSession();
-
-            if(participantUser != null && groupService.verifyPermissionToEditGroup(groupEdit, user)) {
-                if(groupService.removeParticipantFromGroup(groupEdit, participantUser.getProfile())) {
-                    response.message = "Participante removido com sucesso.";
-                    return;
-                } else {
-                    throw new GroupException("Participante não faz parte deste Grupo.");
-                }
-            }
-
-            throw new GroupException("Falha ao adicionar participante ao grupo");
-
-        });
+    @PatchMapping(value = "/remove", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Boolean> participant_remove( @Valid @RequestBody UpdateGroupParticipantDTO updateGroupParticipantDTO ) {
+        return ResponseEntity.ok( groupParticipantService.removeParticipantGroup( updateGroupParticipantDTO ) );
     }
 
-    @PostMapping(value = "/list", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response participant_list(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-
-            String groupId = (String)body.get("groupId");
-            String groupPath = (String)body.get("groupPath");
-
-            Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
-
-            RolesService.getInstance().checkPermission(group, FeaturesTypes.PEOPLE, Permission.READ);
-
-            if(group != null) {
-                Collection<ProfileGroup> participants = group.getParticipants();
-
-                List<Profile> profiles = participants.stream()
-                        .sorted(Comparator.comparing(ProfileGroup::getJoined).reversed())
-                        .map(ProfileGroup::getProfile)
-                        .filter(p -> p != null && !p.isHidden())
-                        .collect(Collectors.toList());
-
-                response.body.put("participants", profiles);
-                return;
-            }
-
-            throw new GroupException("Falha ao listar participante ao grupo");
-
-        });
+    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<Profile>> participant_list( @Valid @PathVariable @NotNull( message = "ID do grupo inválida" ) UUID id ) {
+        return ResponseEntity.ok( groupParticipantService.listParticipantsByGroupId( id ) );
     }
-
 
     //Used when filtering participants based on their competences
-    @PostMapping(value = "/filter", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response filterParticipants(@RequestBody CompetenceFilterDTO competenceFilter){
-
-        return Response.buildResponse(response -> {
-            response.body.put("filteredParticipants", groupService.filterProfilesWithCompetences(competenceFilter));
-        });
+    @PostMapping(value = "/filter", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<ProfileWithCompetencesDTO>> filterParticipants( @Valid @RequestBody CompetenceFilterDTO competenceFilter ){
+        return ResponseEntity.ok( groupService.filterProfilesWithCompetences( competenceFilter ) );
     }
 
-    @PostMapping("/competences")
-    @ResponseBody
-    public Response competences(@RequestBody Map<String, Object> body){
-        return Response.buildResponse(response ->{
-
-            String groupId = (String)body.get("groupId");
-            String groupPath = (String)body.get("groupPath");
-
-            RolesService.getInstance().checkPermission(groupId, FeaturesTypes.COMPETENCE, Permission.READ);
-
-            Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, groupPath);
-
-            response.body.put("competences", groupService.getGroupCompetences(group));
-        });
-
+    @GetMapping(value = "/competences/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<CompetenceInfoDTO>> competences_list( @Valid @PathVariable @NotNull( message = "ID do grupo inválida" ) UUID id ){
+        return ResponseEntity.ok( groupParticipantService.getGroupCompetencesByGroupId( id ) );
     }
 }

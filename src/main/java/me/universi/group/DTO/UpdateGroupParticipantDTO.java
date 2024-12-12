@@ -4,11 +4,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 
-public record UpdateGroupFeatureDTO(
+public record UpdateGroupParticipantDTO(
         @NotNull
         @NotBlank
-        UUID groupFeatureId,
+        UUID groupId,
 
-        String description,
-        Boolean enabled
+        @NotNull
+        @NotBlank
+        String participant
 ) { }
