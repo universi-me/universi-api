@@ -20,7 +20,7 @@ public class RestExceptionHandler {
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .errors(List.of(ex.getMessage()))
                 .build();
-        return new ResponseEntity<>(apiError, HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(apiError, apiError.status());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -37,7 +37,7 @@ public class RestExceptionHandler {
                 .status(HttpStatus.BAD_REQUEST)
                 .errors(errorList)
                 .build();
-        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(apiError, apiError.status());
     }
 
     private String invalidArgumentMessage( FieldError err ) {
