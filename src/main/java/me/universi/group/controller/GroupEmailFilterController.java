@@ -8,6 +8,7 @@ import me.universi.group.DTO.UpdateEmailFilterDTO;
 import me.universi.group.entities.GroupSettings.GroupEmailFilter;
 import me.universi.group.services.GroupEmailFilterService;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +25,10 @@ public class GroupEmailFilterController {
 
     @PostMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GroupEmailFilter> email_filter_create( @Valid @RequestBody CreateEmailFilterDTO createEmailFilterDTO ) {
-        return ResponseEntity.ok( groupEmailFilterService.createEmailFilter( createEmailFilterDTO ) );
+        return new ResponseEntity<>(
+            groupEmailFilterService.createEmailFilter( createEmailFilterDTO ),
+            HttpStatus.CREATED
+        );
     }
 
     @PatchMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)

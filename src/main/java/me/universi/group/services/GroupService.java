@@ -556,84 +556,6 @@ public class GroupService {
         groupSettingsRepository.save(gSettings);
     }
 
-    public boolean addFeature(Group group, String name, String description, Boolean enabled) {
-        if(group == null) {
-            return false;
-        }
-        if(name == null || name.isEmpty()) {
-            throw new GroupException("Nome da feature está vazio.");
-        }
-        GroupSettings groupSettings = group.getGroupSettings();
-        if(groupSettings == null) {
-            return false;
-        }
-        if(groupFeaturesRepository.existsByGroupSettingsIdAndName(groupSettings.getId(), name)) {
-            throw new GroupException("Feature já existe.");
-        }
-        GroupFeatures groupFeature = new GroupFeatures();
-        groupFeature.groupSettings = groupSettings;
-        groupFeature.name = name.trim();
-        if(description != null) {
-            groupFeature.description = description;
-        }
-        if(enabled != null) {
-            groupFeature.enabled = enabled;
-        }
-        groupFeaturesRepository.save(groupFeature);
-        return true;
-    }
-
-    public boolean deleteFeature(Group group, UUID groupFeatureId) {
-        if(group == null || groupFeatureId == null) {
-            return false;
-        }
-        if(groupFeaturesRepository.existsByGroupSettingsIdAndId(group.getGroupSettings().getId(), groupFeatureId)) {
-            GroupFeatures groupFeature = groupFeaturesRepository.findFirstByGroupSettingsIdAndId(group.getGroupSettings().getId(), groupFeatureId);
-            groupFeature.setRemoved(ConvertUtil.getDateTimeNow());
-            groupFeature.setDeleted(true);
-            groupFeaturesRepository.save(groupFeature);
-            return true;
-        }
-        return false;
-    }
-
-    public boolean deleteFeature(Group group, String groupFeatureId) {
-        if(group == null || groupFeatureId == null || groupFeatureId.isEmpty()) {
-            return false;
-        }
-        return deleteFeature(group, UUID.fromString(groupFeatureId));
-    }
-
-    public boolean editFeature(Group group, UUID groupFeatureId, Boolean enabled, String description) {
-        if(group == null) {
-            return false;
-        }
-        GroupSettings groupSettings = group.getGroupSettings();
-        if(groupSettings == null) {
-            return false;
-        }
-        GroupFeatures groupFeature = groupFeaturesRepository.findFirstByGroupSettingsIdAndId(groupSettings.getId(), groupFeatureId);
-        if(groupFeature == null) {
-            throw new GroupException("Feature não encontrada.");
-        }
-        if(enabled != null) {
-            groupFeature.enabled = enabled;
-        }
-        if(description != null) {
-            groupFeature.description = description;
-        }
-        groupFeaturesRepository.save(groupFeature);
-        return true;
-    }
-
-    public boolean editFeature(Group group, String groupFeatureId, Boolean enabled, String description) {
-        if(group == null || groupFeatureId == null || groupFeatureId.isEmpty()) {
-            return false;
-        }
-        return editFeature(group, UUID.fromString(groupFeatureId), enabled, description);
-    }
-
-
 
     public GroupEnvironment getGroupEnvironment(Group group) {
         if(group == null) {
@@ -897,5 +819,20 @@ public class GroupService {
         return group.participants.stream()
             .filter(pg -> pg.role.getRoleType() == RoleType.ADMINISTRATOR)
             .toList();
+    }
+
+    public Group getGroupByGroupSettingsId(UUID groupSettingsId) {
+        return groupRepository.findFirstByGroupSettingsId(groupSettingsId);
+    }
+
+    // determining group by groupEmailFilterId
+    public Group getGroupByGroupEmailFilterId(UUID groupEmailFilterId) {
+        GroupEmailFilter groupEmailFilter = groupEmailFilterRepository.findFirstById(groupEmailFilterId).orElseThrow(() -> new GroupException("Filtro não existe."));
+        UUID groupSettingId = groupEmailFilter.groupSettings.getId();
+        Group group = getGroupByGroupSettingsId(groupSettingId);
+        if(group != null) {
+            return group;
+        }
+        throw new GroupException("Falha ao determinar grupo por filtro de email.");
     }
 }

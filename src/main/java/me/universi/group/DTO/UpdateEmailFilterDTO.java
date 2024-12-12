@@ -5,15 +5,11 @@ import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 
 public record UpdateEmailFilterDTO(
+    @NotNull
     @NotBlank
     UUID groupEmailFilterId,
 
-    @NotBlank
     String email,
-
-    @NotNull
     Boolean enabled,
-
-    @NotBlank
     String type
 ) { }

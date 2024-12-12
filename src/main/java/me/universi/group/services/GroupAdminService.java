@@ -30,12 +30,10 @@ public class GroupAdminService {
         if(!groupService.canEditGroup(group))
             throw new GroupException("Você não tem permissão para gerenciar este grupo.");
 
-        List<Profile> profiles = groupService.getAdministrators(group).stream()
+        return groupService.getAdministrators(group).stream()
                 .sorted(Comparator.comparing(ProfileGroup::getJoined).reversed())
                 .map(ProfileGroup::getProfile)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
-
-        return profiles;
     }
 }

@@ -18,7 +18,7 @@ public class GroupEnvironmentController {
     }
 
     @PatchMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GroupEnvironment> environment_update(@Valid @RequestBody UpdateGroupEnvironmentDTO updateGroupEnvironmentDTO) {
+    public ResponseEntity<GroupEnvironment> environment_update( @Valid @RequestBody UpdateGroupEnvironmentDTO updateGroupEnvironmentDTO ) {
         return ResponseEntity.ok(groupEnvironmentService.updateOrganizationEnvironment( updateGroupEnvironmentDTO ));
     }
 

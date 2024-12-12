@@ -18,7 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/group/participant")
+@RequestMapping("/api/group/participants")
 public class GroupParticipantController {
     private final GroupService groupService;
     private final UserService userService;

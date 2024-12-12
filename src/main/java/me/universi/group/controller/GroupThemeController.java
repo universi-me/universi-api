@@ -19,7 +19,7 @@ public class GroupThemeController {
     }
 
     @PatchMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GroupTheme> theme_update(@Valid @RequestBody UpdateGroupThemeDTO updateGroupThemeDTO) {
+    public ResponseEntity<GroupTheme> theme_update( @Valid @RequestBody UpdateGroupThemeDTO updateGroupThemeDTO ) {
         return ResponseEntity.ok(groupThemeService.updateTheme( updateGroupThemeDTO ));
     }
 }
