@@ -2,7 +2,7 @@ package me.universi.education.dto;
 
 import jakarta.annotation.Nullable;
 
-public record UpdateTypeEducationDTO(
+public record UpdateEducationTypeDTO(
     @Nullable
     String name
 ) {}

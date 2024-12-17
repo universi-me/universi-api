@@ -1,10 +1,10 @@
 package me.universi.education.controller;
 
 
-import me.universi.education.dto.CreateTypeEducationDTO;
-import me.universi.education.dto.UpdateTypeEducationDTO;
-import me.universi.education.entities.TypeEducation;
-import me.universi.education.servicies.TypeEducationService;
+import me.universi.education.dto.CreateEducationTypeDTO;
+import me.universi.education.dto.UpdateEducationTypeDTO;
+import me.universi.education.entities.EducationType;
+import me.universi.education.servicies.EducationTypeService;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -25,40 +25,40 @@ import java.util.List;
 
 @RestController
 @RequestMapping(value = "/api/education-types")
-public class TypeEducationController {
+public class EducationTypeController {
 
-    private TypeEducationService typeEducationService;
+    private EducationTypeService educationTypeService;
 
-    public TypeEducationController(TypeEducationService typeEducationService){
-        this.typeEducationService = typeEducationService;
+    public EducationTypeController(EducationTypeService educationTypeService){
+        this.educationTypeService = educationTypeService;
     }
 
     @PostMapping( path = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE )
-    public ResponseEntity<TypeEducation> create( @Valid @RequestBody CreateTypeEducationDTO createTypeEducationDTO ) {
-        return new ResponseEntity<>( typeEducationService.create( createTypeEducationDTO ), HttpStatus.CREATED );
+    public ResponseEntity<EducationType> create( @Valid @RequestBody CreateEducationTypeDTO createEducationTypeDTO ) {
+        return new ResponseEntity<>( educationTypeService.create( createEducationTypeDTO ), HttpStatus.CREATED );
     }
 
     @GetMapping( path = "/{idOrName}", produces = MediaType.APPLICATION_JSON_VALUE )
-    public ResponseEntity<TypeEducation> get( @Valid @PathVariable @NotNull String idOrName ) {
-        return ResponseEntity.ok( typeEducationService.findByIdOrNameOrThrow( idOrName ) );
+    public ResponseEntity<EducationType> get( @Valid @PathVariable @NotNull String idOrName ) {
+        return ResponseEntity.ok( educationTypeService.findByIdOrNameOrThrow( idOrName ) );
     }
 
     @PutMapping( path = "/{idOrName}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE )
-    public ResponseEntity<TypeEducation> update(
+    public ResponseEntity<EducationType> update(
         @Valid @PathVariable @NotNull String idOrName,
-        @Valid @RequestBody UpdateTypeEducationDTO updateTypeEducationDTO
+        @Valid @RequestBody UpdateEducationTypeDTO updateEducationTypeDTO
     ) {
-        return ResponseEntity.ok( typeEducationService.update( idOrName, updateTypeEducationDTO ) );
+        return ResponseEntity.ok( educationTypeService.update( idOrName, updateEducationTypeDTO ) );
     }
 
     @GetMapping( path = "", produces = MediaType.APPLICATION_JSON_VALUE )
-    public ResponseEntity<List<TypeEducation>> findAll( ) {
-        return ResponseEntity.ok( typeEducationService.findAll() );
+    public ResponseEntity<List<EducationType>> findAll( ) {
+        return ResponseEntity.ok( educationTypeService.findAll() );
     }
 
     @DeleteMapping( path = "/{idOrName}", produces = MediaType.APPLICATION_JSON_VALUE )
     public ResponseEntity<Void> delete( @Valid @PathVariable @NotNull String idOrName ) {
-        typeEducationService.delete( idOrName );
+        educationTypeService.delete( idOrName );
         return ResponseEntity.noContent().build();
     }
 }

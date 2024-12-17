@@ -2,7 +2,7 @@ package me.universi.education.dto;
 
 import jakarta.validation.constraints.NotBlank;
 
-public record CreateTypeEducationDTO(
+public record CreateEducationTypeDTO(
     @NotBlank
     String name
 ) {}

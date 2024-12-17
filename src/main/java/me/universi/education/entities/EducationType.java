@@ -7,6 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.NotNull;
@@ -17,11 +18,12 @@ import java.util.UUID;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
-@Entity(name = "type_education")
-@SQLDelete(sql = "UPDATE type_education SET deleted = true WHERE id=?")
+@Entity(name = "EducationType" )
+@Table( name = "education_type", schema = "education" )
+@SQLDelete(sql = "UPDATE education_type SET deleted = true WHERE id=?")
 @SQLRestriction( "NOT deleted" )
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-public class TypeEducation {
+public class EducationType {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id")
@@ -40,10 +42,10 @@ public class TypeEducation {
     @Column(name = "deleted")
     private boolean deleted = Boolean.FALSE;
 
-    public TypeEducation() {
+    public EducationType() {
     }
 
-    public TypeEducation(String name) {
+    public EducationType(String name) {
         this.name = name;
     }
 

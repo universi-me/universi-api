@@ -6,7 +6,7 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import me.universi.api.entities.Response;
 import me.universi.education.entities.Education;
-import me.universi.education.entities.TypeEducation;
+import me.universi.education.entities.EducationType;
 import me.universi.education.exceptions.EducationException;
 import me.universi.education.exceptions.TypeEducationException;
 import me.universi.education.repositories.EducationRepository;
@@ -35,9 +35,9 @@ public class EducationService {
     private final UserService userService;
     private final ProfileService profileService;
     private final InstitutionService institutionService;
-    private final TypeEducationService typeEducationService;
+    private final EducationTypeService typeEducationService;
 
-    public EducationService(EducationRepository educationRepository, UserService userService, ProfileService profileService, TypeEducationService typeEducationService, InstitutionService institutionService){
+    public EducationService(EducationRepository educationRepository, UserService userService, ProfileService profileService, EducationTypeService typeEducationService, InstitutionService institutionService){
         this.educationRepository = educationRepository;
         this.userService = userService;
         this.profileService = profileService;
@@ -150,7 +150,7 @@ public class EducationService {
             checkPermissionForEdit(education, false);
 
             if(typeEducationId != null) {
-                TypeEducation typeEducation = typeEducationService.findOrThrow(UUID.fromString(typeEducationId));
+                EducationType typeEducation = typeEducationService.findOrThrow(UUID.fromString(typeEducationId));
                 if(typeEducation == null) {
                     throw new EducationException("Tipo de Education não encontrado.");
                 }
@@ -234,9 +234,9 @@ public class EducationService {
                 }
             }
 
-            TypeEducation typeEducation = typeEducationService.findOrThrow(UUID.fromString(typeEducationId));
+            EducationType typeEducation = typeEducationService.findOrThrow(UUID.fromString(typeEducationId));
             if(typeEducation == null) {
-                throw new TypeEducationException("TypeEducation não encontrado.");
+                throw new TypeEducationException("EducationType não encontrado.");
             }
 
             Institution institution = institutionService.findOrThrow(UUID.fromString(institutionId));

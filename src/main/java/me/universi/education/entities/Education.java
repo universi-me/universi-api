@@ -35,7 +35,7 @@ public class Education {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "type_education_id")
-    private TypeEducation typeEducation;
+    private EducationType typeEducation;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "institution_id")
@@ -67,7 +67,7 @@ public class Education {
         this.presentDate = false;
     }
 
-    public Education( TypeEducation typeEducation, Institution institution, Date startDate, Date endDate, Boolean presentDate){
+    public Education( EducationType typeEducation, Institution institution, Date startDate, Date endDate, Boolean presentDate){
         this.typeEducation = typeEducation;
         this.institution = institution;
         this.startDate = startDate;
@@ -75,7 +75,7 @@ public class Education {
         this.presentDate = presentDate;
     }
 
-    public Education( TypeEducation typeEducation, Institution institution, Date startDate, Date endDate){
+    public Education( EducationType typeEducation, Institution institution, Date startDate, Date endDate){
         this.typeEducation = typeEducation;
         this.institution = institution;
         this.startDate = startDate;
@@ -87,11 +87,11 @@ public class Education {
         return id;
     }
 
-    public TypeEducation getTypeEducation() {
+    public EducationType getTypeEducation() {
         return typeEducation;
     }
 
-    public void setTypeEducation(TypeEducation typeEducation) {
+    public void setTypeEducation(EducationType typeEducation) {
         this.typeEducation = typeEducation;
     }
 
