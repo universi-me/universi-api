@@ -2,7 +2,7 @@ package me.universi.profile.services;
 
 import me.universi.Sys;
 import me.universi.education.entities.Education;
-import me.universi.curriculum.experience.entities.Experience;
+import me.universi.experience.entities.Experience;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.exceptions.ProfileException;
 import me.universi.profile.repositories.PerfilRepository;

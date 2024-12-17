@@ -1,13 +1,13 @@
-package me.universi.curriculum.experience.servicies;
+package me.universi.experience.servicies;
 
 import me.universi.api.entities.Response;
 import me.universi.education.exceptions.EducationException;
 import me.universi.education.exceptions.TypeEducationException;
-import me.universi.curriculum.experience.entities.Experience;
-import me.universi.curriculum.experience.entities.TypeExperience;
-import me.universi.curriculum.experience.exceptions.ExperienceException;
-import me.universi.curriculum.experience.exceptions.TypeExperienceException;
-import me.universi.curriculum.experience.repositories.ExperienceRepository;
+import me.universi.experience.entities.Experience;
+import me.universi.experience.entities.TypeExperience;
+import me.universi.experience.exceptions.ExperienceException;
+import me.universi.experience.exceptions.TypeExperienceException;
+import me.universi.experience.repositories.ExperienceRepository;
 import me.universi.institution.services.InstitutionService;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.exceptions.ProfileException;

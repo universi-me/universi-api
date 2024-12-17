@@ -1,4 +1,4 @@
-package me.universi.curriculum.experience.exceptions;
+package me.universi.experience.exceptions;
 
 public class TypeExperienceException extends Exception{
 

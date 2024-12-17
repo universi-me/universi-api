@@ -1,10 +1,11 @@
-package me.universi.curriculum.experience.controller;
+package me.universi.experience.controller;
 
 import me.universi.api.entities.Response;
 import me.universi.competence.exceptions.CompetenceException;
 import me.universi.education.exceptions.TypeEducationException;
-import me.universi.curriculum.experience.entities.TypeExperience;
-import me.universi.curriculum.experience.servicies.TypeExperienceService;
+import me.universi.experience.entities.TypeExperience;
+import me.universi.experience.servicies.TypeExperienceService;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;

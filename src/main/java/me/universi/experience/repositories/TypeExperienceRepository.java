@@ -1,9 +1,11 @@
-package me.universi.curriculum.experience.repositories;
+package me.universi.experience.repositories;
 
 import java.util.Optional;
-import me.universi.curriculum.experience.entities.TypeExperience;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
+import me.universi.experience.entities.TypeExperience;
 
 import java.util.UUID;
 

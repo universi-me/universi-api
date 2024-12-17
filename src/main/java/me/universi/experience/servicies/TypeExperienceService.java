@@ -1,8 +1,9 @@
-package me.universi.curriculum.experience.servicies;
+package me.universi.experience.servicies;
 
-import me.universi.curriculum.experience.entities.TypeExperience;
-import me.universi.curriculum.experience.repositories.TypeExperienceRepository;
 import org.springframework.stereotype.Service;
+
+import me.universi.experience.entities.TypeExperience;
+import me.universi.experience.repositories.TypeExperienceRepository;
 
 import java.util.ArrayList;
 import java.util.List;

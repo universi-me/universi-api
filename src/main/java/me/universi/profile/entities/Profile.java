@@ -12,7 +12,7 @@ import me.universi.capacity.entidades.FolderFavorite;
 import me.universi.capacity.entidades.FolderProfile;
 import me.universi.competence.entities.CompetenceType;
 import me.universi.education.entities.Education;
-import me.universi.curriculum.experience.entities.Experience;
+import me.universi.experience.entities.Experience;
 import me.universi.group.entities.ProfileGroup;
 import me.universi.link.entities.Link;
 import me.universi.roles.entities.Roles;

@@ -1,4 +1,4 @@
-package me.universi.curriculum.experience.entities;
+package me.universi.experience.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
