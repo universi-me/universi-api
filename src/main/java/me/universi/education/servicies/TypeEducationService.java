@@ -1,122 +1,91 @@
 package me.universi.education.servicies;
 
-import me.universi.api.entities.Response;
+import me.universi.education.dto.CreateTypeEducationDTO;
+import me.universi.education.dto.UpdateTypeEducationDTO;
 import me.universi.education.entities.TypeEducation;
-import me.universi.education.exceptions.TypeEducationException;
 import me.universi.education.repositories.TypeEducationRepository;
+import me.universi.user.services.UserService;
+import me.universi.util.CastingUtil;
 
-import org.springframework.http.MediaType;
+import org.springframework.lang.NonNull;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
+
+import jakarta.persistence.EntityNotFoundException;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 @Service
 public class TypeEducationService {
 
-    private TypeEducationRepository typeEducationRepository;
+    private final TypeEducationRepository typeEducationRepository;
+    private final UserService userService;
 
-    public TypeEducationService(TypeEducationRepository typeEducationRepository){
+    public TypeEducationService(TypeEducationRepository typeEducationRepository, UserService userService){
         this.typeEducationRepository = typeEducationRepository;
-    }
-
-    public TypeEducation save(TypeEducation typeEducation){
-        return typeEducationRepository.saveAndFlush(typeEducation);
+        this.userService = userService;
     }
 
     public List<TypeEducation> findAll(){
         return typeEducationRepository.findAll();
     }
 
-    public Optional<TypeEducation> findById(UUID id){
-        return typeEducationRepository.findFirstById(id);
+    public Optional<TypeEducation> find( UUID id ) {
+        return typeEducationRepository.findById( id );
     }
 
-    public TypeEducation update(TypeEducation newTypeEducation, UUID id) throws Exception{
-        return typeEducationRepository.findById(id).map(typeEducation -> {
-            typeEducation.setName(newTypeEducation.getName());
-            return save(typeEducation);
-        }).orElseGet(()->{
-            try {
-                return save(newTypeEducation);
-            }catch (Exception e){
-                /*Implementar tratamento de exeptions*/
-                return null;
-            }
-        });
+    public TypeEducation findOrThrow( UUID id ) throws EntityNotFoundException {
+        return find( id ).orElseThrow( () -> new EntityNotFoundException( "Tipo de Educação de ID '" + id + "' não encontrado" ) );
     }
 
-    public void deleteLogic(UUID id){
-        TypeEducation typeEducation = findById(id).get();
-        typeEducation.setDeleted(true);
-        save(typeEducation);
+    public Optional<TypeEducation> findByName( String name ) {
+        return typeEducationRepository.findFirstByNameIgnoreCase( name );
     }
 
-
-    public Response create(Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-
-            String name = (String) body.get("name");
-            if(name.isBlank() || name.isEmpty()){
-                throw new TypeEducationException("Paramentro name passado é nulo");
-            }
-
-            TypeEducation newTypeEducation = new TypeEducation(name);
-            save(newTypeEducation);
-
-            response.message = "Tipo de Educação criada com sucesso.";
-            response.success = true;
-
-        });
+    public TypeEducation findByNameOrThrow( String name ) throws EntityNotFoundException {
+        return findByName( name ).orElseThrow( () -> new EntityNotFoundException( "Tipo de Educação de nome '" + name + "' não encontrado" ) );
     }
 
-    public Response get(Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-
-            String id = (String)body.get("typeEducationId");
-
-            if(id.isEmpty()) {
-                throw new TypeEducationException("Parametro id é nulo.");
-            }
-
-            TypeEducation typeEducation = findById(UUID.fromString(id)).get();
-
-            response.body.put("typeEducation", typeEducation);
-            response.success = true;
-
-        });
+    public Optional<TypeEducation> findByIdOrName( String idOrName ) {
+        return typeEducationRepository.findFirstByIdOrNameIgnoreCase(
+            CastingUtil.getUUID(idOrName).orElse(null),
+            idOrName
+        );
     }
 
-    public Response findAll(Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-
-            List<TypeEducation> typeEducations = findAll();
-
-            response.body.put("lista", typeEducations);
-            response.success = true;
-
-        });
+    public TypeEducation findByIdOrNameOrThrow( String idOrName ) throws EntityNotFoundException {
+        return findByIdOrName( idOrName ).orElseThrow( () -> new EntityNotFoundException( "Tipo de Educação de nome ou ID '" + idOrName + "' não encontrado" ) );
     }
 
+    public TypeEducation update( @NonNull String idOrName, @NonNull UpdateTypeEducationDTO updateTypeEducationDTO ) {
+        if ( !userService.isUserAdminSession() )
+            throw new AccessDeniedException( "Você não tem permissão para alterar este Tipo de Educação" );
 
-    public Response remove(Map<String, Object> body) {
-        return Response.buildResponse(response -> {
+        var typeEducation = findByIdOrNameOrThrow( idOrName );
 
-            String id = (String)body.get("tyEducationId");
-            if(id.isEmpty()) {
-                throw new TypeEducationException("Parametro typeEducationId é nulo.");
-            }
+        if ( updateTypeEducationDTO.name() != null && !updateTypeEducationDTO.name().isBlank() )
+            typeEducation.setName( updateTypeEducationDTO.name() );
 
-            deleteLogic(UUID.fromString(id));
+        return typeEducationRepository.saveAndFlush( typeEducation );
+    }
 
-            response.message = "Tipo de Educação removida com sucesso.";
-            response.success = true;
+    public TypeEducation create( CreateTypeEducationDTO createTypeEducationDTO ) throws IllegalStateException {
+        var existingTypeEducation = findByName( createTypeEducationDTO.name() );
+        if ( existingTypeEducation.isPresent() )
+            throw new IllegalStateException( "Tipo de Educação de nome '" + existingTypeEducation.get().getName() + "' já existe" );
 
-        });
+        return typeEducationRepository.saveAndFlush(
+            new TypeEducation( createTypeEducationDTO.name() )
+        );
+    }
+
+    public void delete( String idOrName ) {
+        if ( !userService.isUserAdminSession() )
+            throw new AccessDeniedException( "Você não tem permissão para deletar este Tipo de Educação" );
+
+        var typeEducation = findByIdOrNameOrThrow( idOrName );
+        typeEducationRepository.delete( typeEducation );
     }
 }

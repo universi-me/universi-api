@@ -15,11 +15,11 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.util.Date;
 import java.util.UUID;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity(name = "type_education")
 @SQLDelete(sql = "UPDATE type_education SET deleted = true WHERE id=?")
-@Where(clause = "deleted=false")
+@SQLRestriction( "NOT deleted" )
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class TypeEducation {
     @Id

@@ -11,6 +11,7 @@ import java.util.UUID;
 
 @Repository
 public interface TypeEducationRepository extends JpaRepository<TypeEducation, UUID> {
-    Optional<TypeEducation> findFirstById(UUID id);
+    Optional<TypeEducation> findFirstByNameIgnoreCase( String name );
+    Optional<TypeEducation> findFirstByIdOrNameIgnoreCase( UUID id, String name );
 }
 

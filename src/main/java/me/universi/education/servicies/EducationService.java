@@ -150,7 +150,7 @@ public class EducationService {
             checkPermissionForEdit(education, false);
 
             if(typeEducationId != null) {
-                TypeEducation typeEducation = typeEducationService.findById(UUID.fromString(typeEducationId)).get();
+                TypeEducation typeEducation = typeEducationService.findOrThrow(UUID.fromString(typeEducationId));
                 if(typeEducation == null) {
                     throw new EducationException("Tipo de Education não encontrado.");
                 }
@@ -234,7 +234,7 @@ public class EducationService {
                 }
             }
 
-            TypeEducation typeEducation = typeEducationService.findById(UUID.fromString(typeEducationId)).get();
+            TypeEducation typeEducation = typeEducationService.findOrThrow(UUID.fromString(typeEducationId));
             if(typeEducation == null) {
                 throw new TypeEducationException("TypeEducation não encontrado.");
             }
