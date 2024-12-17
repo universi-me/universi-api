@@ -2,9 +2,9 @@ package me.universi.curriculum.services;
 
 import me.universi.competence.entities.CompetenceType;
 import me.universi.competence.services.CompetenceService;
-import me.universi.curriculum.education.entities.Education;
-import me.universi.curriculum.education.entities.TypeEducation;
-import me.universi.curriculum.education.servicies.EducationService;
+import me.universi.education.entities.Education;
+import me.universi.education.entities.TypeEducation;
+import me.universi.education.servicies.EducationService;
 import me.universi.curriculum.experience.entities.Experience;
 import me.universi.curriculum.experience.entities.TypeExperience;
 import me.universi.profile.entities.Profile;

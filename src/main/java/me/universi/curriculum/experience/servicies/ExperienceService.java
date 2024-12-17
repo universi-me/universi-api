@@ -1,8 +1,8 @@
 package me.universi.curriculum.experience.servicies;
 
 import me.universi.api.entities.Response;
-import me.universi.curriculum.education.exceptions.EducationException;
-import me.universi.curriculum.education.exceptions.TypeEducationException;
+import me.universi.education.exceptions.EducationException;
+import me.universi.education.exceptions.TypeEducationException;
 import me.universi.curriculum.experience.entities.Experience;
 import me.universi.curriculum.experience.entities.TypeExperience;
 import me.universi.curriculum.experience.exceptions.ExperienceException;

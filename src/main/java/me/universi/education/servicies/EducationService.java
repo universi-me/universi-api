@@ -1,17 +1,17 @@
-package me.universi.curriculum.education.servicies;
+package me.universi.education.servicies;
 
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import me.universi.api.entities.Response;
-import me.universi.curriculum.education.entities.Education;
+import me.universi.education.entities.Education;
+import me.universi.education.entities.TypeEducation;
+import me.universi.education.exceptions.EducationException;
+import me.universi.education.exceptions.TypeEducationException;
+import me.universi.education.repositories.EducationRepository;
 import me.universi.institution.entities.Institution;
-import me.universi.curriculum.education.entities.TypeEducation;
-import me.universi.curriculum.education.exceptions.EducationException;
 import me.universi.institution.services.InstitutionService;
-import me.universi.curriculum.education.exceptions.TypeEducationException;
-import me.universi.curriculum.education.repositories.EducationRepository;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.exceptions.ProfileException;
 import me.universi.profile.services.ProfileService;

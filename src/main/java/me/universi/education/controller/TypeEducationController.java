@@ -1,10 +1,11 @@
-package me.universi.curriculum.education.controller;
+package me.universi.education.controller;
 
 
 import me.universi.api.entities.Response;
-import me.universi.curriculum.education.entities.TypeEducation;
-import me.universi.curriculum.education.exceptions.TypeEducationException;
-import me.universi.curriculum.education.servicies.TypeEducationService;
+import me.universi.education.entities.TypeEducation;
+import me.universi.education.exceptions.TypeEducationException;
+import me.universi.education.servicies.TypeEducationService;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;

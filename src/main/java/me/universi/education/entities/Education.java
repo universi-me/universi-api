@@ -1,4 +1,4 @@
-package me.universi.curriculum.education.entities;
+package me.universi.education.entities;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;

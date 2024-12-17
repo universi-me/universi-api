@@ -1,4 +1,4 @@
-package me.universi.curriculum.education.exceptions;
+package me.universi.education.exceptions;
 
 public class EducationException extends RuntimeException{
 

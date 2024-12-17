@@ -1,9 +1,10 @@
-package me.universi.curriculum.education.servicies;
+package me.universi.education.servicies;
 
 import me.universi.api.entities.Response;
-import me.universi.curriculum.education.entities.TypeEducation;
-import me.universi.curriculum.education.exceptions.TypeEducationException;
-import me.universi.curriculum.education.repositories.TypeEducationRepository;
+import me.universi.education.entities.TypeEducation;
+import me.universi.education.exceptions.TypeEducationException;
+import me.universi.education.repositories.TypeEducationRepository;
+
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PostMapping;
