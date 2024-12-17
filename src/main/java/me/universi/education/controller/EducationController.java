@@ -2,7 +2,7 @@ package me.universi.education.controller;
 
 
 import me.universi.api.entities.Response;
-import me.universi.education.servicies.EducationService;
+import me.universi.education.services.EducationService;
 
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;

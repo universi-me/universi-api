@@ -1,4 +1,4 @@
-package me.universi.education.servicies;
+package me.universi.education.services;
 
 import me.universi.education.dto.CreateEducationTypeDTO;
 import me.universi.education.dto.UpdateEducationTypeDTO;

@@ -4,7 +4,7 @@ package me.universi.education.controller;
 import me.universi.education.dto.CreateEducationTypeDTO;
 import me.universi.education.dto.UpdateEducationTypeDTO;
 import me.universi.education.entities.EducationType;
-import me.universi.education.servicies.EducationTypeService;
+import me.universi.education.services.EducationTypeService;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;

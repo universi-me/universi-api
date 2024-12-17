@@ -1,4 +1,4 @@
-package me.universi.education.servicies;
+package me.universi.education.services;
 
 
 import jakarta.persistence.EntityManager;
