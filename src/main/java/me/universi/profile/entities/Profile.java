@@ -55,13 +55,7 @@ public class Profile implements Serializable {
     private Collection<ProfileGroup> groups;
 
     @JsonIgnore
-    @ManyToMany
-    @JoinTable(
-            name = "education_profile",
-            joinColumns = @JoinColumn(name = "profile_id"),
-            inverseJoinColumns = @JoinColumn(name = "education_id")
-    )
-    @NotFound(action = NotFoundAction.IGNORE)
+    @OneToMany( mappedBy = "profile" )
     private Collection<Education> educations;
 
     @JsonIgnore

@@ -10,22 +10,26 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.NotNull;
 import me.universi.institution.entities.Institution;
+import me.universi.profile.entities.Profile;
 
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
 import java.util.UUID;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.SQLRestriction;
 
-@Entity(name = "education")
-@SQLDelete(sql = "UPDATE education SET deleted = true WHERE id=?")
-@Where(clause = "deleted=false")
+@Entity(name = "Education")
+@Table( name = "education", schema = "education" )
+@SQLDelete(sql = "UPDATE education.education SET deleted = true WHERE id=?")
+@SQLRestriction( "NOT deleted" )
 public class Education {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -33,9 +37,9 @@ public class Education {
     @NotNull
     private UUID id;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "type_education_id")
-    private EducationType typeEducation;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "education_type_id")
+    private EducationType educationType;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "institution_id")
@@ -50,9 +54,10 @@ public class Education {
     @Column(name = "end_date")
     private Date endDate;
 
-    /*Vai verificar se o usuario ainda nao terminou*/
-    @Column(name = "present_date")
-    private Boolean presentDate;
+    @ManyToOne
+    @JoinColumn( name = "profile_id" )
+    @NotNull
+    private Profile profile;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
@@ -63,79 +68,36 @@ public class Education {
     @Column(name = "deleted")
     private boolean deleted = Boolean.FALSE;
 
-    public Education(){
-        this.presentDate = false;
-    }
+    public Education() {}
 
-    public Education( EducationType typeEducation, Institution institution, Date startDate, Date endDate, Boolean presentDate){
-        this.typeEducation = typeEducation;
+    public Education( EducationType typeEducation, Institution institution, Date startDate, Date endDate, Profile profile ){
+        this.educationType = typeEducation;
         this.institution = institution;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.presentDate = presentDate;
+        this.profile = profile;
     }
 
-    public Education( EducationType typeEducation, Institution institution, Date startDate, Date endDate){
-        this.typeEducation = typeEducation;
-        this.institution = institution;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.presentDate = false;
-    }
+    public UUID getId() { return id; }
 
-    public UUID getId() {
-        return id;
-    }
+    public EducationType getEducationType() { return educationType; }
+    public void setEducationType(EducationType typeEducation) { this.educationType = typeEducation; }
 
-    public EducationType getTypeEducation() {
-        return typeEducation;
-    }
+    public Institution getInstitution() { return institution; }
+    public void setInstitution(Institution institution) { this.institution = institution; }
 
-    public void setTypeEducation(EducationType typeEducation) {
-        this.typeEducation = typeEducation;
-    }
+    public Date getStartDate() { return startDate; }
+    public void setStartDate(Date startDate) { this.startDate = startDate; }
 
-    public Institution getInstitution() {
-        return institution;
-    }
+    public Date getEndDate() { return endDate; }
+    public void setEndDate(Date endDate) { this.endDate = endDate; }
 
-    public void setInstitution(Institution institution) {
-        this.institution = institution;
-    }
+    public Date getCreationDate() { return creationDate; }
+    public void setCreationDate(Date creationDate) { this.creationDate = creationDate; }
 
-    public Date getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(Date startDate) {
-        this.startDate = startDate;
-    }
-
-    public Date getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(Date endDate) {
-        this.endDate = endDate;
-    }
-
-    public Boolean getPresentDate() {
-        return presentDate;
-    }
-
-    public void setPresentDate(Boolean presentDate) {
-        this.presentDate = presentDate;
-    }
-
-    public Date getCreationDate() {
-        return creationDate;
-    }
-
-    public void setCreationDate(Date creationDate) {
-        this.creationDate = creationDate;
-    }
+    public Profile getProfile() { return profile; }
+    public void setProfile(Profile profile) { this.profile = profile; }
 
     public boolean isDeleted() { return deleted; }
-
     public void setDeleted(boolean deleted) { this.deleted = deleted; }
 }
