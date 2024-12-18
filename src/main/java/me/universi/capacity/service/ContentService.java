@@ -5,12 +5,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.constraints.NotNull;
 import me.universi.Sys;
+import me.universi.api.interfaces.EntityService;
 import me.universi.capacity.dto.CreateContentDTO;
 import me.universi.capacity.dto.UpdateContentDTO;
 import me.universi.capacity.entidades.Category;
@@ -22,12 +20,11 @@ import me.universi.capacity.exceptions.CapacityException;
 import me.universi.capacity.repository.ContentRepository;
 import me.universi.capacity.repository.ContentStatusRepository;
 import me.universi.capacity.repository.FolderContentsRepository;
-import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
 import me.universi.user.services.UserService;
 
 @Service
-public class ContentService {
+public class ContentService extends EntityService<Content> {
     private final CategoryService categoryService;
     private final ContentRepository contentRepository;
     private final FolderService folderService;
@@ -45,6 +42,8 @@ public class ContentService {
         this.profileService = profileService;
         this.userService = userService;
         this.folderContentsRepository = folderContentsRepository;
+
+        this.entityName = "Material";
     }
 
     public static ContentService getInstance() {
@@ -52,18 +51,12 @@ public class ContentService {
     }
 
     public List<Content> findAll(){
-        List<Content> contentList = new ArrayList<>();
-        contentRepository.findAll().forEach(contentList::add);
-
-        return contentList;
+        return contentRepository.findAll();
     }
 
+    @Override
     public Optional<Content> find( UUID id ) {
         return contentRepository.findById( id );
-    }
-
-    public Content findOrThrow( UUID id ) throws EntityNotFoundException {
-        return find( id ).orElseThrow( () -> new EntityNotFoundException( "Material de ID '" + id + "' não encontrado" ) );
     }
 
     public List<Content> findByCategory(UUID categoryId) throws CapacityException {
@@ -118,7 +111,7 @@ public class ContentService {
 
     public Content update( UUID id, UpdateContentDTO updateContentDTO ) {
         var content = findOrThrow( id );
-        canEditOrThrow( content, profileService.getProfileInSession() );
+        checkPermissionToEdit( content );
 
         if ( updateContentDTO.description() != null && !updateContentDTO.description().isBlank() )
             content.setDescription( updateContentDTO.description() );
@@ -146,7 +139,7 @@ public class ContentService {
 
     public void delete( UUID id ) {
         Content content = findOrThrow( id );
-        canEditOrThrow( content, profileService.getProfileInSession() );
+        checkPermissionToDelete( content );
 
         contentRepository.delete( content );
     }
@@ -186,17 +179,20 @@ public class ContentService {
     }
 
     public void deleteStatus(UUID contentId) {
-        canEditOrThrow( findOrThrow( contentId ) , profileService.getProfileInSession() );
-        contentStatusRepository.deleteByContentId(contentId);
+        var content = findOrThrow( contentId );
+        checkPermissionToEdit( content );
+
+        contentStatusRepository.deleteByContentId( content.getId() );
     }
 
-    public boolean canEdit( @NotNull Content content, @NotNull Profile profile ) {
-        return content.getAuthor().getId().equals( profile.getId() )
-            || userService.isUserAdmin( profile.getUser() );
+    @Override
+    public boolean hasPermissionToEdit( Content content ) {
+        return profileService.isSessionOfProfile( content.getAuthor() )
+            || userService.isUserAdminSession();
     }
 
-    public void canEditOrThrow( @NotNull Content content, @NotNull Profile profile ) throws AccessDeniedException {
-        if ( !canEdit( content, profile ) )
-            throw new AccessDeniedException( "Você não tem permissão para editar este material" );
+    @Override
+    public boolean hasPermissionToDelete( Content content ) {
+        return hasPermissionToEdit( content );
     }
 }
