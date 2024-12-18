@@ -7,6 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.NotNull;
@@ -15,13 +16,14 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.util.Date;
 import java.util.UUID;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.SQLRestriction;
 
-@Entity(name = "type_experience")
-@SQLDelete(sql = "UPDATE type_experience SET deleted = true WHERE id=?")
-@Where(clause = "deleted=false")
+@Entity(name = "ExperienceType")
+@Table( name = "experience_type", schema = "experience" )
+@SQLDelete(sql = "UPDATE experience.experience_type SET deleted = true WHERE id=?")
+@SQLRestriction( "NOT deleted" )
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-public class TypeExperience {
+public class ExperienceType {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id")
@@ -40,35 +42,20 @@ public class TypeExperience {
     @Column(name = "deleted")
     private boolean deleted = Boolean.FALSE;
 
-    public TypeExperience(){
+    public ExperienceType() { }
 
-    }
-
-    public TypeExperience(String name){
+    public ExperienceType(String name){
         this.name = name;
     }
 
-    public UUID getId() {
-        return id;
-    }
+    public UUID getId() { return id; }
 
-    public String getName() {
-        return name;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Date getCreationDate() {
-        return creationDate;
-    }
-
-    public void setCreationDate(Date creationDate) {
-        this.creationDate = creationDate;
-    }
+    public Date getCreationDate() { return creationDate; }
+    public void setCreationDate(Date creationDate) { this.creationDate = creationDate; }
 
     public boolean isDeleted() { return deleted; }
-
     public void setDeleted(boolean deleted) { this.deleted = deleted; }
 }

@@ -35,8 +35,8 @@ public class Experience {
     private UUID id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "type_experience_id")
-    private TypeExperience typeExperience;
+    @JoinColumn(name = "experience_type_id")
+    private ExperienceType experienceType;
 
     @ManyToOne
     @JoinColumn(name = "institution_id", nullable = false)
@@ -69,8 +69,8 @@ public class Experience {
 
     }
 
-    public Experience(TypeExperience typeExperience, Institution institution, String description, Date startDate, Date endDate, Boolean presentDate) {
-        this.typeExperience = typeExperience;
+    public Experience(ExperienceType typeExperience, Institution institution, String description, Date startDate, Date endDate, Boolean presentDate) {
+        this.experienceType = typeExperience;
         this.institution = institution;
         this.description = description;
         this.startDate = startDate;
@@ -78,8 +78,8 @@ public class Experience {
         this.presentDate = presentDate;
     }
 
-    public Experience(TypeExperience typeExperience, Institution institution, String description, Date startDate, Date endDate) {
-        this.typeExperience = typeExperience;
+    public Experience(ExperienceType typeExperience, Institution institution, String description, Date startDate, Date endDate) {
+        this.experienceType = typeExperience;
         this.institution = institution;
         this.description = description;
         this.startDate = startDate;
@@ -139,12 +139,12 @@ public class Experience {
         this.creationDate = creationDate;
     }
 
-    public TypeExperience getTypeExperience() {
-        return typeExperience;
+    public ExperienceType getExperienceType() {
+        return experienceType;
     }
 
-    public void setTypeExperience(TypeExperience typeExperience) {
-        this.typeExperience = typeExperience;
+    public void setExperienceType(ExperienceType typeExperience) {
+        this.experienceType = typeExperience;
     }
 
     public boolean isDeleted() { return deleted; }

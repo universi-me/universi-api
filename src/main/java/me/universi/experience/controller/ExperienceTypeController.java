@@ -3,8 +3,8 @@ package me.universi.experience.controller;
 import me.universi.api.entities.Response;
 import me.universi.competence.exceptions.CompetenceException;
 import me.universi.education.exceptions.TypeEducationException;
-import me.universi.experience.entities.TypeExperience;
-import me.universi.experience.services.TypeExperienceService;
+import me.universi.experience.entities.ExperienceType;
+import me.universi.experience.services.ExperienceTypeService;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -25,35 +25,35 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping(value = "/api/curriculum/typeExperience")
-public class TypeExperienceController {
+public class ExperienceTypeController {
 
-    private TypeExperienceService typeExperienceService;
+    private ExperienceTypeService typeExperienceService;
 
-    public TypeExperienceController(TypeExperienceService typeExperienceService){
+    public ExperienceTypeController(ExperienceTypeService typeExperienceService){
         this.typeExperienceService = typeExperienceService;
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public TypeExperience save(@RequestBody TypeExperience typeExperience) throws Exception{
+    public ExperienceType save(@RequestBody ExperienceType typeExperience) throws Exception{
         return  typeExperienceService.save(typeExperience);
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<TypeExperience> getAllCurriculum() throws Exception{
+    public List<ExperienceType> getAllCurriculum() throws Exception{
         return typeExperienceService.findAll();
     }
 
     @GetMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Optional<TypeExperience> getTypeExperience(@PathVariable UUID id){
+    public Optional<ExperienceType> getTypeExperience(@PathVariable UUID id){
         return typeExperienceService.findById(id);
     }
 
     @PutMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public TypeExperience update(@RequestBody TypeExperience newTypeExperience, @PathVariable UUID id) throws Exception {
+    public ExperienceType update(@RequestBody ExperienceType newTypeExperience, @PathVariable UUID id) throws Exception {
         return typeExperienceService.update(newTypeExperience, id);
     }
 
@@ -67,7 +67,7 @@ public class TypeExperienceController {
                 throw new CompetenceException("Parametro name é nulo.");
             }
 
-            TypeExperience typeExperience = new TypeExperience();
+            ExperienceType typeExperience = new ExperienceType();
             typeExperience.setName(name);
 
             typeExperienceService.save(typeExperience);
@@ -90,7 +90,7 @@ public class TypeExperienceController {
 
             String name = (String)body.get("name");
 
-            TypeExperience typeExperience = typeExperienceService.findById(UUID.fromString(id)).get();
+            ExperienceType typeExperience = typeExperienceService.findById(UUID.fromString(id)).get();
             if (typeExperience == null) {
                 throw new TypeEducationException("typeExperience não encontrada.");
             }
@@ -119,7 +119,7 @@ public class TypeExperienceController {
                 throw new TypeEducationException("Parametro typeExperienceId é nulo.");
             }
 
-            TypeExperience typeExperience = typeExperienceService.findById(UUID.fromString(id)).get();
+            ExperienceType typeExperience = typeExperienceService.findById(UUID.fromString(id)).get();
             if (typeExperience == null) {
                 throw new CompetenceException("TypeExperience não encontrada.");
             }
@@ -142,7 +142,7 @@ public class TypeExperienceController {
                 throw new TypeEducationException("Parametro typeExperienceId é nulo.");
             }
 
-            TypeExperience typeExperience = typeExperienceService.findById(UUID.fromString(id)).get();
+            ExperienceType typeExperience = typeExperienceService.findById(UUID.fromString(id)).get();
             if (typeExperience == null) {
                 throw new TypeEducationException("Tipo de Experiência não encontrada.");
             }
@@ -158,7 +158,7 @@ public class TypeExperienceController {
     public Response findAll(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
 
-            List<TypeExperience> typeExperiences = typeExperienceService.findAll();
+            List<ExperienceType> typeExperiences = typeExperienceService.findAll();
 
             response.body.put("lista", typeExperiences);
             response.success = true;

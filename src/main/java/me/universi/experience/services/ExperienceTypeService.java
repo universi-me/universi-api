@@ -2,8 +2,8 @@ package me.universi.experience.services;
 
 import org.springframework.stereotype.Service;
 
-import me.universi.experience.entities.TypeExperience;
-import me.universi.experience.repositories.TypeExperienceRepository;
+import me.universi.experience.entities.ExperienceType;
+import me.universi.experience.repositories.ExperienceTypeRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,27 +11,27 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-public class TypeExperienceService {
+public class ExperienceTypeService {
 
-    private final TypeExperienceRepository typeExperienceRepository;
+    private final ExperienceTypeRepository typeExperienceRepository;
 
-    public TypeExperienceService(TypeExperienceRepository typeExperienceRepository){
+    public ExperienceTypeService(ExperienceTypeRepository typeExperienceRepository){
         this.typeExperienceRepository = typeExperienceRepository;
     }
 
-    public TypeExperience save(TypeExperience typeExperience){
+    public ExperienceType save(ExperienceType typeExperience){
         return typeExperienceRepository.saveAndFlush(typeExperience);
     }
 
-    public List<TypeExperience> findAll(){
+    public List<ExperienceType> findAll(){
         return typeExperienceRepository.findAll();
     }
 
-    public Optional<TypeExperience> findById(UUID id){
+    public Optional<ExperienceType> findById(UUID id){
         return typeExperienceRepository.findFirstById(id);
     }
 
-    public TypeExperience update(TypeExperience newTypeExperience, UUID id) throws Exception{
+    public ExperienceType update(ExperienceType newTypeExperience, UUID id) throws Exception{
         return typeExperienceRepository.findById(id).map(typeExperience -> {
             typeExperience.setName(newTypeExperience.getName());
             return save(typeExperience);
@@ -44,14 +44,14 @@ public class TypeExperienceService {
         });
     }
     public void deleteLogic(UUID id) throws Exception {
-        TypeExperience typeExperience = findById(id).get();
+        ExperienceType typeExperience = findById(id).get();
         typeExperience.setDeleted(true);
         update(typeExperience, id);
     }
 
-    public List<TypeExperience> findAllNotDeleted(){
-        List<TypeExperience> typeExperiences = new ArrayList<>();
-        for (TypeExperience type: typeExperienceRepository.findAll()) {
+    public List<ExperienceType> findAllNotDeleted(){
+        List<ExperienceType> typeExperiences = new ArrayList<>();
+        for (ExperienceType type: typeExperienceRepository.findAll()) {
             if (!type.isDeleted()){
                 typeExperiences.add(type);
             }

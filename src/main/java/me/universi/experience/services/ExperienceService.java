@@ -4,7 +4,7 @@ import me.universi.api.entities.Response;
 import me.universi.education.exceptions.EducationException;
 import me.universi.education.exceptions.TypeEducationException;
 import me.universi.experience.entities.Experience;
-import me.universi.experience.entities.TypeExperience;
+import me.universi.experience.entities.ExperienceType;
 import me.universi.experience.exceptions.ExperienceException;
 import me.universi.experience.exceptions.TypeExperienceException;
 import me.universi.experience.repositories.ExperienceRepository;
@@ -32,14 +32,14 @@ public class ExperienceService {
     private final InstitutionService institutionService;
     private final UserService userService;
     private final ProfileService profileService;
-    private final TypeExperienceService typeExperienceService;
+    private final ExperienceTypeService experienceTypeService;
 
 
-    public ExperienceService(ExperienceRepository experienceRepository, UserService userService, ProfileService profileService, TypeExperienceService typeExperienceService, InstitutionService institutionService){
+    public ExperienceService(ExperienceRepository experienceRepository, UserService userService, ProfileService profileService, ExperienceTypeService typeExperienceService, InstitutionService institutionService){
         this.experienceRepository = experienceRepository;
         this.userService = userService;
         this.profileService = profileService;
-        this.typeExperienceService = typeExperienceService;
+        this.experienceTypeService = typeExperienceService;
         this.institutionService = institutionService;
     }
 
@@ -62,7 +62,7 @@ public class ExperienceService {
 
     public Experience update(Experience newExperience, UUID id) throws Exception{
         return experienceRepository.findById(id).map(experience -> {
-            experience.setTypeExperience(newExperience.getTypeExperience());
+            experience.setExperienceType(newExperience.getExperienceType());
             experience.setInstitution(newExperience.getInstitution());
             experience.setDescription(newExperience.getDescription());
             experience.setStartDate(newExperience.getStartDate());
@@ -139,13 +139,13 @@ public class ExperienceService {
                 }
             }
 
-            TypeExperience typeExperience = typeExperienceService.findById(UUID.fromString(typeExperienceId)).get();
+            ExperienceType typeExperience = experienceTypeService.findById(UUID.fromString(typeExperienceId)).get();
             if(typeExperience == null) {
                 throw new TypeEducationException("typeExperience não encontrado.");
             }
 
             Experience experience = new Experience();
-            experience.setTypeExperience(typeExperience);
+            experience.setExperienceType(typeExperience);
             experience.setInstitution(institution);
             experience.setDescription(description);
             experience.setStartDate(startDate);
@@ -205,11 +205,11 @@ public class ExperienceService {
             checkPermissionForEdit(experience, false);
 
             if(typeExperienceId != null) {
-                TypeExperience typeExperience = typeExperienceService.findById(UUID.fromString(typeExperienceId)).get();
+                ExperienceType typeExperience = experienceTypeService.findById(UUID.fromString(typeExperienceId)).get();
                 if(typeExperience == null) {
                     throw new TypeExperienceException("Tipo de Experiencia não encontrado.");
                 }
-                experience.setTypeExperience(typeExperience);
+                experience.setExperienceType(typeExperience);
             }
 
             if (institutionId.isPresent()) {
