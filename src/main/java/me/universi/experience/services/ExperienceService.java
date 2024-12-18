@@ -139,7 +139,7 @@ public class ExperienceService {
                 }
             }
 
-            ExperienceType typeExperience = experienceTypeService.findById(UUID.fromString(typeExperienceId)).get();
+            ExperienceType typeExperience = experienceTypeService.findOrThrow(UUID.fromString(typeExperienceId));
             if(typeExperience == null) {
                 throw new TypeEducationException("typeExperience não encontrado.");
             }
@@ -205,7 +205,7 @@ public class ExperienceService {
             checkPermissionForEdit(experience, false);
 
             if(typeExperienceId != null) {
-                ExperienceType typeExperience = experienceTypeService.findById(UUID.fromString(typeExperienceId)).get();
+                ExperienceType typeExperience = experienceTypeService.findOrThrow(UUID.fromString(typeExperienceId));
                 if(typeExperience == null) {
                     throw new TypeExperienceException("Tipo de Experiencia não encontrado.");
                 }

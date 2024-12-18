@@ -11,6 +11,5 @@ import java.util.UUID;
 
 @Repository
 public interface ExperienceTypeRepository extends JpaRepository<ExperienceType, UUID>{
-    Optional<ExperienceType> findFirstById(UUID id);
+    Optional<ExperienceType> findFirstByIdOrNameIgnoreCase( UUID id, String name );
 }
-

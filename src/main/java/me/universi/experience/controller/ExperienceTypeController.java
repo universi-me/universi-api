@@ -1,169 +1,63 @@
 package me.universi.experience.controller;
 
-import me.universi.api.entities.Response;
-import me.universi.competence.exceptions.CompetenceException;
-import me.universi.education.exceptions.TypeEducationException;
+import me.universi.experience.dto.CreateExperienceTypeDTO;
+import me.universi.experience.dto.UpdateExperienceTypeDTO;
 import me.universi.experience.entities.ExperienceType;
 import me.universi.experience.services.ExperienceTypeService;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
 
 @RestController
-@RequestMapping(value = "/api/curriculum/typeExperience")
+@RequestMapping( "/api/experience-types" )
 public class ExperienceTypeController {
 
-    private ExperienceTypeService typeExperienceService;
+    private ExperienceTypeService experienceTypeService;
 
     public ExperienceTypeController(ExperienceTypeService typeExperienceService){
-        this.typeExperienceService = typeExperienceService;
+        this.experienceTypeService = typeExperienceService;
     }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public ExperienceType save(@RequestBody ExperienceType typeExperience) throws Exception{
-        return  typeExperienceService.save(typeExperience);
+    @PostMapping( path = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE )
+    public ResponseEntity<ExperienceType> create( @Valid @RequestBody CreateExperienceTypeDTO createExperienceTypeDTO ) {
+        return new ResponseEntity<>( experienceTypeService.create( createExperienceTypeDTO ), HttpStatus.CREATED );
     }
 
-    @GetMapping
-    @ResponseStatus(HttpStatus.OK)
-    public List<ExperienceType> getAllCurriculum() throws Exception{
-        return typeExperienceService.findAll();
+    @GetMapping( path = "", produces = MediaType.APPLICATION_JSON_VALUE )
+    public ResponseEntity<List<ExperienceType>> listAll() {
+        return ResponseEntity.ok( experienceTypeService.findAll() );
     }
 
-    @GetMapping(value = "/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public Optional<ExperienceType> getTypeExperience(@PathVariable UUID id){
-        return typeExperienceService.findById(id);
+    @GetMapping( path = "/{idOrName}", produces = MediaType.APPLICATION_JSON_VALUE )
+    public ResponseEntity<ExperienceType> get( @Valid @PathVariable @NotNull String idOrName ) {
+        return ResponseEntity.ok( experienceTypeService.findByIdOrNameOrThrow( idOrName ) );
     }
 
-    @PutMapping(value = "/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public ExperienceType update(@RequestBody ExperienceType newTypeExperience, @PathVariable UUID id) throws Exception {
-        return typeExperienceService.update(newTypeExperience, id);
+    @PatchMapping( path = "/{idOrName}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE )
+    public ResponseEntity<ExperienceType> update(
+        @Valid @PathVariable @NotNull String idOrName,
+        @Valid @RequestBody UpdateExperienceTypeDTO updateExperienceTypeDTO
+    ) {
+        return ResponseEntity.ok( experienceTypeService.update( idOrName, updateExperienceTypeDTO ) );
     }
 
-    @PostMapping(value = "/criar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response create(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-
-            String name = (String)body.get("name");
-            if(name == null) {
-                throw new CompetenceException("Parametro name é nulo.");
-            }
-
-            ExperienceType typeExperience = new ExperienceType();
-            typeExperience.setName(name);
-
-            typeExperienceService.save(typeExperience);
-
-            response.message = "Tipo de Experiência Criada.";
-            response.success = true;
-
-        });
+    @DeleteMapping( path = "/{idOrName}", produces = MediaType.APPLICATION_JSON_VALUE )
+    public ResponseEntity<Void> delete( @Valid @PathVariable @NotNull String idOrName ) {
+        experienceTypeService.delete( idOrName );
+        return ResponseEntity.noContent().build();
     }
-
-    @PostMapping(value = "/atualizar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response update(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-
-            String id = (String)body.get("typeExperienceId");
-            if(id == null) {
-                throw new TypeEducationException("Parametro typeExperienceId é nulo.");
-            }
-
-            String name = (String)body.get("name");
-
-            ExperienceType typeExperience = typeExperienceService.findById(UUID.fromString(id)).get();
-            if (typeExperience == null) {
-                throw new TypeEducationException("typeExperience não encontrada.");
-            }
-
-            if (name != null) {
-                throw new TypeEducationException("Parametro name nulo.");
-            }
-
-            typeExperience.setName(name);
-
-            typeExperienceService.update(typeExperience, typeExperience.getId());
-
-            response.message = "Tipo de Experiência atualizada";
-            response.success = true;
-
-        });
-    }
-
-    @PostMapping(value = "/remover", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response remove(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-
-            String id = (String)body.get("typeExperienceId");
-            if(id == null) {
-                throw new TypeEducationException("Parametro typeExperienceId é nulo.");
-            }
-
-            ExperienceType typeExperience = typeExperienceService.findById(UUID.fromString(id)).get();
-            if (typeExperience == null) {
-                throw new CompetenceException("TypeExperience não encontrada.");
-            }
-
-            typeExperienceService.deleteLogic(typeExperience.getId());
-
-            response.message = "Tipo de Experiência removida";
-            response.success = true;
-
-        });
-    }
-
-    @PostMapping(value = "/obter", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response get(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-
-            String id = (String)body.get("typeExperienceId");
-            if(id == null) {
-                throw new TypeEducationException("Parametro typeExperienceId é nulo.");
-            }
-
-            ExperienceType typeExperience = typeExperienceService.findById(UUID.fromString(id)).get();
-            if (typeExperience == null) {
-                throw new TypeEducationException("Tipo de Experiência não encontrada.");
-            }
-
-            response.body.put("typeExperience", typeExperience);
-            response.success = true;
-
-        });
-    }
-
-    @PostMapping(value = "/listar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response findAll(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-
-            List<ExperienceType> typeExperiences = typeExperienceService.findAll();
-
-            response.body.put("lista", typeExperiences);
-            response.success = true;
-
-        });
-    }
-
 }
