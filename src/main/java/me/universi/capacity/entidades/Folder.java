@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -25,8 +26,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-@Entity(name="folder")
-@SQLDelete(sql = "UPDATE folder SET deleted = true WHERE id=?")
+@Entity(name="Folder")
+@Table( name = "folder", schema = "capacity" )
+@SQLDelete(sql = "UPDATE capacity.folder SET deleted = true WHERE id=?")
 @SQLRestriction( value = "NOT deleted" )
 public class Folder implements Serializable {
 
@@ -56,6 +58,7 @@ public class Folder implements Serializable {
     private String description;
 
     @OneToMany(cascade = CascadeType.PERSIST)
+    @JoinTable( name = "folder_categories", schema = "capacity" )
     private Collection<Category> categories;
 
     @CreationTimestamp
@@ -87,6 +90,7 @@ public class Folder implements Serializable {
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
         name = "folder_granted_access_groups",
+        schema = "capacity",
         joinColumns = @JoinColumn(name = "folder_id"),
         inverseJoinColumns = @JoinColumn(name = "granted_access_groups_id")
     )
@@ -108,6 +112,7 @@ public class Folder implements Serializable {
     @ManyToMany
     @JoinTable(
         name = "folder_competences",
+        schema = "capacity",
         joinColumns = @JoinColumn(name = "folder_id"),
         inverseJoinColumns = @JoinColumn(name = "competence_type_id")
     )

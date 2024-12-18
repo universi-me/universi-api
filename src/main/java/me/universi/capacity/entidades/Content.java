@@ -38,8 +38,8 @@ import me.universi.profile.services.ProfileService;
 import org.hibernate.annotations.*;
 
 @Entity(name = "Content")
-@Table( name = "content" )
-@SQLDelete(sql = "UPDATE content SET deleted = true WHERE id=?")
+@Table( name = "content", schema = "capacity" )
+@SQLDelete(sql = "UPDATE capacity.content SET deleted = true WHERE id=?")
 @SQLRestriction( "NOT deleted" )
 public class Content implements Serializable {
 

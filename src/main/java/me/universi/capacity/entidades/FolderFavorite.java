@@ -23,9 +23,9 @@ import jakarta.validation.constraints.NotNull;
 import me.universi.profile.entities.Profile;
 
 @Entity(name = "FolderFavorite")
-@Table(name = "folder_favorite")
-@SQLDelete(sql = "UPDATE folder_favorite SET deleted = true, removed = CURRENT_TIMESTAMP WHERE id=?")
-@Where(clause = "deleted=false")
+@Table( name = "folder_favorite", schema = "capacity" )
+@SQLDelete(sql = "UPDATE capacity.folder_favorite SET deleted = true, removed = CURRENT_TIMESTAMP WHERE id=?")
+@SQLRestriction( "NOT deleted" )
 public class FolderFavorite implements Serializable {
     private static final long serialVersionUID = 2134355147415946228L;
 

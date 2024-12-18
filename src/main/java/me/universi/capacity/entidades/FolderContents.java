@@ -19,6 +19,7 @@ import jakarta.validation.constraints.NotNull;
 @Entity( name = "FolderContents" )
 @Table(
     name = "folder_contents",
+    schema = "capacity",
     uniqueConstraints = {
         // No repeated content
         @UniqueConstraint( columnNames = { "contents_id", "folders_id" } ),
@@ -27,7 +28,7 @@ import jakarta.validation.constraints.NotNull;
     }
 )
 @SQLRestriction( "NOT deleted" )
-@SQLDelete( sql = "UPDATE folder_contents SET deleted = TRUE WHERE id = ?" )
+@SQLDelete( sql = "UPDATE capacity.folder_contents SET deleted = TRUE WHERE id = ?" )
 public class FolderContents {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.Size;
@@ -20,8 +21,9 @@ import org.hibernate.annotations.*;
 import java.util.Date;
 import java.util.UUID;
 
-@Entity(name="category")
-@SQLDelete(sql = "UPDATE category SET deleted = true WHERE id=?")
+@Entity( name="Category" )
+@Table( name = "category", schema = "capacity" )
+@SQLDelete(sql = "UPDATE capacity.category SET deleted = true WHERE id=?")
 @SQLRestriction( "NOT deleted" )
 public class Category implements Serializable {
 
