@@ -4,7 +4,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import jakarta.persistence.EntityNotFoundException;
+import me.universi.api.interfaces.UniqueNameEntityService;
 import me.universi.experience.dto.CreateExperienceTypeDTO;
 import me.universi.experience.dto.UpdateExperienceTypeDTO;
 import me.universi.experience.entities.ExperienceType;
@@ -17,28 +17,33 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-public class ExperienceTypeService {
-
+public class ExperienceTypeService extends UniqueNameEntityService<ExperienceType> {
     private final ExperienceTypeRepository experienceTypeRepository;
     private final UserService userService;
 
     public ExperienceTypeService(ExperienceTypeRepository typeExperienceRepository, UserService userService){
         this.experienceTypeRepository = typeExperienceRepository;
         this.userService = userService;
+
+        setEntityName( "Tipo de Experiência" );
     }
 
+    @Override
     public List<ExperienceType> findAll(){
         return experienceTypeRepository.findAll();
     }
 
+    @Override
     public Optional<ExperienceType> find( UUID id ) {
         return experienceTypeRepository.findById(id);
     }
 
-    public ExperienceType findOrThrow( UUID id ) {
-        return find( id ).orElseThrow( () -> new EntityNotFoundException( "Tipo de Experiência de ID '" + id + "' não encontrado" ) );
+    @Override
+    public Optional<ExperienceType> findByName( String name ) {
+        return experienceTypeRepository.findFirstByNameIgnoreCase( name );
     }
 
+    @Override
     public Optional<ExperienceType> findByIdOrName( String idOrName ) {
         return experienceTypeRepository.findFirstByIdOrNameIgnoreCase(
             CastingUtil.getUUID( idOrName ).orElse( null ),
@@ -46,15 +51,10 @@ public class ExperienceTypeService {
         );
     }
 
-    public ExperienceType findByIdOrNameOrThrow( String idOrName ) {
-        return findByIdOrName( idOrName ).orElseThrow( () -> new EntityNotFoundException( "Tipo de Experiência de ID ou nome '" + idOrName + "' não encontrado" ) );
-    }
-
     public ExperienceType update( @NonNull String idOrName, @NonNull UpdateExperienceTypeDTO dto ) throws AccessDeniedException {
-        if ( !userService.isUserAdminSession() )
-            throw new AccessDeniedException( "Você não tem permissão para alterar este Tipo de Experiência" );
-
         var experienceType = findByIdOrNameOrThrow( idOrName );
+        checkPermissionToEdit( experienceType );
+
         if ( dto.name() != null && !dto.name().isBlank() )
             experienceType.setName( dto.name() );
 
@@ -64,16 +64,25 @@ public class ExperienceTypeService {
     public ExperienceType create( CreateExperienceTypeDTO dto ) {
         var existingExperienceType = findByIdOrName( dto.name() );
         if ( existingExperienceType.isPresent() )
-            throw new IllegalStateException( "Tipo de Experiência de nome '" + existingExperienceType.get().getName() + "' já existe" );
+            throw new IllegalStateException( this.entityName + " de nome '" + existingExperienceType.get().getName() + "' já existe" );
 
         return experienceTypeRepository.saveAndFlush( new ExperienceType( dto.name() ) );
     }
 
     public void delete( String idOrName ) {
         var experienceType = findByIdOrNameOrThrow( idOrName );
-        if ( !userService.isUserAdminSession() )
-            throw new AccessDeniedException( "Você não tem permissão para deletar este Tipo de Experiência" );
+        checkPermissionToDelete( experienceType );
 
         experienceTypeRepository.delete( experienceType );
+    }
+
+    @Override
+    public boolean hasPermissionToEdit( ExperienceType entity ) {
+        return userService.isUserAdminSession();
+    }
+
+    @Override
+    public boolean hasPermissionToDelete( ExperienceType entity ) {
+        return userService.isUserAdminSession();
     }
 }
