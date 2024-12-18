@@ -1,4 +1,4 @@
-package me.universi.experience.servicies;
+package me.universi.experience.services;
 
 import org.springframework.stereotype.Service;
 

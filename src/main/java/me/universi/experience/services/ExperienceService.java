@@ -1,4 +1,4 @@
-package me.universi.experience.servicies;
+package me.universi.experience.services;
 
 import me.universi.api.entities.Response;
 import me.universi.education.exceptions.EducationException;

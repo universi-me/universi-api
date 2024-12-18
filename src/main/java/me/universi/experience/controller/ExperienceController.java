@@ -1,7 +1,7 @@
 package me.universi.experience.controller;
 
 import me.universi.api.entities.Response;
-import me.universi.experience.servicies.ExperienceService;
+import me.universi.experience.services.ExperienceService;
 
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;

@@ -4,7 +4,7 @@ import me.universi.api.entities.Response;
 import me.universi.competence.exceptions.CompetenceException;
 import me.universi.education.exceptions.TypeEducationException;
 import me.universi.experience.entities.TypeExperience;
-import me.universi.experience.servicies.TypeExperienceService;
+import me.universi.experience.services.TypeExperienceService;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
