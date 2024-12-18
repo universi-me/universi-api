@@ -49,3 +49,7 @@ ALTER TABLE folder_profile
 -- update folder_categories
 ALTER TABLE folder_categories
     SET SCHEMA capacity;
+
+-- update content_categories
+ALTER TABLE content_categories
+    SET SCHEMA capacity;

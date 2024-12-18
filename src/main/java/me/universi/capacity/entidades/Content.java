@@ -12,6 +12,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Transient;
 import jakarta.persistence.EnumType;
@@ -68,6 +69,7 @@ public class Content implements Serializable {
     private String description;
 
     @OneToMany(cascade = CascadeType.PERSIST)
+    @JoinTable( name = "content_categories", schema = "capacity" )
     private Collection<Category> categories;
 
     @ManyToMany(mappedBy = "content")
