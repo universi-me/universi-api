@@ -14,4 +14,13 @@ public abstract class UniqueNameEntityService<T> extends EntityService<T> {
     public final T findByIdOrNameOrThrow( String idOrName ) throws EntityNotFoundException {
         return findByIdOrName( idOrName ).orElseThrow( () -> new EntityNotFoundException( entityName + " de nome ou ID '" + idOrName + "' não existe" ) );
     }
+
+    public final boolean isNameAvailable( String name ) {
+        return findByName( name ).isEmpty();
+    }
+
+    public final void checkNameAvailable( String name ) throws IllegalStateException {
+        if ( !isNameAvailable( name ) )
+            throw new IllegalStateException( entityName + " de nome '" + name + "' já existe" );
+    }
 }

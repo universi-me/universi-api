@@ -11,9 +11,6 @@ import jakarta.persistence.EntityNotFoundException;
 
 public abstract class EntityService<T> {
     protected String entityName;
-    protected final void setEntityName( String entityName ) {
-        this.entityName = entityName;
-    }
 
     public abstract Optional<T> find( UUID id );
     public final T findOrThrow( UUID id ) throws EntityNotFoundException {

@@ -25,7 +25,7 @@ public class ExperienceTypeService extends UniqueNameEntityService<ExperienceTyp
         this.experienceTypeRepository = typeExperienceRepository;
         this.userService = userService;
 
-        setEntityName( "Tipo de Experiência" );
+        this.entityName = "Tipo de Experiência";
     }
 
     @Override
@@ -62,11 +62,10 @@ public class ExperienceTypeService extends UniqueNameEntityService<ExperienceTyp
     }
 
     public ExperienceType create( CreateExperienceTypeDTO dto ) {
-        var existingExperienceType = findByIdOrName( dto.name() );
-        if ( existingExperienceType.isPresent() )
-            throw new IllegalStateException( this.entityName + " de nome '" + existingExperienceType.get().getName() + "' já existe" );
+        checkNameAvailable( dto.name() );
 
-        return experienceTypeRepository.saveAndFlush( new ExperienceType( dto.name() ) );
+        var experienceType = new ExperienceType( dto.name() );
+        return experienceTypeRepository.saveAndFlush( experienceType );
     }
 
     public void delete( String idOrName ) {
