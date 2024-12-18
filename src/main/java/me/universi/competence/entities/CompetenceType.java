@@ -24,8 +24,8 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
 @Entity(name = "CompetenceType")
-@Table( name = "competence_type" )
-@SQLDelete(sql = "UPDATE competence_type SET deleted = true WHERE id=?")
+@Table( name = "competence_type", schema = "competence" )
+@SQLDelete(sql = "UPDATE competence.competence_type SET deleted = true WHERE id=?")
 @SQLRestriction( "NOT deleted" )
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class CompetenceType {
@@ -49,6 +49,7 @@ public class CompetenceType {
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "competence_type_profiles_with_access",
+        schema = "competence",
         joinColumns = @JoinColumn(name = "competence_type_id"),
         inverseJoinColumns = @JoinColumn(name = "profile_id")
     )

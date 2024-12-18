@@ -26,8 +26,8 @@ import java.util.Date;
 import java.util.UUID;
 
 @Entity( name = "Competence" )
-@Table( name = "competence" )
-@SQLDelete(sql = "UPDATE competence SET deleted = true WHERE id=?")
+@Table( name = "competence", schema = "competence" )
+@SQLDelete(sql = "UPDATE competence.competence SET deleted = true WHERE id=?")
 @SQLRestriction( "NOT deleted")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Competence {
