@@ -8,20 +8,19 @@ import java.util.UUID;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotNull;
 import me.universi.Sys;
+import me.universi.api.interfaces.UniqueNameEntityService;
 import me.universi.capacity.dto.CreateCategoryDTO;
 import me.universi.capacity.dto.UpdateCategoryDTO;
 import me.universi.capacity.entidades.Category;
-import me.universi.capacity.exceptions.CapacityException;
 import me.universi.capacity.repository.CategoryRepository;
-import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
 import me.universi.user.services.UserService;
+import me.universi.util.CastingUtil;
 
 @Service
-public class CategoryService {
+public class CategoryService extends UniqueNameEntityService<Category> {
     private final CategoryRepository categoryRepository;
     private final ProfileService profileService;
     private final UserService userService;
@@ -30,31 +29,40 @@ public class CategoryService {
         this.categoryRepository = categoryRepository;
         this.profileService = profileService;
         this.userService = userService;
+
+        this.entityName = "Categoria";
     }
 
     public static CategoryService getInstance() {
         return Sys.context.getBean("categoryService", CategoryService.class);
     }
 
+    @Override
     public Optional<Category> find( UUID id ) {
         return categoryRepository.findById( id );
     }
 
-    public List<Optional<Category>> find( Collection<UUID> id ) {
-        return id.stream().map( this::find ).toList();
+    public List<Category> findOrThrow( Collection<UUID> ids ) {
+        return ids.stream().map( this::findOrThrow ).toList();
     }
 
-    public List<Category> findOrThrow( Collection<UUID> id ) {
-        return id.stream().map( this::findOrThrow ).toList();
+    @Override
+    public Optional<Category> findByName( String name ) {
+        return categoryRepository.findFirstByNameIgnoreCase( name );
     }
 
-    public Category findOrThrow( UUID id ) throws EntityNotFoundException {
-        return find( id ).orElseThrow( () -> new EntityNotFoundException( "Categoria de ID '" + id + "' não encontrada" ) );
+    @Override
+    public Optional<Category> findByIdOrName( String idOrName ) {
+        return categoryRepository.findFirstByIdOrNameIgnoreCase(
+            CastingUtil.getUUID( idOrName ).orElse( null ),
+            idOrName
+        );
     }
 
     public @NotNull Category create( @NotNull CreateCategoryDTO createCategoryDTO ) {
-        var category = new Category();
+        checkNameAvailable( createCategoryDTO.name() );
 
+        var category = new Category();
         category.setName( createCategoryDTO.name() );
 
         if ( createCategoryDTO.image() != null && !createCategoryDTO.image().isBlank() ) {
@@ -62,14 +70,15 @@ public class CategoryService {
         }
 
         category.setAuthor( profileService.getProfileInSession() );
-        return saveOrUpdate( category );
+        return categoryRepository.saveAndFlush( category );
     }
 
     public @NotNull Category update( @NotNull UUID id, @NotNull UpdateCategoryDTO updateCategoryDTO ) throws AccessDeniedException {
         var category = findOrThrow( id );
-        canEditOrThrow( category, profileService.getProfileInSession() );
+        checkPermissionToEdit( category );
 
         if ( updateCategoryDTO.name() != null && !updateCategoryDTO.name().isBlank() ) {
+            checkNameAvailable( updateCategoryDTO.name() );
             category.setName( updateCategoryDTO.name() );
         }
 
@@ -77,21 +86,12 @@ public class CategoryService {
             category.setImage( updateCategoryDTO.image() );
         }
 
-        return saveOrUpdate( category );
-    }
-
-    private Category saveOrUpdate(Category category) throws CapacityException {
-        boolean titleExists = categoryRepository.existsByName(category.getName());
-        if (titleExists) {
-            throw new CapacityException("Categoria com título já existente.");
-        }
-
-        return categoryRepository.save(category);
+        return categoryRepository.saveAndFlush( category );
     }
 
     public void delete( UUID id ) {
         Category category = findOrThrow( id );
-        canEditOrThrow( category, profileService.getProfileInSession() );
+        checkPermissionToDelete( category );
 
         categoryRepository.delete( category );
     }
@@ -100,13 +100,14 @@ public class CategoryService {
         return categoryRepository.findAll();
     }
 
-    public boolean canEdit( @NotNull Category category, @NotNull Profile profile ) {
-        return profile.getId().equals( category.getAuthor().getId() )
-            || userService.isUserAdmin( profile.getUser() );
+    @Override
+    public boolean hasPermissionToEdit( Category category ) {
+        return profileService.isSessionOfProfile( category.getAuthor() )
+            || userService.isUserAdminSession();
     }
 
-    public void canEditOrThrow( @NotNull Category category, @NotNull Profile profile ) {
-        if ( !canEdit(category, profile) )
-            throw new AccessDeniedException( "Você não tem permissão para editar esta categoria" );
+    @Override
+    public boolean hasPermissionToDelete( Category category ) {
+        return hasPermissionToEdit( category );
     }
 }
