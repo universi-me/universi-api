@@ -11,21 +11,24 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.NotNull;
 import me.universi.institution.entities.Institution;
+import me.universi.profile.entities.Profile;
 
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
 import java.util.UUID;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.SQLRestriction;
 
-@Entity(name = "experience")
-@SQLDelete(sql = "UPDATE experience SET deleted = true WHERE id=?")
-@Where(clause = "deleted=false")
+@Entity(name = "Experience")
+@Table( name = "experience", schema = "experience" )
+@SQLDelete(sql = "UPDATE experience.experience SET deleted = true WHERE id=?")
+@SQLRestriction( "NOT deleted" )
 public class Experience {
 
     @Id
@@ -53,8 +56,9 @@ public class Experience {
     @Column(name = "end_date")
     private Date endDate;
 
-    @Column(name = "present_date")
-    private Boolean presentDate;
+    @ManyToOne
+    @JoinColumn( name = "profile_id", nullable = false )
+    private Profile profile;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
@@ -65,89 +69,40 @@ public class Experience {
     @Column(name = "deleted")
     private boolean deleted = Boolean.FALSE;
 
-    public Experience(){
+    public Experience() {}
 
-    }
-
-    public Experience(ExperienceType typeExperience, Institution institution, String description, Date startDate, Date endDate, Boolean presentDate) {
-        this.experienceType = typeExperience;
+    public Experience( ExperienceType experienceType, Institution institution, String description, Date startDate, Date endDate, Profile profile ) {
+        this.experienceType = experienceType;
         this.institution = institution;
         this.description = description;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.presentDate = presentDate;
+        this.profile = profile;
     }
 
-    public Experience(ExperienceType typeExperience, Institution institution, String description, Date startDate, Date endDate) {
-        this.experienceType = typeExperience;
-        this.institution = institution;
-        this.description = description;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.presentDate = false;
-    }
+    public UUID getId() { return id; }
 
-    public UUID getId() {
-        return id;
-    }
+    public Institution getInstitution() { return institution; }
+    public void setInstitution(Institution institution) { this.institution = institution; }
 
-    public Institution getInstitution() {
-        return institution;
-    }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
-    public void setInstitution(Institution institution) {
-        this.institution = institution;
-    }
+    public Date getStartDate() { return startDate; }
+    public void setStartDate(Date startDate) { this.startDate = startDate; }
 
-    public String getDescription() {
-        return description;
-    }
+    public Date getEndDate() { return endDate; }
+    public void setEndDate(Date endDate) { this.endDate = endDate; }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    public Date getCreationDate() { return creationDate; }
+    public void setCreationDate(Date creationDate) { this.creationDate = creationDate; }
 
-    public Date getStartDate() {
-        return startDate;
-    }
+    public ExperienceType getExperienceType() { return experienceType; }
+    public void setExperienceType(ExperienceType experienceType) { this.experienceType = experienceType; }
 
-    public void setStartDate(Date startDate) {
-        this.startDate = startDate;
-    }
-
-    public Date getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(Date endDate) {
-        this.endDate = endDate;
-    }
-
-    public Boolean getPresentDate() {
-        return presentDate;
-    }
-
-    public void setPresentDate(Boolean presentDate) {
-        this.presentDate = presentDate;
-    }
-
-    public Date getCreationDate() {
-        return creationDate;
-    }
-
-    public void setCreationDate(Date creationDate) {
-        this.creationDate = creationDate;
-    }
-
-    public ExperienceType getExperienceType() {
-        return experienceType;
-    }
-
-    public void setExperienceType(ExperienceType typeExperience) {
-        this.experienceType = typeExperience;
-    }
+    public Profile getProfile() { return profile; }
+    public void setProfile(Profile profile) { this.profile = profile; }
 
     public boolean isDeleted() { return deleted; }
-
     public void setDeleted(boolean deleted) { this.deleted = deleted; }
 }

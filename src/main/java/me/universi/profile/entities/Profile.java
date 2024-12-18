@@ -59,13 +59,7 @@ public class Profile implements Serializable {
     private Collection<Education> educations;
 
     @JsonIgnore
-    @ManyToMany
-    @JoinTable(
-            name = "experience_profile",
-            joinColumns = @JoinColumn(name = "profile_id"),
-            inverseJoinColumns = @JoinColumn(name = "experience_id")
-    )
-    @NotFound(action = NotFoundAction.IGNORE)
+    @OneToMany( mappedBy = "profile" )
     private Collection<Experience> experiences;
 
     @JsonIgnore
