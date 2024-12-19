@@ -1,5 +1,6 @@
 package me.universi.group.services;
 
+import java.net.URI;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import me.universi.Sys;
@@ -8,19 +9,17 @@ import me.universi.competence.entities.Competence;
 import me.universi.competence.services.CompetenceService;
 import me.universi.feed.dto.GroupPostDTO;
 import me.universi.feed.services.GroupFeedService;
-import me.universi.group.DTO.CompetenceFilterDTO;
-import me.universi.group.DTO.CompetenceFilterRequestDTO;
-import me.universi.group.DTO.ProfileWithCompetencesDTO;
-import me.universi.group.DTO.CompetenceInfoDTO;
+import me.universi.group.DTO.*;
 
 import me.universi.group.entities.*;
 import me.universi.group.entities.GroupSettings.*;
-import me.universi.group.enums.GroupEmailFilterType;
 import me.universi.group.enums.GroupType;
 import me.universi.group.exceptions.GroupException;
 import me.universi.group.repositories.*;
 import me.universi.profile.entities.Profile;
 import me.universi.roles.entities.Roles;
+import me.universi.roles.enums.FeaturesTypes;
+import me.universi.roles.enums.Permission;
 import me.universi.roles.enums.RoleType;
 import me.universi.roles.services.RolesService;
 import me.universi.user.entities.User;
@@ -28,6 +27,8 @@ import me.universi.user.services.UserService;
 import me.universi.util.CastingUtil;
 import me.universi.util.ConvertUtil;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -36,6 +37,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class GroupService {
@@ -835,4 +837,274 @@ public class GroupService {
         }
         throw new GroupException("Falha ao determinar grupo por filtro de email.");
     }
-}
+
+    public Group createGroup(CreateGroupDTO createGroupDTO) {
+        User user = userService.getUserInSession();
+
+        Boolean groupRoot = (Boolean)createGroupDTO.groupRoot();
+
+        UUID groupIdParent = (UUID)createGroupDTO.groupId();
+        String groupPathParent = (String)createGroupDTO.groupPath();
+
+        boolean hasGroupParent = groupIdParent != null || groupPathParent != null;
+
+        if(!hasGroupParent) {
+            if(!(groupRoot != null && userService.isUserAdmin(user))) {
+                throw new GroupException("Parâmetro groupId é nulo.");
+            }
+        } else if(((groupIdParent != null) || (groupPathParent != null && !groupPathParent.isEmpty())) && (groupRoot!=null && groupRoot)) {
+            throw new GroupException("Você não pode criar Grupo Master em Subgrupos.");
+        }
+
+        String nickname = (String)createGroupDTO.nickname();
+        if(nickname == null) {
+            throw new GroupException("Parâmetro nickname é nulo.");
+        }
+
+        String name = (String)createGroupDTO.name();
+        if(name == null) {
+            throw new GroupException("Parâmetro nome é nulo.");
+        }
+
+        String image = (String)createGroupDTO.imageUrl();
+        String bannerImage = (String)createGroupDTO.bannerImageUrl();
+        String headerImage = (String)createGroupDTO.headerImageUrl();
+
+        String description = (String)createGroupDTO.description();
+        if(description == null) {
+            throw new GroupException("Parâmetro description é nulo.");
+        }
+
+        String groupType = (String)createGroupDTO.type();
+        if(groupType == null) {
+            throw new GroupException("Parâmetro type é nulo.");
+        }
+
+        Boolean canCreateGroup = (Boolean)createGroupDTO.canCreateGroup();
+        Boolean publicGroup = (Boolean)createGroupDTO.publicGroup();
+        Boolean canEnter = (Boolean)createGroupDTO.canEnter();
+
+        Group parentGroup = (groupIdParent==null && groupPathParent==null)?null:getGroupByGroupIdOrGroupPath(groupIdParent, groupPathParent);
+
+        // support only lowercase nickname
+        nickname = nickname.toLowerCase();
+
+        if(!isNicknameAvailableForGroup(parentGroup, nickname)) {
+            throw new GroupException("Este Nickname não está disponível para este grupo.");
+        }
+
+        if((groupRoot != null && groupRoot && userService.isUserAdmin(user)) || ((parentGroup !=null && parentGroup.canCreateGroup) || verifyPermissionToEditGroup(parentGroup, user))) {
+            Group groupNew = new Group();
+            groupNew.setNickname(nickname);
+            groupNew.setName(name);
+            if(image != null && !image.isEmpty()) {
+                groupNew.setImage(image);
+            }
+            if(bannerImage != null && !bannerImage.isEmpty()) {
+                groupNew.setBannerImage(bannerImage);
+            }
+            if(headerImage != null && !headerImage.isEmpty()) {
+                groupNew.setHeaderImage(headerImage);
+            }
+            groupNew.setDescription(description);
+            groupNew.setType(GroupType.valueOf(groupType));
+            groupNew.setAdmin(user.getProfile());
+            GroupSettings gSettings = new GroupSettings();
+            saveGroupSettings(gSettings);
+            groupNew.setGroupSettings(gSettings);
+            if(canCreateGroup != null) {
+                groupNew.setCanCreateGroup(canCreateGroup);
+            }
+            if(publicGroup != null) {
+                groupNew.setPublicGroup(publicGroup);
+            }
+            if(canEnter != null) {
+                groupNew.setCanEnter(canEnter);
+            }
+            if((groupRoot != null && groupRoot) && userService.isUserAdmin(user)) {
+                groupNew.setRootGroup(true);
+                save(groupNew);
+            } else {
+                save(groupNew);
+                addSubGroup(parentGroup, groupNew);
+            }
+
+            // add creator to group participants
+            RolesService.getInstance().createBaseRoles(groupNew);
+            addParticipantToGroup(groupNew, groupNew.getAdmin(), RolesService.getInstance().getGroupAdminRole(groupNew));
+
+            return groupNew;
+        }
+
+        throw new GroupException("Apenas Administradores podem criar subgrupos.");
+    }
+
+    public Group updateGroup(UpdateGroupDTO updateGroupDTO) {
+        UUID groupId = (UUID)updateGroupDTO.groupId();
+        String groupPath = (String)updateGroupDTO.groupPath();
+
+        String name = (String)updateGroupDTO.name();
+        String description = (String)updateGroupDTO.description();
+        String groupType = (String)updateGroupDTO.type();
+        String image = (String)updateGroupDTO.imageUrl();
+        String bannerImage = (String)updateGroupDTO.bannerImageUrl();
+        String headerImage = (String)updateGroupDTO.headerImageUrl();
+
+        Boolean canCreateGroup = (Boolean)updateGroupDTO.canCreateGroup();
+        Boolean publicGroup = (Boolean)updateGroupDTO.publicGroup();
+        Boolean canEnter = (Boolean)updateGroupDTO.canEnter();
+        Boolean everyoneCanPost = (Boolean)updateGroupDTO.everyoneCanPost();
+
+        Group groupEdit = getGroupByGroupIdOrGroupPath(groupId, groupPath);
+
+        RolesService.getInstance().checkPermission(groupEdit, FeaturesTypes.GROUP, Permission.READ_WRITE);
+
+        User user = userService.getUserInSession();
+
+        if(verifyPermissionToEditGroup(groupEdit, user)) {
+            if(name != null && !name.isEmpty()) {
+                groupEdit.setName(name);
+            }
+            if(description != null && !description.isEmpty()) {
+                groupEdit.setDescription(description);
+            }
+            if(groupType != null && !groupType.isEmpty()) {
+                groupEdit.setType(GroupType.valueOf(groupType));
+            }
+            if(image != null && !image.isEmpty()) {
+                groupEdit.setImage(image);
+            }
+            if(bannerImage != null && !bannerImage.isEmpty()) {
+                groupEdit.setBannerImage(bannerImage);
+            }
+            if(headerImage != null && !headerImage.isEmpty()) {
+                groupEdit.setHeaderImage(headerImage);
+            }
+            if(canCreateGroup != null) {
+                groupEdit.setCanCreateGroup(canCreateGroup);
+            }
+            if(publicGroup != null) {
+                groupEdit.setPublicGroup(publicGroup);
+            }
+            if(canEnter != null) {
+                groupEdit.setCanEnter(canEnter);
+            }
+            if(everyoneCanPost != null){
+                groupEdit.setEveryoneCanPost(everyoneCanPost);
+            }
+
+            save(groupEdit);
+
+            return groupEdit;
+        }
+
+        throw new GroupException("Falha ao editar grupo");
+    }
+
+    public List<Group> subGroups(UUID groupId) {
+        Group group = getGroupByGroupIdOrGroupPath(groupId, null);
+
+        RolesService.getInstance().checkPermission(group, FeaturesTypes.GROUP, Permission.READ);
+
+        if(group != null) {
+            Collection<Subgroup> subgroupList = group.getSubGroups();
+
+            List<Group> groups = subgroupList.stream()
+                    .sorted(Comparator.comparing(Subgroup::getAdded).reversed())
+                    .map(Subgroup::getSubgroup)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+
+            return groups;
+        }
+        throw new GroupException("Falha ao listar grupo.");
+    }
+
+    public Collection<Folder> listFolders(UUID groupId) {
+        Group group = getGroupByGroupIdOrGroupPath(groupId, null);
+
+        // check permission contents
+        RolesService.getInstance().checkPermission(group, FeaturesTypes.CONTENT, Permission.READ);
+
+        return group.getFoldersGrantedAccess();
+    }
+
+    public boolean deleteGroup(UUID groupId) {
+        Group group = getGroupByGroupIdOrGroupPath(groupId, null);
+
+        RolesService.getInstance().checkPermission(group, FeaturesTypes.GROUP, Permission.READ_WRITE_DELETE);
+
+        User user = userService.getUserInSession();
+
+        if(verifyPermissionToEditGroup(group, user)) {
+            delete(group);
+            return true;
+        }
+
+        throw new GroupException("Erro ao executar operação.");
+    }
+
+    public boolean removeSubgroup(UUID groupId, UUID subGroupId) {
+        Group group = getGroupByGroupIdOrGroupPath(groupId, null);
+
+        RolesService.getInstance().checkPermission(group, FeaturesTypes.GROUP, Permission.READ_WRITE_DELETE);
+
+        if(subGroupId == null) {
+            throw new GroupException("Parâmetro groupIdRemove é nulo.");
+        }
+
+        if(group == null) {
+            throw new GroupException("Grupo não encontrado.");
+        }
+
+        Group groupRemove = findFirstById(subGroupId);
+        if(groupRemove == null) {
+            throw new GroupException("Subgrupo não encontrado.");
+        }
+
+        User user = userService.getUserInSession();
+
+        if(verifyPermissionToEditGroup(group, user)) {
+            removeSubGroup(group, groupRemove);
+            return true;
+        }
+
+        throw new GroupException("Erro ao executar operação.");
+    }
+
+    // get image of group
+    public ResponseEntity<Void> getGroupImage(UUID groupId) {
+        Group group = findFirstById(groupId);
+        if(group != null) {
+            if(group.getImage() != null) {
+                String urlImage = (group.getImage().startsWith("/")) ? "/api" + group.getImage() : group.getImage();
+                return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(urlImage)).build();
+            }
+        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "not found");
+    }
+
+    // get image banner of group
+    public ResponseEntity<Void> getBannerImage(UUID groupId) {
+        Group group = findFirstById(groupId);
+        if(group != null) {
+            if(group.getBannerImage() != null) {
+                String urlImage = (group.getBannerImage().startsWith("/")) ? "/api" + group.getBannerImage() : group.getBannerImage();
+                return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(urlImage)).build();
+            }
+        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "not found");
+    }
+
+    // get image header of group
+    public ResponseEntity<Void> getHeaderImage(UUID groupId) {
+        Group group = findFirstById(groupId);
+        if(group != null) {
+            if(group.getHeaderImage() != null) {
+                String urlImage = (group.getHeaderImage().startsWith("/")) ? "/api" + group.getHeaderImage() : group.getHeaderImage();
+                return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(urlImage)).build();
+            }
+        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "not found");
+    }
+ }
