@@ -1,5 +1,7 @@
 package me.universi.link.services;
 
+import me.universi.api.exceptions.UniversiForbiddenAccessException;
+import me.universi.api.exceptions.UniversiNoEntityException;
 import me.universi.link.dto.CreateLinkDTO;
 import me.universi.link.dto.UpdateLinkDTO;
 import me.universi.link.entities.Link;
@@ -7,10 +9,7 @@ import me.universi.link.repositories.LinkRepository;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
 
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
-
-import jakarta.persistence.EntityNotFoundException;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -29,9 +28,8 @@ public class LinkService {
         return linkRepository.findFirstById(id);
     }
 
-    public Link findOrThrow( UUID id ) throws EntityNotFoundException {
-        // TODO: UniversiEntityNotFoundException
-        return find( id ).orElseThrow( () -> new EntityNotFoundException( "Link de ID '" + id + "' não encontrado" ) );
+    public Link findOrThrow( UUID id ) throws UniversiNoEntityException {
+        return find( id ).orElseThrow( () -> new UniversiNoEntityException( "Link de ID '" + id + "' não encontrado" ) );
     }
 
     public Link create( CreateLinkDTO createLinkDTO ) {
@@ -85,9 +83,8 @@ public class LinkService {
         canModifyOrThrow( link, profileService.getProfileInSession() );
     }
 
-    public void canModifyOrThrow( Link link, Profile profile ) throws AccessDeniedException {
+    public void canModifyOrThrow( Link link, Profile profile ) throws UniversiForbiddenAccessException {
         if ( !canModify( link, profile ) )
-            // TODO: UniversiForbiddenAccessException
-            throw new AccessDeniedException( "Não é possível modificar o Link de ID '" + link.getId() + "'" );
+            throw new UniversiForbiddenAccessException( "Não é possível modificar o Link de ID '" + link.getId() + "'" );
     }
 }

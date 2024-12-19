@@ -9,6 +9,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import me.universi.api.exceptions.UniversiException;
+
 @RestControllerAdvice
 public class RestExceptionHandler {
 
@@ -20,7 +22,8 @@ public class RestExceptionHandler {
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .errors(List.of(ex.getMessage()))
                 .build();
-        return new ResponseEntity<>(apiError, apiError.status());
+
+        return apiError.toResponseEntity();
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -37,7 +40,8 @@ public class RestExceptionHandler {
                 .status(HttpStatus.BAD_REQUEST)
                 .errors(errorList)
                 .build();
-        return new ResponseEntity<>(apiError, apiError.status());
+
+        return apiError.toResponseEntity();
     }
 
     private String invalidArgumentMessage( FieldError err ) {
@@ -45,5 +49,10 @@ public class RestExceptionHandler {
             return "O parâmetro '" + err.getField() + "' não foi informado";
 
         return err.getField() + ": " + err.getDefaultMessage();
+    }
+
+    @ExceptionHandler( UniversiException.class )
+    public ResponseEntity<ApiError> universiExceptionHandler( UniversiException ex ) {
+        return ex.toApiError().toResponseEntity();
     }
 }

@@ -1,7 +1,6 @@
 package me.universi.api;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -10,6 +9,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 public record ApiError (
 
@@ -51,6 +51,10 @@ public record ApiError (
         // Static method to create a builder instance
         public static Builder builder() {
                 return new Builder();
+        }
+
+        public ResponseEntity<ApiError> toResponseEntity() {
+            return new ResponseEntity<>( this, this.status );
         }
 
         public static class StatusCodeToValueParse extends JsonSerializer<HttpStatus> {

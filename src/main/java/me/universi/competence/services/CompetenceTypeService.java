@@ -1,6 +1,8 @@
 package me.universi.competence.services;
 
 import me.universi.Sys;
+import me.universi.api.exceptions.UniversiConflictingOperationException;
+import me.universi.api.exceptions.UniversiForbiddenAccessException;
 import me.universi.competence.dto.CreateCompetenceTypeDTO;
 import me.universi.competence.dto.MergeCompetenceTypeDTO;
 import me.universi.competence.dto.UpdateCompetenceTypeDTO;
@@ -96,9 +98,9 @@ public class CompetenceTypeService {
             .toList();
     }
 
-    public CompetenceType update( UUID id, UpdateCompetenceTypeDTO updateCompetenceTypeDTO ) throws AccessDeniedException {
+    public CompetenceType update( UUID id, UpdateCompetenceTypeDTO updateCompetenceTypeDTO ) throws UniversiForbiddenAccessException, UniversiConflictingOperationException {
         if ( !userService.isUserAdminSession() )
-            throw new AccessDeniedException( "Esta operação não é permitida para este usuário." );
+            throw new UniversiForbiddenAccessException( "Esta operação não é permitida para este usuário." );
 
         var existingCompetenceType = findOrThrow( id );
 
@@ -108,7 +110,7 @@ public class CompetenceTypeService {
             if ( competenceWithName.isPresent()
                 && !competenceWithName.get().getId().equals(existingCompetenceType.getId())
             ) {
-                throw new IllegalStateException( "Já existe um tipo de competência com este nome" );
+                throw new UniversiConflictingOperationException( "Já existe um tipo de competência com este nome" );
             }
 
             existingCompetenceType.setName( updateCompetenceTypeDTO.name() );
@@ -125,7 +127,7 @@ public class CompetenceTypeService {
         return competenceTypeRepository.saveAndFlush( existingCompetenceType );
     }
 
-    public CompetenceType create( @NotNull CreateCompetenceTypeDTO createCompetenceTypeDTO ) {
+    public CompetenceType create( @NotNull CreateCompetenceTypeDTO createCompetenceTypeDTO ) throws UniversiConflictingOperationException {
         var profileInSession = profileService.getProfileInSession();
         var existingCompetenceType = findByNameIgnoringAccess( createCompetenceTypeDTO.name() );
 
@@ -147,7 +149,7 @@ public class CompetenceTypeService {
             return competenceTypeRepository.saveAndFlush( competenceType );
         }
 
-        throw new IllegalStateException( "Este tipo de competência já existe" );
+        throw new UniversiConflictingOperationException( "Este tipo de competência já existe" );
     }
 
     public void merge( MergeCompetenceTypeDTO mergeCompetenceTypeDTO ) throws AccessDeniedException {

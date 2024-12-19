@@ -1,5 +1,7 @@
 package me.universi.education.services;
 
+import me.universi.api.exceptions.UniversiConflictingOperationException;
+import me.universi.api.exceptions.UniversiForbiddenAccessException;
 import me.universi.education.dto.CreateEducationTypeDTO;
 import me.universi.education.dto.UpdateEducationTypeDTO;
 import me.universi.education.entities.EducationType;
@@ -8,7 +10,6 @@ import me.universi.user.services.UserService;
 import me.universi.util.CastingUtil;
 
 import org.springframework.lang.NonNull;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -61,7 +62,7 @@ public class EducationTypeService {
 
     public EducationType update( @NonNull String idOrName, @NonNull UpdateEducationTypeDTO updateEducationTypeDTO ) {
         if ( !userService.isUserAdminSession() )
-            throw new AccessDeniedException( "Você não tem permissão para alterar este Tipo de Educação" );
+            throw new UniversiForbiddenAccessException( "Você não tem permissão para alterar este Tipo de Educação" );
 
         var educationType = findByIdOrNameOrThrow( idOrName );
 
@@ -71,10 +72,10 @@ public class EducationTypeService {
         return educationTypeRepository.saveAndFlush( educationType );
     }
 
-    public EducationType create( CreateEducationTypeDTO createEducationTypeDTO ) throws IllegalStateException {
+    public EducationType create( CreateEducationTypeDTO createEducationTypeDTO ) throws UniversiConflictingOperationException {
         var existingEducationType = findByName( createEducationTypeDTO.name() );
         if ( existingEducationType.isPresent() )
-            throw new IllegalStateException( "Tipo de Educação de nome '" + existingEducationType.get().getName() + "' já existe" );
+            throw new UniversiConflictingOperationException( "Tipo de Educação de nome '" + existingEducationType.get().getName() + "' já existe" );
 
         return educationTypeRepository.saveAndFlush(
             new EducationType( createEducationTypeDTO.name() )
@@ -83,7 +84,7 @@ public class EducationTypeService {
 
     public void delete( String idOrName ) {
         if ( !userService.isUserAdminSession() )
-            throw new AccessDeniedException( "Você não tem permissão para deletar este Tipo de Educação" );
+            throw new UniversiForbiddenAccessException( "Você não tem permissão para deletar este Tipo de Educação" );
 
         var educationType = findByIdOrNameOrThrow( idOrName );
         educationTypeRepository.delete( educationType );

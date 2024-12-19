@@ -9,16 +9,18 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.lang.NonNull;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.validation.constraints.NotNull;
 import me.universi.Sys;
+import me.universi.api.exceptions.UniversiConflictingOperationException;
+import me.universi.api.exceptions.UniversiForbiddenAccessException;
+import me.universi.api.exceptions.UniversiNoEntityException;
+import me.universi.api.exceptions.UniversiUnprocessableOperationException;
 import me.universi.api.interfaces.EntityService;
 import me.universi.capacity.dto.ChangeContentPositionDTO;
 import me.universi.capacity.dto.ChangeFolderAssignmentsDTO;
@@ -109,7 +111,7 @@ public class FolderService extends EntityService<Folder> {
         return folderRepository.findFirstByReference(reference);
     }
 
-    public Folder findByReferenceOrThrow( String reference ) throws EntityNotFoundException {
+    public Folder findByReferenceOrThrow( String reference ) throws UniversiNoEntityException {
         return findByReference( reference ).orElseThrow( () -> makeNotFoundException( "referência", reference ) );
     }
 
@@ -117,7 +119,7 @@ public class FolderService extends EntityService<Folder> {
         return folderRepository.findFirstByIdOrReference( CastingUtil.getUUID(idOrReference).orElse(null), idOrReference );
     }
 
-    public Folder findByIdOrReferenceOrThrow( String idOrReference ) throws EntityNotFoundException {
+    public Folder findByIdOrReferenceOrThrow( String idOrReference ) throws UniversiNoEntityException {
         return findByIdOrReference( idOrReference ).orElseThrow( () -> makeNotFoundException( "ID ou referência", idOrReference ) );
     }
 
@@ -134,7 +136,7 @@ public class FolderService extends EntityService<Folder> {
         return folderRepository.saveAndFlush( folder );
     }
 
-    public Folder create( CreateFolderDTO createFolderDTO ) {
+    public Folder create( CreateFolderDTO createFolderDTO ) throws UniversiForbiddenAccessException {
         var folder = new Folder();
         folder.setName( createFolderDTO.name() );
         folder.setReference( generateAvailableReference() );
@@ -165,7 +167,7 @@ public class FolderService extends EntityService<Folder> {
             } );
 
             if ( !deniedAccessGroups.isEmpty() )
-                throw new AccessDeniedException(
+                throw new UniversiForbiddenAccessException(
                     "Você não tem permissão para criar este conteúdo no(s) seguinte(s) grupo(s): "
                     + String.join( ", " , deniedAccessGroups )
                 );
@@ -262,7 +264,7 @@ public class FolderService extends EntityService<Folder> {
                     .noneMatch( cId -> fc.getContent().getId().equals( cId ) )
                 ).toList();
 
-        newContentList = folderContentsRepository.saveAllAndFlush( newContentList );
+        folderContentsRepository.saveAllAndFlush( newContentList );
     }
 
     public void changeContentPosition( String idOrReference, UUID contentId, ChangeContentPositionDTO changeContentPositionDTO ) throws IllegalArgumentException {
@@ -313,9 +315,9 @@ public class FolderService extends EntityService<Folder> {
         return folderContentsRepository.findByFolderIdAndContentId( folderId, contentId ).isPresent();
     }
 
-    public int getPositionOfContent( UUID folderId, UUID contentId ) throws CapacityException {
+    public int getPositionOfContent( UUID folderId, UUID contentId ) throws UniversiUnprocessableOperationException {
         return folderContentsRepository.findByFolderIdAndContentId( folderId, contentId )
-            .orElseThrow( () -> new EntityNotFoundException( "O conteúdo não possui o material informado" ) )
+            .orElseThrow( () -> new UniversiUnprocessableOperationException( "O conteúdo não possui o material informado" ) )
             .getOrderNum();
     }
 
@@ -348,7 +350,7 @@ public class FolderService extends EntityService<Folder> {
         );
     }
 
-    public List<FolderProfile> getAssignments( @Nullable String idOrReference, @Nullable String assignedBy, @Nullable String assignedTo ) throws AccessDeniedException {
+    public List<FolderProfile> getAssignments( @Nullable String idOrReference, @Nullable String assignedBy, @Nullable String assignedTo ) throws UniversiForbiddenAccessException {
         Profile assignedByProfile = null;
         Profile assignedToProfile = null;
 
@@ -370,14 +372,14 @@ public class FolderService extends EntityService<Folder> {
                 && assignedToProfile != null
                 && !profileService.isSessionOfProfile( assignedToProfile )
             )
-                throw new AccessDeniedException( "Você não pode ver atribuições para outros usuários" );
+                throw new UniversiForbiddenAccessException( "Você não pode ver atribuições para outros usuários" );
 
             // Checking for assigned to anyone -> Can only check assigned by themselves
             else if ( assignedToProfile == null
                 && assignedByProfile != null
                 && !profileService.isSessionOfProfile( assignedByProfile )
             )
-                throw new AccessDeniedException( "Você não pode ver atribuições de outros usuários" );
+                throw new UniversiForbiddenAccessException( "Você não pode ver atribuições de outros usuários" );
 
             // Checking assigned to and by someone -> Can only check if assigned by or to themselves
             else if ( assignedToProfile != null
@@ -385,7 +387,7 @@ public class FolderService extends EntityService<Folder> {
                 && !profileService.isSessionOfProfile( assignedToProfile )
                 && !profileService.isSessionOfProfile( assignedByProfile )
             )
-                throw new AccessDeniedException( "Você não pode ver atribuições não relacionadas a você" );
+                throw new UniversiForbiddenAccessException( "Você não pode ver atribuições não relacionadas a você" );
         }
 
         var folder = idOrReference != null
@@ -411,7 +413,7 @@ public class FolderService extends EntityService<Folder> {
             .getResultList();
     }
 
-    public void favorite( String idOrReference ) throws AccessDeniedException {
+    public void favorite( String idOrReference ) throws UniversiForbiddenAccessException {
         Folder folder = findByIdOrReferenceOrThrow( idOrReference );
 
         var profileInSession = profileService.getProfileInSession();
@@ -423,7 +425,7 @@ public class FolderService extends EntityService<Folder> {
             return;
 
         if ( !hasPermissionToView( folder ) )
-            throw new AccessDeniedException("Essa pasta não existe ou você não pode favoritá-la");
+            throw new UniversiForbiddenAccessException( "Essa pasta não existe ou você não pode favoritá-la" );
 
         folderFavorite = new FolderFavorite();
         folderFavorite.setFolder(folder);
@@ -445,12 +447,12 @@ public class FolderService extends EntityService<Folder> {
         folderFavoriteRepository.delete( folderFavorite.get() );
     }
 
-    public List<WatchProfileProgressDTO> watch( String idOrReference, String idOrUsername ) throws AccessDeniedException {
+    public List<WatchProfileProgressDTO> watch( String idOrReference, String idOrUsername ) throws UniversiForbiddenAccessException {
         var folder = findByIdOrReferenceOrThrow( idOrReference );
         var profile = profileService.findByIdOrUsernameOrThrow( idOrUsername );
 
         if ( !canCheckProfileProgress( profile, folder ) )
-            throw new AccessDeniedException( "Você não pode checar o progresso deste usuário para esse conteúdo" );
+            throw new UniversiForbiddenAccessException( "Você não pode checar o progresso deste usuário para esse conteúdo" );
 
         return folderContentsRepository.findByFolderIdOrderByOrderNumAsc( folder.getId() ).stream()
             .map( c -> new WatchProfileProgressDTO( profile , c.getContent() ) )
@@ -483,7 +485,7 @@ public class FolderService extends EntityService<Folder> {
         return findOrThrow( copy.getId() );
     }
 
-    public void moveFolder( String idOrReference, MoveFolderDTO moveFolderDTO ) {
+    public void moveFolder( String idOrReference, MoveFolderDTO moveFolderDTO ) throws UniversiConflictingOperationException {
         var folder = findByIdOrReferenceOrThrow( idOrReference );
         var originalGroup = groupService.findByIdOrPathOrThrow( moveFolderDTO.originalGroupId() );
         rolesService.checkPermission(
@@ -504,10 +506,8 @@ public class FolderService extends EntityService<Folder> {
         if ( newGroup.getId().equals( originalGroup.getId() ) )
             return;
 
-        if ( folder.getGrantedAccessGroups().stream().anyMatch( g -> g.getId().equals( newGroup.getId() ) ) ) {
-            // Group already has this folder
-            // TODO: UniversiInvalidOperationException
-            throw new IllegalStateException( "O grupo já contém o conteúdo" );
+        if ( folderIsInGroup( folder, newGroup ) ) {
+            throw new UniversiConflictingOperationException( "O grupo já contém o conteúdo" );
         }
 
         var newGrantedAccessGroups = folder.getGrantedAccessGroups().stream()
@@ -632,14 +632,14 @@ public class FolderService extends EntityService<Folder> {
         return folders.stream().allMatch( this::hasPermissionToEdit );
     }
 
-    public void checkPermissionToEdit( Collection<Folder> folders ) throws AccessDeniedException {
+    public void checkPermissionToEdit( Collection<Folder> folders ) throws UniversiForbiddenAccessException {
         var deniedAccessFoldersNames = folders.stream()
             .filter( this::hasPermissionToEdit )
             .map( Folder::getName )
             .toList();
 
         if ( !deniedAccessFoldersNames.isEmpty() ) {
-            throw new AccessDeniedException(
+            throw new UniversiForbiddenAccessException(
                 "Você não tem permissão para alterar o(s) seguinte(s) conteúdo(s): "
                 + String.join( "," , deniedAccessFoldersNames )
             );

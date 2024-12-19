@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import jakarta.validation.constraints.NotNull;
@@ -73,7 +72,7 @@ public class CategoryService extends UniqueNameEntityService<Category> {
         return categoryRepository.saveAndFlush( category );
     }
 
-    public @NotNull Category update( @NotNull UUID id, @NotNull UpdateCategoryDTO updateCategoryDTO ) throws AccessDeniedException {
+    public @NotNull Category update( @NotNull UUID id, @NotNull UpdateCategoryDTO updateCategoryDTO ) {
         var category = findOrThrow( id );
         checkPermissionToEdit( category );
 
