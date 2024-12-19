@@ -251,7 +251,7 @@ public class Folder implements Serializable {
 
     @Transient
     public boolean isCanEdit() {
-        return FolderService.getInstance().hasPermissions(this, true);
+        return FolderService.getInstance().hasPermissionToEdit( this );
     }
 
     @Transient

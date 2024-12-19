@@ -14,7 +14,7 @@ public abstract class EntityService<T> {
 
     public abstract Optional<T> find( UUID id );
     public final T findOrThrow( UUID id ) throws EntityNotFoundException {
-        return find( id ).orElseThrow( () -> new EntityNotFoundException( entityName + " de ID '" + id + "' não existe" ) );
+        return find( id ).orElseThrow( () -> makeNotFoundException( "ID", id ) );
     }
 
     public abstract List<T> findAll();
@@ -22,12 +22,20 @@ public abstract class EntityService<T> {
     public abstract boolean hasPermissionToEdit( @NonNull T entity );
     public final void checkPermissionToEdit( @NonNull T entity ) throws AccessDeniedException {
         if ( !hasPermissionToEdit( entity ) )
-            throw new AccessDeniedException( "Você não tem permissão para alterar este " + entityName );
+            throw makeDeniedException( "alterar" );
     }
 
     public abstract boolean hasPermissionToDelete( @NonNull T entity );
     public final void checkPermissionToDelete( @NonNull T entity ) throws AccessDeniedException {
         if ( !hasPermissionToEdit( entity ) )
-            throw new AccessDeniedException( "Você não tem permissão para deletar este " + entityName );
+            throw makeDeniedException( "deletar" );
+    }
+
+    public final EntityNotFoundException makeNotFoundException( String fieldName, Object value ) {
+        return new EntityNotFoundException( entityName + " de " + fieldName + " '" + value + "' não existe" );
+    }
+
+    public final AccessDeniedException makeDeniedException( String action ) {
+        return new AccessDeniedException( "Você não tem permissão para " + action + " este " + entityName );
     }
 }

@@ -8,6 +8,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.lang.NonNull;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +19,7 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.validation.constraints.NotNull;
 import me.universi.Sys;
+import me.universi.api.interfaces.EntityService;
 import me.universi.capacity.dto.ChangeContentPositionDTO;
 import me.universi.capacity.dto.ChangeFolderAssignmentsDTO;
 import me.universi.capacity.dto.ChangeFolderContentsDTO;
@@ -56,7 +58,7 @@ import me.universi.util.CastingUtil;
 import me.universi.util.RandomUtil;
 
 @Service
-public class FolderService {
+public class FolderService extends EntityService<Folder> {
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -86,77 +88,21 @@ public class FolderService {
         this.userService = userService;
         this.rolesService = rolesService;
         this.folderContentsRepository = folderContentsRepository;
+
+        this.entityName = "Conteúdo";
     }
 
     public static FolderService getInstance() {
         return Sys.context.getBean("folderService", FolderService.class);
     }
 
+    @Override
     public List<Folder> findAll() {
         return folderRepository.findAll();
     }
 
-    public boolean hasPermissions( Folder folder, boolean forWrite ) {
-        final var fetchedFolder = findOrThrow( folder.getId() );
-
-        if ( profileService.isSessionOfProfile( fetchedFolder.getAuthor() )
-            || userService.isUserAdminSession()
-        ) {
-            /* Folder author and admins always have access */
-            return true;
-        }
-
-        if ( forWrite ) {
-            /* Only admin and author have write access */
-            return false;
-        }
-
-        if ( fetchedFolder.isPublicFolder() ) {
-            /* Everyone has reading access to public folder */
-            return true;
-        }
-
-        return profileService.getProfileInSession().getGroups().stream().anyMatch( profileGroup ->
-            fetchedFolder.getGrantedAccessGroups().stream().anyMatch(
-                // User is in a group with access to the folder
-                folderGroup -> folderGroup.getId().equals( profileGroup.getGroup().getId() )
-            )
-        );
-    }
-
-    public List<Boolean> hasPermissions( @NotNull List<Folder> folders, boolean forWrite ) {
-        return folders.stream().map( f -> hasPermissions( f, forWrite ) ).toList();
-    }
-
-    public void checkPermissions( Folder folder, boolean forWrite ) {
-        if ( !hasPermissions( folder, forWrite ) )
-            throw new AccessDeniedException(
-                forWrite
-                    ? "Você não tem permissão para alterar este conteúdo"
-                    : "Você não tem permissão para ver este conteúdo"
-            );
-    }
-
-    public void checkPermissions( @NotNull List<Folder> folders, boolean forWrite ) throws AccessDeniedException {
-            List<String> deniedAccessFolders = new ArrayList<>();
-            for ( var folder : folders ) {
-                if ( !hasPermissions( folder , true ) )
-                    deniedAccessFolders.add( "'" + folder.getId() + "'" );
-            }
-
-            if ( !deniedAccessFolders.isEmpty() )
-                throw new AccessDeniedException(
-                    "Você não tem permissão para alterar o(s) seguinte(s) conteúdo(s): "
-                    + String.join( "," , deniedAccessFolders )
-                );
-    }
-
     public Optional<Folder> find( UUID id ) {
         return folderRepository.findById( id );
-    }
-
-    public Folder findOrThrow( UUID id ) throws EntityNotFoundException {
-        return find( id ).orElseThrow( () -> new EntityNotFoundException("Conteúdo com ID '" + id + "' não encontrado") );
     }
 
     public Optional<Folder> findByReference(String reference) {
@@ -164,7 +110,7 @@ public class FolderService {
     }
 
     public Folder findByReferenceOrThrow( String reference ) throws EntityNotFoundException {
-        return findByReference( reference ).orElseThrow( () -> new EntityNotFoundException("Conteúdo com referência '" + reference + "' não encontrado") );
+        return findByReference( reference ).orElseThrow( () -> makeNotFoundException( "referência", reference ) );
     }
 
     public Optional<Folder> findByIdOrReference( String idOrReference ) {
@@ -172,7 +118,7 @@ public class FolderService {
     }
 
     public Folder findByIdOrReferenceOrThrow( String idOrReference ) throws EntityNotFoundException {
-        return findByIdOrReference( idOrReference ).orElseThrow( () -> new EntityNotFoundException( "Conteúdo com ID ou referência '" + idOrReference + "' não encontrado" ) );
+        return findByIdOrReference( idOrReference ).orElseThrow( () -> makeNotFoundException( "ID ou referência", idOrReference ) );
     }
 
     public List<Folder> findByCategory(UUID categoryId) throws CapacityException {
@@ -240,7 +186,7 @@ public class FolderService {
 
     public Folder edit( String idOrReference, UpdateFolderDTO updateFolderDTO ) {
         var folder = findByIdOrReferenceOrThrow( idOrReference );
-        checkPermissions( folder, true );
+        checkPermissionToEdit( folder );
 
         if ( updateFolderDTO.name() != null && !updateFolderDTO.name().isBlank() ) {
             folder.setName( updateFolderDTO.name() );
@@ -282,14 +228,14 @@ public class FolderService {
 
     public void delete( String idOrReference ) {
         Folder folder = findByIdOrReferenceOrThrow( idOrReference );
-        checkPermissions( folder, true );
+        checkPermissionToDelete( folder );
 
         folderRepository.delete( folder );
     }
 
     public void changeContents( String idOrReference, ChangeFolderContentsDTO changeFolderContentsDTO ) {
         var folder = findByIdOrReferenceOrThrow( idOrReference );
-        checkPermissions( folder, true );
+        checkPermissionToEdit( folder );
 
         List<FolderContents> newContentList = new ArrayList<>( folder.getFolderContents() );
 
@@ -321,7 +267,7 @@ public class FolderService {
 
     public void changeContentPosition( String idOrReference, UUID contentId, ChangeContentPositionDTO changeContentPositionDTO ) throws IllegalArgumentException {
         var folder = findByIdOrReferenceOrThrow( idOrReference );
-        checkPermissions( folder, true );
+        checkPermissionToEdit( folder );
 
         if ( !folderContainsContent( folder.getId(), contentId ) )
             throw new IllegalArgumentException( "O conteúdo não possui o material informado" );
@@ -375,7 +321,7 @@ public class FolderService {
 
     public void changeAssignments( String idOrReference, ChangeFolderAssignmentsDTO changeFolderAssignmentsDTO ) {
         var folder = findByIdOrReferenceOrThrow( idOrReference );
-        checkPermissions( folder, true );
+        checkPermissionToEdit( folder );
 
         var profileInSession = profileService.getProfileInSession();
 
@@ -476,7 +422,7 @@ public class FolderService {
         if ( folderFavorite != null )
             return;
 
-        if ( !hasPermissions(folder, false) )
+        if ( !hasPermissionToView( folder ) )
             throw new AccessDeniedException("Essa pasta não existe ou você não pode favoritá-la");
 
         folderFavorite = new FolderFavorite();
@@ -663,5 +609,45 @@ public class FolderService {
                 competenceTypeService.grantAccessToProfile(competenceType, profile);
             }
         }
+    }
+
+    public boolean folderIsInGroup( @NonNull Folder folder, @NonNull Group group ) {
+        return folder.getGrantedAccessGroups().stream().anyMatch( g -> g.getId().equals( group.getId() ) );
+    }
+
+    public boolean hasPermissionToView( Folder folder ) {
+        return folder.isPublicFolder()
+            || profileService.getProfileInSession().getGroups().stream().anyMatch(
+                profileGroup -> folderIsInGroup( folder, profileGroup.getGroup() )
+            );
+    }
+
+    @Override
+    public boolean hasPermissionToEdit( Folder folder ) {
+        return profileService.isSessionOfProfile( folder.getAuthor() )
+            || userService.isUserAdminSession();
+    }
+
+    public boolean hasPermissionToEdit( Collection<Folder> folders ) {
+        return folders.stream().allMatch( this::hasPermissionToEdit );
+    }
+
+    public void checkPermissionToEdit( Collection<Folder> folders ) throws AccessDeniedException {
+        var deniedAccessFoldersNames = folders.stream()
+            .filter( this::hasPermissionToEdit )
+            .map( Folder::getName )
+            .toList();
+
+        if ( !deniedAccessFoldersNames.isEmpty() ) {
+            throw new AccessDeniedException(
+                "Você não tem permissão para alterar o(s) seguinte(s) conteúdo(s): "
+                + String.join( "," , deniedAccessFoldersNames )
+            );
+        }
+    }
+
+    @Override
+    public boolean hasPermissionToDelete( Folder folder ) {
+        return hasPermissionToEdit( folder );
     }
 }

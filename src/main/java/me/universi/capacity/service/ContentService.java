@@ -89,7 +89,7 @@ public class ContentService extends EntityService<Content> {
 
         if ( createContentDTO.folders() != null ) {
             var folders = createContentDTO.folders().stream().map( folderService::findByIdOrReferenceOrThrow ).toList();
-            folderService.checkPermissions( folders , true );
+            folderService.checkPermissionToEdit( folders );
 
             var folderContents = new ArrayList<FolderContents>( folders.size() );
             var nextIndex = createContentDTO.folders().size();

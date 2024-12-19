@@ -7,12 +7,12 @@ import jakarta.persistence.EntityNotFoundException;
 public abstract class UniqueNameEntityService<T> extends EntityService<T> {
     public abstract Optional<T> findByName( String name );
     public final T findByNameOrThrow( String name ) throws EntityNotFoundException {
-        return findByName( name ).orElseThrow( () -> new EntityNotFoundException( entityName + " de nome '" + name + "' não existe" ) );
+        return findByName( name ).orElseThrow( () -> makeNotFoundException( "nome", name ) );
     }
 
     public abstract Optional<T> findByIdOrName( String idOrName );
     public final T findByIdOrNameOrThrow( String idOrName ) throws EntityNotFoundException {
-        return findByIdOrName( idOrName ).orElseThrow( () -> new EntityNotFoundException( entityName + " de nome ou ID '" + idOrName + "' não existe" ) );
+        return findByIdOrName( idOrName ).orElseThrow( () -> makeNotFoundException( "ID ou nome", idOrName ) );
     }
 
     public final boolean isNameAvailable( String name ) {
