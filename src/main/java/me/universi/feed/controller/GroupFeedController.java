@@ -6,9 +6,9 @@ import me.universi.feed.dto.GroupPostDTO;
 import me.universi.feed.entities.GroupPost;
 import me.universi.feed.exceptions.GroupFeedException;
 import me.universi.feed.services.GroupFeedService;
-import me.universi.roles.enums.FeaturesTypes;
-import me.universi.roles.enums.Permission;
-import me.universi.roles.services.RolesService;
+import me.universi.role.enums.FeaturesTypes;
+import me.universi.role.enums.Permission;
+import me.universi.role.services.RoleService;
 import me.universi.profile.services.ProfileService;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,7 +32,7 @@ public class GroupFeedController {
         return Response.buildResponse(response -> {
 
             // check permission post
-            RolesService.getInstance().checkPermission(groupId, FeaturesTypes.FEED, Permission.READ);
+            RoleService.getInstance().checkPermission(groupId, FeaturesTypes.FEED, Permission.READ);
 
             List<GroupPost> groupPosts = groupFeedService.getGroupPosts(groupId);
             List<GroupGetDTO> groupGetDTOS = new ArrayList<>();

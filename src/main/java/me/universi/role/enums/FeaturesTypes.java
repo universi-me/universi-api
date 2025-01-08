@@ -1,6 +1,6 @@
-package me.universi.roles.enums;
+package me.universi.role.enums;
 
-// ! When adding a new FeaturesTypes add a new column on Roles
+// ! When adding a new FeaturesTypes add a new column on Role
 
 public enum FeaturesTypes {
     FEED("Publicações"),

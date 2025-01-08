@@ -17,11 +17,11 @@ import me.universi.group.enums.GroupType;
 import me.universi.group.exceptions.GroupException;
 import me.universi.group.repositories.*;
 import me.universi.profile.entities.Profile;
-import me.universi.roles.entities.Roles;
-import me.universi.roles.enums.FeaturesTypes;
-import me.universi.roles.enums.Permission;
-import me.universi.roles.enums.RoleType;
-import me.universi.roles.services.RolesService;
+import me.universi.role.entities.Role;
+import me.universi.role.enums.FeaturesTypes;
+import me.universi.role.enums.Permission;
+import me.universi.role.enums.RoleType;
+import me.universi.role.services.RoleService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import me.universi.util.CastingUtil;
@@ -243,16 +243,16 @@ public class GroupService {
         return addParticipantToGroup(
             group,
             profile,
-            RolesService.getInstance().getGroupMemberRole(group)
+            RoleService.getInstance().getGroupMemberRole(group)
         );
     }
 
-    public boolean addParticipantToGroup(@NotNull Group group, @NotNull Profile profile, Roles roles) throws GroupException {
+    public boolean addParticipantToGroup(@NotNull Group group, @NotNull Profile profile, Role role) throws GroupException {
         if(!profileGroupRepository.existsByGroupIdAndProfileId(group.getId(), profile.getId())) {
             ProfileGroup profileGroup = new ProfileGroup();
             profileGroup.profile = profile;
             profileGroup.group = group;
-            profileGroup.role = roles;
+            profileGroup.role = role;
             profileGroupRepository.save(profileGroup);
             return true;
         }
@@ -930,8 +930,8 @@ public class GroupService {
             }
 
             // add creator to group participants
-            RolesService.getInstance().createBaseRoles(groupNew);
-            addParticipantToGroup(groupNew, groupNew.getAdmin(), RolesService.getInstance().getGroupAdminRole(groupNew));
+            RoleService.getInstance().createBaseRoles(groupNew);
+            addParticipantToGroup(groupNew, groupNew.getAdmin(), RoleService.getInstance().getGroupAdminRole(groupNew));
 
             return groupNew;
         }
@@ -957,7 +957,7 @@ public class GroupService {
 
         Group groupEdit = getGroupByGroupIdOrGroupPath(groupId, groupPath);
 
-        RolesService.getInstance().checkPermission(groupEdit, FeaturesTypes.GROUP, Permission.READ_WRITE);
+        RoleService.getInstance().checkPermission(groupEdit, FeaturesTypes.GROUP, Permission.READ_WRITE);
 
         User user = userService.getUserInSession();
 
@@ -1004,7 +1004,7 @@ public class GroupService {
     public List<Group> subGroups(UUID groupId) {
         Group group = getGroupByGroupIdOrGroupPath(groupId, null);
 
-        RolesService.getInstance().checkPermission(group, FeaturesTypes.GROUP, Permission.READ);
+        RoleService.getInstance().checkPermission(group, FeaturesTypes.GROUP, Permission.READ);
 
         if(group != null) {
             Collection<Subgroup> subgroupList = group.getSubGroups();
@@ -1024,7 +1024,7 @@ public class GroupService {
         Group group = getGroupByGroupIdOrGroupPath(groupId, null);
 
         // check permission contents
-        RolesService.getInstance().checkPermission(group, FeaturesTypes.CONTENT, Permission.READ);
+        RoleService.getInstance().checkPermission(group, FeaturesTypes.CONTENT, Permission.READ);
 
         return group.getFoldersGrantedAccess();
     }
@@ -1032,7 +1032,7 @@ public class GroupService {
     public boolean deleteGroup(UUID groupId) {
         Group group = getGroupByGroupIdOrGroupPath(groupId, null);
 
-        RolesService.getInstance().checkPermission(group, FeaturesTypes.GROUP, Permission.READ_WRITE_DELETE);
+        RoleService.getInstance().checkPermission(group, FeaturesTypes.GROUP, Permission.READ_WRITE_DELETE);
 
         User user = userService.getUserInSession();
 
@@ -1047,7 +1047,7 @@ public class GroupService {
     public boolean removeSubgroup(UUID groupId, UUID subGroupId) {
         Group group = getGroupByGroupIdOrGroupPath(groupId, null);
 
-        RolesService.getInstance().checkPermission(group, FeaturesTypes.GROUP, Permission.READ_WRITE_DELETE);
+        RoleService.getInstance().checkPermission(group, FeaturesTypes.GROUP, Permission.READ_WRITE_DELETE);
 
         if(subGroupId == null) {
             throw new GroupException("Parâmetro groupIdRemove é nulo.");
@@ -1108,7 +1108,7 @@ public class GroupService {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "not found");
     }
 
-    public Collection<Roles> findRoles( UUID groupId ) {
-        return RolesService.getInstance().findByGroup( groupId );
+    public Collection<Role> findRoles( UUID groupId ) {
+        return RoleService.getInstance().findByGroup( groupId );
     }
  }

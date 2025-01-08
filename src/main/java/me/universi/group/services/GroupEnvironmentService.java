@@ -6,7 +6,7 @@ import me.universi.group.entities.GroupSettings.GroupEnvironment;
 import me.universi.group.entities.GroupSettings.GroupSettings;
 import me.universi.group.exceptions.GroupException;
 import me.universi.group.repositories.GroupEnvironmentRepository;
-import me.universi.roles.services.RolesService;
+import me.universi.role.services.RoleService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import org.springframework.stereotype.Service;
@@ -28,7 +28,7 @@ public class GroupEnvironmentService {
     public GroupEnvironment getOrganizationEnvironment() {
         Group group = groupService.getOrganizationBasedInDomainIfExist();
 
-        RolesService.getInstance().checkIsAdmin(group);
+        RoleService.getInstance().checkIsAdmin(group);
 
         if(group != null) {
             User user = userService.getUserInSession();
@@ -45,7 +45,7 @@ public class GroupEnvironmentService {
     public GroupEnvironment updateOrganizationEnvironment(UpdateGroupEnvironmentDTO updateGroupEnvironment) {
         Group group = groupService.getOrganizationBasedInDomainIfExist();
 
-        RolesService.getInstance().checkIsAdmin(group);
+        RoleService.getInstance().checkIsAdmin(group);
 
         if(group != null) {
             User user = userService.getUserInSession();

@@ -6,7 +6,7 @@ import me.universi.group.entities.GroupSettings.GroupSettings;
 import me.universi.group.entities.GroupSettings.GroupTheme;
 import me.universi.group.exceptions.GroupException;
 import me.universi.group.repositories.GroupThemeRepository;
-import me.universi.roles.services.RolesService;
+import me.universi.role.services.RoleService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import org.springframework.stereotype.Service;
@@ -27,7 +27,7 @@ public class GroupThemeService {
 
         Group group = groupService.getGroupByGroupIdOrGroupPath(updateGroupThemeDTO.groupId(), null);
 
-        RolesService.getInstance().checkIsAdmin(group);
+        RoleService.getInstance().checkIsAdmin(group);
 
         if(group != null) {
             User user = userService.getUserInSession();

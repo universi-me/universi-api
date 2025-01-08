@@ -1,11 +1,11 @@
-package me.universi.roles.controllers;
+package me.universi.role.controllers;
 
 import java.util.UUID;
 
-import me.universi.roles.dto.CreateRoleDTO;
-import me.universi.roles.dto.UpdateRoleDTO;
-import me.universi.roles.entities.Roles;
-import me.universi.roles.services.RolesService;
+import me.universi.role.dto.CreateRoleDTO;
+import me.universi.role.dto.UpdateRoleDTO;
+import me.universi.role.entities.Role;
+import me.universi.role.services.RoleService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,30 +18,30 @@ import jakarta.validation.constraints.NotNull;
 
 @RestController
 @RequestMapping( "/api/roles" )
-public class RolesController {
-    private final RolesService rolesService;
+public class RoleController {
+    private final RoleService roleService;
 
     @Autowired
-    public RolesController(RolesService rolesService) {
-        this.rolesService = rolesService;
+    public RoleController(RoleService roleService) {
+        this.roleService = roleService;
     }
 
     @PostMapping( path = "/", consumes = "application/json", produces = "application/json" )
-    public ResponseEntity<Roles> create( @Valid @RequestBody CreateRoleDTO createRoleDTO ) {
-        return new ResponseEntity<>( rolesService.create( createRoleDTO ), HttpStatus.CREATED );
+    public ResponseEntity<Role> create( @Valid @RequestBody CreateRoleDTO createRoleDTO ) {
+        return new ResponseEntity<>( roleService.create( createRoleDTO ), HttpStatus.CREATED );
     }
 
     @PatchMapping( path = "/{id}", consumes = "application/json", produces = "application/json" )
-    public ResponseEntity<Roles> edit(
+    public ResponseEntity<Role> edit(
         @Valid @RequestBody UpdateRoleDTO updateRoleDTO,
         @Valid @PathVariable @NotNull UUID id
     ) {
-        return ResponseEntity.ok( rolesService.update( id, updateRoleDTO ) );
+        return ResponseEntity.ok( roleService.update( id, updateRoleDTO ) );
     }
 
     @DeleteMapping( path = "/{id}" )
     public ResponseEntity<Void> delete( @Valid @PathVariable @NotNull UUID id ) {
-        rolesService.delete( id );
+        roleService.delete( id );
         return ResponseEntity.noContent().build();
     }
 
@@ -51,17 +51,17 @@ public class RolesController {
         @Valid @PathVariable @NotNull UUID roleId,
         @Valid @PathVariable @NotNull String profile
     ) {
-        rolesService.assignRole( roleId, profile );
+        roleService.assignRole( roleId, profile );
         return ResponseEntity.noContent().build();
     }
 
     // assigned roles
     // todo: move to a more appropriate controller ( eg.: ProfileGroupController )
     @GetMapping( path = "/{groupId}/{profile}/role", produces = MediaType.APPLICATION_JSON_VALUE )
-    public ResponseEntity<Roles> assignedRole(
+    public ResponseEntity<Role> assignedRole(
         @Valid @PathVariable @NotNull UUID groupId,
         @Valid @PathVariable @NotNull String profile
     ) {
-        return ResponseEntity.ok( rolesService.getAssignedRoles( profile, groupId ) );
+        return ResponseEntity.ok( roleService.getAssignedRole( profile, groupId ) );
     }
 }

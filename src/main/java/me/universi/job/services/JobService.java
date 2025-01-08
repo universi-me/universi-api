@@ -21,9 +21,9 @@ import me.universi.job.exceptions.JobException;
 import me.universi.job.repositories.JobRepository;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
-import me.universi.roles.enums.FeaturesTypes;
-import me.universi.roles.enums.Permission;
-import me.universi.roles.services.RolesService;
+import me.universi.role.enums.FeaturesTypes;
+import me.universi.role.enums.Permission;
+import me.universi.role.services.RoleService;
 import me.universi.user.services.UserService;
 
 @Service
@@ -33,16 +33,16 @@ public class JobService {
     private final GroupFeedService groupFeedService;
     private final InstitutionService institutionService;
     private final ProfileService profileService;
-    private final RolesService rolesService;
+    private final RoleService roleService;
     private final UserService userService;
 
-    public JobService( JobRepository jobRepository, CompetenceTypeService competenceTypeService, GroupFeedService groupFeedService, InstitutionService institutionService, ProfileService profileService, RolesService rolesService, UserService userService ) {
+    public JobService( JobRepository jobRepository, CompetenceTypeService competenceTypeService, GroupFeedService groupFeedService, InstitutionService institutionService, ProfileService profileService, RoleService roleService, UserService userService ) {
         this.jobRepository = jobRepository;
         this.competenceTypeService = competenceTypeService;
         this.groupFeedService = groupFeedService;
         this.institutionService = institutionService;
         this.profileService = profileService;
-        this.rolesService = rolesService;
+        this.roleService = roleService;
         this.userService = userService;
     }
 
@@ -84,7 +84,7 @@ public class JobService {
 
         var organizationId = profileInSession.getUser().getOrganization().getId().toString();
 
-        if ( rolesService.hasPermission( organizationId , FeaturesTypes.FEED, Permission.READ_WRITE) ) {
+        if ( roleService.hasPermission( organizationId , FeaturesTypes.FEED, Permission.READ_WRITE) ) {
             // TODO: group environment variable for message
             var postMessage = "Nova vaga cadastrada para a instituição " + job.getInstitution().getName()
                 + ": <a href=\"/job/" + job.getId() + "\"><strong>" + job.getTitle() + "</strong></a>";

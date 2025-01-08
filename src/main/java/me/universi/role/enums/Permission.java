@@ -1,4 +1,4 @@
-package me.universi.roles.enums;
+package me.universi.role.enums;
 
 public class Permission {
     public static final int DEFAULT = 4;

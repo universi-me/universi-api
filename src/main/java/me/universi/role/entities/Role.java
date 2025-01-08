@@ -1,4 +1,4 @@
-package me.universi.roles.entities;
+package me.universi.role.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -7,11 +7,12 @@ import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Arrays;
+
+import me.universi.api.exceptions.UniversiUnprocessableOperationException;
 import me.universi.group.entities.Group;
-import me.universi.roles.enums.FeaturesTypes;
-import me.universi.roles.enums.Permission;
-import me.universi.roles.enums.RoleType;
-import me.universi.roles.exceptions.RolesException;
+import me.universi.role.enums.FeaturesTypes;
+import me.universi.role.enums.Permission;
+import me.universi.role.enums.RoleType;
 
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -21,12 +22,13 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.SQLRestriction;
 
-@Entity(name = "roles")
-@SQLDelete(sql = "UPDATE roles SET deleted = true WHERE id=?")
-@Where(clause = "deleted=false")
-public class Roles implements Serializable {
+@Entity( name = "Role" )
+@Table( name = "role", schema = "system_group" )
+@SQLDelete( sql = "UPDATE role SET deleted = true WHERE id=?" )
+@SQLRestriction( "NOT deleted" )
+public class Role implements Serializable {
 
     @Serial
     private static final long serialVersionUID = -7368873462832313132L;
@@ -86,10 +88,10 @@ public class Roles implements Serializable {
     @NotNull
     private RoleType roleType;
 
-    public Roles() {
+    public Role() {
     }
 
-    private Roles(@NotNull String name, String description, @NotNull Group group, @NotNull RoleType roleType, int permission) {
+    private Role(@NotNull String name, String description, @NotNull Group group, @NotNull RoleType roleType, int permission) {
         this.name = name;
         this.description = description;
         this.group = group;
@@ -99,25 +101,25 @@ public class Roles implements Serializable {
             .forEach(ft -> this.setPermission(ft, permission));
     }
 
-    public static Roles makeAdmin(@NotNull Group group) {
-        return new Roles("Administrador", null, group, RoleType.ADMINISTRATOR, Permission.READ_WRITE_DELETE);
+    public static Role makeAdmin(@NotNull Group group) {
+        return new Role("Administrador", null, group, RoleType.ADMINISTRATOR, Permission.READ_WRITE_DELETE);
     }
 
-    public static Roles makeParticipant(@NotNull Group group) {
-        return new Roles("Participante", null, group, RoleType.PARTICIPANT, Permission.READ);
+    public static Role makeParticipant(@NotNull Group group) {
+        return new Role("Participante", null, group, RoleType.PARTICIPANT, Permission.READ);
     }
 
-    public static Roles makeVisitor(@NotNull Group group) {
-        return new Roles("Visitante", null, group, RoleType.VISITOR, Permission.READ);
+    public static Role makeVisitor(@NotNull Group group) {
+        return new Role("Visitante", null, group, RoleType.VISITOR, Permission.READ);
     }
 
-    public static Roles makeCustom(@NotNull String name, String description, @NotNull Group group, int permission) {
-        return new Roles(name, description, group, RoleType.CUSTOM, permission);
+    public static Role makeCustom(@NotNull String name, String description, @NotNull Group group, int permission) {
+        return new Role(name, description, group, RoleType.CUSTOM, permission);
     }
 
     @Override
     public String toString() {
-        return "\nRoles[" +
+        return "\nRole[" +
                 "id='" + id + '\'' +
                 ", name='" + name + "']\n";
     }
@@ -177,7 +179,7 @@ public class Roles implements Serializable {
             this.jobPermission = permission;
 
         else
-            throw new RolesException("FeaturesTypes '" + feature + "' não existe");
+            throw new UniversiUnprocessableOperationException("FeaturesTypes '" + feature + "' não existe");
     }
 
     @Transient

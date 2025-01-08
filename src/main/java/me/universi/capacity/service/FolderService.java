@@ -52,9 +52,9 @@ import me.universi.group.entities.Group;
 import me.universi.group.services.GroupService;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
-import me.universi.roles.enums.FeaturesTypes;
-import me.universi.roles.enums.Permission;
-import me.universi.roles.services.RolesService;
+import me.universi.role.enums.FeaturesTypes;
+import me.universi.role.enums.Permission;
+import me.universi.role.services.RoleService;
 import me.universi.user.services.UserService;
 import me.universi.util.CastingUtil;
 import me.universi.util.RandomUtil;
@@ -74,10 +74,10 @@ public class FolderService extends EntityService<Folder> {
     private final CompetenceTypeService competenceTypeService;
     private final CompetenceService competenceService;
     private final UserService userService;
-    private final RolesService rolesService;
+    private final RoleService roleService;
     private final FolderContentsRepository folderContentsRepository;
 
-    public FolderService(GroupService groupService, ProfileService profileService, CategoryService categoryService, FolderRepository folderRepository, FolderProfileRepository folderProfileRepository, FolderFavoriteRepository folderFavoriteRepository, ContentStatusRepository contentStatusRepository, CompetenceTypeService competenceTypeService, CompetenceService competenceService, UserService userService, RolesService rolesService, FolderContentsRepository folderContentsRepository) {
+    public FolderService(GroupService groupService, ProfileService profileService, CategoryService categoryService, FolderRepository folderRepository, FolderProfileRepository folderProfileRepository, FolderFavoriteRepository folderFavoriteRepository, ContentStatusRepository contentStatusRepository, CompetenceTypeService competenceTypeService, CompetenceService competenceService, UserService userService, RoleService roleService, FolderContentsRepository folderContentsRepository) {
         this.groupService = groupService;
         this.profileService = profileService;
         this.categoryService = categoryService;
@@ -88,7 +88,7 @@ public class FolderService extends EntityService<Folder> {
         this.competenceTypeService = competenceTypeService;
         this.competenceService = competenceService;
         this.userService = userService;
-        this.rolesService = rolesService;
+        this.roleService = roleService;
         this.folderContentsRepository = folderContentsRepository;
 
         this.entityName = "Conteúdo";
@@ -160,7 +160,7 @@ public class FolderService extends EntityService<Folder> {
                     g
                 );
 
-                if ( !rolesService.hasPermission( group , FeaturesTypes.CONTENT, Permission.READ_WRITE ) )
+                if ( !roleService.hasPermission( group , FeaturesTypes.CONTENT, Permission.READ_WRITE ) )
                     deniedAccessGroups.add( "'" + g + "'" );
 
                 groupsFetched.add( group );
@@ -488,7 +488,7 @@ public class FolderService extends EntityService<Folder> {
     public void moveFolder( String idOrReference, MoveFolderDTO moveFolderDTO ) throws UniversiConflictingOperationException {
         var folder = findByIdOrReferenceOrThrow( idOrReference );
         var originalGroup = groupService.findByIdOrPathOrThrow( moveFolderDTO.originalGroupId() );
-        rolesService.checkPermission(
+        roleService.checkPermission(
             profileService.getProfileInSession(),
             originalGroup,
             FeaturesTypes.CONTENT,
@@ -496,7 +496,7 @@ public class FolderService extends EntityService<Folder> {
         );
 
         var newGroup = groupService.findByIdOrPathOrThrow( moveFolderDTO.newGroupId() );
-        rolesService.checkPermission(
+        roleService.checkPermission(
             profileService.getProfileInSession(),
             newGroup,
             FeaturesTypes.CONTENT,

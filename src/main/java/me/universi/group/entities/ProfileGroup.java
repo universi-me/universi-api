@@ -9,7 +9,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
 import me.universi.profile.entities.Profile;
-import me.universi.roles.entities.Roles;
+import me.universi.role.entities.Role;
 
 import org.hibernate.annotations.*;
 
@@ -60,7 +60,7 @@ public class ProfileGroup implements Serializable {
     @ManyToOne
     @NotNull
     @PrimaryKeyJoinColumn(name="role_id")
-    public Roles role;
+    public Role role;
 
     public ProfileGroup() {
     }

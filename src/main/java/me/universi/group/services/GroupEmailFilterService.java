@@ -10,7 +10,7 @@ import me.universi.group.enums.GroupEmailFilterType;
 import me.universi.group.exceptions.GroupException;
 import me.universi.group.repositories.GroupEmailFilterRepository;
 import me.universi.group.repositories.GroupRepository;
-import me.universi.roles.services.RolesService;
+import me.universi.role.services.RoleService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import me.universi.util.ConvertUtil;
@@ -35,7 +35,7 @@ public class GroupEmailFilterService {
     public GroupEmailFilter createEmailFilter(CreateEmailFilterDTO createEmailFilterDTO) {
         Group group = groupService.getGroupByGroupIdOrGroupPath(createEmailFilterDTO.groupId(), null);
 
-        RolesService.getInstance().checkIsAdmin(group);
+        RoleService.getInstance().checkIsAdmin(group);
 
         if(group != null) {
             User user = userService.getUserInSession();
@@ -60,7 +60,7 @@ public class GroupEmailFilterService {
     public GroupEmailFilter updateEmailFilter(UpdateEmailFilterDTO updateEmailFilterDTO) {
         Group group = groupService.getGroupByGroupEmailFilterId(updateEmailFilterDTO.groupEmailFilterId());
 
-        RolesService.getInstance().checkIsAdmin(group);
+        RoleService.getInstance().checkIsAdmin(group);
 
         if(group != null) {
             User user = userService.getUserInSession();
@@ -92,7 +92,7 @@ public class GroupEmailFilterService {
 
         if(group != null) {
 
-            RolesService.getInstance().checkIsAdmin(group);
+            RoleService.getInstance().checkIsAdmin(group);
 
             User user = userService.getUserInSession();
 
@@ -115,7 +115,7 @@ public class GroupEmailFilterService {
     public List<GroupEmailFilter> listEmailFilter(UUID groupId) {
         Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, null);
 
-        RolesService.getInstance().checkIsAdmin(group);
+        RoleService.getInstance().checkIsAdmin(group);
 
         if(group != null) {
 

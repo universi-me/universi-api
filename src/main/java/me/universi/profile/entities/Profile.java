@@ -15,7 +15,7 @@ import me.universi.education.entities.Education;
 import me.universi.experience.entities.Experience;
 import me.universi.group.entities.ProfileGroup;
 import me.universi.link.entities.Link;
-import me.universi.roles.entities.Roles;
+import me.universi.role.entities.Role;
 import me.universi.profile.enums.Gender;
 import me.universi.user.entities.User;
 import org.hibernate.annotations.*;
@@ -92,7 +92,7 @@ public class Profile implements Serializable {
 
     @Transient
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    public Roles roles;
+    public Role role;
 
     @JsonIgnore
     @Column(name = "hidden")

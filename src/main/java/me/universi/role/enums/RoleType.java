@@ -1,4 +1,4 @@
-package me.universi.roles.enums;
+package me.universi.role.enums;
 
 public enum RoleType {
     ADMINISTRATOR,

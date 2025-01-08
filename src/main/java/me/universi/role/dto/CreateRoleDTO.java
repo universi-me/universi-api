@@ -1,4 +1,4 @@
-package me.universi.roles.dto;
+package me.universi.role.dto;
 
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotBlank;

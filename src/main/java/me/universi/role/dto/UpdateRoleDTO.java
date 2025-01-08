@@ -1,9 +1,9 @@
-package me.universi.roles.dto;
+package me.universi.role.dto;
 
 import java.util.Map;
 
 import jakarta.annotation.Nullable;
-import me.universi.roles.enums.FeaturesTypes;
+import me.universi.role.enums.FeaturesTypes;
 
 public record UpdateRoleDTO(
     @Nullable
