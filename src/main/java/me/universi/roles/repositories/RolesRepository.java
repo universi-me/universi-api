@@ -12,6 +12,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface RolesRepository extends JpaRepository<Roles, UUID> {
     Optional<Roles> findFirstById(UUID id);
     Collection<Roles> findAllByGroup(Group group);
+    Optional<Roles> findFirstByNameIgnoreCaseAndGroupId( String name, UUID groupId );
 
     Roles findFirstByGroupIdAndRoleType(UUID groupId, RoleType roleType);
 }

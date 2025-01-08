@@ -1107,4 +1107,8 @@ public class GroupService {
         }
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "not found");
     }
+
+    public Collection<Roles> findRoles( UUID groupId ) {
+        return RolesService.getInstance().findByGroup( groupId );
+    }
  }

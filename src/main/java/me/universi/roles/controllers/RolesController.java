@@ -1,21 +1,23 @@
 package me.universi.roles.controllers;
 
-import java.util.Map;
+import java.util.UUID;
 
-import me.universi.api.entities.Response;
+import me.universi.roles.dto.CreateRoleDTO;
+import me.universi.roles.dto.UpdateRoleDTO;
 import me.universi.roles.entities.Roles;
-import me.universi.roles.enums.FeaturesTypes;
-import me.universi.roles.enums.Permission;
-import me.universi.roles.exceptions.RolesException;
 import me.universi.roles.services.RolesService;
-import me.universi.util.CastingUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+
 @RestController
-@RequestMapping(value = "/api/roles")
+@RequestMapping( "/api/roles" )
 public class RolesController {
     private final RolesService rolesService;
 
@@ -24,150 +26,42 @@ public class RolesController {
         this.rolesService = rolesService;
     }
 
-    @PostMapping(value = "/create", consumes = "application/json", produces = "application/json")
-    @ResponseBody
-    public Response roles_create(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-            var name = CastingUtil.getString(body.get("name")).orElseThrow(() -> {
-                response.setStatus(HttpStatus.BAD_REQUEST);
-                return new RolesException("Parâmetro 'name' não informado");
-            });
-
-            var description = CastingUtil.getString(body.get("description"))
-                .orElse(null);
-
-            var groupId = CastingUtil.getUUID(body.get("groupId")).orElseThrow(() -> {
-                response.setStatus(HttpStatus.BAD_REQUEST);
-                return new RolesException("Parâmetro 'groupId' não informado ou inválido");
-            });
-
-            Roles roles = rolesService.createRole(name, description, groupId);
-            response.body.put("roles", roles);
-            response.message = "Papel \"" + roles.name + "\" criado com sucesso.";
-        });
+    @PostMapping( path = "/", consumes = "application/json", produces = "application/json" )
+    public ResponseEntity<Roles> create( @Valid @RequestBody CreateRoleDTO createRoleDTO ) {
+        return new ResponseEntity<>( rolesService.create( createRoleDTO ), HttpStatus.CREATED );
     }
 
-    @PostMapping(value = "/edit", consumes = "application/json", produces = "application/json")
-    @ResponseBody
-    public Response roles_edit(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-            var roleId = CastingUtil.getUUID(body.get("rolesId"))
-                .orElseThrow(() -> {
-                    response.setStatus(HttpStatus.BAD_REQUEST);
-                    throw new RolesException("ID de papel não informado.");
-                });
-
-            String name = CastingUtil.getString(body.get("name"))
-                .orElse(null);
-
-            String description = CastingUtil.getString(body.get("description"))
-                .orElse(null);
-
-            Roles roles = rolesService.editRole(roleId, name, description);
-            response.body.put("roles", roles);
-            response.message = "Papel \""+ roles.name +"\" editado com sucesso.";
-        });
+    @PatchMapping( path = "/{id}", consumes = "application/json", produces = "application/json" )
+    public ResponseEntity<Roles> edit(
+        @Valid @RequestBody UpdateRoleDTO updateRoleDTO,
+        @Valid @PathVariable @NotNull UUID id
+    ) {
+        return ResponseEntity.ok( rolesService.update( id, updateRoleDTO ) );
     }
 
-    @PostMapping(value = "/list", produces = "application/json")
-    @ResponseBody
-    public Response roles_list(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-            response.body.put("roles", rolesService.listRolesGroup(body));
-        });
-    }
-
-    @PostMapping(value = "/feature/toggle", consumes = "application/json", produces = "application/json")
-    @ResponseBody
-    public Response roles_feature_active(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-            var rolesId = CastingUtil.getUUID(body.get("rolesId")).orElseThrow(() -> {
-                response.setStatus(HttpStatus.BAD_REQUEST);
-                return new RolesException("Parâmetro 'rolesId' não informado ou inválido.");
-            });
-
-            var feature = CastingUtil.getEnum(FeaturesTypes.class, body.get("feature")).orElseThrow(() -> {
-                response.setStatus(HttpStatus.BAD_REQUEST);
-                return new RolesException("Parâmetro 'feature' não informado ou inválido.");
-            });
-
-            var permission = CastingUtil.getInteger(body.get("value")).orElseThrow(() -> {
-                response.setStatus(HttpStatus.BAD_REQUEST);
-                return new RolesException("Parâmetro 'value' não informado ou inválido.");
-            });
-
-            var roles = rolesService.setRolesFeatureValue(rolesId, feature, permission);
-
-            response.message = "Funcionalidade " + feature.label + " foi alterada " +
-                               " com sucesso para "+ Permission.getPermissionName(permission) +" em \"" + roles.name + "\".";
-        });
+    @DeleteMapping( path = "/{id}" )
+    public ResponseEntity<Void> delete( @Valid @PathVariable @NotNull UUID id ) {
+        rolesService.delete( id );
+        return ResponseEntity.noContent().build();
     }
 
     // assign roles
-    @PostMapping(value = "/assign", consumes = "application/json", produces = "application/json")
-    @ResponseBody
-    public Response roles_assign(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-            var roleIdOpt = CastingUtil.getUUID(body.get("rolesId"));
-            var groupIdOpt = CastingUtil.getUUID(body.get("groupId"));
-            var profileIdOpt = CastingUtil.getUUID(body.get("profileId"));
-
-            var roleId = roleIdOpt.orElseThrow(() -> {
-                response.setStatus(HttpStatus.BAD_REQUEST);
-                return new RolesException("Parâmetro rolesId é nulo.");
-            });
-
-            var groupId = groupIdOpt.orElseThrow(() -> {
-                response.setStatus(HttpStatus.BAD_REQUEST);
-                return new RolesException("Parâmetro groupId é nulo.");
-            });
-
-            var profileId = profileIdOpt.orElseThrow(() -> {
-                response.setStatus(HttpStatus.BAD_REQUEST);
-                return new RolesException("Parâmetro profileId é nulo.");
-            });
-
-            Roles rolesProfile = rolesService.assignRole(roleId, groupId, profileId);
-            response.message = "Papel \""+ rolesProfile.name +"\" atribuído com sucesso.";
-        });
+    @PatchMapping( value = "/{roleId}/assign/{profile}", produces = "application/json" )
+    public ResponseEntity<Void> assign(
+        @Valid @PathVariable @NotNull UUID roleId,
+        @Valid @PathVariable @NotNull String profile
+    ) {
+        rolesService.assignRole( roleId, profile );
+        return ResponseEntity.noContent().build();
     }
 
     // assigned roles
-    @PostMapping(value = "/assigned", consumes = "application/json", produces = "application/json")
-    public Response roles_assigned(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-            var profileId = CastingUtil.getUUID(body.get("profileId"))
-                .orElseThrow(() -> {
-                    response.setStatus(HttpStatus.BAD_REQUEST);
-                    return new RolesException("Parâmetro 'profileId' não informado.");
-                });
-
-            var groupId = CastingUtil.getUUID(body.get("groupId"))
-                .orElseThrow(() -> {
-                    response.setStatus(HttpStatus.BAD_REQUEST);
-                    return new RolesException("Parâmetro 'groupId' não informado.");
-                });
-
-            response.body.put("roles", rolesService.getAssignedRoles(profileId, groupId));
-        });
+    // todo: move to a more appropriate controller ( eg.: ProfileGroupController )
+    @GetMapping( path = "/{groupId}/{profile}/role", produces = MediaType.APPLICATION_JSON_VALUE )
+    public ResponseEntity<Roles> assignedRole(
+        @Valid @PathVariable @NotNull UUID groupId,
+        @Valid @PathVariable @NotNull String profile
+    ) {
+        return ResponseEntity.ok( rolesService.getAssignedRoles( profile, groupId ) );
     }
-
-    // list roles profiles by group
-    @PostMapping(value = "/participants/list", consumes = "application/json", produces = "application/json")
-    @ResponseBody
-    public Response roles_profile_list(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-            response.body.put("participants", rolesService.listRolesProfile(body));
-        });
-    }
-
-    // list all my roles
-    @GetMapping(value = "", produces = "application/json")
-    @ResponseBody
-    public Response all_my_roles() {
-        return Response.buildResponse(response -> {
-            response.body.put("roles", rolesService.getAllRolesSession());
-        });
-    }
-
 }

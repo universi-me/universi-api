@@ -8,6 +8,7 @@ import me.universi.group.DTO.CreateGroupDTO;
 import me.universi.group.DTO.UpdateGroupDTO;
 import me.universi.group.entities.Group;
 import me.universi.group.services.GroupService;
+import me.universi.roles.entities.Roles;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -89,4 +90,8 @@ public class GroupController {
         return groupService.getHeaderImage( id );
     }
 
+    @GetMapping( path = "/{id}/roles", produces = "application/json" )
+    public ResponseEntity<Collection<Roles>> listRoles( @Valid @PathVariable @NotNull UUID id ) {
+        return ResponseEntity.ok( groupService.findRoles( id ) );
+    }
 }

@@ -2,10 +2,13 @@ package me.universi.roles.services;
 
 import java.util.*;
 import me.universi.Sys;
+import me.universi.api.exceptions.UniversiConflictingOperationException;
+import me.universi.api.interfaces.EntityService;
 import me.universi.group.entities.Group;
-import me.universi.group.entities.ProfileGroup;
 import me.universi.group.repositories.ProfileGroupRepository;
 import me.universi.group.services.GroupService;
+import me.universi.roles.dto.CreateRoleDTO;
+import me.universi.roles.dto.UpdateRoleDTO;
 import me.universi.roles.entities.Roles;
 import me.universi.roles.enums.FeaturesTypes;
 import me.universi.roles.enums.Permission;
@@ -22,7 +25,7 @@ import org.springframework.stereotype.Service;
 import jakarta.validation.constraints.NotNull;
 
 @Service
-public class RolesService {
+public class RolesService extends EntityService<Roles> {
     private final UserService userService;
     private final ProfileService profileService;
     private final GroupService groupService;
@@ -36,108 +39,110 @@ public class RolesService {
         this.groupService = groupService;
         this.rolesRepository = rolesRepository;
         this.profileGroupRepository = profileGroupRepository;
+
+        this.entityName = "Papel";
     }
 
     public static RolesService getInstance() {
         return Sys.context.getBean("rolesService", RolesService.class);
     }
 
-    public Roles saveRole(Roles roles) {
-        return rolesRepository.save(roles);
+    @Override
+    public Optional<Roles> find( UUID id ) {
+        return rolesRepository.findById( id );
     }
 
-    public Roles createRole(@NotNull String name, String description, @NotNull UUID groupId) {
-        Group group = groupService.findFirstById(groupId);
-        checkIsAdmin(group);
-
-        return saveRole(Roles.makeCustom(name, description, group, Permission.READ));
+    @Override
+    public List<Roles> findAll() {
+        return rolesRepository.findAll();
     }
 
-    public Roles editRole(UUID rolesId, String name, String description) {
-        if (rolesId == null) {
-            throw new RolesException("Parâmetro rolesId é nulo.");
-        }
-
-        Roles roles = rolesRepository.findFirstById(rolesId)
-            .orElseThrow(() -> new RolesException("Papel não encontrado."));
-
-        if(!roles.isCanBeEdited()) {
-            throw new RolesException("Papel não pode ser editado.");
-        }
-
-        checkIsAdmin(roles.group);
-
-        if (name != null)
-            roles.name = name;
-
-        if (description != null)
-            roles.description = description;
-
-        return saveRole(roles);
+    public Optional<Roles> findByNameAndGroup( String name, UUID groupId ) {
+        return rolesRepository.findFirstByNameIgnoreCaseAndGroupId( name, groupId );
     }
 
-    public Roles assignRole(@NotNull Roles roles, @NotNull Group group, @NotNull Profile profile) {
-        checkIsAdmin(group);
-
-        if (!group.getId().equals(roles.group.getId()))
-            throw new RolesException("Você só pode atribuir um papel que pertença ao grupo");
-
-        if(profileService.isSessionOfProfile(profile))
-            throw new RolesException("Você não pode alterar seu próprio papel");
-
-        if ( group.getAdmin().getId().equals(profile.getId()) )
-            throw new RolesException("O papel do dono do grupo não pode ser alterado");
-
-        if(!roles.isCanBeAssigned()) {
-            throw new RolesException("O papel de visitante não pode ser colocado em um participante.");
-        }
-
-        ProfileGroup profileGroup = profileGroupRepository.findFirstByGroupAndProfile(group, profile);
-        if (profileGroup == null) {
-            throw new RolesException("Você só pode atribuir o papel à um membro do grupo");
-        }
-
-        profileGroup.role = roles;
-        profileGroupRepository.save(profileGroup);
-
-        return roles;
+    public Roles findByNameAndGroupOrThrow( String name, UUID groupId ) {
+        return findByNameAndGroup( name, groupId )
+            .orElseThrow( () -> makeNotFoundException( "nome e grupo", name + "' e '" + groupId) );
     }
 
-    public Roles assignRole(@NotNull UUID roleId, @NotNull UUID groupId, @NotNull UUID profileId) {
-        Group group = groupService.getGroupByGroupIdOrGroupPath(groupId.toString(), null);
-        if(group == null) {
-            throw new RolesException("Grupo não encontrado.");
-        }
+    public Roles create( @NotNull CreateRoleDTO dto ) {
+        var group = groupService.findByIdOrPathOrThrow( dto.group() );
+        checkIsAdmin( group );
 
-        Profile profile = profileService.findFirstById(profileId);
-        if(profile == null) {
-            throw new RolesException("Perfil não encontrado.");
-        }
+        var existingRole = findByNameAndGroup( dto.name(), group.getId() );
+        if ( existingRole.isPresent() )
+            throw new UniversiConflictingOperationException( "O grupo já possui um papel de nome '" + existingRole.get().name + "'" );
 
-        Roles roles = rolesRepository.findById(roleId).orElseThrow(() -> {
-            return new RolesException("Papel não encontrado.");
-        });
+        var role = Roles.makeCustom(
+            dto.name().trim(),
+            dto.description(),
+            group,
+            Permission.READ
+        );
 
-        return assignRole(roles, group, profile);
+        return rolesRepository.saveAndFlush( role );
     }
 
-    public Roles setRolesFeatureValue(@NotNull UUID rolesId, @NotNull FeaturesTypes feature, @NotNull int permission) {
-        Roles roles = rolesRepository.findFirstById(rolesId)
-            .orElseThrow(() -> new RolesException("Papel de usuário não encontrado."));
+    public Roles update( @NotNull UUID id, @NotNull UpdateRoleDTO dto ) {
+        var role = findOrThrow( id );
+        checkPermissionToEdit( role );
 
-        roles.setPermission(feature, permission);
+        if ( dto.name() != null && !dto.name().isBlank() )
+            role.name = dto.name();
 
-        return rolesRepository.save(roles);
+        if ( dto.description() != null && !dto.description().isBlank() )
+            role.description = dto.description();
+
+        if ( dto.features() != null ) {
+            dto.features().forEach( role::setPermission );
+        }
+
+        return rolesRepository.saveAndFlush( role );
     }
 
-    public Collection<Roles> listRolesGroup(Map<String, Object> body) {
-        Object groupId = body.get("groupId");
+    public void delete( @NotNull UUID id ) {
+        var role = findOrThrow( id );
+        checkPermissionToDelete( role );
 
-        if(groupId == null) {
-            throw new RolesException("Parâmetro groupId é nulo.");
-        }
-        Group group = groupService.getGroupByGroupIdOrGroupPath(groupId.toString(), null);
+        // remove role from members before deleting
+        var memberRole = getGroupMemberRole( role.group );
 
+        var profileGroups = profileGroupRepository.findAllByRoleId( id );
+        profileGroups.stream().forEach( pg -> {
+            pg.role = memberRole;
+        } );
+
+        profileGroupRepository.saveAllAndFlush( profileGroups );
+        rolesRepository.delete( role );
+    }
+
+    public Roles assignRole( @NotNull UUID roleId, @NotNull String profileIdOrUsername ) {
+        var profile = profileService.findByIdOrUsernameOrThrow( profileIdOrUsername );
+        var role = findOrThrow( roleId );
+
+        checkIsAdmin( role.group );
+
+        if ( !role.isCanBeAssigned() )
+            throw new UniversiConflictingOperationException( "O papel não pode ser atribuído" );
+
+        if( profileService.isSessionOfProfile( profile ) )
+            throw new UniversiConflictingOperationException( "Você não pode alterar seu próprio papel" );
+
+        if ( role.group.getAdmin().getId().equals( profile.getId() ) )
+            throw new UniversiConflictingOperationException( "O papel do dono do grupo não pode ser alterado" );
+
+        // todo: ProfileGroupService to handle ProfileGroup
+        var profileGroup = profileGroupRepository.findFirstByGroupAndProfile( role.group, profile );
+        if ( profileGroup == null )
+            throw new UniversiConflictingOperationException( "Você só pode atribuir o papel à um membro do grupo" );
+
+        profileGroup.role = role;
+        return profileGroupRepository.saveAndFlush( profileGroup ).role;
+    }
+
+    public Collection<Roles> findByGroup( UUID groupId ) {
+        Group group = groupService.findOrThrow( groupId );
         checkIsAdmin(group);
 
         return rolesRepository.findAllByGroup(group);
@@ -233,39 +238,21 @@ public class RolesService {
         );
     }
 
-    public Collection<Profile> listRolesProfile(Map<String, Object> body) {
-        Object groupId = body.get("groupId");
-
-        if(groupId == null) {
-            throw new RolesException("Parâmetro groupId é nulo.");
-        }
-        Group group = groupService.getGroupByGroupIdOrGroupPath(groupId.toString(), null);
-
-        Collection<ProfileGroup> participants = group.participants;
-
-        return participants.stream()
-            .map(p -> {
-                p.profile.roles = p.role;
-                return p.profile;
-            })
-            .toList();
+    public Roles getAssignedRoles( String profileIdOrUsername, UUID groupId ) {
+        return getAssignedRoles(
+            profileService.findByIdOrUsernameOrThrow( profileIdOrUsername ),
+            groupService.findOrThrow( groupId )
+        );
     }
 
-    public Roles getAssignedRoles(UUID profileId, UUID groupId) {
-        if(profileId == null)
-            throw new RolesException("Parâmetro profileId é nulo.");
+    public Roles getAssignedRoles( UUID profileId, UUID groupId ) {
+        return getAssignedRoles(
+            profileService.findOrThrow( profileId ),
+            groupService.findOrThrow( groupId )
+        );
+    }
 
-        if(groupId == null)
-            throw new RolesException("Parâmetro groupId é nulo.");
-
-        Profile profile = profileService.findFirstById(profileId);
-        if(profile == null)
-            throw new RolesException("Perfil não encontrado.");
-
-        Group group = groupService.findFirstById(groupId);
-        if(group == null)
-            throw new RolesException("Grupo não encontrado.");
-
+    private Roles getAssignedRoles( Profile profile, Group group ) {
         var profileGroup = profileGroupRepository.findFirstByGroupAndProfile(group, profile);
         return profileGroup != null
             ? profileGroup.role
@@ -313,5 +300,16 @@ public class RolesService {
             rolesToCreate.add(Roles.makeVisitor(group));
 
         rolesRepository.saveAll(rolesToCreate);
+    }
+
+    @Override
+    public boolean hasPermissionToEdit( @NotNull Roles role ) {
+        return role.isCanBeEdited()
+            && isAdmin( profileService.getProfileInSession(), role.group );
+    }
+
+    @Override
+    public boolean hasPermissionToDelete( @NotNull Roles role ) {
+        return hasPermissionToEdit( role );
     }
 }
