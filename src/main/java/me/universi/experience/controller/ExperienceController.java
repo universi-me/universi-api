@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping( "/api/experiences" )
+@RequestMapping( "/experiences" )
 public class ExperienceController {
 
     private ExperienceService experienceService;

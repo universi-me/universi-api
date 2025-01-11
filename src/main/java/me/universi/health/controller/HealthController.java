@@ -17,7 +17,7 @@ import me.universi.health.services.HealthService;
 
 @RestController
 @RequestMapping(
-    path = "/api/health",
+    path = "/health",
     consumes = {},
     produces = MediaType.APPLICATION_JSON_VALUE
 )

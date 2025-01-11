@@ -70,6 +70,7 @@ server:
       enabled: true
       max-file-size: 200MB
       max-request-size: 200MB
+    contextPath: ${API_SERVER_CONTEXT_PATH:/api}
   tomcat:
     max-http-form-post-size: 200MB
 
@@ -78,10 +79,10 @@ server:
 springdoc:
   version: 1.0
   api-docs:
-    path: /api/v3/api-docs
+    path: /v3/api-docs
   swagger-ui:
     enabled: ${API_SWAGGER_ENABLED:true}
-    path: /api/swagger-ui.html
+    path: /swagger-ui.html
 
 # BUILD HASH
 BUILD_HASH: ${API_BUILD_HASH:development}
@@ -141,7 +142,7 @@ spring:
   h2:
     console:
       enabled: true
-      path: /api/h2-console
+      path: /h2-console
   # JPA
   jpa:
     show-sql: true

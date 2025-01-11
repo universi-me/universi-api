@@ -27,7 +27,7 @@ import me.universi.capacity.service.ContentService;
 import me.universi.capacity.service.FolderService;
 
 @RestController
-@RequestMapping( "/api/capacity/categories" )
+@RequestMapping( "/capacity/categories" )
 public class CategoryController {
     private final CategoryService categoryService;
     private final ContentService contentService;

@@ -11,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/group/settings/admin")
+@RequestMapping("/group/settings/admin")
 public class GroupAdminController {
     private final GroupAdminService groupAdminService;
 

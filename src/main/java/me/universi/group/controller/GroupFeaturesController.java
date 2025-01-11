@@ -13,7 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/group/settings/features")
+@RequestMapping("/group/settings/features")
 public class GroupFeaturesController {
     private final GroupFeatureService groupFeatureService;
 

@@ -59,6 +59,9 @@ public class GroupService {
     @Value("${LOCAL_ORGANIZATION_ID}")
     private String localOrganizationId;
 
+    @Value( "${server.servlet.context-path}" )
+    private String contextPath;
+
     public GroupService(UserService userService, GroupFeedService groupFeedService, GroupRepository groupRepository, ProfileGroupRepository profileGroupRepository, SubgroupRepository subgroupRepository, GroupSettingsRepository groupSettingsRepository, GroupEmailFilterRepository groupEmailFilterRepository, GroupThemeRepository groupThemeRepository, GroupFeaturesRepository groupFeaturesRepository, GroupEnvironmentRepository groupEnvironmentRepository, CompetenceService competenceService) {
         this.userService = userService;
         this.groupFeedService = groupFeedService;
@@ -1077,7 +1080,7 @@ public class GroupService {
         Group group = findFirstById(groupId);
         if(group != null) {
             if(group.getImage() != null) {
-                String urlImage = (group.getImage().startsWith("/")) ? "/api" + group.getImage() : group.getImage();
+                String urlImage = (group.getImage().startsWith("/")) ? contextPath + group.getImage() : group.getImage();
                 return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(urlImage)).build();
             }
         }
@@ -1089,7 +1092,7 @@ public class GroupService {
         Group group = findFirstById(groupId);
         if(group != null) {
             if(group.getBannerImage() != null) {
-                String urlImage = (group.getBannerImage().startsWith("/")) ? "/api" + group.getBannerImage() : group.getBannerImage();
+                String urlImage = (group.getBannerImage().startsWith("/")) ? contextPath + group.getBannerImage() : group.getBannerImage();
                 return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(urlImage)).build();
             }
         }
@@ -1101,7 +1104,7 @@ public class GroupService {
         Group group = findFirstById(groupId);
         if(group != null) {
             if(group.getHeaderImage() != null) {
-                String urlImage = (group.getHeaderImage().startsWith("/")) ? "/api" + group.getHeaderImage() : group.getHeaderImage();
+                String urlImage = (group.getHeaderImage().startsWith("/")) ? contextPath + group.getHeaderImage() : group.getHeaderImage();
                 return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(urlImage)).build();
             }
         }

@@ -32,7 +32,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
-@RequestMapping(value = "/api")
+@RequestMapping(value = "")
 public class UserController {
     private final UserService userService;
     private final ProfileService profileService;

@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/group/settings/themes")
+@RequestMapping("/group/settings/themes")
 public class GroupThemeController {
     private final GroupThemeService groupThemeService;
 

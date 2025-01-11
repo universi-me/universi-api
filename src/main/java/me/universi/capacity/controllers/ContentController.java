@@ -25,7 +25,7 @@ import me.universi.capacity.entidades.ContentStatus;
 import me.universi.capacity.service.ContentService;
 
 @RestController
-@RequestMapping( "/api/capacity/contents" )
+@RequestMapping( "/capacity/contents" )
 public class ContentController {
     private final ContentService contentService;
 

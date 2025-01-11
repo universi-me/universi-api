@@ -35,7 +35,7 @@ import me.universi.capacity.service.ContentService;
 import me.universi.capacity.service.FolderService;
 
 @RestController
-@RequestMapping( "/api/capacity/folders" )
+@RequestMapping( "/capacity/folders" )
 public class FolderController {
     private final ContentService contentService;
     private final FolderService folderService;

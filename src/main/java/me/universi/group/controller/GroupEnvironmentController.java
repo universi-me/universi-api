@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/group/settings/environments")
+@RequestMapping("/group/settings/environments")
 public class GroupEnvironmentController {
     private final GroupEnvironmentService groupEnvironmentService;
 

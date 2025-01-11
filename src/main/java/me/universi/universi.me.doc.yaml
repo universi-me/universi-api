@@ -127,9 +127,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Response"
-  /api/registrar:
+  /registrar:
     post:
-      summary: "POST api/registrar"
+      summary: "POST registrar"
       operationId: "registrarUsuarioJson"
       requestBody:
         content:
@@ -144,9 +144,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Response"
-  /api/conta/editar:
+  /conta/editar:
     post:
-      summary: "POST api/conta/editar"
+      summary: "POST conta/editar"
       operationId: "conta_editar"
       requestBody:
         content:
@@ -161,9 +161,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Response"
-  /api/admin/conta/editar:
+  /admin/conta/editar:
     post:
-      summary: "POST api/admin/conta/editar"
+      summary: "POST admin/conta/editar"
       operationId: "admin_conta_editar"
       requestBody:
         content:
@@ -178,9 +178,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Response"
-  /api/login/google:
+  /login/google:
     post:
-      summary: "POST api/login/google"
+      summary: "POST login/google"
       operationId: "conta_google"
       requestBody:
         content:
@@ -195,9 +195,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Response"
-  /api/login:
+  /login:
     get:
-      summary: "GET api/login"
+      summary: "GET login"
       operationId: "login"
       responses:
         "200":

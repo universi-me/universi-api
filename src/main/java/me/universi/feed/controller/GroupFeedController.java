@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/feed/groups")
+@RequestMapping("/feed/groups")
 public class GroupFeedController {
 
     private final GroupFeedService groupFeedService;

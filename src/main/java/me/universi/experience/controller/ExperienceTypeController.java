@@ -23,7 +23,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
 @RestController
-@RequestMapping( "/api/experience-types" )
+@RequestMapping( "/experience-types" )
 public class ExperienceTypeController {
 
     private ExperienceTypeService experienceTypeService;

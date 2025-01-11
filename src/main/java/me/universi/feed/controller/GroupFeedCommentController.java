@@ -10,7 +10,7 @@ import me.universi.feed.services.GroupFeedService;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/feed")
+@RequestMapping("/feed")
 public class GroupFeedCommentController {
     private final GroupFeedService groupFeedService;
 

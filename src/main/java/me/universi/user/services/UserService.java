@@ -116,6 +116,9 @@ public class UserService implements UserDetailsService {
     @Value("${keycloak.client-secret}")
     String KEYCLOAK_CLIENT_SECRET;
 
+    @Value( "${server.servlet.context-path}" )
+    private String contextPath;
+
     @Autowired
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, ProfileService profileService, RoleHierarchyImpl roleHierarchy, SessionRegistry sessionRegistry) {
         this.userRepository = userRepository;
@@ -689,7 +692,7 @@ public class UserService implements UserDetailsService {
 
         String token = generateRecoveryPasswordToken(user, false);
 
-        String url = getPublicUrl() + "/api/confirm-account/" + token;
+        String url = getPublicUrl() + "/confirm-account/" + token;
         String subject = "Universi.me - Confirmação de Conta";
         String messageExplain = (signup) ? "Seja bem-vindo(a) ao Universi.me, para continuar com o seu cadastro precisamos confirmar a sua conta do Universi.me." : "Você solicitou a confirmação de sua conta no Universi.me.";
         String text = "Olá " + user.getUsername() + ",<br/><br/>\n\n" +
@@ -909,7 +912,11 @@ public class UserService implements UserDetailsService {
                 return PUBLIC_URL;
             }
             URL requestUrl = new URL(getRequest().getRequestURL().toString());
-            return requestUrl.getProtocol() + "://" + requestUrl.getHost() + ((requestUrl.getPort() > 0 && requestUrl.getPort() != 80 && requestUrl.getPort() != 443)  ? ":"+requestUrl.getPort() : "");
+            String port = requestUrl.getPort() > 0 && requestUrl.getPort() != 80 && requestUrl.getPort() != 443
+                ? ":" + requestUrl.getPort()
+                : "";
+
+            return requestUrl.getProtocol() + "://" + requestUrl.getHost() + port + contextPath;
         } catch (Exception e) {
             return null;
         }

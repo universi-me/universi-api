@@ -24,7 +24,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/api/education-types")
+@RequestMapping(value = "/education-types")
 public class EducationTypeController {
 
     private EducationTypeService educationTypeService;

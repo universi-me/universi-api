@@ -28,7 +28,7 @@ import io.minio.GetObjectArgs;
 
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/img")
 public class ImageController {
 
     private final ImageService imageService;
@@ -37,7 +37,7 @@ public class ImageController {
         this.imageService = imageService;
     }
 
-    @PostMapping(value = "/imagem/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Response upload_of_image(@RequestParam("imagem") MultipartFile image) {
         return Response.buildResponse(response -> {
 
@@ -52,7 +52,7 @@ public class ImageController {
     }
 
     // get image from minIO
-    @GetMapping(value = "/img/minio/{imageId}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    @GetMapping(value = "/minio/{imageId}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     @ResponseBody
     @Cacheable("img")
     public ResponseEntity<byte[]> getImageFromMinio(@PathVariable("imageId") String imageId) {
@@ -85,7 +85,7 @@ public class ImageController {
     }
 
     // get image from filesystem
-    @GetMapping(value = "/img/imagem/{image}.jpg", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    @GetMapping(value = "/imagem/{image}.jpg", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     @ResponseBody
     @Cacheable("img")
     public ResponseEntity<Resource> getImageFromFilesystem(@PathVariable("image") String nameOfImage) {
@@ -113,7 +113,7 @@ public class ImageController {
     }
 
     // get image from database
-    @GetMapping(value = "/img/store/{imageId}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    @GetMapping(value = "/store/{imageId}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     @ResponseBody
     @Cacheable("img")
     public ResponseEntity<Resource> getImageFromDatabase(@PathVariable("imageId") UUID imageId) {

@@ -16,7 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/groups")
+@RequestMapping("/groups")
 public class GroupController {
     private final GroupService groupService;
 

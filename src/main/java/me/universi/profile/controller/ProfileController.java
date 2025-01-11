@@ -13,6 +13,8 @@ import me.universi.profile.exceptions.ProfileException;
 import me.universi.profile.services.ProfileService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -28,11 +30,14 @@ import org.springframework.web.server.ResponseStatusException;
 import java.net.URI;
 
 @RestController
-@RequestMapping(value = "/api/profile")
+@RequestMapping(value = "/profile")
 public class ProfileController {
     private final  UserService userService;
     private final  ProfileService profileService;
     private final  FolderService folderService;
+
+    @Value( "${server.servlet.context-path}" )
+    private String contextPath;
 
     public ProfileController(UserService userService,  ProfileService profileService,  FolderService folderService) {
         this.userService = userService;
@@ -222,7 +227,7 @@ public class ProfileController {
         Profile profile = profileService.findFirstById(profileId);
         if(profile != null) {
             if(profile.getImage() != null) {
-                String urlImage = (profile.getImage().startsWith("/")) ? "/api" + profile.getImage() : profile.getImage();
+                String urlImage = (profile.getImage().startsWith("/")) ? contextPath + profile.getImage() : profile.getImage();
                 return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(urlImage)).build();
             }
         }

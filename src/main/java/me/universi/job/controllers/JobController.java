@@ -23,7 +23,7 @@ import me.universi.job.entities.Job;
 import me.universi.job.services.JobService;
 
 @RestController
-@RequestMapping( "/api/jobs" )
+@RequestMapping( "/jobs" )
 public class JobController {
     private final JobService jobService;
 
