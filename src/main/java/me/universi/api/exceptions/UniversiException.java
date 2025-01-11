@@ -17,6 +17,12 @@ public class UniversiException extends RuntimeException {
         this.status = status;
     }
 
+    public UniversiException( Throwable throwable, HttpStatus status ) {
+        super( throwable );
+        this.message = throwable.getMessage();
+        this.status = status;
+    }
+
     public ApiError toApiError() {
         return ApiError.builder()
             .status( status )
