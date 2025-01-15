@@ -3,6 +3,7 @@ package me.universi.capacity.entidades;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Table;
@@ -15,6 +16,7 @@ import java.io.Serializable;
 import me.universi.capacity.service.FolderService;
 import me.universi.competence.entities.CompetenceType;
 import me.universi.group.entities.Group;
+import me.universi.image.entities.ImageMetadata;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
 
@@ -49,9 +51,10 @@ public class Folder implements Serializable {
     @Size(max = 100)
     private String name;
 
-    @Column
-    @Size(max = 100)
-    private String image;
+    @Nullable
+    @OneToOne
+    @JoinColumn( name = "image_metadata_id" )
+    private ImageMetadata image;
 
     @Column
     @Size(max = 200)
@@ -142,13 +145,8 @@ public class Folder implements Serializable {
         return this.name;
     }
 
-    public void setImage(String image) {
-        this.image = image;
-    }
-
-    public String getImage() {
-        return this.image;
-    }
+    public @Nullable ImageMetadata getImage() { return image; }
+    public void setImage(ImageMetadata image) { this.image = image; }
 
     public void setDescription(String description) {
         this.description = description;

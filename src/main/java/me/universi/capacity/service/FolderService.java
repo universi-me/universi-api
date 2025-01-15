@@ -50,6 +50,7 @@ import me.universi.competence.services.CompetenceService;
 import me.universi.competence.services.CompetenceTypeService;
 import me.universi.group.entities.Group;
 import me.universi.group.services.GroupService;
+import me.universi.image.services.ImageMetadataService;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
 import me.universi.role.enums.FeaturesTypes;
@@ -76,8 +77,9 @@ public class FolderService extends EntityService<Folder> {
     private final UserService userService;
     private final RoleService roleService;
     private final FolderContentsRepository folderContentsRepository;
+    private final ImageMetadataService imageMetadataService;
 
-    public FolderService(GroupService groupService, ProfileService profileService, CategoryService categoryService, FolderRepository folderRepository, FolderProfileRepository folderProfileRepository, FolderFavoriteRepository folderFavoriteRepository, ContentStatusRepository contentStatusRepository, CompetenceTypeService competenceTypeService, CompetenceService competenceService, UserService userService, RoleService roleService, FolderContentsRepository folderContentsRepository) {
+    public FolderService(GroupService groupService, ProfileService profileService, CategoryService categoryService, FolderRepository folderRepository, FolderProfileRepository folderProfileRepository, FolderFavoriteRepository folderFavoriteRepository, ContentStatusRepository contentStatusRepository, CompetenceTypeService competenceTypeService, CompetenceService competenceService, UserService userService, RoleService roleService, FolderContentsRepository folderContentsRepository, ImageMetadataService imageMetadataService) {
         this.groupService = groupService;
         this.profileService = profileService;
         this.categoryService = categoryService;
@@ -90,6 +92,7 @@ public class FolderService extends EntityService<Folder> {
         this.userService = userService;
         this.roleService = roleService;
         this.folderContentsRepository = folderContentsRepository;
+        this.imageMetadataService = imageMetadataService;
 
         this.entityName = "Conteúdo";
     }
@@ -141,7 +144,8 @@ public class FolderService extends EntityService<Folder> {
         folder.setName( createFolderDTO.name() );
         folder.setReference( generateAvailableReference() );
         folder.setAuthor( profileService.getProfileInSession() );
-        folder.setImage( createFolderDTO.image() );
+        if ( createFolderDTO.image() != null )
+            folder.setImage( imageMetadataService.findOrThrow( createFolderDTO.image() ) );
         folder.setDescription( createFolderDTO.description() );
         folder.setRating( createFolderDTO.rating() );
         folder.setPublicFolder( createFolderDTO.publicFolder() );
@@ -194,8 +198,8 @@ public class FolderService extends EntityService<Folder> {
             folder.setName( updateFolderDTO.name() );
         }
 
-        if ( updateFolderDTO.image() != null && !updateFolderDTO.image().isBlank() ) {
-            folder.setImage( updateFolderDTO.image() );
+        if ( updateFolderDTO.image() != null ) {
+            folder.setImage( imageMetadataService.findOrThrow( updateFolderDTO.image() ) );
         }
 
         if ( updateFolderDTO.description() != null && !updateFolderDTO.description().isBlank() ) {
@@ -461,10 +465,14 @@ public class FolderService extends EntityService<Folder> {
 
     public Folder duplicate( String idOrReference, DuplicateFolderDTO duplicateFolderDTO ) {
         var folder = findByIdOrReferenceOrThrow( idOrReference );
+        var image = folder.getImage();
+        var imageId = image != null
+            ? image.getId()
+            : null;
 
         var copy = create( new CreateFolderDTO(
             folder.getName(),
-            folder.getImage(),
+            imageId,
             folder.getDescription(),
             folder.getRating(),
             folder.isPublicFolder(),

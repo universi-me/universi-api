@@ -2,6 +2,8 @@ package me.universi.profile.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;
 import jakarta.validation.constraints.NotNull;
@@ -14,6 +16,8 @@ import me.universi.competence.entities.CompetenceType;
 import me.universi.education.entities.Education;
 import me.universi.experience.entities.Experience;
 import me.universi.group.entities.ProfileGroup;
+import me.universi.image.entities.ImageMetadata;
+import me.universi.image.services.ImageMetadataService;
 import me.universi.link.entities.Link;
 import me.universi.role.entities.Role;
 import me.universi.profile.enums.Gender;
@@ -45,8 +49,12 @@ public class Profile implements Serializable {
     private String firstname;
     @Column(name = "lastname")
     private String lastname;
-    @Column(name = "image")
-    private String image;
+
+    @Nullable
+    @OneToOne
+    @JoinColumn( name = "image_metadata_id" )
+    private ImageMetadata image;
+
     @Column(name = "bio", columnDefinition = "TEXT")
     private String bio;
 
@@ -166,14 +174,6 @@ public class Profile implements Serializable {
         this.lastname = lastname;
     }
 
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
-    }
-
     public Date getCreationDate() {
         return creationDate;
     }
@@ -262,6 +262,9 @@ public class Profile implements Serializable {
         this.competenceBadges = competenceBadges;
     }
 
+    public @Nullable ImageMetadata getImage() { return image; }
+    public void setImage(ImageMetadata image) { this.image = image; }
+
     @Transient
     public boolean hasBadge(@NotNull CompetenceType competenceType) {
         return this.getCompetenceBadges().stream().anyMatch(ct -> ct.getId().equals(competenceType.getId()));
@@ -274,7 +277,7 @@ public class Profile implements Serializable {
                 ", user='" + user + '\'' +
                 ", firstname='" + firstname + '\'' +
                 ", lastname='" + lastname + '\'' +
-                ", image='" + image + '\'' +
+                ", image='" + ImageMetadataService.getInstance().getUri( image ) + '\'' +
                 ", bio='" + bio + "']\n";
     }
 }

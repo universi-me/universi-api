@@ -1,5 +1,7 @@
 package me.universi.capacity.dto;
 
+import java.util.UUID;
+
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotBlank;
 
@@ -8,5 +10,5 @@ public record CreateCategoryDTO(
     String name,
 
     @Nullable
-    String image
+    UUID image
 ) { }

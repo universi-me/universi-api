@@ -14,6 +14,7 @@ import me.universi.capacity.dto.CreateCategoryDTO;
 import me.universi.capacity.dto.UpdateCategoryDTO;
 import me.universi.capacity.entidades.Category;
 import me.universi.capacity.repository.CategoryRepository;
+import me.universi.image.services.ImageMetadataService;
 import me.universi.profile.services.ProfileService;
 import me.universi.user.services.UserService;
 import me.universi.util.CastingUtil;
@@ -23,11 +24,13 @@ public class CategoryService extends UniqueNameEntityService<Category> {
     private final CategoryRepository categoryRepository;
     private final ProfileService profileService;
     private final UserService userService;
+    private final ImageMetadataService imageMetadataService;
 
-    public CategoryService(CategoryRepository categoryRepository, ProfileService profileService, UserService userService) {
+    public CategoryService(CategoryRepository categoryRepository, ProfileService profileService, UserService userService, ImageMetadataService imageMetadataService) {
         this.categoryRepository = categoryRepository;
         this.profileService = profileService;
         this.userService = userService;
+        this.imageMetadataService = imageMetadataService;
 
         this.entityName = "Categoria";
     }
@@ -64,8 +67,8 @@ public class CategoryService extends UniqueNameEntityService<Category> {
         var category = new Category();
         category.setName( createCategoryDTO.name() );
 
-        if ( createCategoryDTO.image() != null && !createCategoryDTO.image().isBlank() ) {
-            category.setImage( createCategoryDTO.image() );
+        if ( createCategoryDTO.image() != null ) {
+            category.setImage( imageMetadataService.findOrThrow( createCategoryDTO.image() ) );
         }
 
         category.setAuthor( profileService.getProfileInSession() );
@@ -81,8 +84,8 @@ public class CategoryService extends UniqueNameEntityService<Category> {
             category.setName( updateCategoryDTO.name() );
         }
 
-        if ( updateCategoryDTO.image() != null && !updateCategoryDTO.image().isBlank() ) {
-            category.setImage( updateCategoryDTO.image() );
+        if ( updateCategoryDTO.image() != null ) {
+            category.setImage( imageMetadataService.findOrThrow( updateCategoryDTO.image() ) );
         }
 
         return categoryRepository.saveAndFlush( category );

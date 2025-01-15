@@ -3,8 +3,10 @@ package me.universi.capacity.entidades;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -33,6 +35,7 @@ import java.util.UUID;
 import me.universi.capacity.enums.ContentStatusType;
 import me.universi.capacity.enums.ContentType;
 import me.universi.capacity.service.ContentService;
+import me.universi.image.entities.ImageMetadata;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
 
@@ -60,9 +63,10 @@ public class Content implements Serializable {
     @Size(max = 100)
     private String title;
 
-    @Column(name = "image")
-    @Size(max = 100)
-    private String image;
+    @Nullable
+    @OneToOne
+    @JoinColumn( name = "image_metadata_id" )
+    private ImageMetadata image;
 
     @Column(name = "description")
     @Size(max = 200)
@@ -127,13 +131,8 @@ public class Content implements Serializable {
         return title;
     }
 
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
-    }
+    public @Nullable ImageMetadata getImage() { return image; }
+    public void setImage(ImageMetadata image) { this.image = image; }
 
     public void setTitle(String title) {
         this.title = title;

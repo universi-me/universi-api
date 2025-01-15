@@ -1,5 +1,6 @@
 package me.universi.group.DTO;
 
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
@@ -18,9 +19,10 @@ public record CreateGroupDTO(
         @NotBlank
         String name,
 
-        String imageUrl,
-        String bannerImageUrl,
-        String headerImageUrl,
+        @Nullable
+        UUID image,
+        UUID bannerImage,
+        UUID headerImage,
 
         String description,
 

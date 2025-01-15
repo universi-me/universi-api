@@ -19,7 +19,7 @@ public record UpdateContentDTO(
     ContentType type,
 
     @Nullable
-    String image,
+    UUID image,
 
     @Nullable
     String description,

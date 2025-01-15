@@ -18,6 +18,7 @@ import me.universi.Sys;
 import me.universi.group.entities.Group;
 import me.universi.group.entities.GroupSettings.GroupEnvironment;
 import me.universi.group.services.GroupService;
+import me.universi.image.services.ImageMetadataService;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.exceptions.ProfileException;
 import me.universi.profile.services.ProfileService;
@@ -876,7 +877,7 @@ public class UserService implements UserDetailsService {
                     }
                 }
                 if(pictureUrl != null) {
-                    profile.setImage(pictureUrl.trim());
+                    profile.setImage( ImageMetadataService.getInstance().saveExternalImage( pictureUrl.trim() ) );
                 }
 
                 profileService.save(profile);

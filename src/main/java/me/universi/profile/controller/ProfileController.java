@@ -3,18 +3,23 @@ package me.universi.profile.controller;
 import java.util.*;
 import java.util.stream.Collectors;
 import me.universi.api.entities.Response;
+import me.universi.api.exceptions.UniversiBadRequestException;
 import me.universi.capacity.service.FolderService;
 import me.universi.competence.services.CompetenceService;
 import me.universi.group.entities.Group;
 import me.universi.group.entities.ProfileGroup;
+import me.universi.image.controller.ImageMetadataController;
+import me.universi.image.services.ImageMetadataService;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.enums.Gender;
 import me.universi.profile.exceptions.ProfileException;
 import me.universi.profile.services.ProfileService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
+import me.universi.util.CastingUtil;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,9 +30,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
-
-import java.net.URI;
 
 @RestController
 @RequestMapping(value = "/profile")
@@ -79,7 +81,7 @@ public class ProfileController {
 
             Object name      = body.get("name");
             Object lastname  = body.get("lastname");
-            Object imageUrl  = body.get("imageUrl");
+            Object imageId   = body.get("imageId");
             Object bio       = body.get("bio");
             Object gender    = body.get("gender");
 
@@ -109,14 +111,9 @@ public class ProfileController {
                 }
                 profileGet.setLastname(lastnameString);
             }
-            if(imageUrl != null) {
-                String imageUrlString = String.valueOf(imageUrl);
-                if(!imageUrlString.isEmpty()) {
-                    if(imageUrlString.length() > 255) {
-                        throw new ProfileException("A URL da imagem não pode ter mais de 255 caracteres.");
-                    }
-                    profileGet.setImage(imageUrlString);
-                }
+            if(imageId != null) {
+                var imageIdParsed = CastingUtil.getUUID( imageId ).orElseThrow( () -> new UniversiBadRequestException( "Parâmetro 'imageId' inválido." ) );
+                profileGet.setImage( ImageMetadataService.getInstance().findOrThrow( imageIdParsed ) );
             }
             if(bio != null) {
                 String bioString = String.valueOf(bio);
@@ -223,15 +220,8 @@ public class ProfileController {
 
     // get image of profile
     @GetMapping(value = "/image/{profileId}")
-    public ResponseEntity<Void> get_image(@PathVariable String profileId) {
-        Profile profile = profileService.findFirstById(profileId);
-        if(profile != null) {
-            if(profile.getImage() != null) {
-                String urlImage = (profile.getImage().startsWith("/")) ? contextPath + profile.getImage() : profile.getImage();
-                return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(urlImage)).build();
-            }
-        }
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "not found");
+    public ResponseEntity<Resource> get_image(@PathVariable String profileId) {
+        return ImageMetadataController.redirectToImage( profileService.findByIdOrUsernameOrThrow( profileId ).getImage() );
     }
 
     @PostMapping(value = "/educations", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)

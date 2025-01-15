@@ -20,6 +20,7 @@ import me.universi.capacity.exceptions.CapacityException;
 import me.universi.capacity.repository.ContentRepository;
 import me.universi.capacity.repository.ContentStatusRepository;
 import me.universi.capacity.repository.FolderContentsRepository;
+import me.universi.image.services.ImageMetadataService;
 import me.universi.profile.services.ProfileService;
 import me.universi.user.services.UserService;
 
@@ -32,9 +33,10 @@ public class ContentService extends EntityService<Content> {
     private final ProfileService profileService;
     private final UserService userService;
     private final FolderContentsRepository folderContentsRepository;
+    private final ImageMetadataService imageMetadataService;
 
 
-    public ContentService(CategoryService categoryService, ContentRepository contentRepository, FolderService folderService, ContentStatusRepository contentStatusRepository, ProfileService profileService, UserService userService, FolderContentsRepository folderContentsRepository) {
+    public ContentService(CategoryService categoryService, ContentRepository contentRepository, FolderService folderService, ContentStatusRepository contentStatusRepository, ProfileService profileService, UserService userService, FolderContentsRepository folderContentsRepository, ImageMetadataService imageMetadataService) {
         this.categoryService = categoryService;
         this.contentRepository = contentRepository;
         this.folderService = folderService;
@@ -42,6 +44,7 @@ public class ContentService extends EntityService<Content> {
         this.profileService = profileService;
         this.userService = userService;
         this.folderContentsRepository = folderContentsRepository;
+        this.imageMetadataService = imageMetadataService;
 
         this.entityName = "Material";
     }
@@ -78,7 +81,8 @@ public class ContentService extends EntityService<Content> {
         var content = new Content();
         content.setAuthor( profileService.getProfileInSession() );
         content.setDescription( createContentDTO.description() );
-        content.setImage( createContentDTO.image() );
+        if ( createContentDTO.image() != null )
+            content.setImage( imageMetadataService.findOrThrow( createContentDTO.image() ) );
         content.setRating( createContentDTO.rating() );
         content.setTitle( createContentDTO.title() );
         content.setType( createContentDTO.type() );
@@ -116,8 +120,8 @@ public class ContentService extends EntityService<Content> {
         if ( updateContentDTO.description() != null && !updateContentDTO.description().isBlank() )
             content.setDescription( updateContentDTO.description() );
 
-        if ( updateContentDTO.image() != null && !updateContentDTO.image().isBlank() )
-            content.setImage( updateContentDTO.image() );
+        if ( updateContentDTO.image() != null )
+            content.setImage( imageMetadataService.findOrThrow( updateContentDTO.image() ) );
 
         if ( updateContentDTO.rating() != null )
             content.setRating( updateContentDTO.rating() );

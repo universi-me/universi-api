@@ -1,5 +1,7 @@
 package me.universi.capacity.dto;
 
+import java.util.UUID;
+
 import jakarta.annotation.Nullable;
 
 public record UpdateCategoryDTO(
@@ -7,5 +9,5 @@ public record UpdateCategoryDTO(
     String name,
 
     @Nullable
-    String image
+    UUID image
 ) { }

@@ -3,6 +3,8 @@ package me.universi.group.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
@@ -11,6 +13,7 @@ import me.universi.capacity.entidades.Folder;
 import me.universi.group.entities.GroupSettings.GroupSettings;
 import me.universi.group.enums.GroupType;
 import me.universi.group.services.GroupService;
+import me.universi.image.entities.ImageMetadata;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
 import me.universi.role.entities.Role;
@@ -29,7 +32,6 @@ import java.util.stream.Collectors;
 
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
-import org.hibernate.annotations.Where;
 
 
 @Entity(name = "system_group")
@@ -59,14 +61,20 @@ public class Group implements Serializable {
     @Column(name = "description", columnDefinition = "TEXT")
     public String description;
 
-    @Column(name = "image")
-    public String image;
+    @Nullable
+    @OneToOne
+    @JoinColumn( name = "image_metadata_id" )
+    private ImageMetadata image;
 
-    @Column(name = "bannerImage")
-    public String bannerImage;
+    @Nullable
+    @OneToOne
+    @JoinColumn( name = "banner_image_metadata_id" )
+    public ImageMetadata bannerImage;
 
-    @Column(name = "headerImage")
-    public String headerImage;
+    @Nullable
+    @OneToOne
+    @JoinColumn( name = "header_image_metadata_id" )
+    public ImageMetadata headerImage;
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
     @ManyToOne(fetch = FetchType.EAGER)
@@ -244,13 +252,8 @@ public class Group implements Serializable {
         this.canCreateGroup = canCreateGroup;
     }
 
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
-    }
+    public @Nullable ImageMetadata getImage() { return image; }
+    public void setImage(ImageMetadata image) { this.image = image; }
 
     public Date getCreatedAt() {
         return createdAt;
@@ -318,11 +321,11 @@ public class Group implements Serializable {
         this.enableCurriculum = enableCurriculum;
     }
 
-    public String getBannerImage() {
+    public @Nullable ImageMetadata getBannerImage() {
         return bannerImage;
     }
 
-    public void setBannerImage(String bannerImage) {
+    public void setBannerImage(ImageMetadata bannerImage) {
         this.bannerImage = bannerImage;
     }
 
@@ -338,11 +341,11 @@ public class Group implements Serializable {
         this.groupSettings = groupSettings;
     }
 
-    public String getHeaderImage() {
+    public @Nullable ImageMetadata getHeaderImage() {
         return headerImage;
     }
 
-    public void setHeaderImage(String headerImage) {
+    public void setHeaderImage(ImageMetadata headerImage) {
         this.headerImage = headerImage;
     }
 
@@ -372,7 +375,7 @@ public class Group implements Serializable {
     }
 
     @Transient
-    public Map<FeaturesTypes, Integer> getPermissions() {
+    public @Nullable Map<FeaturesTypes, Integer> getPermissions() {
 
         if(!UserService.getInstance().userIsLoggedIn()) {
             return null;

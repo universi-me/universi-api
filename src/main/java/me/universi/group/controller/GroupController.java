@@ -8,8 +8,10 @@ import me.universi.group.DTO.CreateGroupDTO;
 import me.universi.group.DTO.UpdateGroupDTO;
 import me.universi.group.entities.Group;
 import me.universi.group.services.GroupService;
+import me.universi.image.controller.ImageMetadataController;
 import me.universi.role.entities.Role;
 
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -76,18 +78,18 @@ public class GroupController {
     }
 
     @GetMapping(value = "/{id}/image")
-    public ResponseEntity<Void> get_image( @Valid @PathVariable @NotNull( message = "ID do grupo inválido" ) UUID id ) {
-        return groupService.getGroupImage( id );
+    public ResponseEntity<Resource> get_image( @Valid @PathVariable @NotNull( message = "ID do grupo inválido" ) UUID id ) {
+        return ImageMetadataController.redirectToImage( groupService.findOrThrow( id ).getImage() );
     }
 
     @GetMapping(value = "/{id}/banner")
-    public ResponseEntity<Void> get_image_banner( @Valid @PathVariable @NotNull( message = "ID do grupo inválido" ) UUID id ) {
-        return groupService.getBannerImage( id );
+    public ResponseEntity<Resource> get_image_banner( @Valid @PathVariable @NotNull( message = "ID do grupo inválido" ) UUID id ) {
+        return ImageMetadataController.redirectToImage( groupService.findOrThrow( id ).getBannerImage() );
     }
 
     @GetMapping(value = "/{id}/header")
-    public ResponseEntity<Void> get_image_header( @Valid @PathVariable @NotNull( message = "ID do grupo inválido" ) UUID id ) {
-        return groupService.getHeaderImage( id );
+    public ResponseEntity<Resource> get_image_header( @Valid @PathVariable @NotNull( message = "ID do grupo inválido" ) UUID id ) {
+        return ImageMetadataController.redirectToImage( groupService.findOrThrow( id ).getHeaderImage() );
     }
 
     @GetMapping( path = "/{id}/roles", produces = "application/json" )

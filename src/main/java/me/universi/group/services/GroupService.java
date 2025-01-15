@@ -16,6 +16,7 @@ import me.universi.group.entities.GroupSettings.*;
 import me.universi.group.enums.GroupType;
 import me.universi.group.exceptions.GroupException;
 import me.universi.group.repositories.*;
+import me.universi.image.services.ImageMetadataService;
 import me.universi.profile.entities.Profile;
 import me.universi.role.entities.Role;
 import me.universi.role.enums.FeaturesTypes;
@@ -52,6 +53,7 @@ public class GroupService {
     private final GroupFeaturesRepository groupFeaturesRepository;
     private final GroupEnvironmentRepository groupEnvironmentRepository;
     private final CompetenceService competenceService;
+    private final ImageMetadataService imageMetadataService;
 
     @Value("${LOCAL_ORGANIZATION_ID_ENABLED}")
     private boolean localOrganizationIdEnabled;
@@ -62,7 +64,7 @@ public class GroupService {
     @Value( "${server.servlet.context-path}" )
     private String contextPath;
 
-    public GroupService(UserService userService, GroupFeedService groupFeedService, GroupRepository groupRepository, ProfileGroupRepository profileGroupRepository, SubgroupRepository subgroupRepository, GroupSettingsRepository groupSettingsRepository, GroupEmailFilterRepository groupEmailFilterRepository, GroupThemeRepository groupThemeRepository, GroupFeaturesRepository groupFeaturesRepository, GroupEnvironmentRepository groupEnvironmentRepository, CompetenceService competenceService) {
+    public GroupService(UserService userService, GroupFeedService groupFeedService, GroupRepository groupRepository, ProfileGroupRepository profileGroupRepository, SubgroupRepository subgroupRepository, GroupSettingsRepository groupSettingsRepository, GroupEmailFilterRepository groupEmailFilterRepository, GroupThemeRepository groupThemeRepository, GroupFeaturesRepository groupFeaturesRepository, GroupEnvironmentRepository groupEnvironmentRepository, CompetenceService competenceService, ImageMetadataService imageMetadataService) {
         this.userService = userService;
         this.groupFeedService = groupFeedService;
         this.groupRepository = groupRepository;
@@ -74,6 +76,7 @@ public class GroupService {
         this.groupFeaturesRepository = groupFeaturesRepository;
         this.groupEnvironmentRepository = groupEnvironmentRepository;
         this.competenceService = competenceService;
+        this.imageMetadataService = imageMetadataService;
     }
 
 
@@ -600,15 +603,8 @@ public class GroupService {
 
         for(Profile p : profiles){
             ProfileWithCompetencesDTO profile = new ProfileWithCompetencesDTO(
-                    p.getId(),
-                    p.getUser(),
-                    p.getFirstname(),
-                    p.getLastname(),
-                    p.getImage(),
-                    p.getBio(),
-                    p.getGender(),
-                    p.getCreationDate(),
-                    competenceService.findByProfileId( p.getId() )
+                p,
+                competenceService.findByProfileId( p.getId() )
             );
 
 
@@ -869,9 +865,9 @@ public class GroupService {
             throw new GroupException("Parâmetro nome é nulo.");
         }
 
-        String image = (String)createGroupDTO.imageUrl();
-        String bannerImage = (String)createGroupDTO.bannerImageUrl();
-        String headerImage = (String)createGroupDTO.headerImageUrl();
+        var image = createGroupDTO.image();
+        var bannerImage = createGroupDTO.bannerImage();
+        var headerImage = createGroupDTO.headerImage();
 
         String description = (String)createGroupDTO.description();
         if(description == null) {
@@ -900,14 +896,14 @@ public class GroupService {
             Group groupNew = new Group();
             groupNew.setNickname(nickname);
             groupNew.setName(name);
-            if(image != null && !image.isEmpty()) {
-                groupNew.setImage(image);
+            if(image != null) {
+                groupNew.setImage( imageMetadataService.findOrThrow( image ) );
             }
-            if(bannerImage != null && !bannerImage.isEmpty()) {
-                groupNew.setBannerImage(bannerImage);
+            if(bannerImage != null) {
+                groupNew.setBannerImage( imageMetadataService.findOrThrow( bannerImage ) );
             }
-            if(headerImage != null && !headerImage.isEmpty()) {
-                groupNew.setHeaderImage(headerImage);
+            if(headerImage != null) {
+                groupNew.setHeaderImage( imageMetadataService.findOrThrow( headerImage ) );
             }
             groupNew.setDescription(description);
             groupNew.setType(GroupType.valueOf(groupType));
@@ -949,9 +945,9 @@ public class GroupService {
         String name = (String)updateGroupDTO.name();
         String description = (String)updateGroupDTO.description();
         String groupType = (String)updateGroupDTO.type();
-        String image = (String)updateGroupDTO.imageUrl();
-        String bannerImage = (String)updateGroupDTO.bannerImageUrl();
-        String headerImage = (String)updateGroupDTO.headerImageUrl();
+        var image = updateGroupDTO.image();
+        var bannerImage = updateGroupDTO.bannerImage();
+        var headerImage = updateGroupDTO.headerImage();
 
         Boolean canCreateGroup = (Boolean)updateGroupDTO.canCreateGroup();
         Boolean publicGroup = (Boolean)updateGroupDTO.publicGroup();
@@ -974,14 +970,14 @@ public class GroupService {
             if(groupType != null && !groupType.isEmpty()) {
                 groupEdit.setType(GroupType.valueOf(groupType));
             }
-            if(image != null && !image.isEmpty()) {
-                groupEdit.setImage(image);
+            if(image != null) {
+                groupEdit.setImage( imageMetadataService.findOrThrow( image ) );
             }
-            if(bannerImage != null && !bannerImage.isEmpty()) {
-                groupEdit.setBannerImage(bannerImage);
+            if(bannerImage != null) {
+                groupEdit.setBannerImage( imageMetadataService.findOrThrow( bannerImage ) );
             }
-            if(headerImage != null && !headerImage.isEmpty()) {
-                groupEdit.setHeaderImage(headerImage);
+            if(headerImage != null) {
+                groupEdit.setHeaderImage( imageMetadataService.findOrThrow( headerImage ) );
             }
             if(canCreateGroup != null) {
                 groupEdit.setCanCreateGroup(canCreateGroup);
@@ -1073,42 +1069,6 @@ public class GroupService {
         }
 
         throw new GroupException("Erro ao executar operação.");
-    }
-
-    // get image of group
-    public ResponseEntity<Void> getGroupImage(UUID groupId) {
-        Group group = findFirstById(groupId);
-        if(group != null) {
-            if(group.getImage() != null) {
-                String urlImage = (group.getImage().startsWith("/")) ? contextPath + group.getImage() : group.getImage();
-                return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(urlImage)).build();
-            }
-        }
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "not found");
-    }
-
-    // get image banner of group
-    public ResponseEntity<Void> getBannerImage(UUID groupId) {
-        Group group = findFirstById(groupId);
-        if(group != null) {
-            if(group.getBannerImage() != null) {
-                String urlImage = (group.getBannerImage().startsWith("/")) ? contextPath + group.getBannerImage() : group.getBannerImage();
-                return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(urlImage)).build();
-            }
-        }
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "not found");
-    }
-
-    // get image header of group
-    public ResponseEntity<Void> getHeaderImage(UUID groupId) {
-        Group group = findFirstById(groupId);
-        if(group != null) {
-            if(group.getHeaderImage() != null) {
-                String urlImage = (group.getHeaderImage().startsWith("/")) ? contextPath + group.getHeaderImage() : group.getHeaderImage();
-                return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(urlImage)).build();
-            }
-        }
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "not found");
     }
 
     public Collection<Role> findRoles( UUID groupId ) {

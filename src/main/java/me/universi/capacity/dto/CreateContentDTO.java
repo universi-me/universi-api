@@ -21,7 +21,7 @@ public record CreateContentDTO(
     ContentType type,
 
     @Nullable
-    String image,
+    UUID image,
 
     @Nullable
     String description,

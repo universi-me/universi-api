@@ -13,7 +13,7 @@ public record UpdateFolderDTO(
     String name,
 
     @Nullable
-    String image,
+    UUID image,
 
     @Nullable
     String description,
