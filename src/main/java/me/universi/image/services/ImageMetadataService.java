@@ -1,15 +1,8 @@
 package me.universi.image.services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.io.*;
-import java.net.HttpURLConnection;
 import java.net.URI;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import me.universi.Sys;
@@ -20,7 +13,6 @@ import me.universi.api.interfaces.EntityService;
 import me.universi.image.controller.ImageMetadataController;
 import me.universi.image.entities.ImageMetadata;
 import me.universi.image.enums.ImageStoreLocation;
-import me.universi.image.exceptions.ImageException;
 import me.universi.minioConfig.MinioConfig;
 import me.universi.profile.services.ProfileService;
 import me.universi.util.CastingUtil;
@@ -42,13 +34,10 @@ public class ImageMetadataService extends EntityService<ImageMetadata> {
     private final ProfileService profileService;
 
     @Value("${SAVE_IMAGE_LOCAL}")
-    public boolean saveImageLocal;
+    public boolean saveOnFilesystem;
 
     @Value("${IMAGE_UPLOAD_LIMIT}")
-    public int imageUploadLimit;
-
-    @Value("${IMGUR_CLIENT_ID}")
-    public String imgurClientId;
+    private int imageSizeLimitInGigabytes;
 
     @Value( "${server.servlet.context-path}" )
     private String contextPath;
@@ -140,53 +129,6 @@ public class ImageMetadataService extends EntityService<ImageMetadata> {
         );
     }
 
-    public String uploadImagemImgur(MultipartFile imagem) throws Exception {
-        // post da imagem para api da Imgur e retornar o link.
-        String urlApi = "https://api.imgur.com/3/image";
-        String boundary = "----WebKitFormBoundary"+Long.toHexString(System.currentTimeMillis());
-        URLConnection connection = new URL(urlApi).openConnection();
-        connection.setDoOutput(true);
-        connection.setRequestProperty("Authorization", "Client-ID " + getImgurClientId());
-        connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
-        OutputStream outPut = connection.getOutputStream();
-        outPut.write(("--" + boundary).getBytes());
-        outPut.write(("\n").getBytes());
-        outPut.write(("Content-Disposition: form-data; name=\"image\"; filename=\"" + imagem.getName() + "\"").getBytes());
-        outPut.write(("\n").getBytes());
-        outPut.write(("Content-Type: "+imagem.getContentType()).getBytes());
-        outPut.write(("\n").getBytes());
-        outPut.write(("\n").getBytes());
-        outPut.write(imagem.getBytes());
-        outPut.write(("\n").getBytes());
-        outPut.write(("--" + boundary + "--").getBytes());
-        outPut.write(("\n").getBytes());
-        HttpURLConnection connectionResp = ((HttpURLConnection)connection);
-        String strCurrentLine = "";
-        if (connectionResp.getResponseCode() == 200) {
-            BufferedReader br = new BufferedReader(new InputStreamReader(connectionResp.getInputStream()));
-            String resp;
-            while ((resp = br.readLine()) != null) {
-                strCurrentLine += resp;
-            }
-            ObjectMapper mapper = new ObjectMapper();
-            Map mapRequest = mapper.readValue(strCurrentLine, Map.class);
-            return ((Map)mapRequest.get("data")).get("link").toString();
-        }
-        throw new ImageException("Falha ao fazer upload da imagem.");
-    }
-
-    private boolean isSaveImageLocal() {
-        return saveImageLocal;
-    }
-
-    public int getImageUploadLimit() {
-        return imageUploadLimit;
-    }
-
-    public String getImgurClientId() {
-        return imgurClientId;
-    }
-
     public byte[] checkImageSize( MultipartFile image) throws UniversiPayloadTooLargeException, UniversiBadRequestException {
         byte[] imageBytes;
         try {
@@ -195,7 +137,7 @@ public class ImageMetadataService extends EntityService<ImageMetadata> {
             throw new UniversiBadRequestException( "Não foi possível processar a imagem" );
         }
 
-        if (imageBytes.length > 1024 * 1024 * getImageUploadLimit()) {
+        if ( imageBytes.length > 1024 * 1024 * imageSizeLimitInGigabytes ) {
             throw new UniversiPayloadTooLargeException( "Imagem muito grande." );
         }
 
@@ -206,7 +148,7 @@ public class ImageMetadataService extends EntityService<ImageMetadata> {
         if ( MinioConfig.isMinioEnabled() )
             return ImageStoreLocation.MINIO;
 
-        else if ( isSaveImageLocal() )
+        else if ( saveOnFilesystem )
             return ImageStoreLocation.FILESYSTEM;
 
         return ImageStoreLocation.DATABASE;
