@@ -13,6 +13,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import me.universi.api.exceptions.UniversiBadRequestException;
 import me.universi.api.exceptions.UniversiServerException;
 import me.universi.image.entities.ImageMetadata;
 import me.universi.image.enums.ImageStoreLocation;
@@ -46,6 +47,9 @@ public class FilesystemImageService {
         File imageDir = new File( pathImageSave );
         if ( !imageDir.exists() )
             imageDir.mkdirs();
+
+        if ( filename.contains( ".." ) || filename.contains( "/" ) || filename.contains( "\\" ) )
+            throw new UniversiBadRequestException( "Não é possível salvar o arquivo de nome '" + filename + "'" );
 
         File file = Paths.get( imageDir.toString(), filename ).toFile();
 
