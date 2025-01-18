@@ -1,6 +1,8 @@
 package me.universi.user.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import java.net.URI;
 import java.net.URL;
 import java.util.Collections;
@@ -10,9 +12,9 @@ import java.util.Map;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import me.universi.api.entities.Response;
-import me.universi.group.services.GroupService;
-import me.universi.profile.services.ProfileService;
-import me.universi.role.services.RoleService;
+import me.universi.user.dto.CreateAccountDTO;
+import me.universi.user.dto.GetAccountDTO;
+import me.universi.user.dto.GetAvailableCheckDTO;
 import me.universi.user.entities.User;
 import me.universi.user.enums.Authority;
 import me.universi.user.exceptions.UserException;
@@ -20,7 +22,6 @@ import me.universi.user.services.JWTService;
 import me.universi.user.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
@@ -35,190 +36,42 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping(value = "")
 public class UserController {
     private final UserService userService;
-    private final ProfileService profileService;
-    private final AuthenticationManager authenticationManager;
     private final JWTService jwtService;
 
     @Autowired
-    public UserController(UserService userService, ProfileService profileService, AuthenticationManager authenticationManager, JWTService jwtService) {
+    public UserController(UserService userService, JWTService jwtService) {
         this.userService = userService;
-        this.profileService = profileService;
-        this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
     }
 
     @GetMapping(value = "/account", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response account() {
-        return Response.buildResponse(response -> {
-
-            if(userService.userIsLoggedIn()) {
-                response.success = true;
-                response.body.put("user", userService.getUserInSession());
-                response.body.put("roles", RoleService.getInstance().getAllRolesSession());
-            } else {
-                response.success = false;
-                response.status = 401;
-            }
-
-            if(userService.getInSession("account_confirmed") != null) {
-
-                response.success = true;
-                response.redirectTo = "/login";
-
-                response.message = userService.getInSession("message_account_confirmed").toString();
-
-                response.alertOptions.put("title", "Confirmação de Conta");
-                response.alertOptions.put("icon", "success");
-                response.alertOptions.put("modalAlert", true);
-                response.alertOptions.put("timer", null);
-
-                userService.removeInSession("account_confirmed");
-                userService.removeInSession("message_account_confirmed");
-            }
-
-        });
+    public ResponseEntity<GetAccountDTO> account() {
+        GetAccountDTO getAccountDTO = userService.getAccountSession();
+        return getAccountDTO != null ? ResponseEntity.ok(getAccountDTO) : new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 
     @GetMapping("/logout")
-    @ResponseBody
-    public Response logout() {
-        return Response.buildResponse(response -> {
-
-            if(userService.userIsLoggedIn()) {
-                userService.logout();
-                response.success = true;
-                response.message = "A sua sessão foi finalizada com sucesso.";
-                response.redirectTo = userService.getUrlWhenLogout();
-                return;
-            }
-
-            throw new UserException("Usuário não esta logado.");
-
-        });
+    public ResponseEntity<Boolean> logout() {
+        return ResponseEntity.ok( userService.logoutUserSession() );
     }
 
-    @PostMapping(value = "/username-available", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response available_username_check(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-            String username = (String)body.get("username");
-
-            boolean usernameRegex = userService.usernameRegex(username);
-            boolean usernameExist = userService.usernameExist(username);
-
-            response.success = usernameRegex && !usernameExist;
-
-            response.body.put("reason", !usernameRegex ? "Verifique o formato do nome de usuário." :
-                                        usernameExist ? "Este nome de usuário está em uso." :
-                                                "Usuário Disponível para uso.");
-        });
+    @GetMapping(value = "/available/username/{username}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GetAvailableCheckDTO> available_username_check( @Valid @PathVariable @NotNull( message = "username inválido" ) String username ) {
+        return ResponseEntity.ok( userService.availableUsernameCheck( username ) );
     }
 
-    @PostMapping(value = "/email-available", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response available_email_check(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-            String email = (String)body.get("email");
-
-            boolean emailRegex = userService.emailRegex(email);
-            boolean emailExist = userService.emailExist(email);
-            boolean emailAvailableForOrganization = GroupService.getInstance().emailAvailableForOrganization(email);
-
-            response.success = emailRegex && !emailExist && emailAvailableForOrganization;
-
-            response.body.put("reason", !emailRegex ? "Verifique o formato do email." :
-                                        emailExist ? "Este email já está em uso." :
-                                        !emailAvailableForOrganization ? "Email não autorizado.\nUtilize seu email corporativo." :
-                                                "Email Disponível para uso.");
-        });
+    @PostMapping(value = "/available/email/{email}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GetAvailableCheckDTO> available_email_check( @Valid @PathVariable @NotNull( message = "email inválido" ) String email ) {
+        return ResponseEntity.ok( userService.availableEmailCheck( email ) );
     }
 
-    @PostMapping(value = "/signup", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response signup(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-
-            response.alertOptions.put("title", "Registro de Conta");
-
-            // check if register is enabled
-            if(!userService.isSignupEnabled()) {
-                throw new UserException("Registrar-se está desativado!");
-            }
-
-            userService.checkRecaptchaWithToken(body.get("recaptchaToken"));
-
-            String username = (String)body.get("username");
-            String email = (String)body.get("email");
-
-            String firstname = (String)body.get("firstname");
-            String lastname = (String)body.get("lastname");
-
-            String password = (String)body.get("password");
-
-            if (username==null || username.isEmpty()) {
-                throw new UserException("Verifique o campo Usuário!");
-            } else {
-                username = username.trim().toLowerCase();
-                if(!userService.usernameRegex(username)) {
-                    throw new UserException("Nome de usuário está com formato inválido!");
-                }
-            }
-            if (email==null || email.isEmpty()) {
-                throw new UserException("Verifique o campo Email!");
-            } else {
-                email = email.trim().toLowerCase();
-                if(!userService.emailRegex(email)) {
-                    throw new UserException("Email está com formato inválido!");
-                }
-            }
-            if (password==null || password.isEmpty()) {
-                throw new UserException("Verifique o campo Senha!");
-            } else {
-                if(!userService.passwordRegex(password)) {
-                    throw new UserException("Senha está com formato inválido!");
-                }
-            }
-
-            if(userService.usernameExist(username)) {
-                throw new UserException("Usuário \""+username+"\" já esta cadastrado!");
-            }
-            if(userService.emailExist(email)) {
-                throw new UserException("Email \""+email+"\" já esta cadastrado!");
-            }
-            if(!GroupService.getInstance().emailAvailableForOrganization(email)) {
-                throw new UserException("Email \""+email+"\" não esta disponível para cadastro!");
-            }
-
-            User user = new User();
-            user.setName(username);
-            user.setEmail(email);
-            if(userService.isConfirmAccountEnabled()) {
-                user.setInactive(true);
-            }
-            userService.saveRawPasswordToUser(user, password, false);
-
-            userService.createUser(user, firstname, lastname);
-
-            if(userService.isConfirmAccountEnabled()) {
-                userService.sendConfirmAccountEmail(user, true);
-            }
-
-            response.success = true;
-
-            response.message = userService.isConfirmAccountEnabled() ? "Usuário registrado com sucesso, Enviamos um link de confirmação de conta para o seu email cadastrado." : "Usuário registrado com sucesso, efetue o login para continuar.";
-
-            response.alertOptions.put("title", userService.isConfirmAccountEnabled() ? "Confirmação de Conta" : "Registro de Conta");
-            response.alertOptions.put("icon", userService.isConfirmAccountEnabled() ? "info" : "success");
-            response.alertOptions.put("modalAlert", true);
-            response.alertOptions.put("timer", null);
-
-        });
+    @PostMapping(value = "/signup", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Boolean> signup( @Valid @RequestBody CreateAccountDTO createAccountDTO ) {
+        return ResponseEntity.ok( userService.createAccount( createAccountDTO ) );
     }
 
 
-    @PostMapping(value = "/account/edit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
+    @PostMapping(value = "/account/edit", produces = MediaType.APPLICATION_JSON_VALUE)
     public Response account_edit(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
 
@@ -254,8 +107,7 @@ public class UserController {
         });
     }
 
-    @PostMapping(value = "/admin/account/edit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
+    @PostMapping(value = "/admin/account/edit", produces = MediaType.APPLICATION_JSON_VALUE)
     public Response admin_account_edit(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
 
@@ -342,7 +194,6 @@ public class UserController {
     }
 
     @PostMapping(value = "/admin/account/list", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
     public Response admin_account_list(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
 
@@ -358,8 +209,7 @@ public class UserController {
         });
     }
 
-    @PostMapping(value = "/login/keycloak", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
+    @PostMapping(value = "/login/keycloak", produces = MediaType.APPLICATION_JSON_VALUE)
     public Response oauth_keycloak_session(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
             if(!userService.isKeycloakEnabled()) {
@@ -431,7 +281,6 @@ public class UserController {
     }
 
     @GetMapping(value = "/login/keycloak/auth")
-    @ResponseBody
     public ResponseEntity<Void> keycloak_login() {
         if(!userService.isKeycloakEnabled()) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "denied access to keycloak login");
@@ -439,8 +288,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(userService.keycloakLoginUrl())).build();
     }
 
-    @PostMapping(value = "/login/google", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
+    @PostMapping(value = "/login/google", produces = MediaType.APPLICATION_JSON_VALUE)
     public Response login_google(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
 
@@ -495,8 +343,7 @@ public class UserController {
     }
 
     // recovery user password
-    @PostMapping(value = "/recovery-password", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
+    @PostMapping(value = "/recovery-password", produces = MediaType.APPLICATION_JSON_VALUE)
     public Response recovery_password(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
 
@@ -531,8 +378,7 @@ public class UserController {
     }
 
     // create new password for user
-    @PostMapping(value = "/new-password", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
+    @PostMapping(value = "/new-password", produces = MediaType.APPLICATION_JSON_VALUE)
     public Response new_password(@RequestBody Map<String, Object> body) {
         return Response.buildResponse(response -> {
 
@@ -569,8 +415,7 @@ public class UserController {
     }
 
     // request confirm account
-    @PostMapping(value = "/confirm-account", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
+    @PostMapping(value = "/confirm-account", produces = MediaType.APPLICATION_JSON_VALUE)
     public Response request_confirm_account() {
         return Response.buildResponse(response -> {
 
@@ -595,7 +440,6 @@ public class UserController {
 
     // confirm account
     @GetMapping(value = "/confirm-account/{token}")
-    @ResponseBody
     public ResponseEntity confirm_account(@PathVariable("token")String token) throws Exception {
 
         URL requestUrl = new URL(userService.getRequest().getRequestURL().toString());

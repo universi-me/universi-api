@@ -10,6 +10,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -22,6 +23,10 @@ import me.universi.image.services.ImageMetadataService;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.exceptions.ProfileException;
 import me.universi.profile.services.ProfileService;
+import me.universi.role.services.RoleService;
+import me.universi.user.dto.CreateAccountDTO;
+import me.universi.user.dto.GetAccountDTO;
+import me.universi.user.dto.GetAvailableCheckDTO;
 import me.universi.user.entities.User;
 import me.universi.user.enums.Authority;
 import me.universi.user.exceptions.ExceptionResponse;
@@ -174,7 +179,7 @@ public class UserService implements UserDetailsService {
         return findFirstById(UUID.fromString(id));
     }
 
-    public void createUser(User user, String firstname, String lastname) throws Exception {
+    public void createUser(User user, String firstname, String lastname) throws UserException {
         if (user==null) {
             throw new UserException("Usuario está vazio!");
         } else if (user.getUsername()==null) {
@@ -611,7 +616,7 @@ public class UserService implements UserDetailsService {
     }
 
     // generate recovery password token sha256 for user
-    public String generateRecoveryPasswordToken(User user, boolean useIntervalCheck) throws Exception {
+    public String generateRecoveryPasswordToken(User user, boolean useIntervalCheck) throws UserException {
 
         //check recovery date token if less than 15min
         if(useIntervalCheck && user.getRecoveryPasswordTokenDate() != null) {
@@ -623,7 +628,12 @@ public class UserService implements UserDetailsService {
 
         String tokenRandom = UUID.randomUUID().toString();
 
-        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        MessageDigest digest = null;
+        try {
+            digest = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            throw new UserException("Algoritmo sha256 não disponível.");
+        }
         byte[] encodedHash = digest.digest(tokenRandom.getBytes(StandardCharsets.UTF_8));
         String tokenString = ConvertUtil.bytesToHex(encodedHash);
 
@@ -688,7 +698,7 @@ public class UserService implements UserDetailsService {
     }
 
     //send confirmation signup account email to user
-    public void sendConfirmAccountEmail(User user, boolean signup) throws Exception {
+    public void sendConfirmAccountEmail(User user, boolean signup) throws UserException {
         String userIp = getClientIpAddress();
 
         String token = generateRecoveryPasswordToken(user, false);
@@ -1010,6 +1020,116 @@ public class UserService implements UserDetailsService {
             setupEmailSender();
         }
         return emailSender;
+    }
+
+    public GetAccountDTO getAccountSession() {
+        GetAccountDTO getAccount = null;
+        if(userIsLoggedIn()) {
+            getAccount = new GetAccountDTO(getUserInSession(), RoleService.getInstance().getAllRolesSession());
+        }
+        if(getInSession("account_confirmed") != null) {
+            removeInSession("account_confirmed");
+            removeInSession("message_account_confirmed");
+        }
+        return getAccount;
+    }
+
+    public boolean logoutUserSession() {
+        if(userIsLoggedIn()) {
+            logout();
+            return true;
+        }
+        return false;
+    }
+
+    public GetAvailableCheckDTO availableUsernameCheck(String username) {
+        boolean usernameRegex = usernameRegex(username);
+        boolean usernameExist = usernameExist(username);
+
+        return new GetAvailableCheckDTO(
+                usernameRegex && !usernameExist,
+                !usernameRegex ? "Verifique o formato do nome de usuário." : usernameExist ? "Este nome de usuário está em uso." : "Usuário Disponível para uso."
+        );
+    }
+
+    public GetAvailableCheckDTO availableEmailCheck(String email) {
+        boolean emailRegex = emailRegex(email);
+        boolean emailExist = emailExist(email);
+        boolean emailAvailableForOrganization = GroupService.getInstance().emailAvailableForOrganization(email);
+
+        return new GetAvailableCheckDTO(
+                emailRegex && !emailExist && emailAvailableForOrganization,
+                !emailRegex ? "Verifique o formato do email." : emailExist ? "Este email já está em uso." : !emailAvailableForOrganization ? "Email não autorizado.\nUtilize seu email corporativo." :  "Email Disponível para uso."
+        );
+    }
+
+    public boolean createAccount(CreateAccountDTO createAccountDTO) throws UserException {
+
+        // check if register is enabled
+        if(!isSignupEnabled()) {
+            throw new UserException("Registrar-se está desativado!");
+        }
+
+        // check recaptcha if available
+        checkRecaptchaWithToken(createAccountDTO.recaptchaToken());
+
+        String username = createAccountDTO.username();
+        String email = createAccountDTO.email();
+
+        String firstname = createAccountDTO.firstname();
+        String lastname = createAccountDTO.lastname();
+
+        String password = createAccountDTO.password();
+
+        if (username==null || username.isEmpty()) {
+            throw new UserException("Verifique o campo Usuário!");
+        } else {
+            username = username.trim().toLowerCase();
+            if(!usernameRegex(username)) {
+                throw new UserException("Nome de usuário está com formato inválido!");
+            }
+        }
+        if (email==null || email.isEmpty()) {
+            throw new UserException("Verifique o campo Email!");
+        } else {
+            email = email.trim().toLowerCase();
+            if(!emailRegex(email)) {
+                throw new UserException("Email está com formato inválido!");
+            }
+        }
+        if (password==null || password.isEmpty()) {
+            throw new UserException("Verifique o campo Senha!");
+        } else {
+            if(!passwordRegex(password)) {
+                throw new UserException("Senha está com formato inválido!");
+            }
+        }
+
+        if(usernameExist(username)) {
+            throw new UserException("Usuário \""+username+"\" já esta cadastrado!");
+        }
+        if(emailExist(email)) {
+            throw new UserException("Email \""+email+"\" já esta cadastrado!");
+        }
+        if(!GroupService.getInstance().emailAvailableForOrganization(email)) {
+            throw new UserException("Email \""+email+"\" não esta disponível para cadastro!");
+        }
+
+        User user = new User();
+        user.setName(username);
+        user.setEmail(email);
+        if(isConfirmAccountEnabled()) {
+            user.setInactive(true);
+        }
+        saveRawPasswordToUser(user, password, false);
+
+        createUser(user, firstname, lastname);
+
+        if(isConfirmAccountEnabled()) {
+            sendConfirmAccountEmail(user, true);
+        }
+
+        return true;
     }
 
 }
