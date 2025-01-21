@@ -4,12 +4,9 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.net.URI;
 import java.net.URL;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.gson.GsonFactory;
 import me.universi.api.entities.Response;
 import me.universi.user.dto.*;
 import me.universi.user.entities.User;
@@ -20,10 +17,6 @@ import me.universi.user.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
-
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 
 @RestController
 @RequestMapping(value = "")
@@ -97,98 +90,23 @@ public class UserController {
 
     // recovery user password
     @PostMapping(value = "/recovery-password", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Response recovery_password(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-
-            response.alertOptions.put("title", "Recuperação de Senha");
-
-            userService.checkRecaptchaWithToken(body.get("recaptchaToken"));
-
-            String usernameOrEmail = (String)body.get("username");
-
-            if(usernameOrEmail == null) {
-                throw new UserException("Parametro username é nulo.");
-            }
-
-            User user = null;
-
-            try {
-                user = (User) userService.loadUserByUsername(usernameOrEmail);
-            } catch (Exception e) {
-                throw new UserException("Conta não encontrada!");
-            }
-
-            userService.sendRecoveryPasswordEmail(user);
-
-            response.message = "Enviamos um link de recuperação da senha para seu email cadastrado.";
-
-            response.alertOptions.put("icon", "success");
-            response.alertOptions.put("modalAlert", true);
-            response.alertOptions.put("timer", null);
-
-            response.redirectTo = "/login";
-        });
+    public ResponseEntity<Void> recovery_password( @Valid @RequestBody RecoveryPasswordDTO recoveryPasswordDTO ) {
+        userService.recoveryPassword( recoveryPasswordDTO );
+        return ResponseEntity.noContent().build();
     }
 
     // create new password for user
     @PostMapping(value = "/new-password", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Response new_password(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-
-            String token = (String)body.get("token");
-            String newPassword = (String)body.get("newPassword");
-
-            if(token == null) {
-                throw new UserException("Parametro token é nulo.");
-            }
-            if(newPassword == null) {
-                throw new UserException("Parametro newPassword é nulo.");
-            }
-
-            if(!userService.passwordRegex(newPassword)) {
-                throw new UserException("Nova Senha está com formato inválido!");
-            }
-
-            User user = userService.getUserByRecoveryPasswordToken(token);
-
-            if(user == null) {
-                throw new UserException("Token de recuperação de senha inválido ou expirado!");
-            }
-
-            user.setRecoveryPasswordToken(null);
-            user.setInactive(false);
-            userService.saveRawPasswordToUser(user, newPassword, true);
-
-
-
-            response.message = "Senha alterada com sucesso, efetue o login para continuar.";
-            response.redirectTo = "/login";
-
-        });
+    public ResponseEntity<Void> recovery_new_password(@Valid @RequestBody RecoveryNewPasswordDTO recoveryNewPasswordDTO ) {
+        userService.recoveryNewPassword( recoveryNewPasswordDTO );
+        return ResponseEntity.noContent().build();
     }
 
     // request confirm account
-    @PostMapping(value = "/confirm-account", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Response request_confirm_account() {
-        return Response.buildResponse(response -> {
-
-            response.alertOptions.put("title", "Confirmação de Conta");
-
-            User user = userService.getUserInSession();
-
-            if(userService.isAccountConfirmed(user)) {
-                throw new UserException("Conta já confirmada!");
-            }
-
-            userService.sendConfirmAccountEmail(user, false);
-
-            response.message = "Enviamos um link de confirmação de conta para seu email cadastrado.";
-
-            response.alertOptions.put("icon", "info");
-            response.alertOptions.put("modalAlert", true);
-            response.alertOptions.put("timer", null);
-
-        });
+    @GetMapping(value = "/confirm-account", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Void> request_confirm_account() {
+        userService.requestConfirmAccountEmail();
+        return ResponseEntity.noContent().build();
     }
 
     // confirm account

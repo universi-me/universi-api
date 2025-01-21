@@ -15,7 +15,6 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
-import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
@@ -661,7 +660,7 @@ public class UserService extends EntityService<User> implements UserDetailsServi
     }
 
     // send recovery password email to user
-    public void sendRecoveryPasswordEmail(User user) throws Exception {
+    public void sendRecoveryPasswordEmail(User user) throws UserException {
         String userIp = getClientIpAddress();
 
         String token = generateRecoveryPasswordToken(user, true);
@@ -1337,6 +1336,61 @@ public class UserService extends EntityService<User> implements UserDetailsServi
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "denied access to keycloak login");
         }
         return URI.create(keycloakLoginUrl());
+    }
+
+    public void recoveryPassword( RecoveryPasswordDTO recoveryPasswordDTO ) {
+
+        checkRecaptchaWithToken(recoveryPasswordDTO.recaptchaToken());
+
+        String usernameOrEmail = recoveryPasswordDTO.username();
+
+        if(usernameOrEmail == null) {
+            throw new UserException("Parametro username é nulo.");
+        }
+
+        User user = null;
+
+        try {
+            user = (User) loadUserByUsername(usernameOrEmail);
+        } catch (Exception e) {
+            throw new UserException("Conta não encontrada!");
+        }
+
+        sendRecoveryPasswordEmail(user);
+    }
+
+    public void recoveryNewPassword( RecoveryNewPasswordDTO recoveryNewPasswordDTO ) {
+        String token = recoveryNewPasswordDTO.token();
+        String newPassword = recoveryNewPasswordDTO.newPassword();
+
+        if(token == null) {
+            throw new UserException("Parametro token é nulo.");
+        }
+        if(newPassword == null) {
+            throw new UserException("Parametro newPassword é nulo.");
+        }
+
+        if(!passwordRegex(newPassword)) {
+            throw new UserException("Nova Senha está com formato inválido!");
+        }
+
+        User user = getUserByRecoveryPasswordToken(token);
+
+        if(user == null) {
+            throw new UserException("Token de recuperação de senha inválido ou expirado!");
+        }
+
+        user.setRecoveryPasswordToken(null);
+        user.setInactive(false);
+        saveRawPasswordToUser(user, newPassword, true);
+    }
+
+    public void requestConfirmAccountEmail() {
+        User user = getUserInSession();
+        if(isAccountConfirmed(user)) {
+            throw new UserException("Conta já confirmada!");
+        }
+        sendConfirmAccountEmail(user, false);
     }
 
     @Override
