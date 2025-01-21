@@ -19,12 +19,12 @@ public class GroupFeedReactionController {
     }
 
     @GetMapping("/posts/{groupPostId}/reactions")
-    public ResponseEntity<List<GroupPostReaction>> getGroupPostReactions(@Valid @PathVariable @NotNull( message = "groupPostId inválido" ) String groupPostId) {
+    public ResponseEntity<List<GroupPostReaction>> getGroupPostReactions( @Valid @PathVariable @NotNull( message = "groupPostId inválido" ) String groupPostId ) {
         return ResponseEntity.ok ( groupFeedService.getGroupPostReactions(groupPostId) );
     }
 
     @PatchMapping("/posts/{groupPostId}/reactions")
-    public ResponseEntity<GroupPostReaction> setGroupPostReaction(@Valid @PathVariable @NotNull( message = "groupPostId inválido" ) String groupPostId, @Valid @RequestBody UpdatePostReactionDTO updatePostReactionDTO ) {
+    public ResponseEntity<GroupPostReaction> setGroupPostReaction( @Valid @PathVariable @NotNull( message = "groupPostId inválido" ) String groupPostId, @Valid @RequestBody UpdatePostReactionDTO updatePostReactionDTO ) {
         return ResponseEntity.ok( groupFeedService.setGroupPostReaction(groupPostId, updatePostReactionDTO.reaction()) );
     }
 }
