@@ -1212,6 +1212,13 @@ public class UserService extends EntityService<User> implements UserDetailsServi
         logoutUsername(usernameOld);
     }
 
+    public List<User> adminListAccount(String byRole) {
+        if(!isUserAdminSession()) {
+            throw new UserException("Você não tem permissão para listar usuários.");
+        }
+        return findAllUsers(byRole);
+    }
+
     @Override
     public boolean hasPermissionToEdit( User user ) {
         return isSessionOfUser( user );

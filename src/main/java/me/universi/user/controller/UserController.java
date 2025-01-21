@@ -7,6 +7,7 @@ import java.net.URI;
 import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -14,11 +15,9 @@ import com.google.api.client.json.gson.GsonFactory;
 import me.universi.api.entities.Response;
 import me.universi.user.dto.*;
 import me.universi.user.entities.User;
-import me.universi.user.enums.Authority;
 import me.universi.user.exceptions.UserException;
 import me.universi.user.services.JWTService;
 import me.universi.user.services.UserService;
-import me.universi.util.CastingUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -50,9 +49,20 @@ public class UserController {
         return getAccountDTO != null ? ResponseEntity.ok(getAccountDTO) : new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 
+    @PatchMapping(value = "/account", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Void> account_edit( @Valid @RequestBody UpdateAccountDTO updateAccountDTO) {
+        userService.editAccount( updateAccountDTO );
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/logout")
     public ResponseEntity<Boolean> logout() {
         return ResponseEntity.ok( userService.logoutUserSession() );
+    }
+
+    @PostMapping(value = "/signup", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Boolean> signup( @Valid @RequestBody CreateAccountDTO createAccountDTO ) {
+        return ResponseEntity.ok( userService.createAccount( createAccountDTO ) );
     }
 
     @GetMapping(value = "/available/username/{username}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -65,38 +75,15 @@ public class UserController {
         return ResponseEntity.ok( userService.availableEmailCheck( email ) );
     }
 
-    @PostMapping(value = "/signup", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Boolean> signup( @Valid @RequestBody CreateAccountDTO createAccountDTO ) {
-        return ResponseEntity.ok( userService.createAccount( createAccountDTO ) );
-    }
-
-
-    @PatchMapping(value = "/account/edit", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> account_edit( @Valid @RequestBody UpdateAccountDTO updateAccountDTO) {
-        userService.editAccount( updateAccountDTO );
-        return ResponseEntity.noContent().build();
-    }
-
-    @PatchMapping(value = "/admin/account/edit", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(value = "/admin/account", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> admin_account_edit( @Valid @RequestBody EditAccountDTO editAccountDTO ) {
         userService.adminEditAccount( editAccountDTO );
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping(value = "/admin/account/list", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Response admin_account_list(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-
-            if(!userService.isUserAdminSession()) {
-                throw new UserException("Você não tem permissão para listar usuários.");
-            }
-
-            Object byRole = body.get("accessLevel");
-
-            response.success = true;
-            response.body.put("users", userService.findAllUsers(byRole));
-
-        });
+    @GetMapping(value = "/admin/accounts/{accessLevel}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<User> admin_account_list( @Valid @PathVariable @NotNull( message = "accessLevel inválido" ) String accessLevel ) {
+        return userService.adminListAccount( accessLevel );
     }
 
     @PostMapping(value = "/login/keycloak", produces = MediaType.APPLICATION_JSON_VALUE)
