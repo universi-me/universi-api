@@ -146,7 +146,7 @@ public class FolderService extends EntityService<Folder> {
             folder.setImage( imageMetadataService.findOrThrow( createFolderDTO.image() ) );
         folder.setDescription( createFolderDTO.description() );
         folder.setRating( createFolderDTO.rating() );
-        folder.setPublicFolder( createFolderDTO.publicFolder() );
+        folder.setPublicFolder( createFolderDTO.publicFolder().orElse( false ) );
         folder.setCategories( categoryService.findOrThrow(
             createFolderDTO.categoriesIds() == null ? Arrays.asList() : createFolderDTO.categoriesIds()
         ) );
@@ -473,7 +473,7 @@ public class FolderService extends EntityService<Folder> {
             imageId,
             folder.getDescription(),
             folder.getRating(),
-            folder.isPublicFolder(),
+            Optional.of( folder.isPublicFolder() ),
             new ArrayList<>( 
                 folder.getCategories().stream().map( Category::getId ).toList()
             ),

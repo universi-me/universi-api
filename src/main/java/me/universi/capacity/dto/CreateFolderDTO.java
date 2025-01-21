@@ -3,6 +3,7 @@ package me.universi.capacity.dto;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import jakarta.annotation.Nullable;
@@ -24,8 +25,7 @@ public record CreateFolderDTO(
     @Min(0) @Max(5)
     Integer rating,
 
-    @Nullable
-    boolean publicFolder,
+    Optional<Boolean> publicFolder,
 
     @Nullable
     List<UUID> categoriesIds,
