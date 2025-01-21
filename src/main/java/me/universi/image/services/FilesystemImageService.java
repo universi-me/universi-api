@@ -65,7 +65,7 @@ public class FilesystemImageService {
             new ImageMetadata(
                 filename,
                 image.getContentType(),
-                ProfileService.getInstance().getProfileInSession(),
+                ProfileService.getInstance().getProfileInSessionOrThrow(),
                 ImageStoreLocation.FILESYSTEM,
                 new Date()
             )

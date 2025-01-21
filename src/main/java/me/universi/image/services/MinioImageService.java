@@ -73,7 +73,7 @@ public class MinioImageService {
                 new ImageMetadata(
                     filename,
                     image.getContentType(),
-                    ProfileService.getInstance().getProfileInSession(),
+                    ProfileService.getInstance().getProfileInSessionOrThrow(),
                     ImageStoreLocation.MINIO,
                     new Date()
                 )

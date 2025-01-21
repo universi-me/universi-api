@@ -1,6 +1,8 @@
 package me.universi.capacity.entidades;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
@@ -203,9 +205,14 @@ public class Content implements Serializable {
     }
 
     @Transient
+    @JsonInclude( JsonInclude.Include.NON_NULL )
     public ContentStatusType getStatus() {
+        var profile = ProfileService.getInstance().getProfileInSession();
+        if ( profile.isEmpty() )
+            return null;
+
         return ContentService.getInstance()
-            .findStatusById( id, ProfileService.getInstance().getProfileInSession().getId() )
+            .findStatusById( id, profile.get().getId() )
             .getStatus();
     }
 }

@@ -78,11 +78,7 @@ public class GroupParticipantService {
 
         User participantUser = null;
         if(updateGroupParticipantDTO.participant() != null && !updateGroupParticipantDTO.participant().isEmpty()) {
-            if (updateGroupParticipantDTO.participant().contains("@")) {
-                participantUser = (User) userService.findFirstByEmail(updateGroupParticipantDTO.participant());
-            } else {
-                participantUser = (User) userService.loadUserByUsername(updateGroupParticipantDTO.participant());
-            }
+            participantUser = userService.findByUsernameOrEmail( updateGroupParticipantDTO.participant() ).orElse( null );
         }
 
         Group groupEdit = groupService.getGroupByGroupIdOrGroupPath(updateGroupParticipantDTO.groupId(), null);
@@ -107,11 +103,7 @@ public class GroupParticipantService {
 
         User participantUser = null;
         if(updateGroupParticipantDTO.participant() != null && !updateGroupParticipantDTO.participant().isEmpty()) {
-            if (updateGroupParticipantDTO.participant().contains("@")) {
-                participantUser = (User) userService.findFirstByEmail(updateGroupParticipantDTO.participant());
-            } else {
-                participantUser = (User) userService.loadUserByUsername(updateGroupParticipantDTO.participant());
-            }
+            participantUser = userService.findByUsernameOrEmail( updateGroupParticipantDTO.participant() ).orElse( null );
         }
 
         Group groupEdit = groupService.getGroupByGroupIdOrGroupPath(updateGroupParticipantDTO.groupId(), null);

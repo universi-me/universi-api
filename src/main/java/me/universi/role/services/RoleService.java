@@ -304,8 +304,12 @@ public class RoleService extends EntityService<Role> {
 
     @Override
     public boolean hasPermissionToEdit( @NotNull Role role ) {
+        var profile = profileService.getProfileInSession();
+        if ( profile.isEmpty() )
+            return false;
+
         return role.isCanBeEdited()
-            && isAdmin( profileService.getProfileInSession(), role.group );
+            && isAdmin( profile.get(), role.group );
     }
 
     @Override

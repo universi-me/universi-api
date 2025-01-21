@@ -128,7 +128,7 @@ public class CompetenceTypeService {
     }
 
     public CompetenceType create( @NotNull CreateCompetenceTypeDTO createCompetenceTypeDTO ) throws UniversiConflictingOperationException {
-        var profileInSession = profileService.getProfileInSession();
+        var profileInSession = profileService.getProfileInSessionOrThrow();
         var existingCompetenceType = findByNameIgnoringAccess( createCompetenceTypeDTO.name() );
 
         if ( existingCompetenceType.isEmpty() ) {
@@ -175,7 +175,11 @@ public class CompetenceTypeService {
     }
 
     public boolean hasAccessToCompetenceType(CompetenceType competence) {
-        return hasAccessToCompetenceType( competence, profileService.getProfileInSession() );
+        var profileInSession = profileService.getProfileInSession();
+        if ( profileInSession.isEmpty() )
+            return competence.isReviewed();
+
+        return hasAccessToCompetenceType( competence, profileInSession.get() );
     }
 
     public boolean hasAccessToCompetenceType(@NotNull CompetenceType competence, @NotNull Profile profile) {

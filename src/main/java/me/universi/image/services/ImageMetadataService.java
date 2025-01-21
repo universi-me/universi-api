@@ -122,7 +122,7 @@ public class ImageMetadataService extends EntityService<ImageMetadata> {
             new ImageMetadata(
                 imageUrl,
                 MediaType.APPLICATION_OCTET_STREAM_VALUE,
-                profileService.getProfileInSession(),
+                profileService.getProfileInSessionOrThrow(),
                 ImageStoreLocation.EXTERNAL,
                 new Date()
             )

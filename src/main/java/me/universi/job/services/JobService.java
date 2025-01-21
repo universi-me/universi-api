@@ -69,7 +69,7 @@ public class JobService {
 
         var competencesTypes = competenceTypeService.findOrThrow( createJobDTO.requiredCompetencesIds() );
 
-        var profileInSession = profileService.getProfileInSession();
+        var profileInSession = profileService.getProfileInSessionOrThrow();
 
         var job = new Job();
         job.setTitle(title);
@@ -97,7 +97,7 @@ public class JobService {
     }
 
     public Job edit( UUID id, UpdateJobDTO updateJobDTO ) throws JobException {
-        var job = checkCanEdit( id, profileService.getProfileInSession() );
+        var job = checkCanEdit( id, profileService.getProfileInSessionOrThrow() );
 
         if ( updateJobDTO.title() != null )
             job.setTitle( checkValidTitle( updateJobDTO.title() ) );
@@ -115,7 +115,7 @@ public class JobService {
     }
 
     public Job close( @NotNull UUID id ) {
-        return close( id, profileService.getProfileInSession() );
+        return close( id, profileService.getProfileInSessionOrThrow() );
     }
 
     public Job close(@NotNull UUID jobId, @NotNull Profile profile) throws JobException {

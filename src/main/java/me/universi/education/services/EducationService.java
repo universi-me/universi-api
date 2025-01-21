@@ -103,7 +103,7 @@ public class EducationService {
             institution,
             dto.startDate(),
             dto.endDate(),
-            profileService.getProfileInSession()
+            profileService.getProfileInSessionOrThrow()
         );
 
         return educationRepository.saveAndFlush( education );

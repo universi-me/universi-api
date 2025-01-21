@@ -69,7 +69,7 @@ public class CompetenceService {
     }
 
     public Competence create( @NotNull CreateCompetenceDTO createCompetenceDTO ) {
-        return create( createCompetenceDTO, profileService.getProfileInSession() );
+        return create( createCompetenceDTO, profileService.getProfileInSessionOrThrow() );
     }
 
     public Competence update( UUID id, UpdateCompetenceDTO updateCompetenceDTO ) {
@@ -102,16 +102,17 @@ public class CompetenceService {
 
         var profile = profileService.getProfileInSession();
 
-        if ( !competence.getProfile().getId().equals( profile.getId() ) )
+        if ( profile.isEmpty() || !competence.getProfile().getId().equals( profile.get().getId() ) )
             throw new AccessDeniedException( "Você não tem permissão para alterar esta Competência" );
     }
 
     private void checkPermissionForDelete( @NotNull Competence competence ) throws AccessDeniedException {
         var profile = profileService.getProfileInSession();
 
-        if ( !competence.getProfile().getId().equals( profile.getId() )
+        if ( profile.isEmpty() || (
+            !competence.getProfile().getId().equals( profile.get().getId() )
             && !userService.isUserAdminSession()
-        )
+        ) )
             throw new AccessDeniedException( "Você não tem permissão para deletar esta Competência" );
     }
 

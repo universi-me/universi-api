@@ -66,12 +66,12 @@ public class CategoryService extends UniqueNameEntityService<Category> {
 
         var category = new Category();
         category.setName( createCategoryDTO.name() );
+        category.setAuthor( profileService.getProfileInSessionOrThrow() );
 
         if ( createCategoryDTO.image() != null ) {
             category.setImage( imageMetadataService.findOrThrow( createCategoryDTO.image() ) );
         }
 
-        category.setAuthor( profileService.getProfileInSession() );
         return categoryRepository.saveAndFlush( category );
     }
 

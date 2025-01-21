@@ -20,6 +20,8 @@ import me.universi.user.enums.Authority;
 import me.universi.user.exceptions.UserException;
 import me.universi.user.services.JWTService;
 import me.universi.user.services.UserService;
+import me.universi.util.CastingUtil;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.util.LinkedMultiValueMap;
@@ -115,7 +117,7 @@ public class UserController {
                 throw new UserException("Você não tem permissão para editar usuário.");
             }
 
-            String userId = (String)body.get("userId");
+            var userId = CastingUtil.getUUID( body.get("userId") ).orElse( null );
             if(userId == null) {
                 throw new UserException("Parametro userId é nulo.");
             }
@@ -131,7 +133,7 @@ public class UserController {
             Boolean credentialsExpired = (Boolean)body.get("credentialsExpired");
             Boolean expiredUser = (Boolean)body.get("expiredUser");
 
-            User userEdit = (User) userService.findFirstById(userId);
+            User userEdit = userService.find(userId).orElse( null );
             if(userEdit == null) {
                 throw new UserException("Usuário não encontrado.");
             }

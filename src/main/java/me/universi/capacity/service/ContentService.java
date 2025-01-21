@@ -79,7 +79,7 @@ public class ContentService extends EntityService<Content> {
 
     public Content create( CreateContentDTO createContentDTO ) {
         var content = new Content();
-        content.setAuthor( profileService.getProfileInSession() );
+        content.setAuthor( profileService.getProfileInSessionOrThrow() );
         content.setDescription( createContentDTO.description() );
         if ( createContentDTO.image() != null )
             content.setImage( imageMetadataService.findOrThrow( createContentDTO.image() ) );
@@ -149,11 +149,11 @@ public class ContentService extends EntityService<Content> {
     }
 
     public ContentStatus findStatusById( UUID contentId ) {
-        return findStatusById( contentId, profileService.getProfileInSession().getId() );
+        return findStatusById( contentId, profileService.getProfileInSessionOrThrow().getId() );
     }
 
     public ContentStatus findStatusById( UUID contentId, UUID profileId ) {
-        var profile = profileService.findFirstById( profileId );
+        var profile = profileService.findOrThrow( profileId );
         var contentStatus = contentStatusRepository.findFirstByProfileIdAndContentId( profileId, contentId );
 
         if(contentStatus == null) {
@@ -173,7 +173,7 @@ public class ContentService extends EntityService<Content> {
             contentStatus.setUpdatedAt(new java.util.Date());
 
             contentStatus = contentStatusRepository.save(contentStatus);
-            folderService.grantCompetenceBadge(
+            profileService.grantCompetenceBadge(
                 contentStatus.getContent().getFolderContents().stream().map( fc -> fc.getFolder() ).toList(),
                 contentStatus.getProfile()
             );

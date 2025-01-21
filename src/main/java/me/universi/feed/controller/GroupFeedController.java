@@ -9,6 +9,7 @@ import me.universi.feed.services.GroupFeedService;
 import me.universi.role.enums.FeaturesTypes;
 import me.universi.role.enums.Permission;
 import me.universi.role.services.RoleService;
+import me.universi.util.CastingUtil;
 import me.universi.profile.services.ProfileService;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,7 +38,9 @@ public class GroupFeedController {
             List<GroupPost> groupPosts = groupFeedService.getGroupPosts(groupId);
             List<GroupGetDTO> groupGetDTOS = new ArrayList<>();
             for(GroupPost post : groupPosts){
-                GroupGetDTO groupGet = new GroupGetDTO(post.getContent(), profileService.findFirstById(post.getAuthorId()), post.getId(), post.getGroupId());
+                var author = profileService.findOrThrow( CastingUtil.getUUID( post.getAuthorId() ).orElse( null ) );
+
+                GroupGetDTO groupGet = new GroupGetDTO(post.getContent(), author, post.getId(), post.getGroupId());
                 groupGet.reactions = groupFeedService.getGroupPostReactions(post.getId());
                 groupGet.comments = groupFeedService.getGroupPostComments(post.getId());
                 groupGetDTOS.add(groupGet);

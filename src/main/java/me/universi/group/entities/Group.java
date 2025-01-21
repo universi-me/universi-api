@@ -375,14 +375,14 @@ public class Group implements Serializable {
     }
 
     @Transient
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public @Nullable Map<FeaturesTypes, Integer> getPermissions() {
-
-        if(!UserService.getInstance().userIsLoggedIn()) {
+        var profile = ProfileService.getInstance().getProfileInSession();
+        if ( profile.isEmpty() )
             return null;
-        }
 
         Role role = RoleService.getInstance().getAssignedRole(
-            ProfileService.getInstance().getProfileInSession().getId(),
+            profile.get().getId(),
             this.id
         );
 

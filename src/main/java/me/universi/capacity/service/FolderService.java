@@ -43,8 +43,6 @@ import me.universi.capacity.repository.FolderContentsRepository;
 import me.universi.capacity.repository.FolderFavoriteRepository;
 import me.universi.capacity.repository.FolderProfileRepository;
 import me.universi.capacity.repository.FolderRepository;
-import me.universi.competence.dto.CreateCompetenceDTO;
-import me.universi.competence.entities.Competence;
 import me.universi.competence.entities.CompetenceType;
 import me.universi.competence.services.CompetenceService;
 import me.universi.competence.services.CompetenceTypeService;
@@ -143,7 +141,7 @@ public class FolderService extends EntityService<Folder> {
         var folder = new Folder();
         folder.setName( createFolderDTO.name() );
         folder.setReference( generateAvailableReference() );
-        folder.setAuthor( profileService.getProfileInSession() );
+        folder.setAuthor( profileService.getProfileInSessionOrThrow() );
         if ( createFolderDTO.image() != null )
             folder.setImage( imageMetadataService.findOrThrow( createFolderDTO.image() ) );
         folder.setDescription( createFolderDTO.description() );
@@ -329,7 +327,7 @@ public class FolderService extends EntityService<Folder> {
         var folder = findByIdOrReferenceOrThrow( idOrReference );
         checkPermissionToEdit( folder );
 
-        var profileInSession = profileService.getProfileInSession();
+        var profileInSession = profileService.getProfileInSessionOrThrow();
 
         folderProfileRepository.saveAllAndFlush(
             changeFolderAssignmentsDTO.addProfileIds().stream()
@@ -420,7 +418,7 @@ public class FolderService extends EntityService<Folder> {
     public void favorite( String idOrReference ) throws UniversiForbiddenAccessException {
         Folder folder = findByIdOrReferenceOrThrow( idOrReference );
 
-        var profileInSession = profileService.getProfileInSession();
+        var profileInSession = profileService.getProfileInSessionOrThrow();
         var folderFavorite = folderFavoriteRepository
             .findByFolderIdAndProfileId( folder.getId(), profileInSession.getId() )
             .orElse( null );
@@ -441,7 +439,7 @@ public class FolderService extends EntityService<Folder> {
     public void unfavorite( String idOrReference ) {
         var folder = findByIdOrReferenceOrThrow( idOrReference );
 
-        var profileInSession = profileService.getProfileInSession();
+        var profileInSession = profileService.getProfileInSessionOrThrow();
         var folderFavorite = folderFavoriteRepository
             .findByFolderIdAndProfileId( folder.getId(), profileInSession.getId() );
 
@@ -496,8 +494,10 @@ public class FolderService extends EntityService<Folder> {
     public void moveFolder( String idOrReference, MoveFolderDTO moveFolderDTO ) throws UniversiConflictingOperationException {
         var folder = findByIdOrReferenceOrThrow( idOrReference );
         var originalGroup = groupService.findByIdOrPathOrThrow( moveFolderDTO.originalGroupId() );
+        var profileInSession = profileService.getProfileInSessionOrThrow();
+
         roleService.checkPermission(
-            profileService.getProfileInSession(),
+            profileInSession,
             originalGroup,
             FeaturesTypes.CONTENT,
             Permission.READ_WRITE_DELETE
@@ -505,7 +505,7 @@ public class FolderService extends EntityService<Folder> {
 
         var newGroup = groupService.findByIdOrPathOrThrow( moveFolderDTO.newGroupId() );
         roleService.checkPermission(
-            profileService.getProfileInSession(),
+            profileInSession,
             newGroup,
             FeaturesTypes.CONTENT,
             Permission.READ_WRITE
@@ -529,14 +529,9 @@ public class FolderService extends EntityService<Folder> {
         groupService.didImportContentToGroup( newGroup, folder );
     }
 
-    public Collection<Folder> listFavorites(UUID profileId) throws CapacityException {
-        Profile profile = profileService.findFirstById(profileId);
-        if (profile == null)
-            throw new CapacityException("Usuário não encontrado");
-
-        return profile.getFavoriteFolders().stream()
-            .map(FolderFavorite::getFolder)
-            .toList();
+    public Collection<FolderFavorite> listFavorites(UUID profileId) throws CapacityException {
+        return profileService.findOrThrow( profileId )
+            .getFavoriteFolders();
     }
 
     public String generateAvailableReference() {
@@ -580,43 +575,9 @@ public class FolderService extends EntityService<Folder> {
             // has assigned that folder to that user
             || !getAssignments(
                     folder.getId().toString(),
-                    profileService.getProfileInSession().getId().toString(),
+                    profileService.getProfileInSessionOrThrow().getId().toString(),
                     profile.getId().toString()
                 ).isEmpty();
-    }
-
-    public void grantCompetenceBadge(@NotNull Collection<Folder> folder, @NotNull Profile profile) {
-        for (var f : folder) grantCompetenceBadgeToProfile(f, profile);
-
-        profileService.save(profile);
-    }
-
-    private void grantCompetenceBadgeToProfile(@NotNull Folder folder, @NotNull Profile profile) {
-        if (!isComplete(profile, folder)) return;
-
-        for (var competenceType : folder.getGrantsBadgeToCompetences()) {
-            if (!profile.hasBadge(competenceType))
-                profile.getCompetenceBadges().add(competenceType);
-
-            var hasCompetence = !competenceService.findByProfileIdAndCompetenceTypeId(
-                profile.getId(),
-                competenceType.getId()
-            ).isEmpty();
-
-            if ( !hasCompetence ) {
-                competenceService.create(
-                    new CreateCompetenceDTO(
-                        competenceType.getId(),
-                        "",
-                        Competence.MIN_LEVEL
-                    ), profile
-                );
-            }
-
-            if (!competenceTypeService.hasAccessToCompetenceType(competenceType, profile)) {
-                competenceTypeService.grantAccessToProfile(competenceType, profile);
-            }
-        }
     }
 
     public boolean folderIsInGroup( @NonNull Folder folder, @NonNull Group group ) {
@@ -624,8 +585,12 @@ public class FolderService extends EntityService<Folder> {
     }
 
     public boolean hasPermissionToView( Folder folder ) {
-        return folder.isPublicFolder()
-            || profileService.getProfileInSession().getGroups().stream().anyMatch(
+        if ( folder.isPublicFolder() )
+            return true;
+
+        var profileInSession = profileService.getProfileInSession();
+        return profileInSession.isPresent()
+            && profileInSession.get().getGroups().stream().anyMatch(
                 profileGroup -> folderIsInGroup( folder, profileGroup.getGroup() )
             );
     }

@@ -58,7 +58,7 @@ public class ExperienceService {
             dto.description(),
             dto.startDate(),
             dto.endDate(),
-            profileService.getProfileInSession()
+            profileService.getProfileInSessionOrThrow()
         );
 
         return experienceRepository.saveAndFlush( experience );

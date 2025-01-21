@@ -42,16 +42,8 @@ class CompetenciaTest {
     void create() throws Exception {
         String nome = "competenceTest";
         User userNew = new User(nome, nome+"@email.com", userService.encodePassword("senha"));
-        Profile profile = new Profile();
-        profile.setGender(Gender.M);
-        profileService.save(profile);
-        userNew.setProfile(profile);
-        try {
-            userService.createUser(userNew, null, null);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        userNew.setName(userNew.getName());
+        userService.createUser( userNew, null, null );
+        var profile = userNew.getProfile();
 
         CompetenceType compTipo1 = new CompetenceType();
         compTipo1.setName("teste tipo 1"+userNew.getId());
@@ -86,9 +78,6 @@ class CompetenciaTest {
         commonProfile.setBio("Bio - comum_perfil"+userNew.getId());
         commonProfile.setGender(Gender.M);
 
-        profileService.update(adminProfile);
-        profileService.update(commonProfile);
-
         assertEquals( competence1.getId(), competenceService.findOrThrow(competence1.getId()).getId() );
         assertEquals( competence2.getId(), competenceService.findOrThrow(competence2.getId()).getId() );
     }
@@ -96,16 +85,8 @@ class CompetenciaTest {
     void update() throws Exception {
         String nome = "competenceTestUpdate";
         User userNew = new User(nome, nome+"@email.com", userService.encodePassword("senha"));
-        Profile profile = new Profile();
-        profile.setGender(Gender.M);
-        profileService.save(profile);
-        userNew.setProfile(profile);
-        try {
-            userService.createUser(userNew, null, null);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        userNew.setName(userNew.getName());
+        userService.createUser( userNew, null, null );
+        Profile profile = userNew.getProfile();
 
         CompetenceType compTipo1 = new CompetenceType();
         compTipo1.setName("teste update tipo1"+userNew.getId());
@@ -161,9 +142,6 @@ class CompetenciaTest {
             )
         );
 
-        profileService.update(adminProfile);
-        profileService.update(commonProfile);
-
         assertEquals(competence1.getDescription(), competenceService.findOrThrow(competence1.getId()).getDescription());
         assertEquals(competence2.getDescription(), competenceService.findOrThrow(competence2.getId()).getDescription());
     }
@@ -171,16 +149,8 @@ class CompetenciaTest {
     void delete() throws Exception {
         String nome = "competenceTestDelete";
         User userNew = new User(nome, nome+"@email.com", userService.encodePassword("senha"));
-        Profile profile = new Profile();
-        profile.setGender(Gender.M);
-        profileService.save(profile);
-        userNew.setProfile(profile);
-        try {
-            userService.createUser(userNew, null, null);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        userNew.setName(userNew.getName());
+        userService.createUser( userNew, null, null );
+        var profile = userNew.getProfile();
 
         CompetenceType compTipo1 = new CompetenceType();
         compTipo1.setName("teste delete tipo1"+userNew.getId());
@@ -226,16 +196,8 @@ class CompetenciaTest {
     void read() throws Exception {
         String nome = "competenceTestRead";
         User userNew = new User(nome, nome+"@email.com", userService.encodePassword("senha"));
-        Profile profile = new Profile();
-        profile.setGender(Gender.M);
-        profileService.save(profile);
-        userNew.setProfile(profile);
-        try {
-            userService.createUser(userNew, null, null);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        userNew.setName(userNew.getName());
+        userService.createUser( userNew, null, null );
+        var profile = userNew.getProfile();
 
         CompetenceType compTipo1 = new CompetenceType();
         compTipo1.setName("teste read tipo1"+userNew.getId());

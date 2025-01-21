@@ -33,7 +33,7 @@ public class LinkService {
     }
 
     public Link create( CreateLinkDTO createLinkDTO ) {
-        var profile = profileService.getProfileInSession();
+        var profile = profileService.getProfileInSessionOrThrow();
 
         var link = new Link();
         link.setProfile( profile );
@@ -45,7 +45,7 @@ public class LinkService {
     }
 
     public void remove( UUID id ) {
-        remove( id, profileService.getProfileInSession() );
+        remove( id, profileService.getProfileInSessionOrThrow() );
     }
 
     public void remove( UUID linkId, Profile profile ) {
@@ -72,7 +72,7 @@ public class LinkService {
     }
 
     public boolean canModify( Link link ) {
-        return canModify( link, profileService.getProfileInSession() );
+        return canModify( link, profileService.getProfileInSessionOrThrow() );
     }
 
     public boolean canModify( Link link, Profile profile ) {
@@ -80,7 +80,7 @@ public class LinkService {
     }
 
     public void canModifyOrThrow( Link link ) {
-        canModifyOrThrow( link, profileService.getProfileInSession() );
+        canModifyOrThrow( link, profileService.getProfileInSessionOrThrow() );
     }
 
     public void canModifyOrThrow( Link link, Profile profile ) throws UniversiForbiddenAccessException {

@@ -58,7 +58,7 @@ public class ImageDataService extends EntityService<ImageData> {
             new ImageMetadata(
                 filename,
                 image.getContentType(),
-                ProfileService.getInstance().getProfileInSession(),
+                ProfileService.getInstance().getProfileInSessionOrThrow(),
                 ImageStoreLocation.DATABASE,
                 new Date()
             )

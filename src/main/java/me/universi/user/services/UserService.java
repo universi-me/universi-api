@@ -16,13 +16,14 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 import me.universi.Sys;
+import me.universi.api.interfaces.EntityService;
 import me.universi.group.entities.Group;
 import me.universi.group.entities.GroupSettings.GroupEnvironment;
 import me.universi.group.services.GroupService;
 import me.universi.image.services.ImageMetadataService;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.exceptions.ProfileException;
-import me.universi.profile.services.ProfileService;
+import me.universi.profile.repositories.PerfilRepository;
 import me.universi.role.services.RoleService;
 import me.universi.user.dto.CreateAccountDTO;
 import me.universi.user.dto.GetAccountDTO;
@@ -37,7 +38,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -65,10 +65,10 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 @Service
-public class UserService implements UserDetailsService {
+public class UserService extends EntityService<User> implements UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final ProfileService profileService;
+    private final PerfilRepository profileRepository;
     private final RoleHierarchyImpl roleHierarchy;
     private final SessionRegistry sessionRegistry;
     private JavaMailSender emailSender;
@@ -126,10 +126,10 @@ public class UserService implements UserDetailsService {
     private String contextPath;
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, ProfileService profileService, RoleHierarchyImpl roleHierarchy, SessionRegistry sessionRegistry) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, PerfilRepository profileRepository, RoleHierarchyImpl roleHierarchy, SessionRegistry sessionRegistry) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.profileService = profileService;
+        this.profileRepository = profileRepository;
         this.roleHierarchy = roleHierarchy;
         this.sessionRegistry = sessionRegistry;
         this.emailExecutor = Executors.newFixedThreadPool(5);
@@ -140,43 +140,42 @@ public class UserService implements UserDetailsService {
         return Sys.context.getBean("userService", UserService.class);
     }
 
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserDetails user = findFirstByUsername(username);
-        if (user != null) {
-            return user;
-        }
-        if(emailRegex(username)) {
-            try {
-                return findFirstByEmail(username);
-            } catch (UserException e) {
-                throw new UsernameNotFoundException("Usuário não encontrado!");
-            }
-        }
-        throw new UsernameNotFoundException("Usuário não encontrado!");
+    @Override
+    public Optional<User> find( UUID id ) {
+        return userRepository.findById( id );
     }
 
-    public UserDetails findFirstByEmail(String email) throws UserException {
-        Group organization = GroupService.getInstance().obtainOrganizationBasedInDomain();
-        Optional<User> user = organization == null ? userRepository.findFirstByEmail(email) : userRepository.findFirstByEmailAndOrganizationId(email, organization.getId());
-        if (user.isPresent()) {
-            return user.get();
-        }
-        throw new UserException("Email de Usuário não encontrado!");
+    @Override
+    public List<User> findAll() {
+        return userRepository.findAll();
     }
 
-    public UserDetails findFirstByUsername(String username) {
-        Group organization = GroupService.getInstance().obtainOrganizationBasedInDomain();
-        Optional<User> userGet = organization == null ? userRepository.findFirstByName(username) : userRepository.findFirstByNameAndOrganizationId(username, organization.getId());
-        return userGet.orElse(null);
+    public Optional<User> findByUsername( String username ) {
+        var organization = GroupService.getInstance().obtainOrganizationBasedInDomain();
+
+        return organization == null
+            ? userRepository.findFirstByName( username )
+            : userRepository.findFirstByNameAndOrganizationId( username, organization.getId() );
     }
 
-    public UserDetails findFirstById(UUID id) {
-        Optional<User> userGet = userRepository.findFirstById(id);
-        return userGet.orElse(null);
+    public Optional<User> findByEmail( String email ) {
+        var organization = GroupService.getInstance().obtainOrganizationBasedInDomain();
+        return organization == null
+            ? userRepository.findFirstByEmail( email )
+            : userRepository.findFirstByEmailAndOrganizationId( email, organization.getId() );
     }
 
-    public UserDetails findFirstById(String id) {
-        return findFirstById(UUID.fromString(id));
+    @Override
+    public User loadUserByUsername( String username ) throws UsernameNotFoundException {
+        return findByUsernameOrEmail( username )
+            .orElseThrow( () -> new UsernameNotFoundException("Usuário não encontrado!") );
+    }
+
+    public Optional<User> findByUsernameOrEmail( String usernameOrEmail ) {
+        var organization = GroupService.getInstance().obtainOrganizationBasedInDomain();
+        return organization == null
+            ? userRepository.findFirstByEmailOrName( usernameOrEmail )
+            : userRepository.findFirstByEmailOrNameAndOrganizationId( usernameOrEmail, organization.getId() );
     }
 
     public void createUser(User user, String firstname, String lastname) throws UserException {
@@ -212,7 +211,7 @@ public class UserService implements UserDetailsService {
             }
 
             userProfile.setUser(user);
-            profileService.save(userProfile);
+            profileRepository.saveAndFlush(userProfile);
             try {
                 // add organization to user profile
                 GroupService groupService = GroupService.getInstance();
@@ -223,38 +222,16 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    public long count() {
-        try {
-            return userRepository.count();
-        } catch (Exception e) {
-            return 0;
-        }
-    }
-
     public String encodePassword(String rawPassword) {
         return passwordEncoder.encode(rawPassword);
     }
 
     public boolean usernameExist(String username) {
-        try {
-            if(loadUserByUsername(username) != null) {
-                return true;
-            }
-        }catch (UsernameNotFoundException e){
-            return false;
-        }
-        return false;
+        return findByUsername( username ).isPresent();
     }
 
     public boolean emailExist(String email) {
-        try {
-            if(findFirstByEmail(email) != null) {
-                return true;
-            }
-        }catch (Exception e){
-            return false;
-        }
-        return false;
+        return findByEmail( email ).isPresent();
     }
 
     public boolean usernameRegex(String username) {
@@ -337,7 +314,7 @@ public class UserService implements UserDetailsService {
     public void updateUserInSession() {
         User userSession = getUserInSession();
         if(userSession != null) {
-            User actualUser = (User) findFirstById(userSession.getId());
+            User actualUser = find(userSession.getId()).orElse(null);
             if(actualUser != null) {
                 configureSessionForUser(actualUser, null);
             }
@@ -861,11 +838,9 @@ public class UserService implements UserDetailsService {
             throw new UserException("Email \""+email+"\" não esta disponível para cadastro!");
         }
 
-        User user;
+        User user = findByEmail(email).orElse( null );
 
-        try {
-            user = (User)findFirstByEmail(email);
-        } catch (UserException e) {
+        if ( user == null ) {
             // register user
             if(!usernameExist(username.trim())) {
 
@@ -890,7 +865,7 @@ public class UserService implements UserDetailsService {
                     profile.setImage( ImageMetadataService.getInstance().saveExternalImage( pictureUrl.trim() ) );
                 }
 
-                profileService.save(profile);
+                profileRepository.saveAndFlush(profile);
 
                 saveInSession("novoUsuario", true);
 
@@ -1132,4 +1107,13 @@ public class UserService implements UserDetailsService {
         return true;
     }
 
+    @Override
+    public boolean hasPermissionToEdit( User user ) {
+        return isSessionOfUser( user );
+    }
+
+    @Override
+    public boolean hasPermissionToDelete( User user ) {
+        return hasPermissionToEdit( user ) || isUserAdminSession();
+    }
 }

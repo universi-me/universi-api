@@ -18,6 +18,8 @@ import me.universi.role.enums.FeaturesTypes;
 import me.universi.role.enums.Permission;
 import me.universi.role.services.RoleService;
 import me.universi.user.services.UserService;
+import me.universi.util.CastingUtil;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -186,12 +188,16 @@ public class GroupFeedService {
         Optional<List<GroupPostComment>> comments = groupPostCommentRepository.findByGroupPostIdAndDeletedIsFalse(groupPostId);
         if(comments.isPresent()) {
             List<GroupPostCommentDTO> commentsDTO = new ArrayList<GroupPostCommentDTO>();
+            var profileService = ProfileService.getInstance();
+
             for(GroupPostComment comment : comments.get()) {
+                var author = profileService.findOrThrow( CastingUtil.getUUID( comment.getAuthorId() ).orElse( null ) );
+
                 GroupPostCommentDTO commentObj = new GroupPostCommentDTO();
                 commentObj.setId(comment.getId());
                 commentObj.setContent(comment.getContent());
                 commentObj.setAuthorId(comment.getAuthorId());
-                commentObj.setAuthor(ProfileService.getInstance().findFirstById(comment.getAuthorId()));
+                commentObj.setAuthor( author );
                 commentsDTO.add(commentObj);
             }
 
