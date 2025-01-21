@@ -1,12 +1,10 @@
 package me.universi.user.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.net.URI;
 import java.net.URL;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -21,15 +19,11 @@ import me.universi.user.services.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping(value = "")
@@ -87,136 +81,18 @@ public class UserController {
     }
 
     @PostMapping(value = "/login/keycloak", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Response oauth_keycloak_session(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-            if(!userService.isKeycloakEnabled()) {
-                throw new UserException("Keycloak desabilitado!");
-            }
-
-            String code = (String)body.get("code");
-            if(code == null) {
-                throw new UserException("Parametro code é nulo.");
-            }
-
-            try {
-                HttpHeaders headers = new HttpHeaders();
-                headers.add("Content-Type", MediaType.APPLICATION_FORM_URLENCODED.toString());
-                headers.add("Accept", MediaType.APPLICATION_JSON.toString());
-
-                MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<String, String>();
-                requestBody.add("client_id", userService.getKeycloakClientId());
-                requestBody.add("grant_type", "authorization_code");
-                requestBody.add("redirect_uri", userService.getKeycloakRedirectUrl());
-                requestBody.add("client_secret", userService.getKeycloakClientSecret());
-                requestBody.add("code", code);
-                HttpEntity formEntity = new HttpEntity<MultiValueMap<String, String>>(requestBody, headers);
-
-                RestTemplate restTemplate = new RestTemplate();
-                HashMap<String, Object> token = restTemplate.postForObject(userService.getKeycloakUrl() + "/realms/" + userService.getKeycloakRealm() + "/protocol/openid-connect/token", formEntity, HashMap.class);
-
-                // returned secured token
-                String accessToken = (String) token.get("access_token");
-
-                // Split the JWT into its parts
-                String[] parts = accessToken.split("\\.");
-                if (parts.length != 3) {
-                    throw new IllegalArgumentException("Invalid JWT token");
-                }
-
-                String bodyJson = new String(java.util.Base64.getUrlDecoder().decode(parts[1]));
-                Map<String, Object> decodedToken = new ObjectMapper().readValue(bodyJson, Map.class);
-
-                String email = (String) decodedToken.get("email");
-                String username = (String) decodedToken.get("preferred_username");
-                String name = (String) decodedToken.get("name");
-                String pictureUrl = null;
-
-                User user = userService.configureLoginForOAuth(name, username, email, pictureUrl);
-
-                if (user != null) {
-                    response.success = true;
-                    response.redirectTo = userService.getUrlWhenLogin();
-                    response.message = "Usuário Logado com sucesso.";
-
-                    response.token = jwtService.buildTokenForUser(user);
-
-                    response.body.put("user", user);
-
-                    return;
-                }
-            }catch (Exception e) {
-                if(e.getClass() == UserException.class) {
-                    throw e;
-                }
-                response.success = false;
-                return;
-            }
-
-            throw new UserException("Falha ao fazer login com Keycloak.");
-
-        });
+    public ResponseEntity<User> oauth_keycloak_session( @Valid @RequestBody LoginTokenDTO loginTokenDTO ) {
+        return ResponseEntity.ok( userService.keycloackLogin(loginTokenDTO) );
     }
 
     @GetMapping(value = "/login/keycloak/auth")
     public ResponseEntity<Void> keycloak_login() {
-        if(!userService.isKeycloakEnabled()) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "denied access to keycloak login");
-        }
-        return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(userService.keycloakLoginUrl())).build();
+        return ResponseEntity.status(HttpStatus.FOUND).location( userService.getKeycloakLoginUrl() ).build();
     }
 
     @PostMapping(value = "/login/google", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Response login_google(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-
-            if(!userService.isLoginViaGoogleEnabled()) {
-                throw new UserException("Login via Google desabilitado!");
-            }
-
-            String idTokenString = (String)body.get("token");
-
-            if(idTokenString==null) {
-                throw new UserException("Parametro token é nulo.");
-            }
-
-            // check if payload is valid
-            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
-                    .setAudience(Collections.singletonList(userService.getGoogleClientId()))
-                    .build();
-
-            GoogleIdToken idToken = verifier.verify(idTokenString);
-
-            if (idToken != null) {
-                Payload payload = idToken.getPayload();
-
-                String email = payload.getEmail();
-                String name = (String) payload.get("name");
-                String pictureUrl = (String) payload.get("picture");
-
-                String username = email.split("@")[0].trim();
-
-                User user = userService.configureLoginForOAuth(name, username, email, pictureUrl);
-
-                if(user != null) {
-
-                    response.success = true;
-                    response.redirectTo = userService.getUrlWhenLogin();
-                    response.message = "Usuário Logado com sucesso.";
-
-                    response.token = jwtService.buildTokenForUser(user);
-
-                    response.body.put("user", user);
-
-                    return;
-                }
-
-            } else {
-                throw new UserException("Token de Autenticação é Inválida.");
-            }
-
-            throw new UserException("Falha ao fazer login com Google.");
-
-        });
+    public ResponseEntity<User> login_google( @Valid @RequestBody LoginTokenDTO loginTokenDTO ) {
+        return ResponseEntity.ok( userService.googleLogin(loginTokenDTO) );
     }
 
     // recovery user password

@@ -1,14 +1,21 @@
 package me.universi.user.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
@@ -37,6 +44,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.*;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -59,9 +67,12 @@ import org.springframework.security.web.authentication.preauth.PreAuthenticatedA
 import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class UserService extends EntityService<User> implements UserDetailsService {
@@ -825,7 +836,7 @@ public class UserService extends EntityService<User> implements UserDetailsServi
         return BUILD_HASH;
     }
 
-    public User configureLoginForOAuth(String name, String username, String email, String pictureUrl) throws Exception {
+    public User configureLoginForOAuth(String name, String username, String email, String pictureUrl) throws UserException {
         if(email == null) {
             throw new UserException("Não foi possível obter Email.");
         }
@@ -1217,6 +1228,115 @@ public class UserService extends EntityService<User> implements UserDetailsServi
             throw new UserException("Você não tem permissão para listar usuários.");
         }
         return findAllUsers(byRole);
+    }
+
+    public User keycloackLogin( LoginTokenDTO loginTokenDTO) {
+        if(!isKeycloakEnabled()) {
+            throw new UserException("Keycloak desabilitado!");
+        }
+
+        String code = loginTokenDTO.token();
+        if(code == null) {
+            throw new UserException("Parametro token é nulo.");
+        }
+
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Content-Type", MediaType.APPLICATION_FORM_URLENCODED.toString());
+            headers.add("Accept", MediaType.APPLICATION_JSON.toString());
+
+            MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<String, String>();
+            requestBody.add("client_id", getKeycloakClientId());
+            requestBody.add("grant_type", "authorization_code");
+            requestBody.add("redirect_uri", getKeycloakRedirectUrl());
+            requestBody.add("client_secret", getKeycloakClientSecret());
+            requestBody.add("code", code);
+            HttpEntity formEntity = new HttpEntity<MultiValueMap<String, String>>(requestBody, headers);
+
+            RestTemplate restTemplate = new RestTemplate();
+            HashMap<String, Object> token = restTemplate.postForObject(getKeycloakUrl() + "/realms/" + getKeycloakRealm() + "/protocol/openid-connect/token", formEntity, HashMap.class);
+
+            // returned secured token
+            String accessToken = (String) token.get("access_token");
+
+            // Split the JWT into its parts
+            String[] parts = accessToken.split("\\.");
+            if (parts.length != 3) {
+                throw new IllegalArgumentException("Invalid JWT token");
+            }
+
+            String bodyJson = new String(java.util.Base64.getUrlDecoder().decode(parts[1]));
+            Map<String, Object> decodedToken = new ObjectMapper().readValue(bodyJson, Map.class);
+
+            String email = (String) decodedToken.get("email");
+            String username = (String) decodedToken.get("preferred_username");
+            String name = (String) decodedToken.get("name");
+            String pictureUrl = null;
+
+            User user = configureLoginForOAuth(name, username, email, pictureUrl);
+
+            if (user != null) {
+                return user;
+            }
+        } catch (Exception e) {
+            if(e.getClass() == UserException.class) {
+                throw (UserException) e;
+            }
+        }
+
+        throw new UserException("Falha ao fazer login com Keycloak.");
+    }
+
+    public User googleLogin( LoginTokenDTO loginTokenDTO ) {
+        if(!isLoginViaGoogleEnabled()) {
+            throw new UserException("Login via Google desabilitado!");
+        }
+
+        String idTokenString = loginTokenDTO.token();
+
+        if(idTokenString==null) {
+            throw new UserException("Parametro token é nulo.");
+        }
+
+        // check if payload is valid
+        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
+                .setAudience(Collections.singletonList(getGoogleClientId()))
+                .build();
+
+        GoogleIdToken idToken = null;
+        try {
+            idToken = verifier.verify(idTokenString);
+        } catch (Exception e) {
+            throw new UserException("Ocorreu um erro ao verificar Token de Autenticação.");
+        }
+
+        if (idToken != null) {
+            GoogleIdToken.Payload payload = idToken.getPayload();
+
+            String email = payload.getEmail();
+            String name = (String) payload.get("name");
+            String pictureUrl = (String) payload.get("picture");
+
+            String username = email.split("@")[0].trim();
+
+            User user = configureLoginForOAuth(name, username, email, pictureUrl);
+
+            if(user != null) {
+                return user;
+            }
+
+        } else {
+            throw new UserException("Token de Autenticação é Inválida.");
+        }
+
+        throw new UserException("Falha ao fazer login com Google.");
+    }
+
+    public URI getKeycloakLoginUrl() {
+        if(!isKeycloakEnabled()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "denied access to keycloak login");
+        }
+        return URI.create(keycloakLoginUrl());
     }
 
     @Override
