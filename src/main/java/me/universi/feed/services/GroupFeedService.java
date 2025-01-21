@@ -3,6 +3,7 @@ package me.universi.feed.services;
 
 import java.util.ArrayList;
 import me.universi.Sys;
+import me.universi.feed.dto.GroupGetDTO;
 import me.universi.feed.dto.GroupPostCommentDTO;
 import me.universi.feed.dto.GroupPostDTO;
 import me.universi.feed.entities.GroupPostComment;
@@ -32,15 +33,17 @@ public class GroupFeedService {
     private final GroupPostRepository groupPostRepository;
     private final GroupPostReactionRepository groupPostReactionRepository;
     private final GroupPostCommentRepository groupPostCommentRepository;
+    private final ProfileService profileService;
 
     private static final Integer MAX_CONTENT_LENGTH = 3000;
     private static final Integer MAX_COMMENT_LENGTH = 2000;
 
     @Autowired
-    public GroupFeedService(GroupPostRepository groupPostRepository, GroupPostReactionRepository groupPostReactionRepository, GroupPostCommentRepository groupPostCommentRepository) {
+    public GroupFeedService(GroupPostRepository groupPostRepository, GroupPostReactionRepository groupPostReactionRepository, GroupPostCommentRepository groupPostCommentRepository, ProfileService profileService) {
         this.groupPostRepository = groupPostRepository;
         this.groupPostReactionRepository = groupPostReactionRepository;
         this.groupPostCommentRepository = groupPostCommentRepository;
+        this.profileService = profileService;
     }
 
     public static GroupFeedService getInstance() {
@@ -82,6 +85,23 @@ public class GroupFeedService {
         } else {
             throw new PostNotFoundException("Publicação não foi encontrada.");
         }
+    }
+
+    public List<GroupGetDTO> getGroupPostsDTO(String groupId) {
+        // check permission post
+        RoleService.getInstance().checkPermission(groupId, FeaturesTypes.FEED, Permission.READ);
+
+        List<GroupPost> groupPosts = getGroupPosts(groupId);
+        List<GroupGetDTO> groupGetDTOS = new ArrayList<>();
+        for(GroupPost post : groupPosts){
+            var author = profileService.findOrThrow( CastingUtil.getUUID( post.getAuthorId() ).orElse( null ) );
+
+            GroupGetDTO groupGet = new GroupGetDTO(post.getContent(), author, post.getId(), post.getGroupId());
+            groupGet.reactions = getGroupPostReactions(post.getId());
+            groupGet.comments = getGroupPostComments(post.getId());
+            groupGetDTOS.add(groupGet);
+        }
+        return groupGetDTOS;
     }
 
     public void checkPermissionForEdit(GroupPost post, boolean forDelete) {

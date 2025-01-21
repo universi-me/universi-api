@@ -11,6 +11,7 @@ import me.universi.role.enums.Permission;
 import me.universi.role.services.RoleService;
 import me.universi.util.CastingUtil;
 import me.universi.profile.services.ProfileService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -29,51 +30,23 @@ public class GroupFeedController {
     }
 
     @GetMapping("/{groupId}/posts")
-    public Response getGroupPosts(@PathVariable String groupId) {
-        return Response.buildResponse(response -> {
-
-            // check permission post
-            RoleService.getInstance().checkPermission(groupId, FeaturesTypes.FEED, Permission.READ);
-
-            List<GroupPost> groupPosts = groupFeedService.getGroupPosts(groupId);
-            List<GroupGetDTO> groupGetDTOS = new ArrayList<>();
-            for(GroupPost post : groupPosts){
-                var author = profileService.findOrThrow( CastingUtil.getUUID( post.getAuthorId() ).orElse( null ) );
-
-                GroupGetDTO groupGet = new GroupGetDTO(post.getContent(), author, post.getId(), post.getGroupId());
-                groupGet.reactions = groupFeedService.getGroupPostReactions(post.getId());
-                groupGet.comments = groupFeedService.getGroupPostComments(post.getId());
-                groupGetDTOS.add(groupGet);
-            }
-            response.body.put("posts", groupGetDTOS);
-        });
+    public ResponseEntity<List<GroupGetDTO>> getGroupPosts( @PathVariable String groupId ) {
+        return ResponseEntity.ok( groupFeedService.getGroupPostsDTO(groupId) );
     }
 
     @PostMapping("/{groupId}/posts")
-    public Response createGroupPost(@PathVariable String groupId, @RequestBody GroupPostDTO groupPostDTO) {
-        return Response.buildResponse(response ->{
-            GroupPost createdPost = groupFeedService.createGroupPost(groupId, groupPostDTO);
-            response.body.put("createdPost", createdPost);
-            response.message = "Publicação criada com sucesso";
-        });
+    public ResponseEntity<GroupPost> createGroupPost( @PathVariable String groupId, @RequestBody GroupPostDTO groupPostDTO ) {
+        return ResponseEntity.ok( groupFeedService.createGroupPost(groupId, groupPostDTO) );
     }
 
-    @PutMapping("/{groupId}/posts/{postId}")
-    public Response editGroupPost(@PathVariable String groupId, @PathVariable String postId, @RequestBody GroupPostDTO groupPostDTO) {
-        return Response.buildResponse(response ->{
-            GroupPost createdPost = groupFeedService.editGroupPost(groupId, postId, groupPostDTO);
-            response.body.put("editedPost", createdPost);
-            response.message = "Publicação editada com sucesso";
-        });
+    @PatchMapping("/{groupId}/posts/{postId}")
+    public ResponseEntity<GroupPost> editGroupPost( @PathVariable String groupId, @PathVariable String postId, @RequestBody GroupPostDTO groupPostDTO ) {
+        return ResponseEntity.ok ( groupFeedService.editGroupPost(groupId, postId, groupPostDTO) );
     }
 
     @DeleteMapping("/{groupId}/posts/{postId}")
-    public Response deleteGroupPost(@PathVariable String groupId, @PathVariable String postId) {
-        return Response.buildResponse(response-> {
-            if (!groupFeedService.deleteGroupPost(groupId, postId)) {
-                throw  new GroupFeedException("Houve um erro interno ao excluir a publicação");
-            }
-            response.message = "Publicação excluída com sucesso";
-        });
+    public ResponseEntity<Void> deleteGroupPost( @PathVariable String groupId, @PathVariable String postId ) {
+        groupFeedService.deleteGroupPost(groupId, postId);
+        return ResponseEntity.noContent().build();
     }
 }
