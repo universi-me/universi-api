@@ -1393,6 +1393,21 @@ public class UserService extends EntityService<User> implements UserDetailsServi
         sendConfirmAccountEmail(user, false);
     }
 
+    public Boolean confirmAccountEmail(String token) throws RuntimeException {
+        User user = token==null ? null : getUserByRecoveryPasswordToken(token);
+        if(user == null) {
+            return false;
+        }
+
+        user.setRecoveryPasswordToken(null);
+        user.setInactive(false);
+        user.setConfirmed(true);
+        save(user);
+
+        saveInSession("account_confirmed", true);
+        return true;
+    }
+
     @Override
     public boolean hasPermissionToEdit( User user ) {
         return isSessionOfUser( user );

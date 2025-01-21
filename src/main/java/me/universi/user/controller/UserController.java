@@ -5,13 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import java.net.URI;
 import java.net.URL;
 import java.util.List;
-import java.util.Map;
-
-import me.universi.api.entities.Response;
 import me.universi.user.dto.*;
 import me.universi.user.entities.User;
-import me.universi.user.exceptions.UserException;
-import me.universi.user.services.JWTService;
 import me.universi.user.services.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,12 +17,10 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(value = "")
 public class UserController {
     private final UserService userService;
-    private final JWTService jwtService;
 
     @Autowired
-    public UserController(UserService userService, JWTService jwtService) {
+    public UserController(UserService userService) {
         this.userService = userService;
-        this.jwtService = jwtService;
     }
 
     @GetMapping(value = "/account", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -111,30 +104,8 @@ public class UserController {
 
     // confirm account
     @GetMapping(value = "/confirm-account/{token}")
-    public ResponseEntity confirm_account(@PathVariable("token")String token) throws Exception {
-
-        URL requestUrl = new URL(userService.getRequest().getRequestURL().toString());
-
-        String baseUrl = "https://" + requestUrl.getHost();
-
-        User user = token==null ? null : userService.getUserByRecoveryPasswordToken(token);
-
-        if(user == null) {
-            userService.saveInSession("message_account_confirmed", "Token de confirmação de conta inválido ou expirado!");
-            return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(baseUrl + "/login")).build();
-        }
-
-        user.setRecoveryPasswordToken(null);
-        user.setInactive(false);
-        user.setConfirmed(true);
-        userService.save(user);
-
-        userService.saveInSession("account_confirmed", true);
-        userService.saveInSession("message_account_confirmed", "Conta confirmada com sucesso, efetue o login para continuar.");
-
-        return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(baseUrl + "/login")).build();
+    public ResponseEntity<Boolean> confirm_account(@PathVariable("token")String token) {
+        return ResponseEntity.ok( userService.confirmAccountEmail( token ) );
     }
-
-
 
 }
