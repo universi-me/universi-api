@@ -25,14 +25,13 @@ import me.universi.profile.entities.Profile;
 import me.universi.profile.exceptions.ProfileException;
 import me.universi.profile.repositories.PerfilRepository;
 import me.universi.role.services.RoleService;
-import me.universi.user.dto.CreateAccountDTO;
-import me.universi.user.dto.GetAccountDTO;
-import me.universi.user.dto.GetAvailableCheckDTO;
+import me.universi.user.dto.*;
 import me.universi.user.entities.User;
 import me.universi.user.enums.Authority;
 import me.universi.user.exceptions.ExceptionResponse;
 import me.universi.user.exceptions.UserException;
 import me.universi.user.repositories.UserRepository;
+import me.universi.util.CastingUtil;
 import me.universi.util.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -1105,6 +1104,112 @@ public class UserService extends EntityService<User> implements UserDetailsServi
         }
 
         return true;
+    }
+
+    public void editAccount(UpdateAccountDTO updateAccountDTO) {
+        String newPassword = updateAccountDTO.newPassword();
+        if(newPassword == null || newPassword.isEmpty()) {
+            throw new UserException("Parametro newPassword é nulo.");
+        }
+
+        if(!passwordRegex(newPassword)) {
+            throw new UserException("Nova Senha está com formato inválido!");
+        }
+
+        String password = updateAccountDTO.password();
+
+        User user = getUserInSession();
+
+        // if logged with google don't check password
+        boolean loggedAsGoogle = (getInSession("loginViaGoogle") != null);
+
+        if (loggedAsGoogle || passwordValid(user, password)) {
+
+            saveRawPasswordToUser(user, newPassword, false);
+
+            updateUserInSession();
+
+        } else {
+            throw new UserException("Credenciais Invalidas!");
+        }
+    }
+
+    public void adminEditAccount(EditAccountDTO editAccountDTO) {
+        if(!isUserAdminSession()) {
+            throw new UserException("Você não tem permissão para editar usuário.");
+        }
+
+        var userId = CastingUtil.getUUID( editAccountDTO.userId()).orElse( null );
+        if(userId == null) {
+            throw new UserException("Parametro userId é nulo.");
+        }
+
+        String username = editAccountDTO.username();
+        String email = editAccountDTO.email();
+        String password = editAccountDTO.password();
+        String authorityLevel = editAccountDTO.authorityLevel();
+
+        Boolean emailVerified = editAccountDTO.emailVerified();
+        Boolean blockedAccount = editAccountDTO.blockedAccount();
+        Boolean inactiveAccount = editAccountDTO.inactiveAccount();
+        Boolean credentialsExpired = editAccountDTO.credentialsExpired();
+        Boolean expiredUser = editAccountDTO.expiredUser();
+
+        User userEdit = find(userId).orElse( null );
+        if(userEdit == null) {
+            throw new UserException("Usuário não encontrado.");
+        }
+
+        String usernameOld = userEdit.getUsername();
+
+        if(username != null && !username.isEmpty()) {
+            if(usernameExist(username) && !username.equals(usernameOld)) {
+                throw new UserException("Usuário \""+username+"\" já esta cadastrado!");
+            }
+            if(usernameRegex(username)) {
+                userEdit.setName(username);
+            } else {
+                throw new UserException("Nome de Usuário está com formato inválido!");
+            }
+        }
+        if(email != null && !email.isEmpty()) {
+            if(emailExist(email) && !email.equals(userEdit.getEmail())) {
+                throw new UserException("Email \""+email+"\" já esta cadastrado!");
+            }
+            if(emailRegex(email)) {
+                userEdit.setEmail(email);
+            } else {
+                throw new UserException("Email está com formato inválido!");
+            }
+        }
+        if(password != null && !password.isEmpty()) {
+            saveRawPasswordToUser(userEdit, password, false);
+        }
+
+        if(authorityLevel != null && !authorityLevel.isEmpty()) {
+            userEdit.setAuthority(Authority.valueOf(authorityLevel));
+        }
+
+        if(emailVerified != null) {
+            userEdit.setEmail_verified(emailVerified);
+        }
+        if(blockedAccount != null) {
+            userEdit.setBlocked_account(blockedAccount);
+        }
+        if(inactiveAccount != null) {
+            userEdit.setInactive(inactiveAccount);
+        }
+        if(credentialsExpired != null) {
+            userEdit.setExpired_credentials(credentialsExpired);
+        }
+        if(expiredUser != null) {
+            userEdit.setExpired_user(expiredUser);
+        }
+
+        save(userEdit);
+
+        // force logout
+        logoutUsername(usernameOld);
     }
 
     @Override

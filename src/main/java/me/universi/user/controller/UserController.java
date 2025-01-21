@@ -12,9 +12,7 @@ import java.util.Map;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import me.universi.api.entities.Response;
-import me.universi.user.dto.CreateAccountDTO;
-import me.universi.user.dto.GetAccountDTO;
-import me.universi.user.dto.GetAvailableCheckDTO;
+import me.universi.user.dto.*;
 import me.universi.user.entities.User;
 import me.universi.user.enums.Authority;
 import me.universi.user.exceptions.UserException;
@@ -62,7 +60,7 @@ public class UserController {
         return ResponseEntity.ok( userService.availableUsernameCheck( username ) );
     }
 
-    @PostMapping(value = "/available/email/{email}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/available/email/{email}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GetAvailableCheckDTO> available_email_check( @Valid @PathVariable @NotNull( message = "email inválido" ) String email ) {
         return ResponseEntity.ok( userService.availableEmailCheck( email ) );
     }
@@ -73,126 +71,16 @@ public class UserController {
     }
 
 
-    @PostMapping(value = "/account/edit", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Response account_edit(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-
-            String newPassword = (String)body.get("newPassword");
-            if(newPassword == null || newPassword.isEmpty()) {
-                throw new UserException("Parametro newPassword é nulo.");
-            }
-
-            if(!userService.passwordRegex(newPassword)) {
-                throw new UserException("Nova Senha está com formato inválido!");
-            }
-
-            String password = (String)body.get("password");
-
-            User user = userService.getUserInSession();
-
-            // if logged with google don't check password
-            boolean logadoComGoogle = (userService.getInSession("loginViaGoogle") != null);
-
-            if (logadoComGoogle || userService.passwordValid(user, password)) {
-
-                userService.saveRawPasswordToUser(user, newPassword, false);
-
-                userService.updateUserInSession();
-
-                response.success = true;
-                response.message = "As Alterações foram salvas com sucesso.";
-
-            } else {
-                throw new UserException("Credenciais Invalidas!");
-            }
-
-        });
+    @PatchMapping(value = "/account/edit", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Void> account_edit( @Valid @RequestBody UpdateAccountDTO updateAccountDTO) {
+        userService.editAccount( updateAccountDTO );
+        return ResponseEntity.noContent().build();
     }
 
-    @PostMapping(value = "/admin/account/edit", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Response admin_account_edit(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-
-            if(!userService.isUserAdminSession()) {
-                throw new UserException("Você não tem permissão para editar usuário.");
-            }
-
-            var userId = CastingUtil.getUUID( body.get("userId") ).orElse( null );
-            if(userId == null) {
-                throw new UserException("Parametro userId é nulo.");
-            }
-
-            String username = (String)body.get("username");
-            String email = (String)body.get("email");
-            String password = (String)body.get("password");
-            String authorityLevel = (String)body.get("authorityLevel");
-
-            Boolean emailVerified = (Boolean)body.get("emailVerified");
-            Boolean blockedAccount = (Boolean)body.get("blockedAccount");
-            Boolean inactiveAccount = (Boolean)body.get("inactiveAccount");
-            Boolean credentialsExpired = (Boolean)body.get("credentialsExpired");
-            Boolean expiredUser = (Boolean)body.get("expiredUser");
-
-            User userEdit = userService.find(userId).orElse( null );
-            if(userEdit == null) {
-                throw new UserException("Usuário não encontrado.");
-            }
-
-            String usernameOld = userEdit.getUsername();
-
-            if(username != null && !username.isEmpty()) {
-                if(userService.usernameExist(username) && !username.equals(usernameOld)) {
-                    throw new UserException("Usuário \""+username+"\" já esta cadastrado!");
-                }
-                if(userService.usernameRegex(username)) {
-                    userEdit.setName(username);
-                } else {
-                    throw new UserException("Nome de Usuário está com formato inválido!");
-                }
-            }
-            if(email != null && !email.isEmpty()) {
-                if(userService.emailExist(email) && !email.equals(userEdit.getEmail())) {
-                    throw new UserException("Email \""+email+"\" já esta cadastrado!");
-                }
-                if(userService.emailRegex(email)) {
-                    userEdit.setEmail(email);
-                } else {
-                    throw new UserException("Email está com formato inválido!");
-                }
-            }
-            if(password != null && !password.isEmpty()) {
-                userService.saveRawPasswordToUser(userEdit, password, false);
-            }
-
-            if(authorityLevel != null && !authorityLevel.isEmpty()) {
-                userEdit.setAuthority(Authority.valueOf(authorityLevel));
-            }
-
-            if(emailVerified != null) {
-                userEdit.setEmail_verified(emailVerified);
-            }
-            if(blockedAccount != null) {
-                userEdit.setBlocked_account(blockedAccount);
-            }
-            if(inactiveAccount != null) {
-                userEdit.setInactive(inactiveAccount);
-            }
-            if(credentialsExpired != null) {
-                userEdit.setExpired_credentials(credentialsExpired);
-            }
-            if(expiredUser != null) {
-                userEdit.setExpired_user(expiredUser);
-            }
-
-            userService.save(userEdit);
-
-            // force logout
-            userService.logoutUsername(usernameOld);
-
-            response.success = true;
-            response.message = "As Alterações foram salvas com sucesso, A sessão do usuário foi finalizada.";
-
-        });
+    @PatchMapping(value = "/admin/account/edit", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Void> admin_account_edit( @Valid @RequestBody EditAccountDTO editAccountDTO ) {
+        userService.adminEditAccount( editAccountDTO );
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping(value = "/admin/account/list", produces = MediaType.APPLICATION_JSON_VALUE)
