@@ -13,10 +13,10 @@ import me.universi.user.services.JsonUserAdminFilter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
-import org.hibernate.annotations.Where;
 
-@Entity(name = "group_environment")
-@SQLDelete(sql = "UPDATE group_environment SET deleted = true WHERE id=?")
+@Entity(name = "GroupEnvironment")
+@Table( name = "group_environment", schema = "system_group" )
+@SQLDelete(sql = "UPDATE system_group.group_environment SET deleted = true WHERE id=?")
 @SQLRestriction( value = "NOT deleted" )
 @JsonIgnoreProperties({"hibernateLazyInitializer"})
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)

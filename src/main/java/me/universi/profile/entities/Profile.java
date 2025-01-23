@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
@@ -28,9 +29,10 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.UUID;
 
-@Entity(name = "profile")
-@SQLDelete(sql = "UPDATE profile SET deleted = true WHERE id=?")
-@Where(clause = "deleted=false")
+@Entity(name = "Profile")
+@Table( name = "profile", schema = "profile" )
+@SQLDelete(sql = "UPDATE profile.profile SET deleted = true WHERE id=?")
+@SQLRestriction( "NOT deleted" )
 public class Profile implements Serializable {
 
     @Serial
@@ -110,6 +112,7 @@ public class Profile implements Serializable {
     @OneToMany( fetch = FetchType.EAGER )
     @JoinTable(
         name = "profile_competence_badges",
+        schema = "profile",
         joinColumns = @JoinColumn(name = "profile_id"),
         inverseJoinColumns = @JoinColumn(name = "competence_type_id")
     )

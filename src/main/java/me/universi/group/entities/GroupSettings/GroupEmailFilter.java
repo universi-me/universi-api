@@ -3,18 +3,19 @@ package me.universi.group.entities.GroupSettings;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
 import me.universi.group.enums.GroupEmailFilterType;
-import me.universi.group.enums.GroupType;
 import org.hibernate.annotations.*;
 
 
-@Entity(name = "group_email_filter")
-@SQLDelete(sql = "UPDATE group_email_filter SET deleted = true WHERE id=?")
+@Entity(name = "GroupEmailFilter")
+@Table( name = "group_email_filter", schema = "system_group" )
+@SQLDelete(sql = "UPDATE system_group.group_email_filter SET deleted = true WHERE id=?")
 @SQLRestriction( value = "NOT deleted" )
 @JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class GroupEmailFilter implements Serializable {

@@ -25,8 +25,8 @@ import me.universi.institution.entities.Institution;
 import me.universi.profile.entities.Profile;
 
 @Entity(name = "Job")
-@Table(name = "job")
-@SQLDelete(sql = "UPDATE jobs SET deleted = true WHERE id=?")
+@Table(name = "job", schema = "job")
+@SQLDelete(sql = "UPDATE job.job SET deleted = true WHERE id=?")
 @SQLRestriction( "NOT deleted" )
 public class Job {
     public static final int SHORT_DESCRIPTION_MAX_LENGTH = 255;
@@ -53,6 +53,7 @@ public class Job {
     @ManyToMany
     @JoinTable(
         name = "job_competences",
+        schema = "job",
         joinColumns = @JoinColumn(name = "job_id"),
         inverseJoinColumns = @JoinColumn(name = "competence_type_id")
     )

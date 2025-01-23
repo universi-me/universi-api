@@ -3,6 +3,7 @@ package me.universi.group.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
@@ -14,8 +15,9 @@ import me.universi.role.entities.Role;
 import org.hibernate.annotations.*;
 
 
-@Entity(name = "profile_group")
-@SQLDelete(sql = "UPDATE profile_group SET deleted = true WHERE id=?")
+@Entity(name = "ProfileGroup")
+@Table(name = "profile_group", schema = "system_group")
+@SQLDelete(sql = "UPDATE system_group.profile_group SET deleted = true WHERE id=?")
 @SQLRestriction( value = "NOT deleted" )
 @JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class ProfileGroup implements Serializable {

@@ -31,7 +31,7 @@
         <intercept-url pattern="/new-password" access="permitAll"/>
         <intercept-url pattern="/confirm-account/*" access="permitAll"/>
 
-        <intercept-url pattern="/group/current-organization" access="permitAll"/>
+        <intercept-url pattern="/groups/current-organization" access="permitAll"/>
 
 
         <intercept-url pattern="/swagger-ui.html" access="permitAll"/>
@@ -45,8 +45,6 @@
         <intercept-url pattern="/h2-console/**" access="('${spring.profiles.active}' == 'test')"/>
 
         <intercept-url pattern="/**" access="isAuthenticated()"/>
-
-        <intercept-url pattern="/**" access="permitAll"/>
 
         <custom-filter position="CONCURRENT_SESSION_FILTER" ref="concurrencyFilter" />
         <custom-filter ref="customCorsFilter" before="CONCURRENT_SESSION_FILTER"/>

@@ -3,6 +3,7 @@ package me.universi.group.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
@@ -11,8 +12,9 @@ import java.util.UUID;
 import org.hibernate.annotations.*;
 
 
-@Entity(name = "subgroup")
-@SQLDelete(sql = "UPDATE subgroup SET deleted = true WHERE id=?")
+@Entity(name = "Subgroup")
+@Table(name = "subgroup", schema = "system_group")
+@SQLDelete(sql = "UPDATE system_group.subgroup SET deleted = true WHERE id=?")
 @SQLRestriction( value = "NOT deleted" )
 @JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class Subgroup implements Serializable {

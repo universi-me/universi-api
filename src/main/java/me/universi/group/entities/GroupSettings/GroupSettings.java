@@ -12,10 +12,10 @@ import java.util.UUID;
 import me.universi.user.services.JsonUserLoggedFilter;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
-import org.hibernate.annotations.Where;
 
-@Entity(name = "group_settings")
-@SQLDelete(sql = "UPDATE group_settings SET deleted = true WHERE id=?")
+@Entity(name = "GroupSettings")
+@Table(name = "group_settings", schema = "system_group")
+@SQLDelete(sql = "UPDATE system_group.group_settings SET deleted = true WHERE id=?")
 @SQLRestriction( value = "NOT deleted" )
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class GroupSettings implements Serializable {

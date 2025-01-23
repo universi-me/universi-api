@@ -34,8 +34,9 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
 
-@Entity(name = "system_group")
-@SQLDelete(sql = "UPDATE system_group SET deleted = true WHERE id=?")
+@Entity(name = "Group")
+@Table( name = "system_group", schema = "system_group" )
+@SQLDelete(sql = "UPDATE system_group.system_group SET deleted = true WHERE id=?")
 @SQLRestriction( value = "NOT deleted" )
 @JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class Group implements Serializable {
