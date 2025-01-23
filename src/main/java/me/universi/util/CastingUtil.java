@@ -1,5 +1,7 @@
 package me.universi.util;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -103,5 +105,17 @@ public class CastingUtil {
         }
 
         return Optional.empty();
+    }
+
+    public static Optional<URI> getURI( Object obj ) {
+        var asStr = getString( obj );
+        if ( asStr.isEmpty() )
+            return Optional.empty();
+
+        try {
+            return Optional.of( new URI( asStr.get() ) );
+        } catch ( URISyntaxException e ) {
+            return Optional.empty();
+        }
     }
 }

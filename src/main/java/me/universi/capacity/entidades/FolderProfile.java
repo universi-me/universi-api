@@ -3,6 +3,7 @@ package me.universi.capacity.entidades;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
@@ -14,9 +15,10 @@ import me.universi.capacity.service.FolderService;
 import me.universi.profile.entities.Profile;
 import org.hibernate.annotations.*;
 
-@Entity(name = "folder_profile")
-@SQLDelete( sql = "UPDATE folder_profile SET deleted = true, removed = CURRENT_TIMESTAMP WHERE id=?" )
-@SQLRestriction( "NOT deleted" )
+@Entity(name = "FolderProfile")
+@Table( name = "folder_profile", schema = "capacity" )
+@SQLDelete( sql = "UPDATE capacity.folder_profile SET removed = CURRENT_TIMESTAMP WHERE id=?" )
+@SQLRestriction( "removed IS NOT NULL" )
 @JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class FolderProfile implements Serializable {
 
@@ -38,10 +40,6 @@ public class FolderProfile implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "removed")
     public Date removed;
-
-    @JsonIgnore
-    @Column(name = "deleted")
-    public boolean deleted = Boolean.FALSE;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @PrimaryKeyJoinColumn(name="assigned_by_id")
@@ -72,13 +70,8 @@ public class FolderProfile implements Serializable {
         this.created = created;
     }
 
-    public boolean isDeleted() {
-        return deleted;
-    }
-
-    public void setDeleted(boolean deleted) {
-        this.deleted = deleted;
-    }
+    public Date getRemoved() { return removed; }
+    public void setRemoved(Date removed) { this.removed = removed; }
 
     public Profile getAssignedBy() {
         return assignedBy;
@@ -106,7 +99,7 @@ public class FolderProfile implements Serializable {
 
     @Transient
     public int getFolderSize() {
-        return this.folder.getContents().size();
+        return this.folder.getFolderContents().size();
     }
 
     @Transient

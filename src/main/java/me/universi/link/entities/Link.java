@@ -12,11 +12,12 @@ import java.util.UUID;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.SQLRestriction;
 
-@Entity(name = "link")
-@SQLDelete(sql = "UPDATE link SET deleted = true WHERE id=?")
-@Where(clause = "deleted=false")
+@Entity(name = "Link")
+@Table( name = "link", schema = "link" )
+@SQLDelete(sql = "UPDATE link.link SET deleted = true WHERE id=?")
+@SQLRestriction( "NOT deleted" )
 public class Link {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

@@ -3,6 +3,7 @@ package me.universi.group.entities.GroupSettings;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
@@ -10,9 +11,10 @@ import java.util.Date;
 import java.util.UUID;
 import org.hibernate.annotations.*;
 
-@Entity(name = "group_features")
-@SQLDelete(sql = "UPDATE group_features SET deleted = true WHERE id=?")
-@Where(clause = "deleted=false")
+@Entity(name = "GroupFeatures")
+@Table( name = "group_features", schema = "system_group" )
+@SQLDelete(sql = "UPDATE system_group.group_features SET deleted = true WHERE id=?")
+@SQLRestriction( value = "NOT deleted" )
 @JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class GroupFeatures  implements Serializable {
 

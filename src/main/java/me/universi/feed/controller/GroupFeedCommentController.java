@@ -1,16 +1,14 @@
 package me.universi.feed.controller;
 
-import java.util.List;
-import java.util.Map;
-import me.universi.api.entities.Response;
-import me.universi.feed.dto.GroupPostCommentDTO;
+import jakarta.validation.Valid;
+import me.universi.feed.dto.CreateCommentDTO;
 import me.universi.feed.entities.GroupPostComment;
-import me.universi.feed.entities.GroupPostReaction;
 import me.universi.feed.services.GroupFeedService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/feed")
+@RequestMapping("/feeds")
 public class GroupFeedCommentController {
     private final GroupFeedService groupFeedService;
 
@@ -19,28 +17,18 @@ public class GroupFeedCommentController {
     }
 
     @PostMapping("/posts/{groupPostId}/comments")
-    public Response setGroupPostComment(@PathVariable String groupPostId, @RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-            GroupPostComment commentSet = groupFeedService.createGroupPostComment(groupPostId, body.get("content").toString());
-            response.body.put("comments", commentSet);
-            response.message = "Comentário publicado com sucesso";
-        });
+    public ResponseEntity<GroupPostComment> createGroupPostComment( @PathVariable String groupPostId, @Valid @RequestBody CreateCommentDTO createCommentDTO ) {
+        return ResponseEntity.ok( groupFeedService.createGroupPostComment(groupPostId, createCommentDTO.content()) );
     }
 
-    @PostMapping("/comments/{commentId}/edit")
-    public Response editGroupPostComment(@PathVariable String commentId, @RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-            GroupPostComment commentSet = groupFeedService.editGroupPostComment(commentId, body.get("content").toString());
-            response.body.put("comments", commentSet);
-            response.message = "Comentário editado com sucesso";
-        });
+    @PatchMapping("/comments/{commentId}")
+    public ResponseEntity<GroupPostComment> editGroupPostComment( @PathVariable String commentId, @Valid @RequestBody CreateCommentDTO createCommentDTO ) {
+        return ResponseEntity.ok( groupFeedService.editGroupPostComment(commentId, createCommentDTO.content()) ) ;
     }
 
     @DeleteMapping("/comments/{commentId}")
-    public Response deleteGroupPostComment(@PathVariable String commentId) {
-        return Response.buildResponse(response -> {
-            groupFeedService.deleteGroupPostComment(commentId);
-            response.message = "Comentário deletado com sucesso";
-        });
+    public ResponseEntity<Void> deleteGroupPostComment( @PathVariable String commentId ) {
+        groupFeedService.deleteGroupPostComment(commentId);
+        return ResponseEntity.noContent().build();
     }
 }

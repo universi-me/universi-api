@@ -4,10 +4,11 @@ import me.universi.competence.entities.Competence;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
+import java.util.List;
 import java.util.UUID;
 
 @Repository
 public interface CompetenceRepository extends JpaRepository<Competence, UUID> {
-    Optional<Competence> findFirstById(UUID id);
+    List<Competence> findByProfileId( UUID profileId );
+    List<Competence> findByProfileIdAndCompetenceTypeId( UUID profileId, UUID competenceTypeId );
 }

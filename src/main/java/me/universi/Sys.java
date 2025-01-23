@@ -39,13 +39,13 @@ public class Sys {
         context = SpringApplication.run(Sys.class, args);
     }
 
-    @GetMapping("/api/admin/exit")
+    @GetMapping("/admin/exit")
     public void exitApp() {
         int exitCode = SpringApplication.exit(context, (ExitCodeGenerator) () -> 0);
         System.exit(exitCode);
     }
 
-    @GetMapping(value = {"/", "/api", "/api/",})
+    @GetMapping(value = {"/", "",})
     @ResponseBody
     String index() {
         return "Universi.me API – " + PROFILE_ACTIVE.toUpperCase();

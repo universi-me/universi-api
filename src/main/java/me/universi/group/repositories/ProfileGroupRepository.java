@@ -19,4 +19,5 @@ public interface ProfileGroupRepository extends JpaRepository<ProfileGroup, UUID
 
     ProfileGroup findFirstByGroupAndProfile(@NotNull Group group, @NotNull Profile profile);
     Collection<ProfileGroup> findAllByProfile(@NotNull Profile profile);
+    Collection<ProfileGroup> findAllByRoleId( @NotNull UUID roleId );
 }

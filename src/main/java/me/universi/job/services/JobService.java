@@ -1,6 +1,5 @@
 package me.universi.job.services;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -8,86 +7,115 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.Nullable;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotNull;
 import me.universi.Sys;
 import me.universi.competence.services.CompetenceTypeService;
 import me.universi.feed.dto.GroupPostDTO;
 import me.universi.feed.services.GroupFeedService;
 import me.universi.institution.services.InstitutionService;
+import me.universi.job.dto.CreateJobDTO;
+import me.universi.job.dto.UpdateJobDTO;
 import me.universi.job.entities.Job;
 import me.universi.job.exceptions.JobException;
 import me.universi.job.repositories.JobRepository;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
+import me.universi.role.enums.FeaturesTypes;
+import me.universi.role.enums.Permission;
+import me.universi.role.services.RoleService;
 import me.universi.user.services.UserService;
 
 @Service
 public class JobService {
     private final JobRepository jobRepository;
+    private final CompetenceTypeService competenceTypeService;
+    private final GroupFeedService groupFeedService;
+    private final InstitutionService institutionService;
+    private final ProfileService profileService;
+    private final RoleService roleService;
+    private final UserService userService;
 
-    public JobService(JobRepository jobRepository) {
+    public JobService( JobRepository jobRepository, CompetenceTypeService competenceTypeService, GroupFeedService groupFeedService, InstitutionService institutionService, ProfileService profileService, RoleService roleService, UserService userService ) {
         this.jobRepository = jobRepository;
+        this.competenceTypeService = competenceTypeService;
+        this.groupFeedService = groupFeedService;
+        this.institutionService = institutionService;
+        this.profileService = profileService;
+        this.roleService = roleService;
+        this.userService = userService;
     }
 
     public static JobService getInstance() { return Sys.context.getBean("jobService", JobService.class); }
 
-    public Optional<Job> findById(@NotNull UUID id) {
+    public Optional<Job> find( @NotNull UUID id ) {
         return jobRepository.findById(id);
+    }
+
+    public @NotNull Job findOrThrow( @NotNull UUID id ) throws EntityNotFoundException {
+        // TODO: UniversiEntityNotFoundException
+        return find( id ).orElseThrow( () -> new EntityNotFoundException( "Vaga de ID '" + id + "' não encontrada" ) );
     }
 
     public List<Job> findAll() {
         return jobRepository.findAll();
     }
 
-    public Job create(@NotNull String title, @NotNull String shortDescription, @NotNull String longDescription, @NotNull UUID institutionId, @NotNull Collection<UUID> requiredCompetencesIds) throws JobException {
-        title = checkValidTitle(title);
-        shortDescription = checkValidShortDescription(shortDescription);
+    public Job create( CreateJobDTO createJobDTO ) throws JobException {
+        var title = checkValidTitle( createJobDTO.title() );
+        var shortDescription = checkValidShortDescription( createJobDTO.shortDescription() );
 
-        var institution = InstitutionService.getInstance().findById(institutionId).orElseThrow(() -> {
-            return new JobException("Instituição não encontrada");
-        });
+        var institution = institutionService.findOrThrow( createJobDTO.institutionId() );
 
-        var competencesTypes = CompetenceTypeService.getInstance().findAllById(requiredCompetencesIds);
+        var competencesTypes = competenceTypeService.findOrThrow( createJobDTO.requiredCompetencesIds() );
+
+        var profileInSession = profileService.getProfileInSessionOrThrow();
 
         var job = new Job();
         job.setTitle(title);
         job.setShortDescription(shortDescription);
-        job.setLongDescription(longDescription);
+        job.setLongDescription( createJobDTO.longDescription() );
         job.setInstitution(institution);
         job.setRequiredCompetences(competencesTypes);
         job.setClosed(false);
-        job.setAuthor(ProfileService.getInstance().getProfileInSession());
+        job.setAuthor( profileInSession );
 
         job = save(job);
 
-        var organizationId = UserService.getInstance().getUserInSession().getOrganization().getId().toString();
-        // TODO: group environment variable for message
-        var postMessage = "Nova vaga cadastrada para a instituição " + job.getInstitution().getName()
-            + ": <a href=\"/job/" + job.getId() + "\"><strong>" + job.getTitle() + "</strong></a>";
+        var organizationId = profileInSession.getUser().getOrganization().getId().toString();
 
-        var groupPostDto = new GroupPostDTO(postMessage, job.getAuthor().getId().toString());
+        if ( roleService.hasPermission( organizationId , FeaturesTypes.FEED, Permission.READ_WRITE) ) {
+            // TODO: group environment variable for message
+            var postMessage = "Nova vaga cadastrada para a instituição " + job.getInstitution().getName()
+                + ": <a href=\"/job/" + job.getId() + "\"><strong>" + job.getTitle() + "</strong></a>";
 
-        GroupFeedService.getInstance().createGroupPost(organizationId, groupPostDto);
+            var groupPostDto = new GroupPostDTO(postMessage, job.getAuthor().getId().toString());
+            groupFeedService.createGroupPost(organizationId, groupPostDto);
+        }
 
         return job;
     }
 
-    public Job edit(@NotNull UUID jobId, String title, String shortDescription, String longDescription, Collection<UUID> requiredCompetencesIds) throws JobException {
-        var job = checkCanEdit(jobId, ProfileService.getInstance().getProfileInSession());
+    public Job edit( UUID id, UpdateJobDTO updateJobDTO ) throws JobException {
+        var job = checkCanEdit( id, profileService.getProfileInSessionOrThrow() );
 
-        if (title != null)
-            job.setTitle( checkValidTitle(title) );
+        if ( updateJobDTO.title() != null )
+            job.setTitle( checkValidTitle( updateJobDTO.title() ) );
 
-        if (shortDescription != null)
-            job.setShortDescription( checkValidShortDescription(shortDescription) );
+        if ( updateJobDTO.shortDescription() != null )
+            job.setShortDescription( checkValidShortDescription( updateJobDTO.shortDescription() ) );
 
-        if (longDescription != null)
-            job.setLongDescription(longDescription);
+        if ( updateJobDTO.longDescription() != null)
+            job.setLongDescription( updateJobDTO.longDescription() );
 
-        if (requiredCompetencesIds != null)
-            job.setRequiredCompetences( CompetenceTypeService.getInstance().findAllById(requiredCompetencesIds) );
+        if ( updateJobDTO.requiredCompetencesIds() != null)
+            job.setRequiredCompetences( competenceTypeService.findOrThrow( updateJobDTO.requiredCompetencesIds() ) );
 
         return save(job);
+    }
+
+    public Job close( @NotNull UUID id ) {
+        return close( id, profileService.getProfileInSessionOrThrow() );
     }
 
     public Job close(@NotNull UUID jobId, @NotNull Profile profile) throws JobException {
@@ -102,9 +130,9 @@ public class JobService {
     }
 
     private Job checkCanEdit(@NotNull UUID jobId, @NotNull Profile profile) throws JobException {
-        var job = findById(jobId).orElseThrow(() -> new JobException("Vaga não encontrada."));
+        var job = findOrThrow(jobId);
 
-        var canEdit = UserService.getInstance().isUserAdmin(profile.getUser())
+        var canEdit = userService.isUserAdmin(profile.getUser())
             || job.getAuthor().getId().equals(profile.getId());
 
         if (!canEdit)

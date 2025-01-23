@@ -9,6 +9,5 @@ import java.util.UUID;
 
 @Repository
 public interface CompetenceTypeRepository extends JpaRepository<CompetenceType, UUID> {
-    Optional<CompetenceType> findFirstById(UUID id);
     Optional<CompetenceType> findFirstByNameIgnoreCase(String name);
 }

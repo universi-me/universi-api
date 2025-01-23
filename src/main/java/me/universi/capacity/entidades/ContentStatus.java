@@ -2,6 +2,8 @@ package me.universi.capacity.entidades;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.persistence.Table;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
@@ -10,9 +12,10 @@ import me.universi.capacity.enums.ContentStatusType;
 import me.universi.profile.entities.Profile;
 import org.hibernate.annotations.*;
 
-@Entity(name="contentstatus")
-@SQLDelete(sql = "UPDATE contentstatus SET deleted = true WHERE id=?")
-@Where(clause = "deleted=false")
+@Entity(name="ContentStatus")
+@Table( name = "content_status", schema = "capacity" )
+@SQLDelete(sql = "UPDATE capacity.content_status SET deleted = true WHERE id=?")
+@SQLRestriction( "NOT deleted" )
 public class ContentStatus implements Serializable {
 
     @Serial
