@@ -42,7 +42,6 @@ public class FolderFavorite implements Serializable {
     @NotFound(action = NotFoundAction.IGNORE)
     private Profile profile;
 
-    @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER)
     @PrimaryKeyJoinColumn(name="folder_id")
     @NotNull
