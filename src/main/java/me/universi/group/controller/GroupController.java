@@ -1,5 +1,6 @@
 package me.universi.group.controller;
 
+import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.util.*;
@@ -55,6 +56,11 @@ public class GroupController {
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Group> get( @Valid @PathVariable @NotNull( message = "ID do grupo inválido" ) UUID id ) {
         return ResponseEntity.ok( groupService.getGroupByGroupIdOrGroupPath(id, null) );
+    }
+
+    @GetMapping( path = "/from-path", produces = MediaType.APPLICATION_JSON_VALUE )
+    public ResponseEntity<Group> getFromPath( @RequestParam( name = "group", required = true ) @Nullable String group ) {
+        return ResponseEntity.ok( groupService.getGroupByGroupIdOrGroupPath( null, group ) );
     }
 
     @GetMapping(value = "/{id}/subgroups", produces = MediaType.APPLICATION_JSON_VALUE)
