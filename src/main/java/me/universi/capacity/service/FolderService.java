@@ -590,9 +590,9 @@ public class FolderService extends EntityService<Folder> {
 
         var profileInSession = profileService.getProfileInSession();
         return profileInSession.isPresent()
-            && profileInSession.get().getGroups().stream().anyMatch(
+            && ( profileInSession.get().getGroups().stream().anyMatch(
                 profileGroup -> folderIsInGroup( folder, profileGroup.getGroup() )
-            );
+            ) || profileInSession.get().getId().equals( folder.getAuthor().getId() ) );
     }
 
     @Override
