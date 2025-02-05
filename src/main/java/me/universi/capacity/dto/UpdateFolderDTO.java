@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import jakarta.annotation.Nullable;
@@ -28,8 +29,11 @@ public record UpdateFolderDTO(
     @Nullable
     List<UUID> categoriesIds,
 
-    @Nullable
-    List<String> grantedAccessGroups,
+    Optional<List<String>> grantedAccessGroups,
+
+    Optional<List<String>> addGrantedAccessGroups,
+
+    Optional<List<String>> removeGrantedAccessGroups,
 
     @Nullable
     List<UUID> competenceTypeBadgeIds

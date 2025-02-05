@@ -216,12 +216,23 @@ public class FolderService extends EntityService<Folder> {
             folder.setCategories( categoryService.findOrThrow( updateFolderDTO.categoriesIds() ) );
         }
 
-        if ( updateFolderDTO.grantedAccessGroups() != null ) {
-            var groups = new ArrayList<Group>( updateFolderDTO.grantedAccessGroups().size() );
-            updateFolderDTO.grantedAccessGroups().forEach( g -> groups.add( groupService.findByIdOrPathOrThrow( g ) ) );
+        updateFolderDTO.grantedAccessGroups().ifPresent( granted -> {
+            // Guarantees the list is mutable
+            var groups = new ArrayList<Group>( granted.size() );
+            granted.forEach( g -> groups.add( groupService.findByIdOrPathOrThrow( g ) ) );
 
             folder.setGrantedAccessGroups( groups );
-        }
+        } );
+
+        updateFolderDTO.removeGrantedAccessGroups().ifPresent( removed -> {
+            var removedGroups = removed.stream().map( groupService::findByIdOrPathOrThrow ).toList();
+            folder.getGrantedAccessGroups().removeAll( removedGroups );
+        } );
+
+        updateFolderDTO.addGrantedAccessGroups().ifPresent( added -> {
+            var addedGroups = added.stream().map( groupService::findByIdOrPathOrThrow ).toList();
+            folder.getGrantedAccessGroups().addAll( addedGroups );
+        } );
 
         if ( updateFolderDTO.competenceTypeBadgeIds() != null ) {
             folder.setGrantsBadgeToCompetences( competenceTypeService.findOrThrow( updateFolderDTO.competenceTypeBadgeIds() ) );
