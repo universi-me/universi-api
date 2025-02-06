@@ -144,7 +144,6 @@
 
     <beans:bean class="org.springframework.security.web.session.HttpSessionEventPublisher"/>
 
-    <beans:bean id="userServices" class="me.universi.user.services.UserService"/>
     <beans:bean id="encoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
 
     <beans:bean name="customAccessDeniedHandler" class="me.universi.user.services.CustomAccessDeniedHandler"/>
@@ -152,7 +151,7 @@
 
     <beans:bean id="authenticationProvider" class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
         <beans:property name="passwordEncoder" ref="encoder"/>
-        <beans:property name="userDetailsService" ref="userServices"/>
+        <beans:property name="userDetailsService" ref="userService"/>
     </beans:bean>
 
     <beans:bean id="authUser" class="me.universi.user.services.PreAuthUsuarioService"/>
