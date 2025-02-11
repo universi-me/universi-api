@@ -25,8 +25,7 @@
         <intercept-url pattern="/signup" access="permitAll"/>
         <intercept-url pattern="/account" access="permitAll"/>
 
-        <intercept-url pattern="/username-available" access="permitAll"/>
-        <intercept-url pattern="/email-available" access="permitAll"/>
+        <intercept-url pattern="/available/**" access="permitAll"/>
         <intercept-url pattern="/recovery-password" access="permitAll"/>
         <intercept-url pattern="/new-password" access="permitAll"/>
         <intercept-url pattern="/confirm-account/*" access="permitAll"/>
