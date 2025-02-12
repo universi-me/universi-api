@@ -8,7 +8,7 @@ import java.util.UUID;
 public record CreateGroupDTO(
         Boolean groupRoot,
 
-        UUID groupId,
+        UUID parentGroupId,
         String groupPath,
 
         @NotNull
@@ -28,9 +28,10 @@ public record CreateGroupDTO(
 
         @NotNull
         @NotBlank
-        String type,
+        String groupType,
 
         Boolean canCreateGroup,
-        Boolean publicGroup,
-        Boolean canEnter
+        Boolean isPublic,
+        Boolean canJoin,
+        Boolean everyoneCanPost
 ) { }

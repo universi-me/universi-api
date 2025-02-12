@@ -1,6 +1,5 @@
 package me.universi.group.services;
 
-import java.net.URI;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import me.universi.Sys;
@@ -28,8 +27,6 @@ import me.universi.user.services.UserService;
 import me.universi.util.CastingUtil;
 import me.universi.util.ConvertUtil;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -38,7 +35,6 @@ import jakarta.validation.constraints.NotNull;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class GroupService {
@@ -842,7 +838,7 @@ public class GroupService {
 
         Boolean groupRoot = (Boolean)createGroupDTO.groupRoot();
 
-        UUID groupIdParent = (UUID)createGroupDTO.groupId();
+        UUID groupIdParent = (UUID)createGroupDTO.parentGroupId();
         String groupPathParent = (String)createGroupDTO.groupPath();
 
         boolean hasGroupParent = groupIdParent != null || groupPathParent != null;
@@ -874,14 +870,15 @@ public class GroupService {
             throw new GroupException("Parâmetro description é nulo.");
         }
 
-        String groupType = (String)createGroupDTO.type();
+        String groupType = createGroupDTO.groupType();
         if(groupType == null) {
-            throw new GroupException("Parâmetro type é nulo.");
+            throw new GroupException("Parâmetro groupType é nulo.");
         }
 
         Boolean canCreateGroup = (Boolean)createGroupDTO.canCreateGroup();
-        Boolean publicGroup = (Boolean)createGroupDTO.publicGroup();
-        Boolean canEnter = (Boolean)createGroupDTO.canEnter();
+        Boolean publicGroup = (Boolean)createGroupDTO.isPublic();
+        Boolean canEnter = (Boolean)createGroupDTO.canJoin();
+        Boolean everyoneCanPost = (Boolean)createGroupDTO.everyoneCanPost();
 
         Group parentGroup = (groupIdParent==null && groupPathParent==null)?null:getGroupByGroupIdOrGroupPath(groupIdParent, groupPathParent);
 
@@ -919,6 +916,9 @@ public class GroupService {
             }
             if(canEnter != null) {
                 groupNew.setCanEnter(canEnter);
+            }
+            if(everyoneCanPost != null) {
+                groupNew.setEveryoneCanPost(everyoneCanPost);
             }
             if((groupRoot != null && groupRoot) && userService.isUserAdmin(user)) {
                 groupNew.setRootGroup(true);
