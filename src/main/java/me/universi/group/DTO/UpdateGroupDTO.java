@@ -6,14 +6,10 @@ import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 
 public record UpdateGroupDTO(
-        Boolean groupRoot,
+        Boolean isRootGroup,
 
         UUID groupId,
         String groupPath,
-
-        @NotNull
-        @NotBlank
-        String nickname,
 
         @NotNull
         @NotBlank
@@ -26,13 +22,11 @@ public record UpdateGroupDTO(
 
         String description,
 
-        @NotNull
-        @NotBlank
-        String type,
+        String groupType,
 
-        Boolean canCreateGroup,
-        Boolean publicGroup,
-        Boolean canEnter,
+        Boolean canHaveSubgroup,
+        Boolean isPublic,
+        Boolean canJoin,
 
         Boolean everyoneCanPost
 ) { }

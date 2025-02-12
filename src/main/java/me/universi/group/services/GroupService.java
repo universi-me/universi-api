@@ -944,14 +944,14 @@ public class GroupService {
 
         String name = (String)updateGroupDTO.name();
         String description = (String)updateGroupDTO.description();
-        String groupType = (String)updateGroupDTO.type();
+        String groupType = (String)updateGroupDTO.groupType();
         var image = updateGroupDTO.image();
         var bannerImage = updateGroupDTO.bannerImage();
         var headerImage = updateGroupDTO.headerImage();
 
-        Boolean canCreateGroup = (Boolean)updateGroupDTO.canCreateGroup();
-        Boolean publicGroup = (Boolean)updateGroupDTO.publicGroup();
-        Boolean canEnter = (Boolean)updateGroupDTO.canEnter();
+        Boolean canCreateGroup = (Boolean)updateGroupDTO.canHaveSubgroup();
+        Boolean publicGroup = (Boolean)updateGroupDTO.isPublic();
+        Boolean canEnter = (Boolean)updateGroupDTO.canJoin();
         Boolean everyoneCanPost = (Boolean)updateGroupDTO.everyoneCanPost();
 
         Group groupEdit = getGroupByGroupIdOrGroupPath(groupId, groupPath);
