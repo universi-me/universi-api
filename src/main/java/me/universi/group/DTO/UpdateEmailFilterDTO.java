@@ -6,7 +6,6 @@ import java.util.UUID;
 
 public record UpdateEmailFilterDTO(
     @NotNull
-    @NotBlank
     UUID groupEmailFilterId,
 
     String email,
