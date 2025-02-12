@@ -618,7 +618,7 @@ public class FolderService extends EntityService<Folder> {
 
     public void checkPermissionToEdit( Collection<Folder> folders ) throws UniversiForbiddenAccessException {
         var deniedAccessFoldersNames = folders.stream()
-            .filter( this::hasPermissionToEdit )
+            .filter( f -> !this.hasPermissionToEdit( f ) )
             .map( Folder::getName )
             .toList();
 
