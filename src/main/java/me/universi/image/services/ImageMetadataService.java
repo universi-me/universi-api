@@ -76,14 +76,14 @@ public class ImageMetadataService extends EntityService<ImageMetadata> {
         return imageMetadataRepository.findAll();
     }
 
-    public ImageMetadata saveImageFromMultipartFile(MultipartFile image) {
+    public ImageMetadata saveImageFromMultipartFile(MultipartFile image, Boolean isPublic) {
         switch ( getImageStore() ) {
             case MINIO:
-                return minioImageService.saveNewImage( image );
+                return minioImageService.saveNewImage( image, isPublic );
             case DATABASE:
-                return databaseImageService.saveNewImage( image );
+                return databaseImageService.saveNewImage( image, isPublic );
             case FILESYSTEM:
-                return filesystemImageService.saveNewImage( image );
+                return filesystemImageService.saveNewImage( image, isPublic );
             default:
                 throw new UniversiServerException( "Não foi possível salvar a imagem" );
         }
@@ -117,13 +117,14 @@ public class ImageMetadataService extends EntityService<ImageMetadata> {
             .orElseThrow( () -> makeNotFoundException( "id", filename ) );
     }
 
-    public ImageMetadata saveExternalImage( String imageUrl ) {
+    public ImageMetadata saveExternalImage( String imageUrl, Boolean isPublic ) {
         return imageMetadataRepository.saveAndFlush(
             new ImageMetadata(
                 imageUrl,
                 MediaType.APPLICATION_OCTET_STREAM_VALUE,
                 profileService.getProfileInSessionOrThrow(),
                 ImageStoreLocation.EXTERNAL,
+                isPublic,
                 new Date()
             )
         );

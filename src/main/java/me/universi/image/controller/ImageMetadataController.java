@@ -7,9 +7,9 @@ import java.util.concurrent.TimeUnit;
 import me.universi.api.exceptions.UniversiServerException;
 import me.universi.image.entities.ImageMetadata;
 import me.universi.image.enums.ImageStoreLocation;
-import me.universi.image.services.ImageDataService;
 import me.universi.image.services.ImageMetadataService;
 
+import me.universi.profile.services.ProfileService;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.io.Resource;
 import org.springframework.http.CacheControl;
@@ -36,16 +36,14 @@ public class ImageMetadataController {
     public static final String MINIO_PATH = "/minio";
 
     private final ImageMetadataService imageMetadataService;
-    private final ImageDataService databaseImageService;
 
-    public ImageMetadataController(ImageMetadataService imageMetadataService, ImageDataService databaseImageService) {
+    public ImageMetadataController(ImageMetadataService imageMetadataService) {
         this.imageMetadataService = imageMetadataService;
-        this.databaseImageService = databaseImageService;
     }
 
     @PostMapping( path = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE )
-    public ResponseEntity<UUID> upload( @RequestParam("image") MultipartFile image ) {
-        var imageMetadata = imageMetadataService.saveImageFromMultipartFile( image );
+    public ResponseEntity<UUID> upload( @RequestParam("image") MultipartFile image, @RequestParam(value = "isPublic", required = false, defaultValue = "false") boolean isPublic ) {
+        var imageMetadata = imageMetadataService.saveImageFromMultipartFile( image, isPublic );
         return ResponseEntity.status( HttpStatus.CREATED ).body( imageMetadata.getId() );
     }
 
@@ -93,6 +91,12 @@ public class ImageMetadataController {
     }
 
     private ResponseEntity<Resource> makeResponseFromMetadata( ImageMetadata metadata ) {
+
+        if(! metadata.isPublic() ) {
+            // security, check if user has valid session before continue access
+            ProfileService.getInstance().getProfileInSessionOrThrow();
+        }
+
         if ( metadata.getImageStore() == ImageStoreLocation.EXTERNAL )
             return ResponseEntity
                 .status( HttpStatus.FOUND )

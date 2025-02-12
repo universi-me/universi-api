@@ -50,7 +50,7 @@ public class ImageDataService extends EntityService<ImageData> {
         ) );
     }
 
-    public ImageMetadata saveNewImage( MultipartFile image ) {
+    public ImageMetadata saveNewImage( MultipartFile image, Boolean isPublic ) {
         var imageBytes = ImageMetadataService.getInstance().checkImageSize(image);
         var filename = ImageMetadataService.generateFilename( image.getOriginalFilename() );
 
@@ -60,6 +60,7 @@ public class ImageDataService extends EntityService<ImageData> {
                 image.getContentType(),
                 ProfileService.getInstance().getProfileInSessionOrThrow(),
                 ImageStoreLocation.DATABASE,
+                isPublic,
                 new Date()
             )
         );

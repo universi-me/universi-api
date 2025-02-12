@@ -1,5 +1,6 @@
 package me.universi.image.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
@@ -65,6 +66,10 @@ public class ImageMetadata implements Serializable {
     @Enumerated(EnumType.STRING)
     private ImageStoreLocation imageStore;
 
+    @JsonIgnore
+    @Column(name = "public")
+    private boolean isPublic = Boolean.FALSE;
+
     @NotNull
     @CreationTimestamp
     @Temporal( TemporalType.TIMESTAMP )
@@ -73,11 +78,12 @@ public class ImageMetadata implements Serializable {
 
     public ImageMetadata() {}
 
-    public ImageMetadata( @NotNull String filename, @NotNull String contentType, @NotNull Profile profile, ImageStoreLocation imageStore, Date createdAt ) {
+    public ImageMetadata( @NotNull String filename, @NotNull String contentType, @NotNull Profile profile, ImageStoreLocation imageStore, Boolean isPublic, Date createdAt ) {
         this.filename = filename;
         this.contentType = contentType;
         this.profile = profile;
         this.imageStore = imageStore;
+        this.isPublic = isPublic;
         this.createdAt = createdAt;
     }
 
@@ -91,6 +97,9 @@ public class ImageMetadata implements Serializable {
 
     public Date getCreatedAt() { return createdAt; }
     public void setCreatedAt( Date createdAt ) { this.createdAt = createdAt; }
+
+    public boolean isPublic() { return isPublic; }
+    public void setPublic( boolean isPublic ) { this.isPublic = isPublic; }
 
     public Profile getProfile() { return profile; }
 

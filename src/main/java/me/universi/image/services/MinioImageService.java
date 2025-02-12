@@ -51,7 +51,7 @@ public class MinioImageService {
         return Optional.of( new ByteArrayResource( byteArray ) );
     }
 
-    public ImageMetadata saveNewImage( MultipartFile image ) {
+    public ImageMetadata saveNewImage( MultipartFile image, Boolean isPublic ) {
         //Valida o tamanho da imagem
         ImageMetadataService.getInstance().checkImageSize( image );
 
@@ -75,6 +75,7 @@ public class MinioImageService {
                     image.getContentType(),
                     ProfileService.getInstance().getProfileInSessionOrThrow(),
                     ImageStoreLocation.MINIO,
+                    isPublic,
                     new Date()
                 )
             );

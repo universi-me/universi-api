@@ -871,7 +871,7 @@ public class UserService extends EntityService<User> implements UserDetailsServi
                     }
                 }
                 if(pictureUrl != null) {
-                    profile.setImage( ImageMetadataService.getInstance().saveExternalImage( pictureUrl.trim() ) );
+                    profile.setImage( ImageMetadataService.getInstance().saveExternalImage( pictureUrl.trim(), false ) );
                 }
 
                 profileRepository.saveAndFlush(profile);

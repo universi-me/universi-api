@@ -40,7 +40,7 @@ public class FilesystemImageService {
             : Optional.empty();
     }
 
-    public ImageMetadata saveNewImage( MultipartFile image ) {
+    public ImageMetadata saveNewImage( MultipartFile image, Boolean isPublic ) {
         var imageBytes = ImageMetadataService.getInstance().checkImageSize( image );
         var filename = ImageMetadataService.generateFilename( image.getOriginalFilename() );
 
@@ -67,6 +67,7 @@ public class FilesystemImageService {
                 image.getContentType(),
                 ProfileService.getInstance().getProfileInSessionOrThrow(),
                 ImageStoreLocation.FILESYSTEM,
+                isPublic,
                 new Date()
             )
         );

@@ -32,6 +32,8 @@
 
         <intercept-url pattern="/groups/current-organization" access="permitAll"/>
 
+        <intercept-url pattern="/img" access="isAuthenticated()"/>
+        <intercept-url pattern="/img/**" access="permitAll"/>
 
         <intercept-url pattern="/swagger-ui.html" access="permitAll"/>
         <intercept-url pattern="/swagger-ui/**" access="permitAll"/>
