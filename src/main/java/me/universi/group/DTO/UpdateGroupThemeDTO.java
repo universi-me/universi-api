@@ -6,7 +6,6 @@ import java.util.UUID;
 
 public record UpdateGroupThemeDTO(
         @NotNull
-        @NotBlank
         UUID groupId,
 
         String primary_color,
