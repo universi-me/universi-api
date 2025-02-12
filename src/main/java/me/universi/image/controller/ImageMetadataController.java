@@ -44,11 +44,9 @@ public class ImageMetadataController {
     }
 
     @PostMapping( path = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE )
-    public ResponseEntity<Void> upload( @RequestParam("image") MultipartFile image ) {
+    public ResponseEntity<UUID> upload( @RequestParam("image") MultipartFile image ) {
         var imageMetadata = imageMetadataService.saveImageFromMultipartFile( image );
-        var link = imageMetadataService.getUri( imageMetadata );
-
-        return ResponseEntity.created( link ).build();
+        return ResponseEntity.status( HttpStatus.CREATED ).body( imageMetadata.getId() );
     }
 
     @GetMapping( path = "/{imageId}" )
@@ -75,11 +73,11 @@ public class ImageMetadataController {
     }
 
     // get image from database
-    @GetMapping( path = DATABASE_PATH + "/{imageId}" )
+    @GetMapping( path = DATABASE_PATH + "/{filename}" )
     @Cacheable("img")
-    public ResponseEntity<Resource> getImageFromDatabase( @PathVariable UUID imageId ) {
+    public ResponseEntity<Resource> getImageFromDatabase( @PathVariable String filename ) {
         return makeResponseFromMetadata(
-            databaseImageService.findOrThrow( imageId ).getMetadata()
+            imageMetadataService.findByFilenameOrThrow( filename, ImageStoreLocation.DATABASE )
         );
     }
 
