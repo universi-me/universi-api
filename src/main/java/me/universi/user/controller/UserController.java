@@ -35,7 +35,7 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/logout")
+    @GetMapping("/account/logout")
     public ResponseEntity<Boolean> logout() {
         return ResponseEntity.ok( userService.logoutUserSession() );
     }
