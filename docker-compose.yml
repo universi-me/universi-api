@@ -1,6 +1,7 @@
-version: '3.5'
 
 services:
+
+    # The main service running the application in port 8080
     universi-me:
         container_name: universi-me
         build:
@@ -11,24 +12,24 @@ services:
         ports:
             - "8080:8080"
         volumes:
-            - universi-me-login-session:/var/lib/login-sesion/data
+            - universi-me-login-session:/var/lib/login-session/data
         depends_on:
             - universi-me-db
             - universi-me-mongo
         environment:
             API_DB_DOMAIN: universi-me-db
             API_DB_MONGO_HOST: universi-me-mongo
+            API_SERVER_SESSION_STORE_DIR: /var/lib/login-session/data
         env_file:
             - .env
 
+    # The database service running postgres, in same network as the application
     universi-me-db:
         container_name: universi-me-postgres
         image: postgres:latest
         restart: unless-stopped
         networks:
             - universi-me-network
-        ports:
-            - "5432:5432"
         volumes:
             - universi-me-postgres:/var/lib/postgresql/data
         environment:
@@ -39,19 +40,20 @@ services:
         env_file:
             - .env
 
+    # The database service running MongoGB, in same network as the application
     universi-me-mongo:
         container_name: universi-me-mongo
         image: mongo:latest
         restart: unless-stopped
         networks:
             - universi-me-network
-        ports:
-            - "27017:27017"
         volumes:
             - universi-me-mongo-data:/data/db
+            - universi-me-mongo-data:/data/configdb
         env_file:
             - .env
 
+    # The pgAdmin service running in port 16543
     universi-me-pgadmin:
         container_name: universi-me-pgadmin4
         image: dpage/pgadmin4
