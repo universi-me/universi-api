@@ -1,10 +1,6 @@
 package me.universi.profile.services;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import org.springframework.stereotype.Service;
 
@@ -156,6 +152,7 @@ public class ProfileService extends EntityService<Profile> {
         return CompetenceService.getInstance().findByProfileId( profileId )
             .stream()
             .sorted( Comparator.comparing( Competence::getCreationDate ).reversed() )
+            .filter(Objects::nonNull)
             .toList();
     }
 
@@ -164,6 +161,7 @@ public class ProfileService extends EntityService<Profile> {
             .getEducations()
             .stream()
             .sorted( Comparator.comparing( Education::getStartDate ).reversed() )
+            .filter(Objects::nonNull)
             .toList();
     }
 
@@ -172,6 +170,7 @@ public class ProfileService extends EntityService<Profile> {
             .getExperiences()
             .stream()
             .sorted( Comparator.comparing( Experience::getStartDate ).reversed() )
+            .filter(Objects::nonNull)
             .toList();
     }
 
@@ -181,6 +180,7 @@ public class ProfileService extends EntityService<Profile> {
             .stream()
             .sorted( Comparator.comparing( ProfileGroup::getJoined ).reversed() )
             .map( ProfileGroup::getGroup )
+            .filter(Objects::nonNull)
             .toList();
     }
 

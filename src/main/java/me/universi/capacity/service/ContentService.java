@@ -1,9 +1,6 @@
 package me.universi.capacity.service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import org.springframework.stereotype.Service;
 
@@ -70,6 +67,7 @@ public class ContentService extends EntityService<Content> {
     public List<Content> findByFolder(UUID folderId) throws CapacityException {
         return folderContentsRepository.findByFolderIdOrderByOrderNumAsc( folderId ).stream()
             .map( fc -> fc.getContent() )
+            .filter(Objects::nonNull)
             .toList();
     }
 

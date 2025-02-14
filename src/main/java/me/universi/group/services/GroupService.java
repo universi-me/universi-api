@@ -815,6 +815,7 @@ public class GroupService {
     public Collection<ProfileGroup> getAdministrators(@NotNull Group group) {
         return group.participants.stream()
             .filter(pg -> pg.role.getRoleType() == RoleType.ADMINISTRATOR)
+            .filter(Objects::nonNull)
             .toList();
     }
 

@@ -13,6 +13,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.*;
 import me.universi.capacity.service.FolderService;
 import me.universi.competence.entities.CompetenceType;
 import me.universi.group.entities.Group;
@@ -21,12 +22,6 @@ import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
 
 import org.hibernate.annotations.*;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
 
 @Entity(name="Folder")
 @Table( name = "folder", schema = "capacity" )
@@ -258,6 +253,7 @@ public class Folder implements Serializable {
         return this.assignedUsers.stream()
             .filter(u -> ProfileService.getInstance().isSessionOfProfile(u.getAssignedTo()))
             .map( fp -> fp.getAssignedBy() )
+            .filter(Objects::nonNull)
             .toList();
     }
 

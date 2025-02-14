@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Objects;
 import java.util.UUID;
 
 import me.universi.capacity.enums.ContentStatusType;
@@ -106,6 +107,7 @@ public class FolderProfile implements Serializable {
     public int getDoneUntilNow() {
         return FolderService.getInstance().getStatuses(assignedTo, folder).stream()
             .filter(cs -> cs.getStatus().equals(ContentStatusType.DONE))
+            .filter(Objects::nonNull)
             .toList()
             .size();
     }
