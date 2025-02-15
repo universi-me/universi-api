@@ -77,7 +77,8 @@ public class EducationService {
         var education = findOrThrow( id );
         checkPermissionForDelete( education );
 
-       educationRepository.delete( education );
+        education.setDeleted( true );
+        educationRepository.save( education );
     }
 
     private void checkPermissionForEdit( @NonNull Education education ) throws AccessDeniedException {

@@ -88,7 +88,9 @@ public class CompetenceTypeService {
             throw new AccessDeniedException( "Esta operação não é permitida para este usuário." );
 
         var ct = findIgnoringAccessOrThrow( id );
-        competenceTypeRepository.delete( ct );
+
+        ct.setDeleted( true );
+        competenceTypeRepository.save( ct );
     }
 
     public List<CompetenceType> findAll() {
@@ -167,7 +169,9 @@ public class CompetenceTypeService {
         competenceRepository.saveAll(updateCompetences);
 
         removedCompetenceType.setProfilesWithAccess( Arrays.asList() );
-        competenceTypeRepository.delete( removedCompetenceType );
+
+        removedCompetenceType.setDeleted( true );
+        competenceTypeRepository.save( removedCompetenceType );
     }
 
     private boolean hasAccessToCompetenceType( Optional<CompetenceType> competenceType ) {

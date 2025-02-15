@@ -72,7 +72,8 @@ public class ExperienceTypeService extends UniqueNameEntityService<ExperienceTyp
         var experienceType = findByIdOrNameOrThrow( idOrName );
         checkPermissionToDelete( experienceType );
 
-        experienceTypeRepository.delete( experienceType );
+        experienceType.setDeleted( true );
+        experienceTypeRepository.save( experienceType );
     }
 
     @Override

@@ -143,7 +143,8 @@ public class ContentService extends EntityService<Content> {
         Content content = findOrThrow( id );
         checkPermissionToDelete( content );
 
-        contentRepository.delete( content );
+        content.setDeleted( true );
+        saveOrUpdate( content );
     }
 
     public ContentStatus findStatusById( UUID contentId ) {

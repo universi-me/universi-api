@@ -87,7 +87,8 @@ public class InstitutionService {
 
         var institution = findOrThrow( id );
 
-        institutionRepository.delete(institution);
+        institution.setDeleted(true);
+        institutionRepository.save(institution);
     }
 
     private Institution save(@NotNull Institution institution) {

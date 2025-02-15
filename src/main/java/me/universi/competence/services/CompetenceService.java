@@ -93,7 +93,9 @@ public class CompetenceService {
     public void delete( UUID id ) {
         var competence = findOrThrow( id );
         checkPermissionForDelete( competence );
-        competenceRepository.delete( competence );
+
+        competence.setDeleted( true );
+        competenceRepository.save( competence );
     }
 
     private void checkPermissionForEdit( @NotNull Competence competence ) throws AccessDeniedException {

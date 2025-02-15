@@ -87,6 +87,8 @@ public class EducationTypeService {
             throw new UniversiForbiddenAccessException( "Você não tem permissão para deletar este Tipo de Educação" );
 
         var educationType = findByIdOrNameOrThrow( idOrName );
-        educationTypeRepository.delete( educationType );
+
+        educationType.setDeleted( true );
+        educationTypeRepository.save( educationType );
     }
 }

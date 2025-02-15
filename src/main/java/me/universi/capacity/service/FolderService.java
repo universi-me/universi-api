@@ -245,7 +245,8 @@ public class FolderService extends EntityService<Folder> {
         Folder folder = findByIdOrReferenceOrThrow( idOrReference );
         checkPermissionToDelete( folder );
 
-        folderRepository.delete( folder );
+        folder.setDeleted( true );
+        saveOrUpdate ( folder );
     }
 
     public void changeContents( String idOrReference, ChangeFolderContentsDTO changeFolderContentsDTO ) {
@@ -457,7 +458,9 @@ public class FolderService extends EntityService<Folder> {
         if ( folderFavorite.isEmpty() )
             return;
 
-        folderFavoriteRepository.delete( folderFavorite.get() );
+        var folderFavoriteGet = folderFavorite.get();
+        folderFavoriteGet.setDeleted( true );
+        folderFavoriteRepository.saveAndFlush( folderFavoriteGet );
     }
 
     public List<WatchProfileProgressDTO> watch( String idOrReference, String idOrUsername ) throws UniversiForbiddenAccessException {

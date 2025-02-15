@@ -95,7 +95,8 @@ public class CategoryService extends UniqueNameEntityService<Category> {
         Category category = findOrThrow( id );
         checkPermissionToDelete( category );
 
-        categoryRepository.delete( category );
+        category.setDeleted( true );
+        categoryRepository.saveAndFlush( category );
     }
 
     public List<Category> findAll() {

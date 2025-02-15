@@ -109,6 +109,7 @@ public class ExperienceService {
         var experience = findOrThrow( id );
         checkPermissionForDelete( experience );
 
-        experienceRepository.delete( experience );
+        experience.setDeleted( true );
+        experienceRepository.save( experience );
     }
 }

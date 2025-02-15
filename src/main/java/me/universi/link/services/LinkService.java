@@ -52,7 +52,8 @@ public class LinkService {
         var link = findOrThrow( linkId );
         canModifyOrThrow( link, profile );
 
-        linkRepository.delete( link );
+        link.setDeleted( true );
+        linkRepository.save( link );
     }
 
     public Link update( UUID id, UpdateLinkDTO updateLinkDTO ) {

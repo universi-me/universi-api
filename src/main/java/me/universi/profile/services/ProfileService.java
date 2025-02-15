@@ -101,7 +101,8 @@ public class ProfileService extends EntityService<Profile> {
         var profile = findByIdOrUsernameOrThrow( idOrUsername );
         checkPermissionToDelete( profile );
 
-        perfilRepository.delete( profile );
+        profile.setDeleted( true );
+        perfilRepository.save( profile );
     }
 
     public void grantCompetenceBadge( @NotNull Collection<@NotNull Folder> folders, @NotNull Profile profile ) {
