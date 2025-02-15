@@ -311,8 +311,8 @@ public class RoleService extends EntityService<Role> {
         if ( profile.isEmpty() )
             return false;
 
-        return role.isCanBeEdited()
-            && isAdmin( profile.get(), role.group );
+        return ( role.isCanBeEdited()
+            && isAdmin( profile.get(), role.group ) ) || userService.isUserAdmin( profile.get().getUser() );
     }
 
     @Override
