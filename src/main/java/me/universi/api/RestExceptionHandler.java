@@ -16,6 +16,7 @@ public class RestExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> genericException(Exception ex) {
+        ex.printStackTrace();
         ApiError apiError = ApiError
                 .builder()
                 .timestamp(LocalDateTime.now())
@@ -53,6 +54,7 @@ public class RestExceptionHandler {
 
     @ExceptionHandler( UniversiException.class )
     public ResponseEntity<ApiError> universiExceptionHandler( UniversiException ex ) {
+        ex.printStackTrace();
         return ex.toApiError().toResponseEntity();
     }
 }
