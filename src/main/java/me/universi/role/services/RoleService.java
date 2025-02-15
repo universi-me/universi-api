@@ -191,8 +191,11 @@ public class RoleService extends EntityService<Role> {
 
         var permission = role.getPermissionForFeature(feature);
 
-        if (permission < forPermission)
-            throw new RolesException("Você precisa de permissão para executar esta ação em \""+ feature.label +"\".");
+        if (permission < forPermission) {
+            if (!userService.isUserAdmin(profile.getUser())) {
+                throw new RolesException("Você precisa de permissão para executar esta ação em \"" + feature.label + "\".");
+            }
+        }
     }
 
     public boolean hasPermission(Profile profile, Group group, FeaturesTypes feature, int forPermission) {
