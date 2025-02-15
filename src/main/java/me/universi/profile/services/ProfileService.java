@@ -200,7 +200,15 @@ public class ProfileService extends EntityService<Profile> {
 
     public @NotNull Profile getProfileInSessionOrThrow() {
         return getProfileInSession()
-            .orElseThrow( () -> new UniversiForbiddenAccessException( "Esta sessão não está logada em um perfil" ) );
+            .orElseThrow( this::makeProfileAccessErrorException );
+    }
+
+    private UniversiForbiddenAccessException makeProfileAccessErrorException() {
+
+        // Force logout the user if the session is not valid
+        userService.logout();
+
+        return new UniversiForbiddenAccessException( "Esta sessão não está logada em um perfil" );
     }
 
     public boolean isSessionOfProfile( Profile profile) {
