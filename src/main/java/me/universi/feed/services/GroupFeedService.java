@@ -94,9 +94,11 @@ public class GroupFeedService {
         List<GroupPost> groupPosts = getGroupPosts(groupId);
         List<GroupGetDTO> groupGetDTOS = new ArrayList<>();
         for(GroupPost post : groupPosts){
-            var author = profileService.findOrThrow( CastingUtil.getUUID( post.getAuthorId() ).orElse( null ) );
-
-            GroupGetDTO groupGet = new GroupGetDTO(post.getContent(), author, post.getId(), post.getGroupId());
+            var author = profileService.find( CastingUtil.getUUID( post.getAuthorId() ).orElse( null ) );
+            if(author.isEmpty()) {
+                continue;
+            }
+            GroupGetDTO groupGet = new GroupGetDTO(post.getContent(), author.get(), post.getId(), post.getGroupId());
             groupGet.reactions = getGroupPostReactions(post.getId());
             groupGet.comments = getGroupPostComments(post.getId());
             groupGetDTOS.add(groupGet);
@@ -208,16 +210,17 @@ public class GroupFeedService {
         Optional<List<GroupPostComment>> comments = groupPostCommentRepository.findByGroupPostIdAndDeletedIsFalse(groupPostId);
         if(comments.isPresent()) {
             List<GroupPostCommentDTO> commentsDTO = new ArrayList<GroupPostCommentDTO>();
-            var profileService = ProfileService.getInstance();
 
             for(GroupPostComment comment : comments.get()) {
-                var author = profileService.findOrThrow( CastingUtil.getUUID( comment.getAuthorId() ).orElse( null ) );
-
+                var author = profileService.find( CastingUtil.getUUID( comment.getAuthorId() ).orElse( null ) );
+                if(author.isEmpty()) {
+                    continue;
+                }
                 GroupPostCommentDTO commentObj = new GroupPostCommentDTO();
                 commentObj.setId(comment.getId());
                 commentObj.setContent(comment.getContent());
                 commentObj.setAuthorId(comment.getAuthorId());
-                commentObj.setAuthor( author );
+                commentObj.setAuthor( author.get() );
                 commentsDTO.add(commentObj);
             }
 
