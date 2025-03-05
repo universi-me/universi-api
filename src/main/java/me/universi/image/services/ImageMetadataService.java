@@ -14,6 +14,7 @@ import me.universi.image.controller.ImageMetadataController;
 import me.universi.image.entities.ImageMetadata;
 import me.universi.image.enums.ImageStoreLocation;
 import me.universi.minioConfig.MinioConfig;
+import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
 import me.universi.util.CastingUtil;
 
@@ -118,15 +119,19 @@ public class ImageMetadataService extends EntityService<ImageMetadata> {
     }
 
     public ImageMetadata saveExternalImage( String imageUrl, Boolean isPublic ) {
-        return imageMetadataRepository.saveAndFlush(
-            new ImageMetadata(
-                imageUrl,
-                MediaType.APPLICATION_OCTET_STREAM_VALUE,
-                profileService.getProfileInSessionOrThrow(),
-                ImageStoreLocation.EXTERNAL,
-                isPublic,
-                new Date()
-            )
+        return saveExternalImage( imageUrl, profileService.getProfileInSessionOrThrow(), isPublic );
+    }
+
+    public ImageMetadata saveExternalImage(String imageUrl, Profile profile, Boolean isPublic) {
+        return imageMetadataRepository.save(
+                new ImageMetadata(
+                        imageUrl,
+                        MediaType.APPLICATION_OCTET_STREAM_VALUE,
+                        profile,
+                        ImageStoreLocation.EXTERNAL,
+                        isPublic,
+                        new Date()
+                )
         );
     }
 
@@ -179,6 +184,9 @@ public class ImageMetadataService extends EntityService<ImageMetadata> {
     }
 
     public URI getUri( ImageMetadata image, boolean addContextPath ) {
+        if(image == null) {
+            return null;
+        }
         String path = ( addContextPath ? contextPath : "" )
             + ImageMetadataController.ENTITY_PATH;
 
