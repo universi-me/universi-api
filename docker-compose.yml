@@ -1,7 +1,6 @@
-
 services:
 
-    # The main service running the application in port 8080
+    # API service running the application in port 8011
     universi-me:
         container_name: universi-me
         build:
@@ -10,9 +9,9 @@ services:
         networks:
             - universi-me-network
         ports:
-            - "8080:8080"
+            - "8011:8080"
         volumes:
-            - universi-me-login-session:/var/lib/login-session/data
+            - ./data/api:/var/lib/login-session/data
         depends_on:
             - universi-me-db
             - universi-me-mongo
@@ -26,12 +25,12 @@ services:
     # The database service running postgres, in same network as the application
     universi-me-db:
         container_name: universi-me-postgres
-        image: postgres:latest
+        image: postgres:17.2
         restart: unless-stopped
         networks:
             - universi-me-network
         volumes:
-            - universi-me-postgres:/var/lib/postgresql/data
+            - ./data/postgres:/var/lib/postgresql/data
         environment:
             POSTGRES_USER: ${API_DB_USER}
             POSTGRES_PASSWORD: ${API_DB_PASS}
@@ -48,40 +47,23 @@ services:
         networks:
             - universi-me-network
         volumes:
-            - universi-me-mongo-data:/data/db
-            - universi-me-mongo-data:/data/configdb
+            - ./data/mongo:/data/db
+            - ./data/mongo:/data/configdb
         env_file:
             - .env
 
-    # The pgAdmin service running in port 16543
-    universi-me-pgadmin:
-        container_name: universi-me-pgadmin4
-        image: dpage/pgadmin4
-        environment:
-            PGADMIN_PATH_PREFIX: /pgadmin4
-            SCRIPT_NAME: /pgadmin4
-            PGADMIN_DEFAULT_EMAIL: admin@admin.com
-            PGADMIN_DEFAULT_PASSWORD: ${API_DB_PASS}
-        env_file:
-            - .env
+    # Minio service, port 8015 for the web interface and 8016 for the API
+    minio:
+        container_name: universi-me-minio
+        image: bitnami/minio
+        restart: unless-stopped
         ports:
-            - "16543:80"
-        depends_on:
-            - universi-me-db
+            - '8015:9000'
+            - '8016:9001'
         volumes:
-            - universi-me-pgadmin-data:/var/lib/pgadmin
-        networks:
-            - universi-me-network
-
-volumes:
-    universi-me-pgadmin-data:
-        driver: local
-    universi-me-postgres:
-        driver: local
-    universi-me-login-session:
-        driver: local
-    universi-me-mongo-data:
-        driver: local
+            - ./data/minio:/data
+        env_file:
+            - .env
 
 networks:
     universi-me-network:
