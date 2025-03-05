@@ -62,7 +62,7 @@ public class CompetenceService {
 
         return competenceRepository.saveAndFlush( new Competence(
             competenceType,
-            createCompetenceDTO.description(),
+            "",
             createCompetenceDTO.level(),
             profile
         ) );
