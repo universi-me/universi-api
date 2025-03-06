@@ -26,7 +26,7 @@ public class RoleController {
         this.roleService = roleService;
     }
 
-    @PostMapping( path = "/", consumes = "application/json", produces = "application/json" )
+    @PostMapping( path = "", consumes = "application/json", produces = "application/json" )
     public ResponseEntity<Role> create( @Valid @RequestBody CreateRoleDTO createRoleDTO ) {
         return new ResponseEntity<>( roleService.create( createRoleDTO ), HttpStatus.CREATED );
     }
