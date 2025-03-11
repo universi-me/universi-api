@@ -1,5 +1,6 @@
 package me.universi.api;
 
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -15,13 +16,13 @@ import me.universi.api.exceptions.UniversiException;
 public class RestExceptionHandler {
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiError> genericException(Exception ex) {
+    public ResponseEntity<ApiError> genericException(@NotNull Exception ex) {
         ex.printStackTrace();
         ApiError apiError = ApiError
                 .builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .errors(List.of(ex.getMessage()))
+                .errors(ex.getMessage() == null ? null : List.of(ex.getMessage()))
                 .build();
 
         return apiError.toResponseEntity();

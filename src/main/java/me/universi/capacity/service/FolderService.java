@@ -148,7 +148,7 @@ public class FolderService extends EntityService<Folder> {
         folder.setRating( createFolderDTO.rating() );
         folder.setPublicFolder( createFolderDTO.publicFolder().orElse( false ) );
         folder.setCategories( categoryService.findOrThrow(
-            createFolderDTO.categoriesIds() == null ? Arrays.asList() : createFolderDTO.categoriesIds()
+            createFolderDTO.categoriesIds() == null ? new ArrayList<>() : createFolderDTO.categoriesIds()
         ) );
 
         if ( createFolderDTO.grantedAccessGroupsIds() != null ) {
@@ -179,7 +179,7 @@ public class FolderService extends EntityService<Folder> {
         }
 
         folder.setGrantsBadgeToCompetences( competenceTypeService.findOrThrow(
-            createFolderDTO.competenceTypeBadgeIds() == null ? Arrays.asList() : createFolderDTO.competenceTypeBadgeIds() )
+            createFolderDTO.competenceTypeBadgeIds() == null ? new ArrayList<>() : createFolderDTO.competenceTypeBadgeIds() )
         );
 
         final var savedFolder = saveOrUpdate( folder );
@@ -213,7 +213,7 @@ public class FolderService extends EntityService<Folder> {
         }
 
         if ( updateFolderDTO.categoriesIds() != null ) {
-            folder.setCategories( categoryService.findOrThrow( updateFolderDTO.categoriesIds() ) );
+            folder.setCategories( new ArrayList<>(categoryService.findOrThrow( updateFolderDTO.categoriesIds() )) );
         }
 
         updateFolderDTO.grantedAccessGroups().ifPresent( granted -> {
@@ -235,7 +235,7 @@ public class FolderService extends EntityService<Folder> {
         } );
 
         if ( updateFolderDTO.competenceTypeBadgeIds() != null ) {
-            folder.setGrantsBadgeToCompetences( competenceTypeService.findOrThrow( updateFolderDTO.competenceTypeBadgeIds() ) );
+            folder.setGrantsBadgeToCompetences( new ArrayList<>(competenceTypeService.findOrThrow( updateFolderDTO.competenceTypeBadgeIds() )) );
         }
 
         return saveOrUpdate( folder );

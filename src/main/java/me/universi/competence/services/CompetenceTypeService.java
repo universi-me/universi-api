@@ -1,5 +1,6 @@
 package me.universi.competence.services;
 
+import java.util.*;
 import me.universi.Sys;
 import me.universi.api.exceptions.UniversiConflictingOperationException;
 import me.universi.api.exceptions.UniversiForbiddenAccessException;
@@ -19,12 +20,6 @@ import org.springframework.stereotype.Service;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotNull;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class CompetenceTypeService {
@@ -123,7 +118,7 @@ public class CompetenceTypeService {
         ) {
             existingCompetenceType.setReviewed( updateCompetenceTypeDTO.reviewed() );
 
-            existingCompetenceType.setProfilesWithAccess( Arrays.asList() );
+            existingCompetenceType.setProfilesWithAccess( new ArrayList<>() );
         }
 
         return competenceTypeRepository.saveAndFlush( existingCompetenceType );
@@ -137,8 +132,8 @@ public class CompetenceTypeService {
             var ct = new CompetenceType();
             ct.setName( createCompetenceTypeDTO.name() );
             ct.setReviewed( false );
-            ct.setProfilesWithAccess( Arrays.asList(
-                profileInSession
+            ct.setProfilesWithAccess( new ArrayList<>(
+                    Arrays.asList( profileInSession )
             ) );
 
             return competenceTypeRepository.saveAndFlush( ct );
@@ -168,7 +163,7 @@ public class CompetenceTypeService {
         updateCompetences.forEach(c -> c.setCompetenceType( remainingCompetenceType ));
         competenceRepository.saveAll(updateCompetences);
 
-        removedCompetenceType.setProfilesWithAccess( Arrays.asList() );
+        removedCompetenceType.setProfilesWithAccess( new ArrayList<>() );
 
         removedCompetenceType.setDeleted( true );
         competenceTypeRepository.save( removedCompetenceType );
