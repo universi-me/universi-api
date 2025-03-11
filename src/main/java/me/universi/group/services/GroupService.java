@@ -241,6 +241,14 @@ public class GroupService {
         }
     }
 
+    public boolean isParticipantInGroup(Group group, Profile profile) {
+        try {
+            return profileGroupRepository.existsByGroupIdAndProfileId(group.getId(), profile.getId());
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     public boolean addParticipantToGroup(@NotNull Group group, @NotNull Profile profile) throws GroupException {
         return addParticipantToGroup(
             group,
@@ -250,7 +258,7 @@ public class GroupService {
     }
 
     public boolean addParticipantToGroup(@NotNull Group group, @NotNull Profile profile, Role role) throws GroupException {
-        if(!profileGroupRepository.existsByGroupIdAndProfileId(group.getId(), profile.getId())) {
+        if(!isParticipantInGroup(group, profile)) {
             ProfileGroup profileGroup = new ProfileGroup();
             profileGroup.profile = profile;
             profileGroup.group = group;
@@ -266,7 +274,7 @@ public class GroupService {
         if(profile == null) {
             throw new GroupException("Parametro Perfil é nulo.");
         }
-        if(profileGroupRepository.existsByGroupIdAndProfileId(group.getId(), profile.getId())) {
+        if(isParticipantInGroup(group, profile)) {
             ProfileGroup profileGroup = profileGroupRepository.findFirstByGroupAndProfile(group, profile);
             profileGroup.exited = ConvertUtil.getDateTimeNow();
             profileGroup.deleted = true;
@@ -1008,14 +1016,14 @@ public class GroupService {
 
         if(group != null) {
             Collection<Subgroup> subgroupList = group.getSubGroups();
-
-            List<Group> groups = subgroupList.stream()
-                    .sorted(Comparator.comparing(Subgroup::getAdded).reversed())
-                    .map(Subgroup::getSubgroup)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
-
-            return groups;
+            if(subgroupList != null) {
+                return subgroupList.stream()
+                        .sorted(Comparator.comparing(Subgroup::getAdded).reversed())
+                        .map(Subgroup::getSubgroup)
+                        .filter(Objects::nonNull)
+                        .filter((g -> isParticipantInGroup(g, userService.getUserInSession().getProfile()) || g.isPublicGroup() )) // public group flag, available for see in list public groups
+                        .collect(Collectors.toList());
+            }
         }
         throw new GroupException("Falha ao listar grupo.");
     }
