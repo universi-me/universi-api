@@ -72,6 +72,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @Service
 public class UserService extends EntityService<User> implements UserDetailsService {
@@ -921,8 +922,26 @@ public class UserService extends EntityService<User> implements UserDetailsServi
         }
     }
 
+    public String getRefererUrlBase() {
+        try {
+            String refererHeader = getRequest().getHeader("Referer");
+            if(refererHeader != null && !refererHeader.isEmpty()) {
+                URL requestURL = new URL(refererHeader);
+                String port = requestURL.getPort() == -1 ? "" : ":" + requestURL.getPort();
+                return requestURL.getProtocol() + "://" + requestURL.getHost() + port;
+            }
+            return getPublicUrl();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     public String keycloakLoginUrl() {
         return  getKeycloakUrl() + "/realms/" + getKeycloakRealm() + "/protocol/openid-connect/auth?client_id=" + getKeycloakClientId() + "&redirect_uri="+ getKeycloakRedirectUrl() +"&response_type=code";
+    }
+
+    public String urlDefaultKeycloakRedirectCallback() {
+        return getRefererUrlBase() + "/keycloak-oauth-redirect";
     }
 
     public String getKeycloakRedirectUrl() {
@@ -933,7 +952,7 @@ public class UserService extends EntityService<User> implements UserDetailsServi
         if(KEYCLOAK_REDIRECT_URL != null && !KEYCLOAK_REDIRECT_URL.isEmpty()){
             return KEYCLOAK_REDIRECT_URL;
         }
-        return getPublicUrl() + "/keycloak-oauth-redirect";
+        return urlDefaultKeycloakRedirectCallback();
     }
 
     public String getKeycloakClientId() {
@@ -1233,12 +1252,12 @@ public class UserService extends EntityService<User> implements UserDetailsServi
         return findAllUsers(byRole);
     }
 
-    public User keycloackLogin( LoginTokenDTO loginTokenDTO) {
+    public User keycloackLogin( LoginCodeDTO loginCodeDTO) {
         if(!isKeycloakEnabled()) {
             throw new UserException("Keycloak desabilitado!");
         }
 
-        String code = loginTokenDTO.token();
+        String code = loginCodeDTO.code();
         if(code == null) {
             throw new UserException("Parametro token é nulo.");
         }
@@ -1274,7 +1293,7 @@ public class UserService extends EntityService<User> implements UserDetailsServi
             String email = (String) decodedToken.get("email");
             String username = (String) decodedToken.get("preferred_username");
             String name = (String) decodedToken.get("name");
-            String pictureUrl = null;
+            String pictureUrl = (String) decodedToken.get("picture");
 
             User user = configureLoginForOAuth(name, username, email, pictureUrl);
 

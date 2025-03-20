@@ -1,5 +1,6 @@
 package me.universi.user.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.net.URI;
@@ -12,6 +13,7 @@ import me.universi.user.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping(value = "")
@@ -67,8 +69,8 @@ public class UserController {
     }
 
     @PostMapping(value = "/login/keycloak", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<User> oauth_keycloak_session( @Valid @RequestBody LoginTokenDTO loginTokenDTO ) {
-        return ResponseEntity.ok( userService.keycloackLogin(loginTokenDTO) );
+    public ResponseEntity<User> oauth_keycloak_session( @Valid @RequestBody LoginCodeDTO loginCodeDTO ) {
+        return ResponseEntity.ok( userService.keycloackLogin(loginCodeDTO) );
     }
 
     @GetMapping(value = "/login/keycloak/auth")
