@@ -926,9 +926,11 @@ public class UserService extends EntityService<User> implements UserDetailsServi
         try {
             String refererHeader = getRequest().getHeader("Referer");
             if(refererHeader != null && !refererHeader.isEmpty()) {
-                URL requestURL = new URL(refererHeader);
-                String port = requestURL.getPort() == -1 ? "" : ":" + requestURL.getPort();
-                return requestURL.getProtocol() + "://" + requestURL.getHost() + port;
+                URL requestUrl = new URL(refererHeader);
+                String port = requestUrl.getPort() > 0 && requestUrl.getPort() != 80 && requestUrl.getPort() != 443
+                        ? ":" + requestUrl.getPort()
+                        : "";
+                return requestUrl.getProtocol() + "://" + requestUrl.getHost() + port;
             }
             return getPublicUrl();
         } catch (Exception e) {
