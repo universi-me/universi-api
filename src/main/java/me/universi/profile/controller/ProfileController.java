@@ -1,250 +1,100 @@
 package me.universi.profile.controller;
 
-import java.util.*;
-import java.util.stream.Collectors;
-import me.universi.api.entities.Response;
-import me.universi.capacity.service.FolderService;
-import me.universi.competence.dto.CompetenceProfileDTO;
-import me.universi.group.entities.Group;
-import me.universi.group.entities.ProfileGroup;
-import me.universi.profile.entities.Profile;
-import me.universi.profile.enums.Gender;
-import me.universi.profile.exceptions.ProfileException;
-import me.universi.profile.services.ProfileService;
-import me.universi.user.entities.User;
-import me.universi.user.services.UserService;
-import org.springframework.http.HttpStatus;
+import java.util.Collection;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.net.URI;
+import me.universi.capacity.entidades.FolderFavorite;
+import me.universi.capacity.service.FolderService;
+import me.universi.competence.entities.Competence;
+import me.universi.education.entities.Education;
+import me.universi.experience.entities.Experience;
+import me.universi.group.entities.Group;
+import me.universi.image.controller.ImageMetadataController;
+import me.universi.link.entities.Link;
+import me.universi.profile.dto.ProfileFoldersDTO;
+import me.universi.profile.dto.UpdateProfileDTO;
+import me.universi.profile.entities.Profile;
+import me.universi.profile.services.ProfileService;
 
 @RestController
-@RequestMapping(value = "/api/profile")
+@RequestMapping( "/profiles" )
 public class ProfileController {
-    private final  UserService userService;
-    private final  ProfileService profileService;
-    private final  FolderService folderService;
+    private final ProfileService profileService;
+    private final FolderService folderService;
 
-    public ProfileController(UserService userService,  ProfileService profileService,  FolderService folderService) {
-        this.userService = userService;
+    @Value( "${server.servlet.context-path}" )
+    private String contextPath;
+
+    public ProfileController(ProfileService profileService, FolderService folderService) {
         this.profileService = profileService;
         this.folderService = folderService;
     }
 
-    @GetMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response profile() {
-        return Response.buildResponse(response -> {
-
-            User userSession = (User) userService.findFirstById(userService.getUserInSession().getId());
-
-            if(userSession == null) {
-                // force login
-                userService.logout();
-                throw new ProfileException("Usuário não logado.");
-            }
-
-            Profile userProfile = userSession.getProfile();
-            if(userProfile == null) {
-                throw new ProfileException("Perfil não encontrado.");
-            }
-
-            response.body.put("profile", userProfile);
-
-        });
+    @GetMapping( path = "", produces = MediaType.APPLICATION_JSON_VALUE )
+    public ResponseEntity<Profile> profile() {
+        return ResponseEntity.ok( profileService.getProfileInSessionOrThrow() );
     }
 
-    @PostMapping(value = "/edit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response profile_edit(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-
-            response.alertOptions.put("title", "Edição de Perfil");
-
-            Profile profileGet = profileService.getProfileByUserIdOrUsername(body.get("profileId"), body.get("username"));
-
-            Object name      = body.get("name");
-            Object lastname  = body.get("lastname");
-            Object imageUrl  = body.get("imageUrl");
-            Object bio       = body.get("bio");
-            Object gender    = body.get("gender");
-
-            if(userService.isSessionOfUser(profileGet.getUser())) {
-                userService.checkPasswordInSession(body.get("rawPassword"));
-            } else {
-                if(!userService.isUserAdminSession()) {
-                    throw new ProfileException("Você não tem permissão para editar este perfil.");
-                }
-            }
-
-            if(name != null) {
-                String nameString = String.valueOf(name);
-                if(nameString.isEmpty()) {
-                    throw new ProfileException("O nome não pode estar vazio.");
-                } else if(nameString.length() > 50) {
-                    throw new ProfileException("O nome não pode ter mais de 50 caracteres.");
-                }
-                profileGet.setFirstname(nameString);
-            }
-            if(lastname != null) {
-                String lastnameString = String.valueOf(lastname);
-                if(lastnameString.isEmpty()) {
-                    throw new ProfileException("O sobrenome não pode estar vazio.");
-                } else if(lastnameString.length() > 50) {
-                    throw new ProfileException("O sobrenome não pode ter mais de 50 caracteres.");
-                }
-                profileGet.setLastname(lastnameString);
-            }
-            if(imageUrl != null) {
-                String imageUrlString = String.valueOf(imageUrl);
-                if(!imageUrlString.isEmpty()) {
-                    if(imageUrlString.length() > 255) {
-                        throw new ProfileException("A URL da imagem não pode ter mais de 255 caracteres.");
-                    }
-                    profileGet.setImage(imageUrlString);
-                }
-            }
-            if(bio != null) {
-                String bioString = String.valueOf(bio);
-                if(!bioString.isEmpty()) {
-                    if (bioString.length() > 140) {
-                        throw new ProfileException("A biografia não pode ter mais de 140 caracteres.");
-                    }
-                    profileGet.setBio(bioString);
-                }
-            }
-            if(gender != null) {
-                String genderString = String.valueOf(gender);
-                if(!genderString.isEmpty()) {
-                    if(genderString.length() > 4) {
-                        throw new ProfileException("O gênero não pode ter mais de 4 caractere.");
-                    }
-                    profileGet.setGender(Gender.valueOf(genderString));
-                }
-            }
-
-            profileService.save(profileGet);
-
-            userService.updateUserInSession();
-
-            response.message = "As Alterações foram salvas com sucesso.";
-            response.redirectTo = "/profile/" + profileGet.getUser().getUsername();
-
-        });
+    @GetMapping( path = "/{idOrUsername}", produces = MediaType.APPLICATION_JSON_VALUE )
+    public ResponseEntity<Profile> get( @PathVariable String idOrUsername ) {
+        return ResponseEntity.ok( profileService.findByIdOrUsernameOrThrow( idOrUsername ) );
     }
 
-    @PostMapping(value = "/get", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response profile_get(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-
-            Profile profileGet = profileService.getProfileByUserIdOrUsername(body.get("profileId"), body.get("username"));
-
-            response.body.put("profile", profileGet);
-
-        });
+    @PatchMapping( path = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE )
+    public ResponseEntity<Profile> update( @RequestBody UpdateProfileDTO updateProfileDTO ) {
+        return ResponseEntity.ok( profileService.update( updateProfileDTO ) );
     }
 
-    @PostMapping(value = "/groups", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response profile_groups(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-
-            Profile profileGet = profileService.getProfileByUserIdOrUsername(body.get("profileId"), body.get("username"));
-
-            Collection<ProfileGroup> group = profileGet.getGroups();
-
-            List<Group> groups = group.stream()
-                    .sorted(Comparator.comparing(ProfileGroup::getJoined).reversed())
-                    .map(ProfileGroup::getGroup)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
-
-            response.body.put("groups", groups);
-
-        });
+    @GetMapping( path = "/{idOrUsername}/groups", produces = MediaType.APPLICATION_JSON_VALUE )
+    public ResponseEntity<Collection<Group>> groups( @PathVariable String idOrUsername ) {
+        return ResponseEntity.ok( profileService.getGroups( idOrUsername ) );
     }
 
-    @PostMapping(value = "/links", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response profile_links(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-
-            Profile profileGet = profileService.getProfileByUserIdOrUsername(body.get("profileId"), body.get("username"));
-
-            response.body.put("links", profileGet.getLinks());
-
-        });
+    @GetMapping( path = "/{idOrUsername}/links", produces = MediaType.APPLICATION_JSON_VALUE )
+    public ResponseEntity<Collection<Link>> links( @PathVariable String idOrUsername ) {
+        return ResponseEntity.ok( profileService.getLinks( idOrUsername ) );
     }
 
-    @PostMapping(value = "/competences", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response profile_competences(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-
-            Profile profileGet = profileService.getProfileByUserIdOrUsername(body.get("profileId"), body.get("username"));
-
-            response.body.put("competences", CompetenceProfileDTO.allFromProfile(profileGet));
-
-        });
+    @GetMapping( path = "/{idOrUsername}/competences", produces = MediaType.APPLICATION_JSON_VALUE )
+    public ResponseEntity<Collection<Competence>> competences( @PathVariable String idOrUsername ) {
+        return ResponseEntity.ok( profileService.getCompetences( idOrUsername ) );
     }
 
-    @PostMapping(value = "/folders", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response profile_folders(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-
-            Object profileId = body.get("profileId");
-            Object username = body.get("username");
-
-            if (profileId == null && username == null) {
-                throw new IllegalArgumentException("Parâmetro profileId ou username devem ser informados");
-            }
-
-            Profile profile = profileService.getProfileByUserIdOrUsername(profileId, username);
-            response.body.put("folders", folderService.getAssignedTo(profile.getId()));
-            response.body.put("favorites", folderService.listFavorites(profile.getId()));
-        });
+    @GetMapping( path = "/{idOrUsername}/educations", produces = MediaType.APPLICATION_JSON_VALUE )
+    public ResponseEntity<Collection<Education>> educations( @PathVariable String idOrUsername ) {
+        return ResponseEntity.ok( profileService.getEducations( idOrUsername ) );
     }
 
-    // get image of profile
-    @GetMapping(value = "/image/{profileId}")
-    public ResponseEntity<Void> get_image(@PathVariable String profileId) {
-        Profile profile = profileService.findFirstById(profileId);
-        if(profile != null) {
-            if(profile.getImage() != null) {
-                String urlImage = (profile.getImage().startsWith("/")) ? "/api" + profile.getImage() : profile.getImage();
-                return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(urlImage)).build();
-            }
-        }
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "not found");
+    @GetMapping( path = "/{idOrUsername}/experiences", produces = MediaType.APPLICATION_JSON_VALUE )
+    public ResponseEntity<Collection<Experience>> experiences( @PathVariable String idOrUsername ) {
+        return ResponseEntity.ok( profileService.getExperiences( idOrUsername ) );
     }
 
-    @PostMapping(value = "/educations", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response profile_educations(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-                Profile profileGet = profileService.getProfileByUserIdOrUsername(body.get("profileId"), body.get("username"));
-                response.body.put("educations", profileService.findEducationByProfile(profileGet));
-        });
+    @GetMapping( path = "/{idOrUsername}/favorites", produces = MediaType.APPLICATION_JSON_VALUE )
+    public ResponseEntity<Collection<FolderFavorite>> favorites( @PathVariable String idOrUsername ) {
+        return ResponseEntity.ok( profileService.getFavorites( idOrUsername ) );
     }
 
-    @PostMapping(value = "/experiences", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Response profile_experiences(@RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-            Profile profileGet = profileService.getProfileByUserIdOrUsername(body.get("profileId"), body.get("username"));
-            response.body.put("experiences", profileService.findExperienceByProfile(profileGet));
-        });
+    @GetMapping( path = "/{idOrUsername}/folders", produces = MediaType.APPLICATION_JSON_VALUE )
+    public ResponseEntity<ProfileFoldersDTO> folders( @PathVariable String idOrUsername ) {
+        return ResponseEntity.ok( new ProfileFoldersDTO(
+            profileService.getFavorites( idOrUsername ),
+            folderService.getAssignments( null, null, idOrUsername )
+        ) );
     }
 
+    @GetMapping( path = "/{idOrUsername}/image" )
+    public ResponseEntity<Resource> image( @PathVariable String idOrUsername ) {
+        return ImageMetadataController.redirectToImage( profileService.findByIdOrUsernameOrThrow( idOrUsername ).getImage() );
+    }
 }

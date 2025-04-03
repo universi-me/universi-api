@@ -1,36 +1,49 @@
 package me.universi.capacity.service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import org.springframework.stereotype.Service;
 
 import me.universi.Sys;
+import me.universi.api.interfaces.EntityService;
+import me.universi.capacity.dto.CreateContentDTO;
+import me.universi.capacity.dto.UpdateContentDTO;
 import me.universi.capacity.entidades.Category;
 import me.universi.capacity.entidades.Content;
 import me.universi.capacity.entidades.ContentStatus;
-import me.universi.capacity.entidades.Folder;
+import me.universi.capacity.entidades.FolderContents;
 import me.universi.capacity.enums.ContentStatusType;
 import me.universi.capacity.exceptions.CapacityException;
 import me.universi.capacity.repository.ContentRepository;
 import me.universi.capacity.repository.ContentStatusRepository;
-import me.universi.profile.entities.Profile;
+import me.universi.capacity.repository.FolderContentsRepository;
+import me.universi.image.services.ImageMetadataService;
 import me.universi.profile.services.ProfileService;
 import me.universi.user.services.UserService;
 
 @Service
-public class ContentService {
+public class ContentService extends EntityService<Content> {
     private final CategoryService categoryService;
     private final ContentRepository contentRepository;
     private final FolderService folderService;
     private final ContentStatusRepository contentStatusRepository;
+    private final ProfileService profileService;
+    private final UserService userService;
+    private final FolderContentsRepository folderContentsRepository;
+    private final ImageMetadataService imageMetadataService;
 
-    public ContentService(CategoryService categoryService, ContentRepository contentRepository, FolderService folderService, ContentStatusRepository contentStatusRepository) {
+
+    public ContentService(CategoryService categoryService, ContentRepository contentRepository, FolderService folderService, ContentStatusRepository contentStatusRepository, ProfileService profileService, UserService userService, FolderContentsRepository folderContentsRepository, ImageMetadataService imageMetadataService) {
         this.categoryService = categoryService;
         this.contentRepository = contentRepository;
         this.folderService = folderService;
         this.contentStatusRepository = contentStatusRepository;
+        this.profileService = profileService;
+        this.userService = userService;
+        this.folderContentsRepository = folderContentsRepository;
+        this.imageMetadataService = imageMetadataService;
+
+        this.entityName = "Material";
     }
 
     public static ContentService getInstance() {
@@ -38,88 +51,118 @@ public class ContentService {
     }
 
     public List<Content> findAll(){
-        List<Content> contentList = new ArrayList<>();
-        contentRepository.findAll().forEach(contentList::add);
-
-        return contentList;
+        return contentRepository.findAll();
     }
 
-    public Content findById(UUID contentId) throws CapacityException {
-        Content content = contentRepository.findFirstById(contentId);
-        if(content == null) {
-            throw new CapacityException("Conteúdo não encontrada.");
-        }
-        return content;
-    }
-
-    public Content findById(Object contentId) throws CapacityException {
-        if (contentId == null)
-            throw new CapacityException("Conteúdo não encontrado.");
-
-        return findById(String.valueOf(contentId));
-    }
-
-    public Content findById(String contentId) throws CapacityException {
-        return findById(UUID.fromString(contentId));
+    @Override
+    public Optional<Content> find( UUID id ) {
+        return contentRepository.findById( id );
     }
 
     public List<Content> findByCategory(UUID categoryId) throws CapacityException {
-        Category category = categoryService.findById(categoryId);
+        Category category = categoryService.findOrThrow(categoryId);
         return contentRepository.findByCategories(category);
     }
 
-    public List<Content> findByCategory(String categoryId) throws CapacityException {
-        return findByCategory(UUID.fromString(categoryId));
-    }
-
     public List<Content> findByFolder(UUID folderId) throws CapacityException {
-        Folder folder = folderService.findById(folderId);
-
-        return contentRepository.findContentsInFolderByOrderPosition(folder.getId());
+        return folderContentsRepository.findByFolderIdOrderByOrderNumAsc( folderId ).stream()
+            .map( fc -> fc.getContent() )
+            .filter(Objects::nonNull)
+            .toList();
     }
 
-    public List<Content> findByFolder(String folderId) throws CapacityException {
-        return findByFolder(UUID.fromString(folderId));
+    private Content saveOrUpdate(Content content) {
+        return contentRepository.saveAndFlush( content );
     }
 
-    public boolean saveOrUpdate(Content content) throws CapacityException {
-        Content updatedContent = contentRepository.save(content);
-        return findById(updatedContent.getId()) != null;
+    public Content create( CreateContentDTO createContentDTO ) {
+        var content = new Content();
+        content.setAuthor( profileService.getProfileInSessionOrThrow() );
+        content.setDescription( createContentDTO.description() );
+        if ( createContentDTO.image() != null )
+            content.setImage( imageMetadataService.findOrThrow( createContentDTO.image() ) );
+        content.setRating( createContentDTO.rating() );
+        content.setTitle( createContentDTO.title() );
+        content.setType( createContentDTO.type() );
+        content.setUrl( createContentDTO.url() );
+
+        if ( createContentDTO.categoriesIds() != null )
+            content.setCategories( createContentDTO.categoriesIds().stream().map( categoryService::findOrThrow ).toList() );
+
+        if ( createContentDTO.folders() != null ) {
+            var folders = createContentDTO.folders().stream().map( folderService::findByIdOrReferenceOrThrow ).toList();
+            folderService.checkPermissionToEdit( folders );
+
+            var folderContents = new ArrayList<FolderContents>( folders.size() );
+            var nextIndex = createContentDTO.folders().size();
+
+            for ( var f : folders ) {
+                var fc = new FolderContents();
+                fc.setFolder( f );
+                fc.setContent( content );
+                fc.setOrderNum( nextIndex++ );
+
+                folderContents.add( fc );
+            }
+
+            content.setFolderContents( folderContents );
+        }
+
+        return saveOrUpdate( content );
     }
 
-    public boolean delete(UUID id) throws CapacityException {
-        Content content = findById(id);
+    public Content update( UUID id, UpdateContentDTO updateContentDTO ) {
+        var content = findOrThrow( id );
+        checkPermissionToEdit( content );
 
-        // remove from linked folders
-        content.getFolders().forEach(folder -> {
-            folder.getContents().remove(content);
-            folderService.saveOrUpdate(folder);
-        });
+        if ( updateContentDTO.description() != null && !updateContentDTO.description().isBlank() )
+            content.setDescription( updateContentDTO.description() );
 
-        // remove from linked watch`s
-        deleteStatus(content.getId());
+        if ( updateContentDTO.image() != null )
+            content.setImage( imageMetadataService.findOrThrow( updateContentDTO.image() ) );
 
-        content.setDeleted(true);
-        saveOrUpdate(content);
+        if ( updateContentDTO.rating() != null )
+            content.setRating( updateContentDTO.rating() );
 
-        return true;
+        if ( updateContentDTO.title() != null && !updateContentDTO.title().isBlank() )
+            content.setTitle( updateContentDTO.title() );
+
+        if ( updateContentDTO.type() != null )
+            content.setType( updateContentDTO.type() );
+
+        if ( updateContentDTO.url() != null && !updateContentDTO.url().isBlank() )
+            content.setUrl( updateContentDTO.url() );
+
+        if ( updateContentDTO.categoriesIds() != null )
+            content.setCategories( updateContentDTO.categoriesIds().stream().map( categoryService::findOrThrow ).toList() );
+
+        return saveOrUpdate( content );
     }
 
-    public ContentStatus findStatusById(UUID contentId) throws CapacityException {
-        Profile userProfile = UserService.getInstance().getUserInSession().getProfile();
-        ContentStatus contentStatus = contentStatusRepository.findFirstByProfileIdAndContentId(userProfile.getId(), contentId);
+    public void delete( UUID id ) {
+        Content content = findOrThrow( id );
+        checkPermissionToDelete( content );
+
+        content.setDeleted( true );
+        saveOrUpdate( content );
+    }
+
+    public ContentStatus findStatusById( UUID contentId ) {
+        return findStatusById( contentId, profileService.getProfileInSessionOrThrow().getId() );
+    }
+
+    public ContentStatus findStatusById( UUID contentId, UUID profileId ) {
+        var profile = profileService.findOrThrow( profileId );
+        var contentStatus = contentStatusRepository.findFirstByProfileIdAndContentId( profileId, contentId );
+
         if(contentStatus == null) {
             contentStatus = new ContentStatus();
-            contentStatus.setContent(findById(contentId));
-            contentStatus.setProfile(UserService.getInstance().getUserInSession().getProfile());
-            contentStatus.setStatus(ContentStatusType.NOT_VIEWED);
-            return contentStatus;
+            contentStatus.setContent( findOrThrow(contentId) );
+            contentStatus.setProfile( profile );
+            contentStatus.setStatus( ContentStatusType.NOT_VIEWED );
         }
-        return contentStatus;
-    }
 
-    public ContentStatus findStatusById(String contentId) throws CapacityException {
-        return findStatusById(UUID.fromString(contentId));
+        return contentStatus;
     }
 
     public ContentStatus setStatus(UUID contentId, ContentStatusType status) throws CapacityException {
@@ -129,33 +172,30 @@ public class ContentService {
             contentStatus.setUpdatedAt(new java.util.Date());
 
             contentStatus = contentStatusRepository.save(contentStatus);
-            folderService.grantCompetenceBadge(contentStatus.getContent().getFolders(), contentStatus.getProfile());
-
-            return contentStatus;
+            profileService.grantCompetenceBadge(
+                contentStatus.getContent().getFolderContents().stream().map( fc -> fc.getFolder() ).toList(),
+                contentStatus.getProfile()
+            );
         }
+
         return contentStatus;
     }
 
-    public ContentStatus setStatus(String contentId, ContentStatusType status) throws CapacityException {
-        return setStatus(UUID.fromString(contentId), status);
-    }
-
     public void deleteStatus(UUID contentId) {
-        contentStatusRepository.deleteByContentId(contentId);
+        var content = findOrThrow( contentId );
+        checkPermissionToEdit( content );
+
+        contentStatusRepository.deleteByContentId( content.getId() );
     }
 
-    public ContentStatusType getProfileProgress(Object contentId, Object profileId, Object profileUsername) throws CapacityException {
-        Profile profile = ProfileService.getInstance().getProfileByUserIdOrUsername(profileId, profileUsername);
-        Content content = findById(contentId);
-
-        return getProfileProgress(content, profile);
+    @Override
+    public boolean hasPermissionToEdit( Content content ) {
+        return profileService.isSessionOfProfile( content.getAuthor() )
+            || userService.isUserAdminSession();
     }
 
-    public ContentStatusType getProfileProgress(Content content, Profile profile) throws CapacityException {
-        ContentStatus status = contentStatusRepository.findByProfileIdAndContentId(profile.getId(), content.getId());
-
-        return status != null
-            ? status.getStatus()
-            : ContentStatusType.NOT_VIEWED;
+    @Override
+    public boolean hasPermissionToDelete( Content content ) {
+        return hasPermissionToEdit( content );
     }
 }

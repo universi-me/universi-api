@@ -1,37 +1,49 @@
 package me.universi.user.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 import me.universi.Sys;
+import me.universi.api.interfaces.EntityService;
 import me.universi.group.entities.Group;
 import me.universi.group.entities.GroupSettings.GroupEnvironment;
 import me.universi.group.services.GroupService;
+import me.universi.image.services.ImageMetadataService;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.exceptions.ProfileException;
-import me.universi.profile.services.ProfileService;
+import me.universi.profile.repositories.PerfilRepository;
+import me.universi.role.services.RoleService;
+import me.universi.user.dto.*;
 import me.universi.user.entities.User;
 import me.universi.user.enums.Authority;
 import me.universi.user.exceptions.ExceptionResponse;
 import me.universi.user.exceptions.UserException;
 import me.universi.user.repositories.UserRepository;
+import me.universi.util.CastingUtil;
 import me.universi.util.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.mail.SimpleMailMessage;
+import org.springframework.http.*;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -54,15 +66,19 @@ import org.springframework.security.web.authentication.preauth.PreAuthenticatedA
 import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @Service
-public class UserService implements UserDetailsService {
+public class UserService extends EntityService<User> implements UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final ProfileService profileService;
+    private final PerfilRepository profileRepository;
     private final RoleHierarchyImpl roleHierarchy;
     private final SessionRegistry sessionRegistry;
     private JavaMailSender emailSender;
@@ -116,11 +132,14 @@ public class UserService implements UserDetailsService {
     @Value("${keycloak.client-secret}")
     String KEYCLOAK_CLIENT_SECRET;
 
+    @Value( "${server.servlet.context-path}" )
+    private String contextPath;
+
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, ProfileService profileService, RoleHierarchyImpl roleHierarchy, SessionRegistry sessionRegistry) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, PerfilRepository profileRepository, RoleHierarchyImpl roleHierarchy, SessionRegistry sessionRegistry) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.profileService = profileService;
+        this.profileRepository = profileRepository;
         this.roleHierarchy = roleHierarchy;
         this.sessionRegistry = sessionRegistry;
         this.emailExecutor = Executors.newFixedThreadPool(5);
@@ -131,46 +150,45 @@ public class UserService implements UserDetailsService {
         return Sys.context.getBean("userService", UserService.class);
     }
 
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserDetails user = findFirstByUsername(username);
-        if (user != null) {
-            return user;
-        }
-        if(emailRegex(username)) {
-            try {
-                return findFirstByEmail(username);
-            } catch (UserException e) {
-                throw new UsernameNotFoundException("Usuário não encontrado!");
-            }
-        }
-        throw new UsernameNotFoundException("Usuário não encontrado!");
+    @Override
+    public Optional<User> find( UUID id ) {
+        return userRepository.findById( id );
     }
 
-    public UserDetails findFirstByEmail(String email) throws UserException {
-        Group organization = GroupService.getInstance().obtainOrganizationBasedInDomain();
-        Optional<User> user = organization == null ? userRepository.findFirstByEmail(email) : userRepository.findFirstByEmailAndOrganizationId(email, organization.getId());
-        if (user.isPresent()) {
-            return user.get();
-        }
-        throw new UserException("Email de Usuário não encontrado!");
+    @Override
+    public List<User> findAll() {
+        return userRepository.findAll();
     }
 
-    public UserDetails findFirstByUsername(String username) {
-        Group organization = GroupService.getInstance().obtainOrganizationBasedInDomain();
-        Optional<User> userGet = organization == null ? userRepository.findFirstByName(username) : userRepository.findFirstByNameAndOrganizationId(username, organization.getId());
-        return userGet.orElse(null);
+    public Optional<User> findByUsername( String username ) {
+        var organization = GroupService.getInstance().obtainOrganizationBasedInDomain();
+
+        return organization == null
+            ? userRepository.findFirstByName( username )
+            : userRepository.findFirstByNameAndOrganizationId( username, organization.getId() );
     }
 
-    public UserDetails findFirstById(UUID id) {
-        Optional<User> userGet = userRepository.findFirstById(id);
-        return userGet.orElse(null);
+    public Optional<User> findByEmail( String email ) {
+        var organization = GroupService.getInstance().obtainOrganizationBasedInDomain();
+        return organization == null
+            ? userRepository.findFirstByEmail( email )
+            : userRepository.findFirstByEmailAndOrganizationId( email, organization.getId() );
     }
 
-    public UserDetails findFirstById(String id) {
-        return findFirstById(UUID.fromString(id));
+    @Override
+    public User loadUserByUsername( String username ) throws UsernameNotFoundException {
+        return findByUsernameOrEmail( username )
+            .orElseThrow( () -> new UsernameNotFoundException("Usuário não encontrado!") );
     }
 
-    public void createUser(User user, String firstname, String lastname) throws Exception {
+    public Optional<User> findByUsernameOrEmail( String usernameOrEmail ) {
+        var organization = GroupService.getInstance().obtainOrganizationBasedInDomain();
+        return organization == null
+            ? userRepository.findFirstByEmailOrName( usernameOrEmail )
+            : userRepository.findFirstByEmailOrNameAndOrganizationId( usernameOrEmail, organization.getId() );
+    }
+
+    public void createUser(User user, String firstname, String lastname) throws UserException {
         if (user==null) {
             throw new UserException("Usuario está vazio!");
         } else if (user.getUsername()==null) {
@@ -203,7 +221,7 @@ public class UserService implements UserDetailsService {
             }
 
             userProfile.setUser(user);
-            profileService.save(userProfile);
+            profileRepository.saveAndFlush(userProfile);
             try {
                 // add organization to user profile
                 GroupService groupService = GroupService.getInstance();
@@ -214,38 +232,16 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    public long count() {
-        try {
-            return userRepository.count();
-        } catch (Exception e) {
-            return 0;
-        }
-    }
-
     public String encodePassword(String rawPassword) {
         return passwordEncoder.encode(rawPassword);
     }
 
     public boolean usernameExist(String username) {
-        try {
-            if(loadUserByUsername(username) != null) {
-                return true;
-            }
-        }catch (UsernameNotFoundException e){
-            return false;
-        }
-        return false;
+        return findByUsername( username ).isPresent();
     }
 
     public boolean emailExist(String email) {
-        try {
-            if(findFirstByEmail(email) != null) {
-                return true;
-            }
-        }catch (Exception e){
-            return false;
-        }
-        return false;
+        return findByEmail( email ).isPresent();
     }
 
     public boolean usernameRegex(String username) {
@@ -328,7 +324,7 @@ public class UserService implements UserDetailsService {
     public void updateUserInSession() {
         User userSession = getUserInSession();
         if(userSession != null) {
-            User actualUser = (User) findFirstById(userSession.getId());
+            User actualUser = find(userSession.getId()).orElse(null);
             if(actualUser != null) {
                 configureSessionForUser(actualUser, null);
             }
@@ -607,7 +603,7 @@ public class UserService implements UserDetailsService {
     }
 
     // generate recovery password token sha256 for user
-    public String generateRecoveryPasswordToken(User user, boolean useIntervalCheck) throws Exception {
+    public String generateRecoveryPasswordToken(User user, boolean useIntervalCheck) throws UserException {
 
         //check recovery date token if less than 15min
         if(useIntervalCheck && user.getRecoveryPasswordTokenDate() != null) {
@@ -619,7 +615,12 @@ public class UserService implements UserDetailsService {
 
         String tokenRandom = UUID.randomUUID().toString();
 
-        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        MessageDigest digest = null;
+        try {
+            digest = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            throw new UserException("Algoritmo sha256 não disponível.");
+        }
         byte[] encodedHash = digest.digest(tokenRandom.getBytes(StandardCharsets.UTF_8));
         String tokenString = ConvertUtil.bytesToHex(encodedHash);
 
@@ -660,7 +661,7 @@ public class UserService implements UserDetailsService {
     }
 
     // send recovery password email to user
-    public void sendRecoveryPasswordEmail(User user) throws Exception {
+    public void sendRecoveryPasswordEmail(User user) throws UserException {
         String userIp = getClientIpAddress();
 
         String token = generateRecoveryPasswordToken(user, true);
@@ -684,12 +685,12 @@ public class UserService implements UserDetailsService {
     }
 
     //send confirmation signup account email to user
-    public void sendConfirmAccountEmail(User user, boolean signup) throws Exception {
+    public void sendConfirmAccountEmail(User user, boolean signup) throws UserException {
         String userIp = getClientIpAddress();
 
         String token = generateRecoveryPasswordToken(user, false);
 
-        String url = getPublicUrl() + "/api/confirm-account/" + token;
+        String url = getPublicUrl() + "/confirm-account/" + token;
         String subject = "Universi.me - Confirmação de Conta";
         String messageExplain = (signup) ? "Seja bem-vindo(a) ao Universi.me, para continuar com o seu cadastro precisamos confirmar a sua conta do Universi.me." : "Você solicitou a confirmação de sua conta no Universi.me.";
         String text = "Olá " + user.getUsername() + ",<br/><br/>\n\n" +
@@ -824,7 +825,11 @@ public class UserService implements UserDetailsService {
             String jarPath = new File(".").getPath();
             String filePath = Paths.get(jarPath, "build.hash").toString();
             Resource resource = new FileSystemResource(filePath);
-            try (InputStreamReader reader = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8)) {
+            try {
+                if(resource.contentLength() == 0) {
+                    return "development";
+                }
+                InputStreamReader reader = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8);
                 BUILD_HASH = FileCopyUtils.copyToString(reader);
             } catch (IOException ignored) {
             }
@@ -835,7 +840,7 @@ public class UserService implements UserDetailsService {
         return BUILD_HASH;
     }
 
-    public User configureLoginForOAuth(String name, String username, String email, String pictureUrl) throws Exception {
+    public User configureLoginForOAuth(String name, String username, String email, String pictureUrl) throws UserException {
         if(email == null) {
             throw new UserException("Não foi possível obter Email.");
         }
@@ -847,11 +852,9 @@ public class UserService implements UserDetailsService {
             throw new UserException("Email \""+email+"\" não esta disponível para cadastro!");
         }
 
-        User user;
+        User user = findByEmail(email).orElse( null );
 
-        try {
-            user = (User)findFirstByEmail(email);
-        } catch (UserException e) {
+        if ( user == null ) {
             // register user
             if(!usernameExist(username.trim())) {
 
@@ -873,10 +876,10 @@ public class UserService implements UserDetailsService {
                     }
                 }
                 if(pictureUrl != null) {
-                    profile.setImage(pictureUrl.trim());
+                    profile.setImage( ImageMetadataService.getInstance().saveExternalImage( pictureUrl.trim(), profile, false ) );
                 }
 
-                profileService.save(profile);
+                profileRepository.saveAndFlush(profile);
 
                 saveInSession("novoUsuario", true);
 
@@ -909,7 +912,27 @@ public class UserService implements UserDetailsService {
                 return PUBLIC_URL;
             }
             URL requestUrl = new URL(getRequest().getRequestURL().toString());
-            return requestUrl.getProtocol() + "://" + requestUrl.getHost() + ((requestUrl.getPort() > 0 && requestUrl.getPort() != 80 && requestUrl.getPort() != 443)  ? ":"+requestUrl.getPort() : "");
+            String port = requestUrl.getPort() > 0 && requestUrl.getPort() != 80 && requestUrl.getPort() != 443
+                ? ":" + requestUrl.getPort()
+                : "";
+
+            return requestUrl.getProtocol() + "://" + requestUrl.getHost() + port + contextPath;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public String getRefererUrlBase() {
+        try {
+            String refererHeader = getRequest().getHeader("Referer");
+            if(refererHeader != null && !refererHeader.isEmpty()) {
+                URL requestUrl = new URL(refererHeader);
+                String port = requestUrl.getPort() > 0 && requestUrl.getPort() != 80 && requestUrl.getPort() != 443
+                        ? ":" + requestUrl.getPort()
+                        : "";
+                return requestUrl.getProtocol() + "://" + requestUrl.getHost() + port;
+            }
+            return getPublicUrl();
         } catch (Exception e) {
             return null;
         }
@@ -917,6 +940,10 @@ public class UserService implements UserDetailsService {
 
     public String keycloakLoginUrl() {
         return  getKeycloakUrl() + "/realms/" + getKeycloakRealm() + "/protocol/openid-connect/auth?client_id=" + getKeycloakClientId() + "&redirect_uri="+ getKeycloakRedirectUrl() +"&response_type=code";
+    }
+
+    public String urlDefaultKeycloakRedirectCallback() {
+        return getRefererUrlBase() + "/keycloak-oauth-redirect";
     }
 
     public String getKeycloakRedirectUrl() {
@@ -927,7 +954,7 @@ public class UserService implements UserDetailsService {
         if(KEYCLOAK_REDIRECT_URL != null && !KEYCLOAK_REDIRECT_URL.isEmpty()){
             return KEYCLOAK_REDIRECT_URL;
         }
-        return getPublicUrl() + "/keycloak-oauth-redirect";
+        return urlDefaultKeycloakRedirectCallback();
     }
 
     public String getKeycloakClientId() {
@@ -1004,4 +1031,415 @@ public class UserService implements UserDetailsService {
         return emailSender;
     }
 
+    public GetAccountDTO getAccountSession() {
+        GetAccountDTO getAccount = null;
+        if(userIsLoggedIn()) {
+            getAccount = new GetAccountDTO(getUserInSession(), RoleService.getInstance().getAllRolesSession());
+        }
+        if(getInSession("account_confirmed") != null) {
+            removeInSession("account_confirmed");
+            removeInSession("message_account_confirmed");
+        }
+        return getAccount;
+    }
+
+    public boolean logoutUserSession() {
+        if(userIsLoggedIn()) {
+            logout();
+            return true;
+        }
+        return false;
+    }
+
+    public GetAvailableCheckDTO availableUsernameCheck(String username) {
+        boolean usernameRegex = usernameRegex(username);
+        boolean usernameExist = usernameExist(username);
+
+        return new GetAvailableCheckDTO(
+                usernameRegex && !usernameExist,
+                !usernameRegex ? "Verifique o formato do nome de usuário." : usernameExist ? "Este nome de usuário está em uso." : "Usuário Disponível para uso."
+        );
+    }
+
+    public GetAvailableCheckDTO availableEmailCheck(String email) {
+        boolean emailRegex = emailRegex(email);
+        boolean emailExist = emailExist(email);
+        boolean emailAvailableForOrganization = GroupService.getInstance().emailAvailableForOrganization(email);
+
+        return new GetAvailableCheckDTO(
+                emailRegex && !emailExist && emailAvailableForOrganization,
+                !emailRegex ? "Verifique o formato do email." : emailExist ? "Este email já está em uso." : !emailAvailableForOrganization ? "Email não autorizado.\nUtilize seu email corporativo." :  "Email Disponível para uso."
+        );
+    }
+
+    public boolean createAccount(CreateAccountDTO createAccountDTO) throws UserException {
+
+        // check if register is enabled
+        if(!isSignupEnabled()) {
+            throw new UserException("Registrar-se está desativado!");
+        }
+
+        // check recaptcha if available
+        checkRecaptchaWithToken(createAccountDTO.recaptchaToken());
+
+        String username = createAccountDTO.username();
+        String email = createAccountDTO.email();
+
+        String firstname = createAccountDTO.firstname();
+        String lastname = createAccountDTO.lastname();
+
+        String password = createAccountDTO.password();
+
+        if (username==null || username.isEmpty()) {
+            throw new UserException("Verifique o campo Usuário!");
+        } else {
+            username = username.trim().toLowerCase();
+            if(!usernameRegex(username)) {
+                throw new UserException("Nome de usuário está com formato inválido!");
+            }
+        }
+        if (email==null || email.isEmpty()) {
+            throw new UserException("Verifique o campo Email!");
+        } else {
+            email = email.trim().toLowerCase();
+            if(!emailRegex(email)) {
+                throw new UserException("Email está com formato inválido!");
+            }
+        }
+        if (password==null || password.isEmpty()) {
+            throw new UserException("Verifique o campo Senha!");
+        } else {
+            if(!passwordRegex(password)) {
+                throw new UserException("Senha está com formato inválido!");
+            }
+        }
+
+        if(usernameExist(username)) {
+            throw new UserException("Usuário \""+username+"\" já esta cadastrado!");
+        }
+        if(emailExist(email)) {
+            throw new UserException("Email \""+email+"\" já esta cadastrado!");
+        }
+        if(!GroupService.getInstance().emailAvailableForOrganization(email)) {
+            throw new UserException("Email \""+email+"\" não esta disponível para cadastro!");
+        }
+
+        User user = new User();
+        user.setName(username);
+        user.setEmail(email);
+        if(isConfirmAccountEnabled()) {
+            user.setInactive(true);
+        }
+        saveRawPasswordToUser(user, password, false);
+
+        createUser(user, firstname, lastname);
+
+        if(isConfirmAccountEnabled()) {
+            sendConfirmAccountEmail(user, true);
+        }
+
+        return true;
+    }
+
+    public void editAccount(UpdateAccountDTO updateAccountDTO) {
+        String newPassword = updateAccountDTO.newPassword();
+        if(newPassword == null || newPassword.isEmpty()) {
+            throw new UserException("Parametro newPassword é nulo.");
+        }
+
+        if(!passwordRegex(newPassword)) {
+            throw new UserException("Nova Senha está com formato inválido!");
+        }
+
+        String password = updateAccountDTO.password();
+
+        User user = getUserInSession();
+
+        // if logged with google don't check password
+        boolean loggedAsGoogle = (getInSession("loginViaGoogle") != null);
+
+        if (loggedAsGoogle || passwordValid(user, password)) {
+
+            saveRawPasswordToUser(user, newPassword, false);
+
+            updateUserInSession();
+
+        } else {
+            throw new UserException("Credenciais Invalidas!");
+        }
+    }
+
+    public void adminEditAccount(EditAccountDTO editAccountDTO) {
+        if(!isUserAdminSession()) {
+            throw new UserException("Você não tem permissão para editar usuário.");
+        }
+
+        var userId = CastingUtil.getUUID( editAccountDTO.userId()).orElse( null );
+        if(userId == null) {
+            throw new UserException("Parametro userId é nulo.");
+        }
+
+        String username = editAccountDTO.username();
+        String email = editAccountDTO.email();
+        String password = editAccountDTO.password();
+        String authorityLevel = editAccountDTO.authorityLevel();
+
+        Boolean emailVerified = editAccountDTO.emailVerified();
+        Boolean blockedAccount = editAccountDTO.blockedAccount();
+        Boolean inactiveAccount = editAccountDTO.inactiveAccount();
+        Boolean credentialsExpired = editAccountDTO.credentialsExpired();
+        Boolean expiredUser = editAccountDTO.expiredUser();
+
+        User userEdit = find(userId).orElse( null );
+        if(userEdit == null) {
+            throw new UserException("Usuário não encontrado.");
+        }
+
+        String usernameOld = userEdit.getUsername();
+
+        if(username != null && !username.isEmpty()) {
+            if(usernameExist(username) && !username.equals(usernameOld)) {
+                throw new UserException("Usuário \""+username+"\" já esta cadastrado!");
+            }
+            if(usernameRegex(username)) {
+                userEdit.setName(username);
+            } else {
+                throw new UserException("Nome de Usuário está com formato inválido!");
+            }
+        }
+        if(email != null && !email.isEmpty()) {
+            if(emailExist(email) && !email.equals(userEdit.getEmail())) {
+                throw new UserException("Email \""+email+"\" já esta cadastrado!");
+            }
+            if(emailRegex(email)) {
+                userEdit.setEmail(email);
+            } else {
+                throw new UserException("Email está com formato inválido!");
+            }
+        }
+        if(password != null && !password.isEmpty()) {
+            saveRawPasswordToUser(userEdit, password, false);
+        }
+
+        if(authorityLevel != null && !authorityLevel.isEmpty()) {
+            userEdit.setAuthority(Authority.valueOf(authorityLevel));
+        }
+
+        if(emailVerified != null) {
+            userEdit.setEmail_verified(emailVerified);
+        }
+        if(blockedAccount != null) {
+            userEdit.setBlocked_account(blockedAccount);
+        }
+        if(inactiveAccount != null) {
+            userEdit.setInactive(inactiveAccount);
+        }
+        if(credentialsExpired != null) {
+            userEdit.setExpired_credentials(credentialsExpired);
+        }
+        if(expiredUser != null) {
+            userEdit.setExpired_user(expiredUser);
+        }
+
+        save(userEdit);
+
+        // force logout
+        logoutUsername(usernameOld);
+    }
+
+    public List<User> adminListAccount(String byRole) {
+        if(!isUserAdminSession()) {
+            throw new UserException("Você não tem permissão para listar usuários.");
+        }
+        return findAllUsers(byRole);
+    }
+
+    public User keycloackLogin( LoginCodeDTO loginCodeDTO) {
+        if(!isKeycloakEnabled()) {
+            throw new UserException("Keycloak desabilitado!");
+        }
+
+        String code = loginCodeDTO.code();
+        if(code == null) {
+            throw new UserException("Parametro token é nulo.");
+        }
+
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Content-Type", MediaType.APPLICATION_FORM_URLENCODED.toString());
+            headers.add("Accept", MediaType.APPLICATION_JSON.toString());
+
+            MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<String, String>();
+            requestBody.add("client_id", getKeycloakClientId());
+            requestBody.add("grant_type", "authorization_code");
+            requestBody.add("redirect_uri", getKeycloakRedirectUrl());
+            requestBody.add("client_secret", getKeycloakClientSecret());
+            requestBody.add("code", code);
+            HttpEntity formEntity = new HttpEntity<MultiValueMap<String, String>>(requestBody, headers);
+
+            RestTemplate restTemplate = new RestTemplate();
+            HashMap<String, Object> token = restTemplate.postForObject(getKeycloakUrl() + "/realms/" + getKeycloakRealm() + "/protocol/openid-connect/token", formEntity, HashMap.class);
+
+            // returned secured token
+            String accessToken = (String) token.get("access_token");
+
+            // Split the JWT into its parts
+            String[] parts = accessToken.split("\\.");
+            if (parts.length != 3) {
+                throw new IllegalArgumentException("Invalid JWT token");
+            }
+
+            String bodyJson = new String(java.util.Base64.getUrlDecoder().decode(parts[1]));
+            Map<String, Object> decodedToken = new ObjectMapper().readValue(bodyJson, Map.class);
+
+            String email = (String) decodedToken.get("email");
+            String username = (String) decodedToken.get("preferred_username");
+            String name = (String) decodedToken.get("name");
+            String pictureUrl = (String) decodedToken.get("picture");
+
+            User user = configureLoginForOAuth(name, username, email, pictureUrl);
+
+            if (user != null) {
+                return user;
+            }
+        } catch (Exception e) {
+            if(e.getClass() == UserException.class) {
+                throw (UserException) e;
+            }
+        }
+
+        throw new UserException("Falha ao fazer login com Keycloak.");
+    }
+
+    public User googleLogin( LoginTokenDTO loginTokenDTO ) {
+        if(!isLoginViaGoogleEnabled()) {
+            throw new UserException("Login via Google desabilitado!");
+        }
+
+        String idTokenString = loginTokenDTO.token();
+
+        if(idTokenString==null) {
+            throw new UserException("Parametro token é nulo.");
+        }
+
+        // check if payload is valid
+        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
+                .setAudience(Collections.singletonList(getGoogleClientId()))
+                .build();
+
+        GoogleIdToken idToken = null;
+        try {
+            idToken = verifier.verify(idTokenString);
+        } catch (Exception e) {
+            throw new UserException("Ocorreu um erro ao verificar Token de Autenticação.");
+        }
+
+        if (idToken != null) {
+            GoogleIdToken.Payload payload = idToken.getPayload();
+
+            String email = payload.getEmail();
+            String name = (String) payload.get("name");
+            String pictureUrl = (String) payload.get("picture");
+
+            String username = email.split("@")[0].trim();
+
+            User user = configureLoginForOAuth(name, username, email, pictureUrl);
+
+            if(user != null) {
+                return user;
+            }
+
+        } else {
+            throw new UserException("Token de Autenticação é Inválida.");
+        }
+
+        throw new UserException("Falha ao fazer login com Google.");
+    }
+
+    public URI getKeycloakLoginUrl() {
+        if(!isKeycloakEnabled()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "denied access to keycloak login");
+        }
+        return URI.create(keycloakLoginUrl());
+    }
+
+    public void recoveryPassword( RecoveryPasswordDTO recoveryPasswordDTO ) {
+
+        checkRecaptchaWithToken(recoveryPasswordDTO.recaptchaToken());
+
+        String usernameOrEmail = recoveryPasswordDTO.username();
+
+        if(usernameOrEmail == null) {
+            throw new UserException("Parametro username é nulo.");
+        }
+
+        User user = null;
+
+        try {
+            user = (User) loadUserByUsername(usernameOrEmail);
+        } catch (Exception e) {
+            throw new UserException("Conta não encontrada!");
+        }
+
+        sendRecoveryPasswordEmail(user);
+    }
+
+    public void recoveryNewPassword( RecoveryNewPasswordDTO recoveryNewPasswordDTO ) {
+        String token = recoveryNewPasswordDTO.token();
+        String newPassword = recoveryNewPasswordDTO.newPassword();
+
+        if(token == null) {
+            throw new UserException("Parametro token é nulo.");
+        }
+        if(newPassword == null) {
+            throw new UserException("Parametro newPassword é nulo.");
+        }
+
+        if(!passwordRegex(newPassword)) {
+            throw new UserException("Nova Senha está com formato inválido!");
+        }
+
+        User user = getUserByRecoveryPasswordToken(token);
+
+        if(user == null) {
+            throw new UserException("Token de recuperação de senha inválido ou expirado!");
+        }
+
+        user.setRecoveryPasswordToken(null);
+        user.setInactive(false);
+        saveRawPasswordToUser(user, newPassword, true);
+    }
+
+    public void requestConfirmAccountEmail() {
+        User user = getUserInSession();
+        if(isAccountConfirmed(user)) {
+            throw new UserException("Conta já confirmada!");
+        }
+        sendConfirmAccountEmail(user, false);
+    }
+
+    public Boolean confirmAccountEmail(String token) throws RuntimeException {
+        User user = token==null ? null : getUserByRecoveryPasswordToken(token);
+        if(user == null) {
+            return false;
+        }
+
+        user.setRecoveryPasswordToken(null);
+        user.setInactive(false);
+        user.setConfirmed(true);
+        save(user);
+
+        saveInSession("account_confirmed", true);
+        return true;
+    }
+
+    @Override
+    public boolean hasPermissionToEdit( User user ) {
+        return isSessionOfUser( user );
+    }
+
+    @Override
+    public boolean hasPermissionToDelete( User user ) {
+        return hasPermissionToEdit( user ) || isUserAdminSession();
+    }
 }

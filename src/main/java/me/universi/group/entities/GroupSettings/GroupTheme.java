@@ -9,11 +9,12 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.UUID;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.SQLRestriction;
 
-@Entity(name = "group_theme")
-@SQLDelete(sql = "UPDATE group_theme SET deleted = true WHERE id=?")
-@Where(clause = "deleted=false")
+@Entity(name = "GroupTheme")
+@Table(name = "group_theme", schema = "system_group")
+@SQLDelete(sql = "UPDATE system_group.group_theme SET deleted = true WHERE id=?")
+@SQLRestriction( value = "NOT deleted" )
 @JsonIgnoreProperties({"hibernateLazyInitializer"})
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class GroupTheme  implements Serializable {

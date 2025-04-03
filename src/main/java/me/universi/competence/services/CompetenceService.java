@@ -1,23 +1,21 @@
 package me.universi.competence.services;
 
 import me.universi.Sys;
-import me.universi.api.entities.Response;
+import me.universi.competence.dto.CreateCompetenceDTO;
+import me.universi.competence.dto.UpdateCompetenceDTO;
 import me.universi.competence.entities.Competence;
-import me.universi.competence.entities.CompetenceType;
-import me.universi.competence.exceptions.CompetenceException;
 import me.universi.competence.repositories.CompetenceRepository;
 import me.universi.profile.entities.Profile;
-import me.universi.profile.exceptions.ProfileException;
 import me.universi.profile.services.ProfileService;
-import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
+
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotNull;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -27,208 +25,97 @@ public class CompetenceService {
     private final ProfileService profileService;
     private final UserService userService;
     private final CompetenceTypeService competenceTypeService;
-    private final CompetenceProfileService competenceProfileService;
 
-    public CompetenceService(CompetenceRepository competenceRepository, ProfileService profileService, UserService userService, CompetenceTypeService competenceTypeService, CompetenceProfileService competenceProfileService){
+    public CompetenceService(CompetenceRepository competenceRepository, ProfileService profileService, UserService userService, CompetenceTypeService competenceTypeService){
         this.competenceRepository = competenceRepository;
         this.profileService = profileService;
         this.userService = userService;
         this.competenceTypeService = competenceTypeService;
-        this.competenceProfileService = competenceProfileService;
     }
 
     public static CompetenceService getInstance() {
         return Sys.context.getBean("competenceService", CompetenceService.class);
     }
 
-    public Competence findFirstById(UUID id) {
-        Optional<Competence> optionalCompetence = competenceRepository.findFirstById(id);
-        if(optionalCompetence.isPresent()){
-            return optionalCompetence.get();
-        }else{
-            return null;
-        }
+    public Optional<Competence> find( UUID id ) {
+        return competenceRepository.findById( id );
     }
 
-    public Competence save(Competence competence) {
-        try {
-            return competenceRepository.saveAndFlush(competence);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+    public Competence findOrThrow( UUID id ) throws EntityNotFoundException {
+        return find( id ).orElseThrow( () -> new EntityNotFoundException( "Competência de ID '" + id + "' não encontrada" ) );
     }
 
-    public Competence findFirstById(String id) {
-        return findFirstById(UUID.fromString(id));
+    public List<Competence> findByProfileId( UUID profileId ) {
+        return competenceRepository.findByProfileId( profileId );
     }
 
-    public void deleteLogico(Competence competence) {
-        competence.setDeleted(true);
-        save(competence);
+    public List<Competence> findByProfileIdAndCompetenceTypeId( UUID profileId, UUID competenceTypeId ) {
+        return competenceRepository.findByProfileIdAndCompetenceTypeId( profileId, competenceTypeId );
     }
 
     public List<Competence> findAll() {
         return competenceRepository.findAll();
     }
 
-    public void update(Competence competence){ competenceRepository.saveAndFlush(competence); }
+    public Competence create( @NotNull CreateCompetenceDTO createCompetenceDTO, @NotNull Profile profile ) {
+        var competenceType = competenceTypeService.findOrThrow( createCompetenceDTO.competenceTypeId() );
 
-    public boolean profileHasCompetence(@NotNull Profile profile, @NotNull CompetenceType competenceType) {
-        return competenceProfileService.findCompetenceByProfile(profile)
-            .stream()
-            .anyMatch(c -> c.getCompetenceType().getId().equals(competenceType.getId()));
+        return competenceRepository.saveAndFlush( new Competence(
+            competenceType,
+            "",
+            createCompetenceDTO.level(),
+            profile
+        ) );
     }
 
-    public void deleteAll(Collection<Competence> competences) {
-        for(Competence competence : competences) {
-            competence.setDeleted(true);
-        }
-        competenceRepository.saveAll(competences);
+    public Competence create( @NotNull CreateCompetenceDTO createCompetenceDTO ) {
+        return create( createCompetenceDTO, profileService.getProfileInSessionOrThrow() );
     }
 
-    public void addCompetenceInProfile(@NotNull Profile profile,Competence newCompetence) throws ProfileException {
-        competenceProfileService.addToProfile( profile, newCompetence );
+    public Competence update( UUID id, UpdateCompetenceDTO updateCompetenceDTO ) {
+        var competence = findOrThrow( id );
+        checkPermissionForEdit( competence );
+
+        if ( updateCompetenceDTO.competenceTypeId() != null )
+            competence.setCompetenceType(
+                competenceTypeService.findOrThrow( updateCompetenceDTO.competenceTypeId() )
+            );
+
+        if ( updateCompetenceDTO.description() != null && !updateCompetenceDTO.description().isBlank() )
+            competence.setDescription( updateCompetenceDTO.description() );
+
+        if ( updateCompetenceDTO.level() != null )
+            competence.setLevel( updateCompetenceDTO.level() );
+
+        return competenceRepository.save( competence );
     }
 
-    public void delete(UUID id) {
-        Competence competence = findFirstById(id);
-        deleteLogico(competence);
+    public void delete( UUID id ) {
+        var competence = findOrThrow( id );
+        checkPermissionForDelete( competence );
+
+        competence.setDeleted( true );
+        competenceRepository.save( competence );
     }
 
-    public Competence create(@NotNull UUID competenceTypeId, @NotNull String description, @NotNull Integer level, @NotNull Profile profile) {
-        CompetenceType compT = competenceTypeService.findFirstById(competenceTypeId);
-        if(compT == null)
-            throw new CompetenceException("Tipo de Competência não encontrado.");
-
-        return create(compT, description, level, profile);
-    }
-
-    public Competence create(@NotNull CompetenceType competenceType, @NotNull String description, @NotNull Integer level, @NotNull Profile profile) {
-        Competence newCompetence = new Competence();
-        newCompetence.setCompetenceType(competenceType);
-        newCompetence.setDescription(description);
-        newCompetence.setLevel(level);
-
-        newCompetence = save(newCompetence);
-        addCompetenceInProfile(profile, newCompetence);
-
-        return newCompetence;
-    }
-
-    public Response update( Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-
-            String id = (String)body.get("competenciaId");
-            if(id == null) {
-                throw new CompetenceException("Parametro competenciaId é nulo.");
-            }
-
-            String competenceTypeId = (String)body.get("competenciaTipoId");
-            String description = (String)body.get("descricao");
-            String level = (String)body.get("nivel");
-
-
-
-            Competence competence = findFirstById(id);
-            if (competence == null) {
-                throw new CompetenceException("Competência não encontrada.");
-            }
-
-            checkPermissionForEdit(competence, false);
-
-            if(competenceTypeId != null && !competenceTypeId.isEmpty()) {
-                CompetenceType compT = competenceTypeService.findFirstById(competenceTypeId);
-                if(compT == null) {
-                    throw new CompetenceException("Tipo de Competência não encontrado.");
-                }
-                competence.setCompetenceType(compT);
-            }
-            if (description != null) {
-                competence.setDescription(description);
-            }
-            if (level != null) {
-                competence.setLevel(Integer.parseInt(level));
-            }
-
-            save(competence);
-
-            response.message = "Competência atualizada";
-            response.success = true;
-
-        });
-    }
-
-    private void checkPermissionForEdit(Competence competence, boolean forDelete) {
-        User user = userService.getUserInSession();
-        Profile profile = profileService.getProfileByUserIdOrUsername(user.getProfile().getId(), user.getUsername());
-        var hasCompetence = competenceProfileService.findByProfile( profile, competence.getCompetenceType() ).isPresent();
-
-        if(!hasCompetence) {
-            if(forDelete) {
-                if(userService.isUserAdminSession()) {
-                    return;
-                }
-            }
-        } else {
+    private void checkPermissionForEdit( @NotNull Competence competence ) throws AccessDeniedException {
+        if ( userService.isUserAdminSession() )
             return;
-        }
-        throw new CompetenceException("Você não tem permissão para editar essa competência.");
+
+        var profile = profileService.getProfileInSession();
+
+        if ( profile.isEmpty() || !competence.getProfile().getId().equals( profile.get().getId() ) )
+            throw new AccessDeniedException( "Você não tem permissão para alterar esta Competência" );
     }
 
-    public Response remove( Map<String, Object> body) {
-        return Response.buildResponse(response -> {
+    private void checkPermissionForDelete( @NotNull Competence competence ) throws AccessDeniedException {
+        var profile = profileService.getProfileInSession();
 
-            String id = (String)body.get("competenciaId");
-            if(id == null) {
-                throw new CompetenceException("Parametro competenciaId é nulo.");
-            }
-
-            Competence competence = findFirstById(id);
-            if (competence == null) {
-                throw new CompetenceException("Competência não encontrada.");
-            }
-
-            checkPermissionForEdit(competence, true);
-
-            deleteLogico(competence);
-
-            response.message = "Competência removida";
-            response.success = true;
-
-        });
-    }
-
-    public Response get( Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-
-            String id = (String)body.get("competenciaId");
-            if(id == null) {
-                throw new CompetenceException("Parametro competenciaId é nulo.");
-            }
-
-            Competence competence = findFirstById(id);
-            if (competence == null) {
-                throw new CompetenceException("Competencia não encontrada.");
-            }
-
-            response.body.put("competencia", competence);
-            response.success = true;
-
-        });
-    }
-
-    public Response findAll( Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-
-            List<Competence> competences = findAll();
-
-            response.body.put("lista", competences);
-
-            response.message = "Operação realizada com exito.";
-            response.success = true;
-
-        });
+        if ( profile.isEmpty() || (
+            !competence.getProfile().getId().equals( profile.get().getId() )
+            && !userService.isUserAdminSession()
+        ) )
+            throw new AccessDeniedException( "Você não tem permissão para deletar esta Competência" );
     }
 
     public boolean validate( Competence competence ) {

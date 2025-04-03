@@ -16,39 +16,36 @@
         <csrf disabled="true"/>
 
         <intercept-url pattern="/" access="permitAll"/>
-        <intercept-url pattern="/api" access="permitAll"/>
-        <intercept-url pattern="/api/" access="permitAll"/>
-        <intercept-url pattern="/api/health/**" access="permitAll"/>
+        <intercept-url pattern="/health/**" access="permitAll"/>
 
-        <intercept-url pattern="/api/login" access="permitAll"/>
-        <intercept-url pattern="/api/login/google" access="permitAll"/>
-        <intercept-url pattern="/api/login/keycloak" access="permitAll"/>
-        <intercept-url pattern="/api/login/keycloak/auth" access="permitAll"/>
-        <intercept-url pattern="/api/signup" access="permitAll"/>
-        <intercept-url pattern="/api/account" access="permitAll"/>
+        <intercept-url pattern="/login" access="permitAll"/>
+        <intercept-url pattern="/login/google" access="permitAll"/>
+        <intercept-url pattern="/login/keycloak" access="permitAll"/>
+        <intercept-url pattern="/login/keycloak/auth" access="permitAll"/>
+        <intercept-url pattern="/signup" access="permitAll"/>
+        <intercept-url pattern="/account" access="permitAll"/>
 
-        <intercept-url pattern="/api/username-available" access="permitAll"/>
-        <intercept-url pattern="/api/email-available" access="permitAll"/>
-        <intercept-url pattern="/api/recovery-password" access="permitAll"/>
-        <intercept-url pattern="/api/new-password" access="permitAll"/>
-        <intercept-url pattern="/api/confirm-account/*" access="permitAll"/>
+        <intercept-url pattern="/available/**" access="permitAll"/>
+        <intercept-url pattern="/recovery-password" access="permitAll"/>
+        <intercept-url pattern="/new-password" access="permitAll"/>
+        <intercept-url pattern="/confirm-account/*" access="permitAll"/>
 
-        <intercept-url pattern="/api/group/current-organization" access="permitAll"/>
+        <intercept-url pattern="/groups/current-organization" access="permitAll"/>
 
+        <intercept-url pattern="/img" access="isAuthenticated()"/>
+        <intercept-url pattern="/img/**" access="permitAll"/>
 
-        <intercept-url pattern="/api/swagger-ui.html" access="permitAll"/>
-        <intercept-url pattern="/api/swagger-ui/**" access="permitAll"/>
-        <intercept-url pattern="/api/v3/api-docs/**" access="permitAll"/>
+        <intercept-url pattern="/swagger-ui.html" access="permitAll"/>
+        <intercept-url pattern="/swagger-ui/**" access="permitAll"/>
+        <intercept-url pattern="/v3/api-docs/**" access="permitAll"/>
 
         <!-- Admin rules -->
-        <intercept-url pattern="/api/admin/**" access="hasRole('ADMIN')"/>
+        <intercept-url pattern="/admin/**" access="hasRole('ADMIN')"/>
 
         <!-- Perimitir acesso ao H2-console -->
-        <intercept-url pattern="/api/h2-console/**" access="('${spring.profiles.active}' == 'test')"/>
+        <intercept-url pattern="/h2-console/**" access="('${spring.profiles.active}' == 'test')"/>
 
-        <intercept-url pattern="/api/**" access="isAuthenticated()"/>
-
-        <intercept-url pattern="/**" access="permitAll"/>
+        <intercept-url pattern="/**" access="isAuthenticated()"/>
 
         <custom-filter position="CONCURRENT_SESSION_FILTER" ref="concurrencyFilter" />
         <custom-filter ref="customCorsFilter" before="CONCURRENT_SESSION_FILTER"/>
@@ -79,7 +76,7 @@
         <beans:property name="authenticationManager" ref="authenticationManager"/>
         <beans:property name="authenticationSuccessHandler" ref="authenticationSuccessHandler"/>
         <beans:property name="authenticationFailureHandler" ref="authenticationFailedHandler"/>
-        <beans:property name="filterProcessesUrl" value="/api/signin"/>
+        <beans:property name="filterProcessesUrl" value="/signin"/>
         <beans:property name="usernameParameter" value="username"/>
         <beans:property name="passwordParameter" value="password"/>
     </beans:bean>
@@ -148,7 +145,6 @@
 
     <beans:bean class="org.springframework.security.web.session.HttpSessionEventPublisher"/>
 
-    <beans:bean id="userServices" class="me.universi.user.services.UserService"/>
     <beans:bean id="encoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
 
     <beans:bean name="customAccessDeniedHandler" class="me.universi.user.services.CustomAccessDeniedHandler"/>
@@ -156,7 +152,7 @@
 
     <beans:bean id="authenticationProvider" class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
         <beans:property name="passwordEncoder" ref="encoder"/>
-        <beans:property name="userDetailsService" ref="userServices"/>
+        <beans:property name="userDetailsService" ref="userService"/>
     </beans:bean>
 
     <beans:bean id="authUser" class="me.universi.user.services.PreAuthUsuarioService"/>

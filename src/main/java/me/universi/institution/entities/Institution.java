@@ -14,14 +14,14 @@ import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.SQLRestriction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity(name = "Institution")
-@Table(name = "institution")
-@SQLDelete(sql = "UPDATE institution SET deleted = true WHERE id=?")
-@Where(clause = "deleted=false")
+@Table(name = "institution", schema = "institution")
+@SQLDelete(sql = "UPDATE institution.institution SET deleted = true WHERE id=?")
+@SQLRestriction( "NOT deleted" )
 public class Institution {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

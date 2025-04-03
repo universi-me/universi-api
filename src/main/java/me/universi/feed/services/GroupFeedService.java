@@ -3,6 +3,7 @@ package me.universi.feed.services;
 
 import java.util.ArrayList;
 import me.universi.Sys;
+import me.universi.feed.dto.GroupGetDTO;
 import me.universi.feed.dto.GroupPostCommentDTO;
 import me.universi.feed.dto.GroupPostDTO;
 import me.universi.feed.entities.GroupPostComment;
@@ -14,10 +15,12 @@ import me.universi.feed.repositories.GroupPostCommentRepository;
 import me.universi.feed.repositories.GroupPostReactionRepository;
 import me.universi.feed.repositories.GroupPostRepository;
 import me.universi.profile.services.ProfileService;
-import me.universi.roles.enums.FeaturesTypes;
-import me.universi.roles.enums.Permission;
-import me.universi.roles.services.RolesService;
+import me.universi.role.enums.FeaturesTypes;
+import me.universi.role.enums.Permission;
+import me.universi.role.services.RoleService;
 import me.universi.user.services.UserService;
+import me.universi.util.CastingUtil;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,15 +33,17 @@ public class GroupFeedService {
     private final GroupPostRepository groupPostRepository;
     private final GroupPostReactionRepository groupPostReactionRepository;
     private final GroupPostCommentRepository groupPostCommentRepository;
+    private final ProfileService profileService;
 
     private static final Integer MAX_CONTENT_LENGTH = 3000;
     private static final Integer MAX_COMMENT_LENGTH = 2000;
 
     @Autowired
-    public GroupFeedService(GroupPostRepository groupPostRepository, GroupPostReactionRepository groupPostReactionRepository, GroupPostCommentRepository groupPostCommentRepository) {
+    public GroupFeedService(GroupPostRepository groupPostRepository, GroupPostReactionRepository groupPostReactionRepository, GroupPostCommentRepository groupPostCommentRepository, ProfileService profileService) {
         this.groupPostRepository = groupPostRepository;
         this.groupPostReactionRepository = groupPostReactionRepository;
         this.groupPostCommentRepository = groupPostCommentRepository;
+        this.profileService = profileService;
     }
 
     public static GroupFeedService getInstance() {
@@ -48,7 +53,7 @@ public class GroupFeedService {
     public List<GroupPost> getGroupPosts(String groupId) {
 
         // check permission post
-        RolesService.getInstance().checkPermission(groupId, FeaturesTypes.FEED, Permission.READ);
+        RoleService.getInstance().checkPermission(groupId, FeaturesTypes.FEED, Permission.READ);
 
         Optional<List<GroupPost>> posts = groupPostRepository.findByGroupIdAndDeletedIsFalse(groupId);
         return posts.orElseThrow(() -> new PostNotFoundException("Publicação não foi encontrada."));
@@ -57,7 +62,7 @@ public class GroupFeedService {
     public GroupPost createGroupPost(String groupId, GroupPostDTO groupPostDTO) {
 
         // check permission post
-        RolesService.getInstance().checkPermission(groupId, FeaturesTypes.FEED, Permission.READ_WRITE);
+        RoleService.getInstance().checkPermission(groupId, FeaturesTypes.FEED, Permission.READ_WRITE);
 
         String authorId = String.valueOf(UserService.getInstance().getUserInSession().getProfile().getId());
         if (groupPostDTO.getContent() == null || groupPostDTO.getContent().isEmpty()) {
@@ -72,7 +77,7 @@ public class GroupFeedService {
     public GroupPost getGroupPost(String groupId, String postId) {
 
         // check permission post
-        RolesService.getInstance().checkPermission(groupId, FeaturesTypes.FEED, Permission.READ);
+        RoleService.getInstance().checkPermission(groupId, FeaturesTypes.FEED, Permission.READ);
 
         Optional<GroupPost> existingPost = groupPostRepository.findFirstByGroupIdAndIdAndDeletedIsFalse(groupId, postId);
         if (existingPost.isPresent() && !existingPost.get().isDeleted()) {
@@ -80,6 +85,25 @@ public class GroupFeedService {
         } else {
             throw new PostNotFoundException("Publicação não foi encontrada.");
         }
+    }
+
+    public List<GroupGetDTO> getGroupPostsDTO(String groupId) {
+        // check permission post
+        RoleService.getInstance().checkPermission(groupId, FeaturesTypes.FEED, Permission.READ);
+
+        List<GroupPost> groupPosts = getGroupPosts(groupId);
+        List<GroupGetDTO> groupGetDTOS = new ArrayList<>();
+        for(GroupPost post : groupPosts){
+            var author = profileService.find( CastingUtil.getUUID( post.getAuthorId() ).orElse( null ) );
+            if(author.isEmpty()) {
+                continue;
+            }
+            GroupGetDTO groupGet = new GroupGetDTO(post.getContent(), author.get(), post.getId(), post.getGroupId());
+            groupGet.reactions = getGroupPostReactions(post.getId());
+            groupGet.comments = getGroupPostComments(post.getId());
+            groupGetDTOS.add(groupGet);
+        }
+        return groupGetDTOS;
     }
 
     public void checkPermissionForEdit(GroupPost post, boolean forDelete) {
@@ -92,7 +116,7 @@ public class GroupFeedService {
                 }
             }
 
-            if(forDelete && RolesService.getInstance().hasPermission(post.getGroupId(), FeaturesTypes.FEED, Permission.READ_WRITE_DELETE)) {
+            if(forDelete && RoleService.getInstance().hasPermission(post.getGroupId(), FeaturesTypes.FEED, Permission.READ_WRITE_DELETE)) {
                 // user with permission can delete any post
                 return;
             }
@@ -113,7 +137,7 @@ public class GroupFeedService {
 
             String groupId = groupPostRepository.findFirstByIdAndDeletedIsFalse(post.getGroupPostId()).get().getGroupId();
 
-            if(forDelete && RolesService.getInstance().hasPermission(groupId, FeaturesTypes.FEED, Permission.READ_WRITE_DELETE)) {
+            if(forDelete && RoleService.getInstance().hasPermission(groupId, FeaturesTypes.FEED, Permission.READ_WRITE_DELETE)) {
                 // user with permission can delete any post
                 return;
             }
@@ -125,7 +149,7 @@ public class GroupFeedService {
     public GroupPost editGroupPost(String groupId, String postId, GroupPostDTO groupPostDTO) {
 
         // check permission post
-        RolesService.getInstance().checkPermission(groupId, FeaturesTypes.FEED, Permission.READ_WRITE);
+        RoleService.getInstance().checkPermission(groupId, FeaturesTypes.FEED, Permission.READ_WRITE);
 
         GroupPost post = getGroupPost(groupId, postId);
 
@@ -144,7 +168,7 @@ public class GroupFeedService {
     public boolean deleteGroupPost(String groupId, String postId) {
 
         // check permission post
-        RolesService.getInstance().checkPermission(groupId, FeaturesTypes.FEED, Permission.READ_WRITE_DELETE);
+        RoleService.getInstance().checkPermission(groupId, FeaturesTypes.FEED, Permission.READ_WRITE_DELETE);
 
         GroupPost post = getGroupPost(groupId, postId);
 
@@ -186,12 +210,17 @@ public class GroupFeedService {
         Optional<List<GroupPostComment>> comments = groupPostCommentRepository.findByGroupPostIdAndDeletedIsFalse(groupPostId);
         if(comments.isPresent()) {
             List<GroupPostCommentDTO> commentsDTO = new ArrayList<GroupPostCommentDTO>();
+
             for(GroupPostComment comment : comments.get()) {
+                var author = profileService.find( CastingUtil.getUUID( comment.getAuthorId() ).orElse( null ) );
+                if(author.isEmpty()) {
+                    continue;
+                }
                 GroupPostCommentDTO commentObj = new GroupPostCommentDTO();
                 commentObj.setId(comment.getId());
                 commentObj.setContent(comment.getContent());
                 commentObj.setAuthorId(comment.getAuthorId());
-                commentObj.setAuthor(ProfileService.getInstance().findFirstById(comment.getAuthorId()));
+                commentObj.setAuthor( author.get() );
                 commentsDTO.add(commentObj);
             }
 
@@ -211,7 +240,7 @@ public class GroupFeedService {
     private void checkAccessToGroupPost(String groupPostId) {
         // check permission post for read
         String groupId = groupPostRepository.findFirstByIdAndDeletedIsFalse(groupPostId).get().getGroupId();
-        RolesService.getInstance().checkPermission(groupId, FeaturesTypes.FEED, Permission.READ);
+        RoleService.getInstance().checkPermission(groupId, FeaturesTypes.FEED, Permission.READ);
     }
 
     public GroupPostComment editGroupPostComment(String commentId, String comment) {

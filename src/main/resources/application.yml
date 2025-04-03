@@ -70,6 +70,7 @@ server:
       enabled: true
       max-file-size: 200MB
       max-request-size: 200MB
+    contextPath: ${API_SERVER_CONTEXT_PATH:/api}
   tomcat:
     max-http-form-post-size: 200MB
 
@@ -78,10 +79,10 @@ server:
 springdoc:
   version: 1.0
   api-docs:
-    path: /api/v3/api-docs
+    path: /v3/api-docs
   swagger-ui:
     enabled: ${API_SWAGGER_ENABLED:true}
-    path: /api/swagger-ui.html
+    path: /swagger-ui.html
 
 # BUILD HASH
 BUILD_HASH: ${API_BUILD_HASH:development}
@@ -94,9 +95,6 @@ GOOGLE_CLIENT_ID: ${API_GOOGLE_CLIENT_ID:110833050076-ib680ela4hfqr2c0lhc9h19snr
 # IMAGEM CONFIG
 SAVE_IMAGE_LOCAL: ${API_SAVE_IMAGE_LOCAL:false}
 PATH_IMAGE_SAVE: ${API_PATH_IMAGE_SAVE:src/main/resources/static/img/imagem/}
-
-# IMGUR API CLIENT-ID
-IMGUR_CLIENT_ID: ${API_IMGUR_CLIENT_ID:e4f58fc81daec99}
 
 # LOGIN CONFIG
 SIGNUP_ENABLED: ${API_SIGNUP_ENABLED:true}
@@ -141,7 +139,7 @@ spring:
   h2:
     console:
       enabled: true
-      path: /api/h2-console
+      path: /h2-console
   # JPA
   jpa:
     show-sql: true

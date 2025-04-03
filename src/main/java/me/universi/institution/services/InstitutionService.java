@@ -8,9 +8,12 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.Nullable;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotNull;
 import me.universi.Sys;
 import me.universi.institution.exceptions.InstitutionException;
+import me.universi.institution.dto.CreateInstitutionDTO;
+import me.universi.institution.dto.UpdateInstitutionDTO;
 import me.universi.institution.entities.Institution;
 import me.universi.institution.repositories.InstitutionRepository;
 import me.universi.user.services.UserService;
@@ -27,8 +30,12 @@ public class InstitutionService {
         return Sys.context.getBean("institutionService", InstitutionService.class);
     }
 
-    public Optional<Institution> findById(@NotNull UUID id) {
+    public Optional<Institution> find(@NotNull UUID id) {
         return institutionRepository.findById(id);
+    }
+
+    public @NotNull Institution findOrThrow( @NotNull UUID id ) throws EntityNotFoundException {
+        return find( id ).orElseThrow( () -> new EntityNotFoundException( "Instituição de ID '" + id + "' não encontrada" ) );
     }
 
     public Optional<Institution> findByName(@NotNull String name) {
@@ -45,8 +52,8 @@ public class InstitutionService {
             .toList();
     }
 
-    public Institution create(@NotNull String name) throws InstitutionException {
-        name = name.trim();
+    public Institution create( @NotNull CreateInstitutionDTO createInstitutionDTO ) throws InstitutionException {
+        var name = createInstitutionDTO.name().trim();
         checkValidName(name);
 
         if (findByName(name).isPresent())
@@ -58,16 +65,16 @@ public class InstitutionService {
         return save(institution);
     }
 
-    public Institution edit(@NotNull UUID id, @Nullable String name) throws InstitutionException {
+    public Institution edit( @NotNull UUID id, @NotNull UpdateInstitutionDTO updateInstitutionDTO ) throws InstitutionException {
         // todo: proper authority check
         if (!UserService.getInstance().isUserAdminSession())
             throw new InstitutionException("Você não tem permissão para editar locais");
 
-        var institution = findById(id).orElseThrow(() -> new InstitutionException("Instituição não encontrado."));
+        var institution = findOrThrow( id );
 
-        if (name != null) {
-            checkValidName(name);
-            institution.setName(name);
+        if (updateInstitutionDTO.name() != null) {
+            checkValidName( updateInstitutionDTO.name() );
+            institution.setName( updateInstitutionDTO.name() );
         }
 
         return save(institution);
@@ -78,9 +85,10 @@ public class InstitutionService {
         if (!UserService.getInstance().isUserAdminSession())
             throw new InstitutionException("Você não tem permissão para editar locais");
 
-        var institution = findById(id).orElseThrow(() -> new InstitutionException("Instituição não encontrado."));
+        var institution = findOrThrow( id );
 
-        institutionRepository.delete(institution);
+        institution.setDeleted(true);
+        institutionRepository.save(institution);
     }
 
     private Institution save(@NotNull Institution institution) {

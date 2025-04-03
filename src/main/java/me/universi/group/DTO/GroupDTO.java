@@ -12,7 +12,6 @@ import jakarta.persistence.TemporalType;
 import me.universi.group.entities.Group;
 import me.universi.group.enums.GroupType;
 import me.universi.profile.entities.Profile;
-import org.hibernate.annotations.CreationTimestamp;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -55,20 +54,20 @@ public class GroupDTO implements Serializable {
     public boolean rootGroup;
 
     /** Can create subGroups */
-    public boolean canCreateGroup;
+    public boolean canHaveSubgroup;
 
-    public boolean canEnter;
+    public boolean canJoin;
 
     public boolean canAddParticipant;
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
 
-    public boolean publicGroup;
+    public boolean isPublic;
 
     public boolean everyoneCanPost;
 
-    public GroupDTO(UUID id, String nickname, String name, String description, String image, Profile admin, Collection<Profile> participants, Collection<Group> subGroups, GroupType type, boolean rootGroup, boolean canCreateGroup, boolean canEnter, boolean canAddParticipant, Date createdAt, boolean publicGroup, boolean everyoneCanPost) {
+    public GroupDTO(UUID id, String nickname, String name, String description, String image, Profile admin, Collection<Profile> participants, Collection<Group> subGroups, GroupType type, boolean rootGroup, boolean canHaveSubgroup, boolean canJoin, boolean canAddParticipant, Date createdAt, boolean isPublic, boolean everyoneCanPost) {
         this.id = id;
         this.nickname = nickname;
         this.name = name;
@@ -79,11 +78,11 @@ public class GroupDTO implements Serializable {
         this.subGroups = subGroups;
         this.type = type;
         this.rootGroup = rootGroup;
-        this.canCreateGroup = canCreateGroup;
-        this.canEnter = canEnter;
+        this.canHaveSubgroup = canHaveSubgroup;
+        this.canJoin = canJoin;
         this.canAddParticipant = canAddParticipant;
         this.createdAt = createdAt;
-        this.publicGroup = publicGroup;
+        this.isPublic = isPublic;
         this.everyoneCanPost = everyoneCanPost;
     }
 
@@ -170,20 +169,20 @@ public class GroupDTO implements Serializable {
         this.rootGroup = rootGroup;
     }
 
-    public boolean isCanCreateGroup() {
-        return canCreateGroup;
+    public boolean isCanHaveSubgroup() {
+        return canHaveSubgroup;
     }
 
-    public void setCanCreateGroup(boolean canCreateGroup) {
-        this.canCreateGroup = canCreateGroup;
+    public void setCanHaveSubgroup(boolean canHaveSubgroup) {
+        this.canHaveSubgroup = canHaveSubgroup;
     }
 
-    public boolean isCanEnter() {
-        return canEnter;
+    public boolean isCanJoin() {
+        return canJoin;
     }
 
-    public void setCanEnter(boolean canEnter) {
-        this.canEnter = canEnter;
+    public void setCanJoin(boolean canJoin) {
+        this.canJoin = canJoin;
     }
 
     public boolean isCanAddParticipant() {
@@ -202,11 +201,11 @@ public class GroupDTO implements Serializable {
         this.createdAt = createdAt;
     }
 
-    public boolean isPublicGroup() {
-        return publicGroup;
+    public boolean isPublic() {
+        return isPublic;
     }
 
-    public void setPublicGroup(boolean publicGroup) {
-        this.publicGroup = publicGroup;
+    public void setPublic(boolean aPublic) {
+        this.isPublic = aPublic;
     }
 }
