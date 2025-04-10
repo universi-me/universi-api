@@ -5,6 +5,8 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
+
+import jakarta.annotation.Nullable;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -27,9 +29,11 @@ import me.universi.group.entities.Group;
 import me.universi.group.entities.GroupSettings.GroupEnvironment;
 import me.universi.group.services.GroupService;
 import me.universi.image.services.ImageMetadataService;
+import me.universi.profile.entities.Department;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.exceptions.ProfileException;
 import me.universi.profile.repositories.PerfilRepository;
+import me.universi.profile.services.DepartmentService;
 import me.universi.role.services.RoleService;
 import me.universi.user.dto.*;
 import me.universi.user.entities.User;
@@ -188,7 +192,7 @@ public class UserService extends EntityService<User> implements UserDetailsServi
             : userRepository.findFirstByEmailOrNameAndOrganizationId( usernameOrEmail, organization.getId() );
     }
 
-    public void createUser(User user, String firstname, String lastname) throws UserException {
+    public void createUser(User user, String firstname, String lastname, @Nullable String departmentId) throws UserException {
         if (user==null) {
             throw new UserException("Usuario está vazio!");
         } else if (user.getUsername()==null) {
@@ -218,6 +222,11 @@ public class UserService extends EntityService<User> implements UserDetailsServi
                 if(!lastnameString.isEmpty()) {
                     userProfile.setLastname(lastnameString);
                 }
+            }
+
+            if ( departmentId != null ) {
+                var department = DepartmentService.getInstance().findByIdOrNameOrThrow( departmentId );
+                userProfile.setDepartment( department );
             }
 
             userProfile.setUser(user);
@@ -861,7 +870,7 @@ public class UserService extends EntityService<User> implements UserDetailsServi
                 user = new User();
                 user.setName(username.trim());
                 user.setEmail(email.trim());
-                createUser(user, null, null);
+                createUser(user, null, null, null);
 
                 Profile profile = user.getProfile();
 
@@ -1132,7 +1141,7 @@ public class UserService extends EntityService<User> implements UserDetailsServi
         }
         saveRawPasswordToUser(user, password, false);
 
-        createUser(user, firstname, lastname);
+        createUser(user, firstname, lastname, createAccountDTO.department().orElse(null));
 
         if(isConfirmAccountEnabled()) {
             sendConfirmAccountEmail(user, true);

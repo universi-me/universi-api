@@ -67,7 +67,7 @@ class ProfileTest {
 
     public Profile perfil(String nome) throws Exception {
         User userNew = new User(nome, nome+"@email.com", userService.encodePassword("senha"));
-        userService.createUser( userNew, null, null );
+        userService.createUser( userNew, null, null, null );
         var adminProfile = userNew.getProfile();
 
         CompetenceType compTipo1 = new CompetenceType();

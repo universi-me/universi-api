@@ -42,7 +42,7 @@ class CompetenciaTest {
     void create() throws Exception {
         String nome = "competenceTest";
         User userNew = new User(nome, nome+"@email.com", userService.encodePassword("senha"));
-        userService.createUser( userNew, null, null );
+        userService.createUser( userNew, null, null, null );
         var profile = userNew.getProfile();
 
         CompetenceType compTipo1 = new CompetenceType();
@@ -85,7 +85,7 @@ class CompetenciaTest {
     void update() throws Exception {
         String nome = "competenceTestUpdate";
         User userNew = new User(nome, nome+"@email.com", userService.encodePassword("senha"));
-        userService.createUser( userNew, null, null );
+        userService.createUser( userNew, null, null, null );
         Profile profile = userNew.getProfile();
 
         CompetenceType compTipo1 = new CompetenceType();
@@ -149,7 +149,7 @@ class CompetenciaTest {
     void delete() throws Exception {
         String nome = "competenceTestDelete";
         User userNew = new User(nome, nome+"@email.com", userService.encodePassword("senha"));
-        userService.createUser( userNew, null, null );
+        userService.createUser( userNew, null, null, null );
         var profile = userNew.getProfile();
 
         CompetenceType compTipo1 = new CompetenceType();
@@ -196,7 +196,7 @@ class CompetenciaTest {
     void read() throws Exception {
         String nome = "competenceTestRead";
         User userNew = new User(nome, nome+"@email.com", userService.encodePassword("senha"));
-        userService.createUser( userNew, null, null );
+        userService.createUser( userNew, null, null, null );
         var profile = userNew.getProfile();
 
         CompetenceType compTipo1 = new CompetenceType();

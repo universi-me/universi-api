@@ -21,6 +21,9 @@ public record UpdateProfileDTO(
 
     Optional<Gender> gender,
 
+    @JsonAlias( { "department_id", "departmentId" } )
+    Optional<String> department,
+
     @Nonnull
     @JsonAlias( { "password", "rawPassword", "raw_password" } )
     String password

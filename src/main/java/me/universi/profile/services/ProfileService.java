@@ -91,6 +91,14 @@ public class ProfileService extends EntityService<Profile> {
 
         dto.gender().ifPresent( myself::setGender );
 
+        dto.department().ifPresent( id -> {
+            // unset department if blank id was sent
+            if ( id.isBlank() )
+                myself.setDepartment( null );
+            else
+                myself.setDepartment( DepartmentService.getInstance().findByIdOrNameOrThrow( id ) );
+        } );
+
         var updated = perfilRepository.saveAndFlush( myself );
         userService.updateUserInSession();
 
