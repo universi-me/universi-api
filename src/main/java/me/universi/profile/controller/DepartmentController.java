@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping(
-    path = "/department",
+    path = "/departments",
     produces = MediaType.APPLICATION_JSON_VALUE
 )
 public class DepartmentController {
