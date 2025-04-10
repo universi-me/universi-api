@@ -1,5 +1,6 @@
 package me.universi.role.services;
 
+import jakarta.validation.Valid;
 import java.util.*;
 import me.universi.Sys;
 import me.universi.api.exceptions.UniversiConflictingOperationException;
@@ -8,6 +9,7 @@ import me.universi.group.entities.Group;
 import me.universi.group.repositories.ProfileGroupRepository;
 import me.universi.group.services.GroupService;
 import me.universi.role.dto.CreateRoleDTO;
+import me.universi.role.dto.ProfileRoleDTO;
 import me.universi.role.dto.UpdateRoleDTO;
 import me.universi.role.entities.Role;
 import me.universi.role.enums.FeaturesTypes;
@@ -318,5 +320,16 @@ public class RoleService extends EntityService<Role> {
     @Override
     public boolean hasPermissionToDelete( @NotNull Role role ) {
         return hasPermissionToEdit( role );
+    }
+
+    // list paticipants group with assigned role
+    public Collection<ProfileRoleDTO> getParticipantsRoles(@Valid @NotNull UUID groupId) {
+        var group = groupService.findOrThrow(groupId);
+        checkIsAdmin(group);
+
+        return group.participants
+            .stream()
+            .map(pg -> new ProfileRoleDTO(pg.profile, getAssignedRole(pg.profile, group)))
+            .toList();
     }
 }
