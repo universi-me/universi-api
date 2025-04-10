@@ -1,7 +1,6 @@
 package me.universi.group.DTO;
 
 import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 
@@ -12,11 +11,9 @@ public record CreateGroupDTO(
         String groupPath,
 
         @NotNull
-        @NotBlank
         String nickname,
 
         @NotNull
-        @NotBlank
         String name,
 
         @Nullable
@@ -27,7 +24,6 @@ public record CreateGroupDTO(
         String description,
 
         @NotNull
-        @NotBlank
         String groupType,
 
         Boolean canCreateGroup,

@@ -1,11 +1,11 @@
 package me.universi.user.dto;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public record GetAvailableCheckDTO(
     boolean available,
 
-    @NotBlank
+    @NotNull
     String reason
 ) {
 }

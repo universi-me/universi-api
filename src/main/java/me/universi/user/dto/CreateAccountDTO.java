@@ -1,24 +1,24 @@
 package me.universi.user.dto;
 
 import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public record CreateAccountDTO(
         @Nullable
         String recaptchaToken,
 
-        @NotBlank
+        @NotNull
         String username,
 
-        @NotBlank
+        @NotNull
         String email,
-        @NotBlank
+        @NotNull
         String password,
 
-        @NotBlank
+        @NotNull
         String firstname,
 
-        @NotBlank
+        @NotNull
         String lastname
 ) {
 }

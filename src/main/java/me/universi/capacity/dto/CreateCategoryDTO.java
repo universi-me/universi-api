@@ -1,12 +1,12 @@
 package me.universi.capacity.dto;
 
+import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 
 import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.NotBlank;
 
 public record CreateCategoryDTO(
-    @NotBlank
+    @NotNull
     String name,
 
     @Nullable

@@ -1,8 +1,8 @@
 package me.universi.institution.dto;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public record UpdateInstitutionDTO(
-    @NotBlank
+    @NotNull
     String name
 ) { }

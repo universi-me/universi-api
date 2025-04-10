@@ -1,13 +1,13 @@
 package me.universi.user.dto;
 
 import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public record RecoveryPasswordDTO(
         @Nullable
         String recaptchaToken,
 
-        @NotBlank
+        @NotNull
         String username
 ) {
 }

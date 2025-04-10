@@ -1,9 +1,9 @@
 package me.universi.feed.dto;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public record CreateCommentDTO(
-        @NotBlank
+        @NotNull
         String content
 ) {
 }

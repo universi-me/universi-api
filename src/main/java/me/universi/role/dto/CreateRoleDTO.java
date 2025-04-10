@@ -1,15 +1,15 @@
 package me.universi.role.dto;
 
 import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public record CreateRoleDTO(
-    @NotBlank
+    @NotNull
     String name,
 
     @Nullable
     String description,
 
-    @NotBlank
+    @NotNull
     String group
 ) {}

@@ -4,11 +4,10 @@ import java.util.Date;
 import java.util.UUID;
 
 import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record CreateEducationDTO(
-    @NotBlank
+    @NotNull
     String educationType,
 
     @NotNull

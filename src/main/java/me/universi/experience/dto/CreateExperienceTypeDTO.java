@@ -1,8 +1,8 @@
 package me.universi.experience.dto;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public record CreateExperienceTypeDTO(
-    @NotBlank
+    @NotNull
     String name
 ) {}

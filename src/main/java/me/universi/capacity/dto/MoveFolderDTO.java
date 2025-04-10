@@ -1,11 +1,11 @@
 package me.universi.capacity.dto;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public record MoveFolderDTO(
-    @NotBlank
+    @NotNull
     String originalGroupId,
 
-    @NotBlank
+    @NotNull
     String newGroupId
 ) { }

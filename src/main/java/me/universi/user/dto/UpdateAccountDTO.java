@@ -1,11 +1,11 @@
 package me.universi.user.dto;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public record UpdateAccountDTO(
-        @NotBlank
+        @NotNull
         String password,
-        @NotBlank
+        @NotNull
         String newPassword
 ) {
 }

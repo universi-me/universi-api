@@ -1,8 +1,8 @@
 package me.universi.education.dto;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public record CreateEducationTypeDTO(
-    @NotBlank
+    @NotNull
     String name
 ) {}

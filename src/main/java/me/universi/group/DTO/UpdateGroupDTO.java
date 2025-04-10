@@ -1,7 +1,6 @@
 package me.universi.group.DTO;
 
 import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 
@@ -12,7 +11,6 @@ public record UpdateGroupDTO(
         String groupPath,
 
         @NotNull
-        @NotBlank
         String name,
 
         @Nullable
