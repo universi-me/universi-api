@@ -1,8 +1,10 @@
 package me.universi.role.controllers;
 
+import java.util.Collection;
 import java.util.UUID;
 
 import me.universi.role.dto.CreateRoleDTO;
+import me.universi.role.dto.ProfileRoleDTO;
 import me.universi.role.dto.UpdateRoleDTO;
 import me.universi.role.entities.Role;
 import me.universi.role.services.RoleService;
@@ -53,6 +55,14 @@ public class RoleController {
     ) {
         roleService.assignRole( roleId, profile );
         return ResponseEntity.noContent().build();
+    }
+
+    // get participants roles of a group
+    @GetMapping( path = "/{groupId}/participants", produces = MediaType.APPLICATION_JSON_VALUE )
+    public ResponseEntity<Collection<ProfileRoleDTO>> getParticipantsRoles(
+        @Valid @PathVariable @NotNull UUID groupId
+    ) {
+        return ResponseEntity.ok( roleService.getParticipantsRoles( groupId ) );
     }
 
     // assigned roles
