@@ -118,7 +118,12 @@ public class Profile implements Serializable {
     )
     private Collection<CompetenceType> competenceBadges;
 
-    public Profile(UUID id, User user, String bio, Collection<ProfileGroup> groups, Collection<Link> links, Collection<FolderProfile> assignedFolders, Collection<FolderFavorite> favoriteFolders, boolean hidden) {
+    @Nullable
+    @ManyToOne
+    @JoinColumn( name = "department_id" )
+    private Department department;
+
+    public Profile(UUID id, User user, String bio, Collection<ProfileGroup> groups, Collection<Link> links, Collection<FolderProfile> assignedFolders, Collection<FolderFavorite> favoriteFolders, boolean hidden, Department department) {
         this.id = id;
         this.user = user;
         this.bio = bio;
@@ -127,6 +132,7 @@ public class Profile implements Serializable {
         this.assignedFolders = assignedFolders;
         this.favoriteFolders = favoriteFolders;
         this.hidden = hidden;
+        this.department = department;
     }
 
     public Profile(){
@@ -267,6 +273,9 @@ public class Profile implements Serializable {
 
     public @Nullable ImageMetadata getImage() { return image; }
     public void setImage(ImageMetadata image) { this.image = image; }
+
+    public Department getDepartment() { return department; }
+    public void setDepartment(Department department) { this.department = department; }
 
     @Transient
     public boolean hasBadge(@NotNull CompetenceType competenceType) {
