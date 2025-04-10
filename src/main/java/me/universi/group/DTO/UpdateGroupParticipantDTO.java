@@ -6,10 +6,8 @@ import java.util.UUID;
 
 public record UpdateGroupParticipantDTO(
         @NotNull
-        @NotBlank
         UUID groupId,
 
         @NotNull
-        @NotBlank
         String participant
 ) { }
