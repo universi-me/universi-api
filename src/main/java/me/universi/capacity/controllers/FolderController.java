@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import me.universi.capacity.dto.ChangeFolderAssignmentsDTO;
 import me.universi.capacity.dto.ChangeContentPositionDTO;
@@ -50,12 +51,12 @@ public class FolderController {
     }
 
     @GetMapping( path = "/{idOrReference}/contents", produces = MediaType.APPLICATION_JSON_VALUE )
-    public ResponseEntity<List<Content>> contentsByFolder( @Valid @PathVariable @NotNull( message = "ID inválido" ) String idOrReference ) {
+    public ResponseEntity<List<Content>> contentsByFolder( @Valid @PathVariable @NotBlank( message = "ID inválido" ) String idOrReference ) {
         return ResponseEntity.ok( contentService.findByFolder( folderService.findByIdOrReferenceOrThrow( idOrReference ).getId() ) );
     }
 
     @GetMapping( path = "/{idOrReference}", produces = MediaType.APPLICATION_JSON_VALUE )
-    public ResponseEntity<Folder> get( @Valid @PathVariable @NotNull( message = "ID inválido" ) String idOrReference ) {
+    public ResponseEntity<Folder> get( @Valid @PathVariable @NotBlank( message = "ID inválido" ) String idOrReference ) {
         return ResponseEntity.ok( folderService.findByIdOrReferenceOrThrow( idOrReference ) );
     }
 
@@ -66,7 +67,7 @@ public class FolderController {
 
     @PatchMapping( path = "/{idOrReference}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE )
     public ResponseEntity<Folder> edit(
-        @Valid @PathVariable @NotNull( message = "ID inválido" ) String idOrReference,
+        @Valid @PathVariable @NotBlank( message = "ID inválido" ) String idOrReference,
         @Valid @RequestBody UpdateFolderDTO updateFolderDTO
     ) {
         return ResponseEntity.ok( folderService.edit( idOrReference, updateFolderDTO ) );

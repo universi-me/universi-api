@@ -1,17 +1,18 @@
 package me.universi.group.DTO;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record CreateEmailFilterDTO(
-    @NotNull
+    @NotBlank
     String groupId,
 
-    @NotNull
+    @NotBlank
     String email,
 
     @NotNull
     Boolean enabled,
 
-    @NotNull
+    @NotBlank
     String type
 ) { }

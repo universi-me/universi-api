@@ -6,14 +6,15 @@ import java.util.UUID;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import me.universi.capacity.enums.ContentType;
 
 public record CreateContentDTO(
-    @NotNull
+    @NotBlank
     String url,
 
-    @NotNull
+    @NotBlank
     String title,
 
     @NotNull

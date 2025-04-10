@@ -1,8 +1,8 @@
 package me.universi.competence.dto;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 
 public record CreateCompetenceTypeDTO(
-    @NotNull
+    @NotBlank
     String name
 ) {}

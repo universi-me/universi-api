@@ -4,16 +4,17 @@ import java.util.Date;
 import java.util.UUID;
 
 import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record CreateExperienceDTO(
-    @NotNull
+    @NotBlank
     String experienceType,
 
     @NotNull
     UUID institution,
 
-    @NotNull
+    @NotBlank
     String description,
 
     @NotNull

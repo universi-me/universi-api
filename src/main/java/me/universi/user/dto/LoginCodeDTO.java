@@ -1,9 +1,9 @@
 package me.universi.user.dto;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 
 public record LoginCodeDTO(
-        @NotNull
+        @NotBlank
         String code
 ) {
 }
