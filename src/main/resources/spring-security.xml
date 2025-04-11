@@ -24,6 +24,8 @@
         <intercept-url pattern="/login/keycloak/auth" access="permitAll"/>
         <intercept-url pattern="/signup" access="permitAll"/>
         <intercept-url pattern="/account" access="permitAll"/>
+        <intercept-url pattern="/departments" access="permitAll"/>
+        <intercept-url pattern="/departments/**" access="permitAll"/>
 
         <intercept-url pattern="/available/**" access="permitAll"/>
         <intercept-url pattern="/recovery-password" access="permitAll"/>
