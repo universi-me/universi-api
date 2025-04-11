@@ -1,5 +1,9 @@
 package me.universi.user.dto;
 
+import java.util.Optional;
+
+import com.fasterxml.jackson.annotation.JsonAlias;
+
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotBlank;
 
@@ -19,6 +23,9 @@ public record CreateAccountDTO(
         String firstname,
 
         @NotBlank
-        String lastname
+        String lastname,
+
+        @JsonAlias( { "department_id", "departmentId" } )
+        Optional<String> department
 ) {
 }

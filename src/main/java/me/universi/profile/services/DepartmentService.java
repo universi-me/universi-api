@@ -1,0 +1,105 @@
+package me.universi.profile.services;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import me.universi.Sys;
+import me.universi.api.interfaces.UniqueNameEntityService;
+import me.universi.profile.dto.CreateDepartmentDTO;
+import me.universi.profile.dto.UpdateDepartmentDTO;
+import me.universi.profile.entities.Department;
+import me.universi.profile.repositories.DepartmentRepository;
+import me.universi.user.services.UserService;
+import me.universi.util.CastingUtil;
+
+@Service
+public class DepartmentService extends UniqueNameEntityService<Department> {
+    private final DepartmentRepository repository;
+    private final UserService userService;
+
+    public DepartmentService(DepartmentRepository departmentRepository, UserService userService) {
+        this.repository = departmentRepository;
+        this.userService = userService;
+        this.entityName = "Departamento";
+    }
+
+    public static DepartmentService getInstance() {
+        return Sys.context.getBean( "departmentService", DepartmentService.class );
+    }
+
+    @Override
+    public Optional<Department> find( UUID id ) {
+        return repository.findById( id );
+    }
+
+    @Override
+    public Optional<Department> findByName( String name ) {
+        return repository.findFirstByNameIgnoreCase( name );
+    }
+
+    @Override
+    public Optional<Department> findByIdOrName( String idOrName ) {
+        return repository.findFirstByIdOrNameIgnoreCaseOrAcronymIgnoreCase(
+            CastingUtil.getUUID( idOrName ).orElse( null ),
+            idOrName,
+            idOrName
+        );
+    }
+
+    @Override
+    public List<Department> findAll() {
+        return repository.findAll();
+    }
+
+    public Department create( @Valid CreateDepartmentDTO dto ) {
+        checkNameAvailable( dto.name() );
+        checkPermissionToCreate();
+
+        var department = new Department( dto.acronym(), dto.name() );
+        return repository.saveAndFlush( department );
+    }
+
+    public Department update( @NotBlank String id, @Valid UpdateDepartmentDTO dto ) {
+        var department = findByIdOrNameOrThrow( id );
+        checkPermissionToEdit( department );
+
+        dto.acronym().ifPresent( acronym -> {
+            checkNameAvailable( acronym );
+            department.setAcronym( acronym );
+        } );
+
+        dto.name().ifPresent( name -> {
+            checkNameAvailable( name );
+            department.setName( name );
+        } );
+
+        return repository.saveAndFlush( department );
+    }
+
+    public void delete( @NotBlank String id ) {
+        var department = findByIdOrNameOrThrow( id );
+        checkPermissionToDelete( department );
+
+        repository.delete( department );
+    }
+
+    @Override
+    public boolean hasPermissionToCreate() {
+        return userService.isUserAdminSession();
+    }
+
+    @Override
+    public boolean hasPermissionToEdit( Department entity ) {
+        return userService.isUserAdminSession();
+    }
+
+    @Override
+    public boolean hasPermissionToDelete( Department entity ) {
+        return hasPermissionToEdit( entity );
+    }
+}

@@ -19,6 +19,12 @@ public abstract class EntityService<T> {
 
     public abstract List<T> findAll();
 
+    public boolean hasPermissionToCreate() { return true; }
+    public final void checkPermissionToCreate() throws UniversiForbiddenAccessException {
+        if ( !hasPermissionToCreate() )
+            throw makeDeniedException( "criar" );
+    }
+
     public abstract boolean hasPermissionToEdit( @NonNull T entity );
     public final void checkPermissionToEdit( @NonNull T entity ) throws UniversiForbiddenAccessException {
         if ( !hasPermissionToEdit( entity ) )
