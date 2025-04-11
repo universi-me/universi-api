@@ -81,7 +81,7 @@ public class GroupParticipantService {
             participantUser = userService.findByUsernameOrEmail( updateGroupParticipantDTO.participant() ).orElse( null );
         }
 
-        Group groupEdit = groupService.getGroupByGroupIdOrGroupPath(updateGroupParticipantDTO.groupId(), null);
+        Group groupEdit = groupService.findByIdOrPathOrThrow( updateGroupParticipantDTO.groupId() );
 
         User user = userService.getUserInSession();
 
@@ -106,7 +106,7 @@ public class GroupParticipantService {
             participantUser = userService.findByUsernameOrEmail( updateGroupParticipantDTO.participant() ).orElse( null );
         }
 
-        Group groupEdit = groupService.getGroupByGroupIdOrGroupPath(updateGroupParticipantDTO.groupId(), null);
+        Group groupEdit = groupService.findByIdOrPathOrThrow( updateGroupParticipantDTO.groupId() );
 
         User user = userService.getUserInSession();
 
