@@ -17,6 +17,13 @@ public abstract class EntityService<T> {
         return find( id ).orElseThrow( () -> makeNotFoundException( "ID", id ) );
     }
 
+    public final List<Optional<T>> find( List<UUID> ids ) {
+        return ids.stream().map( this::find ).toList();
+    }
+    public final List<T> findOrThrow( List<UUID> ids ) {
+        return ids.stream().map( this::findOrThrow ).toList();
+    }
+
     public abstract List<T> findAll();
 
     public boolean hasPermissionToCreate() { return true; }
