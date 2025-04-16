@@ -15,7 +15,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping( "/competence-types" )
@@ -36,21 +35,21 @@ public class CompetenceTypeController {
 
     @PatchMapping( path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE )
     public ResponseEntity<CompetenceType> update(
-        @Valid @PathVariable @NotNull UUID id,
+        @Valid @PathVariable @NotNull String id,
         @Valid @RequestBody UpdateCompetenceTypeDTO updateCompetenceTypeDTO
     ) {
         return ResponseEntity.ok( competenceTypeService.update( id, updateCompetenceTypeDTO ) );
     }
 
     @DeleteMapping( path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE )
-    public ResponseEntity<Void> delete( @Valid @PathVariable @NotNull UUID id ) {
+    public ResponseEntity<Void> delete( @Valid @PathVariable @NotNull String id ) {
         competenceTypeService.delete( id );
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping( path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE )
-    public ResponseEntity<CompetenceType> get( @Valid @PathVariable @NotNull UUID id ) {
-        return ResponseEntity.ok( competenceTypeService.findOrThrow( id ) );
+    public ResponseEntity<CompetenceType> get( @Valid @PathVariable @NotNull String id ) {
+        return ResponseEntity.ok( competenceTypeService.findByIdOrNameOrThrow( id ) );
     }
 
     @GetMapping( path = "", produces = MediaType.APPLICATION_JSON_VALUE )
