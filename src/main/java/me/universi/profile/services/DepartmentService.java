@@ -27,6 +27,7 @@ public class DepartmentService extends UniqueNameEntityService<Department> {
         this.repository = departmentRepository;
         this.userService = userService;
         this.entityName = "Departamento";
+        this.fieldName = "sigla";
     }
 
     public static DepartmentService getInstance() {
@@ -39,16 +40,15 @@ public class DepartmentService extends UniqueNameEntityService<Department> {
     }
 
     @Override
-    public Optional<Department> findByName( String name ) {
-        return repository.findFirstByNameIgnoreCaseOrAcronymIgnoreCase( name, name );
+    public Optional<Department> findByName( String acronym ) {
+        return repository.findFirstByAcronymIgnoreCase( acronym );
     }
 
     @Override
-    public Optional<Department> findByIdOrName( String idOrName ) {
-        return repository.findFirstByIdOrNameIgnoreCaseOrAcronymIgnoreCase(
-            CastingUtil.getUUID( idOrName ).orElse( null ),
-            idOrName,
-            idOrName
+    public Optional<Department> findByIdOrName( String idOrAcronym ) {
+        return repository.findFirstByIdOrAcronymIgnoreCase(
+            CastingUtil.getUUID( idOrAcronym ).orElse( null ),
+            idOrAcronym
         );
     }
 
@@ -59,7 +59,6 @@ public class DepartmentService extends UniqueNameEntityService<Department> {
 
     public Department create( @Valid CreateDepartmentDTO dto ) {
         checkNameAvailable( dto.acronym() );
-        checkNameAvailable( dto.name() );
         checkPermissionToCreate();
 
         var department = new Department( dto.acronym(), dto.name() );
@@ -72,7 +71,7 @@ public class DepartmentService extends UniqueNameEntityService<Department> {
 
         dto.acronym().ifPresent( acronym -> {
             if ( acronym.isBlank() )
-                throw new UniversiBadRequestException( "A sigla não pode estar em branco." );
+                throw new UniversiBadRequestException( "A sigla não pode estar em branco" );
 
             checkNameAvailableIgnoreIf( acronym, d -> d.getId().equals( department.getId() ) );
             department.setAcronym( acronym );
@@ -80,9 +79,8 @@ public class DepartmentService extends UniqueNameEntityService<Department> {
 
         dto.name().ifPresent( name -> {
             if ( name.isBlank() )
-                throw new UniversiBadRequestException( "O nome não pode estar em branco." );
+                throw new UniversiBadRequestException( "O nome não pode estar em branco" );
 
-            checkNameAvailableIgnoreIf( name, d -> d.getId().equals( department.getId() ) );
             department.setName( name );
         } );
 
