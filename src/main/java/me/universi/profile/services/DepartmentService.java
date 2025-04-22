@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import me.universi.Sys;
+import me.universi.api.exceptions.UniversiBadRequestException;
 import me.universi.api.interfaces.UniqueNameEntityService;
 import me.universi.profile.dto.CreateDepartmentDTO;
 import me.universi.profile.dto.UpdateDepartmentDTO;
@@ -39,7 +40,7 @@ public class DepartmentService extends UniqueNameEntityService<Department> {
 
     @Override
     public Optional<Department> findByName( String name ) {
-        return repository.findFirstByNameIgnoreCase( name );
+        return repository.findFirstByNameIgnoreCaseOrAcronymIgnoreCase( name, name );
     }
 
     @Override
@@ -57,6 +58,7 @@ public class DepartmentService extends UniqueNameEntityService<Department> {
     }
 
     public Department create( @Valid CreateDepartmentDTO dto ) {
+        checkNameAvailable( dto.acronym() );
         checkNameAvailable( dto.name() );
         checkPermissionToCreate();
 
@@ -69,12 +71,18 @@ public class DepartmentService extends UniqueNameEntityService<Department> {
         checkPermissionToEdit( department );
 
         dto.acronym().ifPresent( acronym -> {
-            checkNameAvailable( acronym );
+            if ( acronym.isBlank() )
+                throw new UniversiBadRequestException( "A sigla não pode estar em branco." );
+
+            checkNameAvailableIgnoreIf( acronym, d -> d.getId().equals( department.getId() ) );
             department.setAcronym( acronym );
         } );
 
         dto.name().ifPresent( name -> {
-            checkNameAvailable( name );
+            if ( name.isBlank() )
+                throw new UniversiBadRequestException( "O nome não pode estar em branco." );
+
+            checkNameAvailableIgnoreIf( name, d -> d.getId().equals( department.getId() ) );
             department.setName( name );
         } );
 
