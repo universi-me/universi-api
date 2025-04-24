@@ -1,5 +1,6 @@
 package me.universi.group.services;
 
+import me.universi.group.DTO.UpdateGroupDTO;
 import me.universi.group.DTO.UpdateGroupEnvironmentDTO;
 import me.universi.group.entities.Group;
 import me.universi.group.entities.GroupSettings.GroupEnvironment;
@@ -170,6 +171,27 @@ public class GroupEnvironmentService {
         if(updateGroupEnvironment.email_password() != null) {
             groupEnvironment.email_password = updateGroupEnvironment.email_password().isEmpty() ? null : updateGroupEnvironment.email_password();
         }
+
+        if(updateGroupEnvironment.organization_name() != null) {
+            Group currentOrganization = GroupService.getInstance().getOrganizationBasedInDomain();
+            if(currentOrganization != null) {
+                currentOrganization.setName(updateGroupEnvironment.organization_name());
+                groupService.save(currentOrganization);
+            }
+        }
+
+        if(updateGroupEnvironment.organization_nickname() != null) {
+            Group currentOrganization = GroupService.getInstance().getOrganizationBasedInDomain();
+            if(currentOrganization != null) {
+                String nickname = updateGroupEnvironment.organization_nickname().toLowerCase();
+                if(!groupService.nicknameRegex(nickname)) {
+                    throw new GroupException("O apelido da organização não pode conter caracteres especiais.");
+                }
+                currentOrganization.setNickname(nickname);
+                groupService.save(currentOrganization);
+            }
+        }
+
 
         groupEnvironmentRepository.save(groupEnvironment);
 
