@@ -172,6 +172,12 @@ public class GroupEnvironmentService {
             groupEnvironment.email_password = updateGroupEnvironment.email_password().isEmpty() ? null : updateGroupEnvironment.email_password();
         }
 
+        groupEnvironmentRepository.save(groupEnvironment);
+
+        if(needUpdateEmailConfiguration) {
+            userService.setupEmailSender();
+        }
+
         if(updateGroupEnvironment.organization_name() != null) {
             Group currentOrganization = GroupService.getInstance().getOrganizationBasedInDomain();
             if(currentOrganization != null) {
@@ -191,13 +197,6 @@ public class GroupEnvironmentService {
                 currentOrganization.setNickname(nickname);
                 groupService.save(currentOrganization);
             }
-        }
-
-
-        groupEnvironmentRepository.save(groupEnvironment);
-
-        if(needUpdateEmailConfiguration) {
-            userService.setupEmailSender();
         }
 
         return groupEnvironment;

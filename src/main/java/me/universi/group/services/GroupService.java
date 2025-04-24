@@ -310,7 +310,7 @@ public class GroupService {
         if(nickname == null || nickname.isEmpty()) {
             available = false;
             if(thwrowException) {
-                throw new GroupException("Apelido não pode estar vazio.");
+                throw new GroupException("Apelido do grupo não pode estar vazio.");
             }
         }
 
@@ -321,7 +321,7 @@ public class GroupService {
             available = nicknameRegex(nickname);
             if(!available) {
                 if(thwrowException) {
-                    throw new GroupException("Apelido está com formato inválido, não pode conter caracteres especiais.");
+                    throw new GroupException("Apelido do Grupo está com formato inválido, não pode conter caracteres especiais.");
                 }
             }
         }
@@ -332,7 +332,7 @@ public class GroupService {
                 if (groupNow.subgroup != null && groupNow.subgroup.nickname.toLowerCase().equals(nicknameLower)) {
                     available = false;
                     if(thwrowException) {
-                        throw new GroupException("Apelido de grupo indisponível, já existe um grupo com esse apelido.");
+                        throw new GroupException("Apelido de Grupo indisponível, já existe um grupo com apelido informado.");
                     }
                     break;
                 }
@@ -345,7 +345,7 @@ public class GroupService {
             if(groupRoot != null) {
                 available = false;
                 if(thwrowException) {
-                    throw new GroupException("Apelido de grupo indisponível, apelido já está em uso em um grupo da organização.");
+                    throw new GroupException("Apelido de Grupo indisponível, já está em uso por uma organização.");
                 }
             }
         }
