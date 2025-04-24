@@ -184,9 +184,10 @@ public class GroupEnvironmentService {
             Group currentOrganization = GroupService.getInstance().getOrganizationBasedInDomain();
             if(currentOrganization != null) {
                 String nickname = updateGroupEnvironment.organization_nickname().toLowerCase();
-                if(!groupService.nicknameRegex(nickname)) {
-                    throw new GroupException("O apelido da organização não pode conter caracteres especiais.");
-                }
+
+                // check if nickname is valid and available
+                groupService.isNicknameAvailableForGroup(group, nickname, true);
+
                 currentOrganization.setNickname(nickname);
                 groupService.save(currentOrganization);
             }
