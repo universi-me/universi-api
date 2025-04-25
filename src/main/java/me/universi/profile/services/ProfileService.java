@@ -4,6 +4,7 @@ import java.util.*;
 
 import org.springframework.stereotype.Service;
 
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import me.universi.Sys;
 import me.universi.api.exceptions.UniversiBadRequestException;
@@ -245,11 +246,11 @@ public class ProfileService extends EntityService<Profile> {
         return lastname;
     }
 
-    private String validateBiography( String biography ) {
+    private @Nullable String validateBiography( String biography ) {
         biography = biography.trim();
 
         if ( biography.isBlank() )
-            throw new UniversiBadRequestException( "A biografia não pode estar vazia" );
+            return null;
 
         if ( biography.length() > MAX_BIO_LENGTH )
             throw new UniversiBadRequestException( "A biografia não pode ter mais de " + MAX_BIO_LENGTH + " caracteres" );
