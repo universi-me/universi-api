@@ -26,5 +26,7 @@ public record UpdateGroupEnvironmentDTO(
         String email_port,
         String email_protocol,
         String email_username,
-        String email_password
+        String email_password,
+        String organization_name,
+        String organization_nickname
 ) { }

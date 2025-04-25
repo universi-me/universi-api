@@ -254,7 +254,7 @@ public class UserService extends EntityService<User> implements UserDetailsServi
     }
 
     public boolean usernameRegex(String username) {
-        return matchRegex(username, "^[a-z0-9_.-].{1,49}$");
+        return matchRegex(username, "^[a-z0-9_.-]{1,49}$");
     }
 
     public boolean passwordRegex(String password) {

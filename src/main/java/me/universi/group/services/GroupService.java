@@ -296,33 +296,60 @@ public class GroupService {
     }
 
     public boolean isNicknameAvailableForGroup(Group group, String nickname) {
-        boolean available = true;
         try {
-            String nicknameLower = nickname.toLowerCase();
-
-            if(available) {
-                available = nicknameRegex(nickname);
-            }
-
-            if(available && group != null) {
-                for (Subgroup groupNow : group.getSubGroups()) {
-                    if (groupNow.subgroup != null && groupNow.subgroup.nickname.toLowerCase().equals(nicknameLower)) {
-                        available = false;
-                        break;
-                    }
-                }
-            }
-
-            if(available && group==null) {
-                Group groupRoot = findFirstByRootGroupAndNicknameIgnoreCase(true, nicknameLower, false);
-                if(groupRoot != null) {
-                    available = false;
-                }
-            }
-
-        }catch (Exception e) {
-            available = false;
+            return isNicknameAvailableForGroup(group, nickname, false);
+        } catch (Exception e) {
+            return false;
         }
+    }
+
+    public boolean isNicknameAvailableForGroup(Group group, String nickname, boolean thwrowException) throws RuntimeException {
+        boolean available = true;
+
+        // check if nickname is empty
+        if(nickname == null || nickname.isEmpty()) {
+            available = false;
+            if(thwrowException) {
+                throw new GroupException("Apelido do grupo não pode estar vazio.");
+            }
+        }
+
+        String nicknameLower = nickname.toLowerCase();
+
+        // check nickname format valid
+        if(available) {
+            available = nicknameRegex(nickname);
+            if(!available) {
+                if(thwrowException) {
+                    throw new GroupException("Apelido do Grupo está com formato inválido, não pode conter caracteres especiais.");
+                }
+            }
+        }
+
+        // check if nickname is already in use subgroup
+        if(available && group != null) {
+            for (Subgroup groupNow : group.getSubGroups()) {
+                if (groupNow.subgroup != null && groupNow.subgroup.nickname.toLowerCase().equals(nicknameLower)) {
+                    available = false;
+                    if(thwrowException) {
+                        throw new GroupException("Apelido de Grupo indisponível, já existe um grupo com apelido informado.");
+                    }
+                    break;
+                }
+            }
+        }
+
+        // check if nickname is already in use in the group organization
+        if(available && (group==null || group.rootGroup)) {
+            Group groupRoot = findFirstByRootGroupAndNicknameIgnoreCase(true, nicknameLower, false);
+            if(groupRoot != null) {
+                available = false;
+                if(thwrowException) {
+                    throw new GroupException("Apelido de Grupo indisponível, já está em uso por uma organização.");
+                }
+            }
+        }
+
         return available;
     }
 
