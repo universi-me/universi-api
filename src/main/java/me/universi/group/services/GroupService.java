@@ -169,6 +169,11 @@ public class GroupService {
         return group;
     }
 
+    public Group findFirstByRootGroup(boolean rootGroup) {
+        Optional<Group> optionalGroup = groupRepository.findFirstByRootGroup(rootGroup);
+        return optionalGroup.orElse(null);
+    }
+
     public List<Group> findByPublicGroup(boolean publicGroup) {
         List<Group> optionalGroup = groupRepository.findByPublicGroup(publicGroup);
         return optionalGroup;
@@ -514,7 +519,12 @@ public class GroupService {
             organizationId = localOrganizationId;
         }
 
-        return findFirstByRootGroupAndNicknameIgnoreCase(true, organizationId, false);
+        Group org = findFirstByRootGroupAndNicknameIgnoreCase(true, organizationId, false);
+        if(org == null) {
+            org = findFirstByRootGroup(true);
+        }
+
+        return org;
     }
 
     public Group getOrganizationBasedInDomain() {
