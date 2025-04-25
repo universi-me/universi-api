@@ -509,11 +509,21 @@ public class GroupService {
         return groupRepository.findTop5ByNameContainingIgnoreCase(name);
     }
 
+    private String getSubdomainFromDomain(String domain) {
+        String subdomain = domain;
+        Pattern pattern = Pattern.compile("https?://([a-zA-Z0-9-]+)\\.");
+        Matcher matcher = pattern.matcher(domain);
+        if (matcher.find()) {
+            subdomain = matcher.group(1);
+        }
+        return subdomain;
+    }
+
     // calculate organization based in domain
     public Group obtainOrganizationBasedInDomain() {
         String domain = userService.getDomainFromRequest();
 
-        String organizationId = (domain.contains(".") ? domain.split("\\.")[0] : domain).toLowerCase().trim();
+        String organizationId = (getSubdomainFromDomain(domain)).toLowerCase().trim();
 
         if(!userService.isProduction() || localOrganizationIdEnabled) {
             organizationId = localOrganizationId;
