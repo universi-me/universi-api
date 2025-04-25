@@ -511,7 +511,7 @@ public class GroupService {
 
     private String getSubdomainFromDomain(String domain) {
         String subdomain = domain;
-        Pattern pattern = Pattern.compile("https?://([a-zA-Z0-9-]+)\\.");
+        Pattern pattern = Pattern.compile("^([a-zA-Z0-9-]+)\\.[a-zA-Z0-9.-]+\\.[a-z]{2,}$");
         Matcher matcher = pattern.matcher(domain);
         if (matcher.find()) {
             subdomain = matcher.group(1);
