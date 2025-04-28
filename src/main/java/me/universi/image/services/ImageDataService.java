@@ -31,12 +31,12 @@ public class ImageDataService extends EntityService<ImageData> {
     }
 
     @Override
-    public Optional<ImageData> find( UUID id ) {
+    public Optional<ImageData> findUnchecked( UUID id ) {
         return imageDataRepository.findById( id );
     }
 
     @Override
-    public List<ImageData> findAll() {
+    public List<ImageData> findAllUnchecked() {
         return imageDataRepository.findAll();
     }
 

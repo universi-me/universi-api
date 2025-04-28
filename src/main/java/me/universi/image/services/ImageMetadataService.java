@@ -59,7 +59,7 @@ public class ImageMetadataService extends EntityService<ImageMetadata> {
     }
 
     @Override
-    public Optional<ImageMetadata> find( UUID id ) {
+    public Optional<ImageMetadata> findUnchecked( UUID id ) {
         return imageMetadataRepository.findById( id );
     }
 
@@ -73,7 +73,7 @@ public class ImageMetadataService extends EntityService<ImageMetadata> {
     }
 
     @Override
-    public List<ImageMetadata> findAll() {
+    public List<ImageMetadata> findAllUnchecked() {
         return imageMetadataRepository.findAll();
     }
 

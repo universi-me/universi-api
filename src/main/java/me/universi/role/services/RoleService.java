@@ -50,12 +50,12 @@ public class RoleService extends EntityService<Role> {
     }
 
     @Override
-    public Optional<Role> find( UUID id ) {
+    public Optional<Role> findUnchecked( UUID id ) {
         return roleRepository.findById( id );
     }
 
     @Override
-    public List<Role> findAll() {
+    public List<Role> findAllUnchecked() {
         return roleRepository.findAll();
     }
 

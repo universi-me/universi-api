@@ -35,17 +35,17 @@ public class DepartmentService extends UniqueNameEntityService<Department> {
     }
 
     @Override
-    public Optional<Department> find( UUID id ) {
+    public Optional<Department> findUnchecked( UUID id ) {
         return repository.findById( id );
     }
 
     @Override
-    public Optional<Department> findByName( String acronym ) {
+    public Optional<Department> findByNameUnchecked( String acronym ) {
         return repository.findFirstByAcronymIgnoreCase( acronym );
     }
 
     @Override
-    public Optional<Department> findByIdOrName( String idOrAcronym ) {
+    public Optional<Department> findByIdOrNameUnchecked( String idOrAcronym ) {
         return repository.findFirstByIdOrAcronymIgnoreCase(
             CastingUtil.getUUID( idOrAcronym ).orElse( null ),
             idOrAcronym
@@ -53,7 +53,7 @@ public class DepartmentService extends UniqueNameEntityService<Department> {
     }
 
     @Override
-    public List<Department> findAll() {
+    public List<Department> findAllUnchecked() {
         return repository.findAll();
     }
 

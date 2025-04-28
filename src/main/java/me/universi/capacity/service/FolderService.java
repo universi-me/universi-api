@@ -1,7 +1,6 @@
 package me.universi.capacity.service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -44,7 +43,6 @@ import me.universi.capacity.repository.FolderFavoriteRepository;
 import me.universi.capacity.repository.FolderProfileRepository;
 import me.universi.capacity.repository.FolderRepository;
 import me.universi.competence.entities.CompetenceType;
-import me.universi.competence.services.CompetenceService;
 import me.universi.competence.services.CompetenceTypeService;
 import me.universi.group.entities.Group;
 import me.universi.group.services.GroupService;
@@ -71,13 +69,12 @@ public class FolderService extends EntityService<Folder> {
     private final FolderFavoriteRepository folderFavoriteRepository;
     private final ContentStatusRepository contentStatusRepository;
     private final CompetenceTypeService competenceTypeService;
-    private final CompetenceService competenceService;
     private final UserService userService;
     private final RoleService roleService;
     private final FolderContentsRepository folderContentsRepository;
     private final ImageMetadataService imageMetadataService;
 
-    public FolderService(GroupService groupService, ProfileService profileService, CategoryService categoryService, FolderRepository folderRepository, FolderProfileRepository folderProfileRepository, FolderFavoriteRepository folderFavoriteRepository, ContentStatusRepository contentStatusRepository, CompetenceTypeService competenceTypeService, CompetenceService competenceService, UserService userService, RoleService roleService, FolderContentsRepository folderContentsRepository, ImageMetadataService imageMetadataService) {
+    public FolderService(GroupService groupService, ProfileService profileService, CategoryService categoryService, FolderRepository folderRepository, FolderProfileRepository folderProfileRepository, FolderFavoriteRepository folderFavoriteRepository, ContentStatusRepository contentStatusRepository, CompetenceTypeService competenceTypeService, UserService userService, RoleService roleService, FolderContentsRepository folderContentsRepository, ImageMetadataService imageMetadataService) {
         this.groupService = groupService;
         this.profileService = profileService;
         this.categoryService = categoryService;
@@ -86,7 +83,6 @@ public class FolderService extends EntityService<Folder> {
         this.folderFavoriteRepository = folderFavoriteRepository;
         this.contentStatusRepository = contentStatusRepository;
         this.competenceTypeService = competenceTypeService;
-        this.competenceService = competenceService;
         this.userService = userService;
         this.roleService = roleService;
         this.folderContentsRepository = folderContentsRepository;
@@ -100,11 +96,12 @@ public class FolderService extends EntityService<Folder> {
     }
 
     @Override
-    public List<Folder> findAll() {
+    public List<Folder> findAllUnchecked() {
         return folderRepository.findAll();
     }
 
-    public Optional<Folder> find( UUID id ) {
+    @Override
+    public Optional<Folder> findUnchecked( UUID id ) {
         return folderRepository.findById( id );
     }
 

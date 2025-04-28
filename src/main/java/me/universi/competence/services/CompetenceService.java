@@ -39,17 +39,20 @@ public class CompetenceService extends EntityService<Competence> {
         return Sys.context.getBean("competenceService", CompetenceService.class);
     }
 
-    public Optional<Competence> find( UUID id ) {
+    @Override
+    public Optional<Competence> findUnchecked( UUID id ) {
         return competenceRepository.findById( id );
     }
 
     public List<Competence> findByProfile( String profileIdOrUsername ) {
         var profile = profileService.findByIdOrUsernameOrThrow( profileIdOrUsername );
-        return competenceRepository.findByProfileId( profile.getId() );
+        return competenceRepository.findByProfileId( profile.getId() )
+            .stream().filter( this::isValid ).toList();
     }
 
     public List<Competence> findByProfile( UUID profileId ) {
-        return competenceRepository.findByProfileId( profileId );
+        return competenceRepository.findByProfileId( profileId )
+            .stream().filter( this::isValid ).toList();
     }
 
     public List<Competence> findByProfileAndCompetenceType( String profileIdOrUsername, String competenceTypeIdOrName ) {
@@ -63,7 +66,8 @@ public class CompetenceService extends EntityService<Competence> {
         return competenceRepository.findByProfileIdAndCompetenceTypeId( profileId, competenceTypeId );
     }
 
-    public List<Competence> findAll() {
+    @Override
+    public List<Competence> findAllUnchecked() {
         return competenceRepository.findAll();
     }
 
@@ -123,8 +127,9 @@ public class CompetenceService extends EntityService<Competence> {
         return hasPermissionToEdit( competence );
     }
 
-    public boolean validate( Competence competence ) {
+    @Override
+    public boolean isValid( Competence competence ) {
         return competence != null
-            && competenceTypeService.validate( competence.getCompetenceType() );
+            && competenceTypeService.isValid( competence.getCompetenceType() );
     }
 }

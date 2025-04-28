@@ -49,7 +49,7 @@ public class ProfileService extends EntityService<Profile> {
     }
 
     @Override
-    public Optional<Profile> find( UUID id ) {
+    public Optional<Profile> findUnchecked( UUID id ) {
         return perfilRepository.findById( id );
     }
 
@@ -62,7 +62,8 @@ public class ProfileService extends EntityService<Profile> {
             .orElseThrow( () -> makeNotFoundException( "ID ou username", idOrUsername ) );
     }
 
-    public List<Profile> findAll() {
+    @Override
+    public List<Profile> findAllUnchecked() {
         return perfilRepository.findAll();
     }
 

@@ -54,17 +54,17 @@ public class CompetenceTypeService extends UniqueNameEntityService<CompetenceTyp
     }
 
     @Override
-    public Optional<CompetenceType> find( UUID id ) {
+    public Optional<CompetenceType> findUnchecked( UUID id ) {
         return findIgnoringAccess( id ).map( this::echoIfHasAccess );
     }
 
     @Override
-    public Optional<CompetenceType> findByName( String name ) {
+    public Optional<CompetenceType> findByNameUnchecked( String name ) {
         return competenceTypeRepository.findFirstByNameIgnoreCase( name ).map( this::echoIfHasAccess );
     }
 
     @Override
-    public Optional<CompetenceType> findByIdOrName( String idOrName ) {
+    public Optional<CompetenceType> findByIdOrNameUnchecked( String idOrName ) {
         return findIgnoringAccess( idOrName ).map( this::echoIfHasAccess );
     }
 
@@ -74,7 +74,8 @@ public class CompetenceTypeService extends UniqueNameEntityService<CompetenceTyp
         competenceTypeRepository.delete( ct );
     }
 
-    public List<CompetenceType> findAll() {
+    @Override
+    public List<CompetenceType> findAllUnchecked() {
         return competenceTypeRepository.findAll()
             .stream()
             .filter(this::hasAccessToCompetenceType)
@@ -180,7 +181,8 @@ public class CompetenceTypeService extends UniqueNameEntityService<CompetenceTyp
         return competenceTypeRepository.saveAndFlush( competenceType );
     }
 
-    public boolean validate( CompetenceType competenceType ) {
+    @Override
+    public boolean isValid( CompetenceType competenceType ) {
         return competenceType != null;
     }
 

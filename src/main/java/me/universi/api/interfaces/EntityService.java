@@ -12,7 +12,10 @@ import me.universi.api.exceptions.UniversiNoEntityException;
 public abstract class EntityService<T> {
     protected String entityName;
 
-    public abstract Optional<T> find( UUID id );
+    protected abstract Optional<T> findUnchecked( UUID id );
+    public final Optional<T> find( UUID id ) {
+        return findUnchecked( id ).filter( this::isValid );
+    }
     public final T findOrThrow( UUID id ) throws UniversiNoEntityException {
         return find( id ).orElseThrow( () -> makeNotFoundException( "ID", id ) );
     }
@@ -24,7 +27,10 @@ public abstract class EntityService<T> {
         return ids.stream().map( this::findOrThrow ).toList();
     }
 
-    public abstract List<T> findAll();
+    protected abstract List<T> findAllUnchecked();
+    public final List<T> findAll() {
+        return findAllUnchecked().stream().filter( this::isValid ).toList();
+    }
 
     public boolean hasPermissionToCreate() { return true; }
     public final void checkPermissionToCreate() throws UniversiForbiddenAccessException {
@@ -50,5 +56,9 @@ public abstract class EntityService<T> {
 
     public final UniversiForbiddenAccessException makeDeniedException( String action ) {
         return new UniversiForbiddenAccessException( "Você não tem permissão para " + action + " este " + entityName );
+    }
+
+    public boolean isValid( T entity ) {
+        return true;
     }
 }
