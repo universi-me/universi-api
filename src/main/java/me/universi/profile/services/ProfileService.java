@@ -127,7 +127,7 @@ public class ProfileService extends EntityService<Profile> {
                 if ( !profile.hasBadge( competenceType ) )
                     profile.getCompetenceBadges().add( competenceType );
 
-                var hasCompetence = !competenceService.findByProfileIdAndCompetenceTypeId(
+                var hasCompetence = !competenceService.findByProfileAndCompetenceType(
                     profile.getId(),
                     competenceType.getId()
                 ).isEmpty();
@@ -159,7 +159,7 @@ public class ProfileService extends EntityService<Profile> {
     public Collection<Competence> getCompetences( String idOrUsername ) {
         var profileId = findByIdOrUsernameOrThrow( idOrUsername ).getId();
 
-        return CompetenceService.getInstance().findByProfileId( profileId )
+        return CompetenceService.getInstance().findByProfile( profileId )
             .stream()
             .sorted( Comparator.comparing( Competence::getCreationDate ).reversed() )
             .filter(Objects::nonNull)

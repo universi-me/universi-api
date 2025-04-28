@@ -655,7 +655,7 @@ public class GroupService {
         for(Profile p : profiles){
             ProfileWithCompetencesDTO profile = new ProfileWithCompetencesDTO(
                 p,
-                competenceService.findByProfileId( p.getId() )
+                competenceService.findByProfile( p.getId() )
             );
 
 
@@ -692,7 +692,7 @@ public class GroupService {
         List<Profile> groupProfiles = group.getParticipants().stream().map(ProfileGroup::getProfile).collect(Collectors.toList());
 
         for(Profile profile : groupProfiles){
-            var competences = competenceService.findByProfileId( profile.getId() );
+            var competences = competenceService.findByProfile( profile.getId() );
 
             for ( Competence competence : competences ) {
                 UUID typeId = competence.getCompetenceType().getId();
