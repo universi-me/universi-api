@@ -29,22 +29,22 @@ public class ExperienceTypeService extends UniqueNameEntityService<ExperienceTyp
     }
 
     @Override
-    public List<ExperienceType> findAll(){
+    public List<ExperienceType> findAllUnchecked(){
         return experienceTypeRepository.findAll();
     }
 
     @Override
-    public Optional<ExperienceType> find( UUID id ) {
+    public Optional<ExperienceType> findUnchecked( UUID id ) {
         return experienceTypeRepository.findById(id);
     }
 
     @Override
-    public Optional<ExperienceType> findByName( String name ) {
+    public Optional<ExperienceType> findByNameUnchecked( String name ) {
         return experienceTypeRepository.findFirstByNameIgnoreCase( name );
     }
 
     @Override
-    public Optional<ExperienceType> findByIdOrName( String idOrName ) {
+    public Optional<ExperienceType> findByIdOrNameUnchecked( String idOrName ) {
         return experienceTypeRepository.findFirstByIdOrNameIgnoreCase(
             CastingUtil.getUUID( idOrName ).orElse( null ),
             idOrName

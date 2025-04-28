@@ -1,6 +1,7 @@
 package me.universi.competence.services;
 
 import me.universi.Sys;
+import me.universi.api.interfaces.EntityService;
 import me.universi.competence.dto.CreateCompetenceDTO;
 import me.universi.competence.dto.UpdateCompetenceDTO;
 import me.universi.competence.entities.Competence;
@@ -12,7 +13,6 @@ import me.universi.user.services.UserService;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
@@ -20,7 +20,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-public class CompetenceService {
+public class CompetenceService extends EntityService<Competence> {
     private final CompetenceRepository competenceRepository;
     private final ProfileService profileService;
     private final UserService userService;
@@ -31,29 +31,43 @@ public class CompetenceService {
         this.profileService = profileService;
         this.userService = userService;
         this.competenceTypeService = competenceTypeService;
+
+        this.entityName = "Competência";
     }
 
     public static CompetenceService getInstance() {
         return Sys.context.getBean("competenceService", CompetenceService.class);
     }
 
-    public Optional<Competence> find( UUID id ) {
+    @Override
+    public Optional<Competence> findUnchecked( UUID id ) {
         return competenceRepository.findById( id );
     }
 
-    public Competence findOrThrow( UUID id ) throws EntityNotFoundException {
-        return find( id ).orElseThrow( () -> new EntityNotFoundException( "Competência de ID '" + id + "' não encontrada" ) );
+    public List<Competence> findByProfile( String profileIdOrUsername ) {
+        var profile = profileService.findByIdOrUsernameOrThrow( profileIdOrUsername );
+        return competenceRepository.findByProfileId( profile.getId() )
+            .stream().filter( this::isValid ).toList();
     }
 
-    public List<Competence> findByProfileId( UUID profileId ) {
-        return competenceRepository.findByProfileId( profileId );
+    public List<Competence> findByProfile( UUID profileId ) {
+        return competenceRepository.findByProfileId( profileId )
+            .stream().filter( this::isValid ).toList();
     }
 
-    public List<Competence> findByProfileIdAndCompetenceTypeId( UUID profileId, UUID competenceTypeId ) {
+    public List<Competence> findByProfileAndCompetenceType( String profileIdOrUsername, String competenceTypeIdOrName ) {
+        var profile = profileService.findByIdOrUsernameOrThrow( profileIdOrUsername );
+        var competenceType = competenceTypeService.findByIdOrNameOrThrow( competenceTypeIdOrName );
+
+        return competenceRepository.findByProfileIdAndCompetenceTypeId( profile.getId(), competenceType.getId() );
+    }
+
+    public List<Competence> findByProfileAndCompetenceType( UUID profileId, UUID competenceTypeId ) {
         return competenceRepository.findByProfileIdAndCompetenceTypeId( profileId, competenceTypeId );
     }
 
-    public List<Competence> findAll() {
+    @Override
+    public List<Competence> findAllUnchecked() {
         return competenceRepository.findAll();
     }
 
@@ -74,7 +88,7 @@ public class CompetenceService {
 
     public Competence update( UUID id, UpdateCompetenceDTO updateCompetenceDTO ) {
         var competence = findOrThrow( id );
-        checkPermissionForEdit( competence );
+        checkPermissionToEdit( competence );
 
         if ( updateCompetenceDTO.competenceTypeId() != null )
             competence.setCompetenceType(
@@ -92,34 +106,30 @@ public class CompetenceService {
 
     public void delete( UUID id ) {
         var competence = findOrThrow( id );
-        checkPermissionForDelete( competence );
+        checkPermissionToDelete( competence );
 
         competence.setDeleted( true );
         competenceRepository.save( competence );
     }
 
-    private void checkPermissionForEdit( @NotNull Competence competence ) throws AccessDeniedException {
+    @Override
+    public boolean hasPermissionToEdit( @NotNull Competence competence ) {
         if ( userService.isUserAdminSession() )
-            return;
+            return true;
 
         var profile = profileService.getProfileInSession();
 
-        if ( profile.isEmpty() || !competence.getProfile().getId().equals( profile.get().getId() ) )
-            throw new AccessDeniedException( "Você não tem permissão para alterar esta Competência" );
+        return profile.isPresent() && competence.getProfile().getId().equals( profile.get().getId() );
     }
 
-    private void checkPermissionForDelete( @NotNull Competence competence ) throws AccessDeniedException {
-        var profile = profileService.getProfileInSession();
-
-        if ( profile.isEmpty() || (
-            !competence.getProfile().getId().equals( profile.get().getId() )
-            && !userService.isUserAdminSession()
-        ) )
-            throw new AccessDeniedException( "Você não tem permissão para deletar esta Competência" );
+    @Override
+    public boolean hasPermissionToDelete( @NotNull Competence competence ) throws AccessDeniedException {
+        return hasPermissionToEdit( competence );
     }
 
-    public boolean validate( Competence competence ) {
+    @Override
+    public boolean isValid( Competence competence ) {
         return competence != null
-            && competenceTypeService.validate( competence.getCompetenceType() );
+            && competenceTypeService.isValid( competence.getCompetenceType() );
     }
 }

@@ -40,7 +40,7 @@ public class CategoryService extends UniqueNameEntityService<Category> {
     }
 
     @Override
-    public Optional<Category> find( UUID id ) {
+    protected Optional<Category> findUnchecked( UUID id ) {
         return categoryRepository.findById( id );
     }
 
@@ -49,12 +49,12 @@ public class CategoryService extends UniqueNameEntityService<Category> {
     }
 
     @Override
-    public Optional<Category> findByName( String name ) {
+    protected Optional<Category> findByNameUnchecked( String name ) {
         return categoryRepository.findFirstByNameIgnoreCase( name );
     }
 
     @Override
-    public Optional<Category> findByIdOrName( String idOrName ) {
+    protected Optional<Category> findByIdOrNameUnchecked( String idOrName ) {
         return categoryRepository.findFirstByIdOrNameIgnoreCase(
             CastingUtil.getUUID( idOrName ).orElse( null ),
             idOrName
@@ -99,7 +99,8 @@ public class CategoryService extends UniqueNameEntityService<Category> {
         categoryRepository.saveAndFlush( category );
     }
 
-    public List<Category> findAll() {
+    @Override
+    protected List<Category> findAllUnchecked() {
         return categoryRepository.findAll();
     }
 

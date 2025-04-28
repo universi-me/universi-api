@@ -50,12 +50,13 @@ public class ContentService extends EntityService<Content> {
         return Sys.context.getBean("contentService", ContentService.class);
     }
 
-    public List<Content> findAll(){
+    @Override
+    public List<Content> findAllUnchecked(){
         return contentRepository.findAll();
     }
 
     @Override
-    public Optional<Content> find( UUID id ) {
+    public Optional<Content> findUnchecked( UUID id ) {
         return contentRepository.findById( id );
     }
 

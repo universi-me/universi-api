@@ -155,12 +155,12 @@ public class UserService extends EntityService<User> implements UserDetailsServi
     }
 
     @Override
-    public Optional<User> find( UUID id ) {
+    public Optional<User> findUnchecked( UUID id ) {
         return userRepository.findById( id );
     }
 
     @Override
-    public List<User> findAll() {
+    public List<User> findAllUnchecked() {
         return userRepository.findAll();
     }
 

@@ -9,12 +9,18 @@ import me.universi.api.exceptions.UniversiNoEntityException;
 public abstract class UniqueNameEntityService<T> extends EntityService<T> {
     protected String fieldName = "nome";
 
-    public abstract Optional<T> findByName( String name );
+    protected abstract Optional<T> findByNameUnchecked( String name );
+    public final Optional<T> findByName( String name ) {
+        return findByNameUnchecked( name ).filter( this::isValid );
+    }
     public final T findByNameOrThrow( String name ) throws UniversiNoEntityException {
         return findByName( name ).orElseThrow( () -> makeNotFoundException( fieldName, name ) );
     }
 
-    public abstract Optional<T> findByIdOrName( String idOrName );
+    protected abstract Optional<T> findByIdOrNameUnchecked( String idOrName );
+    public final Optional<T> findByIdOrName( String idOrName ) {
+        return findByIdOrNameUnchecked( idOrName ).filter( this::isValid );
+    }
     public final T findByIdOrNameOrThrow( String idOrName ) throws UniversiNoEntityException {
         return findByIdOrName( idOrName ).orElseThrow( () -> makeNotFoundException( "ID ou " + fieldName, idOrName ) );
     }
