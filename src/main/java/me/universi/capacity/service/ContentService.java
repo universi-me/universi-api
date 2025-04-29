@@ -6,12 +6,12 @@ import org.springframework.stereotype.Service;
 
 import me.universi.Sys;
 import me.universi.api.interfaces.EntityService;
+import me.universi.capacity.dto.ChangeFolderContentsDTO;
 import me.universi.capacity.dto.CreateContentDTO;
 import me.universi.capacity.dto.UpdateContentDTO;
 import me.universi.capacity.entidades.Category;
 import me.universi.capacity.entidades.Content;
 import me.universi.capacity.entidades.ContentStatus;
-import me.universi.capacity.entidades.FolderContents;
 import me.universi.capacity.enums.ContentStatusType;
 import me.universi.capacity.exceptions.CapacityException;
 import me.universi.capacity.repository.ContentRepository;
@@ -77,6 +77,8 @@ public class ContentService extends EntityService<Content> {
     }
 
     public Content create( CreateContentDTO createContentDTO ) {
+        checkPermissionToCreate();
+
         var content = new Content();
         content.setAuthor( profileService.getProfileInSessionOrThrow() );
         content.setDescription( createContentDTO.description() );
@@ -90,26 +92,24 @@ public class ContentService extends EntityService<Content> {
         if ( createContentDTO.categoriesIds() != null )
             content.setCategories( createContentDTO.categoriesIds().stream().map( categoryService::findOrThrow ).toList() );
 
+        var createdContent = saveOrUpdate( content );
+
         if ( createContentDTO.folders() != null ) {
             var folders = createContentDTO.folders().stream().map( folderService::findByIdOrReferenceOrThrow ).toList();
             folderService.checkPermissionToEdit( folders );
 
-            var folderContents = new ArrayList<FolderContents>( folders.size() );
-            var nextIndex = createContentDTO.folders().size();
-
             for ( var f : folders ) {
-                var fc = new FolderContents();
-                fc.setFolder( f );
-                fc.setContent( content );
-                fc.setOrderNum( nextIndex++ );
-
-                folderContents.add( fc );
+                folderService.changeContents(
+                    f.getReference(),
+                    new ChangeFolderContentsDTO(
+                        Arrays.asList( createdContent.getId() ),
+                        null
+                    )
+                );
             }
-
-            content.setFolderContents( folderContents );
         }
 
-        return saveOrUpdate( content );
+        return createdContent;
     }
 
     public Content update( UUID id, UpdateContentDTO updateContentDTO ) {
