@@ -362,8 +362,13 @@ public class FolderService extends EntityService<Folder> {
     }
 
     public List<FolderProfile> getAssignments( @Nullable String idOrReference, @Nullable String assignedBy, @Nullable String assignedTo ) throws UniversiForbiddenAccessException {
-        Profile assignedByProfile = null;
-        Profile assignedToProfile = null;
+        Profile assignedByProfile = Optional.ofNullable( assignedBy )
+            .map( profileService::findByIdOrUsernameOrThrow )
+            .orElse( null );
+
+        Profile assignedToProfile = Optional.ofNullable( assignedTo )
+            .map( profileService::findByIdOrUsernameOrThrow )
+            .orElse( null );
 
         if ( !userService.isUserAdminSession() ) {
             // Validate search for non-admin user
@@ -371,12 +376,6 @@ public class FolderService extends EntityService<Folder> {
             if ( assignedTo == null && assignedBy == null )
                 // Must specify assignedTo and assignedBy
                 throw new IllegalArgumentException( "Os parâmetros 'assignedBy' e 'assignedTo' não foram informados" );
-
-            if ( assignedTo != null )
-                assignedToProfile = profileService.findByIdOrUsernameOrThrow( assignedTo );
-
-            if ( assignedBy != null )
-                assignedByProfile = profileService.findByIdOrUsernameOrThrow( assignedBy );
 
             // Checking for assigned by anyone -> Can only check assigned to themselves
             if ( assignedByProfile == null

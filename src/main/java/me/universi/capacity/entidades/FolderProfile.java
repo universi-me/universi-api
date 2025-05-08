@@ -19,7 +19,7 @@ import org.hibernate.annotations.*;
 @Entity(name = "FolderProfile")
 @Table( name = "folder_profile", schema = "capacity" )
 @SQLDelete( sql = "UPDATE capacity.folder_profile SET removed = CURRENT_TIMESTAMP WHERE id=?" )
-@SQLRestriction( "removed IS NOT NULL" )
+@SQLRestriction( "removed IS NULL" )
 @JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class FolderProfile implements Serializable {
 
