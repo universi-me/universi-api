@@ -29,7 +29,6 @@ import me.universi.group.entities.Group;
 import me.universi.group.entities.GroupSettings.GroupEnvironment;
 import me.universi.group.services.GroupService;
 import me.universi.image.services.ImageMetadataService;
-import me.universi.profile.entities.Department;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.exceptions.ProfileException;
 import me.universi.profile.repositories.PerfilRepository;
@@ -76,7 +75,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @Service
 public class UserService extends EntityService<User> implements UserDetailsService {
@@ -1298,7 +1296,7 @@ public class UserService extends EntityService<User> implements UserDetailsServi
                 throw new IllegalArgumentException("Invalid JWT token");
             }
 
-            String bodyJson = new String(java.util.Base64.getUrlDecoder().decode(parts[1]));
+            String bodyJson = new String(Base64.getUrlDecoder().decode(parts[1]), StandardCharsets.UTF_8);
             Map<String, Object> decodedToken = new ObjectMapper().readValue(bodyJson, Map.class);
 
             String email = (String) decodedToken.get("email");
