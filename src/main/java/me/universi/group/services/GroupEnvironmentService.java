@@ -1,6 +1,5 @@
 package me.universi.group.services;
 
-import me.universi.group.DTO.UpdateGroupDTO;
 import me.universi.group.DTO.UpdateGroupEnvironmentDTO;
 import me.universi.group.entities.Group;
 import me.universi.group.entities.GroupSettings.GroupEnvironment;

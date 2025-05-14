@@ -1,32 +1,28 @@
 package me.universi.group.DTO;
 
-import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import java.util.Optional;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+
+import jakarta.validation.constraints.NotBlank;
+
 public record UpdateGroupDTO(
-        Boolean isRootGroup,
-
-        UUID groupId,
-        String groupPath,
-
-        @NotNull
         @NotBlank
-        String name,
+        @JsonAlias( { "groupPath", "groupId" } )
+        String group,
 
-        @Nullable
-        UUID image,
-        UUID bannerImage,
-        UUID headerImage,
+        Optional<String> name,
+        Optional<UUID> image,
+        Optional<UUID> bannerImage,
+        Optional<UUID> headerImage,
 
-        String description,
+        Optional<String> description,
 
-        String groupType,
+        Optional<String> groupType,
 
-        Boolean canHaveSubgroup,
-        Boolean isPublic,
-        Boolean canJoin,
-
-        Boolean everyoneCanPost
+        Optional<Boolean> canCreateSubgroup,
+        Optional<Boolean> isPublic,
+        Optional<Boolean> canJoin,
+        Optional<Boolean> everyoneCanPost
 ) { }

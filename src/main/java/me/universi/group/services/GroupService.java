@@ -3,6 +3,9 @@ package me.universi.group.services;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import me.universi.Sys;
+import me.universi.api.exceptions.UniversiBadRequestException;
+import me.universi.api.exceptions.UniversiConflictingOperationException;
+import me.universi.api.exceptions.UniversiForbiddenAccessException;
 import me.universi.capacity.entidades.Folder;
 import me.universi.competence.entities.Competence;
 import me.universi.competence.services.CompetenceService;
@@ -889,171 +892,101 @@ public class GroupService {
         throw new GroupException("Falha ao determinar grupo por filtro de email.");
     }
 
-    public Group createGroup(CreateGroupDTO createGroupDTO) {
-        User user = userService.getUserInSession();
+    public Group createGroup( CreateGroupDTO dto ) {
+        if ( dto.parentGroup().isEmpty() && !userService.isUserAdminSession() )
+            throw new UniversiBadRequestException( "O Parâmetro 'parentGroup' deve ser informado" );
 
-        Boolean groupRoot = (Boolean)createGroupDTO.groupRoot();
+        var parentGroup = dto.parentGroup().map( this::findByIdOrPathOrThrow );
+        var nickname = dto.nickname().toLowerCase();
 
-        UUID groupIdParent = (UUID)createGroupDTO.parentGroupId();
-        String groupPathParent = (String)createGroupDTO.groupPath();
+        if ( !isNicknameAvailableForGroup( parentGroup.orElse( null ), nickname ) )
+            throw new UniversiConflictingOperationException( "O Apelido de Grupo '" + nickname + "' não está disponível" );
 
-        boolean hasGroupParent = groupIdParent != null || groupPathParent != null;
+        var group = new Group();
+        group.setAdmin( userService.getUserInSession().getProfile() );
+        group.setRootGroup( parentGroup.isEmpty() );
 
-        if(!hasGroupParent) {
-            if(!(groupRoot != null && userService.isUserAdmin(user))) {
-                throw new GroupException("Parâmetro groupId é nulo.");
-            }
-        } else if(((groupIdParent != null) || (groupPathParent != null && !groupPathParent.isEmpty())) && (groupRoot!=null && groupRoot)) {
-            throw new GroupException("Você não pode criar Grupo Master em Subgrupos.");
-        }
+        group.setNickname( nickname );
+        group.setName( dto.name() );
+        group.setDescription( dto.description() );
+        group.setType(
+            CastingUtil.getEnum( GroupType.class, dto.groupType() )
+                .orElseThrow( () -> new UniversiBadRequestException( "Tipo de Grupo '" + dto.groupType() + "' não existe" ) )
+        );
 
-        String nickname = (String)createGroupDTO.nickname();
-        if(nickname == null) {
-            throw new GroupException("Parâmetro nickname é nulo.");
-        }
+        group.setCanCreateGroup( dto.canCreateSubgroup() );
+        group.setPublicGroup( dto.isPublic() );
+        group.setCanEnter( dto.canJoin() );
+        group.setEveryoneCanPost( dto.everyoneCanPost() );
 
-        String name = (String)createGroupDTO.name();
-        if(name == null) {
-            throw new GroupException("Parâmetro nome é nulo.");
-        }
+        dto.image().ifPresent( imageId -> {
+            group.setImage( imageMetadataService.findOrThrow( imageId ) );
+        } );
 
-        var image = createGroupDTO.image();
-        var bannerImage = createGroupDTO.bannerImage();
-        var headerImage = createGroupDTO.headerImage();
+        dto.bannerImage().ifPresent( bannerImageId -> {
+            group.setBannerImage( imageMetadataService.findOrThrow( bannerImageId ) );
+        } );
 
-        String description = (String)createGroupDTO.description();
-        if(description == null) {
-            throw new GroupException("Parâmetro description é nulo.");
-        }
+        dto.headerImage().ifPresent( headerImageId -> {
+            group.setHeaderImage( imageMetadataService.findOrThrow( headerImageId ) );
+        } );
 
-        String groupType = createGroupDTO.groupType();
-        if(groupType == null) {
-            throw new GroupException("Parâmetro groupType é nulo.");
-        }
+        var settings = groupSettingsRepository.saveAndFlush( new GroupSettings() );
+        group.setGroupSettings( settings );
 
-        Boolean canCreateGroup = (Boolean)createGroupDTO.canCreateGroup();
-        Boolean publicGroup = (Boolean)createGroupDTO.isPublic();
-        Boolean canEnter = (Boolean)createGroupDTO.canJoin();
-        Boolean everyoneCanPost = (Boolean)createGroupDTO.everyoneCanPost();
+        var createdGroup = groupRepository.saveAndFlush( group );
+        parentGroup.ifPresent( parent -> addSubGroup( parent, createdGroup ) );
 
-        Group parentGroup = (groupIdParent==null && groupPathParent==null)?null:getGroupByGroupIdOrGroupPath(groupIdParent, groupPathParent);
+        RoleService.getInstance().createBaseRoles( createdGroup );
+        addParticipantToGroup(
+            createdGroup,
+            createdGroup.getAdmin(),
+            RoleService.getInstance().getGroupAdminRole( createdGroup )
+        );
 
-        // support only lowercase nickname
-        nickname = nickname.toLowerCase();
-
-        if(!isNicknameAvailableForGroup(parentGroup, nickname)) {
-            throw new GroupException("Este Nickname não está disponível para este grupo.");
-        }
-
-        if((groupRoot != null && groupRoot && userService.isUserAdmin(user)) || ((parentGroup !=null && parentGroup.canCreateGroup) || verifyPermissionToEditGroup(parentGroup, user))) {
-            Group groupNew = new Group();
-            groupNew.setNickname(nickname);
-            groupNew.setName(name);
-            if(image != null) {
-                groupNew.setImage( imageMetadataService.findOrThrow( image ) );
-            }
-            if(bannerImage != null) {
-                groupNew.setBannerImage( imageMetadataService.findOrThrow( bannerImage ) );
-            }
-            if(headerImage != null) {
-                groupNew.setHeaderImage( imageMetadataService.findOrThrow( headerImage ) );
-            }
-            groupNew.setDescription(description);
-            groupNew.setType(GroupType.valueOf(groupType));
-            groupNew.setAdmin(user.getProfile());
-            GroupSettings gSettings = new GroupSettings();
-            saveGroupSettings(gSettings);
-            groupNew.setGroupSettings(gSettings);
-            if(canCreateGroup != null) {
-                groupNew.setCanCreateGroup(canCreateGroup);
-            }
-            if(publicGroup != null) {
-                groupNew.setPublicGroup(publicGroup);
-            }
-            if(canEnter != null) {
-                groupNew.setCanEnter(canEnter);
-            }
-            if(everyoneCanPost != null) {
-                groupNew.setEveryoneCanPost(everyoneCanPost);
-            }
-            if((groupRoot != null && groupRoot) && userService.isUserAdmin(user)) {
-                groupNew.setRootGroup(true);
-                save(groupNew);
-            } else {
-                save(groupNew);
-                addSubGroup(parentGroup, groupNew);
-            }
-
-            // add creator to group participants
-            RoleService.getInstance().createBaseRoles(groupNew);
-            addParticipantToGroup(groupNew, groupNew.getAdmin(), RoleService.getInstance().getGroupAdminRole(groupNew));
-
-            return groupNew;
-        }
-
-        throw new GroupException("Apenas Administradores podem criar subgrupos.");
+        return createdGroup;
     }
 
-    public Group updateGroup(UpdateGroupDTO updateGroupDTO) {
-        UUID groupId = (UUID)updateGroupDTO.groupId();
-        String groupPath = (String)updateGroupDTO.groupPath();
+    public Group updateGroup( @NotNull UpdateGroupDTO dto ) {
+        var group = findByIdOrPathOrThrow( dto.group() );
 
-        String name = (String)updateGroupDTO.name();
-        String description = (String)updateGroupDTO.description();
-        String groupType = (String)updateGroupDTO.groupType();
-        var image = updateGroupDTO.image();
-        var bannerImage = updateGroupDTO.bannerImage();
-        var headerImage = updateGroupDTO.headerImage();
+        if ( !verifyPermissionToEditGroup( group, userService.getUserInSession() ) )
+            throw new UniversiForbiddenAccessException( "Você não tem permissão para alterar o grupo" );
 
-        Boolean canCreateGroup = (Boolean)updateGroupDTO.canHaveSubgroup();
-        Boolean publicGroup = (Boolean)updateGroupDTO.isPublic();
-        Boolean canEnter = (Boolean)updateGroupDTO.canJoin();
-        Boolean everyoneCanPost = (Boolean)updateGroupDTO.everyoneCanPost();
+        dto.name().ifPresent( name -> {
+            if ( !name.isBlank() ) group.setName( name.trim() );
+        } );
 
-        Group groupEdit = getGroupByGroupIdOrGroupPath(groupId, groupPath);
+        dto.description().ifPresent( description -> {
+            if ( !description.isBlank() ) group.setDescription( description.trim() );
+        } );
 
-        RoleService.getInstance().checkPermission(groupEdit, FeaturesTypes.GROUP, Permission.READ_WRITE);
+        dto.groupType().ifPresent( typeName -> {
+            var type = CastingUtil.getEnum( GroupType.class , typeName );
+            type.ifPresentOrElse(
+                group::setType,
+                () -> { throw new UniversiBadRequestException( "Tipo de Grupo '" + typeName + "' não existe" ); }
+            );
+        } );
 
-        User user = userService.getUserInSession();
+        dto.image().ifPresent( imageId -> {
+            group.setImage( imageMetadataService.findOrThrow( imageId ) );
+        } );
 
-        if(verifyPermissionToEditGroup(groupEdit, user)) {
-            if(name != null && !name.isEmpty()) {
-                groupEdit.setName(name);
-            }
-            if(description != null && !description.isEmpty()) {
-                groupEdit.setDescription(description);
-            }
-            if(groupType != null && !groupType.isEmpty()) {
-                groupEdit.setType(GroupType.valueOf(groupType));
-            }
-            if(image != null) {
-                groupEdit.setImage( imageMetadataService.findOrThrow( image ) );
-            }
-            if(bannerImage != null) {
-                groupEdit.setBannerImage( imageMetadataService.findOrThrow( bannerImage ) );
-            }
-            if(headerImage != null) {
-                groupEdit.setHeaderImage( imageMetadataService.findOrThrow( headerImage ) );
-            }
-            if(canCreateGroup != null) {
-                groupEdit.setCanCreateGroup(canCreateGroup);
-            }
-            if(publicGroup != null) {
-                groupEdit.setPublicGroup(publicGroup);
-            }
-            if(canEnter != null) {
-                groupEdit.setCanEnter(canEnter);
-            }
-            if(everyoneCanPost != null){
-                groupEdit.setEveryoneCanPost(everyoneCanPost);
-            }
+        dto.bannerImage().ifPresent( bannerImageId -> {
+            group.setBannerImage( imageMetadataService.findOrThrow( bannerImageId ) );
+        } );
 
-            save(groupEdit);
+        dto.headerImage().ifPresent( headerImageId -> {
+            group.setHeaderImage( imageMetadataService.findOrThrow( headerImageId ) );
+        } );
 
-            return groupEdit;
-        }
+        dto.canCreateSubgroup().ifPresent( group::setCanCreateGroup );
+        dto.isPublic().ifPresent( group::setPublicGroup );
+        dto.canJoin().ifPresent( group::setCanEnter );
+        dto.everyoneCanPost().ifPresent( group::setEveryoneCanPost );
 
-        throw new GroupException("Falha ao editar grupo");
+        return this.groupRepository.saveAndFlush( group );
     }
 
     public List<Group> subGroups(UUID groupId) {
