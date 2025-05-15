@@ -112,12 +112,6 @@ public class Group implements Serializable {
     @Enumerated(EnumType.STRING)
     public GroupType type;
 
-    /** The group's ability to be accessed directly through the URL (parent of all groups) */
-    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
-    @Column(name = "group_root")
-    @NotNull
-    public boolean rootGroup;
-
     /** Can create subGroups */
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
     @Column(name = "can_create_group")
@@ -161,7 +155,7 @@ public class Group implements Serializable {
     public Group() {
     }
 
-    public Group(String nickname, String name, String description, Profile admin, Collection<ProfileGroup> participants, GroupType type, Group parentGroup, Collection<Group> subGroups, boolean rootGroup, boolean canCreateGroup, boolean enableCurriculum, boolean everyoneCanPost) {
+    public Group(String nickname, String name, String description, Profile admin, Collection<ProfileGroup> participants, GroupType type, Group parentGroup, Collection<Group> subGroups, boolean canCreateGroup, boolean enableCurriculum, boolean everyoneCanPost) {
         this.nickname = nickname;
         this.name = name;
         this.description = description;
@@ -170,7 +164,6 @@ public class Group implements Serializable {
         this.type = type;
         this.parentGroup = parentGroup;
         this.subGroups = subGroups;
-        this.rootGroup = rootGroup;
         this.canCreateGroup = canCreateGroup;
         this.enableCurriculum = enableCurriculum;
         this.everyoneCanPost = everyoneCanPost;
@@ -249,12 +242,10 @@ public class Group implements Serializable {
         this.subGroups = subGroups;
     }
 
+    /** The group's ability to be accessed directly through the URL (parent of all groups) */
+    @Transient
     public boolean isRootGroup() {
-        return rootGroup;
-    }
-
-    public void setRootGroup(boolean rootGroup) {
-        this.rootGroup = rootGroup;
+        return parentGroup == null;
     }
 
     public boolean isCanCreateGroup() {
@@ -306,7 +297,7 @@ public class Group implements Serializable {
 
     @Transient
     public String getPath() {
-        return GroupService.getInstance().getGroupPath(this.id);
+        return ( this.isRootGroup() ? "" : this.parentGroup.getPath() ) + "/" + this.nickname;
     }
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
@@ -381,7 +372,7 @@ public class Group implements Serializable {
     @Transient
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public String getBuildHash() {
-        if(!this.rootGroup) {
+        if(!this.isRootGroup()) {
             return null;
         }
         return UserService.getInstance().getBuildHash();

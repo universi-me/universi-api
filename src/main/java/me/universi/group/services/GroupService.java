@@ -87,7 +87,7 @@ public class GroupService {
 
         // check if user is logged in and if the group is from the user organization, elso return null
         if(group != null && userService.userIsLoggedIn()) {
-            UUID orgAccessId = group.rootGroup ? group.getId() : getGroupRootIdFromGroupId(group.getId());
+            UUID orgAccessId = group.isRootGroup() ? group.getId() : getGroupRootIdFromGroupId(group.getId());
             User user = userService.getUserInSession();
             Group userOrg = user.getOrganization();
             if(userOrg != null && !Objects.equals(userOrg.getId(), orgAccessId)) {
@@ -142,15 +142,15 @@ public class GroupService {
         return optionalGroup.orElse(null);
     }
 
-    public Group findFirstByRootGroupAndNicknameIgnoreCase(boolean rootGroup, String nickname, boolean checkUserOrganizationAccess) {
+    public Group findFirstRootGroupByNicknameIgnoreCase(String nickname, boolean checkUserOrganizationAccess) {
         if(nickname == null || nickname.isEmpty()) {
             return null;
         }
-        Optional<Group> optionalGroup = groupRepository.findFirstByRootGroupAndNicknameIgnoreCase(rootGroup, nickname);
+        Optional<Group> optionalGroup = groupRepository.findFirstByParentGroupIsNullAndNicknameIgnoreCase(nickname);
         Group group = optionalGroup.orElse(null);
 
         // check if user is logged in and if the group is from the user organization, elso return null
-        if(checkUserOrganizationAccess && rootGroup && group != null && userService.userIsLoggedIn()) {
+        if(checkUserOrganizationAccess && group != null && userService.userIsLoggedIn()) {
             User user = userService.getUserInSession();
             Group userOrg = user.getOrganization();
             if(userOrg != null && !Objects.equals(userOrg.getId(), group.getId())) {
@@ -161,8 +161,8 @@ public class GroupService {
         return group;
     }
 
-    public Group findFirstByRootGroup(boolean rootGroup) {
-        Optional<Group> optionalGroup = groupRepository.findFirstByRootGroup(rootGroup);
+    public Group findFirstRootGroup() {
+        Optional<Group> optionalGroup = groupRepository.findFirstByParentGroupIsNull();
         return optionalGroup.orElse(null);
     }
 
@@ -339,8 +339,8 @@ public class GroupService {
         }
 
         // check if nickname is already in use in the group organization
-        if(available && (group==null || group.rootGroup)) {
-            Group groupRoot = findFirstByRootGroupAndNicknameIgnoreCase(true, nicknameLower, false);
+        if(available && (group==null || group.isRootGroup())) {
+            Group groupRoot = findFirstRootGroupByNicknameIgnoreCase(nicknameLower, false);
             if(groupRoot != null) {
                 available = false;
                 if(thwrowException) {
@@ -422,18 +422,6 @@ public class GroupService {
         return null;
     }
 
-    /** Generates the group URL from its id */
-    public String getGroupPath(UUID groupId) {
-        ArrayList<String> nicknames = new ArrayList<>();
-        Group groupNow = findFirstById(groupId);
-        while(groupNow != null) {
-            nicknames.add(groupNow.nickname);
-            groupNow = findFirstById(findParentGroupId(groupNow.getId()));
-        }
-        Collections.reverse(nicknames);
-        return "/" + String.join("/", nicknames).toLowerCase();
-    }
-
     /** Get group from url path */
     public Group getGroupFromPath(String path) {
         try {
@@ -448,7 +436,7 @@ public class GroupService {
             Group groupActual = null;
 
             // get group root, its nickname is unique in the system, it can be accessed direct
-            groupRoot = findFirstByRootGroupAndNicknameIgnoreCase(true, nicknameArr[0], true);
+            groupRoot = findFirstRootGroupByNicknameIgnoreCase(nicknameArr[0], true);
             if(groupRoot != null) {
                 // check if group path is valid and return that group
                 groupActual = getGroupFromNicknamePath(groupRoot, nicknameArr);
@@ -523,9 +511,9 @@ public class GroupService {
             organizationId = localOrganizationId;
         }
 
-        Group org = findFirstByRootGroupAndNicknameIgnoreCase(true, organizationId, false);
+        Group org = findFirstRootGroupByNicknameIgnoreCase(organizationId, false);
         if(org == null) {
-            org = findFirstByRootGroup(true);
+            org = findFirstRootGroup();
         }
 
         return org;
@@ -721,7 +709,7 @@ public class GroupService {
 
     public void setupOrganization() {
         if(localOrganizationIdEnabled) {
-            Optional<Group> organizationOpt = groupRepository.findFirstByRootGroup(true);
+            Optional<Group> organizationOpt = groupRepository.findFirstByParentGroupIsNull();
             if(organizationOpt.isPresent()) {
                 Group organization = organizationOpt.get();
                 if(organization.nickname.equals(localOrganizationId)) {
@@ -895,7 +883,6 @@ public class GroupService {
 
         var group = new Group();
         group.setAdmin( userService.getUserInSession().getProfile() );
-        group.setRootGroup( parentGroup.isEmpty() );
 
         group.setNickname( nickname );
         group.setName( dto.name() );

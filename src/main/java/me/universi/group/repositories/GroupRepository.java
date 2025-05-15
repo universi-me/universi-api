@@ -2,8 +2,6 @@ package me.universi.group.repositories;
 
 import me.universi.group.entities.Group;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
@@ -15,8 +13,8 @@ import java.util.UUID;
 public interface GroupRepository extends JpaRepository<Group, UUID> {
     Optional<Group> findFirstById(UUID id);
     Optional<Group> findFirstByNickname(String nickname);
-    Optional<Group> findFirstByRootGroupAndNicknameIgnoreCase(boolean rootGroup, String nickname);
-    Optional<Group> findFirstByRootGroup(boolean rootGroup);
+    Optional<Group> findFirstByParentGroupIsNullAndNicknameIgnoreCase(String nickname);
+    Optional<Group> findFirstByParentGroupIsNull();
     List<Group> findByPublicGroup(boolean grupoPublico);
 
     Collection<Group> findTop5ByNameContainingIgnoreCase(String nome);

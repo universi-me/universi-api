@@ -10,3 +10,6 @@ SET parent_group_id = (
 WHERE sg.parent_group_id IS NULL;
 
 DROP TABLE system_group.subgroup;
+
+ALTER TABLE system_group.system_group
+    DROP COLUMN group_root;
