@@ -22,6 +22,8 @@ import me.universi.role.services.RoleService;
 import me.universi.user.services.JsonUserLoggedFilter;
 import me.universi.user.services.UserService;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -97,8 +99,14 @@ public class Group implements Serializable {
     public Collection<ProfileGroup> participants;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
-    public Collection<Subgroup> subGroups;
+    @ManyToOne( fetch = FetchType.LAZY )
+    @JoinColumn( name = "parent_group_id", nullable = true, referencedColumnName = "id" )
+    @NotFound( action = NotFoundAction.IGNORE )
+    private Group parentGroup;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "parentGroup", fetch = FetchType.LAZY)
+    public Collection<Group> subGroups;
 
     @Column(name = "type")
     @Enumerated(EnumType.STRING)
@@ -153,13 +161,14 @@ public class Group implements Serializable {
     public Group() {
     }
 
-    public Group(String nickname, String name, String description, Profile admin, Collection<ProfileGroup> participants, GroupType type, Collection<Subgroup> subGroups, boolean rootGroup, boolean canCreateGroup, boolean enableCurriculum, boolean everyoneCanPost) {
+    public Group(String nickname, String name, String description, Profile admin, Collection<ProfileGroup> participants, GroupType type, Group parentGroup, Collection<Group> subGroups, boolean rootGroup, boolean canCreateGroup, boolean enableCurriculum, boolean everyoneCanPost) {
         this.nickname = nickname;
         this.name = name;
         this.description = description;
         this.admin = admin;
         this.participants = participants;
         this.type = type;
+        this.parentGroup = parentGroup;
         this.subGroups = subGroups;
         this.rootGroup = rootGroup;
         this.canCreateGroup = canCreateGroup;
@@ -229,11 +238,14 @@ public class Group implements Serializable {
         this.nickname = nickname;
     }
 
-    public Collection<Subgroup> getSubGroups() {
+    public Group getParentGroup() { return parentGroup; }
+    public void setParentGroup(Group parentGroup) { this.parentGroup = parentGroup; }
+
+    public Collection<Group> getSubGroups() {
         return subGroups;
     }
 
-    public void setSubGroups(Collection<Subgroup> subGroups) {
+    public void setSubGroups(Collection<Group> subGroups) {
         this.subGroups = subGroups;
     }
 

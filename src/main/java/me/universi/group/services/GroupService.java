@@ -45,7 +45,6 @@ public class GroupService {
     private final GroupFeedService groupFeedService;
     private final GroupRepository groupRepository;
     private final ProfileGroupRepository profileGroupRepository;
-    private final SubgroupRepository subgroupRepository;
     private final GroupSettingsRepository groupSettingsRepository;
     private final GroupEmailFilterRepository groupEmailFilterRepository;
     private final GroupThemeRepository groupThemeRepository;
@@ -63,12 +62,11 @@ public class GroupService {
     @Value( "${server.servlet.context-path}" )
     private String contextPath;
 
-    public GroupService(UserService userService, GroupFeedService groupFeedService, GroupRepository groupRepository, ProfileGroupRepository profileGroupRepository, SubgroupRepository subgroupRepository, GroupSettingsRepository groupSettingsRepository, GroupEmailFilterRepository groupEmailFilterRepository, GroupThemeRepository groupThemeRepository, GroupFeaturesRepository groupFeaturesRepository, GroupEnvironmentRepository groupEnvironmentRepository, CompetenceService competenceService, ImageMetadataService imageMetadataService) {
+    public GroupService(UserService userService, GroupFeedService groupFeedService, GroupRepository groupRepository, ProfileGroupRepository profileGroupRepository, GroupSettingsRepository groupSettingsRepository, GroupEmailFilterRepository groupEmailFilterRepository, GroupThemeRepository groupThemeRepository, GroupFeaturesRepository groupFeaturesRepository, GroupEnvironmentRepository groupEnvironmentRepository, CompetenceService competenceService, ImageMetadataService imageMetadataService) {
         this.userService = userService;
         this.groupFeedService = groupFeedService;
         this.groupRepository = groupRepository;
         this.profileGroupRepository = profileGroupRepository;
-        this.subgroupRepository = subgroupRepository;
         this.groupSettingsRepository = groupSettingsRepository;
         this.groupEmailFilterRepository = groupEmailFilterRepository;
         this.groupThemeRepository = groupThemeRepository;
@@ -136,16 +134,7 @@ public class GroupService {
     }
 
     public UUID findParentGroupId(UUID id) {
-        Optional<Object> optionalGroup = groupRepository.findParentGroupId(id);
-        if(optionalGroup.isPresent()) {
-            Object object = optionalGroup.get();
-            if(object instanceof UUID) {
-                return (UUID)object;
-            } else if(object instanceof byte[]) {
-                return ConvertUtil.convertBytesToUUID((byte[])object);
-            }
-        }
-        return null;
+        return find( id ).map( Group::getParentGroup ).map( Group::getId ).orElse( null );
     }
 
     public Group findFirstByNickname(String nickname) {
@@ -235,18 +224,20 @@ public class GroupService {
     }
 
     public void addSubGroup(Group group, Group sub) {
-        if(!subgroupRepository.existsByGroupIdAndSubgroupId(group.getId(), sub.getId())) {
-            Subgroup subgroup = new Subgroup();
-            subgroup.group = group;
-            subgroup.subgroup = sub;
-            subgroupRepository.save(subgroup);
-        }
+        sub.setParentGroup( group );
+        groupRepository.saveAndFlush( sub );
     }
 
     public void removeSubGroup(Group group, Group sub) {
-        if(subgroupRepository.existsByGroupIdAndSubgroupId(group.getId(), sub.getId())) {
-            this.delete(sub);
-        }
+        if ( group == null )
+            return;
+
+        Optional.ofNullable( sub.getParentGroup() ).ifPresent( parent -> {
+            if ( parent.getId().equals( group.getId() ) ) {
+                sub.setParentGroup( null );
+                groupRepository.saveAndFlush( sub );
+            }
+        } );
     }
 
     public boolean isParticipantInGroup(Group group, Profile profile) {
@@ -336,8 +327,8 @@ public class GroupService {
 
         // check if nickname is already in use subgroup
         if(available && group != null) {
-            for (Subgroup groupNow : group.getSubGroups()) {
-                if (groupNow.subgroup != null && groupNow.subgroup.nickname.toLowerCase().equals(nicknameLower)) {
+            for (var groupNow : group.getSubGroups()) {
+                if (groupNow != null && groupNow.nickname.toLowerCase().equals(nicknameLower)) {
                     available = false;
                     if(thwrowException) {
                         throw new GroupException("Apelido de Grupo indisponível, já existe um grupo com apelido informado.");
@@ -376,9 +367,9 @@ public class GroupService {
     private void deleteRecursive(Group group, boolean insideRecursion) {
 
         if(group.subGroups != null) {
-            for(Subgroup groupNow : group.subGroups) {
-                if(groupNow.subgroup != null) {
-                    this.deleteRecursive(groupNow.subgroup, true);
+            for(var groupNow : group.subGroups) {
+                if(groupNow != null) {
+                    this.deleteRecursive(groupNow, true);
                 }
             }
         }
@@ -408,9 +399,9 @@ public class GroupService {
                     continue;
                 }
                 Group sub = null;
-                for (Subgroup grupoNow : groupInsta.subGroups) {
-                    if (grupoNow.subgroup != null && nicknameNow.equals(grupoNow.subgroup.nickname.toLowerCase())) {
-                        sub = grupoNow.subgroup;
+                for (var grupoNow : groupInsta.subGroups) {
+                    if (grupoNow != null && nicknameNow.equals(grupoNow.nickname.toLowerCase())) {
+                        sub = grupoNow;
                         break;
                     }
                 }
@@ -995,11 +986,10 @@ public class GroupService {
         RoleService.getInstance().checkPermission(group, FeaturesTypes.GROUP, Permission.READ);
 
         if(group != null) {
-            Collection<Subgroup> subgroupList = group.getSubGroups();
+            var subgroupList = group.getSubGroups();
             if(subgroupList != null) {
                 return subgroupList.stream()
-                        .sorted(Comparator.comparing(Subgroup::getAdded).reversed())
-                        .map(Subgroup::getSubgroup)
+                        .sorted(Comparator.comparing(Group::getCreatedAt).reversed())
                         .filter(Objects::nonNull)
                         .filter((g -> isParticipantInGroup(g, userService.getUserInSession().getProfile()) || g.isPublicGroup() )) // public group flag, available for see in list public groups
                         .collect(Collectors.toList());
