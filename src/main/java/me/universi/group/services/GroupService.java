@@ -786,7 +786,6 @@ public class GroupService extends EntityService<Group> {
         group.setCanCreateGroup( dto.canCreateSubgroup() );
         group.setPublicGroup( dto.isPublic() );
         group.setCanEnter( dto.canJoin() );
-        group.setEveryoneCanPost( dto.everyoneCanPost() );
 
         dto.image().ifPresent( imageId -> {
             group.setImage( imageMetadataService.findOrThrow( imageId ) );
@@ -851,7 +850,6 @@ public class GroupService extends EntityService<Group> {
         dto.canCreateSubgroup().ifPresent( group::setCanCreateGroup );
         dto.isPublic().ifPresent( group::setPublicGroup );
         dto.canJoin().ifPresent( group::setCanEnter );
-        dto.everyoneCanPost().ifPresent( group::setEveryoneCanPost );
 
         return this.groupRepository.saveAndFlush( group );
     }

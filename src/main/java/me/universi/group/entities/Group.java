@@ -150,14 +150,10 @@ public class Group implements Serializable {
     @Column(name = "enable_curriculum")
     private boolean enableCurriculum;
 
-    @NotNull
-    @Column(name = "everyone_can_post")
-    private boolean everyoneCanPost;
-
     public Group() {
     }
 
-    public Group(String nickname, String name, String description, Profile admin, Collection<ProfileGroup> participants, GroupType type, Group parentGroup, Collection<Group> subGroups, boolean canCreateGroup, boolean enableCurriculum, boolean everyoneCanPost) {
+    public Group(String nickname, String name, String description, Profile admin, Collection<ProfileGroup> participants, GroupType type, Group parentGroup, Collection<Group> subGroups, boolean canCreateGroup, boolean enableCurriculum) {
         this.nickname = nickname;
         this.name = name;
         this.description = description;
@@ -168,7 +164,6 @@ public class Group implements Serializable {
         this.subGroups = subGroups;
         this.canCreateGroup = canCreateGroup;
         this.enableCurriculum = enableCurriculum;
-        this.everyoneCanPost = everyoneCanPost;
     }
 
     public Group(String nickname, String name, String description, Profile admin, GroupType type, Date createdAt) {
@@ -366,14 +361,6 @@ public class Group implements Serializable {
 
     public void setHeaderImage(ImageMetadata headerImage) {
         this.headerImage = headerImage;
-    }
-
-    public boolean isEveryoneCanPost() {
-        return everyoneCanPost;
-    }
-
-    public void setEveryoneCanPost(boolean everyoneCanPost) {
-        this.everyoneCanPost = everyoneCanPost;
     }
 
     public Collection<Folder> getFoldersGrantedAccess() {

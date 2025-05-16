@@ -23,6 +23,5 @@ public record UpdateGroupDTO(
 
         Optional<Boolean> canCreateSubgroup,
         Optional<Boolean> isPublic,
-        Optional<Boolean> canJoin,
-        Optional<Boolean> everyoneCanPost
+        Optional<Boolean> canJoin
 ) { }

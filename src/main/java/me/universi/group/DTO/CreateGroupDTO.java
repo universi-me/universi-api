@@ -29,6 +29,5 @@ public record CreateGroupDTO(
 
         boolean canCreateSubgroup,
         boolean isPublic,
-        boolean canJoin,
-        boolean everyoneCanPost
+        boolean canJoin
 ) { }
