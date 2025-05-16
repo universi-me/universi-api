@@ -225,23 +225,6 @@ public class GroupService extends EntityService<Group> {
         }
     }
 
-    public void addSubGroup(Group group, Group sub) {
-        sub.setParentGroup( group );
-        groupRepository.saveAndFlush( sub );
-    }
-
-    public void removeSubGroup(Group group, Group sub) {
-        if ( group == null || sub == null )
-            return;
-
-        sub.getParentGroup().ifPresent( parent -> {
-            if ( parent.getId().equals( group.getId() ) ) {
-                sub.setParentGroup( null );
-                groupRepository.saveAndFlush( sub );
-            }
-        } );
-    }
-
     public boolean isParticipantInGroup(Group group, Profile profile) {
         try {
             return profileGroupRepository.existsByGroupIdAndProfileId(group.getId(), profile.getId());
@@ -796,9 +779,9 @@ public class GroupService extends EntityService<Group> {
 
         var settings = groupSettingsRepository.saveAndFlush( new GroupSettings() );
         group.setGroupSettings( settings );
+        parentGroup.ifPresent( group::setParentGroup );
 
         var createdGroup = groupRepository.saveAndFlush( group );
-        parentGroup.ifPresent( parent -> addSubGroup( parent, createdGroup ) );
 
         RoleService.getInstance().createBaseRoles( createdGroup );
         addParticipantToGroup(
@@ -889,25 +872,6 @@ public class GroupService extends EntityService<Group> {
         }
 
         throw new GroupException("Erro ao executar operação.");
-    }
-
-    public void removeSubgroup(UUID groupId, UUID subGroupId) {
-        Group group = findOrThrow( groupId );
-
-        RoleService.getInstance().checkPermission(group, FeaturesTypes.GROUP, Permission.READ_WRITE_DELETE);
-
-        if(subGroupId == null) {
-            throw new GroupException("Parâmetro groupIdRemove é nulo.");
-        }
-
-        if(group == null) {
-            throw new GroupException("Grupo não encontrado.");
-        }
-
-        Group groupRemove = findOrThrow(subGroupId);
-        checkPermissionToEdit( groupRemove );
-
-        removeSubGroup(group, groupRemove);
     }
 
     public Collection<Role> findRoles( UUID groupId ) {

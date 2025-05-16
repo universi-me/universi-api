@@ -40,13 +40,6 @@ public class GroupController {
         return ResponseEntity.ok( groupService.updateGroup( updateGroupDTO ) );
     }
 
-    @DeleteMapping(value = "/{id}/subgroups/{subgroupId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> remove(@Valid @PathVariable @NotNull( message = "ID do grupo inválido" ) UUID id,
-                                       @Valid @PathVariable @NotNull( message = "ID do subgrupo inválido" ) UUID subgroupId ) {
-        groupService.removeSubgroup( id, subgroupId );
-        return ResponseEntity.noContent().build();
-    }
-
     @DeleteMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> delete( @Valid @PathVariable @NotNull( message = "ID do grupo inválido" ) UUID id ) {
         groupService.deleteGroup( id );
