@@ -17,7 +17,7 @@ import org.hibernate.annotations.*;
 
 @Entity(name = "ProfileGroup")
 @Table(name = "profile_group", schema = "system_group")
-@SQLDelete(sql = "UPDATE system_group.profile_group SET deleted = true WHERE id=?")
+@SQLDelete(sql = "UPDATE system_group.profile_group SET deleted = true, exited = NOW() WHERE id=?")
 @SQLRestriction( value = "NOT deleted" )
 @JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class ProfileGroup implements Serializable {

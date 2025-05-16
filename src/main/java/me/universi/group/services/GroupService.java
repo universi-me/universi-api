@@ -96,7 +96,7 @@ public class GroupService extends EntityService<Group> {
             return false;
 
         return group.isPublicGroup()
-            || isParticipantInGroup( group , userInSession.getProfile() );
+            || GroupParticipantService.getInstance().isParticipant( group , userInSession.getProfile() );
     }
 
     protected Optional<Group> findUnchecked( UUID id ) {
@@ -220,60 +220,6 @@ public class GroupService extends EntityService<Group> {
         } catch (Exception e) {
             return false;
         }
-    }
-
-    public boolean isParticipantInGroup(Group group, Profile profile) {
-        try {
-            return profileGroupRepository.existsByGroupIdAndProfileId(group.getId(), profile.getId());
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    public boolean addParticipantToGroup(@NotNull Group group, @NotNull Profile profile) throws GroupException {
-        return addParticipantToGroup(
-            group,
-            profile,
-            RoleService.getInstance().getGroupMemberRole(group)
-        );
-    }
-
-    public boolean addParticipantToGroup(@NotNull Group group, @NotNull Profile profile, Role role) throws GroupException {
-        if(!isParticipantInGroup(group, profile)) {
-            ProfileGroup profileGroup = new ProfileGroup();
-            profileGroup.profile = profile;
-            profileGroup.group = group;
-            profileGroup.role = role;
-            profileGroupRepository.save(profileGroup);
-            return true;
-        }
-
-        return false;
-    }
-
-    public boolean removeParticipantFromGroup(Group group, Profile profile) throws GroupException {
-        if(profile == null) {
-            throw new GroupException("Parametro Perfil é nulo.");
-        }
-        if(isParticipantInGroup(group, profile)) {
-            ProfileGroup profileGroup = profileGroupRepository.findFirstByGroupAndProfile(group, profile);
-            profileGroup.exited = ConvertUtil.getDateTimeNow();
-            profileGroup.deleted = true;
-            profileGroupRepository.save(profileGroup);
-            return true;
-        }
-        return false;
-    }
-
-    public Profile getParticipantInGroup(Group group, UUID participantId) {
-        if(participantId != null && group.getParticipants() != null) {
-            for (ProfileGroup participantNow : group.getParticipants()) {
-                if (Objects.equals(participantNow.profile.getId(), participantId)) {
-                    return participantNow.profile;
-                }
-            }
-        }
-        return null;
     }
 
     public boolean isNicknameAvailableForGroup(Group group, String nickname) {
@@ -774,11 +720,11 @@ public class GroupService extends EntityService<Group> {
         var createdGroup = groupRepository.saveAndFlush( group );
 
         RoleService.getInstance().createBaseRoles( createdGroup );
-        addParticipantToGroup(
+        GroupParticipantService.getInstance().addParticipant( new AddGroupParticipantDTO(
             createdGroup,
             createdGroup.getAdmin(),
             RoleService.getInstance().getGroupAdminRole( createdGroup )
-        );
+        ) );
 
         return createdGroup;
     }
@@ -827,17 +773,11 @@ public class GroupService extends EntityService<Group> {
 
         RoleService.getInstance().checkPermission(group, FeaturesTypes.GROUP, Permission.READ);
 
-        if(group != null) {
-            var subgroupList = group.getSubGroups();
-            if(subgroupList != null) {
-                return subgroupList.stream()
-                        .sorted(Comparator.comparing(Group::getCreatedAt).reversed())
-                        .filter(Objects::nonNull)
-                        .filter((g -> isParticipantInGroup(g, userService.getUserInSession().getProfile()) || g.isPublicGroup() )) // public group flag, available for see in list public groups
-                        .collect(Collectors.toList());
-            }
-        }
-        throw new GroupException("Falha ao listar grupo.");
+        return group.getSubGroups()
+            .stream()
+            .filter( this::isValid )
+            .sorted( Comparator.comparing( Group::getCreatedAt ).reversed() )
+            .toList();
     }
 
     public Collection<Folder> listFolders(UUID groupId) {

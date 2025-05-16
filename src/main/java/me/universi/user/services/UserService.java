@@ -25,8 +25,10 @@ import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 import me.universi.Sys;
 import me.universi.api.interfaces.EntityService;
+import me.universi.group.DTO.AddGroupParticipantDTO;
 import me.universi.group.entities.Group;
 import me.universi.group.entities.GroupSettings.GroupEnvironment;
+import me.universi.group.services.GroupParticipantService;
 import me.universi.group.services.GroupService;
 import me.universi.image.services.ImageMetadataService;
 import me.universi.profile.entities.Profile;
@@ -232,7 +234,13 @@ public class UserService extends EntityService<User> implements UserDetailsServi
             try {
                 // add organization to user profile
                 GroupService groupService = GroupService.getInstance();
-                groupService.addParticipantToGroup(groupService.getOrganizationBasedInDomain(), userProfile);
+                var org = groupService.getOrganizationBasedInDomain();
+
+                GroupParticipantService.getInstance().addParticipant( new AddGroupParticipantDTO (
+                    org,
+                    userProfile,
+                    RoleService.getInstance().getGroupMemberRole( org )
+                ) );
             } catch (Exception ignored) {
             }
             user.setProfile(userProfile);

@@ -1,120 +1,127 @@
 package me.universi.group.services;
 
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
+
+import me.universi.Sys;
+import me.universi.api.exceptions.UniversiConflictingOperationException;
+import me.universi.api.exceptions.UniversiForbiddenAccessException;
+import me.universi.group.DTO.AddGroupParticipantDTO;
 import me.universi.group.DTO.CompetenceInfoDTO;
-import me.universi.group.DTO.UpdateGroupParticipantDTO;
+import me.universi.group.DTO.RemoveGroupParticipantDTO;
 import me.universi.group.entities.Group;
 import me.universi.group.entities.ProfileGroup;
-import me.universi.group.exceptions.GroupException;
+import me.universi.group.repositories.ProfileGroupRepository;
 import me.universi.profile.entities.Profile;
+import me.universi.profile.services.ProfileService;
 import me.universi.role.enums.FeaturesTypes;
 import me.universi.role.enums.Permission;
 import me.universi.role.services.RoleService;
-import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
+
 import org.springframework.stereotype.Service;
+
+import jakarta.validation.constraints.NotNull;
 
 @Service
 public class GroupParticipantService {
+    private final ProfileGroupRepository profileGroupRepository;
     private final GroupService groupService;
     private final UserService userService;
 
-    public GroupParticipantService(GroupService groupService, UserService userService) {
+    public GroupParticipantService(ProfileGroupRepository profileGroupRepository, GroupService groupService, UserService userService) {
+        this.profileGroupRepository = profileGroupRepository;
         this.groupService = groupService;
         this.userService = userService;
     }
 
-    public boolean joinGroup(UUID groupId) {
-
-        Group groupEdit = groupService.findOrThrow( groupId );
-
-        if(groupEdit.isRootGroup()) {
-            throw new GroupException("Você não pode sair do Grupo.");
-        }
-
-        if(!groupEdit.isCanEnter()) {
-            throw new GroupException("Grupo não permite entrada de participantes.");
-        }
-
-        User user = userService.getUserInSession();
-
-        if(groupEdit.isCanEnter() || groupService.hasPermissionToEdit(groupEdit, user)) {
-            if(groupService.addParticipantToGroup(groupEdit, user.getProfile())) {
-                return true;
-            } else {
-                throw new GroupException("Você já esta neste Grupo.");
-            }
-        }
-
-        throw new GroupException("Falha ao entrar ao grupo");
+    public static GroupParticipantService getInstance() {
+        return Sys.context.getBean( "groupParticipantService" , GroupParticipantService.class );
     }
 
-    public boolean leaveGroup(UUID groupId) {
-
-        Group groupEdit = groupService.findOrThrow( groupId );
-
-        if(groupEdit.isRootGroup()) {
-            throw new GroupException("Você não pode sair do Grupo.");
-        }
-
-        User user = userService.getUserInSession();
-
-        if(groupService.removeParticipantFromGroup(groupEdit, user.getProfile())) {
-            return true;
-        } else {
-            throw new GroupException("Você não está neste Grupo.");
-        }
-
+    public boolean isParticipant( Group group ) {
+        return isParticipant( group, userService.getUserInSession().getProfile() );
     }
 
-    public boolean addParticipantGroup(UpdateGroupParticipantDTO updateGroupParticipantDTO) {
-        if(updateGroupParticipantDTO.participant() == null) {
-            throw new GroupException("Parâmetro participant é nulo.");
-        }
-
-        User participantUser = null;
-        if(updateGroupParticipantDTO.participant() != null && !updateGroupParticipantDTO.participant().isEmpty()) {
-            participantUser = userService.findByUsernameOrEmail( updateGroupParticipantDTO.participant() ).orElse( null );
-        }
-
-        Group groupEdit = groupService.findByIdOrPathOrThrow( updateGroupParticipantDTO.groupId() );
-
-        if(participantUser != null && groupService.hasPermissionToEdit( groupEdit )) {
-            if(groupService.addParticipantToGroup(groupEdit, participantUser.getProfile())) {
-                return true;
-            } else {
-                return false;
-            }
-        }
-
-        throw new GroupException("Falha ao adicionar participante ao grupo");
+    public boolean isParticipant( Group group, Profile profile ) {
+        return group != null
+            && profileGroupRepository.existsByGroupIdAndProfileId( group.getId(), profile.getId() );
     }
 
-    public boolean removeParticipantGroup(UpdateGroupParticipantDTO updateGroupParticipantDTO) {
-        if(updateGroupParticipantDTO.participant() == null) {
-            throw new GroupException("Parâmetro participant é nulo.");
-        }
+    public @NotNull ProfileGroup join( UUID groupId ) {
+        var group = groupService.findOrThrow( groupId );
+        var profile = userService.getUserInSession().getProfile();
 
-        User participantUser = null;
-        if(updateGroupParticipantDTO.participant() != null && !updateGroupParticipantDTO.participant().isEmpty()) {
-            participantUser = userService.findByUsernameOrEmail( updateGroupParticipantDTO.participant() ).orElse( null );
-        }
+        if ( isParticipant( group, profile ) )
+            throw new UniversiConflictingOperationException( "Você já participa deste grupo." );
 
-        Group groupEdit = groupService.findByIdOrPathOrThrow( updateGroupParticipantDTO.groupId() );
+        if( !group.isCanEnter() )
+            throw new UniversiForbiddenAccessException( "O grupo não permite entrada de novos participantes." );
 
-        if(participantUser != null && groupService.hasPermissionToEdit( groupEdit )) {
-            if(groupService.removeParticipantFromGroup(groupEdit, participantUser.getProfile())) {
-                return true;
-            } else {
-                return false;
-            }
-        }
+        var profileGroup = new ProfileGroup();
+        profileGroup.setGroup( group );
+        profileGroup.setProfile( profile );
+        profileGroup.role = RoleService.getInstance().getGroupMemberRole( group );
 
-        throw new GroupException("Falha ao remover participante do grupo");
+        return profileGroupRepository.saveAndFlush( profileGroup );
+    }
+
+    public void leave( UUID groupId ) {
+        var group = groupService.findOrThrow( groupId );
+        var profile = userService.getUserInSession().getProfile();
+
+        if( group.isRootGroup() )
+            throw new UniversiForbiddenAccessException( "Você não pode sair deste grupo." );
+
+        var profileGroup = profileGroupRepository.findFirstByGroupAndProfile( group, profile );
+        if ( profileGroup == null )
+            // is not participant
+            return;
+
+        profileGroupRepository.delete( profileGroup );
+    }
+
+    public ProfileGroup addParticipant( AddGroupParticipantDTO dto ) {
+        var participant = ProfileService.getInstance().findByIdOrUsernameOrThrow( dto.participant() );
+        Group group = groupService.findByIdOrPathOrThrow( dto.group() );
+
+        RoleService.getInstance().checkPermission( group, FeaturesTypes.PEOPLE,Permission.READ_WRITE );
+        if ( isParticipant( group, participant ) )
+            throw new UniversiConflictingOperationException( "O usuário já participa do grupo" );
+
+        var role = dto.role().map( roleId -> {
+            var foundRole = RoleService.getInstance().findOrThrow( roleId );
+            if ( !foundRole.group.getId().equals( group.getId() ) )
+                throw new UniversiConflictingOperationException( "O Papel indicado não pertence ao grupo" );
+            return foundRole;
+        } ).orElse(
+            RoleService.getInstance().getGroupMemberRole( group )
+        );
+
+        var profileGroup = new ProfileGroup();
+        profileGroup.setGroup( group );
+        profileGroup.setProfile( participant );
+        profileGroup.role = role;
+
+        return profileGroupRepository.saveAndFlush( profileGroup );
+    }
+
+    public void removeParticipant( RemoveGroupParticipantDTO dto ) {
+        Group group = groupService.findByIdOrPathOrThrow( dto.group() );
+
+        if( group.isRootGroup() )
+            throw new UniversiForbiddenAccessException( "Você não pode remover alguém deste grupo." );
+
+        RoleService.getInstance().checkPermission( group, FeaturesTypes.PEOPLE, Permission.READ_WRITE_DELETE );
+
+        var participant = ProfileService.getInstance().findByIdOrUsernameOrThrow( dto.participant() );
+        var profileGroup = profileGroupRepository.findFirstByGroupAndProfile( group, participant );
+        if ( profileGroup == null )
+            // is not participant
+            return;
+
+        profileGroupRepository.delete( profileGroup );
     }
 
     public List<Profile> listParticipantsByGroupId(UUID groupId) {
@@ -123,19 +130,12 @@ public class GroupParticipantService {
 
         RoleService.getInstance().checkPermission(group, FeaturesTypes.PEOPLE, Permission.READ);
 
-        if(group != null) {
-            Collection<ProfileGroup> participants = group.getParticipants();
-
-            List<Profile> profiles = participants.stream()
-                    .sorted(Comparator.comparing(ProfileGroup::getJoined).reversed())
-                    .map(ProfileGroup::getProfile)
-                    .filter(p -> p != null && !p.isHidden())
-                    .collect(Collectors.toList());
-
-            return profiles;
-        }
-
-        throw new GroupException("Falha ao listar participante ao grupo");
+        return group.getParticipants()
+            .stream()
+            .sorted( Comparator.comparing(ProfileGroup::getJoined).reversed() )
+            .map( ProfileGroup::getProfile )
+            .filter( p -> !p.isHidden() )
+            .toList();
     }
 
     public List<CompetenceInfoDTO> getGroupCompetencesByGroupId(UUID id) {
