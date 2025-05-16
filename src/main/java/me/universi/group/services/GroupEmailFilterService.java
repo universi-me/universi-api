@@ -33,25 +33,24 @@ public class GroupEmailFilterService {
 
     // add email filter to group
     public GroupEmailFilter createEmailFilter(CreateEmailFilterDTO createEmailFilterDTO) {
-        Group group = groupService.getGroupByGroupIdOrGroupPath(createEmailFilterDTO.groupId(), null);
+        Group group = groupService.findByIdOrPathOrThrow( createEmailFilterDTO.groupId() );
 
         RoleService.getInstance().checkIsAdmin(group);
 
         if(group != null) {
-            User user = userService.getUserInSession();
-            if(groupService.verifyPermissionToEditGroup(group, user)) {
-                GroupEmailFilter groupEmailFilter = new GroupEmailFilter();
-                groupEmailFilter.groupSettings = group.groupSettings;
-                groupEmailFilter.email = createEmailFilterDTO.email();
-                if(createEmailFilterDTO.type() != null) {
-                    groupEmailFilter.type = GroupEmailFilterType.valueOf(String.valueOf(createEmailFilterDTO.type()));
-                }
-                if(createEmailFilterDTO.enabled() != null) {
-                    groupEmailFilter.enabled = createEmailFilterDTO.enabled();
-                }
-                groupEmailFilterRepository.save(groupEmailFilter);
-                return groupEmailFilter;
+            groupService.checkPermissionToEdit( group );
+
+            GroupEmailFilter groupEmailFilter = new GroupEmailFilter();
+            groupEmailFilter.groupSettings = group.groupSettings;
+            groupEmailFilter.email = createEmailFilterDTO.email();
+            if(createEmailFilterDTO.type() != null) {
+                groupEmailFilter.type = GroupEmailFilterType.valueOf(String.valueOf(createEmailFilterDTO.type()));
             }
+            if(createEmailFilterDTO.enabled() != null) {
+                groupEmailFilter.enabled = createEmailFilterDTO.enabled();
+            }
+            groupEmailFilterRepository.save(groupEmailFilter);
+            return groupEmailFilter;
         }
 
         throw new GroupException("Falha ao adicionar filtro.");
@@ -63,24 +62,23 @@ public class GroupEmailFilterService {
         RoleService.getInstance().checkIsAdmin(group);
 
         if(group != null) {
-            User user = userService.getUserInSession();
-            if(groupService.verifyPermissionToEditGroup(group, user)) {
-                if(groupEmailFilterRepository.existsByGroupSettingsIdAndId(group.groupSettings.getId(), updateEmailFilterDTO.groupEmailFilterId())) {
-                    GroupEmailFilter groupEmailFilter = groupEmailFilterRepository.findFirstByGroupSettingsIdAndId(group.groupSettings.getId(), updateEmailFilterDTO.groupEmailFilterId());
-                    if(updateEmailFilterDTO.email() != null) {
-                        groupEmailFilter.email = updateEmailFilterDTO.email();
-                    }
-                    if(updateEmailFilterDTO.type() != null) {
-                        groupEmailFilter.type = GroupEmailFilterType.valueOf(String.valueOf(updateEmailFilterDTO.type()));
-                    }
-                    if(updateEmailFilterDTO.enabled() != null) {
-                        groupEmailFilter.enabled = updateEmailFilterDTO.enabled();
-                    }
-                    groupEmailFilterRepository.save(groupEmailFilter);
-                    return groupEmailFilter;
-                } else {
-                    throw new GroupException("Filtro não existe.");
+            groupService.checkPermissionToEdit( group );
+
+            if(groupEmailFilterRepository.existsByGroupSettingsIdAndId(group.groupSettings.getId(), updateEmailFilterDTO.groupEmailFilterId())) {
+                GroupEmailFilter groupEmailFilter = groupEmailFilterRepository.findFirstByGroupSettingsIdAndId(group.groupSettings.getId(), updateEmailFilterDTO.groupEmailFilterId());
+                if(updateEmailFilterDTO.email() != null) {
+                    groupEmailFilter.email = updateEmailFilterDTO.email();
                 }
+                if(updateEmailFilterDTO.type() != null) {
+                    groupEmailFilter.type = GroupEmailFilterType.valueOf(String.valueOf(updateEmailFilterDTO.type()));
+                }
+                if(updateEmailFilterDTO.enabled() != null) {
+                    groupEmailFilter.enabled = updateEmailFilterDTO.enabled();
+                }
+                groupEmailFilterRepository.save(groupEmailFilter);
+                return groupEmailFilter;
+            } else {
+                throw new GroupException("Filtro não existe.");
             }
         }
 
@@ -94,18 +92,16 @@ public class GroupEmailFilterService {
 
             RoleService.getInstance().checkIsAdmin(group);
 
-            User user = userService.getUserInSession();
+            groupService.checkPermissionToEdit( group );
 
-            if(groupService.verifyPermissionToEditGroup(group, user)) {
-                if(groupEmailFilterRepository.existsByGroupSettingsIdAndId(group.groupSettings.getId(), groupEmailFilterId)) {
-                    GroupEmailFilter groupEmailFilter = groupEmailFilterRepository.findFirstByGroupSettingsIdAndId(group.groupSettings.getId(), groupEmailFilterId);
-                    groupEmailFilter.setRemoved(ConvertUtil.getDateTimeNow());
-                    groupEmailFilter.setDeleted(true);
-                    groupEmailFilterRepository.save(groupEmailFilter);
-                    return true;
-                } else {
-                    throw new GroupException("Filtro não existe.");
-                }
+            if(groupEmailFilterRepository.existsByGroupSettingsIdAndId(group.groupSettings.getId(), groupEmailFilterId)) {
+                GroupEmailFilter groupEmailFilter = groupEmailFilterRepository.findFirstByGroupSettingsIdAndId(group.groupSettings.getId(), groupEmailFilterId);
+                groupEmailFilter.setRemoved(ConvertUtil.getDateTimeNow());
+                groupEmailFilter.setDeleted(true);
+                groupEmailFilterRepository.save(groupEmailFilter);
+                return true;
+            } else {
+                throw new GroupException("Filtro não existe.");
             }
         }
 
@@ -113,13 +109,13 @@ public class GroupEmailFilterService {
     }
 
     public List<GroupEmailFilter> listEmailFilter(UUID groupId) {
-        Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, null);
+        Group group = groupService.findOrThrow( groupId );
 
         RoleService.getInstance().checkIsAdmin(group);
 
         if(group != null) {
 
-            if(!groupService.canEditGroup(group)) {
+            if(!groupService.hasPermissionToEdit(group)) {
                 throw new GroupException("Você não tem permissão para gerenciar este grupo.");
             }
 

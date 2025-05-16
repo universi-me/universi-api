@@ -3,6 +3,7 @@ package me.universi.group.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
@@ -29,6 +30,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -231,7 +233,7 @@ public class Group implements Serializable {
         this.nickname = nickname;
     }
 
-    public Group getParentGroup() { return parentGroup; }
+    public Optional<Group> getParentGroup() { return Optional.ofNullable( parentGroup ); }
     public void setParentGroup(Group parentGroup) { this.parentGroup = parentGroup; }
 
     public Collection<Group> getSubGroups() {
@@ -295,21 +297,34 @@ public class Group implements Serializable {
         this.id = id;
     }
 
+    public static final String PATH_DIVISOR = "/";
+
     @Transient
     public String getPath() {
-        return ( this.isRootGroup() ? "" : this.parentGroup.getPath() ) + "/" + this.nickname;
+        return getParentGroup().map( Group::getPath ).orElse( "" ) + PATH_DIVISOR + this.nickname;
     }
 
-    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
+    @JsonIgnore
     @Transient
-    public Group getOrganization() {
-        return GroupService.getInstance().getGroupRootFromGroupId(this.id);
+    public @NotNull Group getOrganization() {
+        return getParentGroup().map( Group::getOrganization ).orElse( this );
+    }
+
+    @JsonProperty( "organization" )
+    @JsonInclude(value = JsonInclude.Include.NON_NULL)
+    @Transient
+    private @Nullable Group getJsonOrganization() {
+        return isRootGroup()
+            ? null
+        : parentGroup.isRootGroup()
+            ? parentGroup
+        : parentGroup.getJsonOrganization();
     }
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
     @Transient
     public boolean isCanEdit() {
-        return GroupService.getInstance().canEditGroup(this);
+        return GroupService.getInstance().hasPermissionToEdit(this);
     }
 
     @Override

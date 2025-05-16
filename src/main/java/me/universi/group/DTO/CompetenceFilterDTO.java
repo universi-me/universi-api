@@ -1,15 +1,13 @@
 package me.universi.group.DTO;
 
-import me.universi.competence.entities.Competence;
-import me.universi.competence.entities.CompetenceType;
-
 import java.util.List;
-import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonAlias;
 
 public record CompetenceFilterDTO(
         List<CompetenceFilterRequestDTO> competences,
         boolean matchEveryCompetence,
-        UUID groupId,
-        String groupPath
+        @JsonAlias({ "groupId", "groupPath" })
+        String group
 ) {
 }

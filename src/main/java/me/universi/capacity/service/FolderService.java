@@ -153,11 +153,7 @@ public class FolderService extends EntityService<Folder> {
             List<Group> groupsFetched = new ArrayList<>();
 
             createFolderDTO.grantedAccessGroupsIds().forEach( g -> {
-                // TODO: GroupService.findByIdOrPathOrElseThrow
-                var group = groupService.getGroupByGroupIdOrGroupPath(
-                    CastingUtil.getUUID( g ).orElse(null),
-                    g
-                );
+                var group = groupService.findByIdOrPathOrThrow( g );
 
                 if ( !roleService.hasPermission( group , FeaturesTypes.CONTENT, Permission.READ_WRITE ) )
                     deniedAccessGroups.add( "'" + g + "'" );

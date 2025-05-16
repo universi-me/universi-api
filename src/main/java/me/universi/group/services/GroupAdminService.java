@@ -22,12 +22,9 @@ public class GroupAdminService {
     // list administrators of group
     public List<Profile> listAdmininistratorsByGroupId(UUID groupId) {
 
-        Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, null);
+        Group group = groupService.findOrThrow( groupId );
 
-        if (group == null)
-            throw new GroupException("Falha ao listar administradores do grupo");
-
-        if(!groupService.canEditGroup(group))
+        if(!groupService.hasPermissionToEdit(group))
             throw new GroupException("Você não tem permissão para gerenciar este grupo.");
 
         return groupService.getAdministrators(group).stream()

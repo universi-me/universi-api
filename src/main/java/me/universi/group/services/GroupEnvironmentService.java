@@ -31,11 +31,9 @@ public class GroupEnvironmentService {
         RoleService.getInstance().checkIsAdmin(group);
 
         if(group != null) {
-            User user = userService.getUserInSession();
+            groupService.checkPermissionToEdit( group );
 
-            if (groupService.verifyPermissionToEditGroup(group, user)) {
-                return groupService.getGroupEnvironment(group);
-            }
+            return groupService.getGroupEnvironment(group);
         }
 
         throw new GroupException("Falha ao listar o ambiente.");
@@ -48,15 +46,13 @@ public class GroupEnvironmentService {
         RoleService.getInstance().checkIsAdmin(group);
 
         if(group != null) {
-            User user = userService.getUserInSession();
-            if(groupService.verifyPermissionToEditGroup(group, user)) {
-                GroupEnvironment groupEnvironment = editEnvironment(group, updateGroupEnvironment);
+            groupService.checkPermissionToEdit( group );
+            GroupEnvironment groupEnvironment = editEnvironment(group, updateGroupEnvironment);
 
-                if(groupEnvironment != null) {
-                    return groupEnvironment;
-                } else {
-                    throw new GroupException("Variáveis Ambiente não existe.");
-                }
+            if(groupEnvironment != null) {
+                return groupEnvironment;
+            } else {
+                throw new GroupException("Variáveis Ambiente não existe.");
             }
         }
         throw new GroupException("Falha ao editar Variáveis Ambiente.");

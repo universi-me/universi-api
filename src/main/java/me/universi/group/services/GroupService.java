@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 import me.universi.Sys;
 import me.universi.api.exceptions.UniversiBadRequestException;
 import me.universi.api.exceptions.UniversiConflictingOperationException;
-import me.universi.api.exceptions.UniversiForbiddenAccessException;
+import me.universi.api.interfaces.EntityService;
 import me.universi.capacity.entidades.Folder;
 import me.universi.competence.entities.Competence;
 import me.universi.competence.services.CompetenceService;
@@ -40,7 +40,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
-public class GroupService {
+public class GroupService extends EntityService<Group> {
     private final UserService userService;
     private final GroupFeedService groupFeedService;
     private final GroupRepository groupRepository;
@@ -74,6 +74,8 @@ public class GroupService {
         this.groupEnvironmentRepository = groupEnvironmentRepository;
         this.competenceService = competenceService;
         this.imageMetadataService = imageMetadataService;
+
+        this.entityName = "Grupo";
     }
 
 
@@ -81,33 +83,29 @@ public class GroupService {
         return Sys.context.getBean("groupService", GroupService.class);
     }
 
-    public Group findFirstById(UUID id) {
-        Optional<Group> optionalGroup = groupRepository.findFirstById(id);
-        Group group = optionalGroup.orElse(null);
+    @Override
+    public boolean isValid( Group group ) {
+        if ( group == null )
+            return false;
 
-        // check if user is logged in and if the group is from the user organization, elso return null
-        if(group != null && userService.userIsLoggedIn()) {
-            UUID orgAccessId = group.isRootGroup() ? group.getId() : getGroupRootIdFromGroupId(group.getId());
-            User user = userService.getUserInSession();
-            Group userOrg = user.getOrganization();
-            if(userOrg != null && !Objects.equals(userOrg.getId(), orgAccessId)) {
-                return null;
-            }
-        }
+        if ( group.isRootGroup() )
+            return true;
 
-        return group;
+        if ( !userService.userIsLoggedIn() )
+            return false;
+
+        var userInSession = userService.getUserInSession();
+        var organization = group.getOrganization();
+
+        if ( !userInSession.getOrganization().getId().equals( organization.getId() ) )
+            return false;
+
+        return group.isPublicGroup()
+            || isParticipantInGroup( group , userInSession.getProfile() );
     }
 
-    public Group findFirstById(String id) {
-        return findFirstById(UUID.fromString(id));
-    }
-
-    public Optional<Group> find( UUID id ) {
+    protected Optional<Group> findUnchecked( UUID id ) {
         return groupRepository.findById( id );
-    }
-
-    public List<Optional<Group>> find( Collection<UUID> id ) {
-        return id.stream().map( this::find ).toList();
     }
 
     public Optional<Group> findByIdOrPath( String idOrPath ) {
@@ -117,32 +115,43 @@ public class GroupService {
         }
 
         else {
-            return Optional.ofNullable( getGroupFromPath( idOrPath ) );
+            var nicknames = Arrays.stream( idOrPath.split( Group.PATH_DIVISOR ) )
+                .map( n -> n.trim().toLowerCase() )
+                .filter( n -> !n.isBlank() )
+                .toList();
+
+            if ( nicknames.isEmpty() )
+                return Optional.empty();
+
+            var organization = groupRepository.findFirstByParentGroupIsNullAndNicknameIgnoreCase( nicknames.get( 0 ) );
+            if ( organization.isEmpty() )
+                return Optional.empty();
+
+            var target = organization.get();
+            for ( int i = 1; i < nicknames.size(); i++ ) {
+                var subs = target.getSubGroups();
+                if ( subs == null ) return Optional.empty();
+
+                var nick = nicknames.get( i );
+                var group = subs.stream()
+                    .filter( g -> g.getNickname().toLowerCase().equals( nick ) )
+                    .findFirst();
+
+                if ( group.isEmpty() )
+                    return Optional.empty();
+
+                target = group.get();
+            }
+
+            return Optional.ofNullable( target ).filter( this::isValid );
         }
     }
 
     public @NotNull Group findByIdOrPathOrThrow( String idOrPath ) throws EntityNotFoundException {
-        return findByIdOrPath( idOrPath ).orElseThrow( () -> new EntityNotFoundException( "Grupo com ID ou caminho '" + idOrPath + "' não encontrado" ) );
+        return findByIdOrPath( idOrPath ).orElseThrow( () -> makeNotFoundException( "ID ou caminho", idOrPath ) );
     }
 
-    public Group findOrThrow( UUID id ) throws EntityNotFoundException {
-        return find( id ).orElseThrow( () -> new EntityNotFoundException( "Grupo de ID '" + id + "' não encontrado" ) );
-    }
-
-    public List<Group> findOrThrow( Collection<UUID> id ) {
-        return id.stream().map( this::findOrThrow ).toList();
-    }
-
-    public UUID findParentGroupId(UUID id) {
-        return find( id ).map( Group::getParentGroup ).map( Group::getId ).orElse( null );
-    }
-
-    public Group findFirstByNickname(String nickname) {
-        Optional<Group> optionalGroup = groupRepository.findFirstByNickname(nickname);
-        return optionalGroup.orElse(null);
-    }
-
-    public Group findFirstRootGroupByNicknameIgnoreCase(String nickname, boolean checkUserOrganizationAccess) {
+    private Group findFirstRootGroupByNicknameIgnoreCase(String nickname, boolean checkUserOrganizationAccess) {
         if(nickname == null || nickname.isEmpty()) {
             return null;
         }
@@ -161,26 +170,27 @@ public class GroupService {
         return group;
     }
 
-    public Group findFirstRootGroup() {
+    private Group findFirstRootGroup() {
         Optional<Group> optionalGroup = groupRepository.findFirstByParentGroupIsNull();
         return optionalGroup.orElse(null);
     }
 
-    public List<Group> findByPublicGroup(boolean publicGroup) {
-        List<Group> optionalGroup = groupRepository.findByPublicGroup(publicGroup);
-        return optionalGroup;
+    @Override
+    public boolean hasPermissionToEdit( Group group ) {
+        return userService.userIsLoggedIn()
+            && hasPermissionToEdit( group, userService.getUserInSession() );
     }
 
-    public long count() {
-        try {
-            return groupRepository.count();
-        } catch (Exception e) {
-            return 0;
-        }
+    @Override
+    public boolean hasPermissionToDelete( Group group ) {
+        return hasPermissionToEdit( group );
     }
 
-    public boolean verifyPermissionToEditGroup(Group group, User user) throws GroupException {
+    public boolean hasPermissionToDelete( Group group, User user ) {
+        return hasPermissionToEdit( group, user );
+    }
 
+    public void checkPermissionToEdit(Group group, User user) throws GroupException {
         if (group == null) {
             throw new GroupException("Grupo não encontrado.");
         }
@@ -190,7 +200,7 @@ public class GroupService {
         }
 
         if(userService.isUserAdmin(user)) {
-            return true;
+            return;
         }
 
         Profile profile = user.getProfile();
@@ -199,28 +209,25 @@ public class GroupService {
         }
 
         if(Objects.equals(group.getAdmin().getId(), profile.getId())) {
-            return true;
+            return;
         }
 
         for(ProfileGroup groupAdminNow : getAdministrators(group)) {
             if(groupAdminNow != null && Objects.equals(groupAdminNow.profile.getId(), profile.getId())) {
-                return true;
+                return;
             }
         }
 
         throw new GroupException("Você não tem permissão para editar este grupo.");
     }
 
-    public boolean hasPermissionToEditGroup(Group group, User user) {
+    public boolean hasPermissionToEdit(Group group, User user) {
         try {
-            return verifyPermissionToEditGroup(group, user);
+            checkPermissionToEdit(group, user);
+            return true;
         } catch (Exception e) {
             return false;
         }
-    }
-
-    public boolean canEditGroup(Group group) {
-        return hasPermissionToEditGroup(group, userService.getUserInSession());
     }
 
     public void addSubGroup(Group group, Group sub) {
@@ -229,10 +236,10 @@ public class GroupService {
     }
 
     public void removeSubGroup(Group group, Group sub) {
-        if ( group == null )
+        if ( group == null || sub == null )
             return;
 
-        Optional.ofNullable( sub.getParentGroup() ).ifPresent( parent -> {
+        sub.getParentGroup().ifPresent( parent -> {
             if ( parent.getId().equals( group.getId() ) ) {
                 sub.setParentGroup( null );
                 groupRepository.saveAndFlush( sub );
@@ -360,135 +367,19 @@ public class GroupService {
         groupRepository.saveAndFlush(group);
     }
 
-    public void delete(Group group) {
-        this.deleteRecursive(group, false);
+    private void delete( Group group ) {
+        if ( group == null )
+            return;
+
+        if ( group.getSubGroups() != null )
+            group.getSubGroups().forEach( this::delete );
+
+        groupRepository.delete( group );
     }
 
-    private void deleteRecursive(Group group, boolean insideRecursion) {
-
-        if(group.subGroups != null) {
-            for(var groupNow : group.subGroups) {
-                if(groupNow != null) {
-                    this.deleteRecursive(groupNow, true);
-                }
-            }
-        }
-
-        group.setDeleted(true);
-        groupRepository.save(group);
-    }
-
-    public List<Group> findAll() {
+    @Override
+    protected List<Group> findAllUnchecked() {
         return groupRepository.findAll();
-    }
-
-    /** Verifies if the user is accessing the group URL correctly, from root/master group to the subgroup */
-    public Group getGroupFromNicknamePath(Group rootGroup, String[] nicknameSequenceArr) {
-        Group finalGroup = null;
-
-        boolean parentCheckFailed = false;
-        try {
-            Group groupInsta = rootGroup;
-            for (int i = 0; i < nicknameSequenceArr.length; i++) {
-                String nicknameNow = nicknameSequenceArr[i];
-                if (nicknameNow == null || nicknameNow.isEmpty()) {
-                    continue;
-                }
-                if (i == 0) {
-                    // ignore the first, already verified
-                    continue;
-                }
-                Group sub = null;
-                for (var grupoNow : groupInsta.subGroups) {
-                    if (grupoNow != null && nicknameNow.equals(grupoNow.nickname.toLowerCase())) {
-                        sub = grupoNow;
-                        break;
-                    }
-                }
-                if (sub != null) {
-                    groupInsta = sub;
-                } else {
-                    parentCheckFailed = true;
-                    break;
-                }
-            }
-            finalGroup = groupInsta;
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        if(!parentCheckFailed) {
-            return finalGroup;
-        }
-        return null;
-    }
-
-    /** Get group from url path */
-    public Group getGroupFromPath(String path) {
-        try {
-            String pathSt = path.toLowerCase();
-
-            String[] nicknameArr = Arrays.stream(pathSt.split("/"))
-                    .map(String::trim)
-                    .filter(Predicate.isEqual("").negate())
-                    .toArray(String[]::new);
-
-            Group groupRoot = null;
-            Group groupActual = null;
-
-            // get group root, its nickname is unique in the system, it can be accessed direct
-            groupRoot = findFirstRootGroupByNicknameIgnoreCase(nicknameArr[0], true);
-            if(groupRoot != null) {
-                // check if group path is valid and return that group
-                groupActual = getGroupFromNicknamePath(groupRoot, nicknameArr);
-            }
-            return groupActual;
-
-        } catch(Exception e) {
-            return null;
-        }
-    }
-
-    public Group getGroupByGroupIdOrGroupPath(Object groupId, Object groupPath) throws GroupException {
-
-        if(groupId == null && groupPath == null) {
-            throw new GroupException("Parâmetro groupId e groupPath é nulo.");
-        }
-
-        Group group = null;
-        if(groupId != null) {
-            group = findFirstById(String.valueOf(groupId));
-        }
-        if (group == null && groupPath != null) {
-            group = getGroupFromPath(String.valueOf(groupPath));
-        }
-
-        if(group == null) {
-            throw new GroupException("Grupo não encontrado.");
-        }
-
-        return group;
-    }
-
-    /** Get the root group from a group id */
-    public Group getGroupRootFromGroupId(UUID groupId) {
-        return findFirstById(getGroupRootIdFromGroupId(groupId));
-    }
-    public UUID getGroupRootIdFromGroupId(UUID groupId) {
-        UUID parentGroupId = findParentGroupId(groupId);
-        while(parentGroupId != null) {
-            UUID partentUUID = findParentGroupId(parentGroupId);
-            if(partentUUID == null) {
-                break;
-            } else {
-                parentGroupId = partentUUID;
-            }
-        }
-        return parentGroupId;
-    }
-
-    /** Searches the first 5 groups containing {@code name} ignoring case */
-    public Collection<Group> findTop5ByNameContainingIgnoreCase(String name){
-        return groupRepository.findTop5ByNameContainingIgnoreCase(name);
     }
 
     private String getSubdomainFromDomain(String domain) {
@@ -522,7 +413,7 @@ public class GroupService {
     public Group getOrganizationBasedInDomain() {
         // if logged find updated organization of user without cached from session, else calculate from domain
         Group gOrg = userService.userIsLoggedIn() && userService.getUserInSession() != null && userService.getUserInSession().getOrganization() != null ?
-                findFirstById(userService.getUserInSession().getOrganization().getId()) : obtainOrganizationBasedInDomain();
+                find(userService.getUserInSession().getOrganization().getId()).orElse(null) : obtainOrganizationBasedInDomain();
         if(gOrg == null) {
             throw new GroupException("Falha ao obter Organização.");
         }
@@ -625,7 +516,7 @@ public class GroupService {
 
         List<ProfileWithCompetencesDTO> selectedProfiles = new ArrayList<>();
 
-        Group group = getGroupByGroupIdOrGroupPath(competenceFilter.groupId(), competenceFilter.groupPath());
+        Group group = findByIdOrPathOrThrow( competenceFilter.group() );
 
         Collection<ProfileGroup> participants = group.getParticipants();
         List<Profile> profiles = participants.stream()
@@ -927,9 +818,7 @@ public class GroupService {
 
     public Group updateGroup( @NotNull UpdateGroupDTO dto ) {
         var group = findByIdOrPathOrThrow( dto.group() );
-
-        if ( !verifyPermissionToEditGroup( group, userService.getUserInSession() ) )
-            throw new UniversiForbiddenAccessException( "Você não tem permissão para alterar o grupo" );
+        checkPermissionToEdit( group );
 
         dto.name().ifPresent( name -> {
             if ( !name.isBlank() ) group.setName( name.trim() );
@@ -968,7 +857,7 @@ public class GroupService {
     }
 
     public List<Group> subGroups(UUID groupId) {
-        Group group = getGroupByGroupIdOrGroupPath(groupId, null);
+        Group group = findOrThrow( groupId );
 
         RoleService.getInstance().checkPermission(group, FeaturesTypes.GROUP, Permission.READ);
 
@@ -986,7 +875,7 @@ public class GroupService {
     }
 
     public Collection<Folder> listFolders(UUID groupId) {
-        Group group = getGroupByGroupIdOrGroupPath(groupId, null);
+        Group group = findOrThrow( groupId );
 
         // check permission contents
         RoleService.getInstance().checkPermission(group, FeaturesTypes.CONTENT, Permission.READ);
@@ -995,13 +884,13 @@ public class GroupService {
     }
 
     public boolean deleteGroup(UUID groupId) {
-        Group group = getGroupByGroupIdOrGroupPath(groupId, null);
+        Group group = findOrThrow( groupId );
 
         RoleService.getInstance().checkPermission(group, FeaturesTypes.GROUP, Permission.READ_WRITE_DELETE);
 
         User user = userService.getUserInSession();
 
-        if(verifyPermissionToEditGroup(group, user)) {
+        if(hasPermissionToDelete(group, user)) {
             delete(group);
             return true;
         }
@@ -1009,8 +898,8 @@ public class GroupService {
         throw new GroupException("Erro ao executar operação.");
     }
 
-    public boolean removeSubgroup(UUID groupId, UUID subGroupId) {
-        Group group = getGroupByGroupIdOrGroupPath(groupId, null);
+    public void removeSubgroup(UUID groupId, UUID subGroupId) {
+        Group group = findOrThrow( groupId );
 
         RoleService.getInstance().checkPermission(group, FeaturesTypes.GROUP, Permission.READ_WRITE_DELETE);
 
@@ -1022,19 +911,10 @@ public class GroupService {
             throw new GroupException("Grupo não encontrado.");
         }
 
-        Group groupRemove = findFirstById(subGroupId);
-        if(groupRemove == null) {
-            throw new GroupException("Subgrupo não encontrado.");
-        }
+        Group groupRemove = findOrThrow(subGroupId);
+        checkPermissionToEdit( groupRemove );
 
-        User user = userService.getUserInSession();
-
-        if(verifyPermissionToEditGroup(group, user)) {
-            removeSubGroup(group, groupRemove);
-            return true;
-        }
-
-        throw new GroupException("Erro ao executar operação.");
+        removeSubGroup(group, groupRemove);
     }
 
     public Collection<Role> findRoles( UUID groupId ) {

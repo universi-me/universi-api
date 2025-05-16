@@ -174,10 +174,6 @@ public class RoleService extends EntityService<Role> {
         checkIsAdmin(UserService.getInstance().getUserInSession().getProfile(), group);
     }
 
-    public void checkIsAdmin(String groupId) {
-        checkIsAdmin(GroupService.getInstance().getGroupByGroupIdOrGroupPath(groupId, null));
-    }
-
     public void checkPermission(Profile profile, Group group, FeaturesTypes feature, int forPermission) {
         if (profile == null) {
             throw new RolesException("Perfil não encontrado.");
@@ -229,7 +225,7 @@ public class RoleService extends EntityService<Role> {
 
     public void checkPermission(String groupId, FeaturesTypes feature, int forPermission) {
         checkPermission(
-                GroupService.getInstance().getGroupByGroupIdOrGroupPath(groupId, null),
+                GroupService.getInstance().findByIdOrPathOrThrow( groupId ),
                 feature,
                 forPermission
         );
@@ -237,7 +233,7 @@ public class RoleService extends EntityService<Role> {
 
     public boolean hasPermission(String groupId, FeaturesTypes feature, int forPermission) {
         return hasPermission(
-                GroupService.getInstance().getGroupByGroupIdOrGroupPath(groupId, null),
+                GroupService.getInstance().findByIdOrPathOrThrow( groupId ),
                 feature,
                 forPermission
         );

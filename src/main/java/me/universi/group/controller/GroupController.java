@@ -55,12 +55,12 @@ public class GroupController {
 
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Group> get( @Valid @PathVariable @NotNull( message = "ID do grupo inválido" ) UUID id ) {
-        return ResponseEntity.ok( groupService.getGroupByGroupIdOrGroupPath(id, null) );
+        return ResponseEntity.ok( groupService.findOrThrow( id ) );
     }
 
     @GetMapping( path = "/from-path", produces = MediaType.APPLICATION_JSON_VALUE )
     public ResponseEntity<Group> getFromPath( @RequestParam( name = "group", required = true ) @Nullable String group ) {
-        return ResponseEntity.ok( groupService.getGroupByGroupIdOrGroupPath( null, group ) );
+        return ResponseEntity.ok( groupService.findByIdOrPathOrThrow( group ) );
     }
 
     @GetMapping(value = "/{id}/subgroups", produces = MediaType.APPLICATION_JSON_VALUE)

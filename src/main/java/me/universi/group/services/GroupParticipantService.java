@@ -30,7 +30,7 @@ public class GroupParticipantService {
 
     public boolean joinGroup(UUID groupId) {
 
-        Group groupEdit = groupService.getGroupByGroupIdOrGroupPath(groupId, null);
+        Group groupEdit = groupService.findOrThrow( groupId );
 
         if(groupEdit.isRootGroup()) {
             throw new GroupException("Você não pode sair do Grupo.");
@@ -42,7 +42,7 @@ public class GroupParticipantService {
 
         User user = userService.getUserInSession();
 
-        if(groupEdit.isCanEnter() || groupService.verifyPermissionToEditGroup(groupEdit, user)) {
+        if(groupEdit.isCanEnter() || groupService.hasPermissionToEdit(groupEdit, user)) {
             if(groupService.addParticipantToGroup(groupEdit, user.getProfile())) {
                 return true;
             } else {
@@ -55,7 +55,7 @@ public class GroupParticipantService {
 
     public boolean leaveGroup(UUID groupId) {
 
-        Group groupEdit = groupService.getGroupByGroupIdOrGroupPath(groupId, null);
+        Group groupEdit = groupService.findOrThrow( groupId );
 
         if(groupEdit.isRootGroup()) {
             throw new GroupException("Você não pode sair do Grupo.");
@@ -83,9 +83,7 @@ public class GroupParticipantService {
 
         Group groupEdit = groupService.findByIdOrPathOrThrow( updateGroupParticipantDTO.groupId() );
 
-        User user = userService.getUserInSession();
-
-        if(participantUser != null && groupService.verifyPermissionToEditGroup(groupEdit, user)) {
+        if(participantUser != null && groupService.hasPermissionToEdit( groupEdit )) {
             if(groupService.addParticipantToGroup(groupEdit, participantUser.getProfile())) {
                 return true;
             } else {
@@ -108,9 +106,7 @@ public class GroupParticipantService {
 
         Group groupEdit = groupService.findByIdOrPathOrThrow( updateGroupParticipantDTO.groupId() );
 
-        User user = userService.getUserInSession();
-
-        if(participantUser != null && groupService.verifyPermissionToEditGroup(groupEdit, user)) {
+        if(participantUser != null && groupService.hasPermissionToEdit( groupEdit )) {
             if(groupService.removeParticipantFromGroup(groupEdit, participantUser.getProfile())) {
                 return true;
             } else {
@@ -123,7 +119,7 @@ public class GroupParticipantService {
 
     public List<Profile> listParticipantsByGroupId(UUID groupId) {
 
-        Group group = groupService.getGroupByGroupIdOrGroupPath(groupId, null);
+        Group group = groupService.findOrThrow( groupId );
 
         RoleService.getInstance().checkPermission(group, FeaturesTypes.PEOPLE, Permission.READ);
 
@@ -145,7 +141,7 @@ public class GroupParticipantService {
     public List<CompetenceInfoDTO> getGroupCompetencesByGroupId(UUID id) {
         RoleService.getInstance().checkPermission(id.toString(), FeaturesTypes.COMPETENCE, Permission.READ);
 
-        Group group = groupService.getGroupByGroupIdOrGroupPath(id, null);
+        Group group = groupService.findOrThrow( id );
 
         return groupService.getGroupCompetences(group);
     }
