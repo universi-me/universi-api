@@ -177,10 +177,6 @@ public class GroupService extends EntityService<Group> {
         return hasPermissionToEdit( group );
     }
 
-    public boolean hasPermissionToDelete( Group group, User user ) {
-        return hasPermissionToEdit( group, user );
-    }
-
     public void checkPermissionToEdit(Group group, User user) throws GroupException {
         if (group == null) {
             throw new GroupException("Grupo não encontrado.");
@@ -785,22 +781,16 @@ public class GroupService extends EntityService<Group> {
         return group.getFoldersGrantedAccess();
     }
 
-    public boolean deleteGroup(UUID groupId) {
+    public void deleteGroup( UUID groupId ) {
         Group group = findOrThrow( groupId );
 
         RoleService.getInstance().checkPermission(group, FeaturesTypes.GROUP, Permission.READ_WRITE_DELETE);
+        checkPermissionToDelete( group );
 
-        User user = userService.getUserInSession();
-
-        if(hasPermissionToDelete(group, user)) {
-            delete(group);
-            return true;
-        }
-
-        throw new GroupException("Erro ao executar operação.");
+        delete( group );
     }
 
     public Collection<Role> findRoles( UUID groupId ) {
         return RoleService.getInstance().findByGroup( groupId );
     }
- }
+}
