@@ -145,15 +145,10 @@ public class Group implements Serializable {
     @JsonIgnore
     private Collection<Folder> foldersGrantedAccess;
 
-    /*Attribute indicates that the group must be part of the person's resume*/
-    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
-    @Column(name = "enable_curriculum")
-    private boolean enableCurriculum;
-
     public Group() {
     }
 
-    public Group(String nickname, String name, String description, Profile admin, Collection<ProfileGroup> participants, GroupType type, Group parentGroup, Collection<Group> subGroups, boolean canCreateGroup, boolean enableCurriculum) {
+    public Group(String nickname, String name, String description, Profile admin, Collection<ProfileGroup> participants, GroupType type, Group parentGroup, Collection<Group> subGroups, boolean canCreateGroup) {
         this.nickname = nickname;
         this.name = name;
         this.description = description;
@@ -163,7 +158,6 @@ public class Group implements Serializable {
         this.parentGroup = parentGroup;
         this.subGroups = subGroups;
         this.canCreateGroup = canCreateGroup;
-        this.enableCurriculum = enableCurriculum;
     }
 
     public Group(String nickname, String name, String description, Profile admin, GroupType type, Date createdAt) {
@@ -173,7 +167,6 @@ public class Group implements Serializable {
         this.admin = admin;
         this.type = type;
         this.createdAt = createdAt;
-        this.enableCurriculum = false;
     }
 
     public UUID getId() {
@@ -325,14 +318,6 @@ public class Group implements Serializable {
     @Override
     public String toString() {
         return "Grupo [id=\""+this.id+"\", nome=\""+this.name+"\", descricao=\""+this.description+"\"]";
-    }
-
-    public boolean isEnableCurriculum() {
-        return enableCurriculum;
-    }
-
-    public void setEnableCurriculum(boolean enableCurriculum) {
-        this.enableCurriculum = enableCurriculum;
     }
 
     public @Nullable ImageMetadata getBannerImage() {
