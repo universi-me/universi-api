@@ -158,7 +158,7 @@ public class RoleService extends EntityService<Role> {
             throw new RolesException("Grupo não encontrado.");
         }
 
-        return getAssignedRole(profile.getId(), group.getId()).getRoleType().equals(RoleType.ADMINISTRATOR);
+        return getAssignedRole( profile, group ).isAdmin();
     }
 
     public void checkIsAdmin(Profile profile, Group group) {

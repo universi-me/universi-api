@@ -205,6 +205,13 @@ public class Group implements Serializable {
         this.participants = participants;
     }
 
+    @Transient
+    public Collection<ProfileGroup> getAdministrators() {
+        return this.participants.stream()
+            .filter( ProfileGroup::isAdmin )
+            .toList();
+    }
+
     public GroupType getType() {
         return type;
     }

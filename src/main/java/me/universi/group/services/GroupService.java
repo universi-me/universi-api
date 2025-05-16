@@ -207,11 +207,8 @@ public class GroupService extends EntityService<Group> {
             return;
         }
 
-        for(ProfileGroup groupAdminNow : getAdministrators(group)) {
-            if(groupAdminNow != null && Objects.equals(groupAdminNow.profile.getId(), profile.getId())) {
-                return;
-            }
-        }
+        if ( RoleService.getInstance().isAdmin( profile, group ) )
+            return;
 
         throw new GroupException("Você não tem permissão para editar este grupo.");
     }
@@ -716,13 +713,6 @@ public class GroupService extends EntityService<Group> {
         String message = getMessageTemplateForContentAssigned(fromUser, profile, folder);
 
         userService.sendSystemEmailToUser(profile.getUser(), subject, message, true);
-    }
-
-    public Collection<ProfileGroup> getAdministrators(@NotNull Group group) {
-        return group.participants.stream()
-            .filter(pg -> pg.role.getRoleType() == RoleType.ADMINISTRATOR)
-            .filter(Objects::nonNull)
-            .toList();
     }
 
     public Group getGroupByGroupSettingsId(UUID groupSettingsId) {

@@ -4,7 +4,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import me.universi.group.entities.Group;
 import me.universi.group.entities.ProfileGroup;
 import me.universi.group.exceptions.GroupException;
@@ -27,10 +26,10 @@ public class GroupAdminService {
         if(!groupService.hasPermissionToEdit(group))
             throw new GroupException("Você não tem permissão para gerenciar este grupo.");
 
-        return groupService.getAdministrators(group).stream()
+        return group.getAdministrators().stream()
                 .sorted(Comparator.comparing(ProfileGroup::getJoined).reversed())
                 .map(ProfileGroup::getProfile)
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .toList();
     }
 }
