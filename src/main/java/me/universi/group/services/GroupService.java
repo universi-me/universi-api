@@ -36,7 +36,6 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -47,8 +46,6 @@ public class GroupService extends EntityService<Group> {
     private final ProfileGroupRepository profileGroupRepository;
     private final GroupSettingsRepository groupSettingsRepository;
     private final GroupEmailFilterRepository groupEmailFilterRepository;
-    private final GroupThemeRepository groupThemeRepository;
-    private final GroupFeaturesRepository groupFeaturesRepository;
     private final GroupEnvironmentRepository groupEnvironmentRepository;
     private final CompetenceService competenceService;
     private final ImageMetadataService imageMetadataService;
@@ -62,15 +59,13 @@ public class GroupService extends EntityService<Group> {
     @Value( "${server.servlet.context-path}" )
     private String contextPath;
 
-    public GroupService(UserService userService, GroupFeedService groupFeedService, GroupRepository groupRepository, ProfileGroupRepository profileGroupRepository, GroupSettingsRepository groupSettingsRepository, GroupEmailFilterRepository groupEmailFilterRepository, GroupThemeRepository groupThemeRepository, GroupFeaturesRepository groupFeaturesRepository, GroupEnvironmentRepository groupEnvironmentRepository, CompetenceService competenceService, ImageMetadataService imageMetadataService) {
+    public GroupService(UserService userService, GroupFeedService groupFeedService, GroupRepository groupRepository, ProfileGroupRepository profileGroupRepository, GroupSettingsRepository groupSettingsRepository, GroupEmailFilterRepository groupEmailFilterRepository, GroupEnvironmentRepository groupEnvironmentRepository, CompetenceService competenceService, ImageMetadataService imageMetadataService) {
         this.userService = userService;
         this.groupFeedService = groupFeedService;
         this.groupRepository = groupRepository;
         this.profileGroupRepository = profileGroupRepository;
         this.groupSettingsRepository = groupSettingsRepository;
         this.groupEmailFilterRepository = groupEmailFilterRepository;
-        this.groupThemeRepository = groupThemeRepository;
-        this.groupFeaturesRepository = groupFeaturesRepository;
         this.groupEnvironmentRepository = groupEnvironmentRepository;
         this.competenceService = competenceService;
         this.imageMetadataService = imageMetadataService;
