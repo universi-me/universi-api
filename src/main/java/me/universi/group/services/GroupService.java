@@ -23,12 +23,10 @@ import me.universi.profile.entities.Profile;
 import me.universi.role.entities.Role;
 import me.universi.role.enums.FeaturesTypes;
 import me.universi.role.enums.Permission;
-import me.universi.role.enums.RoleType;
 import me.universi.role.services.RoleService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import me.universi.util.CastingUtil;
-import me.universi.util.ConvertUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -43,7 +41,6 @@ public class GroupService extends EntityService<Group> {
     private final UserService userService;
     private final GroupFeedService groupFeedService;
     private final GroupRepository groupRepository;
-    private final ProfileGroupRepository profileGroupRepository;
     private final GroupSettingsRepository groupSettingsRepository;
     private final GroupEmailFilterRepository groupEmailFilterRepository;
     private final GroupEnvironmentRepository groupEnvironmentRepository;
@@ -59,11 +56,10 @@ public class GroupService extends EntityService<Group> {
     @Value( "${server.servlet.context-path}" )
     private String contextPath;
 
-    public GroupService(UserService userService, GroupFeedService groupFeedService, GroupRepository groupRepository, ProfileGroupRepository profileGroupRepository, GroupSettingsRepository groupSettingsRepository, GroupEmailFilterRepository groupEmailFilterRepository, GroupEnvironmentRepository groupEnvironmentRepository, CompetenceService competenceService, ImageMetadataService imageMetadataService) {
+    public GroupService(UserService userService, GroupFeedService groupFeedService, GroupRepository groupRepository, GroupSettingsRepository groupSettingsRepository, GroupEmailFilterRepository groupEmailFilterRepository, GroupEnvironmentRepository groupEnvironmentRepository, CompetenceService competenceService, ImageMetadataService imageMetadataService) {
         this.userService = userService;
         this.groupFeedService = groupFeedService;
         this.groupRepository = groupRepository;
-        this.profileGroupRepository = profileGroupRepository;
         this.groupSettingsRepository = groupSettingsRepository;
         this.groupEmailFilterRepository = groupEmailFilterRepository;
         this.groupEnvironmentRepository = groupEnvironmentRepository;
