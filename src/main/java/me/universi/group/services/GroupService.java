@@ -375,11 +375,6 @@ public class GroupService extends EntityService<Group> {
         return hasAnyFilter ? available : !available;
     }
 
-    public void saveGroupSettings(GroupSettings gSettings) {
-        groupSettingsRepository.save(gSettings);
-    }
-
-
     public GroupEnvironment getGroupEnvironment(Group group) {
         if(group == null) {
             return null;
