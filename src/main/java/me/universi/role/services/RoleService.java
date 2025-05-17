@@ -323,7 +323,7 @@ public class RoleService extends EntityService<Role> {
         var group = groupService.findOrThrow(groupId);
         checkIsAdmin(group);
 
-        return group.participants
+        return group.getParticipants()
             .stream()
             .map(pg -> new ProfileRoleDTO(pg.profile, getAssignedRole(pg.profile, group)))
             .toList();

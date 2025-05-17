@@ -28,6 +28,7 @@ import org.hibernate.annotations.NotFoundAction;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
@@ -98,7 +99,7 @@ public class Group implements Serializable {
 
     @JsonIgnore
     @OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
-    public Collection<ProfileGroup> participants;
+    private Collection<ProfileGroup> participants;
 
     @JsonIgnore
     @ManyToOne( fetch = FetchType.LAZY )
@@ -198,7 +199,9 @@ public class Group implements Serializable {
     }
 
     public Collection<ProfileGroup> getParticipants() {
-        return participants;
+        return this.participants == null
+            ? Collections.emptyList()
+            : this.participants;
     }
 
     public void setParticipants(Collection<ProfileGroup> participants) {
@@ -207,7 +210,7 @@ public class Group implements Serializable {
 
     @Transient
     public Collection<ProfileGroup> getAdministrators() {
-        return this.participants.stream()
+        return this.getParticipants().stream()
             .filter( ProfileGroup::isAdmin )
             .toList();
     }
