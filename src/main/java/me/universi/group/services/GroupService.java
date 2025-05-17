@@ -30,6 +30,7 @@ import me.universi.util.CastingUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotNull;
 
@@ -214,66 +215,42 @@ public class GroupService extends EntityService<Group> {
         }
     }
 
-    public boolean isNicknameAvailableForGroup(Group group, String nickname) {
+    public @NotNull String checkNicknameAvailable( String nickname, @Nullable Group parentGroup ) {
+        if ( nickname == null || nickname.isBlank() )
+            throw new UniversiBadRequestException( "O Apelido do Grupo não pode ser vazio" );
+
+        final var validNickname = nickname.trim().toLowerCase();
+        if ( !userService.usernameRegex( nickname ) )
+            throw new UniversiBadRequestException( "O Apelido do Grupo contém caracteres inválidos" );
+
+        final var nicknameInUse = parentGroup == null
+            ? groupRepository.findFirstByParentGroupIsNullAndNicknameIgnoreCase( validNickname ).isPresent()
+            : parentGroup.getSubGroups().stream().anyMatch( sg -> sg.getNickname().equalsIgnoreCase( validNickname ) );
+
+        if ( nicknameInUse ) {
+            throw new UniversiConflictingOperationException(
+                new StringBuilder()
+                    .append( "O Apelido de Grupo '" )
+                    .append( validNickname )
+                    .append( "' não pode ser aplicado pois já está em uso por " )
+                    .append( parentGroup == null
+                        ? "outra organização"
+                        : "outro subgrupo deste grupo"
+                    )
+                    .toString()
+            );
+        }
+
+        return validNickname;
+    }
+
+    public boolean isNicknameAvailable( String nickname, @Nullable Group parentGroup ) {
         try {
-            return isNicknameAvailableForGroup(group, nickname, false);
+            checkNicknameAvailable( nickname, parentGroup );
+            return true;
         } catch (Exception e) {
             return false;
         }
-    }
-
-    public boolean isNicknameAvailableForGroup(Group group, String nickname, boolean thwrowException) throws RuntimeException {
-        boolean available = true;
-
-        // check if nickname is empty
-        if(nickname == null || nickname.isEmpty()) {
-            available = false;
-            if(thwrowException) {
-                throw new GroupException("Apelido do grupo não pode estar vazio.");
-            }
-        }
-
-        String nicknameLower = nickname.toLowerCase();
-
-        // check nickname format valid
-        if(available) {
-            available = nicknameRegex(nickname);
-            if(!available) {
-                if(thwrowException) {
-                    throw new GroupException("Apelido do Grupo está com formato inválido, não pode conter caracteres especiais.");
-                }
-            }
-        }
-
-        // check if nickname is already in use subgroup
-        if(available && group != null) {
-            for (var groupNow : group.getSubGroups()) {
-                if (groupNow != null && groupNow.nickname.toLowerCase().equals(nicknameLower)) {
-                    available = false;
-                    if(thwrowException) {
-                        throw new GroupException("Apelido de Grupo indisponível, já existe um grupo com apelido informado.");
-                    }
-                    break;
-                }
-            }
-        }
-
-        // check if nickname is already in use in the group organization
-        if(available && (group==null || group.isRootGroup())) {
-            Group groupRoot = findFirstRootGroupByNicknameIgnoreCase(nicknameLower, false);
-            if(groupRoot != null) {
-                available = false;
-                if(thwrowException) {
-                    throw new GroupException("Apelido de Grupo indisponível, já está em uso por uma organização.");
-                }
-            }
-        }
-
-        return available;
-    }
-
-    public boolean nicknameRegex(String nickname) {
-        return userService.usernameRegex(nickname);
     }
 
     public void save(Group group) {
@@ -674,10 +651,7 @@ public class GroupService extends EntityService<Group> {
             throw new UniversiBadRequestException( "O Parâmetro 'parentGroup' deve ser informado" );
 
         var parentGroup = dto.parentGroup().map( this::findByIdOrPathOrThrow );
-        var nickname = dto.nickname().toLowerCase();
-
-        if ( !isNicknameAvailableForGroup( parentGroup.orElse( null ), nickname ) )
-            throw new UniversiConflictingOperationException( "O Apelido de Grupo '" + nickname + "' não está disponível" );
+        var nickname = checkNicknameAvailable( dto.nickname(), parentGroup.orElse( null ) );
 
         var group = new Group();
         group.setAdmin( userService.getUserInSession().getProfile() );

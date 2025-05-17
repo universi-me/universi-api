@@ -184,10 +184,10 @@ public class GroupEnvironmentService {
         if(updateGroupEnvironment.organization_nickname() != null) {
             Group currentOrganization = GroupService.getInstance().getOrganizationBasedInDomain();
             if(currentOrganization != null) {
-                String nickname = updateGroupEnvironment.organization_nickname().toLowerCase();
-
-                // check if nickname is valid and available
-                groupService.isNicknameAvailableForGroup(group, nickname, true);
+                String nickname = groupService.checkNicknameAvailable(
+                    updateGroupEnvironment.organization_nickname(),
+                    group.getParentGroup().orElse( null )
+                );
 
                 currentOrganization.setNickname(nickname);
                 groupService.save(currentOrganization);
