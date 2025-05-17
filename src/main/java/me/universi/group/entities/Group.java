@@ -109,7 +109,8 @@ public class Group implements Serializable {
 
     @JsonIgnore
     @OneToMany(mappedBy = "parentGroup", fetch = FetchType.LAZY)
-    public Collection<Group> subGroups;
+    @NotNull
+    private Collection<Group> subGroups;
 
     @Column(name = "type")
     @Enumerated(EnumType.STRING)

@@ -76,7 +76,7 @@ public class GroupService extends EntityService<Group> {
 
     @Override
     public boolean isValid( Group group ) {
-        if ( group == null )
+        if ( group == null || group.isDeleted() )
             return false;
 
         if ( group.isRootGroup() )
@@ -287,7 +287,8 @@ public class GroupService extends EntityService<Group> {
         if ( group.getSubGroups() != null )
             group.getSubGroups().forEach( this::delete );
 
-        groupRepository.delete( group );
+        group.setDeleted( true );
+        groupRepository.saveAndFlush( group );
     }
 
     @Override
