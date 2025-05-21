@@ -39,6 +39,10 @@ public class CompetenceService extends EntityService<Competence> {
         return Sys.context.getBean("competenceService", CompetenceService.class);
     }
 
+    public static CompetenceRepository getRepository() {
+        return Sys.context.getBean( "competenceRepository", CompetenceRepository.class );
+    }
+
     @Override
     public Optional<Competence> findUnchecked( UUID id ) {
         return competenceRepository.findById( id );
