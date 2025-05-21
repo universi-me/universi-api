@@ -210,6 +210,7 @@ public class Group implements Serializable {
     }
 
     @Transient
+    @JsonIgnore
     public Collection<ProfileGroup> getAdministrators() {
         return this.getParticipants().stream()
             .filter( ProfileGroup::isAdmin )
