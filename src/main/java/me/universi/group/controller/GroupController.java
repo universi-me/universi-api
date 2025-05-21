@@ -9,6 +9,7 @@ import me.universi.group.DTO.CreateGroupDTO;
 import me.universi.group.DTO.UpdateGroupDTO;
 import me.universi.group.entities.Group;
 import me.universi.group.services.GroupService;
+import me.universi.group.services.OrganizationService;
 import me.universi.image.controller.ImageMetadataController;
 import me.universi.role.entities.Role;
 
@@ -21,10 +22,13 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/groups")
 public class GroupController {
+
+    private final OrganizationService organizationService;
     private final GroupService groupService;
 
-    public GroupController(GroupService groupService) {
+    public GroupController(GroupService groupService, OrganizationService organizationService) {
         this.groupService = groupService;
+        this.organizationService = organizationService;
     }
 
     @PostMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -73,7 +77,7 @@ public class GroupController {
 
     @GetMapping(value = "/current-organization", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Group> currentOrganization() {
-        return ResponseEntity.ok( groupService.getOrganizationBasedInDomain() );
+        return ResponseEntity.ok( organizationService.getOrganization() );
     }
 
     @GetMapping(value = "/{id}/image")

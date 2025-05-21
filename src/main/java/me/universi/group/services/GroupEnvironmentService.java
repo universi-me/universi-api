@@ -26,7 +26,7 @@ public class GroupEnvironmentService {
 
     //get organization environment
     public GroupEnvironment getOrganizationEnvironment() {
-        Group group = groupService.getOrganizationBasedInDomainIfExist();
+        Group group = OrganizationService.getInstance().getOrganization();
 
         RoleService.getInstance().checkIsAdmin(group);
 
@@ -41,7 +41,7 @@ public class GroupEnvironmentService {
 
     //update organization environment
     public GroupEnvironment updateOrganizationEnvironment(UpdateGroupEnvironmentDTO updateGroupEnvironment) {
-        Group group = groupService.getOrganizationBasedInDomainIfExist();
+        Group group = OrganizationService.getInstance().getOrganization();
 
         RoleService.getInstance().checkIsAdmin(group);
 
@@ -174,7 +174,7 @@ public class GroupEnvironmentService {
         }
 
         if(updateGroupEnvironment.organization_name() != null) {
-            Group currentOrganization = GroupService.getInstance().getOrganizationBasedInDomain();
+            Group currentOrganization = OrganizationService.getInstance().getOrganization();
             if(currentOrganization != null) {
                 currentOrganization.setName(updateGroupEnvironment.organization_name());
                 groupService.save(currentOrganization);
@@ -182,7 +182,7 @@ public class GroupEnvironmentService {
         }
 
         if(updateGroupEnvironment.organization_nickname() != null) {
-            Group currentOrganization = GroupService.getInstance().getOrganizationBasedInDomain();
+            Group currentOrganization = OrganizationService.getInstance().getOrganization();
             if(currentOrganization != null) {
                 String nickname = groupService.checkNicknameAvailable(
                     updateGroupEnvironment.organization_nickname(),

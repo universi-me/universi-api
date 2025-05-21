@@ -1,7 +1,5 @@
 package me.universi.group.services;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import me.universi.Sys;
 import me.universi.api.exceptions.UniversiBadRequestException;
 import me.universi.api.exceptions.UniversiConflictingOperationException;
@@ -27,7 +25,6 @@ import me.universi.role.services.RoleService;
 import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import me.universi.util.CastingUtil;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.Nullable;
@@ -47,15 +44,6 @@ public class GroupService extends EntityService<Group> {
     private final GroupEnvironmentRepository groupEnvironmentRepository;
     private final CompetenceService competenceService;
     private final ImageMetadataService imageMetadataService;
-
-    @Value("${LOCAL_ORGANIZATION_ID_ENABLED}")
-    private boolean localOrganizationIdEnabled;
-
-    @Value("${LOCAL_ORGANIZATION_ID}")
-    private String localOrganizationId;
-
-    @Value( "${server.servlet.context-path}" )
-    private String contextPath;
 
     public GroupService(UserService userService, GroupFeedService groupFeedService, GroupRepository groupRepository, GroupSettingsRepository groupSettingsRepository, GroupEmailFilterRepository groupEmailFilterRepository, GroupEnvironmentRepository groupEnvironmentRepository, CompetenceService competenceService, ImageMetadataService imageMetadataService) {
         this.userService = userService;
@@ -141,30 +129,6 @@ public class GroupService extends EntityService<Group> {
 
     public @NotNull Group findByIdOrPathOrThrow( String idOrPath ) throws EntityNotFoundException {
         return findByIdOrPath( idOrPath ).orElseThrow( () -> makeNotFoundException( "ID ou caminho", idOrPath ) );
-    }
-
-    private Group findFirstRootGroupByNicknameIgnoreCase(String nickname, boolean checkUserOrganizationAccess) {
-        if(nickname == null || nickname.isEmpty()) {
-            return null;
-        }
-        Optional<Group> optionalGroup = groupRepository.findFirstByParentGroupIsNullAndNicknameIgnoreCase(nickname);
-        Group group = optionalGroup.orElse(null);
-
-        // check if user is logged in and if the group is from the user organization, elso return null
-        if(checkUserOrganizationAccess && group != null && userService.userIsLoggedIn()) {
-            User user = userService.getUserInSession();
-            Group userOrg = user.getOrganization();
-            if(userOrg != null && !Objects.equals(userOrg.getId(), group.getId())) {
-                return null;
-            }
-        }
-
-        return group;
-    }
-
-    private Group findFirstRootGroup() {
-        Optional<Group> optionalGroup = groupRepository.findFirstByParentGroupIsNull();
-        return optionalGroup.orElse(null);
     }
 
     @Override
@@ -273,108 +237,6 @@ public class GroupService extends EntityService<Group> {
         return groupRepository.findAll();
     }
 
-    private String getSubdomainFromDomain(String domain) {
-        String subdomain = domain;
-        Pattern pattern = Pattern.compile("^([a-zA-Z0-9-]+)\\.[a-zA-Z0-9.-]+\\.[a-z]{2,}$");
-        Matcher matcher = pattern.matcher(domain);
-        if (matcher.find()) {
-            subdomain = matcher.group(1);
-        }
-        return subdomain;
-    }
-
-    // calculate organization based in domain
-    public Group obtainOrganizationBasedInDomain() {
-        String domain = userService.getDomainFromRequest();
-
-        String organizationId = (getSubdomainFromDomain(domain)).toLowerCase().trim();
-
-        if(!userService.isProduction() || localOrganizationIdEnabled) {
-            organizationId = localOrganizationId;
-        }
-
-        Group org = findFirstRootGroupByNicknameIgnoreCase(organizationId, false);
-        if(org == null) {
-            org = findFirstRootGroup();
-        }
-
-        return org;
-    }
-
-    public Group getOrganizationBasedInDomain() {
-        // if logged find updated organization of user without cached from session, else calculate from domain
-        Group gOrg = userService.userIsLoggedIn() && userService.getUserInSession() != null && userService.getUserInSession().getOrganization() != null ?
-                find(userService.getUserInSession().getOrganization().getId()).orElse(null) : obtainOrganizationBasedInDomain();
-        if(gOrg == null) {
-            throw new GroupException("Falha ao obter Organização.");
-        }
-        return gOrg;
-    }
-
-    public Group getOrganizationBasedInDomainIfExist() {
-        try {
-            return getOrganizationBasedInDomain();
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    public boolean emailAvailableForOrganization(String email) {
-        boolean available = false;
-        boolean hasAnyFilter = false;
-        Group organization = getOrganizationBasedInDomainIfExist();
-
-        if (organization != null) {
-            GroupSettings orgSettings = organization.getGroupSettings();
-
-            for (GroupEmailFilter emailFilterNow : orgSettings.getFilterEmails()) {
-                if (emailFilterNow.enabled) {
-                    if (!hasAnyFilter) {
-                        hasAnyFilter = true;
-                    }
-                    switch (emailFilterNow.type) {
-                        case END_WITH:
-                            if (email.endsWith(emailFilterNow.email)) {
-                                available = true;
-                            }
-                            break;
-                        case START_WITH:
-                            if (email.startsWith(emailFilterNow.email)) {
-                                available = true;
-                            }
-                            break;
-                        case CONTAINS:
-                            if (email.contains(emailFilterNow.email)) {
-                                available = true;
-                            }
-                            break;
-                        case EQUALS:
-                            if (email.equals(emailFilterNow.email)) {
-                                available = true;
-                            }
-                            break;
-                        case MASK:
-                            Pattern patternMask = Pattern.compile(emailFilterNow.email.replaceAll("\\*", "(.*)"));
-                            Matcher matcherMask = patternMask.matcher(email);
-                            if (matcherMask.find()) {
-                                available = true;
-                            }
-                            break;
-                        case REGEX:
-                            Pattern pattern = Pattern.compile(emailFilterNow.email);
-                            Matcher matcher = pattern.matcher(email);
-                            if (matcher.find()) {
-                                available = true;
-                            }
-                            break;
-                    }
-                }
-            }
-        }
-
-        return hasAnyFilter ? available : !available;
-    }
-
     public GroupEnvironment getGroupEnvironment(Group group) {
         if(group == null) {
             return null;
@@ -391,12 +253,6 @@ public class GroupService extends EntityService<Group> {
         }
         return groupEnvironment;
     }
-
-    // get organization environment
-    public GroupEnvironment getOrganizationEnvironment() {
-        return getGroupEnvironment(getOrganizationBasedInDomainIfExist());
-    }
-
 
     public List<ProfileWithCompetencesDTO> filterProfilesWithCompetences(CompetenceFilterDTO competenceFilter){
 
@@ -484,22 +340,6 @@ public class GroupService extends EntityService<Group> {
 
     }
 
-    public void setupOrganization() {
-        if(localOrganizationIdEnabled) {
-            Optional<Group> organizationOpt = groupRepository.findFirstByParentGroupIsNull();
-            if(organizationOpt.isPresent()) {
-                Group organization = organizationOpt.get();
-                if(organization.nickname.equals(localOrganizationId)) {
-                    return;
-                }
-                organization.nickname = localOrganizationId;
-                organization.name = localOrganizationId.toUpperCase();
-                organization.setType(GroupType.INSTITUTION);
-                save(organization);
-            }
-        }
-    }
-
     // send email for all users in group
     public void sendEmailForAllUsersInGroup(Group group, String subject, String message) {
         if(group == null || subject == null || message == null) {
@@ -533,7 +373,7 @@ public class GroupService extends EntityService<Group> {
         String contentName = folder.getName();
         String contentUrl = userService.getPublicUrl() + "/group" + group.getPath() + "#" + "contents/" + folder.getId();
 
-        String message = getOrganizationEnvironment().groupSettings.environment.message_template_new_content;
+        String message = OrganizationService.getInstance().getEnvironment().message_template_new_content;
         if(message == null || message.isEmpty()) {
             message = "Olá, {{ groupName }} tem um novo conteúdo: {{ contentName }}.<br/><br/>Acesse: {{ contentUrl }}";
         }
@@ -551,7 +391,7 @@ public class GroupService extends EntityService<Group> {
         String contentName = folder.getName();
         String contentUrl = userService.getPublicUrl() + "/content/" + folder.getReference();
 
-        String message = getOrganizationEnvironment().groupSettings.environment.message_template_assigned_content;
+        String message = OrganizationService.getInstance().getEnvironment().message_template_assigned_content;
         if(message == null || message.isEmpty()) {
             message = "Olá {{ toUser }}, você recebeu um novo conteúdo de {{ fromUser }}: {{ contentName }}.<br/><br/>Acesse: {{ contentUrl }}";
         }
@@ -600,7 +440,7 @@ public class GroupService extends EntityService<Group> {
             return;
         }
 
-        if(!getOrganizationEnvironment().groupSettings.environment.alert_new_content_enabled) {
+        if(!OrganizationService.getInstance().getEnvironment().alert_new_content_enabled) {
             return;
         }
 
@@ -616,7 +456,7 @@ public class GroupService extends EntityService<Group> {
             return;
         }
 
-        if(!getOrganizationEnvironment().groupSettings.environment.alert_assigned_content_enabled) {
+        if(!OrganizationService.getInstance().getEnvironment().alert_assigned_content_enabled) {
             return;
         }
 

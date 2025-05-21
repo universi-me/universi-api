@@ -29,7 +29,7 @@ import me.universi.group.DTO.AddGroupParticipantDTO;
 import me.universi.group.entities.Group;
 import me.universi.group.entities.GroupSettings.GroupEnvironment;
 import me.universi.group.services.GroupParticipantService;
-import me.universi.group.services.GroupService;
+import me.universi.group.services.OrganizationService;
 import me.universi.image.services.ImageMetadataService;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.exceptions.ProfileException;
@@ -165,7 +165,7 @@ public class UserService extends EntityService<User> implements UserDetailsServi
     }
 
     public Optional<User> findByUsername( String username ) {
-        var organization = GroupService.getInstance().obtainOrganizationBasedInDomain();
+        var organization = OrganizationService.getInstance().getUserlessOrganization();
 
         return organization == null
             ? userRepository.findFirstByName( username )
@@ -173,7 +173,7 @@ public class UserService extends EntityService<User> implements UserDetailsServi
     }
 
     public Optional<User> findByEmail( String email ) {
-        var organization = GroupService.getInstance().obtainOrganizationBasedInDomain();
+        var organization = OrganizationService.getInstance().getUserlessOrganization();
         return organization == null
             ? userRepository.findFirstByEmail( email )
             : userRepository.findFirstByEmailAndOrganizationId( email, organization.getId() );
@@ -186,7 +186,7 @@ public class UserService extends EntityService<User> implements UserDetailsServi
     }
 
     public Optional<User> findByUsernameOrEmail( String usernameOrEmail ) {
-        var organization = GroupService.getInstance().obtainOrganizationBasedInDomain();
+        var organization = OrganizationService.getInstance().getUserlessOrganization();
         return organization == null
             ? userRepository.findFirstByEmailOrName( usernameOrEmail )
             : userRepository.findFirstByEmailOrNameAndOrganizationId( usernameOrEmail, organization.getId() );
@@ -233,8 +233,7 @@ public class UserService extends EntityService<User> implements UserDetailsServi
             profileRepository.saveAndFlush(userProfile);
             try {
                 // add organization to user profile
-                GroupService groupService = GroupService.getInstance();
-                var org = groupService.getOrganizationBasedInDomain();
+                var org = OrganizationService.getInstance().getOrganization();
 
                 GroupParticipantService.getInstance().addParticipant( new AddGroupParticipantDTO (
                     org,
@@ -302,7 +301,7 @@ public class UserService extends EntityService<User> implements UserDetailsServi
 
     public void save(User user) {
         if(user.getOrganization() == null) {
-            user.setOrganization(GroupService.getInstance().getOrganizationBasedInDomain());
+            user.setOrganization(OrganizationService.getInstance().getOrganization());
         }
         userRepository.saveAndFlush(user);
     }
@@ -351,6 +350,22 @@ public class UserService extends EntityService<User> implements UserDetailsServi
         try {
             return getRequest().getServerName();
         } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private static Pattern SUBDOMAIN_PATTERN = Pattern.compile( "^([a-zA-Z0-9-]+)\\." );
+    public @Nullable String getSubdomainFromRequest() {
+        try {
+            var domain = getDomainFromRequest();
+            if ( domain == null ) return null;
+
+            var matcher = SUBDOMAIN_PATTERN.matcher( domain );
+            return matcher.find()
+                ? matcher.group( 1 )
+                : null;
+        }
+        catch( Exception e ) {
             return null;
         }
     }
@@ -721,7 +736,7 @@ public class UserService extends EntityService<User> implements UserDetailsServi
     }
 
     public String getRecaptchaApiKey() {
-        GroupEnvironment envG = GroupService.getInstance().getOrganizationEnvironment();
+        GroupEnvironment envG = OrganizationService.getInstance().getEnvironment();
         if(envG != null) {
             return envG.recaptcha_api_key;
         }
@@ -729,7 +744,7 @@ public class UserService extends EntityService<User> implements UserDetailsServi
     }
 
     public String getRecaptchaApiProjectId() {
-        GroupEnvironment envG = GroupService.getInstance().getOrganizationEnvironment();
+        GroupEnvironment envG = OrganizationService.getInstance().getEnvironment();
         if(envG != null) {
             return envG.recaptcha_api_project_id;
         }
@@ -737,7 +752,7 @@ public class UserService extends EntityService<User> implements UserDetailsServi
     }
 
     public String getRecaptchaSiteKey() {
-        GroupEnvironment envG = GroupService.getInstance().getOrganizationEnvironment();
+        GroupEnvironment envG = OrganizationService.getInstance().getEnvironment();
         if(envG != null) {
             return envG.recaptcha_site_key;
         }
@@ -784,7 +799,7 @@ public class UserService extends EntityService<User> implements UserDetailsServi
     }
 
     public boolean isConfirmAccountEnabled() {
-        GroupEnvironment envG = GroupService.getInstance().getOrganizationEnvironment();
+        GroupEnvironment envG = OrganizationService.getInstance().getEnvironment();
         if(envG != null) {
             return envG.signup_confirm_account_enabled;
         }
@@ -792,7 +807,7 @@ public class UserService extends EntityService<User> implements UserDetailsServi
     }
 
     public boolean isSignupEnabled() {
-        GroupEnvironment envG = GroupService.getInstance().getOrganizationEnvironment();
+        GroupEnvironment envG = OrganizationService.getInstance().getEnvironment();
         if(envG != null) {
             return envG.signup_enabled;
         }
@@ -800,7 +815,7 @@ public class UserService extends EntityService<User> implements UserDetailsServi
     }
 
     public boolean isLoginViaGoogleEnabled() {
-        GroupEnvironment envG = GroupService.getInstance().getOrganizationEnvironment();
+        GroupEnvironment envG = OrganizationService.getInstance().getEnvironment();
         if(envG != null) {
             return envG.login_google_enabled;
         }
@@ -808,7 +823,7 @@ public class UserService extends EntityService<User> implements UserDetailsServi
     }
 
     public boolean isCaptchaEnabled() {
-        GroupEnvironment envG = GroupService.getInstance().getOrganizationEnvironment();
+        GroupEnvironment envG = OrganizationService.getInstance().getEnvironment();
         if(envG != null) {
             return envG.recaptcha_enabled;
         }
@@ -820,7 +835,7 @@ public class UserService extends EntityService<User> implements UserDetailsServi
     }
 
     public String getGoogleClientId() {
-        GroupEnvironment envG = GroupService.getInstance().getOrganizationEnvironment();
+        GroupEnvironment envG = OrganizationService.getInstance().getEnvironment();
         if(envG != null) {
             return envG.google_client_id;
         }
@@ -828,7 +843,7 @@ public class UserService extends EntityService<User> implements UserDetailsServi
     }
 
     public List<User> findAllUsers(Object byROLE) {
-        Group organization = GroupService.getInstance().getOrganizationBasedInDomainIfExist();
+        Group organization = OrganizationService.getInstance().getOrganization();
         if(byROLE != null && !String.valueOf(byROLE).isEmpty()) {
             return organization == null ? userRepository.findAllByAuthority(Authority.valueOf(String.valueOf(byROLE))) : userRepository.findAllByAuthorityAndOrganizationId(Authority.valueOf(String.valueOf(byROLE)), organization.getId());
         }
@@ -863,7 +878,7 @@ public class UserService extends EntityService<User> implements UserDetailsServi
             throw new UserException("Não foi possível obter Nome de Usuário.");
         }
 
-        if(!GroupService.getInstance().emailAvailableForOrganization(email)) {
+        if(!OrganizationService.getInstance().isEmailAvailable(email)) {
             throw new UserException("Email \""+email+"\" não esta disponível para cadastro!");
         }
 
@@ -962,7 +977,7 @@ public class UserService extends EntityService<User> implements UserDetailsServi
     }
 
     public String getKeycloakRedirectUrl() {
-        GroupEnvironment envG = GroupService.getInstance().getOrganizationEnvironment();
+        GroupEnvironment envG = OrganizationService.getInstance().getEnvironment();
         if(envG != null && envG.keycloak_redirect_url != null && !envG.keycloak_redirect_url.isEmpty()) {
             return envG.keycloak_redirect_url;
         }
@@ -973,7 +988,7 @@ public class UserService extends EntityService<User> implements UserDetailsServi
     }
 
     public String getKeycloakClientId() {
-        GroupEnvironment envG = GroupService.getInstance().getOrganizationEnvironment();
+        GroupEnvironment envG = OrganizationService.getInstance().getEnvironment();
         if(envG != null && envG.keycloak_client_id != null && !envG.keycloak_client_id.isEmpty()) {
             return envG.keycloak_client_id;
         }
@@ -981,7 +996,7 @@ public class UserService extends EntityService<User> implements UserDetailsServi
     }
 
     public String getKeycloakClientSecret() {
-        GroupEnvironment envG = GroupService.getInstance().getOrganizationEnvironment();
+        GroupEnvironment envG = OrganizationService.getInstance().getEnvironment();
         if(envG != null && envG.keycloak_client_secret != null && !envG.keycloak_client_secret.isEmpty()) {
             return envG.keycloak_client_secret;
         }
@@ -989,7 +1004,7 @@ public class UserService extends EntityService<User> implements UserDetailsServi
     }
 
     public String getKeycloakRealm() {
-        GroupEnvironment envG = GroupService.getInstance().getOrganizationEnvironment();
+        GroupEnvironment envG = OrganizationService.getInstance().getEnvironment();
         if(envG != null && envG.keycloak_realm != null && !envG.keycloak_realm.isEmpty()) {
             return envG.keycloak_realm;
         }
@@ -997,7 +1012,7 @@ public class UserService extends EntityService<User> implements UserDetailsServi
     }
 
     public String getKeycloakUrl() {
-        GroupEnvironment envG = GroupService.getInstance().getOrganizationEnvironment();
+        GroupEnvironment envG = OrganizationService.getInstance().getEnvironment();
         if(envG != null && envG.keycloak_url != null && !envG.keycloak_url.isEmpty()) {
             return envG.keycloak_url.replaceAll("/$", "");
         }
@@ -1005,7 +1020,7 @@ public class UserService extends EntityService<User> implements UserDetailsServi
     }
 
     public boolean isKeycloakEnabled() {
-        GroupEnvironment envG = GroupService.getInstance().getOrganizationEnvironment();
+        GroupEnvironment envG = OrganizationService.getInstance().getEnvironment();
         if(envG != null) {
             return envG.keycloak_enabled;
         }
@@ -1013,7 +1028,7 @@ public class UserService extends EntityService<User> implements UserDetailsServi
     }
 
     public void setupEmailSender() {
-        GroupEnvironment envG = GroupService.getInstance().getOrganizationEnvironment();
+        GroupEnvironment envG = OrganizationService.getInstance().getEnvironment();
         if(envG != null && envG.email_enabled) {
             JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
             mailSender.setHost(envG.email_host);
@@ -1079,7 +1094,7 @@ public class UserService extends EntityService<User> implements UserDetailsServi
     public GetAvailableCheckDTO availableEmailCheck(String email) {
         boolean emailRegex = emailRegex(email);
         boolean emailExist = emailExist(email);
-        boolean emailAvailableForOrganization = GroupService.getInstance().emailAvailableForOrganization(email);
+        boolean emailAvailableForOrganization = OrganizationService.getInstance().isEmailAvailable(email);
 
         return new GetAvailableCheckDTO(
                 emailRegex && !emailExist && emailAvailableForOrganization,
@@ -1135,7 +1150,7 @@ public class UserService extends EntityService<User> implements UserDetailsServi
         if(emailExist(email)) {
             throw new UserException("Email \""+email+"\" já esta cadastrado!");
         }
-        if(!GroupService.getInstance().emailAvailableForOrganization(email)) {
+        if(!OrganizationService.getInstance().isEmailAvailable(email)) {
             throw new UserException("Email \""+email+"\" não esta disponível para cadastro!");
         }
 

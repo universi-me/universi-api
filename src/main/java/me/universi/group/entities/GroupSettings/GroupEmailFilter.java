@@ -9,6 +9,8 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
+import java.util.regex.Pattern;
+
 import me.universi.group.enums.GroupEmailFilterType;
 import org.hibernate.annotations.*;
 
@@ -61,6 +63,33 @@ public class GroupEmailFilter implements Serializable {
     private boolean deleted = Boolean.FALSE;
 
     public GroupEmailFilter() {
+    }
+
+    public boolean matches( String email ) {
+        if ( this.email == null ) return false;
+
+        switch ( this.type ) {
+            case END_WITH:
+                return email.endsWith( this.email );
+
+            case START_WITH:
+                return email.startsWith( this.email );
+
+            case CONTAINS:
+                return email.contains( this.email );
+
+            case EQUALS:
+                return email.equals( this.email );
+
+            case MASK:
+                return Pattern.compile( this.email.replace( "*" , "(.*)" ) ).matcher( email ).find();
+
+            case REGEX:
+                return Pattern.compile( this.email ).matcher( email ).find();
+
+            default:
+                return false;
+        }
     }
 
     public boolean isDeleted() { return deleted; }

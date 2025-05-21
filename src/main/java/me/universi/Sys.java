@@ -4,7 +4,7 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
-import me.universi.group.services.GroupService;
+import me.universi.group.services.OrganizationService;
 
 import me.universi.user.services.UserService;
 import org.springframework.beans.factory.InitializingBean;
@@ -31,7 +31,7 @@ public class Sys {
     @Autowired
     public UserService userService;
     @Autowired
-    public GroupService groupService;
+    private OrganizationService organizationService;
     public static ApplicationContext context;
 
 
@@ -54,7 +54,7 @@ public class Sys {
     @Bean
     InitializingBean sendDatabase() {
         return () -> {
-            groupService.setupOrganization();
+            organizationService.setup();
         };
     }
 
