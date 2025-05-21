@@ -9,6 +9,7 @@ import me.universi.competence.dto.CreateCompetenceTypeDTO;
 import me.universi.competence.dto.MergeCompetenceTypeDTO;
 import me.universi.competence.dto.UpdateCompetenceTypeDTO;
 import me.universi.competence.entities.CompetenceType;
+import me.universi.competence.repositories.CompetenceRepository;
 import me.universi.competence.repositories.CompetenceTypeRepository;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
@@ -24,11 +25,13 @@ import jakarta.validation.constraints.NotNull;
 @Service
 public class CompetenceTypeService extends UniqueNameEntityService<CompetenceType> {
     private final CompetenceTypeRepository competenceTypeRepository;
+    private final CompetenceRepository competenceRepository;
     private final ProfileService profileService;
     private final UserService userService;
 
-    public CompetenceTypeService(CompetenceTypeRepository competenceTypeRepository, ProfileService profileService, UserService userService) {
+    public CompetenceTypeService(CompetenceTypeRepository competenceTypeRepository, CompetenceRepository competenceRepository, ProfileService profileService, UserService userService) {
         this.competenceTypeRepository = competenceTypeRepository;
+        this.competenceRepository = competenceRepository;
         this.profileService = profileService;
         this.userService = userService;
 
@@ -138,12 +141,12 @@ public class CompetenceTypeService extends UniqueNameEntityService<CompetenceTyp
         var removedCompetenceType = findOrThrow( mergeCompetenceTypeDTO.removedCompetenceType() );
         var remainingCompetenceType = findOrThrow( mergeCompetenceTypeDTO.remainingCompetenceType() );
 
-        var updateCompetences = CompetenceService.getInstance().findAll().stream()
+        var updateCompetences = competenceRepository.findAll().stream()
             .filter( c -> c.getCompetenceType().getId().equals( removedCompetenceType.getId() ) )
             .toList();
 
         updateCompetences.forEach(c -> c.setCompetenceType( remainingCompetenceType ));
-        CompetenceService.getRepository().saveAll( updateCompetences );
+        competenceRepository.saveAll(updateCompetences);
 
         removedCompetenceType.setProfilesWithAccess( new ArrayList<>() );
 
