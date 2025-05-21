@@ -59,6 +59,6 @@ public abstract class EntityService<T> {
     }
 
     public boolean isValid( T entity ) {
-        return true;
+        return entity != null;
     }
 }

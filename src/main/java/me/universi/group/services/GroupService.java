@@ -3,6 +3,7 @@ package me.universi.group.services;
 import me.universi.Sys;
 import me.universi.api.exceptions.UniversiBadRequestException;
 import me.universi.api.exceptions.UniversiConflictingOperationException;
+import me.universi.api.exceptions.UniversiForbiddenAccessException;
 import me.universi.api.interfaces.EntityService;
 import me.universi.capacity.entidades.Folder;
 import me.universi.competence.entities.Competence;
@@ -18,6 +19,7 @@ import me.universi.group.exceptions.GroupException;
 import me.universi.group.repositories.*;
 import me.universi.image.services.ImageMetadataService;
 import me.universi.profile.entities.Profile;
+import me.universi.profile.services.ProfileService;
 import me.universi.role.entities.Role;
 import me.universi.role.enums.FeaturesTypes;
 import me.universi.role.enums.Permission;
@@ -602,5 +604,18 @@ public class GroupService extends EntityService<Group> {
 
     public Collection<Role> findRoles( UUID groupId ) {
         return RoleService.getInstance().findByGroup( groupId );
+    }
+
+    public List<Profile> listAdministrators( UUID groupId ) { return listAdministrators( findOrThrow( groupId ) ); }
+    public List<Profile> listAdministrators( String groupId ) { return listAdministrators( findByIdOrPathOrThrow( groupId ) ); }
+    public List<Profile> listAdministrators( @NotNull Group group ) {
+        if ( !hasPermissionToEdit( group ) )
+            throw new UniversiForbiddenAccessException( "Você não tem permissão para gerenciar este grupo" );
+
+        return group.getAdministrators().stream()
+            .sorted( Comparator.comparing( ProfileGroup::getJoined ).reversed() )
+            .map( ProfileGroup::getProfile )
+            .filter( ProfileService.getInstance()::isValid )
+            .toList();
     }
 }

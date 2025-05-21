@@ -11,6 +11,7 @@ import me.universi.group.entities.Group;
 import me.universi.group.services.GroupService;
 import me.universi.group.services.OrganizationService;
 import me.universi.image.controller.ImageMetadataController;
+import me.universi.profile.entities.Profile;
 import me.universi.role.entities.Role;
 
 import org.springframework.core.io.Resource;
@@ -98,5 +99,10 @@ public class GroupController {
     @GetMapping( path = "/{id}/roles", produces = "application/json" )
     public ResponseEntity<Collection<Role>> listRoles( @Valid @PathVariable @NotNull UUID id ) {
         return ResponseEntity.ok( groupService.findRoles( id ) );
+    }
+
+    @GetMapping(value = "/{id}/administrators", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<Profile>> listAdmins( @Valid @PathVariable @NotNull( message = "ID do grupo inválido" ) UUID id ) {
+        return ResponseEntity.ok( groupService.listAdministrators( id ) );
     }
 }
