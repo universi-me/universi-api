@@ -4,6 +4,7 @@ import me.universi.Sys;
 import me.universi.api.exceptions.UniversiBadRequestException;
 import me.universi.api.exceptions.UniversiConflictingOperationException;
 import me.universi.api.exceptions.UniversiForbiddenAccessException;
+import me.universi.api.exceptions.UniversiNoEntityException;
 import me.universi.api.interfaces.EntityService;
 import me.universi.capacity.entidades.Folder;
 import me.universi.competence.entities.Competence;
@@ -15,7 +16,6 @@ import me.universi.group.DTO.*;
 import me.universi.group.entities.*;
 import me.universi.group.entities.GroupSettings.*;
 import me.universi.group.enums.GroupType;
-import me.universi.group.exceptions.GroupException;
 import me.universi.group.repositories.*;
 import me.universi.image.services.ImageMetadataService;
 import me.universi.profile.entities.Profile;
@@ -139,17 +139,15 @@ public class GroupService extends EntityService<Group> {
 
     @Override
     public boolean hasPermissionToDelete( Group group ) {
-        return hasPermissionToEdit( group );
+        return !group.isRootGroup() && hasPermissionToEdit( group );
     }
 
-    public void checkPermissionToEdit(Group group, User user) throws GroupException {
-        if (group == null) {
-            throw new GroupException("Grupo não encontrado.");
-        }
+    public void checkPermissionToEdit(Group group, User user) {
+        if ( group == null )
+            throw new UniversiNoEntityException( "Grupo não encontrado" );
 
-        if (user == null) {
-            throw new GroupException("Usuário não encontrado.");
-        }
+        if (user == null)
+            throw new UniversiNoEntityException("Usuário não encontrado.");
 
         if(userService.isUserAdmin(user)) {
             return;
@@ -157,7 +155,7 @@ public class GroupService extends EntityService<Group> {
 
         Profile profile = user.getProfile();
         if (userService.userNeedAnProfile(user, true)) {
-            throw new GroupException("Você precisa criar um Perfil.");
+            throw new UniversiForbiddenAccessException("Você precisa criar um Perfil.");
         }
 
         if(Objects.equals(group.getAdmin().getId(), profile.getId())) {
@@ -167,7 +165,7 @@ public class GroupService extends EntityService<Group> {
         if ( RoleService.getInstance().isAdmin( profile, group ) )
             return;
 
-        throw new GroupException("Você não tem permissão para editar este grupo.");
+        throw new UniversiForbiddenAccessException("Você não tem permissão para editar este grupo.");
     }
 
     public boolean hasPermissionToEdit(Group group, User user) {

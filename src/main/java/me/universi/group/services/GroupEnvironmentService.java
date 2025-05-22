@@ -1,10 +1,10 @@
 package me.universi.group.services;
 
+import me.universi.api.exceptions.*;
 import me.universi.group.DTO.UpdateGroupEnvironmentDTO;
 import me.universi.group.entities.Group;
 import me.universi.group.entities.GroupSettings.GroupEnvironment;
 import me.universi.group.entities.GroupSettings.GroupSettings;
-import me.universi.group.exceptions.GroupException;
 import me.universi.group.repositories.GroupEnvironmentRepository;
 import me.universi.role.services.RoleService;
 import me.universi.user.services.UserService;
@@ -13,48 +13,41 @@ import org.springframework.stereotype.Service;
 @Service
 public class GroupEnvironmentService {
 
+    private final OrganizationService organizationService;
+
     private final GroupService groupService;
     private final UserService userService;
     private final GroupEnvironmentRepository groupEnvironmentRepository;
 
-    public GroupEnvironmentService(GroupService groupService, UserService userService, GroupEnvironmentRepository groupEnvironmentRepository) {
+    public GroupEnvironmentService(GroupService groupService, UserService userService, GroupEnvironmentRepository groupEnvironmentRepository, OrganizationService organizationService) {
         this.groupService = groupService;
         this.userService = userService;
         this.groupEnvironmentRepository = groupEnvironmentRepository;
+        this.organizationService = organizationService;
     }
 
     //get organization environment
     public GroupEnvironment getOrganizationEnvironment() {
-        Group group = OrganizationService.getInstance().getOrganization();
+        Group group = organizationService.getOrganization();
 
         RoleService.getInstance().checkIsAdmin(group);
-
-        if(group != null) {
-            groupService.checkPermissionToEdit( group );
-
-            return groupService.getGroupEnvironment(group);
-        }
-
-        throw new GroupException("Falha ao listar o ambiente.");
+        groupService.checkPermissionToEdit( group );
+        return organizationService.getEnvironment();
     }
 
     //update organization environment
     public GroupEnvironment updateOrganizationEnvironment(UpdateGroupEnvironmentDTO updateGroupEnvironment) {
-        Group group = OrganizationService.getInstance().getOrganization();
+        Group group = organizationService.getOrganization();
 
         RoleService.getInstance().checkIsAdmin(group);
 
-        if(group != null) {
-            groupService.checkPermissionToEdit( group );
-            GroupEnvironment groupEnvironment = editEnvironment(group, updateGroupEnvironment);
+        groupService.checkPermissionToEdit( group );
+        GroupEnvironment groupEnvironment = editEnvironment(group, updateGroupEnvironment);
 
-            if(groupEnvironment != null) {
-                return groupEnvironment;
-            } else {
-                throw new GroupException("Variáveis Ambiente não existe.");
-            }
-        }
-        throw new GroupException("Falha ao editar Variáveis Ambiente.");
+        if ( groupEnvironment == null )
+            throw new UniversiUnprocessableOperationException( "Variáveis Ambiente não existe." );
+
+        return groupEnvironment;
     }
 
     // edit group environment
@@ -63,7 +56,7 @@ public class GroupEnvironmentService {
             return null;
         }
         if(!group.isRootGroup()) {
-            throw new GroupException("Este grupo não é uma organização.");
+            throw new UniversiUnprocessableOperationException("Este grupo não é uma organização.");
         }
         GroupSettings groupSettings = group.getGroupSettings();
         if(groupSettings == null) {
@@ -123,7 +116,7 @@ public class GroupEnvironmentService {
         }
         if(updateGroupEnvironment.message_template_new_content() != null) {
             if(updateGroupEnvironment.message_template_new_content().length() > 6000) {
-                throw new GroupException("O template de mensagem para novo conteúdo não pode ter mais de 6000 caracteres.");
+                throw new UniversiBadRequestException("O template de mensagem para novo conteúdo não pode ter mais de 6000 caracteres.");
             }
             groupEnvironment.message_template_new_content = updateGroupEnvironment.message_template_new_content().isEmpty() ? null : updateGroupEnvironment.message_template_new_content();
         }
@@ -132,7 +125,7 @@ public class GroupEnvironmentService {
         }
         if(updateGroupEnvironment.message_template_assigned_content() != null) {
             if(updateGroupEnvironment.message_template_assigned_content().length() > 6000) {
-                throw new GroupException("O template de mensagem para conteúdo atribuído não pode ter mais de 6000 caracteres.");
+                throw new UniversiBadRequestException("O template de mensagem para conteúdo atribuído não pode ter mais de 6000 caracteres.");
             }
             groupEnvironment.message_template_assigned_content = updateGroupEnvironment.message_template_assigned_content().isEmpty() ? null : updateGroupEnvironment.message_template_assigned_content();
         }
@@ -173,7 +166,7 @@ public class GroupEnvironmentService {
         }
 
         if(updateGroupEnvironment.organization_name() != null) {
-            Group currentOrganization = OrganizationService.getInstance().getOrganization();
+            Group currentOrganization = organizationService.getOrganization();
             if(currentOrganization != null) {
                 currentOrganization.setName(updateGroupEnvironment.organization_name());
                 groupService.save(currentOrganization);
@@ -181,7 +174,7 @@ public class GroupEnvironmentService {
         }
 
         if(updateGroupEnvironment.organization_nickname() != null) {
-            Group currentOrganization = OrganizationService.getInstance().getOrganization();
+            Group currentOrganization = organizationService.getOrganization();
             if(currentOrganization != null) {
                 String nickname = groupService.checkNicknameAvailable(
                     updateGroupEnvironment.organization_nickname(),
