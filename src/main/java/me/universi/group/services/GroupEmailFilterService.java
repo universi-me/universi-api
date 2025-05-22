@@ -3,14 +3,13 @@ package me.universi.group.services;
 import java.util.*;
 
 import me.universi.Sys;
-import me.universi.api.exceptions.UniversiBadRequestException;
+import me.universi.api.exceptions.*;
 import me.universi.api.interfaces.EntityService;
 import me.universi.group.DTO.CreateEmailFilterDTO;
 import me.universi.group.DTO.UpdateEmailFilterDTO;
 import me.universi.group.entities.Group;
 import me.universi.group.entities.GroupSettings.GroupEmailFilter;
 import me.universi.group.enums.GroupEmailFilterType;
-import me.universi.group.exceptions.GroupException;
 import me.universi.group.repositories.GroupEmailFilterRepository;
 import me.universi.role.services.RoleService;
 import me.universi.util.CastingUtil;
@@ -85,26 +84,17 @@ public class GroupEmailFilterService extends EntityService<GroupEmailFilter> {
         groupEmailFilterRepository.saveAndFlush( filter );
     }
 
-    public List<GroupEmailFilter> listEmailFilter(UUID groupId) {
+    public List<GroupEmailFilter> listGroupEmailFilters( UUID groupId ) {
         Group group = groupService.findOrThrow( groupId );
-
         RoleService.getInstance().checkIsAdmin(group);
 
-        if(group != null) {
+        if( !groupService.hasPermissionToEdit(group) )
+            throw new UniversiForbiddenAccessException("Você não tem permissão para gerenciar este grupo.");
 
-            if(!groupService.hasPermissionToEdit(group)) {
-                throw new GroupException("Você não tem permissão para gerenciar este grupo.");
-            }
-
-            Collection<GroupEmailFilter> emailFilters = group.getGroupSettings().getFilterEmails();
-
-            return emailFilters.stream()
-                .sorted( Comparator.comparing( GroupEmailFilter::getAdded ).reversed() )
-                .filter( this::isValid )
-                .toList();
-        }
-
-        throw new GroupException("Falha ao listar filtros de email.");
+        return group.getGroupSettings().getFilterEmails().stream()
+            .sorted( Comparator.comparing( GroupEmailFilter::getAdded ).reversed() )
+            .filter( this::isValid )
+            .toList();
     }
 
     @Override
