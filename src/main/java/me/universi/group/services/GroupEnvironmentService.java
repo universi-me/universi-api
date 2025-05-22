@@ -7,7 +7,6 @@ import me.universi.group.entities.GroupSettings.GroupSettings;
 import me.universi.group.exceptions.GroupException;
 import me.universi.group.repositories.GroupEnvironmentRepository;
 import me.universi.role.services.RoleService;
-import me.universi.user.entities.User;
 import me.universi.user.services.UserService;
 import org.springframework.stereotype.Service;
 

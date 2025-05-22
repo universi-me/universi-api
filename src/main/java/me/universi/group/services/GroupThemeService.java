@@ -7,19 +7,15 @@ import me.universi.group.entities.GroupSettings.GroupTheme;
 import me.universi.group.exceptions.GroupException;
 import me.universi.group.repositories.GroupThemeRepository;
 import me.universi.role.services.RoleService;
-import me.universi.user.entities.User;
-import me.universi.user.services.UserService;
 import org.springframework.stereotype.Service;
 
 @Service
 public class GroupThemeService {
     private final GroupService groupService;
-    private final UserService userService;
     private final GroupThemeRepository groupThemeRepository;
 
-    public GroupThemeService(GroupService groupService, UserService userService, GroupThemeRepository groupThemeRepository) {
+    public GroupThemeService(GroupService groupService, GroupThemeRepository groupThemeRepository) {
         this.groupService = groupService;
-        this.userService = userService;
         this.groupThemeRepository = groupThemeRepository;
     }
 
