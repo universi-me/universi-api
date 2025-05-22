@@ -42,17 +42,15 @@ public class GroupService extends EntityService<Group> {
     private final GroupFeedService groupFeedService;
     private final GroupRepository groupRepository;
     private final GroupSettingsRepository groupSettingsRepository;
-    private final GroupEmailFilterRepository groupEmailFilterRepository;
     private final GroupEnvironmentRepository groupEnvironmentRepository;
     private final CompetenceService competenceService;
     private final ImageMetadataService imageMetadataService;
 
-    public GroupService(UserService userService, GroupFeedService groupFeedService, GroupRepository groupRepository, GroupSettingsRepository groupSettingsRepository, GroupEmailFilterRepository groupEmailFilterRepository, GroupEnvironmentRepository groupEnvironmentRepository, CompetenceService competenceService, ImageMetadataService imageMetadataService) {
+    public GroupService(UserService userService, GroupFeedService groupFeedService, GroupRepository groupRepository, GroupSettingsRepository groupSettingsRepository, GroupEnvironmentRepository groupEnvironmentRepository, CompetenceService competenceService, ImageMetadataService imageMetadataService) {
         this.userService = userService;
         this.groupFeedService = groupFeedService;
         this.groupRepository = groupRepository;
         this.groupSettingsRepository = groupSettingsRepository;
-        this.groupEmailFilterRepository = groupEmailFilterRepository;
         this.groupEnvironmentRepository = groupEnvironmentRepository;
         this.competenceService = competenceService;
         this.imageMetadataService = imageMetadataService;
@@ -470,17 +468,6 @@ public class GroupService extends EntityService<Group> {
 
     public Group getGroupByGroupSettingsId(UUID groupSettingsId) {
         return groupRepository.findFirstByGroupSettingsId(groupSettingsId);
-    }
-
-    // determining group by groupEmailFilterId
-    public Group getGroupByGroupEmailFilterId(UUID groupEmailFilterId) {
-        GroupEmailFilter groupEmailFilter = groupEmailFilterRepository.findFirstById(groupEmailFilterId).orElseThrow(() -> new GroupException("Filtro não existe."));
-        UUID groupSettingId = groupEmailFilter.groupSettings.getId();
-        Group group = getGroupByGroupSettingsId(groupSettingId);
-        if(group != null) {
-            return group;
-        }
-        throw new GroupException("Falha ao determinar grupo por filtro de email.");
     }
 
     public Group createGroup( CreateGroupDTO dto ) {

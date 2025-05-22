@@ -1,7 +1,11 @@
 package me.universi.group.services;
 
 import java.util.*;
-import java.util.stream.Collectors;
+
+import me.universi.Sys;
+import me.universi.api.exceptions.UniversiBadRequestException;
+import me.universi.api.exceptions.UniversiNoEntityException;
+import me.universi.api.interfaces.EntityService;
 import me.universi.group.DTO.CreateEmailFilterDTO;
 import me.universi.group.DTO.UpdateEmailFilterDTO;
 import me.universi.group.entities.Group;
@@ -9,103 +13,95 @@ import me.universi.group.entities.GroupSettings.GroupEmailFilter;
 import me.universi.group.enums.GroupEmailFilterType;
 import me.universi.group.exceptions.GroupException;
 import me.universi.group.repositories.GroupEmailFilterRepository;
-import me.universi.group.repositories.GroupRepository;
 import me.universi.role.services.RoleService;
-import me.universi.user.entities.User;
-import me.universi.user.services.UserService;
+import me.universi.util.CastingUtil;
 import me.universi.util.ConvertUtil;
 import org.springframework.stereotype.Service;
 
+import jakarta.annotation.Nullable;
+
 @Service
-public class GroupEmailFilterService {
+public class GroupEmailFilterService extends EntityService<GroupEmailFilter> {
 
     private final GroupService groupService;
-    private final UserService userService;
     private final GroupEmailFilterRepository groupEmailFilterRepository;
-    private final GroupRepository groupRepository;
 
-    public GroupEmailFilterService(GroupService groupService, UserService userService, GroupEmailFilterRepository groupEmailFilterRepository, GroupRepository groupRepository) {
+    public GroupEmailFilterService(GroupService groupService, GroupEmailFilterRepository groupEmailFilterRepository) {
         this.groupService = groupService;
-        this.userService = userService;
         this.groupEmailFilterRepository = groupEmailFilterRepository;
-        this.groupRepository = groupRepository;
+
+        this.entityName = "Filtro de Email";
+    }
+
+    public GroupEmailFilterService getInstance() {
+        return Sys.context.getBean( "groupEmailFilterService", GroupEmailFilterService.class );
+    }
+
+    @Override
+    protected Optional<GroupEmailFilter> findUnchecked(UUID id) {
+        return groupEmailFilterRepository.findById( id );
+    }
+
+    @Override
+    protected List<GroupEmailFilter> findAllUnchecked() {
+        return groupEmailFilterRepository.findAll();
+    }
+
+    private @Nullable Group getGroupByEmailFilter( UUID id ) { return getGroupByEmailFilter( findOrThrow( id ) ); }
+    private @Nullable Group getGroupByEmailFilter( GroupEmailFilter groupEmailFilter ) {
+        if ( groupEmailFilter == null ) return null;
+        return groupService.getGroupByGroupSettingsId( groupEmailFilter.getGroupSettings().getId() );
     }
 
     // add email filter to group
     public GroupEmailFilter createEmailFilter(CreateEmailFilterDTO createEmailFilterDTO) {
         Group group = groupService.findByIdOrPathOrThrow( createEmailFilterDTO.groupId() );
 
-        RoleService.getInstance().checkIsAdmin(group);
+        groupService.checkPermissionToEdit( group );
 
-        if(group != null) {
-            groupService.checkPermissionToEdit( group );
+        GroupEmailFilter groupEmailFilter = new GroupEmailFilter();
+        groupEmailFilter.groupSettings = group.groupSettings;
+        groupEmailFilter.email = createEmailFilterDTO.email();
+        groupEmailFilter.type = CastingUtil.getEnum( GroupEmailFilterType.class, createEmailFilterDTO.type() )
+            .orElseThrow( () -> new UniversiBadRequestException( "Tipo de " + this.entityName + " de valor '" + createEmailFilterDTO.type() + "' não existe" ) );
+        groupEmailFilter.enabled = createEmailFilterDTO.enabled();
 
-            GroupEmailFilter groupEmailFilter = new GroupEmailFilter();
-            groupEmailFilter.groupSettings = group.groupSettings;
-            groupEmailFilter.email = createEmailFilterDTO.email();
-            if(createEmailFilterDTO.type() != null) {
-                groupEmailFilter.type = GroupEmailFilterType.valueOf(String.valueOf(createEmailFilterDTO.type()));
-            }
-            if(createEmailFilterDTO.enabled() != null) {
-                groupEmailFilter.enabled = createEmailFilterDTO.enabled();
-            }
-            groupEmailFilterRepository.save(groupEmailFilter);
-            return groupEmailFilter;
-        }
-
-        throw new GroupException("Falha ao adicionar filtro.");
+        return groupEmailFilterRepository.saveAndFlush( groupEmailFilter );
     }
 
-    public GroupEmailFilter updateEmailFilter(UpdateEmailFilterDTO updateEmailFilterDTO) {
-        Group group = groupService.getGroupByGroupEmailFilterId(updateEmailFilterDTO.groupEmailFilterId());
+    public GroupEmailFilter updateEmailFilter( UpdateEmailFilterDTO dto ) {
+        var filter = findOrThrow( dto.groupEmailFilterId() );
+        checkPermissionToEdit( filter );
 
-        RoleService.getInstance().checkIsAdmin(group);
+        var group = getGroupByEmailFilter( filter );
+        if ( group == null )
+            throw new UniversiNoEntityException( "Grupo não encontrado para o filtro" );
 
-        if(group != null) {
-            groupService.checkPermissionToEdit( group );
+        groupService.checkPermissionToEdit( group );
 
-            if(groupEmailFilterRepository.existsByGroupSettingsIdAndId(group.groupSettings.getId(), updateEmailFilterDTO.groupEmailFilterId())) {
-                GroupEmailFilter groupEmailFilter = groupEmailFilterRepository.findFirstByGroupSettingsIdAndId(group.groupSettings.getId(), updateEmailFilterDTO.groupEmailFilterId());
-                if(updateEmailFilterDTO.email() != null) {
-                    groupEmailFilter.email = updateEmailFilterDTO.email();
-                }
-                if(updateEmailFilterDTO.type() != null) {
-                    groupEmailFilter.type = GroupEmailFilterType.valueOf(String.valueOf(updateEmailFilterDTO.type()));
-                }
-                if(updateEmailFilterDTO.enabled() != null) {
-                    groupEmailFilter.enabled = updateEmailFilterDTO.enabled();
-                }
-                groupEmailFilterRepository.save(groupEmailFilter);
-                return groupEmailFilter;
-            } else {
-                throw new GroupException("Filtro não existe.");
-            }
-        }
+        dto.email().ifPresent( filter::setEmail );
+        dto.type().ifPresent( type -> {
+            filter.setType(
+                CastingUtil.getEnum( GroupEmailFilterType.class , type )
+                .orElseThrow( () -> new UniversiBadRequestException( "Tipo de " + this.entityName + " de valor '" + type + "' não existe" ) )
+            );
+        } );
 
-        throw new GroupException("Falha ao editar filtro.");
+        dto.enabled().ifPresent( filter::setEnabled );
+        return groupEmailFilterRepository.saveAndFlush( filter );
     }
 
-    public boolean deleteEmailFilter(UUID groupEmailFilterId) {
-        Group group = groupService.getGroupByGroupEmailFilterId(groupEmailFilterId);
+    public void deleteEmailFilter(UUID groupEmailFilterId) {
+        var filter = findOrThrow( groupEmailFilterId );
+        checkPermissionToDelete( filter );
 
-        if(group != null) {
+        Group group = getGroupByEmailFilter( groupEmailFilterId );
+        if ( group == null )
+            throw new UniversiNoEntityException( "Grupo não encontrado para o filtro" );
 
-            RoleService.getInstance().checkIsAdmin(group);
-
-            groupService.checkPermissionToEdit( group );
-
-            if(groupEmailFilterRepository.existsByGroupSettingsIdAndId(group.groupSettings.getId(), groupEmailFilterId)) {
-                GroupEmailFilter groupEmailFilter = groupEmailFilterRepository.findFirstByGroupSettingsIdAndId(group.groupSettings.getId(), groupEmailFilterId);
-                groupEmailFilter.setRemoved(ConvertUtil.getDateTimeNow());
-                groupEmailFilter.setDeleted(true);
-                groupEmailFilterRepository.save(groupEmailFilter);
-                return true;
-            } else {
-                throw new GroupException("Filtro não existe.");
-            }
-        }
-
-        throw new GroupException("Falha ao remover filtro.");
+        filter.setRemoved(ConvertUtil.getDateTimeNow());
+        filter.setDeleted(true);
+        groupEmailFilterRepository.saveAndFlush( filter );
     }
 
     public List<GroupEmailFilter> listEmailFilter(UUID groupId) {
@@ -121,16 +117,22 @@ public class GroupEmailFilterService {
 
             Collection<GroupEmailFilter> emailFilters = group.getGroupSettings().getFilterEmails();
 
-            List<GroupEmailFilter> emailFiltersList = emailFilters.stream()
-                    .sorted(Comparator.comparing(GroupEmailFilter::getAdded).reversed())
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
-
-            return emailFiltersList;
+            return emailFilters.stream()
+                .sorted( Comparator.comparing( GroupEmailFilter::getAdded ).reversed() )
+                .filter( this::isValid )
+                .toList();
         }
 
         throw new GroupException("Falha ao listar filtros de email.");
     }
 
+    @Override
+    public boolean hasPermissionToEdit( GroupEmailFilter groupEmailFilter ) {
+        return groupService.hasPermissionToEdit( getGroupByEmailFilter( groupEmailFilter ) );
+    }
 
+    @Override
+    public boolean hasPermissionToDelete( GroupEmailFilter groupEmailFilter ) {
+        return groupService.hasPermissionToEdit( getGroupByEmailFilter( groupEmailFilter ) );
+    }
 }
