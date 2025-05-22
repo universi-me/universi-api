@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+import me.universi.group.entities.Group;
 import me.universi.group.enums.GroupEmailFilterType;
 import org.hibernate.annotations.*;
 
@@ -143,4 +144,7 @@ public class GroupEmailFilter implements Serializable {
     public Date getAdded() {
         return added;
     }
+
+    @JsonIgnore
+    public Group getGroup() { return getGroupSettings().getGroup(); }
 }

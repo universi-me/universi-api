@@ -466,10 +466,6 @@ public class GroupService extends EntityService<Group> {
         userService.sendSystemEmailToUser(profile.getUser(), subject, message, true);
     }
 
-    public Group getGroupByGroupSettingsId(UUID groupSettingsId) {
-        return groupRepository.findFirstByGroupSettingsId(groupSettingsId);
-    }
-
     public Group createGroup( CreateGroupDTO dto ) {
         if ( dto.parentGroup().isEmpty() && !userService.isUserAdminSession() )
             throw new UniversiBadRequestException( "O Parâmetro 'parentGroup' deve ser informado" );

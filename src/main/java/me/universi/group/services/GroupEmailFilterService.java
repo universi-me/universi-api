@@ -4,7 +4,6 @@ import java.util.*;
 
 import me.universi.Sys;
 import me.universi.api.exceptions.UniversiBadRequestException;
-import me.universi.api.exceptions.UniversiNoEntityException;
 import me.universi.api.interfaces.EntityService;
 import me.universi.group.DTO.CreateEmailFilterDTO;
 import me.universi.group.DTO.UpdateEmailFilterDTO;
@@ -17,8 +16,6 @@ import me.universi.role.services.RoleService;
 import me.universi.util.CastingUtil;
 import me.universi.util.ConvertUtil;
 import org.springframework.stereotype.Service;
-
-import jakarta.annotation.Nullable;
 
 @Service
 public class GroupEmailFilterService extends EntityService<GroupEmailFilter> {
@@ -47,12 +44,6 @@ public class GroupEmailFilterService extends EntityService<GroupEmailFilter> {
         return groupEmailFilterRepository.findAll();
     }
 
-    private @Nullable Group getGroupByEmailFilter( UUID id ) { return getGroupByEmailFilter( findOrThrow( id ) ); }
-    private @Nullable Group getGroupByEmailFilter( GroupEmailFilter groupEmailFilter ) {
-        if ( groupEmailFilter == null ) return null;
-        return groupService.getGroupByGroupSettingsId( groupEmailFilter.getGroupSettings().getId() );
-    }
-
     // add email filter to group
     public GroupEmailFilter createEmailFilter(CreateEmailFilterDTO createEmailFilterDTO) {
         Group group = groupService.findByIdOrPathOrThrow( createEmailFilterDTO.groupId() );
@@ -73,12 +64,6 @@ public class GroupEmailFilterService extends EntityService<GroupEmailFilter> {
         var filter = findOrThrow( dto.groupEmailFilterId() );
         checkPermissionToEdit( filter );
 
-        var group = getGroupByEmailFilter( filter );
-        if ( group == null )
-            throw new UniversiNoEntityException( "Grupo não encontrado para o filtro" );
-
-        groupService.checkPermissionToEdit( group );
-
         dto.email().ifPresent( filter::setEmail );
         dto.type().ifPresent( type -> {
             filter.setType(
@@ -94,10 +79,6 @@ public class GroupEmailFilterService extends EntityService<GroupEmailFilter> {
     public void deleteEmailFilter(UUID groupEmailFilterId) {
         var filter = findOrThrow( groupEmailFilterId );
         checkPermissionToDelete( filter );
-
-        Group group = getGroupByEmailFilter( groupEmailFilterId );
-        if ( group == null )
-            throw new UniversiNoEntityException( "Grupo não encontrado para o filtro" );
 
         filter.setRemoved(ConvertUtil.getDateTimeNow());
         filter.setDeleted(true);
@@ -128,11 +109,11 @@ public class GroupEmailFilterService extends EntityService<GroupEmailFilter> {
 
     @Override
     public boolean hasPermissionToEdit( GroupEmailFilter groupEmailFilter ) {
-        return groupService.hasPermissionToEdit( getGroupByEmailFilter( groupEmailFilter ) );
+        return groupService.hasPermissionToEdit( groupEmailFilter.getGroup() );
     }
 
     @Override
     public boolean hasPermissionToDelete( GroupEmailFilter groupEmailFilter ) {
-        return groupService.hasPermissionToEdit( getGroupByEmailFilter( groupEmailFilter ) );
+        return groupService.hasPermissionToEdit( groupEmailFilter.getGroup() );
     }
 }

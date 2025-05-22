@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import me.universi.group.entities.Group;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collection;
@@ -41,6 +43,10 @@ public class GroupSettings implements Serializable {
     public GroupEnvironment environment;
 
     @JsonIgnore
+    @OneToOne( mappedBy = "groupSettings", fetch = FetchType.LAZY )
+    private Group group;
+
+    @JsonIgnore
     @Column(name = "deleted")
     private boolean deleted = Boolean.FALSE;
 
@@ -62,4 +68,6 @@ public class GroupSettings implements Serializable {
     public void setFilterEmails(Collection<GroupEmailFilter> filtersEmail) {
         this.filterEmails = filtersEmail;
     }
+
+    public Group getGroup() { return group; }
 }
