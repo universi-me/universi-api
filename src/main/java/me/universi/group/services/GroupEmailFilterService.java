@@ -8,7 +8,7 @@ import me.universi.api.interfaces.EntityService;
 import me.universi.group.DTO.CreateEmailFilterDTO;
 import me.universi.group.DTO.UpdateEmailFilterDTO;
 import me.universi.group.entities.Group;
-import me.universi.group.entities.GroupSettings.GroupEmailFilter;
+import me.universi.group.entities.GroupEmailFilter;
 import me.universi.group.enums.GroupEmailFilterType;
 import me.universi.group.repositories.GroupEmailFilterRepository;
 import me.universi.role.services.RoleService;

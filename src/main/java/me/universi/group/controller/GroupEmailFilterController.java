@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.*;
 import me.universi.group.DTO.CreateEmailFilterDTO;
 import me.universi.group.DTO.UpdateEmailFilterDTO;
-import me.universi.group.entities.GroupSettings.GroupEmailFilter;
+import me.universi.group.entities.GroupEmailFilter;
 import me.universi.group.services.GroupEmailFilterService;
 
 import org.springframework.http.HttpStatus;

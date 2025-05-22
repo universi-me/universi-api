@@ -1,10 +1,9 @@
-package me.universi.group.entities.GroupSettings;
+package me.universi.group.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import me.universi.group.entities.Group;
 
 import java.io.Serial;
 import java.io.Serializable;

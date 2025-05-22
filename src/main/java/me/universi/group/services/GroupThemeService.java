@@ -2,8 +2,8 @@ package me.universi.group.services;
 
 import me.universi.group.DTO.UpdateGroupThemeDTO;
 import me.universi.group.entities.Group;
-import me.universi.group.entities.GroupSettings.GroupSettings;
-import me.universi.group.entities.GroupSettings.GroupTheme;
+import me.universi.group.entities.GroupSettings;
+import me.universi.group.entities.GroupTheme;
 import me.universi.group.repositories.GroupThemeRepository;
 import me.universi.role.services.RoleService;
 import org.springframework.stereotype.Service;

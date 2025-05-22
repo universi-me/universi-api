@@ -1,4 +1,4 @@
-package me.universi.group.entities.GroupSettings;
+package me.universi.group.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -11,7 +11,6 @@ import java.util.Date;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-import me.universi.group.entities.Group;
 import me.universi.group.enums.GroupEmailFilterType;
 import org.hibernate.annotations.*;
 

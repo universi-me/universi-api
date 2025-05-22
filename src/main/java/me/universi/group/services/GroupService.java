@@ -14,7 +14,6 @@ import me.universi.feed.services.GroupFeedService;
 import me.universi.group.DTO.*;
 
 import me.universi.group.entities.*;
-import me.universi.group.entities.GroupSettings.*;
 import me.universi.group.enums.GroupType;
 import me.universi.group.repositories.*;
 import me.universi.image.services.ImageMetadataService;

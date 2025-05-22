@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import me.universi.Sys;
 import me.universi.api.exceptions.UniversiServerException;
 import me.universi.group.entities.Group;
-import me.universi.group.entities.GroupSettings.GroupEnvironment;
+import me.universi.group.entities.GroupEnvironment;
 import me.universi.group.enums.GroupType;
 import me.universi.group.repositories.GroupRepository;
 import me.universi.user.services.UserService;

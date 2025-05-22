@@ -2,7 +2,7 @@ package me.universi.group.controller;
 
 import jakarta.validation.Valid;
 import me.universi.group.DTO.UpdateGroupThemeDTO;
-import me.universi.group.entities.GroupSettings.GroupTheme;
+import me.universi.group.entities.GroupTheme;
 import me.universi.group.services.GroupThemeService;
 
 import org.springframework.http.MediaType;

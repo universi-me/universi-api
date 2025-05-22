@@ -11,7 +11,6 @@ import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
 import me.universi.capacity.entidades.Folder;
-import me.universi.group.entities.GroupSettings.GroupSettings;
 import me.universi.group.enums.GroupType;
 import me.universi.group.services.GroupService;
 import me.universi.image.entities.ImageMetadata;

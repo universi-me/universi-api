@@ -27,7 +27,7 @@ import me.universi.Sys;
 import me.universi.api.interfaces.EntityService;
 import me.universi.group.DTO.AddGroupParticipantDTO;
 import me.universi.group.entities.Group;
-import me.universi.group.entities.GroupSettings.GroupEnvironment;
+import me.universi.group.entities.GroupEnvironment;
 import me.universi.group.services.GroupParticipantService;
 import me.universi.group.services.OrganizationService;
 import me.universi.image.services.ImageMetadataService;
