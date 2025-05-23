@@ -165,11 +165,13 @@ public class GroupEnvironmentService {
             userService.setupEmailSender();
         }
 
+        var groupRepository = GroupService.getRepository();
+
         if(updateGroupEnvironment.organization_name() != null) {
             Group currentOrganization = organizationService.getOrganization();
             if(currentOrganization != null) {
                 currentOrganization.setName(updateGroupEnvironment.organization_name());
-                groupService.save(currentOrganization);
+                groupRepository.saveAndFlush(currentOrganization);
             }
         }
 
@@ -182,7 +184,7 @@ public class GroupEnvironmentService {
                 );
 
                 currentOrganization.setNickname(nickname);
-                groupService.save(currentOrganization);
+                groupRepository.saveAndFlush(currentOrganization);
             }
         }
 

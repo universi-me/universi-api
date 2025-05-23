@@ -62,6 +62,10 @@ public class GroupService extends EntityService<Group> {
         return Sys.context.getBean("groupService", GroupService.class);
     }
 
+    public static @NotNull GroupRepository getRepository() {
+        return Sys.context.getBean( "groupRepository", GroupRepository.class );
+    }
+
     @Override
     public boolean isValid( Group group ) {
         if ( group == null || group.isDeleted() )
@@ -212,10 +216,6 @@ public class GroupService extends EntityService<Group> {
         } catch (Exception e) {
             return false;
         }
-    }
-
-    public void save(Group group) {
-        groupRepository.saveAndFlush(group);
     }
 
     private void delete( Group group ) {
