@@ -2,6 +2,7 @@ package me.universi.group.services;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Predicate;
 
@@ -61,6 +62,10 @@ public class GroupParticipantService {
             && profileGroupRepository.existsByGroupIdAndProfileId( group.getId(), profile.getId() );
     }
 
+    public Optional<ProfileGroup> findByGroupAndProfile( @NotNull Group group, @NotNull Profile profile ) {
+        return profileGroupRepository.findFirstByGroupAndProfile( group, profile );
+    }
+
     public @NotNull ProfileGroup join( UUID groupId ) {
         var group = groupService.findOrThrow( groupId );
         var profile = userService.getUserInSession().getProfile();
@@ -86,12 +91,8 @@ public class GroupParticipantService {
         if( group.isRootGroup() )
             throw new UniversiForbiddenAccessException( "Você não pode sair deste grupo." );
 
-        var profileGroup = profileGroupRepository.findFirstByGroupAndProfile( group, profile );
-        if ( profileGroup == null )
-            // is not participant
-            return;
-
-        profileGroupRepository.delete( profileGroup );
+        findByGroupAndProfile( group, profile )
+            .ifPresent( profileGroupRepository::delete );
     }
 
     public ProfileGroup addParticipant( AddGroupParticipantDTO dto ) {
@@ -128,12 +129,8 @@ public class GroupParticipantService {
         RoleService.getInstance().checkPermission( group, FeaturesTypes.PEOPLE, Permission.READ_WRITE_DELETE );
 
         var participant = ProfileService.getInstance().findByIdOrUsernameOrThrow( dto.participant() );
-        var profileGroup = profileGroupRepository.findFirstByGroupAndProfile( group, participant );
-        if ( profileGroup == null )
-            // is not participant
-            return;
-
-        profileGroupRepository.delete( profileGroup );
+        findByGroupAndProfile( group, participant )
+            .ifPresent( profileGroupRepository::delete );
     }
 
     public List<Profile> listParticipantsByGroupId(UUID groupId) {

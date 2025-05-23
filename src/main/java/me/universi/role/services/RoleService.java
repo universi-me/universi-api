@@ -7,6 +7,7 @@ import me.universi.api.exceptions.UniversiConflictingOperationException;
 import me.universi.api.interfaces.EntityService;
 import me.universi.group.entities.Group;
 import me.universi.group.repositories.ProfileGroupRepository;
+import me.universi.group.services.GroupParticipantService;
 import me.universi.group.services.GroupService;
 import me.universi.role.dto.CreateRoleDTO;
 import me.universi.role.dto.ProfileRoleDTO;
@@ -134,10 +135,8 @@ public class RoleService extends EntityService<Role> {
         if ( role.group.getAdmin().getId().equals( profile.getId() ) )
             throw new UniversiConflictingOperationException( "O papel do dono do grupo não pode ser alterado" );
 
-        // todo: ProfileGroupService to handle ProfileGroup
-        var profileGroup = profileGroupRepository.findFirstByGroupAndProfile( role.group, profile );
-        if ( profileGroup == null )
-            throw new UniversiConflictingOperationException( "Você só pode atribuir o papel à um membro do grupo" );
+        var profileGroup = GroupParticipantService.getInstance().findByGroupAndProfile( role.group, profile )
+            .orElseThrow( () -> new UniversiConflictingOperationException( "Você só pode atribuir o papel à um membro do grupo" ) );
 
         profileGroup.role = role;
         return profileGroupRepository.saveAndFlush( profileGroup ).role;
@@ -254,10 +253,9 @@ public class RoleService extends EntityService<Role> {
     }
 
     private Role getAssignedRole( Profile profile, Group group ) {
-        var profileGroup = profileGroupRepository.findFirstByGroupAndProfile(group, profile);
-        return profileGroup != null
-            ? profileGroup.role
-            : getGroupVisitorRole(group);
+        return GroupParticipantService.getInstance().findByGroupAndProfile( group, profile )
+            .map( pg -> pg.role )
+            .orElseGet( () -> getGroupVisitorRole( group ) );
     }
 
     public Collection<Role> getAllRolesByProfile(Profile profile) {
