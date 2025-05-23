@@ -32,19 +32,20 @@ import jakarta.validation.constraints.NotNull;
 
 @Service
 public class GroupParticipantService {
-
     private final CompetenceService competenceService;
     private final ProfileGroupRepository profileGroupRepository;
     private final GroupService groupService;
     private final UserService userService;
     private final CompetenceTypeService competenceTypeService;
+    private final RoleService roleService;
 
-    public GroupParticipantService(ProfileGroupRepository profileGroupRepository, GroupService groupService, UserService userService, CompetenceTypeService competenceTypeService, CompetenceService competenceService) {
+    public GroupParticipantService(ProfileGroupRepository profileGroupRepository, GroupService groupService, UserService userService, CompetenceTypeService competenceTypeService, CompetenceService competenceService, RoleService roleService) {
         this.profileGroupRepository = profileGroupRepository;
         this.groupService = groupService;
         this.userService = userService;
         this.competenceTypeService = competenceTypeService;
         this.competenceService = competenceService;
+        this.roleService = roleService;
     }
 
     public static GroupParticipantService getInstance() {
@@ -181,6 +182,7 @@ public class GroupParticipantService {
 
     public List<Profile> filterParticipants( CompetenceFilterDTO dto ) {
         var group = groupService.findByIdOrPathOrThrow( dto.group() );
+        roleService.checkPermission( group, FeaturesTypes.PEOPLE, Permission.READ );
 
         return group.getParticipants().stream()
             .sorted( Comparator.comparing( ProfileGroup::getJoined ).reversed() )
