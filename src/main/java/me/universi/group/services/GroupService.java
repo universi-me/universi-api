@@ -251,53 +251,6 @@ public class GroupService extends EntityService<Group> {
         return groupEnvironment;
     }
 
-    public List<ProfileWithCompetencesDTO> filterProfilesWithCompetences(CompetenceFilterDTO competenceFilter){
-
-        List<ProfileWithCompetencesDTO> selectedProfiles = new ArrayList<>();
-
-        Group group = findByIdOrPathOrThrow( competenceFilter.group() );
-
-        Collection<ProfileGroup> participants = group.getParticipants();
-        List<Profile> profiles = participants.stream()
-                .sorted(Comparator.comparing(ProfileGroup::getJoined).reversed())
-                .map(ProfileGroup::getProfile)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-
-        for(Profile p : profiles){
-            ProfileWithCompetencesDTO profile = new ProfileWithCompetencesDTO(
-                p,
-                competenceService.findByProfile( p.getId() )
-            );
-
-
-            boolean hasNecessaryCompetences = false;
-
-            if(competenceFilter.matchEveryCompetence()){
-                hasNecessaryCompetences = true;
-                for(CompetenceFilterRequestDTO competence : competenceFilter.competences()){
-                    if(!profile.hasCompetence(competence.id(), competence.level())) {
-                        hasNecessaryCompetences = false;
-                        break;
-                    }
-                }
-            }
-            else{
-                for(CompetenceFilterRequestDTO competence : competenceFilter.competences()) {
-                    if(profile.hasCompetence(competence.id(), competence.level())) {
-                        hasNecessaryCompetences = true;
-                        break;
-                    }
-                }
-            }
-
-            if(hasNecessaryCompetences)
-                selectedProfiles.add(profile);
-        }
-
-        return selectedProfiles;
-}
-
     public List<CompetenceInfoDTO> getGroupCompetences(Group group){
 
         List<CompetenceInfoDTO> groupCompetences = new ArrayList<>();

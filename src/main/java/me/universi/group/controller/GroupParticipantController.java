@@ -5,13 +5,11 @@ import jakarta.validation.constraints.NotNull;
 import java.util.*;
 import me.universi.group.DTO.CompetenceFilterDTO;
 import me.universi.group.DTO.CompetenceInfoDTO;
-import me.universi.group.DTO.ProfileWithCompetencesDTO;
 import me.universi.group.DTO.AddGroupParticipantDTO;
 import me.universi.group.DTO.RemoveGroupParticipantDTO;
 import me.universi.group.entities.ProfileGroup;
 import me.universi.group.services.GroupParticipantService;
 import me.universi.profile.entities.Profile;
-import me.universi.group.services.GroupService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,11 +17,9 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/group/participants")
 public class GroupParticipantController {
-    private final GroupService groupService;
     private final GroupParticipantService groupParticipantService;
 
-    public GroupParticipantController(GroupService groupService, GroupParticipantService groupParticipantService) {
-        this.groupService = groupService;
+    public GroupParticipantController(GroupParticipantService groupParticipantService) {
         this.groupParticipantService = groupParticipantService;
     }
 
@@ -56,8 +52,8 @@ public class GroupParticipantController {
 
     //Used when filtering participants based on their competences
     @PostMapping(value = "/filter", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<ProfileWithCompetencesDTO>> filterParticipants( @Valid @RequestBody CompetenceFilterDTO competenceFilter ){
-        return ResponseEntity.ok( groupService.filterProfilesWithCompetences( competenceFilter ) );
+    public ResponseEntity<List<Profile>> filterParticipants( @Valid @RequestBody CompetenceFilterDTO competenceFilter ){
+        return ResponseEntity.ok( groupParticipantService.filterParticipants( competenceFilter ) );
     }
 
     @GetMapping(value = "/competences/{id}", produces = MediaType.APPLICATION_JSON_VALUE)

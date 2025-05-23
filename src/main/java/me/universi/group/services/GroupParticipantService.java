@@ -3,12 +3,18 @@ package me.universi.group.services;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 import me.universi.Sys;
 import me.universi.api.exceptions.UniversiConflictingOperationException;
 import me.universi.api.exceptions.UniversiForbiddenAccessException;
+import me.universi.competence.entities.CompetenceType;
+import me.universi.competence.services.CompetenceService;
+import me.universi.competence.services.CompetenceTypeService;
 import me.universi.group.DTO.AddGroupParticipantDTO;
+import me.universi.group.DTO.CompetenceFilterDTO;
 import me.universi.group.DTO.CompetenceInfoDTO;
+import me.universi.group.DTO.ProfileWithCompetencesDTO;
 import me.universi.group.DTO.RemoveGroupParticipantDTO;
 import me.universi.group.entities.Group;
 import me.universi.group.entities.ProfileGroup;
@@ -26,14 +32,19 @@ import jakarta.validation.constraints.NotNull;
 
 @Service
 public class GroupParticipantService {
+
+    private final CompetenceService competenceService;
     private final ProfileGroupRepository profileGroupRepository;
     private final GroupService groupService;
     private final UserService userService;
+    private final CompetenceTypeService competenceTypeService;
 
-    public GroupParticipantService(ProfileGroupRepository profileGroupRepository, GroupService groupService, UserService userService) {
+    public GroupParticipantService(ProfileGroupRepository profileGroupRepository, GroupService groupService, UserService userService, CompetenceTypeService competenceTypeService, CompetenceService competenceService) {
         this.profileGroupRepository = profileGroupRepository;
         this.groupService = groupService;
         this.userService = userService;
+        this.competenceTypeService = competenceTypeService;
+        this.competenceService = competenceService;
     }
 
     public static GroupParticipantService getInstance() {
@@ -144,5 +155,38 @@ public class GroupParticipantService {
         Group group = groupService.findOrThrow( id );
 
         return groupService.getGroupCompetences(group);
+    }
+
+    private record CompetenceTypeWithLevel( CompetenceType type, int level ){}
+    private Predicate<Profile> getFilterByCompetence( CompetenceFilterDTO dto ) {
+        if ( dto.competences() == null || dto.competences().isEmpty() )
+            return p -> true;
+
+        var competenceTypesWithLevel = dto.competences().stream()
+            .map( c -> new CompetenceTypeWithLevel( competenceTypeService.findByIdOrNameOrThrow( c.id() ), c.level() ) )
+            .toList();
+
+        if ( dto.matchEveryCompetence() )
+            return p -> {
+                var pwc = new ProfileWithCompetencesDTO( p, competenceService.findByProfile( p.getId() ) );
+                return competenceTypesWithLevel.stream().allMatch( c -> pwc.hasCompetence( c.type().getId(), c.level() ) );
+            };
+
+        else
+            return p -> {
+                var pwc = new ProfileWithCompetencesDTO( p, competenceService.findByProfile( p.getId() ) );
+                return competenceTypesWithLevel.stream().anyMatch( c -> pwc.hasCompetence( c.type().getId(), c.level() ) );
+            };
+    }
+
+    public List<Profile> filterParticipants( CompetenceFilterDTO dto ) {
+        var group = groupService.findByIdOrPathOrThrow( dto.group() );
+
+        return group.getParticipants().stream()
+            .sorted( Comparator.comparing( ProfileGroup::getJoined ).reversed() )
+            .map( ProfileGroup::getProfile )
+            .filter( ProfileService.getInstance()::isValid )
+            .filter( getFilterByCompetence( dto ) )
+            .toList();
     }
 }
