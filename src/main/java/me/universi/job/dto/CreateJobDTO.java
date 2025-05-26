@@ -20,5 +20,5 @@ public record CreateJobDTO(
     UUID institutionId,
 
     @NotNull
-    List<UUID> requiredCompetencesIds
+    List<String> requiredCompetencesIds
 ) { }

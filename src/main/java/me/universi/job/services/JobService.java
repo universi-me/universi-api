@@ -66,7 +66,7 @@ public class JobService extends EntityService<Job> {
 
         var institution = institutionService.findOrThrow( createJobDTO.institutionId() );
 
-        var competencesTypes = competenceTypeService.findOrThrow( createJobDTO.requiredCompetencesIds() );
+        var competencesTypes = competenceTypeService.findByIdOrNameOrThrow( createJobDTO.requiredCompetencesIds() );
 
         var profileInSession = profileService.getProfileInSessionOrThrow();
 
@@ -99,17 +99,19 @@ public class JobService extends EntityService<Job> {
         var job = findOrThrow( id );
         checkPermissionToEdit( job );
 
-        if ( updateJobDTO.title() != null )
-            job.setTitle( checkValidTitle( updateJobDTO.title() ) );
+        updateJobDTO.title().ifPresent( title -> {
+            job.setTitle( checkValidTitle( title ) );
+        } );
 
-        if ( updateJobDTO.shortDescription() != null )
-            job.setShortDescription( checkValidShortDescription( updateJobDTO.shortDescription() ) );
+        updateJobDTO.shortDescription().ifPresent( shortDescription -> {
+            job.setShortDescription( checkValidShortDescription( shortDescription ) );
+        } );
 
-        if ( updateJobDTO.longDescription() != null)
-            job.setLongDescription( updateJobDTO.longDescription() );
+        updateJobDTO.longDescription().ifPresent( job::setLongDescription );
 
-        if ( updateJobDTO.requiredCompetencesIds() != null)
-            job.setRequiredCompetences( competenceTypeService.findOrThrow( updateJobDTO.requiredCompetencesIds() ) );
+        updateJobDTO.requiredCompetencesIds().ifPresent( competenceTypesIds -> {
+            job.setRequiredCompetences( competenceTypeService.findByIdOrNameOrThrow( competenceTypesIds ) );
+        } );
 
         return save(job);
     }
