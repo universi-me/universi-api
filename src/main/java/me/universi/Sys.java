@@ -7,6 +7,8 @@ import io.swagger.v3.oas.models.info.License;
 import me.universi.group.services.OrganizationService;
 
 import me.universi.user.services.UserService;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +16,7 @@ import org.springframework.boot.ExitCodeGenerator;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.stereotype.Controller;
@@ -24,7 +27,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @SpringBootApplication
 @ImportResource({"classpath:spring-security.xml"})
 @Controller
-public class Sys {
+public class Sys implements ApplicationContextAware {
 
     @Value("${spring.profiles.active}")
     private String PROFILE_ACTIVE;
@@ -34,9 +37,13 @@ public class Sys {
     private OrganizationService organizationService;
     public static ApplicationContext context;
 
-
     public static void main(String [] args) {
         context = SpringApplication.run(Sys.class, args);
+    }
+
+    @Override
+    public void setApplicationContext(@NotNull ApplicationContext applicationContext) throws BeansException {
+        Sys.context = applicationContext;
     }
 
     @GetMapping("/admin/exit")
