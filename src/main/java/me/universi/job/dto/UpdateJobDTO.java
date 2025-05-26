@@ -16,8 +16,5 @@ public record UpdateJobDTO(
     String longDescription,
 
     @Nullable
-    UUID institutionId,
-
-    @Nullable
     List<UUID> requiredCompetencesIds
 ) { }
