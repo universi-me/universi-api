@@ -1,5 +1,7 @@
 package me.universi.api.interfaces;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
@@ -23,6 +25,19 @@ public abstract class UniqueNameEntityService<T> extends EntityService<T> {
     }
     public final T findByIdOrNameOrThrow( String idOrName ) throws UniversiNoEntityException {
         return findByIdOrName( idOrName ).orElseThrow( () -> makeNotFoundException( "ID ou " + fieldName, idOrName ) );
+    }
+
+    public final List<Optional<T>> findByName( List<String> names ) {
+        return new ArrayList<>( names.stream().map( this::findByName ).toList() );
+    }
+    public final List<T> findByNameOrThrow( List<String> names ) {
+        return new ArrayList<>( names.stream().map( this::findByNameOrThrow ).toList() );
+    }
+    public final List<Optional<T>> findByIdOrName( List<String> idsOrNames ) {
+        return new ArrayList<>( idsOrNames.stream().map( this::findByIdOrName ).toList() );
+    }
+    public final List<T> findByIdOrNameOrThrow( List<String> idsOrNames ) {
+        return new ArrayList<>( idsOrNames.stream().map( this::findByIdOrNameOrThrow ).toList() );
     }
 
     public final boolean isNameAvailable( String name ) {

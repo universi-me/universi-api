@@ -1,5 +1,6 @@
 package me.universi.api.interfaces;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -21,10 +22,10 @@ public abstract class EntityService<T> {
     }
 
     public final List<Optional<T>> find( List<UUID> ids ) {
-        return ids.stream().map( this::find ).toList();
+        return new ArrayList<>( ids.stream().map( this::find ).toList() );
     }
     public final List<T> findOrThrow( List<UUID> ids ) {
-        return ids.stream().map( this::findOrThrow ).toList();
+        return new ArrayList<>( ids.stream().map( this::findOrThrow ).toList() );
     }
 
     protected abstract List<T> findAllUnchecked();

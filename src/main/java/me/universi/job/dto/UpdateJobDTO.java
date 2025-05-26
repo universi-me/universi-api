@@ -1,23 +1,14 @@
 package me.universi.job.dto;
 
 import java.util.List;
-import java.util.UUID;
-
-import jakarta.annotation.Nullable;
+import java.util.Optional;
 
 public record UpdateJobDTO(
-    @Nullable
-    String title,
+    Optional<String> title,
 
-    @Nullable
-    String shortDescription,
+    Optional<String> shortDescription,
 
-    @Nullable
-    String longDescription,
+    Optional<String> longDescription,
 
-    @Nullable
-    UUID institutionId,
-
-    @Nullable
-    List<UUID> requiredCompetencesIds
+    Optional<List<String>> requiredCompetencesIds
 ) { }
