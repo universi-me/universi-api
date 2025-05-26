@@ -532,9 +532,8 @@ public class FolderService extends EntityService<Folder> {
             throw new UniversiConflictingOperationException( "O grupo já contém o conteúdo" );
         }
 
-        var newGrantedAccessGroups = folder.getGrantedAccessGroups().stream()
-            .filter( g -> !g.getId().equals( originalGroup.getId() ) )
-            .toList();
+        var newGrantedAccessGroups = new ArrayList<Group>( folder.getGrantedAccessGroups() );
+        newGrantedAccessGroups.removeIf( g -> g.getId().equals( originalGroup.getId() ) );
         newGrantedAccessGroups.add( newGroup );
 
         folder.setGrantedAccessGroups( newGrantedAccessGroups );
