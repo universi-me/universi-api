@@ -1,37 +1,33 @@
 package me.universi.group.DTO;
 
-import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+
+import java.util.Optional;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+
 public record CreateGroupDTO(
-        Boolean groupRoot,
+        @JsonAlias( { "parentGroupId", "parentGroupPath" } )
+        Optional<String> parentGroup,
 
-        UUID parentGroupId,
-        String groupPath,
-
-        @NotNull
         @NotBlank
         String nickname,
 
-        @NotNull
         @NotBlank
         String name,
 
-        @Nullable
-        UUID image,
-        UUID bannerImage,
-        UUID headerImage,
+        Optional<UUID> image,
+        Optional<UUID> bannerImage,
+        Optional<UUID> headerImage,
 
+        @NotBlank
         String description,
 
-        @NotNull
         @NotBlank
         String groupType,
 
-        Boolean canCreateGroup,
-        Boolean isPublic,
-        Boolean canJoin,
-        Boolean everyoneCanPost
+        boolean canCreateSubgroup,
+        boolean isPublic,
+        boolean canJoin
 ) { }

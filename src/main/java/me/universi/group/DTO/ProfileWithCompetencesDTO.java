@@ -35,9 +35,9 @@ public record ProfileWithCompetencesDTO(
         );
     }
 
-    public boolean hasCompetence(String typeId, int level){
+    public boolean hasCompetence(UUID typeId, int level){
         for(Competence competence : competences){
-            if(competence.getCompetenceType().getId().toString().equals(typeId) && competence.getLevel() == level)
+            if(competence.getCompetenceType().getId().equals(typeId) && competence.getLevel() == level)
                 return true;
         }
         return false;

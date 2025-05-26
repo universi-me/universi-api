@@ -2,7 +2,7 @@ package me.universi.group.controller;
 
 import jakarta.validation.Valid;
 import me.universi.group.DTO.UpdateGroupEnvironmentDTO;
-import me.universi.group.entities.GroupSettings.GroupEnvironment;
+import me.universi.group.entities.GroupEnvironment;
 import me.universi.group.services.GroupEnvironmentService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

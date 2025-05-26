@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+import jakarta.validation.constraints.NotNull;
 import me.universi.api.exceptions.UniversiConflictingOperationException;
 import me.universi.api.exceptions.UniversiNoEntityException;
 
@@ -15,7 +16,7 @@ public abstract class UniqueNameEntityService<T> extends EntityService<T> {
     public final Optional<T> findByName( String name ) {
         return findByNameUnchecked( name ).filter( this::isValid );
     }
-    public final T findByNameOrThrow( String name ) throws UniversiNoEntityException {
+    public final @NotNull T findByNameOrThrow( String name ) throws UniversiNoEntityException {
         return findByName( name ).orElseThrow( () -> makeNotFoundException( fieldName, name ) );
     }
 
@@ -23,7 +24,7 @@ public abstract class UniqueNameEntityService<T> extends EntityService<T> {
     public final Optional<T> findByIdOrName( String idOrName ) {
         return findByIdOrNameUnchecked( idOrName ).filter( this::isValid );
     }
-    public final T findByIdOrNameOrThrow( String idOrName ) throws UniversiNoEntityException {
+    public final @NotNull T findByIdOrNameOrThrow( String idOrName ) throws UniversiNoEntityException {
         return findByIdOrName( idOrName ).orElseThrow( () -> makeNotFoundException( "ID ou " + fieldName, idOrName ) );
     }
 

@@ -1,4 +1,4 @@
-package me.universi.group.entities.GroupSettings;
+package me.universi.group.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

@@ -134,13 +134,17 @@ public class Role implements Serializable {
 
     @Transient
     public boolean isCanBeEdited() {
-        return this.roleType == RoleType.CUSTOM;
+        return this.isCustom();
     }
-
     @Transient
     public boolean isCanBeAssigned() {
-        return this.roleType != RoleType.VISITOR;
+        return !this.isVisitor();
     }
+
+    @Transient @JsonIgnore public boolean isAdmin() { return this.roleType == RoleType.ADMINISTRATOR; }
+    @Transient @JsonIgnore public boolean isParticipant() { return this.roleType == RoleType.PARTICIPANT; }
+    @Transient @JsonIgnore public boolean isVisitor() { return this.roleType == RoleType.VISITOR; }
+    @Transient @JsonIgnore public boolean isCustom() { return this.roleType == RoleType.CUSTOM; }
 
     @Transient @JsonIgnore
     public int getPermissionForFeature(FeaturesTypes feature) {

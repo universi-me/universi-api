@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import org.springframework.lang.NonNull;
 
+import jakarta.validation.constraints.NotNull;
 import me.universi.api.exceptions.UniversiForbiddenAccessException;
 import me.universi.api.exceptions.UniversiNoEntityException;
 
@@ -17,7 +18,7 @@ public abstract class EntityService<T> {
     public final Optional<T> find( UUID id ) {
         return findUnchecked( id ).filter( this::isValid );
     }
-    public final T findOrThrow( UUID id ) throws UniversiNoEntityException {
+    public final @NotNull T findOrThrow( UUID id ) throws UniversiNoEntityException {
         return find( id ).orElseThrow( () -> makeNotFoundException( "ID", id ) );
     }
 
@@ -60,6 +61,6 @@ public abstract class EntityService<T> {
     }
 
     public boolean isValid( T entity ) {
-        return true;
+        return entity != null;
     }
 }

@@ -843,8 +843,6 @@ components:
             - "DEPARTMENT"
             - "STUDY_GROUP"
             - "label"
-        rootGroup:
-          type: "boolean"
         canCreateGroup:
           type: "boolean"
         canEnter:

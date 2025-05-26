@@ -1,15 +1,14 @@
-package me.universi.group.entities.GroupSettings;
+package me.universi.group.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.UUID;
-import me.universi.user.services.JsonUserLoggedFilter;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -32,7 +31,7 @@ public class GroupSettings implements Serializable {
 
     @JsonIgnore
     @OneToMany(mappedBy = "groupSettings", fetch = FetchType.EAGER)
-    public Collection<GroupEmailFilter> filterEmails;
+    private Collection<GroupEmailFilter> filterEmails;
 
     @OneToOne(mappedBy = "groupSettings", fetch = FetchType.EAGER)
     public GroupTheme theme;
@@ -42,9 +41,9 @@ public class GroupSettings implements Serializable {
     @OneToOne(mappedBy = "groupSettings", fetch = FetchType.EAGER)
     public GroupEnvironment environment;
 
-    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
-    @OneToMany(mappedBy = "groupSettings", fetch = FetchType.EAGER)
-    public Collection<GroupFeatures> features;
+    @JsonIgnore
+    @OneToOne( mappedBy = "groupSettings", fetch = FetchType.LAZY )
+    private Group group;
 
     @JsonIgnore
     @Column(name = "deleted")
@@ -68,4 +67,6 @@ public class GroupSettings implements Serializable {
     public void setFilterEmails(Collection<GroupEmailFilter> filtersEmail) {
         this.filterEmails = filtersEmail;
     }
+
+    public Group getGroup() { return group; }
 }

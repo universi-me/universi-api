@@ -9,7 +9,9 @@ import me.universi.group.DTO.CreateGroupDTO;
 import me.universi.group.DTO.UpdateGroupDTO;
 import me.universi.group.entities.Group;
 import me.universi.group.services.GroupService;
+import me.universi.group.services.OrganizationService;
 import me.universi.image.controller.ImageMetadataController;
+import me.universi.profile.entities.Profile;
 import me.universi.role.entities.Role;
 
 import org.springframework.core.io.Resource;
@@ -21,10 +23,13 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/groups")
 public class GroupController {
+
+    private final OrganizationService organizationService;
     private final GroupService groupService;
 
-    public GroupController(GroupService groupService) {
+    public GroupController(GroupService groupService, OrganizationService organizationService) {
         this.groupService = groupService;
+        this.organizationService = organizationService;
     }
 
     @PostMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -40,13 +45,6 @@ public class GroupController {
         return ResponseEntity.ok( groupService.updateGroup( updateGroupDTO ) );
     }
 
-    @DeleteMapping(value = "/{id}/subgroups/{subgroupId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> remove(@Valid @PathVariable @NotNull( message = "ID do grupo inválido" ) UUID id,
-                                       @Valid @PathVariable @NotNull( message = "ID do subgrupo inválido" ) UUID subgroupId ) {
-        groupService.removeSubgroup( id, subgroupId );
-        return ResponseEntity.noContent().build();
-    }
-
     @DeleteMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> delete( @Valid @PathVariable @NotNull( message = "ID do grupo inválido" ) UUID id ) {
         groupService.deleteGroup( id );
@@ -55,12 +53,12 @@ public class GroupController {
 
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Group> get( @Valid @PathVariable @NotNull( message = "ID do grupo inválido" ) UUID id ) {
-        return ResponseEntity.ok( groupService.getGroupByGroupIdOrGroupPath(id, null) );
+        return ResponseEntity.ok( groupService.findOrThrow( id ) );
     }
 
     @GetMapping( path = "/from-path", produces = MediaType.APPLICATION_JSON_VALUE )
     public ResponseEntity<Group> getFromPath( @RequestParam( name = "group", required = true ) @Nullable String group ) {
-        return ResponseEntity.ok( groupService.getGroupByGroupIdOrGroupPath( null, group ) );
+        return ResponseEntity.ok( groupService.findByIdOrPathOrThrow( group ) );
     }
 
     @GetMapping(value = "/{id}/subgroups", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -80,7 +78,7 @@ public class GroupController {
 
     @GetMapping(value = "/current-organization", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Group> currentOrganization() {
-        return ResponseEntity.ok( groupService.getOrganizationBasedInDomain() );
+        return ResponseEntity.ok( organizationService.getOrganization() );
     }
 
     @GetMapping(value = "/{id}/image")
@@ -101,5 +99,10 @@ public class GroupController {
     @GetMapping( path = "/{id}/roles", produces = "application/json" )
     public ResponseEntity<Collection<Role>> listRoles( @Valid @PathVariable @NotNull UUID id ) {
         return ResponseEntity.ok( groupService.findRoles( id ) );
+    }
+
+    @GetMapping(value = "/{id}/administrators", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<Profile>> listAdmins( @Valid @PathVariable @NotNull( message = "ID do grupo inválido" ) UUID id ) {
+        return ResponseEntity.ok( groupService.listAdministrators( id ) );
     }
 }

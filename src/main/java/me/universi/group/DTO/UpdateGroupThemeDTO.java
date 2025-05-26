@@ -1,12 +1,13 @@
 package me.universi.group.DTO;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonAlias;
 
 public record UpdateGroupThemeDTO(
-        @NotNull
-        UUID groupId,
+        @NotBlank
+        @JsonAlias( { "groupId", "groupPath" } )
+        String group,
 
         String primary_color,
         String secondary_color,

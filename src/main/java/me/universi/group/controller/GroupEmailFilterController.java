@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.*;
 import me.universi.group.DTO.CreateEmailFilterDTO;
 import me.universi.group.DTO.UpdateEmailFilterDTO;
-import me.universi.group.entities.GroupSettings.GroupEmailFilter;
+import me.universi.group.entities.GroupEmailFilter;
 import me.universi.group.services.GroupEmailFilterService;
 
 import org.springframework.http.HttpStatus;
@@ -42,8 +42,8 @@ public class GroupEmailFilterController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<GroupEmailFilter>> email_filter_list( @Valid @PathVariable @NotNull( message = "ID do grupo inválido" ) UUID id ) {
-        return ResponseEntity.ok( groupEmailFilterService.listEmailFilter( id ) );
+    @GetMapping(value = "/{groupId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<GroupEmailFilter>> list( @PathVariable UUID groupId ) {
+        return ResponseEntity.ok( groupEmailFilterService.listGroupEmailFilters( groupId ) );
     }
 }
