@@ -7,9 +7,10 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.Nullable;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotNull;
 import me.universi.Sys;
+import me.universi.api.exceptions.UniversiBadRequestException;
+import me.universi.api.interfaces.EntityService;
 import me.universi.competence.services.CompetenceTypeService;
 import me.universi.feed.dto.GroupPostDTO;
 import me.universi.feed.services.GroupFeedService;
@@ -17,7 +18,6 @@ import me.universi.institution.services.InstitutionService;
 import me.universi.job.dto.CreateJobDTO;
 import me.universi.job.dto.UpdateJobDTO;
 import me.universi.job.entities.Job;
-import me.universi.job.exceptions.JobException;
 import me.universi.job.repositories.JobRepository;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
@@ -27,7 +27,7 @@ import me.universi.role.services.RoleService;
 import me.universi.user.services.UserService;
 
 @Service
-public class JobService {
+public class JobService extends EntityService<Job> {
     private final JobRepository jobRepository;
     private final CompetenceTypeService competenceTypeService;
     private final GroupFeedService groupFeedService;
@@ -48,20 +48,19 @@ public class JobService {
 
     public static JobService getInstance() { return Sys.context.getBean("jobService", JobService.class); }
 
-    public Optional<Job> find( @NotNull UUID id ) {
+    @Override
+    protected Optional<Job> findUnchecked(UUID id) {
         return jobRepository.findById(id);
     }
 
-    public @NotNull Job findOrThrow( @NotNull UUID id ) throws EntityNotFoundException {
-        // TODO: UniversiEntityNotFoundException
-        return find( id ).orElseThrow( () -> new EntityNotFoundException( "Vaga de ID '" + id + "' não encontrada" ) );
-    }
-
-    public List<Job> findAll() {
+    @Override
+    protected List<Job> findAllUnchecked() {
         return jobRepository.findAll();
     }
 
-    public Job create( CreateJobDTO createJobDTO ) throws JobException {
+    public Job create( CreateJobDTO createJobDTO ) {
+        checkPermissionToCreate();
+
         var title = checkValidTitle( createJobDTO.title() );
         var shortDescription = checkValidShortDescription( createJobDTO.shortDescription() );
 
@@ -96,8 +95,9 @@ public class JobService {
         return job;
     }
 
-    public Job edit( UUID id, UpdateJobDTO updateJobDTO ) throws JobException {
-        var job = checkCanEdit( id, profileService.getProfileInSessionOrThrow() );
+    public Job edit( UUID id, UpdateJobDTO updateJobDTO ) {
+        var job = findOrThrow( id );
+        checkPermissionToEdit( job );
 
         if ( updateJobDTO.title() != null )
             job.setTitle( checkValidTitle( updateJobDTO.title() ) );
@@ -118,8 +118,9 @@ public class JobService {
         return close( id, profileService.getProfileInSessionOrThrow() );
     }
 
-    public Job close(@NotNull UUID jobId, @NotNull Profile profile) throws JobException {
-        var job = checkCanEdit(jobId, profile);
+    public Job close(@NotNull UUID jobId, @NotNull Profile profile) {
+        var job = findOrThrow( jobId );
+        checkPermissionToEdit( job );
         job.setClosed(true);
 
         return save(job);
@@ -129,44 +130,52 @@ public class JobService {
         return jobRepository.saveAndFlush(job);
     }
 
-    private Job checkCanEdit(@NotNull UUID jobId, @NotNull Profile profile) throws JobException {
-        var job = findOrThrow(jobId);
-
-        var canEdit = userService.isUserAdmin(profile.getUser())
-            || job.getAuthor().getId().equals(profile.getId());
-
-        if (!canEdit)
-            throw new JobException("O perfil '" + profile.getFirstname() + " " + profile.getLastname() + "' não tem permissão para alterar esta vaga.");
-
-        if (job.isClosed())
-            throw new JobException("Uma vaga fechada não pode ser alterada.");
-
-        return job;
+    @Override
+    public boolean hasPermissionToCreate() {
+        var user = userService.getUserInSession();
+        return roleService.hasPermission( user.getOrganization(), FeaturesTypes.JOBS, Permission.READ_WRITE );
     }
 
-    private String checkValidTitle(@Nullable String title) throws JobException {
+    @Override
+    public boolean hasPermissionToEdit( Job job ) {
+        if ( job.isClosed() )
+            return false;
+
+        var user = userService.getUserInSession();
+        return job.getAuthor().getId().equals( user.getProfile().getId() )
+            || roleService.hasPermission( user.getOrganization(), FeaturesTypes.JOBS, Permission.READ_WRITE );
+    }
+
+    @Override
+    public boolean hasPermissionToDelete( Job job ) {
+        var user = userService.getUserInSession();
+        return job.getAuthor().getId().equals( user.getProfile().getId() )
+            || roleService.hasPermission( user.getOrganization(), FeaturesTypes.JOBS, Permission.READ_WRITE_DELETE );
+    }
+
+    private String checkValidTitle(@Nullable String title) {
         if (title == null)
-            throw new JobException("Título da vaga não informado.");
+            throw new UniversiBadRequestException("Título da vaga não informado.");
 
         title = title.trim();
 
         if (title.isBlank())
-            throw new JobException("O título da vaga não pode ser vazio.");
+            throw new UniversiBadRequestException("O título da vaga não pode ser vazio.");
 
         return title;
     }
 
-    private String checkValidShortDescription(@Nullable String shortDescription) throws JobException {
+    private String checkValidShortDescription(@Nullable String shortDescription) {
         if (shortDescription == null)
-            throw new JobException("Resumo da vaga não informado.");
+            throw new UniversiBadRequestException("Resumo da vaga não informado.");
 
         shortDescription = shortDescription.trim();
 
         if (shortDescription.isBlank())
-            throw new JobException("O resumo da vaga não pode ser vazio.");
+            throw new UniversiBadRequestException("O resumo da vaga não pode ser vazio.");
 
         if (shortDescription.length() > Job.SHORT_DESCRIPTION_MAX_LENGTH)
-            throw new JobException("O resumo da vaga não pode ter mais de " + Job.SHORT_DESCRIPTION_MAX_LENGTH + " caracteres.");
+            throw new UniversiBadRequestException("O resumo da vaga não pode ter mais de " + Job.SHORT_DESCRIPTION_MAX_LENGTH + " caracteres.");
 
         return shortDescription;
     }
