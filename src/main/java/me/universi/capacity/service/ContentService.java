@@ -81,21 +81,27 @@ public class ContentService extends EntityService<Content> {
 
         var content = new Content();
         content.setAuthor( profileService.getProfileInSessionOrThrow() );
-        content.setDescription( createContentDTO.description() );
-        if ( createContentDTO.image() != null )
-            content.setImage( imageMetadataService.findOrThrow( createContentDTO.image() ) );
+        createContentDTO.description().ifPresent( description -> {
+            if ( !description.isBlank() ) content.setDescription( description.trim() );
+        } );
+
+        createContentDTO.image().ifPresent( image -> {
+            content.setImage( imageMetadataService.findOrThrow( image ) );
+        } );
+
         content.setRating( createContentDTO.rating() );
         content.setTitle( createContentDTO.title() );
         content.setType( createContentDTO.type() );
         content.setUrl( createContentDTO.url() );
 
-        if ( createContentDTO.categoriesIds() != null )
-            content.setCategories( createContentDTO.categoriesIds().stream().map( categoryService::findOrThrow ).toList() );
+        createContentDTO.categories().ifPresent( categoriesIds -> {
+            content.setCategories( categoryService.findByIdOrNameOrThrow( categoriesIds ) );
+        } );
 
         var createdContent = saveOrUpdate( content );
 
-        if ( createContentDTO.folders() != null ) {
-            var folders = createContentDTO.folders().stream().map( folderService::findByIdOrReferenceOrThrow ).toList();
+        createContentDTO.folders().ifPresent( foldersIds -> {
+            var folders = folderService.findByIdOrReferenceOrThrow( foldersIds );
             folderService.checkPermissionToEdit( folders );
 
             for ( var f : folders ) {
@@ -107,35 +113,38 @@ public class ContentService extends EntityService<Content> {
                     )
                 );
             }
-        }
+        } );
 
         return createdContent;
     }
 
-    public Content update( UUID id, UpdateContentDTO updateContentDTO ) {
+    public Content update( UUID id, UpdateContentDTO dto ) {
         var content = findOrThrow( id );
         checkPermissionToEdit( content );
 
-        if ( updateContentDTO.description() != null && !updateContentDTO.description().isBlank() )
-            content.setDescription( updateContentDTO.description() );
+        dto.description().ifPresent( description -> {
+            if ( !description.isBlank() ) content.setDescription( description.trim() );
+        } );
 
-        if ( updateContentDTO.image() != null )
-            content.setImage( imageMetadataService.findOrThrow( updateContentDTO.image() ) );
+        dto.image().ifPresent( image -> {
+            content.setImage( imageMetadataService.findOrThrow( image ) );
+        } );
 
-        if ( updateContentDTO.rating() != null )
-            content.setRating( updateContentDTO.rating() );
+        dto.rating().ifPresent( content::setRating );
 
-        if ( updateContentDTO.title() != null && !updateContentDTO.title().isBlank() )
-            content.setTitle( updateContentDTO.title() );
+        dto.title().ifPresent( title -> {
+            if ( !title.isBlank() ) content.setTitle( title.trim() );
+        } );
 
-        if ( updateContentDTO.type() != null )
-            content.setType( updateContentDTO.type() );
+        dto.type().ifPresent( content::setType );
 
-        if ( updateContentDTO.url() != null && !updateContentDTO.url().isBlank() )
-            content.setUrl( updateContentDTO.url() );
+        dto.url().ifPresent( url -> {
+            if ( !url.isBlank() ) content.setUrl( url.trim() );
+        } );
 
-        if ( updateContentDTO.categoriesIds() != null )
-            content.setCategories( updateContentDTO.categoriesIds().stream().map( categoryService::findOrThrow ).toList() );
+        dto.categories().ifPresent( categories -> {
+            content.setCategories( categoryService.findByIdOrNameOrThrow( categories ) );
+        } );
 
         return saveOrUpdate( content );
     }

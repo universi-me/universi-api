@@ -117,8 +117,16 @@ public class FolderService extends EntityService<Folder> {
         return folderRepository.findFirstByIdOrReference( CastingUtil.getUUID(idOrReference).orElse(null), idOrReference );
     }
 
+    public List<Optional<Folder>> findByIdOrReference( List<String> idsOrReferences ) {
+        return new ArrayList<>( idsOrReferences.stream().map( this::findByIdOrReference ).toList() );
+    }
+
     public Folder findByIdOrReferenceOrThrow( String idOrReference ) throws UniversiNoEntityException {
         return findByIdOrReference( idOrReference ).orElseThrow( () -> makeNotFoundException( "ID ou referência", idOrReference ) );
+    }
+
+    public List<Folder> findByIdOrReferenceOrThrow( List<String> idsOrReferences ) {
+        return new ArrayList<>( idsOrReferences.stream().map( this::findByIdOrReferenceOrThrow ).toList() );
     }
 
     public List<Folder> findByCategory(UUID categoryId) throws CapacityException {

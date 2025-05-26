@@ -3,31 +3,27 @@ package me.universi.capacity.dto;
 import java.util.List;
 import java.util.UUID;
 
-import jakarta.annotation.Nullable;
+import com.fasterxml.jackson.annotation.JsonAlias;
+
+import java.util.Optional;
+
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import me.universi.capacity.entidades.Content;
 import me.universi.capacity.enums.ContentType;
 
 public record UpdateContentDTO(
-    @Nullable
-    String url,
+    Optional<String> url,
+    Optional<String> title,
+    Optional<ContentType> type,
+    Optional<UUID> image,
+    Optional<String> description,
 
-    @Nullable
-    String title,
+    Optional<
+        @Min( Content.MIN_RATING ) @Max( Content.MAX_RATING )
+        Integer
+    > rating,
 
-    @Nullable
-    ContentType type,
-
-    @Nullable
-    UUID image,
-
-    @Nullable
-    String description,
-
-    @Nullable
-    @Min( 0 ) @Max( 5 )
-    Integer rating,
-
-    @Nullable
-    List<UUID> categoriesIds
+    @JsonAlias( { "categoriesIds" } )
+    Optional<List<String>> categories
 ) { }
