@@ -425,6 +425,7 @@ public class GroupService extends EntityService<Group> {
 
         var group = new Group();
         group.setAdmin( userService.getUserInSession().getProfile() );
+        group.setSubGroups( Arrays.asList() );
 
         group.setNickname( nickname );
         group.setName( dto.name() );
