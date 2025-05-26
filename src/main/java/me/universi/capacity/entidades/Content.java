@@ -83,10 +83,12 @@ public class Content implements Serializable {
     @JsonIgnore
     private Collection<FolderContents> folderContents;
 
+    public static final int MAX_RATING = 5;
+    public static final int MIN_RATING = 0;
     @Column(name = "rating")
     @NotNull
-    @Min(0)
-    @Max(5)
+    @Min( MIN_RATING )
+    @Max( MAX_RATING )
     private Integer rating;
 
     @CreationTimestamp

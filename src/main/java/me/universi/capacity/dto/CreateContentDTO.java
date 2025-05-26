@@ -1,13 +1,16 @@
 package me.universi.capacity.dto;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
-import jakarta.annotation.Nullable;
+import com.fasterxml.jackson.annotation.JsonAlias;
+
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import me.universi.capacity.entidades.Content;
 import me.universi.capacity.enums.ContentType;
 
 public record CreateContentDTO(
@@ -20,19 +23,17 @@ public record CreateContentDTO(
     @NotNull
     ContentType type,
 
-    @Nullable
-    UUID image,
+    Optional<UUID> image,
 
-    @Nullable
-    String description,
+    Optional<String> description,
 
     @NotNull
-    @Min( 0 ) @Max( 5 )
+    @Min( Content.MIN_RATING ) @Max( Content.MAX_RATING )
     Integer rating,
 
-    @Nullable
-    List<UUID> categoriesIds,
+    @JsonAlias( { "categoriesIds" } )
+    Optional<List<String>> categories,
 
-    @Nullable
-    List<String> folders
+    @JsonAlias( { "foldersIds" } )
+    Optional<List<String>> folders
 ) { }
