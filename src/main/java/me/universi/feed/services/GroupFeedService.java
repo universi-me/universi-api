@@ -18,6 +18,7 @@ import me.universi.profile.services.ProfileService;
 import me.universi.role.enums.FeaturesTypes;
 import me.universi.role.enums.Permission;
 import me.universi.role.services.RoleService;
+import me.universi.user.services.LoginService;
 import me.universi.user.services.UserService;
 import me.universi.util.CastingUtil;
 
@@ -64,7 +65,7 @@ public class GroupFeedService {
         // check permission post
         RoleService.getInstance().checkPermission(groupId, FeaturesTypes.FEED, Permission.READ_WRITE);
 
-        String authorId = String.valueOf(UserService.getInstance().getUserInSession().getProfile().getId());
+        String authorId = String.valueOf(LoginService.getInstance().getUserInSession().getProfile().getId());
         if (groupPostDTO.getContent() == null || groupPostDTO.getContent().isEmpty()) {
             throw new GroupFeedException("O conteúdo da publicação não pode estar vazio.");
         } else if(groupPostDTO.getContent().length() > MAX_CONTENT_LENGTH) {
@@ -107,7 +108,7 @@ public class GroupFeedService {
     }
 
     public void checkPermissionForEdit(GroupPost post, boolean forDelete) {
-        String authorId = String.valueOf(UserService.getInstance().getUserInSession().getProfile().getId());
+        String authorId = String.valueOf(LoginService.getInstance().getUserInSession().getProfile().getId());
         if (!post.getAuthorId().equals(authorId)) {
             if(UserService.getInstance().isUserAdminSession()) {
                 if(forDelete) {
@@ -126,7 +127,7 @@ public class GroupFeedService {
     }
 
     public void checkPermissionForEditComment(GroupPostComment post, boolean forDelete) {
-        String authorId = String.valueOf(UserService.getInstance().getUserInSession().getProfile().getId());
+        String authorId = String.valueOf(LoginService.getInstance().getUserInSession().getProfile().getId());
         if (!post.getAuthorId().equals(authorId)) {
             if(UserService.getInstance().isUserAdminSession()) {
                 if(forDelete) {
@@ -193,7 +194,7 @@ public class GroupFeedService {
             throw new GroupFeedException("Reação inválida.");
         }
 
-        String authorId = String.valueOf(UserService.getInstance().getUserInSession().getProfile().getId());
+        String authorId = String.valueOf(LoginService.getInstance().getUserInSession().getProfile().getId());
         GroupPost post = groupPostRepository.findFirstByIdAndDeletedIsFalse(groupPostId).orElseThrow(() -> new PostNotFoundException("Publicação não foi encontrada."));
 
         Optional<GroupPostReaction> existingReaction = groupPostReactionRepository.findFirstByGroupPostIdAndAuthorIdAndDeletedIsFalse(groupPostId, authorId);
@@ -277,7 +278,7 @@ public class GroupFeedService {
 
         checkAccessToGroupPost(groupPostId);
 
-        String authorId = String.valueOf(UserService.getInstance().getUserInSession().getProfile().getId());
+        String authorId = String.valueOf(LoginService.getInstance().getUserInSession().getProfile().getId());
         GroupPostComment commentObj = new GroupPostComment();
         commentObj.setGroupPostId(groupPostId);
         commentObj.setContent(comment);

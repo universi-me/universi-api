@@ -2,6 +2,8 @@ package me.universi.profile.services;
 
 import java.util.*;
 
+import me.universi.user.services.AccountService;
+import me.universi.user.services.LoginService;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.Nullable;
@@ -36,12 +38,16 @@ public class ProfileService extends EntityService<Profile> {
 
     private static final int MAX_NAME_LENGTH = 50;
     private static final int MAX_BIO_LENGTH = 140;
+    private final AccountService accountService;
+    private final LoginService loginService;
 
-    public ProfileService(PerfilRepository perfilRepository, UserService userService) {
+    public ProfileService(PerfilRepository perfilRepository, UserService userService, AccountService accountService, LoginService loginService) {
         this.perfilRepository = perfilRepository;
         this.userService = userService;
 
         this.entityName = "Perfil";
+        this.accountService = accountService;
+        this.loginService = loginService;
     }
 
     public static ProfileService getInstance() {
@@ -69,7 +75,7 @@ public class ProfileService extends EntityService<Profile> {
 
     public @NotNull Profile update( @NotNull UpdateProfileDTO dto ) {
         var myself = getProfileInSessionOrThrow();
-        userService.checkPasswordInSession( dto.password() );
+        accountService.checkPasswordInSession( dto.password() );
 
         dto.firstname().ifPresent( firstname -> {
             firstname = validateFirstname( firstname );
@@ -102,7 +108,7 @@ public class ProfileService extends EntityService<Profile> {
         } );
 
         var updated = perfilRepository.saveAndFlush( myself );
-        userService.updateUserInSession();
+        loginService.updateUserInSession();
 
         return updated;
     }
@@ -201,7 +207,7 @@ public class ProfileService extends EntityService<Profile> {
     }
 
     public Optional<Profile> getProfileInSession() {
-        var user = userService.getUserInSession();
+        var user = loginService.getUserInSession();
         if ( user == null || user.getProfile() == null || user.getProfile().getId() == null)
             return Optional.empty();
         return find( user.getProfile().getId() );
@@ -215,7 +221,7 @@ public class ProfileService extends EntityService<Profile> {
     private UniversiForbiddenAccessException makeProfileAccessErrorException() {
 
         // Force logout the user if the session is not valid
-        userService.logout();
+        loginService.logout();
 
         return new UniversiForbiddenAccessException( "Esta sessão não está logada em um perfil" );
     }

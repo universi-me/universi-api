@@ -1,5 +1,8 @@
 package me.universi.group.services;
 
+import me.universi.user.services.EnvironmentService;
+import me.universi.user.services.LoginService;
+import me.universi.user.services.RequestService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -33,10 +36,10 @@ public class OrganizationService {
     }
 
     public @NotNull Group getOrganization() {
-        var userService = UserService.getInstance();
+        var loginService = LoginService.getInstance();
 
-        if ( userService.userIsLoggedIn() ) {
-            var user = userService.getUserInSession();
+        if ( loginService.userIsLoggedIn() ) {
+            var user = loginService.getUserInSession();
             if ( user != null && user.getOrganization() != null )
                 return user.getOrganization();
         }
@@ -47,7 +50,7 @@ public class OrganizationService {
     public @NotNull Group getUserlessOrganization() {
         var nickname = useLocalOrganization()
             ? localOrganizationNickname
-            : UserService.getInstance().getSubdomainFromRequest();
+            : RequestService.getInstance().getSubdomainFromRequest();
 
         return groupRepository.findFirstByParentGroupIsNullAndNicknameIgnoreCase( nickname )
             .orElseThrow( () -> new UniversiServerException( "Organização local de apelido '" + localOrganizationNickname + "' não existe." ) );
@@ -87,5 +90,5 @@ public class OrganizationService {
         groupRepository.saveAndFlush( org );
     }
 
-    private boolean useLocalOrganization() { return localOrganizationEnabled || !UserService.getInstance().isProduction(); }
+    private boolean useLocalOrganization() { return localOrganizationEnabled || !EnvironmentService.getInstance().isProduction(); }
 }

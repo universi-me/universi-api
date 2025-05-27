@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.servlet.http.HttpServletResponse;
 import me.universi.user.exceptions.ExceptionResponse;
+import me.universi.user.services.EnvironmentService;
 import me.universi.user.services.UserService;
 import me.universi.util.ConvertUtil;
 import java.util.HashMap;
@@ -87,7 +88,7 @@ public class Response {
             } else {
                 // unknown exception occurred
                 String messageExp = "";
-                if(UserService.getInstance().isProduction()) {
+                if(EnvironmentService.getInstance().isProduction()) {
                     if(UserService.getInstance().isUserDevSession()) { // user is developer
                         messageExp = "\n (" + e.getMessage() + ")";
                     }
