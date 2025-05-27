@@ -44,14 +44,17 @@ public class EnvironmentService {
                 return PUBLIC_URL;
             }
             URL requestUrl = new URL(RequestService.getInstance().getRequest().getRequestURL().toString());
-            String port = requestUrl.getPort() > 0 && requestUrl.getPort() != 80 && requestUrl.getPort() != 443
-                    ? ":" + requestUrl.getPort()
-                    : "";
-
-            return requestUrl.getProtocol() + "://" + requestUrl.getHost() + port + contextPath;
+            return RequestService.getInstance().getUrlDomainFromURL(requestUrl);
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public String getContextPath() {
+        if(contextPath == null || contextPath.isEmpty()) {
+            return "";
+        }
+        return contextPath;
     }
 
     public boolean isProduction() {

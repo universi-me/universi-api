@@ -143,7 +143,7 @@ public class EmailService {
 
         String token = generateRecoveryPasswordToken(user, true);
 
-        String url = environmentService.getPublicUrl() + "/recovery-password/" + token;
+        String url = requestService.getPublicUrlWebClient() + "/recovery-password/" + token;
         String subject = "Universi.me - Recuperação de Senha";
         String text = "Olá " + user.getUsername() + ",<br/><br/>\n\n" +
                 "Você solicitou a recuperação de senha para sua conta no Universi.me.<br/>\n" +
@@ -163,7 +163,7 @@ public class EmailService {
 
         String token = generateRecoveryPasswordToken(user, false);
 
-        String url = environmentService.getPublicUrl() + "/confirm-account/" + token;
+        String url = requestService.getPublicUrlApi() + "/confirm-account/" + token;
         String subject = "Universi.me - Confirmação de Conta";
         String messageExplain = (signup) ? "Seja bem-vindo(a) ao Universi.me, para continuar com o seu cadastro precisamos confirmar a sua conta do Universi.me." : "Você solicitou a confirmação de sua conta no Universi.me.";
         String text = "Olá " + user.getUsername() + ",<br/><br/>\n\n" +

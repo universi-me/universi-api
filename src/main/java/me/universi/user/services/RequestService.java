@@ -56,18 +56,39 @@ public class RequestService {
         }
     }
 
-
-
     public String getRefererUrlBase() {
         try {
             String refererHeader = getRequest().getHeader("Referer");
             if(refererHeader != null && !refererHeader.isEmpty()) {
                 URL requestUrl = new URL(refererHeader);
-                String port = requestUrl.getPort() > 0 && requestUrl.getPort() != 80 && requestUrl.getPort() != 443
-                        ? ":" + requestUrl.getPort()
-                        : "";
-                return requestUrl.getProtocol() + "://" + requestUrl.getHost() + port;
+                return getUrlDomainFromURL(requestUrl);
             }
+            return environmentService.getPublicUrl();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    // get url with host only from url with path
+    public String getUrlDomainFromURL(URL requestUrl) {
+        String port = requestUrl.getPort() > 0 && requestUrl.getPort() != 80 && requestUrl.getPort() != 443
+                ? ":" + requestUrl.getPort()
+                : "";
+        return requestUrl.getProtocol() + "://" + requestUrl.getHost() + port;
+    }
+
+    // get full public url domain api
+    public String getPublicUrlApi() {
+        try {
+            return environmentService.getPublicUrl() + environmentService.getContextPath();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    // get full public url domain web client
+    public String getPublicUrlWebClient() {
+        try {
             return environmentService.getPublicUrl();
         } catch (Exception e) {
             return null;
