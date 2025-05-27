@@ -11,6 +11,7 @@ import me.universi.profile.entities.Profile;
 import me.universi.profile.enums.Gender;
 import me.universi.profile.services.ProfileService;
 import me.universi.user.entities.User;
+import me.universi.user.services.AccountService;
 import me.universi.user.services.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,11 +38,13 @@ class CompetenciaTest {
 
     @Autowired
     CompetenceTypeRepository competenceTypeRepository;
+    @Autowired
+    private AccountService accountService;
 
     @Test
     void create() throws Exception {
         String nome = "competenceTest";
-        User userNew = new User(nome, nome+"@email.com", userService.encodePassword("senha"));
+        User userNew = new User(nome, nome+"@email.com", accountService.encodePassword("senha"));
         userService.createUser( userNew, null, null, null );
         var profile = userNew.getProfile();
 
@@ -84,7 +87,7 @@ class CompetenciaTest {
     @Test
     void update() throws Exception {
         String nome = "competenceTestUpdate";
-        User userNew = new User(nome, nome+"@email.com", userService.encodePassword("senha"));
+        User userNew = new User(nome, nome+"@email.com", accountService.encodePassword("senha"));
         userService.createUser( userNew, null, null, null );
         Profile profile = userNew.getProfile();
 
@@ -148,7 +151,7 @@ class CompetenciaTest {
     @Test
     void delete() throws Exception {
         String nome = "competenceTestDelete";
-        User userNew = new User(nome, nome+"@email.com", userService.encodePassword("senha"));
+        User userNew = new User(nome, nome+"@email.com", accountService.encodePassword("senha"));
         userService.createUser( userNew, null, null, null );
         var profile = userNew.getProfile();
 
@@ -195,7 +198,7 @@ class CompetenciaTest {
     @Test
     void read() throws Exception {
         String nome = "competenceTestRead";
-        User userNew = new User(nome, nome+"@email.com", userService.encodePassword("senha"));
+        User userNew = new User(nome, nome+"@email.com", accountService.encodePassword("senha"));
         userService.createUser( userNew, null, null, null );
         var profile = userNew.getProfile();
 
