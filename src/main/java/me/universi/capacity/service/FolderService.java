@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import me.universi.user.services.LoginService;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
@@ -58,6 +59,7 @@ import me.universi.util.RandomUtil;
 
 @Service
 public class FolderService extends EntityService<Folder> {
+    private final LoginService loginService;
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -74,7 +76,7 @@ public class FolderService extends EntityService<Folder> {
     private final FolderContentsRepository folderContentsRepository;
     private final ImageMetadataService imageMetadataService;
 
-    public FolderService(GroupService groupService, ProfileService profileService, CategoryService categoryService, FolderRepository folderRepository, FolderProfileRepository folderProfileRepository, FolderFavoriteRepository folderFavoriteRepository, ContentStatusRepository contentStatusRepository, CompetenceTypeService competenceTypeService, UserService userService, RoleService roleService, FolderContentsRepository folderContentsRepository, ImageMetadataService imageMetadataService) {
+    public FolderService(GroupService groupService, ProfileService profileService, CategoryService categoryService, FolderRepository folderRepository, FolderProfileRepository folderProfileRepository, FolderFavoriteRepository folderFavoriteRepository, ContentStatusRepository contentStatusRepository, CompetenceTypeService competenceTypeService, UserService userService, RoleService roleService, FolderContentsRepository folderContentsRepository, ImageMetadataService imageMetadataService, LoginService loginService) {
         this.groupService = groupService;
         this.profileService = profileService;
         this.categoryService = categoryService;
@@ -89,6 +91,7 @@ public class FolderService extends EntityService<Folder> {
         this.imageMetadataService = imageMetadataService;
 
         this.entityName = "Conteúdo";
+        this.loginService = loginService;
     }
 
     public static FolderService getInstance() {
@@ -584,7 +587,7 @@ public class FolderService extends EntityService<Folder> {
             return false;
 
         return userService.isUserAdminSession()
-            || userService.isSessionOfUser(profile.getUser())
+            || loginService.isSessionOfUser(profile.getUser())
             // has assigned that folder to that user
             || !getAssignments(
                     folder.getId().toString(),

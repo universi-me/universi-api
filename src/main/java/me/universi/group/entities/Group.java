@@ -19,6 +19,7 @@ import me.universi.profile.services.ProfileService;
 import me.universi.role.entities.Role;
 import me.universi.role.enums.FeaturesTypes;
 import me.universi.role.services.RoleService;
+import me.universi.user.services.EnvironmentService;
 import me.universi.user.services.JsonUserLoggedFilter;
 import me.universi.user.services.UserService;
 import org.hibernate.annotations.CreationTimestamp;
@@ -373,7 +374,7 @@ public class Group implements Serializable {
         if(!this.isRootGroup()) {
             return null;
         }
-        return UserService.getInstance().getBuildHash();
+        return EnvironmentService.getInstance().getBuildHash();
     }
 
     @Transient

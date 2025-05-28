@@ -16,11 +16,9 @@ public class JWTService {
     public boolean ENABLED;
     @Value("${jwt.secret.key}")
     private String SECRET_KEY;
-    private final UserService userService;
 
-    @Autowired
-    public JWTService(UserService userService) {
-        this.userService = userService;
+    public JWTService() {
+
     }
 
     public String buildTokenForUser(User user) {
@@ -63,6 +61,6 @@ public class JWTService {
 
         String userName = (String) jws.getBody().get("user");
         // TODO: CACHE USER, INSTEAD OF FIND IN DB
-        return (User) userService.loadUserByUsername(userName);
+        return (User) UserService.getInstance().loadUserByUsername(userName);
     }
 }

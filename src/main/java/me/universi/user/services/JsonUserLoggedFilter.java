@@ -8,7 +8,7 @@ public class JsonUserLoggedFilter {
     @Override
     public boolean equals(Object obj) {
         try {
-            return !UserService.getInstance().userIsLoggedIn();
+            return !LoginService.getInstance().userIsLoggedIn();
         } catch (Exception e) {
             return true;
         }

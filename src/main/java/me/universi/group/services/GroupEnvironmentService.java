@@ -7,6 +7,7 @@ import me.universi.group.entities.GroupEnvironment;
 import me.universi.group.entities.GroupSettings;
 import me.universi.group.repositories.GroupEnvironmentRepository;
 import me.universi.role.services.RoleService;
+import me.universi.user.services.EmailService;
 import me.universi.user.services.UserService;
 import org.springframework.stereotype.Service;
 
@@ -18,12 +19,14 @@ public class GroupEnvironmentService {
     private final GroupService groupService;
     private final UserService userService;
     private final GroupEnvironmentRepository groupEnvironmentRepository;
+    private final EmailService emailService;
 
-    public GroupEnvironmentService(GroupService groupService, UserService userService, GroupEnvironmentRepository groupEnvironmentRepository, OrganizationService organizationService) {
+    public GroupEnvironmentService(GroupService groupService, UserService userService, GroupEnvironmentRepository groupEnvironmentRepository, OrganizationService organizationService, EmailService emailService) {
         this.groupService = groupService;
         this.userService = userService;
         this.groupEnvironmentRepository = groupEnvironmentRepository;
         this.organizationService = organizationService;
+        this.emailService = emailService;
     }
 
     //get organization environment
@@ -162,7 +165,7 @@ public class GroupEnvironmentService {
         groupEnvironmentRepository.save(groupEnvironment);
 
         if(needUpdateEmailConfiguration) {
-            userService.setupEmailSender();
+            emailService.setupEmailSender();
         }
 
         var groupRepository = GroupService.getRepository();

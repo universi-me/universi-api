@@ -5,7 +5,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import me.universi.user.entities.User;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -13,13 +12,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 public class JWTFilter extends OncePerRequestFilter {
-    private final UserService userService;
     private final JWTService jwtService;
     private final AuthenticationManager authenticationManager;
 
-    @Autowired
-    public JWTFilter(UserService userService, JWTService jwtService, AuthenticationManager authenticationManager) {
-        this.userService = userService;
+    public JWTFilter(JWTService jwtService, AuthenticationManager authenticationManager) {
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
     }
@@ -30,14 +26,14 @@ public class JWTFilter extends OncePerRequestFilter {
         String header = request.getHeader("Authorization");
         
         // prefer check first if user is logged-in on session, else use JWT token to authenticate
-        if(!jwtService.ENABLED || header == null || !header.startsWith("Bearer ") || userService.userIsLoggedIn()) {
+        if(!jwtService.ENABLED || header == null || !header.startsWith("Bearer ") || LoginService.getInstance().userIsLoggedIn()) {
             filterChain.doFilter(request, response);
             return;
         }
 
         try {
             User user = jwtService.getUserFromToken(header.replace("Bearer ", ""));
-            userService.configureSessionForUser(user, authenticationManager);
+            LoginService.getInstance().configureSessionForUser(user, authenticationManager);
         } catch (Exception e) {
             SecurityContextHolder.clearContext();
         }

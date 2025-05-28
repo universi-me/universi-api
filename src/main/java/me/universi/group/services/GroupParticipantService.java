@@ -25,6 +25,7 @@ import me.universi.profile.services.ProfileService;
 import me.universi.role.enums.FeaturesTypes;
 import me.universi.role.enums.Permission;
 import me.universi.role.services.RoleService;
+import me.universi.user.services.LoginService;
 import me.universi.user.services.UserService;
 
 import org.springframework.stereotype.Service;
@@ -39,14 +40,16 @@ public class GroupParticipantService {
     private final UserService userService;
     private final CompetenceTypeService competenceTypeService;
     private final RoleService roleService;
+    private final LoginService loginService;
 
-    public GroupParticipantService(ProfileGroupRepository profileGroupRepository, GroupService groupService, UserService userService, CompetenceTypeService competenceTypeService, CompetenceService competenceService, RoleService roleService) {
+    public GroupParticipantService(ProfileGroupRepository profileGroupRepository, GroupService groupService, UserService userService, CompetenceTypeService competenceTypeService, CompetenceService competenceService, RoleService roleService, LoginService loginService) {
         this.profileGroupRepository = profileGroupRepository;
         this.groupService = groupService;
         this.userService = userService;
         this.competenceTypeService = competenceTypeService;
         this.competenceService = competenceService;
         this.roleService = roleService;
+        this.loginService = loginService;
     }
 
     public static GroupParticipantService getInstance() {
@@ -54,7 +57,7 @@ public class GroupParticipantService {
     }
 
     public boolean isParticipant( Group group ) {
-        return isParticipant( group, userService.getUserInSession().getProfile() );
+        return isParticipant( group, loginService.getUserInSession().getProfile() );
     }
 
     public boolean isParticipant( Group group, Profile profile ) {
@@ -68,7 +71,7 @@ public class GroupParticipantService {
 
     public @NotNull ProfileGroup join( UUID groupId ) {
         var group = groupService.findOrThrow( groupId );
-        var profile = userService.getUserInSession().getProfile();
+        var profile = loginService.getUserInSession().getProfile();
 
         if ( isParticipant( group, profile ) )
             throw new UniversiConflictingOperationException( "Você já participa deste grupo." );
@@ -86,7 +89,7 @@ public class GroupParticipantService {
 
     public void leave( UUID groupId ) {
         var group = groupService.findOrThrow( groupId );
-        var profile = userService.getUserInSession().getProfile();
+        var profile = loginService.getUserInSession().getProfile();
 
         if( group.isRootGroup() )
             throw new UniversiForbiddenAccessException( "Você não pode sair deste grupo." );

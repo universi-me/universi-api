@@ -14,6 +14,7 @@ import me.universi.profile.entities.Profile;
 import me.universi.user.enums.Authority;
 import me.universi.user.services.JsonEmailOwnerSessionFilter;
 import me.universi.user.services.JsonUserAdminFilter;
+import me.universi.user.services.LoginService;
 import me.universi.user.services.UserService;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
@@ -291,7 +292,7 @@ public class User implements UserDetails, Serializable {
 
     @Transient
     public boolean getOwnerOfSession() {
-        return UserService.getInstance().isSessionOfUser(this);
+        return LoginService.getInstance().isSessionOfUser(this);
     }
 
     @Transient

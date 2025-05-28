@@ -24,7 +24,7 @@ import me.universi.role.enums.FeaturesTypes;
 import me.universi.role.enums.Permission;
 import me.universi.role.services.RoleService;
 import me.universi.user.entities.User;
-import me.universi.user.services.UserService;
+import me.universi.user.services.*;
 import me.universi.util.CastingUtil;
 import org.springframework.stereotype.Service;
 
@@ -44,8 +44,12 @@ public class GroupService extends EntityService<Group> {
     private final GroupEnvironmentRepository groupEnvironmentRepository;
     private final CompetenceService competenceService;
     private final ImageMetadataService imageMetadataService;
+    private final EnvironmentService environmentService;
+    private final LoginService loginService;
+    private final AccountService accountService;
+    private final EmailService emailService;
 
-    public GroupService(UserService userService, GroupFeedService groupFeedService, GroupRepository groupRepository, GroupSettingsRepository groupSettingsRepository, GroupEnvironmentRepository groupEnvironmentRepository, CompetenceService competenceService, ImageMetadataService imageMetadataService) {
+    public GroupService(UserService userService, GroupFeedService groupFeedService, GroupRepository groupRepository, GroupSettingsRepository groupSettingsRepository, GroupEnvironmentRepository groupEnvironmentRepository, CompetenceService competenceService, ImageMetadataService imageMetadataService, EnvironmentService environmentService, LoginService loginService, AccountService accountService, EmailService emailService) {
         this.userService = userService;
         this.groupFeedService = groupFeedService;
         this.groupRepository = groupRepository;
@@ -55,6 +59,10 @@ public class GroupService extends EntityService<Group> {
         this.imageMetadataService = imageMetadataService;
 
         this.entityName = "Grupo";
+        this.environmentService = environmentService;
+        this.loginService = loginService;
+        this.accountService = accountService;
+        this.emailService = emailService;
     }
 
 
@@ -74,10 +82,10 @@ public class GroupService extends EntityService<Group> {
         if ( group.isRootGroup() )
             return true;
 
-        if ( !userService.userIsLoggedIn() )
+        if ( !loginService.userIsLoggedIn() )
             return false;
 
-        var userInSession = userService.getUserInSession();
+        var userInSession = loginService.getUserInSession();
         var organization = group.getOrganization();
 
         if ( !userInSession.getOrganization().getId().equals( organization.getId() ) )
@@ -136,8 +144,8 @@ public class GroupService extends EntityService<Group> {
 
     @Override
     public boolean hasPermissionToEdit( Group group ) {
-        return userService.userIsLoggedIn()
-            && hasPermissionToEdit( group, userService.getUserInSession() );
+        return loginService.userIsLoggedIn()
+            && hasPermissionToEdit( group, loginService.getUserInSession() );
     }
 
     @Override
@@ -185,7 +193,7 @@ public class GroupService extends EntityService<Group> {
             throw new UniversiBadRequestException( "O Apelido do Grupo não pode ser vazio" );
 
         final var validNickname = nickname.trim().toLowerCase();
-        if ( !userService.usernameRegex( nickname ) )
+        if ( !accountService.usernameRegex( nickname ) )
             throw new UniversiBadRequestException( "O Apelido do Grupo contém caracteres inválidos" );
 
         final var nicknameInUse = parentGroup == null
@@ -299,7 +307,7 @@ public class GroupService extends EntityService<Group> {
         for(ProfileGroup profileGroup : participants) {
             Profile profile = profileGroup.profile;
             if(profile != null && profile.getUser() != null) {
-                userService.sendSystemEmailToUser(profile.getUser(), subject, message, true);
+                emailService.sendSystemEmailToUser(profile.getUser(), subject, message, true);
             }
         }
     }
@@ -321,7 +329,7 @@ public class GroupService extends EntityService<Group> {
 
         String groupName = group.getName();
         String contentName = folder.getName();
-        String contentUrl = userService.getPublicUrl() + "/group" + group.getPath() + "#" + "contents/" + folder.getId();
+        String contentUrl = environmentService.getPublicUrl() + "/group" + group.getPath() + "#" + "contents/" + folder.getId();
 
         String message = OrganizationService.getInstance().getEnvironment().message_template_new_content;
         if(message == null || message.isEmpty()) {
@@ -339,7 +347,7 @@ public class GroupService extends EntityService<Group> {
         String fromUser = fromProfile.getFirstname();
         String toUser = profile.getFirstname();
         String contentName = folder.getName();
-        String contentUrl = userService.getPublicUrl() + "/content/" + folder.getReference();
+        String contentUrl = environmentService.getPublicUrl() + "/content/" + folder.getReference();
 
         String message = OrganizationService.getInstance().getEnvironment().message_template_assigned_content;
         if(message == null || message.isEmpty()) {
@@ -379,7 +387,7 @@ public class GroupService extends EntityService<Group> {
 
         GroupPostDTO groupPostDTO = new GroupPostDTO();
         groupPostDTO.setContent(message);
-        groupPostDTO.setAuthorId(userService.getUserInSession().getId().toString());
+        groupPostDTO.setAuthorId(loginService.getUserInSession().getId().toString());
 
         groupFeedService.createGroupPost(group.getId().toString(), groupPostDTO);
     }
@@ -413,7 +421,7 @@ public class GroupService extends EntityService<Group> {
         String subject = "Conteúdo atribuído";
         String message = getMessageTemplateForContentAssigned(fromUser, profile, folder);
 
-        userService.sendSystemEmailToUser(profile.getUser(), subject, message, true);
+        emailService.sendSystemEmailToUser(profile.getUser(), subject, message, true);
     }
 
     public Group createGroup( CreateGroupDTO dto ) {
@@ -424,7 +432,7 @@ public class GroupService extends EntityService<Group> {
         var nickname = checkNicknameAvailable( dto.nickname(), parentGroup.orElse( null ) );
 
         var group = new Group();
-        group.setAdmin( userService.getUserInSession().getProfile() );
+        group.setAdmin( loginService.getUserInSession().getProfile() );
         group.setSubGroups( Arrays.asList() );
 
         group.setNickname( nickname );

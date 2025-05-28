@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import me.universi.user.services.LoginService;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.Nullable;
@@ -35,8 +36,9 @@ public class JobService extends EntityService<Job> {
     private final ProfileService profileService;
     private final RoleService roleService;
     private final UserService userService;
+    private final LoginService loginService;
 
-    public JobService( JobRepository jobRepository, CompetenceTypeService competenceTypeService, GroupFeedService groupFeedService, InstitutionService institutionService, ProfileService profileService, RoleService roleService, UserService userService ) {
+    public JobService(JobRepository jobRepository, CompetenceTypeService competenceTypeService, GroupFeedService groupFeedService, InstitutionService institutionService, ProfileService profileService, RoleService roleService, UserService userService, LoginService loginService) {
         this.jobRepository = jobRepository;
         this.competenceTypeService = competenceTypeService;
         this.groupFeedService = groupFeedService;
@@ -44,6 +46,7 @@ public class JobService extends EntityService<Job> {
         this.profileService = profileService;
         this.roleService = roleService;
         this.userService = userService;
+        this.loginService = loginService;
     }
 
     public static JobService getInstance() { return Sys.context.getBean("jobService", JobService.class); }
@@ -134,7 +137,7 @@ public class JobService extends EntityService<Job> {
 
     @Override
     public boolean hasPermissionToCreate() {
-        var user = userService.getUserInSession();
+        var user = loginService.getUserInSession();
         return roleService.hasPermission( user.getOrganization(), FeaturesTypes.JOBS, Permission.READ_WRITE );
     }
 
@@ -143,14 +146,14 @@ public class JobService extends EntityService<Job> {
         if ( job.isClosed() )
             return false;
 
-        var user = userService.getUserInSession();
+        var user = loginService.getUserInSession();
         return job.getAuthor().getId().equals( user.getProfile().getId() )
             || roleService.hasPermission( user.getOrganization(), FeaturesTypes.JOBS, Permission.READ_WRITE );
     }
 
     @Override
     public boolean hasPermissionToDelete( Job job ) {
-        var user = userService.getUserInSession();
+        var user = loginService.getUserInSession();
         return job.getAuthor().getId().equals( user.getProfile().getId() )
             || roleService.hasPermission( user.getOrganization(), FeaturesTypes.JOBS, Permission.READ_WRITE_DELETE );
     }

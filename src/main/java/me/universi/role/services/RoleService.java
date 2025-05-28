@@ -20,6 +20,7 @@ import me.universi.profile.entities.Profile;
 import me.universi.role.exceptions.RolesException;
 import me.universi.role.repositories.RoleRepository;
 import me.universi.profile.services.ProfileService;
+import me.universi.user.services.LoginService;
 import me.universi.user.services.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -170,7 +171,7 @@ public class RoleService extends EntityService<Role> {
     }
 
     public void checkIsAdmin(Group group) {
-        checkIsAdmin(UserService.getInstance().getUserInSession().getProfile(), group);
+        checkIsAdmin(LoginService.getInstance().getUserInSession().getProfile(), group);
     }
 
     public void checkPermission(Profile profile, Group group, FeaturesTypes feature, int forPermission) {
@@ -206,7 +207,7 @@ public class RoleService extends EntityService<Role> {
 
     public void checkPermission(Group group, FeaturesTypes feature, int forPermission) {
         checkPermission(
-                UserService.getInstance().getUserInSession().getProfile(),
+                LoginService.getInstance().getUserInSession().getProfile(),
                 group,
                 feature,
                 forPermission
@@ -215,7 +216,7 @@ public class RoleService extends EntityService<Role> {
 
     public boolean hasPermission(Group group, FeaturesTypes feature, int forPermission) {
         return hasPermission(
-                UserService.getInstance().getUserInSession().getProfile(),
+                LoginService.getInstance().getUserInSession().getProfile(),
                 group,
                 feature,
                 forPermission
@@ -271,7 +272,7 @@ public class RoleService extends EntityService<Role> {
 
     // get all roles for user in session
     public Collection<Role> getAllRolesSession() {
-        return getAllRolesByProfile(UserService.getInstance().getUserInSession().getProfile());
+        return getAllRolesByProfile(LoginService.getInstance().getUserInSession().getProfile());
     }
 
     public Role getGroupAdminRole(@NotNull Group group) {

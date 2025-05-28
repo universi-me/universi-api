@@ -44,7 +44,7 @@ public class AuthenticationSuccessHandler extends SavedRequestAwareAuthenticatio
         }
         if(username != null) {
             user = (User) userService.loadUserByUsername(username);
-            userService.configureSessionForUser(user, authenticationManager);
+            LoginService.getInstance().configureSessionForUser(user, authenticationManager);
         } else {
             user = null;
         }
@@ -58,7 +58,7 @@ public class AuthenticationSuccessHandler extends SavedRequestAwareAuthenticatio
                     r.message = "Boas vindas, "+user.getProfile().getFirstname()+".";
                 else
                     r.message = "Boas vindas, "+user.getName()+".";
-                r.redirectTo = userService.getUrlWhenLogin();
+                r.redirectTo = LoginService.getInstance().getUrlWhenLogin();
                 r.token = jwtService.buildTokenForUser(user);
                 r.body.put("user", user);
             });
@@ -70,7 +70,7 @@ public class AuthenticationSuccessHandler extends SavedRequestAwareAuthenticatio
         } else {
 
             RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
-            redirectStrategy.sendRedirect(request, response, userService.getUrlWhenLogin());
+            redirectStrategy.sendRedirect(request, response, LoginService.getInstance().getUrlWhenLogin());
             //super.onAuthenticationSuccess(request, response, authentication);
 
         }
