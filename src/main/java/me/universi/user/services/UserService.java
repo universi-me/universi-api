@@ -4,7 +4,6 @@ import jakarta.annotation.Nullable;
 import java.util.*;
 import me.universi.Sys;
 import me.universi.api.interfaces.EntityService;
-import me.universi.group.DTO.AddGroupParticipantDTO;
 import me.universi.group.entities.Group;
 import me.universi.group.services.GroupParticipantService;
 import me.universi.group.services.OrganizationService;
@@ -12,7 +11,6 @@ import me.universi.profile.entities.Profile;
 import me.universi.profile.exceptions.ProfileException;
 import me.universi.profile.repositories.PerfilRepository;
 import me.universi.profile.services.DepartmentService;
-import me.universi.role.services.RoleService;
 import me.universi.user.entities.User;
 import me.universi.user.enums.Authority;
 import me.universi.user.exceptions.UserException;
@@ -120,17 +118,8 @@ public class UserService extends EntityService<User> implements UserDetailsServi
 
             userProfile.setUser(user);
             profileRepository.saveAndFlush(userProfile);
-            try {
-                // add organization to user profile
-                var org = OrganizationService.getInstance().getOrganization();
-
-                GroupParticipantService.getInstance().addParticipant( new AddGroupParticipantDTO (
-                    org,
-                    userProfile,
-                    RoleService.getInstance().getGroupMemberRole( org )
-                ) );
-            } catch (Exception ignored) {
-            }
+            // add organization to user profile
+            GroupParticipantService.getInstance().joinOrganization( userProfile );
             user.setProfile(userProfile);
         }
     }
