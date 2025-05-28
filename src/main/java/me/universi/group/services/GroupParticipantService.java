@@ -26,7 +26,6 @@ import me.universi.role.enums.FeaturesTypes;
 import me.universi.role.enums.Permission;
 import me.universi.role.services.RoleService;
 import me.universi.user.services.LoginService;
-import me.universi.user.services.UserService;
 
 import org.springframework.stereotype.Service;
 
@@ -37,15 +36,13 @@ public class GroupParticipantService {
     private final CompetenceService competenceService;
     private final ProfileGroupRepository profileGroupRepository;
     private final GroupService groupService;
-    private final UserService userService;
     private final CompetenceTypeService competenceTypeService;
     private final RoleService roleService;
     private final LoginService loginService;
 
-    public GroupParticipantService(ProfileGroupRepository profileGroupRepository, GroupService groupService, UserService userService, CompetenceTypeService competenceTypeService, CompetenceService competenceService, RoleService roleService, LoginService loginService) {
+    public GroupParticipantService(ProfileGroupRepository profileGroupRepository, GroupService groupService, CompetenceTypeService competenceTypeService, CompetenceService competenceService, RoleService roleService, LoginService loginService) {
         this.profileGroupRepository = profileGroupRepository;
         this.groupService = groupService;
-        this.userService = userService;
         this.competenceTypeService = competenceTypeService;
         this.competenceService = competenceService;
         this.roleService = roleService;
@@ -83,6 +80,21 @@ public class GroupParticipantService {
         profileGroup.setGroup( group );
         profileGroup.setProfile( profile );
         profileGroup.role = RoleService.getInstance().getGroupMemberRole( group );
+
+        return profileGroupRepository.saveAndFlush( profileGroup );
+    }
+
+    public @NotNull ProfileGroup joinOrganization( @NotNull Profile profile ) {
+        var organization = profile.getUser().getOrganization();
+        var existingProfileGroup = findByGroupAndProfile( organization, profile );
+
+        if ( existingProfileGroup.isPresent() )
+            return existingProfileGroup.get();
+
+        var profileGroup = new ProfileGroup();
+        profileGroup.setGroup( organization );
+        profileGroup.setProfile( profile );
+        profileGroup.role = RoleService.getInstance().getGroupMemberRole( organization );
 
         return profileGroupRepository.saveAndFlush( profileGroup );
     }
