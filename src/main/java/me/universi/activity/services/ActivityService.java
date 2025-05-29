@@ -1,6 +1,7 @@
 package me.universi.activity.services;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -15,6 +16,7 @@ import me.universi.activity.dto.CreateActivityDTO;
 import me.universi.activity.dto.UpdateActivityDTO;
 import me.universi.activity.entities.Activity;
 import me.universi.activity.repositories.ActivityRepository;
+import me.universi.api.exceptions.UniversiBadRequestException;
 import me.universi.api.interfaces.EntityService;
 import me.universi.competence.services.CompetenceTypeService;
 import me.universi.profile.services.ProfileService;
@@ -41,9 +43,11 @@ public class ActivityService extends EntityService<Activity> {
 
     public @NotNull Activity create( @Valid CreateActivityDTO dto ) {
         checkPermissionToCreate();
+        validateDates( dto );
 
         var name = dto.name().trim();
         var description = dto.description().trim();
+        var location = dto.location().trim();
         var badges = dto.badges().map( competenceTypeService()::findByIdOrNameOrThrow )
             .orElse( Collections.emptyList() );
         var type = activityTypeService().findByIdOrNameOrThrow( dto.type() );
@@ -52,6 +56,10 @@ public class ActivityService extends EntityService<Activity> {
         var activity = new Activity();
         activity.setName( name );
         activity.setDescription( description );
+        activity.setLocation( location );
+        activity.setWorkload( dto.workload() );
+        activity.setStartDate( dto.startDate() );
+        activity.setEndDate( dto.endDate() );
         activity.setBadges( badges );
         activity.setType( type );
         activity.setAuthor( author );
@@ -63,9 +71,14 @@ public class ActivityService extends EntityService<Activity> {
     public @NotNull Activity update( UUID id, @Valid UpdateActivityDTO dto ) {
         var activity = findOrThrow( id );
         checkPermissionToEdit( activity );
+        validateDates( activity, dto );
 
         dto.name().ifPresent( name -> activity.setName( name.trim() ) );
         dto.description().ifPresent( description -> activity.setDescription( description.trim() ) );
+        dto.location().ifPresent( location -> activity.setLocation( location.trim() ) );
+        dto.workload().ifPresent( activity::setWorkload );
+        dto.startDate().ifPresent( activity::setStartDate );
+        dto.endDate().ifPresent( activity::setEndDate );
         dto.badges().ifPresent( badges -> {
             activity.setBadges( competenceTypeService().findByIdOrNameOrThrow( badges ) );
         } );
@@ -80,6 +93,23 @@ public class ActivityService extends EntityService<Activity> {
         var activity = findOrThrow( id );
         checkPermissionToDelete( activity );
         repository().delete( activity );
+    }
+
+    public void validateDates( @Valid CreateActivityDTO dto ) {
+        validateDates( dto.startDate() , dto.endDate() );
+    }
+
+    public void validateDates( @NotNull Activity existingActivity, @Valid UpdateActivityDTO dto ) {
+        if ( dto.startDate().isEmpty() && dto.endDate().isPresent() ) return;
+
+        var start = dto.startDate().orElse( existingActivity.getStartDate() );
+        var end = dto.endDate().orElse( existingActivity.getEndDate() );
+        validateDates( start , end );
+    }
+
+    public void validateDates( @NotNull Date start, @NotNull Date end ) {
+        if ( start.after( end ) )
+            throw new UniversiBadRequestException( "A data de início não pode ser após a data de término" );
     }
 
     @Override public boolean isValid( Activity activity ) {

@@ -44,6 +44,24 @@ public class Activity {
     @JoinColumn( name = "type_id", nullable = false )
     private ActivityType type;
 
+    @NotBlank
+    @Column( name = "location", nullable = false )
+    private String location;
+
+    @NotNull
+    @Column( name = "workload", nullable = false )
+    private Integer workload;
+
+    @NotNull
+    @Temporal( TemporalType.DATE )
+    @Column(name = "start_date")
+    private Date startDate;
+
+    @NotNull
+    @Temporal( TemporalType.DATE )
+    @Column(name = "end_date")
+    private Date endDate;
+
     @NotNull
     @JsonIgnore
     @OneToMany( mappedBy = "activity", fetch = FetchType.LAZY )
@@ -86,6 +104,18 @@ public class Activity {
 
     public @NotNull Collection<CompetenceType> getBadges() { return badges; }
     public void setBadges(@NotNull Collection<CompetenceType> badges) { this.badges = badges; }
+
+    public @NotBlank String getLocation() { return location; }
+    public void setLocation( @NotBlank String location ) { this.location = location; }
+
+    public @NotNull Integer getWorkload() { return workload; }
+    public void setWorkload( @NotNull Integer workload ) { this.workload = workload; }
+
+    public @NotNull Date getStartDate() { return startDate; }
+    public void setStartDate( @NotNull Date startDate ) { this.startDate = startDate; }
+
+    public @NotNull Date getEndDate() { return endDate; }
+    public void setEndDate( @NotNull Date endDate ) { this.endDate = endDate; }
 
     public @Nullable Date getDeletedAt() { return deletedAt; }
 }
