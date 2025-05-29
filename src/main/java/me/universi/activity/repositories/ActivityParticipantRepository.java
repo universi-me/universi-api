@@ -15,4 +15,5 @@ import me.universi.profile.entities.Profile;
 public interface ActivityParticipantRepository extends JpaRepository<ActivityParticipant, UUID> {
     Optional<ActivityParticipant> findFirstByActivityAndProfile( @NotNull Activity activity, @NotNull Profile profile );
     List<ActivityParticipant> findByActivity( @NotNull Activity activity );
+    List<ActivityParticipant> findByProfile( @NotNull Profile profile );
 }

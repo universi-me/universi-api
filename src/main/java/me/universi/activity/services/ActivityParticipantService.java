@@ -15,6 +15,7 @@ import me.universi.activity.dto.ChangeActivityParticipantsDTO;
 import me.universi.activity.entities.*;
 import me.universi.activity.repositories.ActivityParticipantRepository;
 import me.universi.api.interfaces.EntityService;
+import me.universi.competence.entities.CompetenceType;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
 import me.universi.user.services.UserService;
@@ -47,6 +48,25 @@ public class ActivityParticipantService extends EntityService<ActivityParticipan
 
     public List<ActivityParticipant> findByActivity( @NotNull Activity activity ) {
         return repository().findByActivity( activity );
+    }
+
+    public List<Activity> findByProfileAndCompetenceType( @NotNull Profile profile, @NotNull CompetenceType competenceType ) {
+        return findByProfile( profile )
+            .stream()
+            .filter( p -> p.getBadges().contains( competenceType ) )
+            .toList();
+    }
+
+    public List<Activity> findByProfile( @NotNull String idOrUsername ) {
+        return findByProfile( profileService().findByIdOrUsernameOrThrow( idOrUsername ) );
+    }
+
+    public List<Activity> findByProfile( @NotNull Profile profile ) {
+        return repository()
+            .findByProfile( profile )
+            .stream()
+            .map( ActivityParticipant::getActivity )
+            .toList();
     }
 
     public void changeParticipants( UUID id, @Valid ChangeActivityParticipantsDTO dto ) {

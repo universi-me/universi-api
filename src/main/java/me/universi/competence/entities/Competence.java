@@ -18,11 +18,14 @@ import jakarta.persistence.Transient;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import me.universi.activity.entities.Activity;
+import me.universi.activity.services.ActivityParticipantService;
 import me.universi.profile.entities.Profile;
 
 import org.hibernate.annotations.*;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @Entity( name = "Competence" )
@@ -68,6 +71,13 @@ public class Competence {
     @Transient
     public boolean isHasBadge() {
         return this.profile.hasBadge( competenceType );
+    }
+
+    @Transient
+    public List<Activity> getActivities() {
+        return ActivityParticipantService
+            .getInstance()
+            .findByProfileAndCompetenceType( profile, competenceType );
     }
 
     public Competence() {}
