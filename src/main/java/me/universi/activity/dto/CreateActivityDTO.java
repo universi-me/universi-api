@@ -8,5 +8,6 @@ import jakarta.validation.constraints.NotBlank;
 public record CreateActivityDTO(
     @NotBlank String name,
     @NotBlank String description,
+    @NotBlank String type,
     Optional<List<@NotBlank String>> badges
 ) {}

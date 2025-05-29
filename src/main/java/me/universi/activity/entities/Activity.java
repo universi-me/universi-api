@@ -40,6 +40,11 @@ public class Activity {
     private Profile author;
 
     @NotNull
+    @ManyToOne
+    @JoinColumn( name = "type_id", nullable = false )
+    private ActivityType type;
+
+    @NotNull
     @JsonIgnore
     @OneToMany( mappedBy = "activity", fetch = FetchType.LAZY )
     private Collection<ActivityParticipant> participants;
@@ -72,6 +77,9 @@ public class Activity {
 
     public Profile getAuthor() { return author; }
     public void setAuthor(Profile author) { this.author = author; }
+
+    public @NotNull ActivityType getType() { return type; }
+    public void setType( @NotNull ActivityType activityType ) { this.type = activityType; }
 
     public @NotNull Collection<ActivityParticipant> getParticipants() { return participants; }
     public void setParticipants(@NotNull Collection<ActivityParticipant> participants) { this.participants = participants; }

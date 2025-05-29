@@ -26,6 +26,7 @@ public class ActivityService extends EntityService<Activity> {
     private @Nullable UserService userService;
     private @Nullable ProfileService profileService;
     private @Nullable CompetenceTypeService competenceTypeService;
+    private @Nullable ActivityTypeService activityTypeService;
 
     public ActivityService() {
         this.entityName = "Atividade";
@@ -45,12 +46,15 @@ public class ActivityService extends EntityService<Activity> {
         var description = dto.description().trim();
         var badges = dto.badges().map( competenceTypeService()::findByIdOrNameOrThrow )
             .orElse( Collections.emptyList() );
+        var type = activityTypeService().findByIdOrNameOrThrow( dto.type() );
+        var author = profileService().getProfileInSessionOrThrow();
 
         var activity = new Activity();
         activity.setName( name );
         activity.setDescription( description );
         activity.setBadges( badges );
-        activity.setAuthor( profileService().getProfileInSessionOrThrow() );
+        activity.setType( type );
+        activity.setAuthor( author );
         activity.setParticipants( Collections.emptyList() );
 
         return repository().saveAndFlush( activity );
@@ -64,6 +68,9 @@ public class ActivityService extends EntityService<Activity> {
         dto.description().ifPresent( description -> activity.setDescription( description.trim() ) );
         dto.badges().ifPresent( badges -> {
             activity.setBadges( competenceTypeService().findByIdOrNameOrThrow( badges ) );
+        } );
+        dto.type().ifPresent( type -> {
+            activity.setType( activityTypeService().findByIdOrNameOrThrow( type ) );
         } );
 
         return repository().saveAndFlush( activity );
@@ -111,5 +118,11 @@ public class ActivityService extends EntityService<Activity> {
     public synchronized @NotNull CompetenceTypeService competenceTypeService() {
         if ( competenceTypeService == null ) competenceTypeService( CompetenceTypeService.getInstance() );
         return competenceTypeService;
+    }
+
+    public synchronized void activityTypeService( @NotNull ActivityTypeService activityTypeService ) { this.activityTypeService = activityTypeService; }
+    public synchronized @NotNull ActivityTypeService activityTypeService() {
+        if ( activityTypeService == null ) activityTypeService( ActivityTypeService.getInstance() );
+        return activityTypeService;
     }
 }
