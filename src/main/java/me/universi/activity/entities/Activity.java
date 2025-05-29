@@ -55,6 +55,7 @@ public class Activity {
     private Collection<CompetenceType> badges;
 
     @Nullable
+    @JsonIgnore
     @Temporal( TemporalType.TIMESTAMP )
     @Column( name = "deleted_at" )
     private Date deletedAt;
