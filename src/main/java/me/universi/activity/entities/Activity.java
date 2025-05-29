@@ -13,6 +13,7 @@ import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import me.universi.competence.entities.CompetenceType;
+import me.universi.group.entities.Group;
 import me.universi.profile.entities.Profile;
 
 @Entity( name = "Activity" )
@@ -61,6 +62,11 @@ public class Activity {
     @Temporal( TemporalType.DATE )
     @Column(name = "end_date")
     private Date endDate;
+
+    @NotNull
+    @ManyToOne
+    @JoinColumn( name = "group_id", nullable = false )
+    private Group group;
 
     @NotNull
     @JsonIgnore
@@ -116,6 +122,9 @@ public class Activity {
 
     public @NotNull Date getEndDate() { return endDate; }
     public void setEndDate( @NotNull Date endDate ) { this.endDate = endDate; }
+
+    public @NotNull Group getGroup() { return group; }
+    public void setGroup( @NotNull Group group ) { this.group = group; }
 
     public @Nullable Date getDeletedAt() { return deletedAt; }
 }

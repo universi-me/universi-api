@@ -17,6 +17,9 @@ public record CreateActivityDTO(
     @NotNull Integer workload,
     Optional<List<@NotBlank String>> badges,
 
+    @JsonAlias( { "groupId", "groupPath" } )
+    @NotBlank String group,
+
     @JsonAlias( { "start" } )
     @NotNull Date startDate,
 

@@ -1,6 +1,8 @@
 package me.universi.group.services;
 
 import me.universi.Sys;
+import me.universi.activity.entities.Activity;
+import me.universi.activity.services.ActivityService;
 import me.universi.api.exceptions.UniversiBadRequestException;
 import me.universi.api.exceptions.UniversiConflictingOperationException;
 import me.universi.api.exceptions.UniversiForbiddenAccessException;
@@ -48,8 +50,9 @@ public class GroupService extends EntityService<Group> {
     private final LoginService loginService;
     private final AccountService accountService;
     private final EmailService emailService;
+    private final ActivityService activityService;
 
-    public GroupService(UserService userService, GroupFeedService groupFeedService, GroupRepository groupRepository, GroupSettingsRepository groupSettingsRepository, GroupEnvironmentRepository groupEnvironmentRepository, CompetenceService competenceService, ImageMetadataService imageMetadataService, EnvironmentService environmentService, LoginService loginService, AccountService accountService, EmailService emailService) {
+    public GroupService(UserService userService, GroupFeedService groupFeedService, GroupRepository groupRepository, GroupSettingsRepository groupSettingsRepository, GroupEnvironmentRepository groupEnvironmentRepository, CompetenceService competenceService, ImageMetadataService imageMetadataService, EnvironmentService environmentService, LoginService loginService, AccountService accountService, EmailService emailService, ActivityService activityService) {
         this.userService = userService;
         this.groupFeedService = groupFeedService;
         this.groupRepository = groupRepository;
@@ -57,6 +60,7 @@ public class GroupService extends EntityService<Group> {
         this.groupEnvironmentRepository = groupEnvironmentRepository;
         this.competenceService = competenceService;
         this.imageMetadataService = imageMetadataService;
+        this.activityService = activityService;
 
         this.entityName = "Grupo";
         this.environmentService = environmentService;
@@ -558,6 +562,16 @@ public class GroupService extends EntityService<Group> {
             .sorted( Comparator.comparing( ProfileGroup::getJoined ).reversed() )
             .map( ProfileGroup::getProfile )
             .filter( ProfileService.getInstance()::isValid )
+            .toList();
+    }
+
+    public List<Activity> listActivities( UUID groupId ) { return listActivities( findOrThrow( groupId ) ); }
+    public List<Activity> listActivities( String groupId ) { return listActivities( findByIdOrPathOrThrow( groupId ) ); }
+    public List<Activity> listActivities( @NotNull Group group ) {
+        return activityService
+            .findByGroup( group )
+            .stream()
+            .sorted( Comparator.comparing( Activity::getStartDate ) )
             .toList();
     }
 }

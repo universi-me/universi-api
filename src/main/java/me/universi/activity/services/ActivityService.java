@@ -19,6 +19,8 @@ import me.universi.activity.repositories.ActivityRepository;
 import me.universi.api.exceptions.UniversiBadRequestException;
 import me.universi.api.interfaces.EntityService;
 import me.universi.competence.services.CompetenceTypeService;
+import me.universi.group.entities.Group;
+import me.universi.group.services.GroupService;
 import me.universi.profile.services.ProfileService;
 import me.universi.user.services.UserService;
 
@@ -29,6 +31,7 @@ public class ActivityService extends EntityService<Activity> {
     private @Nullable ProfileService profileService;
     private @Nullable CompetenceTypeService competenceTypeService;
     private @Nullable ActivityTypeService activityTypeService;
+    private @Nullable GroupService groupService;
 
     public ActivityService() {
         this.entityName = "Atividade";
@@ -41,6 +44,14 @@ public class ActivityService extends EntityService<Activity> {
     @Override protected Optional<Activity> findUnchecked( UUID id ) { return repository().findById( id ); }
     @Override protected List<Activity> findAllUnchecked() { return repository().findAll(); }
 
+    public List<Activity> findByGroup( @NotNull Group group ) {
+        return repository()
+            .findByGroup( group )
+            .stream()
+            .filter( this::isValid )
+            .toList();
+    }
+
     public @NotNull Activity create( @Valid CreateActivityDTO dto ) {
         checkPermissionToCreate();
         validateDates( dto );
@@ -52,6 +63,7 @@ public class ActivityService extends EntityService<Activity> {
             .orElse( Collections.emptyList() );
         var type = activityTypeService().findByIdOrNameOrThrow( dto.type() );
         var author = profileService().getProfileInSessionOrThrow();
+        var group = groupService().findByIdOrPathOrThrow( dto.group() );
 
         var activity = new Activity();
         activity.setName( name );
@@ -64,6 +76,7 @@ public class ActivityService extends EntityService<Activity> {
         activity.setType( type );
         activity.setAuthor( author );
         activity.setParticipants( Collections.emptyList() );
+        activity.setGroup( group );
 
         return repository().saveAndFlush( activity );
     }
@@ -154,5 +167,11 @@ public class ActivityService extends EntityService<Activity> {
     public synchronized @NotNull ActivityTypeService activityTypeService() {
         if ( activityTypeService == null ) activityTypeService( ActivityTypeService.getInstance() );
         return activityTypeService;
+    }
+
+    public synchronized void groupService( @NotNull GroupService groupService ) { this.groupService = groupService; }
+    public synchronized @NotNull GroupService groupService() {
+        if ( groupService == null ) groupService( GroupService.getInstance() );
+        return groupService;
     }
 }
