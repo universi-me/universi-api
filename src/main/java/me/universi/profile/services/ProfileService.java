@@ -68,6 +68,14 @@ public class ProfileService extends EntityService<Profile> {
             .orElseThrow( () -> makeNotFoundException( "ID ou username", idOrUsername ) );
     }
 
+    public List<Optional<Profile>> findByIdOrUsername( List<String> idsOrUsernames ) {
+        return idsOrUsernames.stream().map( this::findByIdOrUsername ).toList();
+    }
+
+    public List<@NotNull Profile> findByIdOrUsernameOrThrow( List<String> idsOrUsernames ) {
+        return idsOrUsernames.stream().map( this::findByIdOrUsernameOrThrow ).toList();
+    }
+
     @Override
     public List<Profile> findAllUnchecked() {
         return perfilRepository.findAll();
