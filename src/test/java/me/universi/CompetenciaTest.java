@@ -57,7 +57,7 @@ class CompetenciaTest {
 
         var competence1 = competenceService.create(
             new CreateCompetenceDTO(
-                compTipo1.getId(),
+                compTipo1.getId().toString(),
                 "Sou top em java - teste 1"+userNew.getId(),
                 Competence.MIN_LEVEL
             ), profile
@@ -65,7 +65,7 @@ class CompetenciaTest {
 
         var competence2 = competenceService.create(
             new CreateCompetenceDTO(
-                compTipo2.getId(),
+                compTipo2.getId().toString(),
                 "Sou top em java - teste 2"+userNew.getId(),
                 Competence.MIN_LEVEL
             ), profile
@@ -100,7 +100,7 @@ class CompetenciaTest {
 
         var competence1 = competenceService.create(
             new CreateCompetenceDTO(
-                compTipo1.getId(),
+                compTipo1.getId().toString(),
                 "Sou top em java - update 1"+userNew.getId(),
                 Competence.MIN_LEVEL
             ), profile
@@ -108,7 +108,7 @@ class CompetenciaTest {
 
         var competence2 = competenceService.create(
             new CreateCompetenceDTO(
-                compTipo2.getId(),
+                compTipo2.getId().toString(),
                 "Sou top em java - update 2"+userNew.getId(),
                 Competence.MIN_LEVEL
             ), profile
@@ -164,7 +164,7 @@ class CompetenciaTest {
 
         var competence1 = competenceService.create(
             new CreateCompetenceDTO(
-                compTipo1.getId(),
+                compTipo1.getId().toString(),
                 "Sou top em java - delete 1"+userNew.getId(),
                 Competence.MIN_LEVEL
             ), profile
@@ -172,7 +172,7 @@ class CompetenciaTest {
 
         var competence2 = competenceService.create(
             new CreateCompetenceDTO(
-                compTipo2.getId(),
+                compTipo2.getId().toString(),
                 "Sou top em java - delete 2"+userNew.getId(),
                 Competence.MIN_LEVEL
             ), profile
@@ -211,7 +211,7 @@ class CompetenciaTest {
 
         competenceService.create(
             new CreateCompetenceDTO(
-                compTipo1.getId(),
+                compTipo1.getId().toString(),
                 "Sou top em java - read 1"+userNew.getId(),
                 Competence.MIN_LEVEL
             ), profile
@@ -219,7 +219,7 @@ class CompetenciaTest {
 
         competenceService.create(
             new CreateCompetenceDTO(
-                compTipo2.getId(),
+                compTipo2.getId().toString(),
                 "Sou top em java - read 2"+userNew.getId(),
                 Competence.MIN_LEVEL
             ), profile

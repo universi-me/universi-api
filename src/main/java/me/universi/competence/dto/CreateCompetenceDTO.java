@@ -1,15 +1,16 @@
 package me.universi.competence.dto;
 
-import java.util.UUID;
+import com.fasterxml.jackson.annotation.JsonAlias;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import me.universi.competence.entities.Competence;
 
 public record CreateCompetenceDTO(
-    @NotNull
-    UUID competenceTypeId,
+    @JsonAlias( { "competenceTypeId" } )
+    @NotBlank String competenceType,
 
     @NotNull
     String description,

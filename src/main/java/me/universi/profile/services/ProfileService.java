@@ -150,7 +150,7 @@ public class ProfileService extends EntityService<Profile> {
                 if ( !hasCompetence ) {
                     competenceService.create(
                         new CreateCompetenceDTO(
-                        competenceType.getId(),
+                        competenceType.getId().toString(),
                         "",
                         Competence.MIN_LEVEL
                         ),
