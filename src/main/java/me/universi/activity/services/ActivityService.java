@@ -17,11 +17,15 @@ import me.universi.activity.dto.UpdateActivityDTO;
 import me.universi.activity.entities.Activity;
 import me.universi.activity.repositories.ActivityRepository;
 import me.universi.api.exceptions.UniversiBadRequestException;
+import me.universi.api.exceptions.UniversiServerException;
 import me.universi.api.interfaces.EntityService;
 import me.universi.competence.services.CompetenceTypeService;
 import me.universi.group.entities.Group;
 import me.universi.group.services.GroupService;
 import me.universi.profile.services.ProfileService;
+import me.universi.role.enums.FeaturesTypes;
+import me.universi.role.enums.Permission;
+import me.universi.role.services.RoleService;
 import me.universi.user.services.UserService;
 
 @Service
@@ -32,6 +36,7 @@ public class ActivityService extends EntityService<Activity> {
     private @Nullable CompetenceTypeService competenceTypeService;
     private @Nullable ActivityTypeService activityTypeService;
     private @Nullable GroupService groupService;
+    private @Nullable RoleService roleService;
 
     public ActivityService() {
         this.entityName = "Atividade";
@@ -53,7 +58,9 @@ public class ActivityService extends EntityService<Activity> {
     }
 
     public @NotNull Activity create( @Valid CreateActivityDTO dto ) {
-        checkPermissionToCreate();
+        var group = groupService().findByIdOrPathOrThrow( dto.group() );
+
+        checkPermissionToCreate( group );
         validateDates( dto );
 
         var name = dto.name().trim();
@@ -63,7 +70,6 @@ public class ActivityService extends EntityService<Activity> {
             .orElse( Collections.emptyList() );
         var type = activityTypeService().findByIdOrNameOrThrow( dto.type() );
         var author = profileService().getProfileInSessionOrThrow();
-        var group = groupService().findByIdOrPathOrThrow( dto.group() );
 
         var activity = new Activity();
         activity.setName( name );
@@ -127,16 +133,40 @@ public class ActivityService extends EntityService<Activity> {
 
     @Override public boolean isValid( Activity activity ) {
         return activity != null
-            && activity.getDeletedAt() == null;
+            && activity.getDeletedAt() == null
+            && roleService().hasPermission(
+                activity.getGroup(),
+                FeaturesTypes.ACTIVITY,
+                Permission.READ
+            );
+    }
+
+    public boolean hasPermissionToCreate( @NotNull Group group ) {
+        return roleService().hasPermission(
+            group,
+            FeaturesTypes.ACTIVITY,
+            Permission.READ_WRITE
+        );
+    }
+
+    public void checkPermissionToCreate( @NotNull Group group ) {
+        if ( !hasPermissionToCreate( group ) ) throw makeDeniedException( "criar" );
     }
 
     @Override public boolean hasPermissionToEdit( Activity entity ) {
-        return userService().isUserAdminSession()
-            || profileService().getProfileInSessionOrThrow().getId().equals( entity.getAuthor().getId() );
+        return roleService().hasPermission(
+            entity.getGroup(),
+            FeaturesTypes.ACTIVITY,
+            Permission.READ_WRITE
+        );
     }
 
     @Override public boolean hasPermissionToDelete( Activity entity ) {
-        return hasPermissionToEdit( entity );
+        return roleService().hasPermission(
+            entity.getGroup(),
+            FeaturesTypes.ACTIVITY,
+            Permission.READ_WRITE_DELETE
+        );
     }
 
     public synchronized void repository( @NotNull ActivityRepository repository ) { this.repository = repository; }
@@ -174,4 +204,24 @@ public class ActivityService extends EntityService<Activity> {
         if ( groupService == null ) groupService( GroupService.getInstance() );
         return groupService;
     }
+
+    public synchronized void roleService( @NotNull RoleService roleService ) { this.roleService = roleService; }
+    public synchronized @NotNull RoleService roleService() {
+        if ( roleService == null ) roleService( RoleService.getInstance() );
+        return roleService;
+    }
+
+    /**
+     * @deprecated Use {@link #hasPermissionToCreate( Group )} instead
+     * @return Never returns. Always throws {@link UniversiServerException}
+     * @throws UniversiServerException
+     */
+    @Deprecated( forRemoval = false ) @Override public boolean hasPermissionToCreate() { throw new UniversiServerException( "Erro no servidor" ); }
+
+    /**
+     * @deprecated Use {@link #checkPermissionToCreate( Group )} instead
+     * @return Never successfully returns. Always throws {@link UniversiServerException}
+     * @throws UniversiServerException
+     */
+    @Deprecated( forRemoval = false ) @Override public void checkPermissionToCreate() { hasPermissionToCreate(); }
 }

@@ -35,7 +35,7 @@ public abstract class EntityService<T> {
     }
 
     public boolean hasPermissionToCreate() { return true; }
-    public final void checkPermissionToCreate() throws UniversiForbiddenAccessException {
+    public void checkPermissionToCreate() throws UniversiForbiddenAccessException {
         if ( !hasPermissionToCreate() )
             throw makeDeniedException( "criar" );
     }
