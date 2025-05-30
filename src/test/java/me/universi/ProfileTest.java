@@ -82,7 +82,7 @@ class ProfileTest {
 
         competenceService.create(
             new CreateCompetenceDTO(
-                compTipo1.getId(),
+                compTipo1.getId().toString(),
                 "Sou top em java - admin"+userNew.getId(),
                 Competence.MIN_LEVEL
             ), adminProfile
@@ -90,7 +90,7 @@ class ProfileTest {
 
         competenceService.create(
             new CreateCompetenceDTO(
-                compTipo1.getId(),
+                compTipo1.getId().toString(),
                 "Sou top em java - admin 1"+userNew.getId(),
                 Competence.MIN_LEVEL
             ), adminProfile

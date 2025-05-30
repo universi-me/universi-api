@@ -4,6 +4,8 @@ import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.util.*;
+
+import me.universi.activity.entities.Activity;
 import me.universi.capacity.entidades.Folder;
 import me.universi.group.DTO.CreateGroupDTO;
 import me.universi.group.DTO.UpdateGroupDTO;
@@ -104,5 +106,10 @@ public class GroupController {
     @GetMapping(value = "/{id}/administrators", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<Profile>> listAdmins( @Valid @PathVariable @NotNull( message = "ID do grupo inválido" ) UUID id ) {
         return ResponseEntity.ok( groupService.listAdministrators( id ) );
+    }
+
+    @GetMapping(value = "/{id}/activities", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<Activity>> listActivities( @Valid @PathVariable UUID id ) {
+        return ResponseEntity.ok( groupService.listActivities( id ) );
     }
 }

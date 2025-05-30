@@ -76,7 +76,7 @@ public class CompetenceService extends EntityService<Competence> {
     }
 
     public Competence create( @NotNull CreateCompetenceDTO createCompetenceDTO, @NotNull Profile profile ) {
-        var competenceType = competenceTypeService.findOrThrow( createCompetenceDTO.competenceTypeId() );
+        var competenceType = competenceTypeService.findByIdOrNameOrThrow( createCompetenceDTO.competenceType() );
 
         return competenceRepository.saveAndFlush( new Competence(
             competenceType,
@@ -94,10 +94,11 @@ public class CompetenceService extends EntityService<Competence> {
         var competence = findOrThrow( id );
         checkPermissionToEdit( competence );
 
-        if ( updateCompetenceDTO.competenceTypeId() != null )
+        updateCompetenceDTO.competenceType().ifPresent( competenceTypeId -> {
             competence.setCompetenceType(
-                competenceTypeService.findOrThrow( updateCompetenceDTO.competenceTypeId() )
+                competenceTypeService.findByIdOrNameOrThrow( competenceTypeId )
             );
+        } );
 
         if ( updateCompetenceDTO.description() != null && !updateCompetenceDTO.description().isBlank() )
             competence.setDescription( updateCompetenceDTO.description() );

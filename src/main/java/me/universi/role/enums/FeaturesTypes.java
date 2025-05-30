@@ -8,7 +8,8 @@ public enum FeaturesTypes {
     GROUP("Grupo"),
     PEOPLE("Pessoas"),
     COMPETENCE("Competência"),
-    JOBS("Vagas");
+    JOBS("Vagas"),
+    ACTIVITY("Atividades");
 
     public final String label;
 
