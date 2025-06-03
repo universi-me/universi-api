@@ -11,4 +11,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ImageMetadataRepository extends JpaRepository<ImageMetadata, UUID> {
     Optional<ImageMetadata> findFirstByFilenameAndImageStore( String filename, ImageStoreLocation storeType );
+    Optional<ImageMetadata> findFirstByFilename( String filename );
 }
