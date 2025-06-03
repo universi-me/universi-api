@@ -60,7 +60,7 @@ public class ImageMetadataService extends EntityService<ImageMetadata> {
 
     @Override
     public Optional<ImageMetadata> findUnchecked( UUID id ) {
-        return imageMetadataRepository.findById( id );
+        return imageMetadataRepository.findFirstById( id );
     }
 
     public Optional<ImageMetadata> findByFilename( String filename, ImageStoreLocation storeType ) {
@@ -72,9 +72,10 @@ public class ImageMetadataService extends EntityService<ImageMetadata> {
     }
 
     public ImageMetadata findByFilenameOrThrow( String filename, ImageStoreLocation storeType ) {
-        return findByFilename( filename, storeType )
+        return find( UUID.fromString( filename ) )
+                .orElse( findByFilename( filename, storeType )
                 .orElse( findByFilename( filename )
-                .orElseThrow( () -> makeNotFoundException( "id", filename ) ) );
+                        .orElseThrow( () -> makeNotFoundException( "id", filename ) ) ) );
     }
 
     @Override
