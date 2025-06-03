@@ -72,7 +72,7 @@ public class ImageMetadataService extends EntityService<ImageMetadata> {
     }
 
     public ImageMetadata findByFilenameOrThrow( String filename, ImageStoreLocation storeType ) {
-        return find( UUID.fromString( filename ) )
+        return find( CastingUtil.getUUID( filename ).orElse(null) )
                 .orElse( findByFilename( filename, storeType )
                 .orElse( findByFilename( filename )
                         .orElseThrow( () -> makeNotFoundException( "id", filename ) ) ) );
