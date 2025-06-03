@@ -48,6 +48,7 @@ public class ImageMetadataController {
     }
 
     @GetMapping( path = "/{imageId}" )
+    @Cacheable("img")
     public ResponseEntity<Resource> getImageFromMetadataId( @PathVariable UUID imageId ) {
         return makeResponseFromMetadata( imageMetadataService.findOrThrow( imageId ) );
     }
