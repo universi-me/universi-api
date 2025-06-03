@@ -67,8 +67,14 @@ public class ImageMetadataService extends EntityService<ImageMetadata> {
         return imageMetadataRepository.findFirstByFilenameAndImageStore( filename, storeType );
     }
 
+    public Optional<ImageMetadata> findByFilename( String filename ) {
+        return imageMetadataRepository.findFirstByFilename( filename );
+    }
+
     public ImageMetadata findByFilenameOrThrow( String filename, ImageStoreLocation storeType ) {
-        return findByFilename( filename, storeType ).orElse( findOrThrow( UUID.fromString( filename ) ) );
+        return findByFilename( filename, storeType )
+                .orElse( findByFilename( filename )
+                .orElseThrow( () -> makeNotFoundException( "id", filename ) ) );
     }
 
     @Override
