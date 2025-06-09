@@ -10,6 +10,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
+
+import me.universi.activity.entities.Activity;
 import me.universi.capacity.entidades.Folder;
 import me.universi.group.enums.GroupType;
 import me.universi.group.services.GroupService;
@@ -21,7 +23,6 @@ import me.universi.role.enums.FeaturesTypes;
 import me.universi.role.services.RoleService;
 import me.universi.user.services.EnvironmentService;
 import me.universi.user.services.JsonUserLoggedFilter;
-import me.universi.user.services.UserService;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
@@ -106,6 +107,13 @@ public class Group implements Serializable {
     @JoinColumn( name = "parent_group_id", nullable = true, referencedColumnName = "id" )
     @NotFound( action = NotFoundAction.IGNORE )
     private Group parentGroup;
+
+    @Nullable
+    @OneToOne( cascade = CascadeType.ALL )
+    @JoinColumn( name = "activity_id", nullable = true )
+    @NotFound( action = NotFoundAction.IGNORE )
+    @JsonIgnoreProperties( { "group" } )
+    private Activity activity;
 
     @JsonIgnore
     @OneToMany(mappedBy = "parentGroup", fetch = FetchType.LAZY)
@@ -235,6 +243,16 @@ public class Group implements Serializable {
 
     public Optional<Group> getParentGroup() { return Optional.ofNullable( parentGroup ); }
     public void setParentGroup(Group parentGroup) { this.parentGroup = parentGroup; }
+
+    public Optional<Activity> getActivity() { return Optional.ofNullable( activity ); }
+    public void setActivity( Activity activity ) { this.activity = activity; }
+
+    /**
+     * Checks if the Group is a regular group or an special group ( eg. an {@link Activity} group )
+     * @return {@code true} if group is regular, otherwise returns {@code false};
+     */
+    @Transient public boolean isRegularGroup() { return activity == null; }
+    @Transient @JsonIgnore public boolean isActivityGroup() { return activity != null; }
 
     public Collection<Group> getSubGroups() {
         return subGroups;

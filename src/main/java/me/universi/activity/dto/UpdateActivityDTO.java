@@ -9,8 +9,6 @@ import com.fasterxml.jackson.annotation.JsonAlias;
 import jakarta.validation.constraints.NotBlank;
 
 public record UpdateActivityDTO(
-    Optional<String> name,
-    Optional<String> description,
     Optional<String> type,
     Optional<String> location,
     Optional<Integer> workload,

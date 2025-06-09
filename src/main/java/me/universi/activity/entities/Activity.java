@@ -8,12 +8,14 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import me.universi.competence.entities.CompetenceType;
 import me.universi.group.entities.Group;
+import me.universi.group.entities.ProfileGroup;
 import me.universi.profile.entities.Profile;
 
 @Entity( name = "Activity" )
@@ -26,19 +28,6 @@ public class Activity {
     @GeneratedValue( strategy = GenerationType.UUID )
     @Column( name = "id", nullable = false )
     private UUID id;
-
-    @NotBlank
-    @Column( name = "name", nullable = false )
-    private String name;
-
-    @NotBlank
-    @Column( name = "description", nullable = false )
-    private String description;
-
-    @NotNull
-    @ManyToOne
-    @JoinColumn( name = "author_id", nullable = false )
-    private Profile author;
 
     @NotNull
     @ManyToOne
@@ -64,14 +53,9 @@ public class Activity {
     private Date endDate;
 
     @NotNull
-    @ManyToOne
-    @JoinColumn( name = "group_id", nullable = false )
+    @OneToOne( mappedBy = "activity" )
+    @JsonIgnoreProperties( { "activity" } )
     private Group group;
-
-    @NotNull
-    @JsonIgnore
-    @OneToMany( mappedBy = "activity", fetch = FetchType.LAZY )
-    private Collection<ActivityParticipant> participants;
 
     @NotNull
     @ManyToMany
@@ -93,20 +77,13 @@ public class Activity {
 
     public UUID getId() { return id; }
 
-    public @NotBlank String getName() { return name; }
-    public void setName(@NotBlank String name) { this.name = name; }
-
-    public @NotBlank String getDescription() { return description; }
-    public void setDescription(@NotBlank String description) { this.description = description; }
-
-    public Profile getAuthor() { return author; }
-    public void setAuthor(Profile author) { this.author = author; }
+    @Transient @JsonIgnore public @NotBlank String getName() { return group.getName(); }
+    @Transient @JsonIgnore public @NotBlank String getDescription() { return group.getDescription(); }
+    @Transient @JsonIgnore public Profile getAuthor() { return group.getAdmin(); }
+    @Transient @JsonIgnore public @NotNull Collection<ProfileGroup> getParticipants() { return group.getParticipants(); }
 
     public @NotNull ActivityType getType() { return type; }
     public void setType( @NotNull ActivityType activityType ) { this.type = activityType; }
-
-    public @NotNull Collection<ActivityParticipant> getParticipants() { return participants; }
-    public void setParticipants(@NotNull Collection<ActivityParticipant> participants) { this.participants = participants; }
 
     public @NotNull Collection<CompetenceType> getBadges() { return badges; }
     public void setBadges(@NotNull Collection<CompetenceType> badges) { this.badges = badges; }

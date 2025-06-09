@@ -19,9 +19,12 @@ import me.universi.activity.repositories.ActivityRepository;
 import me.universi.api.exceptions.UniversiBadRequestException;
 import me.universi.api.exceptions.UniversiServerException;
 import me.universi.api.interfaces.EntityService;
+import me.universi.competence.entities.CompetenceType;
 import me.universi.competence.services.CompetenceTypeService;
+import me.universi.group.DTO.CreateGroupDTO;
 import me.universi.group.entities.Group;
 import me.universi.group.services.GroupService;
+import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
 import me.universi.role.enums.FeaturesTypes;
 import me.universi.role.enums.Permission;
@@ -50,39 +53,70 @@ public class ActivityService extends EntityService<Activity> {
     @Override protected List<Activity> findAllUnchecked() { return repository().findAll(); }
 
     public List<Activity> findByGroup( @NotNull Group group ) {
-        return repository()
-            .findByGroup( group )
+        return group
+            .getSubGroups()
             .stream()
-            .filter( this::isValid )
+            .filter( g -> g.isActivityGroup() && isValid( g.getActivity().get() ) )
+            .map( g -> g.getActivity().get() )
+            .toList();
+    }
+
+    public List<Activity> findByProfile( @NotNull String idOrUsername ) { return findByProfile( profileService().findByIdOrUsernameOrThrow( idOrUsername ) ); }
+    public List<Activity> findByProfile( @NotNull UUID id ) { return findByProfile( profileService().findOrThrow( id ) ); }
+    public List<Activity> findByProfile( @NotNull Profile profile ) {
+        return profile
+            .getGroups()
+            .stream()
+            .filter( pg -> groupService().isValid( pg.getGroup() ) && pg.getGroup().isActivityGroup() && isValid( pg.getGroup().getActivity().get() ) )
+            .map( pg -> pg.getGroup().getActivity().get() )
+            .toList();
+    }
+
+    public List<Activity> findByProfileAndCompetenceType( @NotNull String idOrUsername, @NotNull String competenceType ) { return findByProfileAndCompetenceType( profileService().findByIdOrUsernameOrThrow( idOrUsername ), competenceTypeService().findByIdOrNameOrThrow( competenceType ) ); }
+    public List<Activity> findByProfileAndCompetenceType( @NotNull UUID id, @NotNull UUID competenceType ) { return findByProfileAndCompetenceType( profileService().findOrThrow( id ), competenceTypeService().findOrThrow( competenceType ) ); }
+    public List<Activity> findByProfileAndCompetenceType( @NotNull Profile profile, @NotNull CompetenceType competenceType ) {
+        return findByProfile( profile )
+            .stream()
+            .filter( a -> a.getBadges().contains( competenceType ) )
             .toList();
     }
 
     public @NotNull Activity create( @Valid CreateActivityDTO dto ) {
-        var group = groupService().findByIdOrPathOrThrow( dto.group() );
+        var parentGroup = groupService().findByIdOrPathOrThrow( dto.group() );
 
-        checkPermissionToCreate( group );
+        checkPermissionToCreate( parentGroup );
         validateDates( dto );
 
         var name = dto.name().trim();
+        var nickname = dto.nickname().trim();
         var description = dto.description().trim();
         var location = dto.location().trim();
         var badges = dto.badges().map( competenceTypeService()::findByIdOrNameOrThrow )
             .orElse( Collections.emptyList() );
         var type = activityTypeService().findByIdOrNameOrThrow( dto.type() );
-        var author = profileService().getProfileInSessionOrThrow();
+
+        var activityGroup = groupService().createGroup( new CreateGroupDTO(
+            Optional.of( parentGroup.getId().toString() ),
+            nickname,
+            name,
+            dto.image(),
+            dto.bannerImage(),
+            dto.headerImage(),
+            description,
+            dto.groupType(),
+            false,
+            true,
+            false
+        ) );
 
         var activity = new Activity();
-        activity.setName( name );
-        activity.setDescription( description );
         activity.setLocation( location );
         activity.setWorkload( dto.workload() );
         activity.setStartDate( dto.startDate() );
         activity.setEndDate( dto.endDate() );
         activity.setBadges( badges );
         activity.setType( type );
-        activity.setAuthor( author );
-        activity.setParticipants( Collections.emptyList() );
-        activity.setGroup( group );
+        activity.setGroup( activityGroup );
 
         return repository().saveAndFlush( activity );
     }
@@ -92,8 +126,6 @@ public class ActivityService extends EntityService<Activity> {
         checkPermissionToEdit( activity );
         validateDates( activity, dto );
 
-        dto.name().ifPresent( name -> activity.setName( name.trim() ) );
-        dto.description().ifPresent( description -> activity.setDescription( description.trim() ) );
         dto.location().ifPresent( location -> activity.setLocation( location.trim() ) );
         dto.workload().ifPresent( activity::setWorkload );
         dto.startDate().ifPresent( activity::setStartDate );
@@ -134,6 +166,7 @@ public class ActivityService extends EntityService<Activity> {
     @Override public boolean isValid( Activity activity ) {
         return activity != null
             && activity.getDeletedAt() == null
+            && groupService().isValid( activity.getGroup() )
             && roleService().hasPermission(
                 activity.getGroup(),
                 FeaturesTypes.ACTIVITY,
