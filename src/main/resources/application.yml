@@ -177,6 +177,12 @@ spring:
     url: ${database.url}
     username: ${database.username}
     password: ${database.password}
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 1
+      connection-timeout: ${API_DATABASE_TIMEOUT:30000} # 30 seconds
+  transaction:
+    default-timeout: ${API_TRANSACTION_TIMEOUT:30} # 30 seconds
   #JPA
   jpa:
     hibernate:
@@ -223,6 +229,12 @@ spring:
     url: ${database.url}
     username: ${database.username}
     password: ${database.password}
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 1
+      connection-timeout: ${API_DATABASE_TIMEOUT:30000} # 30 seconds
+  transaction:
+    default-timeout: ${API_TRANSACTION_TIMEOUT:30} # 30 seconds
   #JPA
   jpa:
     hibernate:
