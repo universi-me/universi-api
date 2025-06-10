@@ -9,4 +9,4 @@ if [ -n "$DEBUG_URL_POST" ] && [ -f "$API_DEBUG_FILE" ]; then
 fi
 
 # Execute the Java application
-exec java -jar /app.jar
+exec java -Xms128m -Xmx512m -XX:+UseSerialGC -jar /app.jar
