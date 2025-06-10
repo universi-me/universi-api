@@ -46,6 +46,8 @@ database:
   transaction-default-timeout: ${API_DB_TRANSACTION_TIMEOUT:30} # 30 seconds
   minimum-idle: ${API_DB_MIN_POOL_SIZE:1}
   maximum-pool-size: ${API_DB_MAX_POOL_SIZE:5}
+  idle-timeout: ${API_DB_IDLE_TIMEOUT:10000} # 10 seconds
+  max-lifetime: ${API_DB_MAX_LIFETIME:300000} # 5 minutes
   flyway:
     url: ${API_DB_FLY_URL:${database.url}}
     username: ${API_DB_FLY_USER:${database.username}}
@@ -187,6 +189,8 @@ spring:
       maximum-pool-size: ${database.maximum-pool-size}
       minimum-idle: ${database.minimum-idle}
       connection-timeout: ${database.connection-timeout}
+      idle-timeout: ${database.idle-timeout}
+      max-lifetime: ${database.max-lifetime}
   transaction:
     default-timeout: ${database.transaction-default-timeout}
   #JPA
@@ -239,6 +243,8 @@ spring:
       maximum-pool-size: ${database.maximum-pool-size}
       minimum-idle: ${database.minimum-idle}
       connection-timeout: ${database.connection-timeout}
+      idle-timeout: ${database.idle-timeout}
+      max-lifetime: ${database.max-lifetime}
   transaction:
     default-timeout: ${database.transaction-default-timeout}
   #JPA
