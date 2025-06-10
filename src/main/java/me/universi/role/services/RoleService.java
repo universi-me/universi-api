@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import java.util.*;
 import me.universi.Sys;
 import me.universi.api.exceptions.UniversiConflictingOperationException;
+import me.universi.api.exceptions.UniversiNoEntityException;
 import me.universi.api.interfaces.EntityService;
 import me.universi.group.entities.Group;
 import me.universi.group.repositories.ProfileGroupRepository;
@@ -68,6 +69,15 @@ public class RoleService extends EntityService<Role> {
     public Role findByNameAndGroupOrThrow( String name, UUID groupId ) {
         return findByNameAndGroup( name, groupId )
             .orElseThrow( () -> makeNotFoundException( "nome e grupo", name + "' e '" + groupId) );
+    }
+
+    public Optional<Role> findByIdAndGroup( @NotNull UUID id, @NotNull Group group ) {
+        return find( id ).filter( role -> role.group.getId().equals( group.getId() ) );
+    }
+
+    public Role findByIdAndGroupOrThrow( @NotNull UUID id, @NotNull Group group ) {
+        return findByIdAndGroup( id, group )
+            .orElseThrow( () -> new UniversiNoEntityException( "Nenhum " + this.entityName + " de ID '" + id + "' foi encontrado para este grupo" ) );
     }
 
     public Role create( @NotNull CreateRoleDTO dto ) {

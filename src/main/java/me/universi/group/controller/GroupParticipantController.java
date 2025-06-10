@@ -6,6 +6,7 @@ import java.util.*;
 import me.universi.group.DTO.CompetenceFilterDTO;
 import me.universi.group.DTO.CompetenceInfoDTO;
 import me.universi.group.DTO.AddGroupParticipantDTO;
+import me.universi.group.DTO.ChangeGroupParticipantsDTO;
 import me.universi.group.DTO.RemoveGroupParticipantDTO;
 import me.universi.group.entities.ProfileGroup;
 import me.universi.group.services.GroupParticipantService;
@@ -31,6 +32,12 @@ public class GroupParticipantController {
     @PatchMapping(value = "/leave/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> leave( @Valid @PathVariable @NotNull( message = "ID do grupo inválida" ) UUID id ) {
         groupParticipantService.leave( id );
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping( value = "/{id}/change", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE )
+    public ResponseEntity<Void> change( @PathVariable UUID id, @Valid @RequestBody ChangeGroupParticipantsDTO dto ) {
+        groupParticipantService.changeParticipants( id, dto );
         return ResponseEntity.noContent().build();
     }
 
