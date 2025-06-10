@@ -30,6 +30,8 @@ ENV JAVA_HOME /user/java/jdk17
 ENV PATH $JAVA_HOME/bin:$PATH
 COPY --from=build /myjre $JAVA_HOME
 
+ENV JAVA_TOOL_OPTIONS -Xms128m -Xmx256m -XX:+UseSerialGC -XX:+UseContainerSupport -XX:MaxRAMPercentage=70 -XX:InitialRAMPercentage=20 -XX:ActiveProcessorCount=2
+
 # Set version in environment variables
 ARG BUILD_HASH
 ENV BUILD_HASH=${BUILD_HASH}
