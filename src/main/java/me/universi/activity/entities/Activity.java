@@ -104,4 +104,5 @@ public class Activity {
     public void setGroup( @NotNull Group group ) { this.group = group; }
 
     public @Nullable Date getDeletedAt() { return deletedAt; }
+    public void setDeletedAt( @Nullable Date deletedAt ) { this.deletedAt = deletedAt; }
 }

@@ -148,7 +148,11 @@ public class ActivityService extends EntityService<Activity> {
     public void delete( UUID id ) {
         var activity = findOrThrow( id );
         checkPermissionToDelete( activity );
-        repository().delete( activity );
+
+        groupService().deleteGroup( activity.getGroup().getId() );
+
+        activity.setDeletedAt( new Date() );
+        repository().saveAndFlush( activity );
     }
 
     public void validateDates( @Valid CreateActivityDTO dto ) {
