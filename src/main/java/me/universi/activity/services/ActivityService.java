@@ -118,7 +118,12 @@ public class ActivityService extends EntityService<Activity> {
         activity.setType( type );
         activity.setGroup( activityGroup );
 
-        return repository().saveAndFlush( activity );
+        activity = repository().saveAndFlush( activity );
+
+        activityGroup.setActivity( activity );
+        GroupService.getRepository().save( activityGroup );
+
+        return activity;
     }
 
     public @NotNull Activity update( UUID id, @Valid UpdateActivityDTO dto ) {
