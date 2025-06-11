@@ -22,7 +22,6 @@ public record CreateActivityDTO(
 
     Optional<UUID> image,
     Optional<UUID> bannerImage,
-    Optional<UUID> headerImage,
 
     @JsonAlias( { "groupId", "groupPath" } )
     @NotBlank String group,
