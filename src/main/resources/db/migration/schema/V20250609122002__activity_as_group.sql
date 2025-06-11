@@ -28,7 +28,8 @@ DECLARE
     entity RECORD;
     group_id UUID;
     group_settings_id UUID;
-    role_id UUID;
+    admin_role_id UUID;
+    member_role_id UUID;
     nickname TEXT;
 
 BEGIN
@@ -44,19 +45,20 @@ FOR entity IN SELECT * FROM activity.activity LOOP
     VALUES
         ( group_id, nickname, entity.name, entity.description, entity.author_id, 'PROJECT', false, false, false, CURRENT_TIMESTAMP, false, entity.deleted_at IS NOT NULL, group_settings_id, NULL, NULL, NULL, entity.group_id, entity.id );
 
-    role_id := UUID_GENERATE_V4();
+    admin_role_id := UUID_GENERATE_V4();
+    member_role_id := UUID_GENERATE_V4();
 
     INSERT INTO system_group."role"
         ( id, deleted, created, removed, "name", description, group_id, role_type, feed_permission, content_permission, group_permission, people_permission, competence_permission, job_permission, activity_permission )
     VALUES
-        ( UUID_GENERATE_V4(), false, CURRENT_TIMESTAMP, NULL, 'Administrador', NULL, group_id, 'ADMINISTRATOR', 4, 4, 4, 4, 4, 4, 4 ),
-        ( role_id, false, CURRENT_TIMESTAMP, NULL, 'Participante', NULL, group_id, 'PARTICIPANT', 2, 2, 2, 2, 2, 2, 2 ),
+        ( admin_role_id, false, CURRENT_TIMESTAMP, NULL, 'Administrador', NULL, group_id, 'ADMINISTRATOR', 4, 4, 4, 4, 4, 4, 4 ),
+        ( member_role_id, false, CURRENT_TIMESTAMP, NULL, 'Participante', NULL, group_id, 'PARTICIPANT', 2, 2, 2, 2, 2, 2, 2 ),
         ( UUID_GENERATE_V4(), false, CURRENT_TIMESTAMP, NULL, 'Visitante', NULL, group_id, 'VISITOR', 2, 2, 2, 2, 2, 2, 2 );
 
     INSERT INTO system_group.profile_group
         ( group_id, profile_id, joined, id, exited, deleted, role_id )
     SELECT
-        group_id, ap.profile_id, ap.joined_at, UUID_GENERATE_V4(), ap.removed_at, ap.removed_at IS NOT NULL, role_id
+        group_id, ap.profile_id, ap.joined_at, UUID_GENERATE_V4(), ap.removed_at, ap.removed_at IS NOT NULL, CASE WHEN ap.profile_id = entity.author_id THEN admin_role_id ELSE member_role_id END
     FROM activity.participant ap
     WHERE activity_id = entity.id;
 END LOOP;
