@@ -15,6 +15,7 @@ import me.universi.Sys;
 import me.universi.activity.dto.CreateActivityDTO;
 import me.universi.activity.dto.UpdateActivityDTO;
 import me.universi.activity.entities.Activity;
+import me.universi.activity.entities.ActivityType;
 import me.universi.activity.repositories.ActivityRepository;
 import me.universi.api.exceptions.UniversiBadRequestException;
 import me.universi.api.exceptions.UniversiServerException;
@@ -79,6 +80,10 @@ public class ActivityService extends EntityService<Activity> {
             .stream()
             .filter( a -> a.getBadges().contains( competenceType ) )
             .toList();
+    }
+
+    public boolean existsByType( @NotNull ActivityType activityType ) {
+        return repository().existsByType( activityType );
     }
 
     public @NotNull Activity create( @Valid CreateActivityDTO dto ) {

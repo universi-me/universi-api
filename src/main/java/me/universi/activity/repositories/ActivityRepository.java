@@ -8,9 +8,11 @@ import org.springframework.stereotype.Repository;
 
 import jakarta.validation.constraints.NotNull;
 import me.universi.activity.entities.Activity;
+import me.universi.activity.entities.ActivityType;
 import me.universi.group.entities.Group;
 
 @Repository
 public interface ActivityRepository extends JpaRepository<Activity, UUID> {
     List<Activity> findByGroup( @NotNull Group group );
+    boolean existsByType( @NotNull ActivityType type );
 }
