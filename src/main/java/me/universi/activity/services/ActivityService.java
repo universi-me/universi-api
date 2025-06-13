@@ -115,7 +115,9 @@ public class ActivityService extends EntityService<Activity> {
             .createQuery( query )
             .getResultList()
             .stream()
-            .filter( this::isValid )
+            .filter( e -> this.isValid( e )
+                && dto.status().map( status -> status.equals( e.getStatus() ) ).orElse( true )
+            )
             .toList();
     }
 
