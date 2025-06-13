@@ -32,8 +32,8 @@ public class ActivityController {
     }
 
     @GetMapping( path = "", produces = MediaType.APPLICATION_JSON_VALUE )
-    public ResponseEntity<Collection<Activity>> list() {
-        return ResponseEntity.ok( activityService.findAll() );
+    public ResponseEntity<Collection<Activity>> list( FilterActivityDTO dto ) {
+        return ResponseEntity.ok( activityService.filter( dto ) );
     }
 
     @PostMapping( path = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE )

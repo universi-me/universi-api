@@ -15,6 +15,7 @@ import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.constraints.NotNull;
 import me.universi.Sys;
 import me.universi.api.exceptions.UniversiConflictingOperationException;
@@ -416,14 +417,18 @@ public class FolderService extends EntityService<Folder> {
         var root = query.from( FolderProfile.class );
         query.select( root );
 
+        var filters = new ArrayList<Predicate>();
+
         if ( folder != null )
-            query.where( criteriaBuilder.equal( root.get( "folder" ).get( "id" ), folder.getId() ) );
+            filters.add( criteriaBuilder.equal( root.get( "folder" ).get( "id" ), folder.getId() ) );
 
         if ( assignedByProfile != null )
-            query.where( criteriaBuilder.equal( root.get( "assignedBy" ).get( "id" ), assignedByProfile.getId() ) );
+            filters.add( criteriaBuilder.equal( root.get( "assignedBy" ).get( "id" ), assignedByProfile.getId() ) );
 
         if ( assignedToProfile != null )
-            query.where( criteriaBuilder.equal( root.get( "assignedTo" ).get( "id" ), assignedToProfile.getId() ) );
+            filters.add( criteriaBuilder.equal( root.get( "assignedTo" ).get( "id" ), assignedToProfile.getId() ) );
+
+        query.where( filters.toArray( new Predicate[ filters.size() ] ) );
 
         return entityManager
             .createQuery( query )

@@ -1,5 +1,6 @@
 package me.universi.activity.services;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -9,10 +10,14 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.Nullable;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import me.universi.Sys;
 import me.universi.activity.dto.CreateActivityDTO;
+import me.universi.activity.dto.FilterActivityDTO;
 import me.universi.activity.dto.UpdateActivityDTO;
 import me.universi.activity.entities.Activity;
 import me.universi.activity.entities.ActivityType;
@@ -41,6 +46,9 @@ public class ActivityService extends EntityService<Activity> {
     private @Nullable ActivityTypeService activityTypeService;
     private @Nullable GroupService groupService;
     private @Nullable RoleService roleService;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public ActivityService() {
         this.entityName = "Atividade";
@@ -79,6 +87,35 @@ public class ActivityService extends EntityService<Activity> {
         return findByProfile( profile )
             .stream()
             .filter( a -> a.getBadges().contains( competenceType ) )
+            .toList();
+    }
+
+    public List<Activity> filter( @Nullable FilterActivityDTO dto ) {
+        if ( dto == null )
+            return findAll();
+
+        var criteriaBuilder = entityManager.getCriteriaBuilder();
+        var query = criteriaBuilder.createQuery( Activity.class );
+        var root = query.from( Activity.class );
+        query.select( root );
+
+        var filters = new ArrayList<Predicate>();
+
+        dto.type().map( activityTypeService()::findByIdOrNameOrThrow ).ifPresent( activityType -> {
+            filters.add( criteriaBuilder.equal( root.get( "type" ).get( "id" ) , activityType.getId() ) );
+        } );
+
+        dto.group().map( groupService()::findByIdOrPathOrThrow ).ifPresent( group -> {
+            filters.add( criteriaBuilder.equal( root.get( "group" ).get( "parentGroup" ).get( "id" ) , group.getId() ) );
+        } );
+
+        query.where( filters.toArray( new Predicate[ filters.size() ] ) );
+
+        return entityManager
+            .createQuery( query )
+            .getResultList()
+            .stream()
+            .filter( this::isValid )
             .toList();
     }
 
