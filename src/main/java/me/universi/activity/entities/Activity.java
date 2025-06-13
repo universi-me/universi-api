@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+import me.universi.activity.enums.ActivityStatus;
 import me.universi.competence.entities.CompetenceType;
 import me.universi.group.entities.Group;
 import me.universi.group.entities.ProfileGroup;
@@ -72,6 +73,19 @@ public class Activity {
     @Temporal( TemporalType.TIMESTAMP )
     @Column( name = "deleted_at" )
     private Date deletedAt;
+
+    @Transient
+    public @NotNull ActivityStatus getStatus() {
+        var now = new Date();
+
+        if ( this.getEndDate().before( now ) )
+            return ActivityStatus.ENDED;
+
+        else if ( this.getStartDate().before( now ) )
+            return ActivityStatus.STARTED;
+
+        return ActivityStatus.NOT_STARTED;
+    }
 
     public Activity() { }
 
