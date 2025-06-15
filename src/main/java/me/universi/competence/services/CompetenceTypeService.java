@@ -1,200 +1,195 @@
 package me.universi.competence.services;
 
+import java.util.*;
 import me.universi.Sys;
+import me.universi.api.exceptions.UniversiConflictingOperationException;
+import me.universi.api.exceptions.UniversiForbiddenAccessException;
+import me.universi.api.interfaces.UniqueNameEntityService;
+import me.universi.competence.dto.CreateCompetenceTypeDTO;
+import me.universi.competence.dto.MergeCompetenceTypeDTO;
+import me.universi.competence.dto.UpdateCompetenceTypeDTO;
 import me.universi.competence.entities.CompetenceType;
-import me.universi.competence.exceptions.CompetenceException;
-import me.universi.competence.repositories.CompetenceRepository;
 import me.universi.competence.repositories.CompetenceTypeRepository;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
 import me.universi.user.services.UserService;
+import me.universi.util.CastingUtil;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
-
 @Service
-public class CompetenceTypeService {
+public class CompetenceTypeService extends UniqueNameEntityService<CompetenceType> {
     private final CompetenceTypeRepository competenceTypeRepository;
-    private final CompetenceRepository competenceRepository;
+    private final ProfileService profileService;
+    private final UserService userService;
 
-    public CompetenceTypeService(CompetenceTypeRepository competenceTypeRepository, CompetenceRepository competenceRepository) {
+    public CompetenceTypeService(CompetenceTypeRepository competenceTypeRepository, ProfileService profileService, UserService userService) {
         this.competenceTypeRepository = competenceTypeRepository;
-        this.competenceRepository = competenceRepository;
+        this.profileService = profileService;
+        this.userService = userService;
+
+        this.entityName = "Tipo de Competência";
     }
 
     public static CompetenceTypeService getInstance() {
         return Sys.context.getBean("competenceTypeService", CompetenceTypeService.class);
     }
 
-    public CompetenceType findFirstById(UUID id) {
-        CompetenceType competenceType = competenceTypeRepository.findFirstById(id).orElse(null);
-
-        if(hasAccessToCompetenceType(competenceType)){
-            return competenceType;
-        }else{
-            return null;
-        }
-    }
-
-    public CompetenceType findFirstById(String id) {
-        try {
-            return findFirstById(UUID.fromString(id));
-        } catch (IllegalArgumentException invalidUUID) {
-            return null;
-        }
-    }
-
-    public List<CompetenceType> findAllById(@NotNull @NotNull Collection<@NotNull UUID> ids) {
-        return new ArrayList<>(ids
-            .stream()
-            .map(this::findFirstById)
-            .filter(Objects::nonNull)
-            .toList()
+    private Optional<CompetenceType> findIgnoringAccess( String idOrName ) {
+        return competenceTypeRepository.findFirstByIdOrNameIgnoringCase(
+            CastingUtil.getUUID( idOrName ).orElse( null ),
+            idOrName
         );
     }
 
-    public CompetenceType findFirstByName(String name) {
-        CompetenceType competenceType = findFirstByNameIgnoringAccess(name);
-
-        if (hasAccessToCompetenceType(competenceType)) {
-            return competenceType;
-        }else{
-            return null;
-        }
+    private Optional<CompetenceType> findIgnoringAccess( UUID id ) {
+        return competenceTypeRepository.findById( id );
     }
 
-    private CompetenceType findFirstByNameIgnoringAccess(String name) {
-        return competenceTypeRepository.findFirstByNameIgnoreCase(name).orElse(null);
+    @Override
+    public Optional<CompetenceType> findUnchecked( UUID id ) {
+        return findIgnoringAccess( id ).map( this::echoIfHasAccess );
     }
 
-    private CompetenceType save(CompetenceType competenceType) {
-        return competenceTypeRepository.saveAndFlush(competenceType);
+    @Override
+    public Optional<CompetenceType> findByNameUnchecked( String name ) {
+        return competenceTypeRepository.findFirstByNameIgnoreCase( name ).map( this::echoIfHasAccess );
     }
 
-    public void delete(UUID id) throws CompetenceException {
-        delete(findFirstById(id));
+    @Override
+    public Optional<CompetenceType> findByIdOrNameUnchecked( String idOrName ) {
+        return findIgnoringAccess( idOrName ).map( this::echoIfHasAccess );
     }
 
-    public void delete(CompetenceType competenceType) throws CompetenceException {
-        if (!UserService.getInstance().isUserAdminSession()) {
-            throw new CompetenceException("Esta operação não é permitida para este usuário.");
-        }
-
-        if (competenceType == null) {
-            throw new CompetenceException("Competência não encontrada.");
-        }
-
-        competenceType.setDeleted(true);
-        save(competenceType);
+    public void delete( String id ) throws AccessDeniedException {
+        var ct = findByIdOrNameOrThrow( id );
+        checkPermissionToDelete( ct );
+        competenceTypeRepository.delete( ct );
     }
 
-    public List<CompetenceType> findAll() {
+    @Override
+    public List<CompetenceType> findAllUnchecked() {
         return competenceTypeRepository.findAll()
             .stream()
             .filter(this::hasAccessToCompetenceType)
             .toList();
     }
 
-    public CompetenceType update(CompetenceType competenceType) throws CompetenceException {
-        return this.update(competenceType, competenceType.getId());
-    }
+    public CompetenceType update( String id, UpdateCompetenceTypeDTO updateCompetenceTypeDTO ) throws UniversiForbiddenAccessException, UniversiConflictingOperationException {
+        var existingCompetenceType = findByIdOrNameOrThrow( id );
+        checkPermissionToEdit( existingCompetenceType );
 
-    public CompetenceType update(CompetenceType updateTo, UUID id) throws CompetenceException {
-        if (!UserService.getInstance().isUserAdminSession()) {
-            throw new CompetenceException("Esta operação não é permitida para este usuário.");
-        }
+        if ( updateCompetenceTypeDTO.name() != null ) {
+            var competenceWithName = findIgnoringAccess( updateCompetenceTypeDTO.name() );
 
-        var existingCompetenceType = competenceTypeRepository.findById(id)
-            .orElseThrow(() -> new CompetenceException("Tipo de competência não encontrado."));
-
-        if (updateTo.getName() != null) {
-            var competenceWithName = findFirstByNameIgnoringAccess(updateTo.getName());
-
-            if (competenceWithName != null && !competenceWithName.getId().equals(existingCompetenceType.getId())) {
-                throw new CompetenceException("Já existe um tipo de competência já existe.");
+            if ( competenceWithName.isPresent()
+                && !competenceWithName.get().getId().equals(existingCompetenceType.getId())
+            ) {
+                throw new UniversiConflictingOperationException( "Já existe um tipo de competência com este nome" );
             }
 
-            existingCompetenceType.setName(updateTo.getName());
+            existingCompetenceType.setName( updateCompetenceTypeDTO.name() );
         }
 
-        if (!existingCompetenceType.isReviewed() && updateTo.isReviewed()) {
-            existingCompetenceType.setReviewed(updateTo.isReviewed());
+        if ( updateCompetenceTypeDTO.reviewed() != null
+            && !existingCompetenceType.isReviewed()
+        ) {
+            existingCompetenceType.setReviewed( updateCompetenceTypeDTO.reviewed() );
 
-            // Delete the profiles with access now that every profile has access to it
-            existingCompetenceType.setProfilesWithAccess(Arrays.asList());
+            existingCompetenceType.setProfilesWithAccess( new ArrayList<>() );
         }
 
-        return save(existingCompetenceType);
+        return competenceTypeRepository.saveAndFlush( existingCompetenceType );
     }
 
-    public CompetenceType create(CompetenceType competenceType) {
-        CompetenceType existingCompetenceType = findFirstByNameIgnoringAccess(competenceType.getName());
+    public CompetenceType create( @NotNull CreateCompetenceTypeDTO createCompetenceTypeDTO ) throws UniversiConflictingOperationException {
+        var profileInSession = profileService.getProfileInSessionOrThrow();
+        var existingCompetenceType = findIgnoringAccess( createCompetenceTypeDTO.name() );
 
-        if(existingCompetenceType != null) {
-            if (!hasAccessToCompetenceType(existingCompetenceType)) {
-                existingCompetenceType.addProfileWithAccess(ProfileService.getInstance().getProfileInSession());
-            }
-        } else {
-            existingCompetenceType = new CompetenceType();
-            existingCompetenceType.setName(competenceType.getName());
-            existingCompetenceType.setReviewed(false);
+        if ( existingCompetenceType.isEmpty() ) {
+            var ct = new CompetenceType();
+            ct.setName( createCompetenceTypeDTO.name() );
+            ct.setReviewed( false );
+            ct.setProfilesWithAccess( new ArrayList<>(
+                    Arrays.asList( profileInSession )
+            ) );
 
-            existingCompetenceType.setProfilesWithAccess(Arrays.asList(
-                ProfileService.getInstance().getProfileInSession()
-            ));
+            return competenceTypeRepository.saveAndFlush( ct );
         }
 
-        return save(existingCompetenceType);
+        var competenceType = existingCompetenceType.get();
+
+        if ( !hasAccessToCompetenceType( competenceType ) ) {
+            competenceType.addProfileWithAccess( profileInSession );
+            return competenceTypeRepository.saveAndFlush( competenceType );
+        }
+
+        throw new UniversiConflictingOperationException( "Este tipo de competência já existe" );
     }
 
-    public void merge(CompetenceType removedTypeCompetence, CompetenceType remainingCompetenceType) throws CompetenceException {
-        if (!UserService.getInstance().isUserAdminSession()) {
-            throw new CompetenceException("Esta operação não é permitida para este usuário.");
-        }
+    public void merge( MergeCompetenceTypeDTO mergeCompetenceTypeDTO ) throws AccessDeniedException {
+        if ( !userService.isUserAdminSession() )
+            throw makeDeniedException( "unir" );
 
-        if (removedTypeCompetence == null || remainingCompetenceType == null) {
-            throw new CompetenceException("Tipo de competência não encontrado.");
-        }
+        var removedCompetenceType = findOrThrow( mergeCompetenceTypeDTO.removedCompetenceType() );
+        var remainingCompetenceType = findOrThrow( mergeCompetenceTypeDTO.remainingCompetenceType() );
 
-        var updateCompetences = competenceRepository.findAll().stream()
-            .filter(c -> c.getCompetenceType().getId().equals(removedTypeCompetence.getId()))
+        var updateCompetences = CompetenceService.getInstance().findAll().stream()
+            .filter( c -> c.getCompetenceType().getId().equals( removedCompetenceType.getId() ) )
             .toList();
 
-        updateCompetences.forEach(c -> c.setCompetenceType(remainingCompetenceType));
-        competenceRepository.saveAll(updateCompetences);
+        updateCompetences.forEach(c -> c.setCompetenceType( remainingCompetenceType ));
+        CompetenceService.getRepository().saveAll( updateCompetences );
 
-        removedTypeCompetence.setProfilesWithAccess(Arrays.asList());
-        competenceTypeRepository.delete(removedTypeCompetence);
+        removedCompetenceType.setProfilesWithAccess( new ArrayList<>() );
+
+        removedCompetenceType.setDeleted( true );
+        competenceTypeRepository.save( removedCompetenceType );
+    }
+
+    private @Nullable CompetenceType echoIfHasAccess( CompetenceType ct ) {
+        return ct != null && hasAccessToCompetenceType( ct )
+            ? ct
+            : null;
     }
 
     public boolean hasAccessToCompetenceType(CompetenceType competence) {
-        return hasAccessToCompetenceType(competence, UserService.getInstance().getUserInSession().getProfile());
+        var profileInSession = profileService.getProfileInSession();
+        if ( profileInSession.isEmpty() )
+            return competence.isReviewed();
+
+        return hasAccessToCompetenceType( competence, profileInSession.get() );
     }
 
     public boolean hasAccessToCompetenceType(@NotNull CompetenceType competence, @NotNull Profile profile) {
-        var currentUser = profile.getUser();
-
         return competence.isReviewed()
-            || UserService.getInstance().isUserAdmin(currentUser)
+            || userService.isUserAdmin( profile.getUser() )
             || competence.getProfilesWithAccess()
                 .stream()
                 .anyMatch(p -> p.getId().equals(profile.getId()));
     }
 
-    public void grantAccessToProfile(@NotNull CompetenceType competenceType, @NotNull Profile profile) {
-        competenceType.getProfilesWithAccess().add(profile);
-        save(competenceType);
+    public CompetenceType grantAccessToProfile(@NotNull CompetenceType competenceType, @NotNull Profile profile) {
+        competenceType.addProfileWithAccess( profile );
+        return competenceTypeRepository.saveAndFlush( competenceType );
     }
 
-    public boolean validate( CompetenceType competenceType ) {
+    @Override
+    public boolean isValid( CompetenceType competenceType ) {
         return competenceType != null;
+    }
+
+    @Override
+    public boolean hasPermissionToEdit( CompetenceType ct ) {
+        return userService.isUserAdminSession();
+    }
+
+    @Override
+    public boolean hasPermissionToDelete( CompetenceType ct ) {
+        return hasPermissionToEdit( ct );
     }
 }

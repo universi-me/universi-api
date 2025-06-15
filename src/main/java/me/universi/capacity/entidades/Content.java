@@ -1,10 +1,14 @@
 package me.universi.capacity.entidades;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,10 +16,12 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Transient;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.Table;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -23,6 +29,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.UUID;
@@ -30,14 +37,16 @@ import java.util.UUID;
 import me.universi.capacity.enums.ContentStatusType;
 import me.universi.capacity.enums.ContentType;
 import me.universi.capacity.service.ContentService;
+import me.universi.image.entities.ImageMetadata;
 import me.universi.profile.entities.Profile;
-import me.universi.user.services.UserService;
+import me.universi.profile.services.ProfileService;
 
 import org.hibernate.annotations.*;
 
-@Entity(name="content")
-@SQLDelete(sql = "UPDATE content SET deleted = true WHERE id=?")
-@Where(clause = "deleted=false")
+@Entity(name = "Content")
+@Table( name = "content", schema = "capacity" )
+@SQLDelete(sql = "UPDATE capacity.content SET deleted = true WHERE id=?")
+@SQLRestriction( "NOT deleted" )
 public class Content implements Serializable {
 
     @Serial
@@ -56,25 +65,30 @@ public class Content implements Serializable {
     @Size(max = 100)
     private String title;
 
-    @Column(name = "image")
-    @Size(max = 100)
-    private String image;
+    @Nullable
+    @OneToOne
+    @JoinColumn( name = "image_metadata_id" )
+    private ImageMetadata image;
 
     @Column(name = "description")
     @Size(max = 200)
     private String description;
 
     @OneToMany(cascade = CascadeType.PERSIST)
+    @JoinTable( name = "content_categories", schema = "capacity" )
     private Collection<Category> categories;
 
-    @ManyToMany(mappedBy = "contents")
+    @ManyToMany(mappedBy = "content")
     @NotFound(action = NotFoundAction.IGNORE)
-    private Collection<Folder> folders;
-    
+    @JsonIgnore
+    private Collection<FolderContents> folderContents;
+
+    public static final int MAX_RATING = 5;
+    public static final int MIN_RATING = 0;
     @Column(name = "rating")
     @NotNull
-    @Min(0)
-    @Max(5)
+    @Min( MIN_RATING )
+    @Max( MAX_RATING )
     private Integer rating;
 
     @CreationTimestamp
@@ -97,6 +111,8 @@ public class Content implements Serializable {
     private boolean deleted = Boolean.FALSE;
 
     public Content() {
+        this.categories = new ArrayList<>();
+        this.folderContents = new ArrayList<>();
     }
 
     public UUID getId() {
@@ -119,13 +135,8 @@ public class Content implements Serializable {
         return title;
     }
 
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
-    }
+    public @Nullable ImageMetadata getImage() { return image; }
+    public void setImage(ImageMetadata image) { this.image = image; }
 
     public void setTitle(String title) {
         this.title = title;
@@ -163,12 +174,12 @@ public class Content implements Serializable {
         this.createdAt = createdAt;
     }
 
-    public Collection<Folder> getFolders() {
-        return folders;
+    public Collection<FolderContents> getFolderContents() {
+        return folderContents;
     }
 
-    public void setFolders(Collection<Folder> folders) {
-        this.folders = folders;
+    public void setFolderContents(Collection<FolderContents> folders) {
+        this.folderContents = folders;
     }
 
     public Profile getAuthor() {
@@ -196,8 +207,14 @@ public class Content implements Serializable {
     }
 
     @Transient
+    @JsonInclude( JsonInclude.Include.NON_NULL )
     public ContentStatusType getStatus() {
+        var profile = ProfileService.getInstance().getProfileInSession();
+        if ( profile.isEmpty() )
+            return null;
+
         return ContentService.getInstance()
-            .getProfileProgress(this, UserService.getInstance().getUserInSession().getProfile());
+            .findStatusById( id, profile.get().getId() )
+            .getStatus();
     }
 }

@@ -3,37 +3,46 @@ package me.universi.group.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
 import me.universi.capacity.entidades.Folder;
-import me.universi.group.entities.GroupSettings.GroupSettings;
 import me.universi.group.enums.GroupType;
 import me.universi.group.services.GroupService;
+import me.universi.image.entities.ImageMetadata;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
-import me.universi.roles.entities.Roles;
-import me.universi.roles.enums.FeaturesTypes;
-import me.universi.roles.services.RolesService;
+import me.universi.role.entities.Role;
+import me.universi.role.enums.FeaturesTypes;
+import me.universi.role.services.RoleService;
+import me.universi.user.services.EnvironmentService;
 import me.universi.user.services.JsonUserLoggedFilter;
 import me.universi.user.services.UserService;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.SQLRestriction;
 
 
-@Entity(name = "system_group")
-@SQLDelete(sql = "UPDATE system_group SET deleted = true WHERE id=?")
-@Where(clause = "deleted=false")
+@Entity(name = "Group")
+@Table( name = "system_group", schema = "system_group" )
+@SQLDelete(sql = "UPDATE system_group.system_group SET deleted = true WHERE id=?")
+@SQLRestriction( value = "NOT deleted" )
 @JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class Group implements Serializable {
 
@@ -58,14 +67,20 @@ public class Group implements Serializable {
     @Column(name = "description", columnDefinition = "TEXT")
     public String description;
 
-    @Column(name = "image")
-    public String image;
+    @Nullable
+    @OneToOne
+    @JoinColumn( name = "image_metadata_id" )
+    private ImageMetadata image;
 
-    @Column(name = "bannerImage")
-    public String bannerImage;
+    @Nullable
+    @OneToOne
+    @JoinColumn( name = "banner_image_metadata_id" )
+    public ImageMetadata bannerImage;
 
-    @Column(name = "headerImage")
-    public String headerImage;
+    @Nullable
+    @OneToOne
+    @JoinColumn( name = "header_image_metadata_id" )
+    public ImageMetadata headerImage;
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
     @ManyToOne(fetch = FetchType.EAGER)
@@ -84,21 +99,22 @@ public class Group implements Serializable {
 
     @JsonIgnore
     @OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
-    public Collection<ProfileGroup> participants;
+    private Collection<ProfileGroup> participants;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
-    public Collection<Subgroup> subGroups;
+    @ManyToOne( fetch = FetchType.LAZY )
+    @JoinColumn( name = "parent_group_id", nullable = true, referencedColumnName = "id" )
+    @NotFound( action = NotFoundAction.IGNORE )
+    private Group parentGroup;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "parentGroup", fetch = FetchType.LAZY)
+    @NotNull
+    private Collection<Group> subGroups;
 
     @Column(name = "type")
     @Enumerated(EnumType.STRING)
     public GroupType type;
-
-    /** The group's ability to be accessed directly through the URL (parent of all groups) */
-    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
-    @Column(name = "group_root")
-    @NotNull
-    public boolean rootGroup;
 
     /** Can create subGroups */
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
@@ -131,30 +147,19 @@ public class Group implements Serializable {
     @JsonIgnore
     private Collection<Folder> foldersGrantedAccess;
 
-    /*Attribute indicates that the group must be part of the person's resume*/
-    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
-    @Column(name = "enable_curriculum")
-    private boolean enableCurriculum;
-
-    @NotNull
-    @Column(name = "everyone_can_post")
-    private boolean everyoneCanPost;
-
     public Group() {
     }
 
-    public Group(String nickname, String name, String description, Profile admin, Collection<ProfileGroup> participants, GroupType type, Collection<Subgroup> subGroups, boolean rootGroup, boolean canCreateGroup, boolean enableCurriculum, boolean everyoneCanPost) {
+    public Group(String nickname, String name, String description, Profile admin, Collection<ProfileGroup> participants, GroupType type, Group parentGroup, Collection<Group> subGroups, boolean canCreateGroup) {
         this.nickname = nickname;
         this.name = name;
         this.description = description;
         this.admin = admin;
         this.participants = participants;
         this.type = type;
+        this.parentGroup = parentGroup;
         this.subGroups = subGroups;
-        this.rootGroup = rootGroup;
         this.canCreateGroup = canCreateGroup;
-        this.enableCurriculum = enableCurriculum;
-        this.everyoneCanPost = everyoneCanPost;
     }
 
     public Group(String nickname, String name, String description, Profile admin, GroupType type, Date createdAt) {
@@ -164,7 +169,6 @@ public class Group implements Serializable {
         this.admin = admin;
         this.type = type;
         this.createdAt = createdAt;
-        this.enableCurriculum = false;
     }
 
     public UUID getId() {
@@ -196,11 +200,21 @@ public class Group implements Serializable {
     }
 
     public Collection<ProfileGroup> getParticipants() {
-        return participants;
+        return this.participants == null
+            ? Collections.emptyList()
+            : this.participants;
     }
 
     public void setParticipants(Collection<ProfileGroup> participants) {
         this.participants = participants;
+    }
+
+    @Transient
+    @JsonIgnore
+    public Collection<ProfileGroup> getAdministrators() {
+        return this.getParticipants().stream()
+            .filter( ProfileGroup::isAdmin )
+            .toList();
     }
 
     public GroupType getType() {
@@ -219,20 +233,21 @@ public class Group implements Serializable {
         this.nickname = nickname;
     }
 
-    public Collection<Subgroup> getSubGroups() {
+    public Optional<Group> getParentGroup() { return Optional.ofNullable( parentGroup ); }
+    public void setParentGroup(Group parentGroup) { this.parentGroup = parentGroup; }
+
+    public Collection<Group> getSubGroups() {
         return subGroups;
     }
 
-    public void setSubGroups(Collection<Subgroup> subGroups) {
+    public void setSubGroups(Collection<Group> subGroups) {
         this.subGroups = subGroups;
     }
 
+    /** The group's ability to be accessed directly through the URL (parent of all groups) */
+    @Transient
     public boolean isRootGroup() {
-        return rootGroup;
-    }
-
-    public void setRootGroup(boolean rootGroup) {
-        this.rootGroup = rootGroup;
+        return parentGroup == null;
     }
 
     public boolean isCanCreateGroup() {
@@ -243,13 +258,8 @@ public class Group implements Serializable {
         this.canCreateGroup = canCreateGroup;
     }
 
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
-    }
+    public @Nullable ImageMetadata getImage() { return image; }
+    public void setImage(ImageMetadata image) { this.image = image; }
 
     public Date getCreatedAt() {
         return createdAt;
@@ -287,21 +297,34 @@ public class Group implements Serializable {
         this.id = id;
     }
 
+    public static final String PATH_DIVISOR = "/";
+
     @Transient
     public String getPath() {
-        return GroupService.getInstance().getGroupPath(this.id);
+        return getParentGroup().map( Group::getPath ).orElse( "" ) + PATH_DIVISOR + this.nickname;
     }
 
-    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
+    @JsonIgnore
     @Transient
-    public Group getOrganization() {
-        return GroupService.getInstance().getGroupRootFromGroupId(this.id);
+    public @NotNull Group getOrganization() {
+        return getParentGroup().map( Group::getOrganization ).orElse( this );
+    }
+
+    @JsonProperty( "organization" )
+    @JsonInclude(value = JsonInclude.Include.NON_NULL)
+    @Transient
+    private @Nullable Group getJsonOrganization() {
+        return isRootGroup()
+            ? null
+        : parentGroup.isRootGroup()
+            ? parentGroup
+        : parentGroup.getJsonOrganization();
     }
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
     @Transient
     public boolean isCanEdit() {
-        return GroupService.getInstance().canEditGroup(this);
+        return GroupService.getInstance().hasPermissionToEdit(this);
     }
 
     @Override
@@ -309,19 +332,11 @@ public class Group implements Serializable {
         return "Grupo [id=\""+this.id+"\", nome=\""+this.name+"\", descricao=\""+this.description+"\"]";
     }
 
-    public boolean isEnableCurriculum() {
-        return enableCurriculum;
-    }
-
-    public void setEnableCurriculum(boolean enableCurriculum) {
-        this.enableCurriculum = enableCurriculum;
-    }
-
-    public String getBannerImage() {
+    public @Nullable ImageMetadata getBannerImage() {
         return bannerImage;
     }
 
-    public void setBannerImage(String bannerImage) {
+    public void setBannerImage(ImageMetadata bannerImage) {
         this.bannerImage = bannerImage;
     }
 
@@ -337,20 +352,12 @@ public class Group implements Serializable {
         this.groupSettings = groupSettings;
     }
 
-    public String getHeaderImage() {
+    public @Nullable ImageMetadata getHeaderImage() {
         return headerImage;
     }
 
-    public void setHeaderImage(String headerImage) {
+    public void setHeaderImage(ImageMetadata headerImage) {
         this.headerImage = headerImage;
-    }
-
-    public boolean isEveryoneCanPost() {
-        return everyoneCanPost;
-    }
-
-    public void setEveryoneCanPost(boolean everyoneCanPost) {
-        this.everyoneCanPost = everyoneCanPost;
     }
 
     public Collection<Folder> getFoldersGrantedAccess() {
@@ -364,21 +371,21 @@ public class Group implements Serializable {
     @Transient
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public String getBuildHash() {
-        if(!this.rootGroup) {
+        if(!this.isRootGroup()) {
             return null;
         }
-        return UserService.getInstance().getBuildHash();
+        return EnvironmentService.getInstance().getBuildHash();
     }
 
     @Transient
-    public Map<FeaturesTypes, Integer> getPermissions() {
-
-        if(!UserService.getInstance().userIsLoggedIn()) {
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public @Nullable Map<FeaturesTypes, Integer> getPermissions() {
+        var profile = ProfileService.getInstance().getProfileInSession();
+        if ( profile.isEmpty() )
             return null;
-        }
 
-        Roles role = RolesService.getInstance().getAssignedRoles(
-            ProfileService.getInstance().getProfileInSession().getId(),
+        Role role = RoleService.getInstance().getAssignedRole(
+            profile.get().getId(),
             this.id
         );
 

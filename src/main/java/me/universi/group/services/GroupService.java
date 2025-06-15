@@ -1,72 +1,72 @@
 package me.universi.group.services;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import me.universi.Sys;
+import me.universi.activity.entities.Activity;
+import me.universi.activity.services.ActivityService;
+import me.universi.api.exceptions.UniversiBadRequestException;
+import me.universi.api.exceptions.UniversiConflictingOperationException;
+import me.universi.api.exceptions.UniversiForbiddenAccessException;
+import me.universi.api.exceptions.UniversiNoEntityException;
+import me.universi.api.interfaces.EntityService;
 import me.universi.capacity.entidades.Folder;
 import me.universi.competence.entities.Competence;
-import me.universi.competence.services.CompetenceProfileService;
+import me.universi.competence.services.CompetenceService;
 import me.universi.feed.dto.GroupPostDTO;
 import me.universi.feed.services.GroupFeedService;
-import me.universi.group.DTO.CompetenceFilterDTO;
-import me.universi.group.DTO.CompetenceFilterRequestDTO;
-import me.universi.group.DTO.ProfileWithCompetencesDTO;
-import me.universi.group.DTO.CompetenceInfoDTO;
+import me.universi.group.DTO.*;
 
 import me.universi.group.entities.*;
-import me.universi.group.entities.GroupSettings.*;
-import me.universi.group.enums.GroupEmailFilterType;
 import me.universi.group.enums.GroupType;
-import me.universi.group.exceptions.GroupException;
 import me.universi.group.repositories.*;
+import me.universi.image.services.ImageMetadataService;
 import me.universi.profile.entities.Profile;
-import me.universi.roles.entities.Roles;
-import me.universi.roles.enums.RoleType;
-import me.universi.roles.services.RolesService;
+import me.universi.profile.services.ProfileService;
+import me.universi.role.entities.Role;
+import me.universi.role.enums.FeaturesTypes;
+import me.universi.role.enums.Permission;
+import me.universi.role.services.RoleService;
 import me.universi.user.entities.User;
-import me.universi.user.services.UserService;
-import me.universi.util.ConvertUtil;
-import org.springframework.beans.factory.annotation.Value;
+import me.universi.user.services.*;
+import me.universi.util.CastingUtil;
 import org.springframework.stereotype.Service;
 
+import jakarta.annotation.Nullable;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
-public class GroupService {
+public class GroupService extends EntityService<Group> {
     private final UserService userService;
     private final GroupFeedService groupFeedService;
     private final GroupRepository groupRepository;
-    private final ProfileGroupRepository profileGroupRepository;
-    private final SubgroupRepository subgroupRepository;
     private final GroupSettingsRepository groupSettingsRepository;
-    private final GroupEmailFilterRepository groupEmailFilterRepository;
-    private final GroupThemeRepository groupThemeRepository;
-    private final GroupFeaturesRepository groupFeaturesRepository;
     private final GroupEnvironmentRepository groupEnvironmentRepository;
-    private final CompetenceProfileService competenceProfileService;
+    private final CompetenceService competenceService;
+    private final ImageMetadataService imageMetadataService;
+    private final EnvironmentService environmentService;
+    private final LoginService loginService;
+    private final AccountService accountService;
+    private final EmailService emailService;
+    private final ActivityService activityService;
 
-    @Value("${LOCAL_ORGANIZATION_ID_ENABLED}")
-    private boolean localOrganizationIdEnabled;
-
-    @Value("${LOCAL_ORGANIZATION_ID}")
-    private String localOrganizationId;
-
-    public GroupService(UserService userService, GroupFeedService groupFeedService, GroupRepository groupRepository, ProfileGroupRepository profileGroupRepository, SubgroupRepository subgroupRepository, GroupSettingsRepository groupSettingsRepository, GroupEmailFilterRepository groupEmailFilterRepository, GroupThemeRepository groupThemeRepository, GroupFeaturesRepository groupFeaturesRepository, GroupEnvironmentRepository groupEnvironmentRepository, CompetenceProfileService competenceProfileService) {
+    public GroupService(UserService userService, GroupFeedService groupFeedService, GroupRepository groupRepository, GroupSettingsRepository groupSettingsRepository, GroupEnvironmentRepository groupEnvironmentRepository, CompetenceService competenceService, ImageMetadataService imageMetadataService, EnvironmentService environmentService, LoginService loginService, AccountService accountService, EmailService emailService, ActivityService activityService) {
         this.userService = userService;
         this.groupFeedService = groupFeedService;
         this.groupRepository = groupRepository;
-        this.profileGroupRepository = profileGroupRepository;
-        this.subgroupRepository = subgroupRepository;
         this.groupSettingsRepository = groupSettingsRepository;
-        this.groupEmailFilterRepository = groupEmailFilterRepository;
-        this.groupThemeRepository = groupThemeRepository;
-        this.groupFeaturesRepository = groupFeaturesRepository;
         this.groupEnvironmentRepository = groupEnvironmentRepository;
-        this.competenceProfileService = competenceProfileService;
+        this.competenceService = competenceService;
+        this.imageMetadataService = imageMetadataService;
+        this.activityService = activityService;
+
+        this.entityName = "Grupo";
+        this.environmentService = environmentService;
+        this.loginService = loginService;
+        this.accountService = accountService;
+        this.emailService = emailService;
     }
 
 
@@ -74,782 +74,176 @@ public class GroupService {
         return Sys.context.getBean("groupService", GroupService.class);
     }
 
-    public Group findFirstById(UUID id) {
-        Optional<Group> optionalGroup = groupRepository.findFirstById(id);
-        Group group = optionalGroup.orElse(null);
+    public static @NotNull GroupRepository getRepository() {
+        return Sys.context.getBean( "groupRepository", GroupRepository.class );
+    }
 
-        // check if user is logged in and if the group is from the user organization, elso return null
-        if(group != null && userService.userIsLoggedIn()) {
-            UUID orgAccessId = group.rootGroup ? group.getId() : getGroupRootIdFromGroupId(group.getId());
-            User user = userService.getUserInSession();
-            Group userOrg = user.getOrganization();
-            if(userOrg != null && !Objects.equals(userOrg.getId(), orgAccessId)) {
-                return null;
+    @Override
+    public boolean isValid( Group group ) {
+        if ( group == null || group.isDeleted() )
+            return false;
+
+        if ( group.isRootGroup() )
+            return true;
+
+        if ( !loginService.userIsLoggedIn() )
+            return false;
+
+        var userInSession = loginService.getUserInSession();
+        var organization = group.getOrganization();
+
+        if ( !userInSession.getOrganization().getId().equals( organization.getId() ) )
+            return false;
+
+        return group.isPublicGroup()
+            || GroupParticipantService.getInstance().isParticipant( group , userInSession.getProfile() );
+    }
+
+    protected Optional<Group> findUnchecked( UUID id ) {
+        return groupRepository.findById( id );
+    }
+
+    public Optional<Group> findByIdOrPath( String idOrPath ) {
+        var groupId = CastingUtil.getUUID( idOrPath );
+        if ( groupId.isPresent() ) {
+            return find( groupId.get() );
+        }
+
+        else {
+            var nicknames = Arrays.stream( idOrPath.split( Group.PATH_DIVISOR ) )
+                .map( n -> n.trim().toLowerCase() )
+                .filter( n -> !n.isBlank() )
+                .toList();
+
+            if ( nicknames.isEmpty() )
+                return Optional.empty();
+
+            var organization = groupRepository.findFirstByParentGroupIsNullAndNicknameIgnoreCase( nicknames.get( 0 ) );
+            if ( organization.isEmpty() )
+                return Optional.empty();
+
+            var target = organization.get();
+            for ( int i = 1; i < nicknames.size(); i++ ) {
+                var subs = target.getSubGroups();
+                if ( subs == null ) return Optional.empty();
+
+                var nick = nicknames.get( i );
+                var group = subs.stream()
+                    .filter( g -> g.getNickname().toLowerCase().equals( nick ) )
+                    .findFirst();
+
+                if ( group.isEmpty() )
+                    return Optional.empty();
+
+                target = group.get();
             }
-        }
 
-        return group;
-    }
-
-    public Group findFirstById(String id) {
-        return findFirstById(UUID.fromString(id));
-    }
-
-    public UUID findParentGroupId(UUID id) {
-        Optional<Object> optionalGroup = groupRepository.findParentGroupId(id);
-        if(optionalGroup.isPresent()) {
-            Object object = optionalGroup.get();
-            if(object instanceof UUID) {
-                return (UUID)object;
-            } else if(object instanceof byte[]) {
-                return ConvertUtil.convertBytesToUUID((byte[])object);
-            }
-        }
-        return null;
-    }
-
-    public Group findFirstByNickname(String nickname) {
-        Optional<Group> optionalGroup = groupRepository.findFirstByNickname(nickname);
-        return optionalGroup.orElse(null);
-    }
-
-    public Group findFirstByRootGroupAndNicknameIgnoreCase(boolean rootGroup, String nickname, boolean checkUserOrganizationAccess) {
-        if(nickname == null || nickname.isEmpty()) {
-            return null;
-        }
-        Optional<Group> optionalGroup = groupRepository.findFirstByRootGroupAndNicknameIgnoreCase(rootGroup, nickname);
-        Group group = optionalGroup.orElse(null);
-
-        // check if user is logged in and if the group is from the user organization, elso return null
-        if(checkUserOrganizationAccess && rootGroup && group != null && userService.userIsLoggedIn()) {
-            User user = userService.getUserInSession();
-            Group userOrg = user.getOrganization();
-            if(userOrg != null && !Objects.equals(userOrg.getId(), group.getId())) {
-                return null;
-            }
-        }
-
-        return group;
-    }
-
-    public List<Group> findByPublicGroup(boolean publicGroup) {
-        List<Group> optionalGroup = groupRepository.findByPublicGroup(publicGroup);
-        return optionalGroup;
-    }
-
-    public long count() {
-        try {
-            return groupRepository.count();
-        } catch (Exception e) {
-            return 0;
+            return Optional.ofNullable( target ).filter( this::isValid );
         }
     }
 
-    public boolean verifyPermissionToEditGroup(Group group, User user) throws GroupException {
+    public @NotNull Group findByIdOrPathOrThrow( String idOrPath ) throws EntityNotFoundException {
+        return findByIdOrPath( idOrPath ).orElseThrow( () -> makeNotFoundException( "ID ou caminho", idOrPath ) );
+    }
 
-        if (group == null) {
-            throw new GroupException("Grupo não encontrado.");
-        }
+    @Override
+    public boolean hasPermissionToEdit( Group group ) {
+        return loginService.userIsLoggedIn()
+            && hasPermissionToEdit( group, loginService.getUserInSession() );
+    }
 
-        if (user == null) {
-            throw new GroupException("Usuário não encontrado.");
-        }
+    @Override
+    public boolean hasPermissionToDelete( Group group ) {
+        return !group.isRootGroup() && hasPermissionToEdit( group );
+    }
+
+    public void checkPermissionToEdit(Group group, User user) {
+        if ( group == null )
+            throw new UniversiNoEntityException( "Grupo não encontrado" );
+
+        if (user == null)
+            throw new UniversiNoEntityException("Usuário não encontrado.");
 
         if(userService.isUserAdmin(user)) {
-            return true;
+            return;
         }
 
         Profile profile = user.getProfile();
         if (userService.userNeedAnProfile(user, true)) {
-            throw new GroupException("Você precisa criar um Perfil.");
+            throw new UniversiForbiddenAccessException("Você precisa criar um Perfil.");
         }
 
         if(Objects.equals(group.getAdmin().getId(), profile.getId())) {
-            return true;
+            return;
         }
 
-        for(ProfileGroup groupAdminNow : getAdministrators(group)) {
-            if(groupAdminNow != null && Objects.equals(groupAdminNow.profile.getId(), profile.getId())) {
-                return true;
-            }
-        }
+        if ( RoleService.getInstance().isAdmin( profile, group ) )
+            return;
 
-        throw new GroupException("Você não tem permissão para editar este grupo.");
+        throw new UniversiForbiddenAccessException("Você não tem permissão para editar este grupo.");
     }
 
-    public boolean hasPermissionToEditGroup(Group group, User user) {
+    public boolean hasPermissionToEdit(Group group, User user) {
         try {
-            return verifyPermissionToEditGroup(group, user);
+            checkPermissionToEdit(group, user);
+            return true;
         } catch (Exception e) {
             return false;
         }
     }
 
-    public boolean canEditGroup(Group group) {
-        return hasPermissionToEditGroup(group, userService.getUserInSession());
-    }
+    public @NotNull String checkNicknameAvailable( String nickname, @Nullable Group parentGroup ) {
+        if ( nickname == null || nickname.isBlank() )
+            throw new UniversiBadRequestException( "O Apelido do Grupo não pode ser vazio" );
 
-    public void addSubGroup(Group group, Group sub) {
-        if(!subgroupRepository.existsByGroupIdAndSubgroupId(group.getId(), sub.getId())) {
-            Subgroup subgroup = new Subgroup();
-            subgroup.group = group;
-            subgroup.subgroup = sub;
-            subgroupRepository.save(subgroup);
-        }
-    }
+        final var validNickname = nickname.trim().toLowerCase();
+        if ( !accountService.usernameRegex( nickname ) )
+            throw new UniversiBadRequestException( "O Apelido do Grupo contém caracteres inválidos" );
 
-    public void removeSubGroup(Group group, Group sub) {
-        if(subgroupRepository.existsByGroupIdAndSubgroupId(group.getId(), sub.getId())) {
-            this.delete(sub);
-        }
-    }
+        final var nicknameInUse = parentGroup == null
+            ? groupRepository.findFirstByParentGroupIsNullAndNicknameIgnoreCase( validNickname ).isPresent()
+            : parentGroup.getSubGroups().stream().anyMatch( sg -> sg.getNickname().equalsIgnoreCase( validNickname ) );
 
-    public boolean addParticipantToGroup(@NotNull Group group, @NotNull Profile profile) throws GroupException {
-        return addParticipantToGroup(
-            group,
-            profile,
-            RolesService.getInstance().getGroupMemberRole(group)
-        );
-    }
-
-    public boolean addParticipantToGroup(@NotNull Group group, @NotNull Profile profile, Roles roles) throws GroupException {
-        if(!profileGroupRepository.existsByGroupIdAndProfileId(group.getId(), profile.getId())) {
-            ProfileGroup profileGroup = new ProfileGroup();
-            profileGroup.profile = profile;
-            profileGroup.group = group;
-            profileGroup.role = roles;
-            profileGroupRepository.save(profileGroup);
-            return true;
+        if ( nicknameInUse ) {
+            throw new UniversiConflictingOperationException(
+                new StringBuilder()
+                    .append( "O Apelido de Grupo '" )
+                    .append( validNickname )
+                    .append( "' não pode ser aplicado pois já está em uso por " )
+                    .append( parentGroup == null
+                        ? "outra organização"
+                        : "outro subgrupo deste grupo"
+                    )
+                    .toString()
+            );
         }
 
-        return false;
+        return validNickname;
     }
 
-    public boolean removeParticipantFromGroup(Group group, Profile profile) throws GroupException {
-        if(profile == null) {
-            throw new GroupException("Parametro Perfil é nulo.");
-        }
-        if(profileGroupRepository.existsByGroupIdAndProfileId(group.getId(), profile.getId())) {
-            ProfileGroup profileGroup = profileGroupRepository.findFirstByGroupAndProfile(group, profile);
-            profileGroup.exited = ConvertUtil.getDateTimeNow();
-            profileGroup.deleted = true;
-            profileGroupRepository.save(profileGroup);
-            return true;
-        }
-        return false;
-    }
-
-    public Profile getParticipantInGroup(Group group, UUID participantId) {
-        if(participantId != null && group.getParticipants() != null) {
-            for (ProfileGroup participantNow : group.getParticipants()) {
-                if (Objects.equals(participantNow.profile.getId(), participantId)) {
-                    return participantNow.profile;
-                }
-            }
-        }
-        return null;
-    }
-
-    public boolean isNicknameAvailableForGroup(Group group, String nickname) {
-        boolean available = true;
+    public boolean isNicknameAvailable( String nickname, @Nullable Group parentGroup ) {
         try {
-            String nicknameLower = nickname.toLowerCase();
-
-            if(available) {
-                available = nicknameRegex(nickname);
-            }
-
-            if(available && group != null) {
-                for (Subgroup groupNow : group.getSubGroups()) {
-                    if (groupNow.subgroup != null && groupNow.subgroup.nickname.toLowerCase().equals(nicknameLower)) {
-                        available = false;
-                        break;
-                    }
-                }
-            }
-
-            if(available && group==null) {
-                Group groupRoot = findFirstByRootGroupAndNicknameIgnoreCase(true, nicknameLower, false);
-                if(groupRoot != null) {
-                    available = false;
-                }
-            }
-
-        }catch (Exception e) {
-            available = false;
+            checkNicknameAvailable( nickname, parentGroup );
+            return true;
+        } catch (Exception e) {
+            return false;
         }
-        return available;
     }
 
-    public boolean nicknameRegex(String nickname) {
-        return userService.usernameRegex(nickname);
+    private void delete( Group group ) {
+        if ( group == null )
+            return;
+
+        if ( group.getSubGroups() != null )
+            group.getSubGroups().forEach( this::delete );
+
+        group.setDeleted( true );
+        groupRepository.saveAndFlush( group );
     }
 
-    public void save(Group group) {
-        groupRepository.saveAndFlush(group);
-    }
-
-    public void delete(Group group) {
-        this.deleteRecursive(group, false);
-    }
-
-    private void deleteRecursive(Group group, boolean insideRecursion) {
-
-        if(group.subGroups != null) {
-            for(Subgroup groupNow : group.subGroups) {
-                if(groupNow.subgroup != null) {
-                    this.deleteRecursive(groupNow.subgroup, true);
-                }
-            }
-        }
-
-        group.setDeleted(true);
-        groupRepository.save(group);
-    }
-
-    public List<Group> findAll() {
+    @Override
+    protected List<Group> findAllUnchecked() {
         return groupRepository.findAll();
-    }
-
-    /** Verifies if the user is accessing the group URL correctly, from root/master group to the subgroup */
-    public Group getGroupFromNicknamePath(Group rootGroup, String[] nicknameSequenceArr) {
-        Group finalGroup = null;
-
-        boolean parentCheckFailed = false;
-        try {
-            Group groupInsta = rootGroup;
-            for (int i = 0; i < nicknameSequenceArr.length; i++) {
-                String nicknameNow = nicknameSequenceArr[i];
-                if (nicknameNow == null || nicknameNow.isEmpty()) {
-                    continue;
-                }
-                if (i == 0) {
-                    // ignore the first, already verified
-                    continue;
-                }
-                Group sub = null;
-                for (Subgroup grupoNow : groupInsta.subGroups) {
-                    if (grupoNow.subgroup != null && nicknameNow.equals(grupoNow.subgroup.nickname.toLowerCase())) {
-                        sub = grupoNow.subgroup;
-                        break;
-                    }
-                }
-                if (sub != null) {
-                    groupInsta = sub;
-                } else {
-                    parentCheckFailed = true;
-                    break;
-                }
-            }
-            finalGroup = groupInsta;
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        if(!parentCheckFailed) {
-            return finalGroup;
-        }
-        return null;
-    }
-
-    /** Generates the group URL from its id */
-    public String getGroupPath(UUID groupId) {
-        ArrayList<String> nicknames = new ArrayList<>();
-        Group groupNow = findFirstById(groupId);
-        while(groupNow != null) {
-            nicknames.add(groupNow.nickname);
-            groupNow = findFirstById(findParentGroupId(groupNow.getId()));
-        }
-        Collections.reverse(nicknames);
-        return "/" + String.join("/", nicknames).toLowerCase();
-    }
-
-    /** Get group from url path */
-    public Group getGroupFromPath(String path) {
-        try {
-            String pathSt = path.toLowerCase();
-
-            String[] nicknameArr = Arrays.stream(pathSt.split("/"))
-                    .map(String::trim)
-                    .filter(Predicate.isEqual("").negate())
-                    .toArray(String[]::new);
-
-            Group groupRoot = null;
-            Group groupActual = null;
-
-            // get group root, its nickname is unique in the system, it can be accessed direct
-            groupRoot = findFirstByRootGroupAndNicknameIgnoreCase(true, nicknameArr[0], true);
-            if(groupRoot != null) {
-                // check if group path is valid and return that group
-                groupActual = getGroupFromNicknamePath(groupRoot, nicknameArr);
-            }
-            return groupActual;
-
-        } catch(Exception e) {
-            return null;
-        }
-    }
-
-    public Group getGroupByGroupIdOrGroupPath(Object groupId, Object groupPath) throws GroupException {
-
-        if(groupId == null && groupPath == null) {
-            throw new GroupException("Parâmetro groupId e groupPath é nulo.");
-        }
-
-        Group group = null;
-        if(groupId != null) {
-            group = findFirstById(String.valueOf(groupId));
-        }
-        if (group == null && groupPath != null) {
-            group = getGroupFromPath(String.valueOf(groupPath));
-        }
-
-        if(group == null) {
-            throw new GroupException("Grupo não encontrado.");
-        }
-
-        return group;
-    }
-
-    /** Get the root group from a group id */
-    public Group getGroupRootFromGroupId(UUID groupId) {
-        return findFirstById(getGroupRootIdFromGroupId(groupId));
-    }
-    public UUID getGroupRootIdFromGroupId(UUID groupId) {
-        UUID parentGroupId = findParentGroupId(groupId);
-        while(parentGroupId != null) {
-            UUID partentUUID = findParentGroupId(parentGroupId);
-            if(partentUUID == null) {
-                break;
-            } else {
-                parentGroupId = partentUUID;
-            }
-        }
-        return parentGroupId;
-    }
-
-    /** Searches the first 5 groups containing {@code name} ignoring case */
-    public Collection<Group> findTop5ByNameContainingIgnoreCase(String name){
-        return groupRepository.findTop5ByNameContainingIgnoreCase(name);
-    }
-
-    // calculate organization based in domain
-    public Group obtainOrganizationBasedInDomain() {
-        String domain = userService.getDomainFromRequest();
-
-        String organizationId = (domain.contains(".") ? domain.split("\\.")[0] : domain).toLowerCase().trim();
-
-        if(!userService.isProduction() || localOrganizationIdEnabled) {
-            organizationId = localOrganizationId;
-        }
-
-        return findFirstByRootGroupAndNicknameIgnoreCase(true, organizationId, false);
-    }
-
-    public Group getOrganizationBasedInDomain() {
-        // if logged find updated organization of user without cached from session, else calculate from domain
-        Group gOrg = userService.userIsLoggedIn() && userService.getUserInSession() != null && userService.getUserInSession().getOrganization() != null ?
-                findFirstById(userService.getUserInSession().getOrganization().getId()) : obtainOrganizationBasedInDomain();
-        if(gOrg == null) {
-            throw new GroupException("Falha ao obter Organização.");
-        }
-        return gOrg;
-    }
-
-    public Group getOrganizationBasedInDomainIfExist() {
-        try {
-            return getOrganizationBasedInDomain();
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    public boolean emailAvailableForOrganization(String email) {
-        boolean available = false;
-        boolean hasAnyFilter = false;
-        Group organization = getOrganizationBasedInDomainIfExist();
-
-        if (organization != null) {
-            GroupSettings orgSettings = organization.getGroupSettings();
-
-            for (GroupEmailFilter emailFilterNow : orgSettings.getFilterEmails()) {
-                if (emailFilterNow.enabled) {
-                    if (!hasAnyFilter) {
-                        hasAnyFilter = true;
-                    }
-                    switch (emailFilterNow.type) {
-                        case END_WITH:
-                            if (email.endsWith(emailFilterNow.email)) {
-                                available = true;
-                            }
-                            break;
-                        case START_WITH:
-                            if (email.startsWith(emailFilterNow.email)) {
-                                available = true;
-                            }
-                            break;
-                        case CONTAINS:
-                            if (email.contains(emailFilterNow.email)) {
-                                available = true;
-                            }
-                            break;
-                        case EQUALS:
-                            if (email.equals(emailFilterNow.email)) {
-                                available = true;
-                            }
-                            break;
-                        case MASK:
-                            Pattern patternMask = Pattern.compile(emailFilterNow.email.replaceAll("\\*", "(.*)"));
-                            Matcher matcherMask = patternMask.matcher(email);
-                            if (matcherMask.find()) {
-                                available = true;
-                            }
-                            break;
-                        case REGEX:
-                            Pattern pattern = Pattern.compile(emailFilterNow.email);
-                            Matcher matcher = pattern.matcher(email);
-                            if (matcher.find()) {
-                                available = true;
-                            }
-                            break;
-                    }
-                }
-            }
-        }
-
-        return hasAnyFilter ? available : !available;
-    }
-
-    public boolean addEmailFilter(Group group, String email, Object type, Boolean enabled) {
-        if(group == null || email == null || email.isEmpty()) {
-            return false;
-        }
-        GroupEmailFilter groupEmailFilter = new GroupEmailFilter();
-        groupEmailFilter.groupSettings = group.groupSettings;
-        groupEmailFilter.email = email;
-        if(type != null) {
-            groupEmailFilter.type = GroupEmailFilterType.valueOf(String.valueOf(type));
-        }
-        if(enabled != null) {
-            groupEmailFilter.enabled = enabled;
-        }
-        groupEmailFilterRepository.save(groupEmailFilter);
-        return true;
-    }
-
-    public boolean editEmailFilter(Group group, UUID groupEmailFilterId, String email, Object type, Boolean enabled) {
-        if(group == null || groupEmailFilterId == null) {
-            return false;
-        }
-        if(groupEmailFilterRepository.existsByGroupSettingsIdAndId(group.groupSettings.getId(), groupEmailFilterId)) {
-            GroupEmailFilter groupEmailFilter = groupEmailFilterRepository.findFirstByGroupSettingsIdAndId(group.groupSettings.getId(), groupEmailFilterId);
-            if(email != null) {
-                groupEmailFilter.email = email;
-            }
-            if(type != null) {
-                groupEmailFilter.type = GroupEmailFilterType.valueOf(String.valueOf(type));
-            }
-            if(enabled != null) {
-                groupEmailFilter.enabled = enabled;
-            }
-            groupEmailFilterRepository.save(groupEmailFilter);
-            return true;
-        }
-        return false;
-    }
-
-    public boolean editEmailFilter(Group group, String groupEmailFilterId, String email, Object type, Boolean enabled) {
-        if(group == null || groupEmailFilterId == null || groupEmailFilterId.isEmpty()) {
-            return false;
-        }
-        return editEmailFilter(group, UUID.fromString(groupEmailFilterId), email, type, enabled);
-    }
-
-    public boolean deleteEmailFilter(Group group, UUID groupEmailFilterId) {
-        if(group == null || groupEmailFilterId == null) {
-            return false;
-        }
-        if(groupEmailFilterRepository.existsByGroupSettingsIdAndId(group.groupSettings.getId(), groupEmailFilterId)) {
-            GroupEmailFilter groupEmailFilter = groupEmailFilterRepository.findFirstByGroupSettingsIdAndId(group.groupSettings.getId(), groupEmailFilterId);
-            groupEmailFilter.setRemoved(ConvertUtil.getDateTimeNow());
-            groupEmailFilter.setDeleted(true);
-            groupEmailFilterRepository.save(groupEmailFilter);
-            return true;
-        }
-        return false;
-    }
-
-    public boolean deleteEmailFilter(Group group, String groupEmailFilterId) {
-        if(group == null || groupEmailFilterId == null || groupEmailFilterId.isEmpty()) {
-            return false;
-        }
-        return deleteEmailFilter(group, UUID.fromString(groupEmailFilterId));
-    }
-
-    public void saveGroupSettings(GroupSettings gSettings) {
-        groupSettingsRepository.save(gSettings);
-    }
-
-    public boolean editTheme(Group group, String primaryColor, String secondaryColor, String backgroundColor, String cardBackgroundColor, String cardItemColor, String fontColorV1, String fontColorV2, String fontColorV3, String fontColorLinks, String fontDisabledColor, String buttonHoverColor, String alertColor, String successColor, String wrongInvalidColor) {
-        if(group == null) {
-            return false;
-        }
-        GroupSettings groupSettings = group.getGroupSettings();
-        if(groupSettings == null) {
-            return false;
-        }
-        GroupTheme groupTheme = groupSettings.theme;
-        if(groupTheme == null) {
-            groupTheme = new GroupTheme();
-            groupTheme.groupSettings = groupSettings;
-            groupTheme = groupThemeRepository.save(groupTheme);
-        }
-        if(primaryColor != null) {
-            groupTheme.primaryColor = primaryColor.isEmpty() ? null : primaryColor;
-        }
-        if(secondaryColor != null) {
-            groupTheme.secondaryColor = secondaryColor.isEmpty() ? null : secondaryColor;
-        }
-        if(backgroundColor != null) {
-            groupTheme.backgroundColor = backgroundColor.isEmpty() ? null : backgroundColor;
-        }
-        if(cardBackgroundColor != null) {
-            groupTheme.cardBackgroundColor = cardBackgroundColor.isEmpty() ? null : cardBackgroundColor;
-        }
-        if(cardItemColor != null) {
-            groupTheme.cardItemColor = cardItemColor.isEmpty() ? null : cardItemColor;
-        }
-        if(fontColorV1 != null) {
-            groupTheme.fontColorV1 = fontColorV1.isEmpty() ? null : fontColorV1;
-        }
-        if(fontColorV2 != null) {
-            groupTheme.fontColorV2 = fontColorV2.isEmpty() ? null : fontColorV2;
-        }
-        if(fontColorV3 != null) {
-            groupTheme.fontColorV3 = fontColorV3.isEmpty() ? null : fontColorV3;
-        }
-        if(fontColorLinks != null) {
-            groupTheme.fontColorLinks = fontColorLinks.isEmpty() ? null : fontColorLinks;
-        }
-        if(fontDisabledColor != null) {
-            groupTheme.fontColorDisabled = fontDisabledColor.isEmpty() ? null : fontDisabledColor;
-        }
-        if(buttonHoverColor != null) {
-            groupTheme.buttonHoverColor = buttonHoverColor.isEmpty() ? null : buttonHoverColor;
-        }
-        if(alertColor != null) {
-            groupTheme.fontColorAlert = alertColor.isEmpty() ? null : alertColor;
-        }
-        if(successColor != null) {
-            groupTheme.fontColorSuccess = successColor.isEmpty() ? null : successColor;
-        }
-        if(wrongInvalidColor != null) {
-            groupTheme.wrongInvalidColor = wrongInvalidColor.isEmpty() ? null : wrongInvalidColor;
-        }
-        groupThemeRepository.save(groupTheme);
-        return true;
-    }
-
-    public boolean addFeature(Group group, String name, String description, Boolean enabled) {
-        if(group == null) {
-            return false;
-        }
-        if(name == null || name.isEmpty()) {
-            throw new GroupException("Nome da feature está vazio.");
-        }
-        GroupSettings groupSettings = group.getGroupSettings();
-        if(groupSettings == null) {
-            return false;
-        }
-        if(groupFeaturesRepository.existsByGroupSettingsIdAndName(groupSettings.getId(), name)) {
-            throw new GroupException("Feature já existe.");
-        }
-        GroupFeatures groupFeature = new GroupFeatures();
-        groupFeature.groupSettings = groupSettings;
-        groupFeature.name = name.trim();
-        if(description != null) {
-            groupFeature.description = description;
-        }
-        if(enabled != null) {
-            groupFeature.enabled = enabled;
-        }
-        groupFeaturesRepository.save(groupFeature);
-        return true;
-    }
-
-    public boolean deleteFeature(Group group, UUID groupFeatureId) {
-        if(group == null || groupFeatureId == null) {
-            return false;
-        }
-        if(groupFeaturesRepository.existsByGroupSettingsIdAndId(group.getGroupSettings().getId(), groupFeatureId)) {
-            GroupFeatures groupFeature = groupFeaturesRepository.findFirstByGroupSettingsIdAndId(group.getGroupSettings().getId(), groupFeatureId);
-            groupFeature.setRemoved(ConvertUtil.getDateTimeNow());
-            groupFeature.setDeleted(true);
-            groupFeaturesRepository.save(groupFeature);
-            return true;
-        }
-        return false;
-    }
-
-    public boolean deleteFeature(Group group, String groupFeatureId) {
-        if(group == null || groupFeatureId == null || groupFeatureId.isEmpty()) {
-            return false;
-        }
-        return deleteFeature(group, UUID.fromString(groupFeatureId));
-    }
-
-    public boolean editFeature(Group group, UUID groupFeatureId, Boolean enabled, String description) {
-        if(group == null) {
-            return false;
-        }
-        GroupSettings groupSettings = group.getGroupSettings();
-        if(groupSettings == null) {
-            return false;
-        }
-        GroupFeatures groupFeature = groupFeaturesRepository.findFirstByGroupSettingsIdAndId(groupSettings.getId(), groupFeatureId);
-        if(groupFeature == null) {
-            throw new GroupException("Feature não encontrada.");
-        }
-        if(enabled != null) {
-            groupFeature.enabled = enabled;
-        }
-        if(description != null) {
-            groupFeature.description = description;
-        }
-        groupFeaturesRepository.save(groupFeature);
-        return true;
-    }
-
-    public boolean editFeature(Group group, String groupFeatureId, Boolean enabled, String description) {
-        if(group == null || groupFeatureId == null || groupFeatureId.isEmpty()) {
-            return false;
-        }
-        return editFeature(group, UUID.fromString(groupFeatureId), enabled, description);
-    }
-
-    // edit group environment
-    public boolean editEnvironment(Group group, Boolean signup_enabled, Boolean signup_confirm_account_enabled,
-                                   Boolean login_google_enabled, String google_client_id, Boolean recaptcha_enabled,
-                                   String recaptcha_api_key, String recaptcha_api_project_id, String recaptcha_site_key,
-                                   Boolean keycloak_enabled, String keycloak_client_id, String keycloak_client_secret,
-                                   String keycloak_realm, String keycloak_url, String keycloak_redirect_url,
-                                   Boolean alert_new_content_enabled, String message_template_new_content,
-                                   Boolean alert_assigned_content_enabled, String message_template_assigned_content,
-                                   Boolean email_enabled, String email_host, String email_port, String email_protocol,
-                                   String email_username, String email_password) {
-        if(group == null) {
-            return false;
-        }
-        if(!group.isRootGroup()) {
-            throw new GroupException("Este grupo não é uma organização.");
-        }
-        GroupSettings groupSettings = group.getGroupSettings();
-        if(groupSettings == null) {
-            return false;
-        }
-        GroupEnvironment groupEnvironment = groupSettings.environment;
-        if(groupEnvironment == null) {
-            groupEnvironment = new GroupEnvironment();
-            groupEnvironment.groupSettings = groupSettings;
-            groupEnvironment = groupEnvironmentRepository.save(groupEnvironment);
-        }
-        if(signup_enabled != null) {
-            groupEnvironment.signup_enabled = signup_enabled;
-        }
-        if(signup_confirm_account_enabled != null) {
-            groupEnvironment.signup_confirm_account_enabled = signup_confirm_account_enabled;
-        }
-        if(login_google_enabled != null) {
-            groupEnvironment.login_google_enabled = login_google_enabled;
-        }
-        if(google_client_id != null) {
-            groupEnvironment.google_client_id = google_client_id.isEmpty() ? null : google_client_id;
-        }
-        if(recaptcha_enabled != null) {
-            groupEnvironment.recaptcha_enabled = recaptcha_enabled;
-        }
-        if(recaptcha_api_key != null) {
-            groupEnvironment.recaptcha_api_key = recaptcha_api_key.isEmpty() ? null : recaptcha_api_key;
-        }
-        if(recaptcha_api_project_id != null) {
-            groupEnvironment.recaptcha_api_project_id = recaptcha_api_project_id.isEmpty() ? null : recaptcha_api_project_id;
-        }
-        if(recaptcha_site_key != null) {
-            groupEnvironment.recaptcha_site_key = recaptcha_site_key.isEmpty() ? null : recaptcha_site_key;
-        }
-        if(keycloak_enabled != null) {
-            groupEnvironment.keycloak_enabled = keycloak_enabled;
-        }
-        if(keycloak_client_id != null) {
-            groupEnvironment.keycloak_client_id = keycloak_client_id.isEmpty() ? null : keycloak_client_id;
-        }
-        if(keycloak_client_secret != null) {
-            groupEnvironment.keycloak_client_secret = keycloak_client_secret.isEmpty() ? null : keycloak_client_secret;
-        }
-        if(keycloak_realm != null) {
-            groupEnvironment.keycloak_realm = keycloak_realm.isEmpty() ? null : keycloak_realm;
-        }
-        if(keycloak_url != null) {
-            groupEnvironment.keycloak_url = keycloak_url.isEmpty() ? null : keycloak_url;
-        }
-        if(keycloak_redirect_url != null) {
-            groupEnvironment.keycloak_redirect_url = keycloak_redirect_url.isEmpty() ? null : keycloak_redirect_url;
-        }
-
-        if(alert_new_content_enabled != null) {
-            groupEnvironment.alert_new_content_enabled = alert_new_content_enabled;
-        }
-        if(message_template_new_content != null) {
-            if(message_template_new_content.length() > 6000) {
-                throw new GroupException("O template de mensagem para novo conteúdo não pode ter mais de 6000 caracteres.");
-            }
-            groupEnvironment.message_template_new_content = message_template_new_content.isEmpty() ? null : message_template_new_content;
-        }
-        if(alert_assigned_content_enabled != null) {
-            groupEnvironment.alert_assigned_content_enabled = alert_assigned_content_enabled;
-        }
-        if(message_template_assigned_content != null) {
-            if(message_template_assigned_content.length() > 6000) {
-                throw new GroupException("O template de mensagem para conteúdo atribuído não pode ter mais de 6000 caracteres.");
-            }
-            groupEnvironment.message_template_assigned_content = message_template_assigned_content.isEmpty() ? null : message_template_assigned_content;
-        }
-
-        boolean needUpdateEmailConfiguration = false;
-        if(email_enabled != null && email_enabled != groupEnvironment.email_enabled ||
-                email_host != null && !email_host.equals(groupEnvironment.email_host) ||
-                email_port != null && !email_port.equals(groupEnvironment.email_port) ||
-                email_protocol != null && !email_protocol.equals(groupEnvironment.email_protocol) ||
-                email_username != null && !email_username.equals(groupEnvironment.email_username) ||
-                email_password != null && !email_password.equals(groupEnvironment.email_password)) {
-            needUpdateEmailConfiguration = true;
-        }
-
-        if(email_enabled != null) {
-            groupEnvironment.email_enabled = email_enabled;
-        }
-        if(email_host != null) {
-            groupEnvironment.email_host = email_host.isEmpty() ? null : email_host;
-        }
-        if(email_port != null) {
-            groupEnvironment.email_port = email_port.isEmpty() ? null : email_port;
-        }
-        if(email_protocol != null) {
-            groupEnvironment.email_protocol = email_protocol.isEmpty() ? null : email_protocol;
-        }
-        if(email_username != null) {
-            groupEnvironment.email_username = email_username.isEmpty() ? null : email_username;
-        }
-        if(email_password != null) {
-            groupEnvironment.email_password = email_password.isEmpty() ? null : email_password;
-        }
-
-        groupEnvironmentRepository.save(groupEnvironment);
-
-        if(needUpdateEmailConfiguration) {
-            userService.setupEmailSender();
-        }
-
-        return true;
     }
 
     public GroupEnvironment getGroupEnvironment(Group group) {
@@ -869,74 +263,13 @@ public class GroupService {
         return groupEnvironment;
     }
 
-    // get organization environment
-    public GroupEnvironment getOrganizationEnvironment() {
-        return getGroupEnvironment(getOrganizationBasedInDomainIfExist());
-    }
-
-
-    public List<ProfileWithCompetencesDTO> filterProfilesWithCompetences(CompetenceFilterDTO competenceFilter){
-
-        List<ProfileWithCompetencesDTO> selectedProfiles = new ArrayList<>();
-
-        Group group = getGroupByGroupIdOrGroupPath(competenceFilter.groupId(), competenceFilter.groupPath());
-
-        Collection<ProfileGroup> participants = group.getParticipants();
-        List<Profile> profiles = participants.stream()
-                .sorted(Comparator.comparing(ProfileGroup::getJoined).reversed())
-                .map(ProfileGroup::getProfile)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-
-        for(Profile p : profiles){
-            ProfileWithCompetencesDTO profile = new ProfileWithCompetencesDTO(
-                    p.getId(),
-                    p.getUser(),
-                    p.getFirstname(),
-                    p.getLastname(),
-                    p.getImage(),
-                    p.getBio(),
-                    p.getGender(),
-                    p.getCreationDate(),
-                    p.getIndicators(),
-                    competenceProfileService.findCompetenceByProfile(p)
-            );
-
-
-            boolean hasNecessaryCompetences = false;
-
-            if(competenceFilter.matchEveryCompetence()){
-                hasNecessaryCompetences = true;
-                for(CompetenceFilterRequestDTO competence : competenceFilter.competences()){
-                    if(!profile.hasCompetence(competence.id(), competence.level())) {
-                        hasNecessaryCompetences = false;
-                        break;
-                    }
-                }
-            }
-            else{
-                for(CompetenceFilterRequestDTO competence : competenceFilter.competences()) {
-                    if(profile.hasCompetence(competence.id(), competence.level())) {
-                        hasNecessaryCompetences = true;
-                        break;
-                    }
-                }
-            }
-
-            if(hasNecessaryCompetences)
-                selectedProfiles.add(profile);
-        }
-
-        return selectedProfiles;
-}
-
     public List<CompetenceInfoDTO> getGroupCompetences(Group group){
 
         List<CompetenceInfoDTO> groupCompetences = new ArrayList<>();
         List<Profile> groupProfiles = group.getParticipants().stream().map(ProfileGroup::getProfile).collect(Collectors.toList());
 
         for(Profile profile : groupProfiles){
-            var competences = competenceProfileService.findCompetenceByProfile( profile );
+            var competences = competenceService.findByProfile( profile.getId() );
 
             for ( Competence competence : competences ) {
                 UUID typeId = competence.getCompetenceType().getId();
@@ -969,22 +302,6 @@ public class GroupService {
 
     }
 
-    public void setupOrganization() {
-        if(localOrganizationIdEnabled) {
-            Optional<Group> organizationOpt = groupRepository.findFirstByRootGroup(true);
-            if(organizationOpt.isPresent()) {
-                Group organization = organizationOpt.get();
-                if(organization.nickname.equals(localOrganizationId)) {
-                    return;
-                }
-                organization.nickname = localOrganizationId;
-                organization.name = localOrganizationId.toUpperCase();
-                organization.setType(GroupType.INSTITUTION);
-                save(organization);
-            }
-        }
-    }
-
     // send email for all users in group
     public void sendEmailForAllUsersInGroup(Group group, String subject, String message) {
         if(group == null || subject == null || message == null) {
@@ -994,7 +311,7 @@ public class GroupService {
         for(ProfileGroup profileGroup : participants) {
             Profile profile = profileGroup.profile;
             if(profile != null && profile.getUser() != null) {
-                userService.sendSystemEmailToUser(profile.getUser(), subject, message, true);
+                emailService.sendSystemEmailToUser(profile.getUser(), subject, message, true);
             }
         }
     }
@@ -1016,9 +333,9 @@ public class GroupService {
 
         String groupName = group.getName();
         String contentName = folder.getName();
-        String contentUrl = userService.getPublicUrl() + "/group" + group.getPath() + "#" + "contents/" + folder.getId();
+        String contentUrl = environmentService.getPublicUrl() + "/group" + group.getPath() + "#" + "contents/" + folder.getId();
 
-        String message = getOrganizationEnvironment().groupSettings.environment.message_template_new_content;
+        String message = OrganizationService.getInstance().getEnvironment().message_template_new_content;
         if(message == null || message.isEmpty()) {
             message = "Olá, {{ groupName }} tem um novo conteúdo: {{ contentName }}.<br/><br/>Acesse: {{ contentUrl }}";
         }
@@ -1034,9 +351,9 @@ public class GroupService {
         String fromUser = fromProfile.getFirstname();
         String toUser = profile.getFirstname();
         String contentName = folder.getName();
-        String contentUrl = userService.getPublicUrl() + "/content/" + folder.getReference();
+        String contentUrl = environmentService.getPublicUrl() + "/content/" + folder.getReference();
 
-        String message = getOrganizationEnvironment().groupSettings.environment.message_template_assigned_content;
+        String message = OrganizationService.getInstance().getEnvironment().message_template_assigned_content;
         if(message == null || message.isEmpty()) {
             message = "Olá {{ toUser }}, você recebeu um novo conteúdo de {{ fromUser }}: {{ contentName }}.<br/><br/>Acesse: {{ contentUrl }}";
         }
@@ -1074,7 +391,7 @@ public class GroupService {
 
         GroupPostDTO groupPostDTO = new GroupPostDTO();
         groupPostDTO.setContent(message);
-        groupPostDTO.setAuthorId(userService.getUserInSession().getId().toString());
+        groupPostDTO.setAuthorId(loginService.getUserInSession().getId().toString());
 
         groupFeedService.createGroupPost(group.getId().toString(), groupPostDTO);
     }
@@ -1085,7 +402,7 @@ public class GroupService {
             return;
         }
 
-        if(!getOrganizationEnvironment().groupSettings.environment.alert_new_content_enabled) {
+        if(!OrganizationService.getInstance().getEnvironment().alert_new_content_enabled) {
             return;
         }
 
@@ -1101,19 +418,160 @@ public class GroupService {
             return;
         }
 
-        if(!getOrganizationEnvironment().groupSettings.environment.alert_assigned_content_enabled) {
+        if(!OrganizationService.getInstance().getEnvironment().alert_assigned_content_enabled) {
             return;
         }
 
         String subject = "Conteúdo atribuído";
         String message = getMessageTemplateForContentAssigned(fromUser, profile, folder);
 
-        userService.sendSystemEmailToUser(profile.getUser(), subject, message, true);
+        emailService.sendSystemEmailToUser(profile.getUser(), subject, message, true);
     }
 
-    public Collection<ProfileGroup> getAdministrators(@NotNull Group group) {
-        return group.participants.stream()
-            .filter(pg -> pg.role.getRoleType() == RoleType.ADMINISTRATOR)
+    public Group createGroup( CreateGroupDTO dto ) {
+        if ( dto.parentGroup().isEmpty() && !userService.isUserAdminSession() )
+            throw new UniversiBadRequestException( "O Parâmetro 'parentGroup' deve ser informado" );
+
+        var parentGroup = dto.parentGroup().map( this::findByIdOrPathOrThrow );
+        var nickname = checkNicknameAvailable( dto.nickname(), parentGroup.orElse( null ) );
+
+        var group = new Group();
+        group.setAdmin( loginService.getUserInSession().getProfile() );
+        group.setSubGroups( Arrays.asList() );
+
+        group.setNickname( nickname );
+        group.setName( dto.name() );
+        group.setDescription( dto.description() );
+        group.setType(
+            CastingUtil.getEnum( GroupType.class, dto.groupType() )
+                .orElseThrow( () -> new UniversiBadRequestException( "Tipo de Grupo '" + dto.groupType() + "' não existe" ) )
+        );
+
+        group.setCanCreateGroup( dto.canCreateSubgroup() );
+        group.setPublicGroup( dto.isPublic() );
+        group.setCanEnter( dto.canJoin() );
+
+        dto.image().ifPresent( imageId -> {
+            group.setImage( imageMetadataService.findOrThrow( imageId ) );
+        } );
+
+        dto.bannerImage().ifPresent( bannerImageId -> {
+            group.setBannerImage( imageMetadataService.findOrThrow( bannerImageId ) );
+        } );
+
+        dto.headerImage().ifPresent( headerImageId -> {
+            group.setHeaderImage( imageMetadataService.findOrThrow( headerImageId ) );
+        } );
+
+        var settings = groupSettingsRepository.saveAndFlush( new GroupSettings() );
+        group.setGroupSettings( settings );
+        parentGroup.ifPresent( group::setParentGroup );
+
+        var createdGroup = groupRepository.saveAndFlush( group );
+
+        RoleService.getInstance().createBaseRoles( createdGroup );
+        GroupParticipantService.getInstance().addParticipant( new AddGroupParticipantDTO(
+            createdGroup,
+            createdGroup.getAdmin(),
+            RoleService.getInstance().getGroupAdminRole( createdGroup )
+        ) );
+
+        return createdGroup;
+    }
+
+    public Group updateGroup( @NotNull UpdateGroupDTO dto ) {
+        var group = findByIdOrPathOrThrow( dto.group() );
+        checkPermissionToEdit( group );
+
+        dto.name().ifPresent( name -> {
+            if ( !name.isBlank() ) group.setName( name.trim() );
+        } );
+
+        dto.description().ifPresent( description -> {
+            if ( !description.isBlank() ) group.setDescription( description.trim() );
+        } );
+
+        dto.groupType().ifPresent( typeName -> {
+            var type = CastingUtil.getEnum( GroupType.class , typeName );
+            type.ifPresentOrElse(
+                group::setType,
+                () -> { throw new UniversiBadRequestException( "Tipo de Grupo '" + typeName + "' não existe" ); }
+            );
+        } );
+
+        dto.image().ifPresent( imageId -> {
+            group.setImage( imageMetadataService.findOrThrow( imageId ) );
+        } );
+
+        dto.bannerImage().ifPresent( bannerImageId -> {
+            group.setBannerImage( imageMetadataService.findOrThrow( bannerImageId ) );
+        } );
+
+        dto.headerImage().ifPresent( headerImageId -> {
+            group.setHeaderImage( imageMetadataService.findOrThrow( headerImageId ) );
+        } );
+
+        dto.canCreateSubgroup().ifPresent( group::setCanCreateGroup );
+        dto.isPublic().ifPresent( group::setPublicGroup );
+        dto.canJoin().ifPresent( group::setCanEnter );
+
+        return this.groupRepository.saveAndFlush( group );
+    }
+
+    public List<Group> subGroups(UUID groupId) {
+        Group group = findOrThrow( groupId );
+
+        RoleService.getInstance().checkPermission(group, FeaturesTypes.GROUP, Permission.READ);
+
+        return group.getSubGroups()
+            .stream()
+            .filter( this::isValid )
+            .sorted( Comparator.comparing( Group::getCreatedAt ).reversed() )
+            .toList();
+    }
+
+    public Collection<Folder> listFolders(UUID groupId) {
+        Group group = findOrThrow( groupId );
+
+        // check permission contents
+        RoleService.getInstance().checkPermission(group, FeaturesTypes.CONTENT, Permission.READ);
+
+        return group.getFoldersGrantedAccess();
+    }
+
+    public void deleteGroup( UUID groupId ) {
+        Group group = findOrThrow( groupId );
+
+        RoleService.getInstance().checkPermission(group, FeaturesTypes.GROUP, Permission.READ_WRITE_DELETE);
+        checkPermissionToDelete( group );
+
+        delete( group );
+    }
+
+    public Collection<Role> findRoles( UUID groupId ) {
+        return RoleService.getInstance().findByGroup( groupId );
+    }
+
+    public List<Profile> listAdministrators( UUID groupId ) { return listAdministrators( findOrThrow( groupId ) ); }
+    public List<Profile> listAdministrators( String groupId ) { return listAdministrators( findByIdOrPathOrThrow( groupId ) ); }
+    public List<Profile> listAdministrators( @NotNull Group group ) {
+        if ( !hasPermissionToEdit( group ) )
+            throw new UniversiForbiddenAccessException( "Você não tem permissão para gerenciar este grupo" );
+
+        return group.getAdministrators().stream()
+            .sorted( Comparator.comparing( ProfileGroup::getJoined ).reversed() )
+            .map( ProfileGroup::getProfile )
+            .filter( ProfileService.getInstance()::isValid )
+            .toList();
+    }
+
+    public List<Activity> listActivities( UUID groupId ) { return listActivities( findOrThrow( groupId ) ); }
+    public List<Activity> listActivities( String groupId ) { return listActivities( findByIdOrPathOrThrow( groupId ) ); }
+    public List<Activity> listActivities( @NotNull Group group ) {
+        return activityService
+            .findByGroup( group )
+            .stream()
+            .sorted( Comparator.comparing( Activity::getStartDate ) )
             .toList();
     }
 }

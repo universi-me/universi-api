@@ -32,7 +32,7 @@ public class AuthenticationFailedHandler extends SimpleUrlAuthenticationFailureH
                 r.status = 401;
                 r.alertOptions.put("icon", "warning");
                 r.alertOptions.put("title", "Falha na autenticação");
-                throw new UserException(userService.getLastSpringSecurityError(exception));
+                throw new UserException(LoginService.getInstance().getLastSpringSecurityError(exception));
             });
 
             response.setHeader("Content-Type", "application/json; charset=utf-8");

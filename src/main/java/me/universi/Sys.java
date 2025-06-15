@@ -4,9 +4,11 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
-import me.universi.group.services.GroupService;
+import me.universi.group.services.OrganizationService;
 
 import me.universi.user.services.UserService;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +16,7 @@ import org.springframework.boot.ExitCodeGenerator;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.stereotype.Controller;
@@ -24,28 +27,32 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @SpringBootApplication
 @ImportResource({"classpath:spring-security.xml"})
 @Controller
-public class Sys {
+public class Sys implements ApplicationContextAware {
 
     @Value("${spring.profiles.active}")
     private String PROFILE_ACTIVE;
     @Autowired
     public UserService userService;
     @Autowired
-    public GroupService groupService;
+    private OrganizationService organizationService;
     public static ApplicationContext context;
-
 
     public static void main(String [] args) {
         context = SpringApplication.run(Sys.class, args);
     }
 
-    @GetMapping("/api/admin/exit")
+    @Override
+    public void setApplicationContext(@NotNull ApplicationContext applicationContext) throws BeansException {
+        Sys.context = applicationContext;
+    }
+
+    @GetMapping("/admin/exit")
     public void exitApp() {
         int exitCode = SpringApplication.exit(context, (ExitCodeGenerator) () -> 0);
         System.exit(exitCode);
     }
 
-    @GetMapping(value = {"/", "/api", "/api/",})
+    @GetMapping(value = {"/", "",})
     @ResponseBody
     String index() {
         return "Universi.me API – " + PROFILE_ACTIVE.toUpperCase();
@@ -54,7 +61,7 @@ public class Sys {
     @Bean
     InitializingBean sendDatabase() {
         return () -> {
-            groupService.setupOrganization();
+            organizationService.setup();
         };
     }
 

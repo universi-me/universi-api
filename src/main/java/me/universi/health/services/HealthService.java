@@ -1,6 +1,5 @@
 package me.universi.health.services;
 
-import jakarta.validation.constraints.Min;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -107,5 +106,9 @@ public class HealthService {
         catch (Exception e) {
             return new HealthResponseDTO(false, false, MINIO_SERVICE_ID, "Serviço offline", e.getMessage());
         }
+    }
+
+    public boolean isUp( HealthResponseDTO health ) {
+        return health.isUp() || health.isDisabled();
     }
 }

@@ -1,26 +1,27 @@
 package me.universi.profile.entities;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
 import me.universi.capacity.entidades.ContentStatus;
 import me.universi.capacity.entidades.FolderFavorite;
 import me.universi.capacity.entidades.FolderProfile;
-import me.universi.competence.entities.Competence;
 import me.universi.competence.entities.CompetenceType;
-import me.universi.curriculum.education.entities.Education;
-import me.universi.curriculum.experience.entities.Experience;
+import me.universi.education.entities.Education;
+import me.universi.experience.entities.Experience;
 import me.universi.group.entities.ProfileGroup;
-import me.universi.indicators.entities.Indicators;
+import me.universi.image.entities.ImageMetadata;
+import me.universi.image.services.ImageMetadataService;
 import me.universi.link.entities.Link;
-import me.universi.roles.entities.Roles;
+import me.universi.role.entities.Role;
 import me.universi.profile.enums.Gender;
-import me.universi.recommendation.entities.Recommendation;
 import me.universi.user.entities.User;
 import org.hibernate.annotations.*;
 
@@ -28,9 +29,10 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.UUID;
 
-@Entity(name = "profile")
-@SQLDelete(sql = "UPDATE profile SET deleted = true WHERE id=?")
-@Where(clause = "deleted=false")
+@Entity(name = "Profile")
+@Table( name = "profile", schema = "profile" )
+@SQLDelete(sql = "UPDATE profile.profile SET deleted = true WHERE id=?")
+@SQLRestriction( "NOT deleted" )
 public class Profile implements Serializable {
 
     @Serial
@@ -49,8 +51,12 @@ public class Profile implements Serializable {
     private String firstname;
     @Column(name = "lastname")
     private String lastname;
-    @Column(name = "image")
-    private String image;
+
+    @Nullable
+    @OneToOne
+    @JoinColumn( name = "image_metadata_id" )
+    private ImageMetadata image;
+
     @Column(name = "bio", columnDefinition = "TEXT")
     private String bio;
 
@@ -59,23 +65,11 @@ public class Profile implements Serializable {
     private Collection<ProfileGroup> groups;
 
     @JsonIgnore
-    @ManyToMany
-    @JoinTable(
-            name = "education_profile",
-            joinColumns = @JoinColumn(name = "profile_id"),
-            inverseJoinColumns = @JoinColumn(name = "education_id")
-    )
-    @NotFound(action = NotFoundAction.IGNORE)
+    @OneToMany( mappedBy = "profile" )
     private Collection<Education> educations;
 
     @JsonIgnore
-    @ManyToMany
-    @JoinTable(
-            name = "experience_profile",
-            joinColumns = @JoinColumn(name = "profile_id"),
-            inverseJoinColumns = @JoinColumn(name = "experience_id")
-    )
-    @NotFound(action = NotFoundAction.IGNORE)
+    @OneToMany( mappedBy = "profile" )
     private Collection<Experience> experiences;
 
     @JsonIgnore
@@ -84,12 +78,6 @@ public class Profile implements Serializable {
     @Column(name = "gender")
     @Enumerated(EnumType.STRING)
     private Gender gender;
-    @JsonIgnore
-    @OneToMany(mappedBy = "origin")
-    private Collection<Recommendation> recomendationsSend;
-    @JsonIgnore
-    @OneToMany(mappedBy = "destiny")
-    private Collection<Recommendation> recomendationsReceived;
 
     @JsonIgnore
     @OneToMany(mappedBy = "profile", fetch = FetchType.LAZY)
@@ -99,10 +87,6 @@ public class Profile implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at")
     private Date creationDate;
-
-    @OneToOne(cascade = CascadeType.ALL)
-    @JsonBackReference
-    private Indicators indicators;
 
     @JsonIgnore
     @Column(name = "deleted")
@@ -118,7 +102,7 @@ public class Profile implements Serializable {
 
     @Transient
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    public Roles roles;
+    public Role role;
 
     @JsonIgnore
     @Column(name = "hidden")
@@ -128,12 +112,18 @@ public class Profile implements Serializable {
     @OneToMany( fetch = FetchType.EAGER )
     @JoinTable(
         name = "profile_competence_badges",
+        schema = "profile",
         joinColumns = @JoinColumn(name = "profile_id"),
         inverseJoinColumns = @JoinColumn(name = "competence_type_id")
     )
     private Collection<CompetenceType> competenceBadges;
 
-    public Profile(UUID id, User user, String bio, Collection<ProfileGroup> groups, Collection<Link> links, Collection<FolderProfile> assignedFolders, Collection<FolderFavorite> favoriteFolders, boolean hidden) {
+    @Nullable
+    @ManyToOne
+    @JoinColumn( name = "department_id" )
+    private Department department;
+
+    public Profile(UUID id, User user, String bio, Collection<ProfileGroup> groups, Collection<Link> links, Collection<FolderProfile> assignedFolders, Collection<FolderFavorite> favoriteFolders, boolean hidden, Department department) {
         this.id = id;
         this.user = user;
         this.bio = bio;
@@ -142,6 +132,7 @@ public class Profile implements Serializable {
         this.assignedFolders = assignedFolders;
         this.favoriteFolders = favoriteFolders;
         this.hidden = hidden;
+        this.department = department;
     }
 
     public Profile(){
@@ -192,22 +183,6 @@ public class Profile implements Serializable {
         this.lastname = lastname;
     }
 
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
-    }
-
-    public Collection<Recommendation> getRecomendationsSend() {
-        return recomendationsSend;
-    }
-
-    public Collection<Recommendation> getRecomendationsReceived() {
-        return recomendationsReceived;
-    }
-
     public Date getCreationDate() {
         return creationDate;
     }
@@ -232,14 +207,6 @@ public class Profile implements Serializable {
         this.gender = gender;
     }
 
-    public void setRecomendationsSend(Collection<Recommendation> recomendationsSend) {
-        this.recomendationsSend = recomendationsSend;
-    }
-
-    public void setRecomendationsReceived(Collection<Recommendation> recomendationsReceived) {
-        this.recomendationsReceived = recomendationsReceived;
-    }
-
     public Collection<ContentStatus> getContentStatus() {
         return contentStatus;
     }
@@ -250,14 +217,6 @@ public class Profile implements Serializable {
 
     public void setId(UUID id) {
         this.id = id;
-    }
-
-    public Indicators getIndicators() {
-        return indicators;
-    }
-
-    public void setIndicators(Indicators indicators) {
-        this.indicators = indicators;
     }
 
     public Collection<Education> getEducations() {
@@ -312,6 +271,12 @@ public class Profile implements Serializable {
         this.competenceBadges = competenceBadges;
     }
 
+    public @Nullable ImageMetadata getImage() { return image; }
+    public void setImage(ImageMetadata image) { this.image = image; }
+
+    public Department getDepartment() { return department; }
+    public void setDepartment(Department department) { this.department = department; }
+
     @Transient
     public boolean hasBadge(@NotNull CompetenceType competenceType) {
         return this.getCompetenceBadges().stream().anyMatch(ct -> ct.getId().equals(competenceType.getId()));
@@ -324,7 +289,7 @@ public class Profile implements Serializable {
                 ", user='" + user + '\'' +
                 ", firstname='" + firstname + '\'' +
                 ", lastname='" + lastname + '\'' +
-                ", image='" + image + '\'' +
+                ", image='" + ImageMetadataService.getInstance().getUri( image ) + '\'' +
                 ", bio='" + bio + "']\n";
     }
 }

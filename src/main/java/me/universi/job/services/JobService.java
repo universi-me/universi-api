@@ -1,97 +1,131 @@
 package me.universi.job.services;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import me.universi.user.services.LoginService;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import me.universi.Sys;
+import me.universi.api.exceptions.UniversiBadRequestException;
+import me.universi.api.interfaces.EntityService;
 import me.universi.competence.services.CompetenceTypeService;
 import me.universi.feed.dto.GroupPostDTO;
 import me.universi.feed.services.GroupFeedService;
 import me.universi.institution.services.InstitutionService;
+import me.universi.job.dto.CreateJobDTO;
+import me.universi.job.dto.UpdateJobDTO;
 import me.universi.job.entities.Job;
-import me.universi.job.exceptions.JobException;
 import me.universi.job.repositories.JobRepository;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
+import me.universi.role.enums.FeaturesTypes;
+import me.universi.role.enums.Permission;
+import me.universi.role.services.RoleService;
 import me.universi.user.services.UserService;
 
 @Service
-public class JobService {
+public class JobService extends EntityService<Job> {
     private final JobRepository jobRepository;
+    private final CompetenceTypeService competenceTypeService;
+    private final GroupFeedService groupFeedService;
+    private final InstitutionService institutionService;
+    private final ProfileService profileService;
+    private final RoleService roleService;
+    private final UserService userService;
+    private final LoginService loginService;
 
-    public JobService(JobRepository jobRepository) {
+    public JobService(JobRepository jobRepository, CompetenceTypeService competenceTypeService, GroupFeedService groupFeedService, InstitutionService institutionService, ProfileService profileService, RoleService roleService, UserService userService, LoginService loginService) {
         this.jobRepository = jobRepository;
+        this.competenceTypeService = competenceTypeService;
+        this.groupFeedService = groupFeedService;
+        this.institutionService = institutionService;
+        this.profileService = profileService;
+        this.roleService = roleService;
+        this.userService = userService;
+        this.loginService = loginService;
     }
 
     public static JobService getInstance() { return Sys.context.getBean("jobService", JobService.class); }
 
-    public Optional<Job> findById(@NotNull UUID id) {
+    @Override
+    protected Optional<Job> findUnchecked(UUID id) {
         return jobRepository.findById(id);
     }
 
-    public List<Job> findAll() {
+    @Override
+    protected List<Job> findAllUnchecked() {
         return jobRepository.findAll();
     }
 
-    public Job create(@NotNull String title, @NotNull String shortDescription, @NotNull String longDescription, @NotNull UUID institutionId, @NotNull Collection<UUID> requiredCompetencesIds) throws JobException {
-        title = checkValidTitle(title);
-        shortDescription = checkValidShortDescription(shortDescription);
+    public Job create( CreateJobDTO createJobDTO ) {
+        checkPermissionToCreate();
 
-        var institution = InstitutionService.getInstance().findById(institutionId).orElseThrow(() -> {
-            return new JobException("Instituição não encontrada");
-        });
+        var title = checkValidTitle( createJobDTO.title() );
+        var shortDescription = checkValidShortDescription( createJobDTO.shortDescription() );
 
-        var competencesTypes = CompetenceTypeService.getInstance().findAllById(requiredCompetencesIds);
+        var institution = institutionService.findOrThrow( createJobDTO.institutionId() );
+
+        var competencesTypes = competenceTypeService.findByIdOrNameOrThrow( createJobDTO.requiredCompetencesIds() );
+
+        var profileInSession = profileService.getProfileInSessionOrThrow();
 
         var job = new Job();
         job.setTitle(title);
         job.setShortDescription(shortDescription);
-        job.setLongDescription(longDescription);
+        job.setLongDescription( createJobDTO.longDescription() );
         job.setInstitution(institution);
         job.setRequiredCompetences(competencesTypes);
         job.setClosed(false);
-        job.setAuthor(ProfileService.getInstance().getProfileInSession());
+        job.setAuthor( profileInSession );
 
         job = save(job);
 
-        var organizationId = UserService.getInstance().getUserInSession().getOrganization().getId().toString();
-        // TODO: group environment variable for message
-        var postMessage = "Nova vaga cadastrada para a instituição " + job.getInstitution().getName()
-            + ": <a href=\"/job/" + job.getId() + "\"><strong>" + job.getTitle() + "</strong></a>";
+        var organizationId = profileInSession.getUser().getOrganization().getId().toString();
 
-        var groupPostDto = new GroupPostDTO(postMessage, job.getAuthor().getId().toString());
+        if ( roleService.hasPermission( organizationId , FeaturesTypes.FEED, Permission.READ_WRITE) ) {
+            // TODO: group environment variable for message
+            var postMessage = "Nova vaga cadastrada para a instituição " + job.getInstitution().getName()
+                + ": <a href=\"/job/" + job.getId() + "\"><strong>" + job.getTitle() + "</strong></a>";
 
-        GroupFeedService.getInstance().createGroupPost(organizationId, groupPostDto);
+            var groupPostDto = new GroupPostDTO(postMessage, job.getAuthor().getId().toString());
+            groupFeedService.createGroupPost(organizationId, groupPostDto);
+        }
 
         return job;
     }
 
-    public Job edit(@NotNull UUID jobId, String title, String shortDescription, String longDescription, Collection<UUID> requiredCompetencesIds) throws JobException {
-        var job = checkCanEdit(jobId, ProfileService.getInstance().getProfileInSession());
+    public Job edit( UUID id, UpdateJobDTO updateJobDTO ) {
+        var job = findOrThrow( id );
+        checkPermissionToEdit( job );
 
-        if (title != null)
-            job.setTitle( checkValidTitle(title) );
+        updateJobDTO.title().ifPresent( title -> {
+            job.setTitle( checkValidTitle( title ) );
+        } );
 
-        if (shortDescription != null)
-            job.setShortDescription( checkValidShortDescription(shortDescription) );
+        updateJobDTO.shortDescription().ifPresent( shortDescription -> {
+            job.setShortDescription( checkValidShortDescription( shortDescription ) );
+        } );
 
-        if (longDescription != null)
-            job.setLongDescription(longDescription);
+        updateJobDTO.longDescription().ifPresent( job::setLongDescription );
 
-        if (requiredCompetencesIds != null)
-            job.setRequiredCompetences( CompetenceTypeService.getInstance().findAllById(requiredCompetencesIds) );
+        updateJobDTO.requiredCompetencesIds().ifPresent( competenceTypesIds -> {
+            job.setRequiredCompetences( competenceTypeService.findByIdOrNameOrThrow( competenceTypesIds ) );
+        } );
 
         return save(job);
     }
 
-    public Job close(@NotNull UUID jobId, @NotNull Profile profile) throws JobException {
-        var job = checkCanEdit(jobId, profile);
+    public Job close( @NotNull UUID id ) {
+        return close( id, profileService.getProfileInSessionOrThrow() );
+    }
+
+    public Job close(@NotNull UUID jobId, @NotNull Profile profile) {
+        var job = findOrThrow( jobId );
+        checkPermissionToEdit( job );
         job.setClosed(true);
 
         return save(job);
@@ -101,44 +135,52 @@ public class JobService {
         return jobRepository.saveAndFlush(job);
     }
 
-    private Job checkCanEdit(@NotNull UUID jobId, @NotNull Profile profile) throws JobException {
-        var job = findById(jobId).orElseThrow(() -> new JobException("Vaga não encontrada."));
-
-        var canEdit = UserService.getInstance().isUserAdmin(profile.getUser())
-            || job.getAuthor().getId().equals(profile.getId());
-
-        if (!canEdit)
-            throw new JobException("O perfil '" + profile.getFirstname() + " " + profile.getLastname() + "' não tem permissão para alterar esta vaga.");
-
-        if (job.isClosed())
-            throw new JobException("Uma vaga fechada não pode ser alterada.");
-
-        return job;
+    @Override
+    public boolean hasPermissionToCreate() {
+        var user = loginService.getUserInSession();
+        return roleService.hasPermission( user.getOrganization(), FeaturesTypes.JOBS, Permission.READ_WRITE );
     }
 
-    private String checkValidTitle(@Nullable String title) throws JobException {
+    @Override
+    public boolean hasPermissionToEdit( Job job ) {
+        if ( job.isClosed() )
+            return false;
+
+        var user = loginService.getUserInSession();
+        return job.getAuthor().getId().equals( user.getProfile().getId() )
+            || roleService.hasPermission( user.getOrganization(), FeaturesTypes.JOBS, Permission.READ_WRITE );
+    }
+
+    @Override
+    public boolean hasPermissionToDelete( Job job ) {
+        var user = loginService.getUserInSession();
+        return job.getAuthor().getId().equals( user.getProfile().getId() )
+            || roleService.hasPermission( user.getOrganization(), FeaturesTypes.JOBS, Permission.READ_WRITE_DELETE );
+    }
+
+    private String checkValidTitle(@Nullable String title) {
         if (title == null)
-            throw new JobException("Título da vaga não informado.");
+            throw new UniversiBadRequestException("Título da vaga não informado.");
 
         title = title.trim();
 
         if (title.isBlank())
-            throw new JobException("O título da vaga não pode ser vazio.");
+            throw new UniversiBadRequestException("O título da vaga não pode ser vazio.");
 
         return title;
     }
 
-    private String checkValidShortDescription(@Nullable String shortDescription) throws JobException {
+    private String checkValidShortDescription(@Nullable String shortDescription) {
         if (shortDescription == null)
-            throw new JobException("Resumo da vaga não informado.");
+            throw new UniversiBadRequestException("Resumo da vaga não informado.");
 
         shortDescription = shortDescription.trim();
 
         if (shortDescription.isBlank())
-            throw new JobException("O resumo da vaga não pode ser vazio.");
+            throw new UniversiBadRequestException("O resumo da vaga não pode ser vazio.");
 
         if (shortDescription.length() > Job.SHORT_DESCRIPTION_MAX_LENGTH)
-            throw new JobException("O resumo da vaga não pode ter mais de " + Job.SHORT_DESCRIPTION_MAX_LENGTH + " caracteres.");
+            throw new UniversiBadRequestException("O resumo da vaga não pode ter mais de " + Job.SHORT_DESCRIPTION_MAX_LENGTH + " caracteres.");
 
         return shortDescription;
     }

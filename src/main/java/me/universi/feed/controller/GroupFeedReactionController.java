@@ -1,14 +1,16 @@
 package me.universi.feed.controller;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
-import java.util.Map;
-import me.universi.api.entities.Response;
+import me.universi.feed.dto.UpdatePostReactionDTO;
 import me.universi.feed.entities.GroupPostReaction;
 import me.universi.feed.services.GroupFeedService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/feed")
+@RequestMapping("/feeds")
 public class GroupFeedReactionController {
     private final GroupFeedService groupFeedService;
 
@@ -17,19 +19,12 @@ public class GroupFeedReactionController {
     }
 
     @GetMapping("/posts/{groupPostId}/reactions")
-    public Response getGroupPostReactions(@PathVariable String groupPostId) {
-        return Response.buildResponse(response -> {
-            List<GroupPostReaction> groupPosts = groupFeedService.getGroupPostReactions(groupPostId);
-            response.body.put("reactions", groupPosts);
-        });
+    public ResponseEntity<List<GroupPostReaction>> getGroupPostReactions( @Valid @PathVariable @NotNull( message = "groupPostId inválido" ) String groupPostId ) {
+        return ResponseEntity.ok ( groupFeedService.getGroupPostReactions(groupPostId) );
     }
 
-    @PostMapping("/posts/{groupPostId}/reactions")
-    public Response setGroupPostReaction(@PathVariable String groupPostId, @RequestBody Map<String, Object> body) {
-        return Response.buildResponse(response -> {
-            GroupPostReaction reactionSet = groupFeedService.setGroupPostReaction(groupPostId, body.get("reaction").toString());
-            response.body.put("reactions", reactionSet);
-            response.message = "Você reagiu a publicação";
-        });
+    @PatchMapping("/posts/{groupPostId}/reactions")
+    public ResponseEntity<GroupPostReaction> setGroupPostReaction( @Valid @PathVariable @NotNull( message = "groupPostId inválido" ) String groupPostId, @Valid @RequestBody UpdatePostReactionDTO updatePostReactionDTO ) {
+        return ResponseEntity.ok( groupFeedService.setGroupPostReaction(groupPostId, updatePostReactionDTO.reaction()) );
     }
 }

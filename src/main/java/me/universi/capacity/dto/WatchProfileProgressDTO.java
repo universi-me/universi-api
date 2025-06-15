@@ -26,6 +26,6 @@ public class WatchProfileProgressDTO {
     }
 
     public ContentStatusType getStatus() {
-        return ContentService.getInstance().getProfileProgress(content, profile);
+        return ContentService.getInstance().findStatusById( content.getId(), profile.getId() ).getStatus();
     }
 }
