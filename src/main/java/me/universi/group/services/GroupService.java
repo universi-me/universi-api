@@ -527,7 +527,7 @@ public class GroupService extends EntityService<Group> {
 
         return group.getSubGroups()
             .stream()
-            .filter( this::isValid )
+            .filter( g -> this.isValid( g ) && g.isRegularGroup() )
             .sorted( Comparator.comparing( Group::getCreatedAt ).reversed() )
             .toList();
     }
@@ -570,6 +570,8 @@ public class GroupService extends EntityService<Group> {
     public List<Activity> listActivities( UUID groupId ) { return listActivities( findOrThrow( groupId ) ); }
     public List<Activity> listActivities( String groupId ) { return listActivities( findByIdOrPathOrThrow( groupId ) ); }
     public List<Activity> listActivities( @NotNull Group group ) {
+        RoleService.getInstance().checkPermission( group, FeaturesTypes.GROUP, Permission.READ );
+
         return activityService
             .findByGroup( group )
             .stream()
