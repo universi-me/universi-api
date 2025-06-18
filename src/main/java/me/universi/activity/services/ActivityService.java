@@ -219,18 +219,13 @@ public class ActivityService extends EntityService<Activity> {
     @Override public boolean isValid( Activity activity ) {
         return activity != null
             && activity.getDeletedAt() == null
-            && groupService().isValid( activity.getGroup() )
-            && roleService().hasPermission(
-                activity.getGroup(),
-                FeaturesTypes.ACTIVITY,
-                Permission.READ
-            );
+            && groupService().isValid( activity.getGroup() );
     }
 
     public boolean hasPermissionToCreate( @NotNull Group group ) {
         return roleService().hasPermission(
             group,
-            FeaturesTypes.ACTIVITY,
+            FeaturesTypes.GROUP,
             Permission.READ_WRITE
         );
     }
@@ -240,18 +235,16 @@ public class ActivityService extends EntityService<Activity> {
     }
 
     @Override public boolean hasPermissionToEdit( Activity entity ) {
-        return roleService().hasPermission(
-            entity.getGroup(),
-            FeaturesTypes.ACTIVITY,
-            Permission.READ_WRITE
+        return roleService().isAdmin(
+            profileService().getProfileInSessionOrThrow(),
+            entity.getGroup()
         );
     }
 
     @Override public boolean hasPermissionToDelete( Activity entity ) {
-        return roleService().hasPermission(
-            entity.getGroup(),
-            FeaturesTypes.ACTIVITY,
-            Permission.READ_WRITE_DELETE
+        return roleService().isAdmin(
+            profileService().getProfileInSessionOrThrow(),
+            entity.getGroup()
         );
     }
 
