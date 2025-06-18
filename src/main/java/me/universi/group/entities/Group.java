@@ -18,7 +18,6 @@ import me.universi.image.entities.ImageMetadata;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
 import me.universi.role.entities.Role;
-import me.universi.role.enums.FeaturesTypes;
 import me.universi.role.services.RoleService;
 import me.universi.user.services.EnvironmentService;
 import me.universi.user.services.JsonUserLoggedFilter;
@@ -26,14 +25,11 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
@@ -397,18 +393,14 @@ public class Group implements Serializable {
 
     @Transient
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    public @Nullable Map<FeaturesTypes, Integer> getPermissions() {
-        var profile = ProfileService.getInstance().getProfileInSession();
-        if ( profile.isEmpty() )
-            return null;
-
-        Role role = RoleService.getInstance().getAssignedRole(
-            profile.get().getId(),
-            this.id
-        );
-
-        return Arrays.asList(FeaturesTypes.values())
-            .stream()
-            .collect(Collectors.toMap(ft -> ft, role::getPermissionForFeature));
+    public @Nullable Role getRole() {
+        return ProfileService.getInstance()
+            .getProfileInSession()
+            .map( profile ->
+                RoleService.getInstance().getAssignedRole(
+                    profile.getId(),
+                    this.id
+                ) )
+            .orElse( null );
     }
 }
