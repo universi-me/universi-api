@@ -13,7 +13,6 @@ import java.io.Serializable;
 
 import me.universi.activity.entities.Activity;
 import me.universi.capacity.entidades.Folder;
-import me.universi.group.enums.GroupType;
 import me.universi.group.services.GroupService;
 import me.universi.image.entities.ImageMetadata;
 import me.universi.profile.entities.Profile;
@@ -120,9 +119,10 @@ public class Group implements Serializable {
     @NotNull
     private Collection<Group> subGroups;
 
-    @Column(name = "type")
-    @Enumerated(EnumType.STRING)
-    public GroupType type;
+    @NotNull
+    @ManyToOne
+    @JoinColumn( name = "type_id", nullable = false )
+    private GroupType type;
 
     /** Can create subGroups */
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
@@ -225,11 +225,11 @@ public class Group implements Serializable {
             .toList();
     }
 
-    public GroupType getType() {
+    public @NotNull GroupType getType() {
         return type;
     }
 
-    public void setType(GroupType type) {
+    public void setType( @NotNull GroupType type ) {
         this.type = type;
     }
     
