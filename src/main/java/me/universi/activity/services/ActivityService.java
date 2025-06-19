@@ -36,6 +36,7 @@ import me.universi.role.enums.FeaturesTypes;
 import me.universi.role.enums.Permission;
 import me.universi.role.services.RoleService;
 import me.universi.user.services.UserService;
+import me.universi.util.DateUtil;
 
 @Service
 public class ActivityService extends EntityService<Activity> {
@@ -117,6 +118,8 @@ public class ActivityService extends EntityService<Activity> {
             .stream()
             .filter( e -> this.isValid( e )
                 && dto.status().map( status -> status.equals( e.getStatus() ) ).orElse( true )
+                && dto.startDate().map( startDate -> !startDate.after( DateUtil.removeTimezoneDifference( e.getStartDate() ) ) ).orElse( true )
+                && dto.endDate().map( endDate -> !endDate.before( DateUtil.removeTimezoneDifference( e.getEndDate() ) ) ).orElse( true )
             )
             .toList();
     }
