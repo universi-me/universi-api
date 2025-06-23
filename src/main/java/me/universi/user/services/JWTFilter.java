@@ -28,18 +28,14 @@ public class JWTFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull FilterChain filterChain) throws ServletException, IOException {
 
         String header = request.getHeader(AUTH_HEADER);
-        
         // prefer check first if user is logged-in on session, else use JWT token to authenticate
-        if(!jwtService.ENABLED || header == null || !header.startsWith(AUTHENTICATION_SCHEME) || LoginService.getInstance().userIsLoggedIn()) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        try {
-            User user = jwtService.getUserFromToken(header.substring(7)); // remove "Bearer " prefix
-            LoginService.getInstance().configureSessionForUser(user, authenticationManager);
-        } catch (Exception e) {
-            SecurityContextHolder.clearContext();
+        if(!( !jwtService.ENABLED || header == null || !header.startsWith(AUTHENTICATION_SCHEME) || LoginService.getInstance().userIsLoggedIn() )) {
+            try {
+                User user = jwtService.getUserFromToken(header.substring(7)); // remove "Bearer " prefix
+                LoginService.getInstance().configureSessionForUser(user, authenticationManager);
+            } catch (Exception e) {
+                SecurityContextHolder.clearContext();
+            }
         }
 
         filterChain.doFilter(request, response);
