@@ -29,6 +29,9 @@ public class AccountService {
     @Value("${SIGNUP_CONFIRMATION_ENABLED}")
     public boolean signupConfirmationEnabled;
 
+    @Value("${RECOVERY_ENABLED}")
+    public boolean recoveryEnabled;
+
     public AccountService(PasswordEncoder passwordEncoder, LoginService loginService, EmailService emailService, GoogleService googleService) {
         this.passwordEncoder = passwordEncoder;
         this.loginService = loginService;
@@ -100,6 +103,10 @@ public class AccountService {
 
     public void recoveryPassword( RecoveryPasswordDTO recoveryPasswordDTO ) {
 
+        if(!isRecoveryEnabled()) {
+            throw new UserException("Recuperação de senha está desativada!");
+        }
+
         googleService.checkRecaptchaWithToken(recoveryPasswordDTO.recaptchaToken());
 
         String usernameOrEmail = recoveryPasswordDTO.username();
@@ -120,6 +127,11 @@ public class AccountService {
     }
 
     public void recoveryNewPassword( RecoveryNewPasswordDTO recoveryNewPasswordDTO ) {
+
+        if(!isRecoveryEnabled()) {
+            throw new UserException("Recuperação de senha está desativada!");
+        }
+
         String token = recoveryNewPasswordDTO.token();
         String newPassword = recoveryNewPasswordDTO.newPassword();
 
@@ -146,6 +158,11 @@ public class AccountService {
     }
 
     public void requestConfirmAccountEmail() {
+
+        if(!isConfirmAccountEnabled()) {
+            throw new UserException("Confirmação de conta está desativada!");
+        }
+
         User user = loginService.getUserInSession();
         if(isAccountConfirmed(user)) {
             throw new UserException("Conta já confirmada!");
@@ -154,6 +171,11 @@ public class AccountService {
     }
 
     public Boolean confirmAccountEmail(String token) throws RuntimeException {
+
+        if(!isConfirmAccountEnabled()) {
+            throw new UserException("Confirmação de conta está desativada!");
+        }
+
         User user = token==null ? null : UserService.getInstance().getUserByRecoveryPasswordToken(token);
         if(user == null) {
             return false;
@@ -402,5 +424,13 @@ public class AccountService {
             return envG.signup_enabled;
         }
         return signupEnabled;
+    }
+
+    public boolean isRecoveryEnabled() {
+        GroupEnvironment envG = OrganizationService.getInstance().getEnvironment();
+        if(envG != null) {
+            return envG.recovery_enabled;
+        }
+        return recoveryEnabled;
     }
 }

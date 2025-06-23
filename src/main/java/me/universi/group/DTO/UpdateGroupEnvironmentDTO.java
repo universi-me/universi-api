@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 public record UpdateGroupEnvironmentDTO(
         Boolean signup_enabled,
         Boolean signup_confirm_account_enabled,
+        Boolean recovery_enabled,
         Boolean login_google_enabled,
         String google_client_id,
         Boolean recaptcha_enabled,
