@@ -22,7 +22,8 @@ keycloak:
 jwt:
   enabled: ${API_JWT_ENABLED:false}
   secret:
-    key: ${API_JWT_SECRET_KEY:test_key}
+    key: ${API_JWT_SECRET_KEY:qcpaA9/W3RB1YTqug4pt1DDmAyvszKDmga3cXOjZygDN+IOJdTzjHsiQTA+hFSCdx6CDTqjBQYjs5pxS/1jFFA==}
+  expiration: ${API_JWT_EXPIRATION:3600} # 1 hour
 
 # MinIO
 minio:
