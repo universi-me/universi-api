@@ -29,7 +29,7 @@ SET label = CASE t.label
     WHEN 'MISCELLANEOUS_SUBJECTS' THEN 'Assuntos Diversos'
     WHEN 'ENTERTAINMENT' THEN 'Entretenimento'
     ELSE t.label
-END CASE;
+END;
 
 ALTER TABLE system_group.system_group
     ADD COLUMN type_id UUID REFERENCES system_group.type ( id );
