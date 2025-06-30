@@ -46,7 +46,7 @@ public class GoogleService {
 
     // bean instance via context
     public static GoogleService getInstance() {
-        return Sys.context.getBean("googleService", GoogleService.class);
+        return Sys.context().getBean("googleService", GoogleService.class);
     }
 
     public User googleLogin(LoginTokenDTO loginTokenDTO ) {

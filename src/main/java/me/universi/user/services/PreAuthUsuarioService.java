@@ -11,12 +11,10 @@ import org.springframework.web.context.request.RequestContextHolder;
 
 @Service
 public class PreAuthUsuarioService implements AuthenticationUserDetailsService<PreAuthenticatedAuthenticationToken> {
-    private final UserService userService;
     private final SessionRegistry sessionRegistry;
 
     @Autowired
-    public PreAuthUsuarioService(UserService userService, SessionRegistry sessionRegistry) {
-        this.userService = userService;
+    public PreAuthUsuarioService(SessionRegistry sessionRegistry) {
         this.sessionRegistry = sessionRegistry;
     }
 
@@ -24,7 +22,7 @@ public class PreAuthUsuarioService implements AuthenticationUserDetailsService<P
     public UserDetails loadUserDetails(PreAuthenticatedAuthenticationToken token) throws UsernameNotFoundException {
 
         String username = ((UserDetails)token.getPrincipal()).getUsername();
-        UserDetails user = userService.loadUserByUsername(username);
+        UserDetails user = UserService.getInstance().loadUserByUsername(username);
 
         if(user != null) {
             String sessionId = RequestContextHolder.currentRequestAttributes().getSessionId();

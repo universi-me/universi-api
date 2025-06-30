@@ -35,7 +35,7 @@ public class EmailService {
 
     // bean instance via context
     public static EmailService getInstance() {
-        return Sys.context.getBean("emailService", EmailService.class);
+        return Sys.context().getBean("emailService", EmailService.class);
     }
 
     public void setupEmailSender() {

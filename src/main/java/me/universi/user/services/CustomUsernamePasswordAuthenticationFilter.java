@@ -2,10 +2,12 @@ package me.universi.user.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import me.universi.Sys;
 import me.universi.api.entities.Response;
 import me.universi.user.exceptions.UserException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -13,6 +15,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.util.Map;
+import org.springframework.stereotype.Component;
 
 /*
     Classe para compatibilidade de login via JSON
@@ -90,8 +93,13 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
     }
 
     @Override
-    @Autowired
     public void setAuthenticationManager(AuthenticationManager authenticationManager) {
         super.setAuthenticationManager(authenticationManager);
     }
+
+    //@Override
+    //@Autowired
+    //public void setAuthenticationManager(AuthenticationManager authenticationManager) {
+    //    super.setAuthenticationManager(authenticationManager);
+    //}
 }

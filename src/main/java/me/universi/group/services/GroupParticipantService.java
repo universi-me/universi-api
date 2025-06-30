@@ -53,7 +53,7 @@ public class GroupParticipantService {
     }
 
     public static GroupParticipantService getInstance() {
-        return Sys.context.getBean( "groupParticipantService" , GroupParticipantService.class );
+        return Sys.context().getBean( "groupParticipantService" , GroupParticipantService.class );
     }
 
     public boolean isParticipant( Group group ) {

@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.springframework.lang.NonNull;
 
 import jakarta.validation.constraints.NotNull;
 import me.universi.api.exceptions.UniversiForbiddenAccessException;
@@ -40,14 +39,14 @@ public abstract class EntityService<T> {
             throw makeDeniedException( "criar" );
     }
 
-    public abstract boolean hasPermissionToEdit( @NonNull T entity );
-    public final void checkPermissionToEdit( @NonNull T entity ) throws UniversiForbiddenAccessException {
+    public abstract boolean hasPermissionToEdit( @NotNull T entity );
+    public final void checkPermissionToEdit( @NotNull T entity ) throws UniversiForbiddenAccessException {
         if ( !hasPermissionToEdit( entity ) )
             throw makeDeniedException( "alterar" );
     }
 
-    public abstract boolean hasPermissionToDelete( @NonNull T entity );
-    public final void checkPermissionToDelete( @NonNull T entity ) throws UniversiForbiddenAccessException {
+    public abstract boolean hasPermissionToDelete( @NotNull T entity );
+    public final void checkPermissionToDelete( @NotNull T entity ) throws UniversiForbiddenAccessException {
         if ( !hasPermissionToEdit( entity ) )
             throw makeDeniedException( "deletar" );
     }

@@ -41,7 +41,7 @@ public class AccountService {
 
     // bean instance via context
     public static AccountService getInstance() {
-        return Sys.context.getBean("accountService", AccountService.class);
+        return Sys.context().getBean("accountService", AccountService.class);
     }
 
     public String encodePassword(String rawPassword) {

@@ -16,19 +16,16 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.security.Principal;
+import org.springframework.stereotype.Component;
 
 /*
     Classe para manipular quando o usuario efetuar o login
  */
+@Component
 public class AuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
-    private final UserService userService;
-    private final AuthenticationManager authenticationManager;
     private final JWTService jwtService;
 
-    @Autowired
-    public AuthenticationSuccessHandler(UserService userService, AuthenticationManager authenticationManager, JWTService jwtService) {
-        this.userService = userService;
-        this.authenticationManager = authenticationManager;
+    public AuthenticationSuccessHandler(JWTService jwtService) {
         this.jwtService = jwtService;
     }
 
@@ -37,6 +34,8 @@ public class AuthenticationSuccessHandler extends SavedRequestAwareAuthenticatio
         String username;
         User user;
 
+        UserService userService = UserService.getInstance();
+
         if (authentication.getPrincipal() instanceof Principal) {
             username = ((Principal) authentication.getPrincipal()).getName();
         } else {
@@ -44,7 +43,7 @@ public class AuthenticationSuccessHandler extends SavedRequestAwareAuthenticatio
         }
         if(username != null) {
             user = (User) userService.loadUserByUsername(username);
-            LoginService.getInstance().configureSessionForUser(user, authenticationManager);
+            LoginService.getInstance().configureSessionForUser(user, null);
         } else {
             user = null;
         }

@@ -36,7 +36,7 @@ public class CategoryService extends UniqueNameEntityService<Category> {
     }
 
     public static CategoryService getInstance() {
-        return Sys.context.getBean("categoryService", CategoryService.class);
+        return Sys.context().getBean("categoryService", CategoryService.class);
     }
 
     @Override

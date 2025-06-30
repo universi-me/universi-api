@@ -65,6 +65,9 @@ database:
 # SERVER
 server:
   port: ${API_SERVER_PORT:8080}
+  mvc:
+    servlet:
+      path: ${API_SERVER_CONTEXT_PATH:/api}
   servlet:
     session:
       timeout: ${API_SERVER_SESSION_TIMEOUT:31536000} # 1 year
@@ -88,6 +91,7 @@ server:
 # SPRINGDOC
 springdoc:
   version: 1.0
+  enable-kotlin: false
   api-docs:
     path: /v3/api-docs
   swagger-ui:

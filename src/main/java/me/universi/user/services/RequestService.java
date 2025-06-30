@@ -19,7 +19,7 @@ public class RequestService {
 
     // bean instance via context
     public static RequestService getInstance() {
-        return Sys.context.getBean("requestService", RequestService.class);
+        return Sys.context().getBean("requestService", RequestService.class);
     }
 
     public HttpServletRequest getRequest() {

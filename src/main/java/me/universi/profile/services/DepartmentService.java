@@ -31,7 +31,7 @@ public class DepartmentService extends UniqueNameEntityService<Department> {
     }
 
     public static DepartmentService getInstance() {
-        return Sys.context.getBean( "departmentService", DepartmentService.class );
+        return Sys.context().getBean( "departmentService", DepartmentService.class );
     }
 
     @Override

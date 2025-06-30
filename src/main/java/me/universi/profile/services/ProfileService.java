@@ -51,7 +51,7 @@ public class ProfileService extends EntityService<Profile> {
     }
 
     public static ProfileService getInstance() {
-        return Sys.context.getBean("profileService", ProfileService.class);
+        return Sys.context().getBean("profileService", ProfileService.class);
     }
 
     @Override

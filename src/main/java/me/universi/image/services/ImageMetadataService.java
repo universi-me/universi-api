@@ -55,7 +55,7 @@ public class ImageMetadataService extends EntityService<ImageMetadata> {
     }
 
     public static ImageMetadataService getInstance() {
-        return Sys.context.getBean("imageMetadataService", ImageMetadataService.class);
+        return Sys.context().getBean("imageMetadataService", ImageMetadataService.class);
     }
 
     @Override

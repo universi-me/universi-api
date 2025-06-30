@@ -42,7 +42,7 @@ public class LoginService {
 
     // bean instance via context
     public static LoginService getInstance() {
-        return Sys.context.getBean("loginService", LoginService.class);
+        return Sys.context().getBean("loginService", LoginService.class);
     }
 
     public User configureLoginForOAuth(String name, String username, String email, String pictureUrl) throws UserException {
@@ -103,7 +103,7 @@ public class LoginService {
 
             saveInSession("loginViaGoogle", true);
 
-            configureSessionForUser(user, Sys.context.getBean("authenticationManager", AuthenticationManager.class));
+            configureSessionForUser(user, Sys.context().getBean("authenticationManager", AuthenticationManager.class));
 
             return user;
         }
@@ -274,6 +274,8 @@ public class LoginService {
 
         // save user based in domain in session
         saveInSession("user", user);
+
+        authenticationManager = authenticationManager != null ? authenticationManager : Sys.context().getBean("authenticationManager", AuthenticationManager.class);
 
         // force authentication
         if(authenticationManager != null) {

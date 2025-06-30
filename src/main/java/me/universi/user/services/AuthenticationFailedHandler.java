@@ -2,7 +2,6 @@ package me.universi.user.services;
 
 import me.universi.api.entities.Response;
 import me.universi.user.exceptions.UserException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 
@@ -10,17 +9,16 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import org.springframework.stereotype.Component;
 
 /*
     Classe para manipular a falhas de login
  */
-
+@Component
 public class AuthenticationFailedHandler extends SimpleUrlAuthenticationFailureHandler {
-    private final UserService userService;
 
-    @Autowired
-    public AuthenticationFailedHandler(UserService userService) {
-        this.userService = userService;
+    public AuthenticationFailedHandler() {
+
     }
 
     @Override

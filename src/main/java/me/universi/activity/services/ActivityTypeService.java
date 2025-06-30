@@ -30,7 +30,7 @@ public class ActivityTypeService extends UniqueNameEntityService<ActivityType> {
     }
 
     public static @NotNull ActivityTypeService getInstance() {
-        return Sys.context.getBean( "activityTypeService", ActivityTypeService.class );
+        return Sys.context().getBean( "activityTypeService", ActivityTypeService.class );
     }
 
     public @NotNull ActivityType create( @Valid CreateActivityTypeDTO dto ) {
@@ -72,7 +72,7 @@ public class ActivityTypeService extends UniqueNameEntityService<ActivityType> {
 
     public synchronized void repository( @NotNull ActivityTypeRepository activityTypeRepository ) { this.activityTypeRepository = activityTypeRepository; }
     public synchronized @NotNull ActivityTypeRepository repository() {
-        if ( activityTypeRepository == null ) repository( Sys.context.getBean( "activityTypeRepository", ActivityTypeRepository.class ) );
+        if ( activityTypeRepository == null ) repository( Sys.context().getBean( "activityTypeRepository", ActivityTypeRepository.class ) );
         return activityTypeRepository;
     }
 

@@ -49,7 +49,7 @@ public class KeycloakService {
 
     // bean instance via context
     public static KeycloakService getInstance() {
-        return Sys.context.getBean("keycloakService", KeycloakService.class);
+        return Sys.context().getBean("keycloakService", KeycloakService.class);
     }
 
     public String keycloakLoginUrl() {

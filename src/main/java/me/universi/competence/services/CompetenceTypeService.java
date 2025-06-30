@@ -36,7 +36,7 @@ public class CompetenceTypeService extends UniqueNameEntityService<CompetenceTyp
     }
 
     public static CompetenceTypeService getInstance() {
-        return Sys.context.getBean("competenceTypeService", CompetenceTypeService.class);
+        return Sys.context().getBean("competenceTypeService", CompetenceTypeService.class);
     }
 
     private Optional<CompetenceType> findIgnoringAccess( String idOrName ) {
