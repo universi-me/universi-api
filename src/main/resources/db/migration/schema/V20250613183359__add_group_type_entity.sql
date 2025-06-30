@@ -7,6 +7,16 @@ CREATE TABLE system_group.type (
 INSERT INTO system_group.type ( label )
 SELECT DISTINCT "type" FROM system_group.system_group;
 
+ALTER TABLE system_group.system_group
+    ADD COLUMN type_id UUID REFERENCES system_group.type ( id );
+
+UPDATE system_group.system_group g
+SET type_id = (
+    SELECT t.id
+    FROM system_group.type t
+    WHERE g.type = t.label
+);
+
 UPDATE system_group.type t
 SET label = CASE t.label
     WHEN 'INSTITUTION' THEN 'Instituição'
@@ -30,16 +40,6 @@ SET label = CASE t.label
     WHEN 'ENTERTAINMENT' THEN 'Entretenimento'
     ELSE t.label
 END;
-
-ALTER TABLE system_group.system_group
-    ADD COLUMN type_id UUID REFERENCES system_group.type ( id );
-
-UPDATE system_group.system_group g
-SET type_id = (
-    SELECT t.id
-    FROM system_group.type t
-    WHERE g.type = t.label
-);
 
 ALTER TABLE system_group.system_group
     ALTER COLUMN type_id SET NOT NULL;
