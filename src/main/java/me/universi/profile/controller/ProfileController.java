@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import me.universi.activity.entities.Activity;
-import me.universi.activity.services.ActivityParticipantService;
+import me.universi.activity.services.ActivityService;
 import me.universi.capacity.entidades.FolderFavorite;
 import me.universi.capacity.service.FolderService;
 import me.universi.competence.entities.Competence;
@@ -33,15 +33,15 @@ import me.universi.profile.services.ProfileService;
 public class ProfileController {
     private final ProfileService profileService;
     private final FolderService folderService;
-    private final ActivityParticipantService activityParticipantService;
+    private final ActivityService activityService;
 
     @Value( "${server.servlet.context-path}" )
     private String contextPath;
 
-    public ProfileController(ProfileService profileService, FolderService folderService, ActivityParticipantService activityParticipantService) {
+    public ProfileController(ProfileService profileService, FolderService folderService, ActivityService activityService) {
         this.profileService = profileService;
         this.folderService = folderService;
-        this.activityParticipantService = activityParticipantService;
+        this.activityService = activityService;
     }
 
     @GetMapping( path = "", produces = MediaType.APPLICATION_JSON_VALUE )
@@ -99,7 +99,7 @@ public class ProfileController {
 
     @GetMapping( path = "/{idOrUsername}/activities", produces = MediaType.APPLICATION_JSON_VALUE )
     public ResponseEntity<Collection<Activity>> activities( @PathVariable String idOrUsername ) {
-        return ResponseEntity.ok( activityParticipantService.findByProfile( idOrUsername ) );
+        return ResponseEntity.ok( activityService.findByProfile( idOrUsername ) );
     }
 
     @GetMapping( path = "/{idOrUsername}/image" )

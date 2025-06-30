@@ -14,6 +14,7 @@ import me.universi.activity.dto.CreateActivityTypeDTO;
 import me.universi.activity.dto.UpdateActivityTypeDTO;
 import me.universi.activity.entities.ActivityType;
 import me.universi.activity.repositories.ActivityTypeRepository;
+import me.universi.api.exceptions.UniversiConflictingOperationException;
 import me.universi.api.interfaces.UniqueNameEntityService;
 import me.universi.user.services.UserService;
 import me.universi.util.CastingUtil;
@@ -22,6 +23,7 @@ import me.universi.util.CastingUtil;
 public class ActivityTypeService extends UniqueNameEntityService<ActivityType> {
     private @Nullable UserService userService;
     private @Nullable ActivityTypeRepository activityTypeRepository;
+    private @Nullable ActivityService activityService;
 
     public ActivityTypeService() {
         this.entityName = "Tipo de Atividade";
@@ -50,6 +52,10 @@ public class ActivityTypeService extends UniqueNameEntityService<ActivityType> {
     public void delete( @NotNull String idOrName ) {
         var activityType = findByIdOrNameOrThrow( idOrName );
         checkPermissionToDelete( activityType );
+
+        if ( activityService().existsByType( activityType ) )
+            throw new UniversiConflictingOperationException( "Este " + this.entityName + " está em uso e portanto não pode ser deletado" );
+
         repository().delete( activityType );
     }
 
@@ -68,6 +74,12 @@ public class ActivityTypeService extends UniqueNameEntityService<ActivityType> {
     public synchronized @NotNull ActivityTypeRepository repository() {
         if ( activityTypeRepository == null ) repository( Sys.context.getBean( "activityTypeRepository", ActivityTypeRepository.class ) );
         return activityTypeRepository;
+    }
+
+    public synchronized void activityService( @NotNull ActivityService activityService ) { this.activityService = activityService; }
+    public synchronized @NotNull ActivityService activityService() {
+        if ( activityService == null ) activityService( ActivityService.getInstance() );
+        return activityService;
     }
 
     public synchronized void userService( @NotNull UserService userService ) { this.userService = userService; }

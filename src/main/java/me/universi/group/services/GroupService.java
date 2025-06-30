@@ -16,7 +16,6 @@ import me.universi.feed.services.GroupFeedService;
 import me.universi.group.DTO.*;
 
 import me.universi.group.entities.*;
-import me.universi.group.enums.GroupType;
 import me.universi.group.repositories.*;
 import me.universi.image.services.ImageMetadataService;
 import me.universi.profile.entities.Profile;
@@ -51,8 +50,9 @@ public class GroupService extends EntityService<Group> {
     private final AccountService accountService;
     private final EmailService emailService;
     private final ActivityService activityService;
+    private final GroupTypeService groupTypeService;
 
-    public GroupService(UserService userService, GroupFeedService groupFeedService, GroupRepository groupRepository, GroupSettingsRepository groupSettingsRepository, GroupEnvironmentRepository groupEnvironmentRepository, CompetenceService competenceService, ImageMetadataService imageMetadataService, EnvironmentService environmentService, LoginService loginService, AccountService accountService, EmailService emailService, ActivityService activityService) {
+    public GroupService(UserService userService, GroupFeedService groupFeedService, GroupRepository groupRepository, GroupSettingsRepository groupSettingsRepository, GroupEnvironmentRepository groupEnvironmentRepository, CompetenceService competenceService, ImageMetadataService imageMetadataService, EnvironmentService environmentService, LoginService loginService, AccountService accountService, EmailService emailService, ActivityService activityService, GroupTypeService groupTypeService) {
         this.userService = userService;
         this.groupFeedService = groupFeedService;
         this.groupRepository = groupRepository;
@@ -61,6 +61,7 @@ public class GroupService extends EntityService<Group> {
         this.competenceService = competenceService;
         this.imageMetadataService = imageMetadataService;
         this.activityService = activityService;
+        this.groupTypeService = groupTypeService;
 
         this.entityName = "Grupo";
         this.environmentService = environmentService;
@@ -144,6 +145,14 @@ public class GroupService extends EntityService<Group> {
 
     public @NotNull Group findByIdOrPathOrThrow( String idOrPath ) throws EntityNotFoundException {
         return findByIdOrPath( idOrPath ).orElseThrow( () -> makeNotFoundException( "ID ou caminho", idOrPath ) );
+    }
+
+    public List<Group> findByType( GroupType type ) {
+        return groupRepository.findByType( type ).stream().filter( this::isValid ).toList();
+    }
+
+    public boolean existsByType( GroupType type ) {
+        return groupRepository.existsByType( type );
     }
 
     @Override
@@ -442,10 +451,7 @@ public class GroupService extends EntityService<Group> {
         group.setNickname( nickname );
         group.setName( dto.name() );
         group.setDescription( dto.description() );
-        group.setType(
-            CastingUtil.getEnum( GroupType.class, dto.groupType() )
-                .orElseThrow( () -> new UniversiBadRequestException( "Tipo de Grupo '" + dto.groupType() + "' não existe" ) )
-        );
+        group.setType( groupTypeService.findByIdOrNameOrThrow( dto.type() ) );
 
         group.setCanCreateGroup( dto.canCreateSubgroup() );
         group.setPublicGroup( dto.isPublic() );
@@ -491,12 +497,8 @@ public class GroupService extends EntityService<Group> {
             if ( !description.isBlank() ) group.setDescription( description.trim() );
         } );
 
-        dto.groupType().ifPresent( typeName -> {
-            var type = CastingUtil.getEnum( GroupType.class , typeName );
-            type.ifPresentOrElse(
-                group::setType,
-                () -> { throw new UniversiBadRequestException( "Tipo de Grupo '" + typeName + "' não existe" ); }
-            );
+        dto.type().ifPresent( typeName -> {
+            group.setType( groupTypeService.findByIdOrNameOrThrow( typeName ) );
         } );
 
         dto.image().ifPresent( imageId -> {
@@ -525,7 +527,7 @@ public class GroupService extends EntityService<Group> {
 
         return group.getSubGroups()
             .stream()
-            .filter( this::isValid )
+            .filter( g -> this.isValid( g ) && g.isRegularGroup() )
             .sorted( Comparator.comparing( Group::getCreatedAt ).reversed() )
             .toList();
     }
@@ -568,6 +570,8 @@ public class GroupService extends EntityService<Group> {
     public List<Activity> listActivities( UUID groupId ) { return listActivities( findOrThrow( groupId ) ); }
     public List<Activity> listActivities( String groupId ) { return listActivities( findByIdOrPathOrThrow( groupId ) ); }
     public List<Activity> listActivities( @NotNull Group group ) {
+        RoleService.getInstance().checkPermission( group, FeaturesTypes.GROUP, Permission.READ );
+
         return activityService
             .findByGroup( group )
             .stream()

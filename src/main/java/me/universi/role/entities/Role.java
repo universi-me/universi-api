@@ -158,7 +158,6 @@ public class Role implements Serializable {
             case PEOPLE:     return this.peoplePermission;
             case COMPETENCE: return this.competencePermission;
             case JOBS:       return this.jobPermission;
-            case ACTIVITY:   return this.activityPermission;
 
             // default case is necessary for compilation
             // If another FeatureTypes is added, add a case above
@@ -185,9 +184,6 @@ public class Role implements Serializable {
 
         else if (feature == FeaturesTypes.JOBS)
             this.jobPermission = permission;
-
-        else if (feature == FeaturesTypes.ACTIVITY)
-            this.activityPermission = permission;
 
         else
             throw new UniversiUnprocessableOperationException("FeaturesTypes '" + feature + "' não existe");

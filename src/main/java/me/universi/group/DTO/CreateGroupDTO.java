@@ -25,7 +25,8 @@ public record CreateGroupDTO(
         String description,
 
         @NotBlank
-        String groupType,
+        @JsonAlias( { "groupType" } )
+        String type,
 
         boolean canCreateSubgroup,
         boolean isPublic,

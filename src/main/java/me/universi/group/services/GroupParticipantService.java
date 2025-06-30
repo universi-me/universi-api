@@ -1,5 +1,6 @@
 package me.universi.group.services;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -13,6 +14,7 @@ import me.universi.competence.entities.CompetenceType;
 import me.universi.competence.services.CompetenceService;
 import me.universi.competence.services.CompetenceTypeService;
 import me.universi.group.DTO.AddGroupParticipantDTO;
+import me.universi.group.DTO.ChangeGroupParticipantsDTO;
 import me.universi.group.DTO.CompetenceFilterDTO;
 import me.universi.group.DTO.CompetenceInfoDTO;
 import me.universi.group.DTO.ProfileWithCompetencesDTO;
@@ -22,6 +24,7 @@ import me.universi.group.entities.ProfileGroup;
 import me.universi.group.repositories.ProfileGroupRepository;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
+import me.universi.role.entities.Role;
 import me.universi.role.enums.FeaturesTypes;
 import me.universi.role.enums.Permission;
 import me.universi.role.services.RoleService;
@@ -146,6 +149,56 @@ public class GroupParticipantService {
         var participant = ProfileService.getInstance().findByIdOrUsernameOrThrow( dto.participant() );
         findByGroupAndProfile( group, participant )
             .ifPresent( profileGroupRepository::delete );
+    }
+
+    public void changeParticipants( @NotNull UUID id, @NotNull ChangeGroupParticipantsDTO dto ) {
+        var group = groupService.findOrThrow( id );
+        var requiredPermission = dto.remove().isPresent()
+            ? Permission.READ_WRITE_DELETE
+            : Permission.READ_WRITE;
+
+        roleService.checkPermission( group, FeaturesTypes.PEOPLE, requiredPermission );
+
+        dto.remove().ifPresent( remove -> {
+            var removedParticipants = ProfileService.getInstance()
+                .findByIdOrUsernameOrThrow( remove ).stream()
+                .map( p -> findByGroupAndProfile( group , p ) )
+                .filter( Optional::isPresent )
+                .map( Optional::get )
+                .toList();
+
+            profileGroupRepository.deleteAll( removedParticipants );
+        } );
+
+        dto.add().ifPresent( toAdd -> {
+            var addedParticipants = new ArrayList<ProfileGroup>( toAdd.size() );
+            Role groupMemberRole = null;
+
+            for ( var data : toAdd ) {
+                var profile = ProfileService.getInstance().findByIdOrUsernameOrThrow( data.profile() );
+                if ( isParticipant( group, profile ) )
+                    continue;
+
+                Role role;
+                if ( data.role().isPresent() )
+                    role = roleService.findByIdAndGroupOrThrow( data.role().get(), group );
+
+                else {
+                    if ( groupMemberRole == null )
+                        groupMemberRole = roleService.getGroupMemberRole( group );
+                    role = groupMemberRole;
+                }
+
+                var profileGroup = new ProfileGroup();
+                profileGroup.setGroup( group );
+                profileGroup.setProfile( profile );
+                profileGroup.setRole( role );
+
+                addedParticipants.add( profileGroup );
+            }
+
+            profileGroupRepository.saveAllAndFlush( addedParticipants );
+        } );
     }
 
     public List<Profile> listParticipantsByGroupId(UUID groupId) {

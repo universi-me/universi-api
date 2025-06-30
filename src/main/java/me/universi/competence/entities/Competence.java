@@ -19,7 +19,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import me.universi.activity.entities.Activity;
-import me.universi.activity.services.ActivityParticipantService;
+import me.universi.activity.services.ActivityService;
 import me.universi.profile.entities.Profile;
 
 import org.hibernate.annotations.*;
@@ -75,7 +75,7 @@ public class Competence {
 
     @Transient
     public List<Activity> getActivities() {
-        return ActivityParticipantService
+        return ActivityService
             .getInstance()
             .findByProfileAndCompetenceType( profile, competenceType );
     }

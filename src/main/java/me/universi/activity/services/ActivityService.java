@@ -1,5 +1,6 @@
 package me.universi.activity.services;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -9,24 +10,33 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.Nullable;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import me.universi.Sys;
 import me.universi.activity.dto.CreateActivityDTO;
+import me.universi.activity.dto.FilterActivityDTO;
 import me.universi.activity.dto.UpdateActivityDTO;
 import me.universi.activity.entities.Activity;
+import me.universi.activity.entities.ActivityType;
 import me.universi.activity.repositories.ActivityRepository;
 import me.universi.api.exceptions.UniversiBadRequestException;
 import me.universi.api.exceptions.UniversiServerException;
 import me.universi.api.interfaces.EntityService;
+import me.universi.competence.entities.CompetenceType;
 import me.universi.competence.services.CompetenceTypeService;
+import me.universi.group.DTO.CreateGroupDTO;
 import me.universi.group.entities.Group;
 import me.universi.group.services.GroupService;
+import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
 import me.universi.role.enums.FeaturesTypes;
 import me.universi.role.enums.Permission;
 import me.universi.role.services.RoleService;
 import me.universi.user.services.UserService;
+import me.universi.util.DateUtil;
 
 @Service
 public class ActivityService extends EntityService<Activity> {
@@ -37,6 +47,9 @@ public class ActivityService extends EntityService<Activity> {
     private @Nullable ActivityTypeService activityTypeService;
     private @Nullable GroupService groupService;
     private @Nullable RoleService roleService;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public ActivityService() {
         this.entityName = "Atividade";
@@ -50,41 +63,114 @@ public class ActivityService extends EntityService<Activity> {
     @Override protected List<Activity> findAllUnchecked() { return repository().findAll(); }
 
     public List<Activity> findByGroup( @NotNull Group group ) {
-        return repository()
-            .findByGroup( group )
+        return group
+            .getSubGroups()
             .stream()
-            .filter( this::isValid )
+            .filter( g -> g.isActivityGroup() && isValid( g.getActivity().get() ) )
+            .map( g -> g.getActivity().get() )
             .toList();
     }
 
-    public @NotNull Activity create( @Valid CreateActivityDTO dto ) {
-        var group = groupService().findByIdOrPathOrThrow( dto.group() );
+    public List<Activity> findByProfile( @NotNull String idOrUsername ) { return findByProfile( profileService().findByIdOrUsernameOrThrow( idOrUsername ) ); }
+    public List<Activity> findByProfile( @NotNull UUID id ) { return findByProfile( profileService().findOrThrow( id ) ); }
+    public List<Activity> findByProfile( @NotNull Profile profile ) {
+        return profile
+            .getGroups()
+            .stream()
+            .filter( pg -> groupService().isValid( pg.getGroup() ) && pg.getGroup().isActivityGroup() && isValid( pg.getGroup().getActivity().get() ) )
+            .map( pg -> pg.getGroup().getActivity().get() )
+            .toList();
+    }
 
-        checkPermissionToCreate( group );
+    public List<Activity> findByProfileAndCompetenceType( @NotNull String idOrUsername, @NotNull String competenceType ) { return findByProfileAndCompetenceType( profileService().findByIdOrUsernameOrThrow( idOrUsername ), competenceTypeService().findByIdOrNameOrThrow( competenceType ) ); }
+    public List<Activity> findByProfileAndCompetenceType( @NotNull UUID id, @NotNull UUID competenceType ) { return findByProfileAndCompetenceType( profileService().findOrThrow( id ), competenceTypeService().findOrThrow( competenceType ) ); }
+    public List<Activity> findByProfileAndCompetenceType( @NotNull Profile profile, @NotNull CompetenceType competenceType ) {
+        return findByProfile( profile )
+            .stream()
+            .filter( a -> a.getBadges().contains( competenceType ) )
+            .toList();
+    }
+
+    public List<Activity> filter( @Nullable FilterActivityDTO dto ) {
+        if ( dto == null )
+            return findAll();
+
+        var criteriaBuilder = entityManager.getCriteriaBuilder();
+        var query = criteriaBuilder.createQuery( Activity.class );
+        var root = query.from( Activity.class );
+        query.select( root );
+
+        var filters = new ArrayList<Predicate>();
+
+        dto.type().map( activityTypeService()::findByIdOrNameOrThrow ).ifPresent( activityType -> {
+            filters.add( criteriaBuilder.equal( root.get( "type" ).get( "id" ) , activityType.getId() ) );
+        } );
+
+        dto.group().map( groupService()::findByIdOrPathOrThrow ).ifPresent( group -> {
+            filters.add( criteriaBuilder.equal( root.get( "group" ).get( "parentGroup" ).get( "id" ) , group.getId() ) );
+        } );
+
+        query.where( filters.toArray( new Predicate[ filters.size() ] ) );
+
+        return entityManager
+            .createQuery( query )
+            .getResultList()
+            .stream()
+            .filter( e -> this.isValid( e )
+                && dto.status().map( status -> status.equals( e.getStatus() ) ).orElse( true )
+                && dto.startDate().map( startDate -> !startDate.after( DateUtil.removeTimezoneDifference( e.getStartDate() ) ) ).orElse( true )
+                && dto.endDate().map( endDate -> !endDate.before( DateUtil.removeTimezoneDifference( e.getEndDate() ) ) ).orElse( true )
+            )
+            .toList();
+    }
+
+    public boolean existsByType( @NotNull ActivityType activityType ) {
+        return repository().existsByType( activityType );
+    }
+
+    public @NotNull Activity create( @Valid CreateActivityDTO dto ) {
+        var parentGroup = groupService().findByIdOrPathOrThrow( dto.group() );
+
+        checkPermissionToCreate( parentGroup );
         validateDates( dto );
 
         var name = dto.name().trim();
+        var nickname = dto.nickname().trim();
         var description = dto.description().trim();
         var location = dto.location().trim();
         var badges = dto.badges().map( competenceTypeService()::findByIdOrNameOrThrow )
             .orElse( Collections.emptyList() );
         var type = activityTypeService().findByIdOrNameOrThrow( dto.type() );
-        var author = profileService().getProfileInSessionOrThrow();
+
+        var activityGroup = groupService().createGroup( new CreateGroupDTO(
+            Optional.of( parentGroup.getId().toString() ),
+            nickname,
+            name,
+            dto.image(),
+            dto.bannerImage(),
+            Optional.empty(),
+            description,
+            dto.groupType(),
+            false,
+            true,
+            false
+        ) );
 
         var activity = new Activity();
-        activity.setName( name );
-        activity.setDescription( description );
         activity.setLocation( location );
         activity.setWorkload( dto.workload() );
         activity.setStartDate( dto.startDate() );
         activity.setEndDate( dto.endDate() );
         activity.setBadges( badges );
         activity.setType( type );
-        activity.setAuthor( author );
-        activity.setParticipants( Collections.emptyList() );
-        activity.setGroup( group );
+        activity.setGroup( activityGroup );
 
-        return repository().saveAndFlush( activity );
+        activity = repository().saveAndFlush( activity );
+
+        activityGroup.setActivity( activity );
+        GroupService.getRepository().save( activityGroup );
+
+        return activity;
     }
 
     public @NotNull Activity update( UUID id, @Valid UpdateActivityDTO dto ) {
@@ -92,8 +178,6 @@ public class ActivityService extends EntityService<Activity> {
         checkPermissionToEdit( activity );
         validateDates( activity, dto );
 
-        dto.name().ifPresent( name -> activity.setName( name.trim() ) );
-        dto.description().ifPresent( description -> activity.setDescription( description.trim() ) );
         dto.location().ifPresent( location -> activity.setLocation( location.trim() ) );
         dto.workload().ifPresent( activity::setWorkload );
         dto.startDate().ifPresent( activity::setStartDate );
@@ -111,7 +195,11 @@ public class ActivityService extends EntityService<Activity> {
     public void delete( UUID id ) {
         var activity = findOrThrow( id );
         checkPermissionToDelete( activity );
-        repository().delete( activity );
+
+        groupService().deleteGroup( activity.getGroup().getId() );
+
+        activity.setDeletedAt( new Date() );
+        repository().saveAndFlush( activity );
     }
 
     public void validateDates( @Valid CreateActivityDTO dto ) {
@@ -134,17 +222,13 @@ public class ActivityService extends EntityService<Activity> {
     @Override public boolean isValid( Activity activity ) {
         return activity != null
             && activity.getDeletedAt() == null
-            && roleService().hasPermission(
-                activity.getGroup(),
-                FeaturesTypes.ACTIVITY,
-                Permission.READ
-            );
+            && groupService().isValid( activity.getGroup() );
     }
 
     public boolean hasPermissionToCreate( @NotNull Group group ) {
         return roleService().hasPermission(
             group,
-            FeaturesTypes.ACTIVITY,
+            FeaturesTypes.GROUP,
             Permission.READ_WRITE
         );
     }
@@ -154,18 +238,16 @@ public class ActivityService extends EntityService<Activity> {
     }
 
     @Override public boolean hasPermissionToEdit( Activity entity ) {
-        return roleService().hasPermission(
-            entity.getGroup(),
-            FeaturesTypes.ACTIVITY,
-            Permission.READ_WRITE
+        return roleService().isAdmin(
+            profileService().getProfileInSessionOrThrow(),
+            entity.getGroup()
         );
     }
 
     @Override public boolean hasPermissionToDelete( Activity entity ) {
-        return roleService().hasPermission(
-            entity.getGroup(),
-            FeaturesTypes.ACTIVITY,
-            Permission.READ_WRITE_DELETE
+        return roleService().isAdmin(
+            profileService().getProfileInSessionOrThrow(),
+            entity.getGroup()
         );
     }
 
