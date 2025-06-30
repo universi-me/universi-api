@@ -18,7 +18,7 @@ SET type_id = (
 );
 
 UPDATE system_group.type t
-SET label = CASE t.label
+SET label = CASE TRIM( FROM t.label )
     WHEN 'INSTITUTION' THEN 'Instituição'
     WHEN 'CAMPUS' THEN 'Campus'
     WHEN 'COURSE' THEN 'Curso'
