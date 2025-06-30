@@ -19,7 +19,8 @@ public record UpdateGroupDTO(
 
         Optional<String> description,
 
-        Optional<String> groupType,
+        @JsonAlias( { "groupType" } )
+        Optional<String> type,
 
         Optional<Boolean> canCreateSubgroup,
         Optional<Boolean> isPublic,

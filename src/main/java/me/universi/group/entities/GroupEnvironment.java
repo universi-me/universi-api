@@ -46,6 +46,8 @@ public class GroupEnvironment implements Serializable {
     public boolean signup_enabled = Boolean.TRUE;
     @Column(name = "signup_confirm_account_enabled")
     public boolean signup_confirm_account_enabled = Boolean.FALSE;
+    @Column(name = "recovery_enabled")
+    public boolean recovery_enabled = Boolean.TRUE;
 
     /** Google Oauth Login **/
     @Column(name = "login_google_enabled")

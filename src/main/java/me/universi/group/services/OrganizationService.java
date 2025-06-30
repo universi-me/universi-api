@@ -11,9 +11,7 @@ import me.universi.Sys;
 import me.universi.api.exceptions.UniversiServerException;
 import me.universi.group.entities.Group;
 import me.universi.group.entities.GroupEnvironment;
-import me.universi.group.enums.GroupType;
 import me.universi.group.repositories.GroupRepository;
-import me.universi.user.services.UserService;
 
 @Service
 public class OrganizationService {
@@ -85,7 +83,6 @@ public class OrganizationService {
         var org = getUserlessOrganization();
         org.nickname = localOrganizationNickname.trim().toLowerCase();
         org.name = localOrganizationNickname.trim().toUpperCase();
-        org.type = GroupType.INSTITUTION;
 
         groupRepository.saveAndFlush( org );
     }

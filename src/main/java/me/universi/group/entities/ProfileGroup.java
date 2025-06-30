@@ -91,4 +91,7 @@ public class ProfileGroup implements Serializable {
     public Date getJoined() {
         return this.joined;
     }
+
+    public @NotNull Role getRole() { return role; }
+    public void setRole( @NotNull Role role ) { this.role = role; }
 }

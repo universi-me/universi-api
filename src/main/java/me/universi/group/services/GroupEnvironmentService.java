@@ -8,7 +8,6 @@ import me.universi.group.entities.GroupSettings;
 import me.universi.group.repositories.GroupEnvironmentRepository;
 import me.universi.role.services.RoleService;
 import me.universi.user.services.EmailService;
-import me.universi.user.services.UserService;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -17,13 +16,11 @@ public class GroupEnvironmentService {
     private final OrganizationService organizationService;
 
     private final GroupService groupService;
-    private final UserService userService;
     private final GroupEnvironmentRepository groupEnvironmentRepository;
     private final EmailService emailService;
 
-    public GroupEnvironmentService(GroupService groupService, UserService userService, GroupEnvironmentRepository groupEnvironmentRepository, OrganizationService organizationService, EmailService emailService) {
+    public GroupEnvironmentService(GroupService groupService, GroupEnvironmentRepository groupEnvironmentRepository, OrganizationService organizationService, EmailService emailService) {
         this.groupService = groupService;
-        this.userService = userService;
         this.groupEnvironmentRepository = groupEnvironmentRepository;
         this.organizationService = organizationService;
         this.emailService = emailService;
@@ -76,6 +73,9 @@ public class GroupEnvironmentService {
         }
         if(updateGroupEnvironment.signup_confirm_account_enabled() != null) {
             groupEnvironment.signup_confirm_account_enabled = updateGroupEnvironment.signup_confirm_account_enabled();
+        }
+        if(updateGroupEnvironment.recovery_enabled() != null) {
+            groupEnvironment.recovery_enabled = updateGroupEnvironment.recovery_enabled();
         }
         if(updateGroupEnvironment.login_google_enabled() != null) {
             groupEnvironment.login_google_enabled = updateGroupEnvironment.login_google_enabled();

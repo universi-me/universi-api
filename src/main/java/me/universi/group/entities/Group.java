@@ -10,30 +10,26 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
+
+import me.universi.activity.entities.Activity;
 import me.universi.capacity.entidades.Folder;
-import me.universi.group.enums.GroupType;
 import me.universi.group.services.GroupService;
 import me.universi.image.entities.ImageMetadata;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
 import me.universi.role.entities.Role;
-import me.universi.role.enums.FeaturesTypes;
 import me.universi.role.services.RoleService;
 import me.universi.user.services.EnvironmentService;
 import me.universi.user.services.JsonUserLoggedFilter;
-import me.universi.user.services.UserService;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
@@ -107,14 +103,22 @@ public class Group implements Serializable {
     @NotFound( action = NotFoundAction.IGNORE )
     private Group parentGroup;
 
+    @Nullable
+    @OneToOne( cascade = CascadeType.ALL )
+    @JoinColumn( name = "activity_id", nullable = true )
+    @NotFound( action = NotFoundAction.IGNORE )
+    @JsonIgnoreProperties( { "group" } )
+    private Activity activity;
+
     @JsonIgnore
     @OneToMany(mappedBy = "parentGroup", fetch = FetchType.LAZY)
     @NotNull
     private Collection<Group> subGroups;
 
-    @Column(name = "type")
-    @Enumerated(EnumType.STRING)
-    public GroupType type;
+    @NotNull
+    @ManyToOne
+    @JoinColumn( name = "type_id", nullable = false )
+    private GroupType type;
 
     /** Can create subGroups */
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
@@ -217,11 +221,11 @@ public class Group implements Serializable {
             .toList();
     }
 
-    public GroupType getType() {
+    public @NotNull GroupType getType() {
         return type;
     }
 
-    public void setType(GroupType type) {
+    public void setType( @NotNull GroupType type ) {
         this.type = type;
     }
     
@@ -235,6 +239,16 @@ public class Group implements Serializable {
 
     public Optional<Group> getParentGroup() { return Optional.ofNullable( parentGroup ); }
     public void setParentGroup(Group parentGroup) { this.parentGroup = parentGroup; }
+
+    public Optional<Activity> getActivity() { return Optional.ofNullable( activity ); }
+    public void setActivity( Activity activity ) { this.activity = activity; }
+
+    /**
+     * Checks if the Group is a regular group or an special group ( eg. an {@link Activity} group )
+     * @return {@code true} if group is regular, otherwise returns {@code false};
+     */
+    @Transient public boolean isRegularGroup() { return activity == null; }
+    @Transient @JsonIgnore public boolean isActivityGroup() { return activity != null; }
 
     public Collection<Group> getSubGroups() {
         return subGroups;
@@ -379,18 +393,14 @@ public class Group implements Serializable {
 
     @Transient
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    public @Nullable Map<FeaturesTypes, Integer> getPermissions() {
-        var profile = ProfileService.getInstance().getProfileInSession();
-        if ( profile.isEmpty() )
-            return null;
-
-        Role role = RoleService.getInstance().getAssignedRole(
-            profile.get().getId(),
-            this.id
-        );
-
-        return Arrays.asList(FeaturesTypes.values())
-            .stream()
-            .collect(Collectors.toMap(ft -> ft, role::getPermissionForFeature));
+    public @Nullable Role getRole() {
+        return ProfileService.getInstance()
+            .getProfileInSession()
+            .map( profile ->
+                RoleService.getInstance().getAssignedRole(
+                    profile.getId(),
+                    this.id
+                ) )
+            .orElse( null );
     }
 }
