@@ -9,4 +9,4 @@ if [ -n "$DEBUG_URL_POST" ] && [ -f "$API_DEBUG_FILE" ]; then
 fi
 
 # Execute the Java application
-exec java -jar /app.jar
+exec java -XX:+UseContainerSupport -jar /app.jar

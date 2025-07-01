@@ -1,9 +1,12 @@
 package me.universi.health.services;
 
+import com.sun.management.OperatingSystemMXBean;
+import java.lang.management.ManagementFactory;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
+import me.universi.health.dto.UsageResponseDTO;
 import org.bson.Document;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
@@ -19,8 +22,15 @@ import me.universi.minioConfig.MinioConfig;
 
 @Service
 public class HealthService {
-    private EntityManager entityManager;
-    private MongoTemplate mongoTemplate;
+    private final EntityManager entityManager;
+    private final MongoTemplate mongoTemplate;
+    private final OperatingSystemMXBean osMxBean;
+    private final Runtime runtime;
+
+    private static final String DATABASE_SERVICE_ID = "DATABASE";
+    private static final String MONGODB_SERVICE_ID = "MONGODB";
+    private static final String MINIO_SERVICE_ID = "MINIO";
+
 
     public HealthService(
         EntityManager entityManager,
@@ -28,6 +38,8 @@ public class HealthService {
     ) {
         this.entityManager = entityManager;
         this.mongoTemplate = mongoTemplate;
+        this.osMxBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);
+        this.runtime = Runtime.getRuntime();
     }
 
     public @NotNull List<@NotNull HealthResponseDTO> allHealth() {
@@ -46,7 +58,6 @@ public class HealthService {
         return new HealthResponseDTO(true, false, "API", null, null);
     }
 
-    private static final String DATABASE_SERVICE_ID = "DATABASE";
     public @NotNull HealthResponseDTO databaseHealth() {
         try {
             boolean open = this.entityManager.isOpen();
@@ -68,7 +79,6 @@ public class HealthService {
         }
     }
 
-    private static final String MONGODB_SERVICE_ID = "MONGODB";
     public @NotNull HealthResponseDTO mongoDbHealth() {
         try {
             var db = this.mongoTemplate.getDb();
@@ -80,7 +90,6 @@ public class HealthService {
         }
     }
 
-    private static final String MINIO_SERVICE_ID = "MINIO";
     public @NotNull HealthResponseDTO minIoHealth() {
         if (!MinioConfig.isMinioEnabled())
             return new HealthResponseDTO(false, true, MINIO_SERVICE_ID, "Serviço desativado", null);
@@ -110,5 +119,16 @@ public class HealthService {
 
     public boolean isUp( HealthResponseDTO health ) {
         return health.isUp() || health.isDisabled();
+    }
+
+    public UsageResponseDTO getProcessUsage() {
+
+        UsageResponseDTO usageResponseDTO = new UsageResponseDTO();
+        usageResponseDTO.cpuLoad = osMxBean.getCpuLoad();
+        usageResponseDTO.maxMemory = runtime.maxMemory();
+        usageResponseDTO.totalMemory = runtime.totalMemory();
+        usageResponseDTO.freeMemory = runtime.freeMemory();
+
+        return usageResponseDTO;
     }
 }
