@@ -6,7 +6,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
-import java.util.Map;
 import me.universi.health.dto.UsageResponseDTO;
 import org.bson.Document;
 import org.hibernate.Session;
@@ -23,8 +22,10 @@ import me.universi.minioConfig.MinioConfig;
 
 @Service
 public class HealthService {
-    private EntityManager entityManager;
-    private MongoTemplate mongoTemplate;
+    private final EntityManager entityManager;
+    private final MongoTemplate mongoTemplate;
+    private final OperatingSystemMXBean osMxBean;
+    private final Runtime runtime;
 
     private static final String DATABASE_SERVICE_ID = "DATABASE";
     private static final String MONGODB_SERVICE_ID = "MONGODB";
@@ -37,6 +38,8 @@ public class HealthService {
     ) {
         this.entityManager = entityManager;
         this.mongoTemplate = mongoTemplate;
+        this.osMxBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);
+        this.runtime = Runtime.getRuntime();
     }
 
     public @NotNull List<@NotNull HealthResponseDTO> allHealth() {
@@ -120,13 +123,11 @@ public class HealthService {
 
     public UsageResponseDTO getProcessUsage() {
 
-        OperatingSystemMXBean osBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);
-
         UsageResponseDTO usageResponseDTO = new UsageResponseDTO();
-        usageResponseDTO.cpuLoad = osBean.getCpuLoad();
-        usageResponseDTO.maxMemory = Runtime.getRuntime().maxMemory();
-        usageResponseDTO.totalMemory = Runtime.getRuntime().totalMemory();
-        usageResponseDTO.freeMemory = Runtime.getRuntime().freeMemory();
+        usageResponseDTO.cpuLoad = osMxBean.getCpuLoad();
+        usageResponseDTO.maxMemory = runtime.maxMemory();
+        usageResponseDTO.totalMemory = runtime.totalMemory();
+        usageResponseDTO.freeMemory = runtime.freeMemory();
 
         return usageResponseDTO;
     }
