@@ -123,8 +123,8 @@ public class HealthService {
         OperatingSystemMXBean osBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);
 
         UsageResponseDTO usageResponseDTO = new UsageResponseDTO();
-        usageResponseDTO.systemCpuLoad = osBean.getSystemCpuLoad();
-        usageResponseDTO.memoryMax = Runtime.getRuntime().maxMemory();
+        usageResponseDTO.cpuLoad = osBean.getCpuLoad();
+        usageResponseDTO.maxMemory = Runtime.getRuntime().maxMemory();
         usageResponseDTO.totalMemory = Runtime.getRuntime().totalMemory();
         usageResponseDTO.freeMemory = Runtime.getRuntime().freeMemory();
 
