@@ -80,6 +80,12 @@ public class GroupEnvironmentService {
         if(updateGroupEnvironment.login_google_enabled() != null) {
             groupEnvironment.login_google_enabled = updateGroupEnvironment.login_google_enabled();
         }
+        if(updateGroupEnvironment.google_login_text() != null) {
+            groupEnvironment.google_login_text = updateGroupEnvironment.google_login_text().isEmpty() ? null : updateGroupEnvironment.google_login_text();
+        }
+        if(updateGroupEnvironment.google_login_image_url() != null) {
+            groupEnvironment.google_login_image_url = updateGroupEnvironment.google_login_image_url().isEmpty() ? null : updateGroupEnvironment.google_login_image_url();
+        }
         if(updateGroupEnvironment.google_client_id() != null) {
             groupEnvironment.google_client_id = updateGroupEnvironment.google_client_id().isEmpty() ? null : updateGroupEnvironment.google_client_id();
         }
@@ -97,6 +103,12 @@ public class GroupEnvironmentService {
         }
         if(updateGroupEnvironment.keycloak_enabled() != null) {
             groupEnvironment.keycloak_enabled = updateGroupEnvironment.keycloak_enabled();
+        }
+        if(updateGroupEnvironment.keycloak_login_text() != null) {
+            groupEnvironment.keycloak_login_text = updateGroupEnvironment.keycloak_login_text().isEmpty() ? null : updateGroupEnvironment.keycloak_login_text();
+        }
+        if(updateGroupEnvironment.keycloak_login_image_url() != null) {
+            groupEnvironment.keycloak_login_image_url = updateGroupEnvironment.keycloak_login_image_url().isEmpty() ? null : updateGroupEnvironment.keycloak_login_image_url();
         }
         if(updateGroupEnvironment.keycloak_client_id() != null) {
             groupEnvironment.keycloak_client_id = updateGroupEnvironment.keycloak_client_id().isEmpty() ? null : updateGroupEnvironment.keycloak_client_id();

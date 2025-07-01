@@ -52,6 +52,10 @@ public class GroupEnvironment implements Serializable {
     /** Google Oauth Login **/
     @Column(name = "login_google_enabled")
     public boolean login_google_enabled = Boolean.FALSE;
+    @Column(name = "google_login_text")
+    public String google_login_text;
+    @Column(name = "google_login_image_url")
+    public String google_login_image_url;
     @Column(name = "google_client_id")
     public String google_client_id;
 
@@ -68,6 +72,10 @@ public class GroupEnvironment implements Serializable {
     /** Keycloak **/
     @Column(name = "keycloak_enabled")
     public boolean keycloak_enabled = Boolean.FALSE;
+    @Column(name = "keycloak_login_text")
+    public String keycloak_login_text;
+    @Column(name = "keycloak_login_image_url")
+    public String keycloak_login_image_url;
     @Column(name = "keycloak_client_id")
     public String keycloak_client_id;
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserAdminFilter.class)
