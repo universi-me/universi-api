@@ -98,11 +98,11 @@ public class GroupEnvironment implements Serializable {
 
     /** Email Notifications **/
     @Column(name = "message_new_content_enabled")
-    public boolean alert_new_content_enabled = Boolean.TRUE;
+    public boolean message_new_content_enabled = Boolean.TRUE;
     @Column(name = "message_template_new_content")
     public String message_template_new_content;
     @Column(name = "message_assigned_content_enabled")
-    public boolean alert_assigned_content_enabled = Boolean.TRUE;
+    public boolean message_assigned_content_enabled = Boolean.TRUE;
     @Column(name = "message_template_assigned_content")
     public String message_template_assigned_content;
 

@@ -114,8 +114,8 @@ public class GroupEnvironmentService {
             groupEnvironment.keycloak_redirect_url = updateGroupEnvironment.keycloak_redirect_url().isEmpty() ? null : updateGroupEnvironment.keycloak_redirect_url();
         }
 
-        if(updateGroupEnvironment.alert_new_content_enabled() != null) {
-            groupEnvironment.alert_new_content_enabled = updateGroupEnvironment.alert_new_content_enabled();
+        if(updateGroupEnvironment.message_new_content_enabled() != null) {
+            groupEnvironment.message_new_content_enabled = updateGroupEnvironment.message_new_content_enabled();
         }
         if(updateGroupEnvironment.message_template_new_content() != null) {
             if(updateGroupEnvironment.message_template_new_content().length() > 6000) {
@@ -123,8 +123,8 @@ public class GroupEnvironmentService {
             }
             groupEnvironment.message_template_new_content = updateGroupEnvironment.message_template_new_content().isEmpty() ? null : updateGroupEnvironment.message_template_new_content();
         }
-        if(updateGroupEnvironment.alert_assigned_content_enabled() != null) {
-            groupEnvironment.alert_assigned_content_enabled = updateGroupEnvironment.alert_assigned_content_enabled();
+        if(updateGroupEnvironment.message_assigned_content_enabled() != null) {
+            groupEnvironment.message_assigned_content_enabled = updateGroupEnvironment.message_assigned_content_enabled();
         }
         if(updateGroupEnvironment.message_template_assigned_content() != null) {
             if(updateGroupEnvironment.message_template_assigned_content().length() > 6000) {

@@ -411,7 +411,7 @@ public class GroupService extends EntityService<Group> {
             return;
         }
 
-        if(!OrganizationService.getInstance().getEnvironment().alert_new_content_enabled) {
+        if(!OrganizationService.getInstance().getEnvironment().message_new_content_enabled) {
             return;
         }
 
@@ -427,7 +427,7 @@ public class GroupService extends EntityService<Group> {
             return;
         }
 
-        if(!OrganizationService.getInstance().getEnvironment().alert_assigned_content_enabled) {
+        if(!OrganizationService.getInstance().getEnvironment().message_assigned_content_enabled) {
             return;
         }
 
