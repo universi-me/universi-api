@@ -70,7 +70,7 @@ server:
       path: ${API_SERVER_CONTEXT_PATH:/api}
   servlet:
     session:
-      tracking-modes: 
+      tracking-modes:
     multipart:
       enabled: true
       max-file-size: 200MB
