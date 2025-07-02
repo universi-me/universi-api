@@ -74,7 +74,7 @@ public class UserController {
     }
 
     @PostMapping(value = "/login/keycloak", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<User> oauth_keycloak_session( @Valid @RequestBody LoginCodeDTO loginCodeDTO ) {
+    public ResponseEntity<LoginResponseDTO> oauth_keycloak_session( @Valid @RequestBody LoginCodeDTO loginCodeDTO ) {
         return ResponseEntity.ok( keycloakService.keycloackLogin(loginCodeDTO) );
     }
 
@@ -84,7 +84,7 @@ public class UserController {
     }
 
     @PostMapping(value = "/login/google", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<User> login_google( @Valid @RequestBody LoginTokenDTO loginTokenDTO ) {
+    public ResponseEntity<LoginResponseDTO> login_google( @Valid @RequestBody LoginTokenDTO loginTokenDTO ) {
         return ResponseEntity.ok( googleService.googleLogin(loginTokenDTO) );
     }
 

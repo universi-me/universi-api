@@ -10,6 +10,7 @@ import me.universi.Sys;
 import me.universi.group.entities.GroupEnvironment;
 import me.universi.group.services.OrganizationService;
 import me.universi.user.dto.LoginCodeDTO;
+import me.universi.user.dto.LoginResponseDTO;
 import me.universi.user.entities.User;
 import me.universi.user.exceptions.UserException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,7 +119,7 @@ public class KeycloakService {
         return URI.create(keycloakLoginUrl());
     }
 
-    public User keycloackLogin(LoginCodeDTO loginCodeDTO) {
+    public LoginResponseDTO keycloackLogin(LoginCodeDTO loginCodeDTO) {
         if(!isKeycloakEnabled()) {
             throw new UserException("Keycloak desabilitado!");
         }
@@ -164,7 +165,7 @@ public class KeycloakService {
             User user = loginService.configureLoginForOAuth(name, username, email, pictureUrl);
 
             if (user != null) {
-                return user;
+                return new LoginResponseDTO(user, JWTService.getInstance().buildTokenForUser(user));
             }
         } catch (Exception e) {
             if(e.getClass() == UserException.class) {

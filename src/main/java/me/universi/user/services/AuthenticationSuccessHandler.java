@@ -3,8 +3,6 @@ package me.universi.user.services;
 import me.universi.api.entities.Response;
 import me.universi.profile.enums.Gender;
 import me.universi.user.entities.User;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.DefaultRedirectStrategy;
@@ -23,11 +21,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class AuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
-    private final JWTService jwtService;
-
-    public AuthenticationSuccessHandler(JWTService jwtService) {
-        this.jwtService = jwtService;
-    }
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws ServletException, IOException {
@@ -58,7 +51,7 @@ public class AuthenticationSuccessHandler extends SavedRequestAwareAuthenticatio
                 else
                     r.message = "Boas vindas, "+user.getName()+".";
                 r.redirectTo = LoginService.getInstance().getUrlWhenLogin();
-                r.token = jwtService.buildTokenForUser(user);
+                r.token = JWTService.getInstance().buildTokenForUser(user);
                 r.body.put("user", user);
             });
 
