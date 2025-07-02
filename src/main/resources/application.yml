@@ -70,15 +70,7 @@ server:
       path: ${API_SERVER_CONTEXT_PATH:/api}
   servlet:
     session:
-      timeout: ${API_SERVER_SESSION_TIMEOUT:31536000} # 1 year
-      persistent: ${API_SERVER_SESSION_PERSISTENT:true}
-      store-dir: ${API_SERVER_SESSION_STORE_DIR:}
-      cookie:
-        http-only: ${API_SERVER_SESSION_COOKIE_HTTP_ONLY:true}
-        secure: ${API_SERVER_SESSION_COOKIE_SECURE:false}
-        same-site: ${API_SERVER_SESSION_COOKIE_SAME_SITE:strict}
-        name: ${API_SERVER_SESSION_COOKIE_NAME:UNIVERSIME_SESSION}
-        max-age: ${API_SERVER_SESSION_TIMEOUT:31536000} # 1 year
+      tracking-modes: 
     multipart:
       enabled: true
       max-file-size: 200MB
