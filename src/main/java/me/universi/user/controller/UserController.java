@@ -75,7 +75,7 @@ public class UserController {
 
     @PostMapping(value = "/login/keycloak", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<LoginResponseDTO> oauth_keycloak_session( @Valid @RequestBody LoginCodeDTO loginCodeDTO ) {
-        return ResponseEntity.ok( keycloakService.keycloackLogin(loginCodeDTO) );
+        return ResponseEntity.ok( keycloakService.keycloakLogin(loginCodeDTO) );
     }
 
     @GetMapping(value = "/login/keycloak/auth")

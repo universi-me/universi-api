@@ -119,7 +119,7 @@ public class KeycloakService {
         return URI.create(keycloakLoginUrl());
     }
 
-    public LoginResponseDTO keycloackLogin(LoginCodeDTO loginCodeDTO) {
+    public LoginResponseDTO keycloakLogin(LoginCodeDTO loginCodeDTO) {
         if(!isKeycloakEnabled()) {
             throw new UserException("Keycloak desabilitado!");
         }
