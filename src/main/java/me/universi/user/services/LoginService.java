@@ -63,6 +63,7 @@ public class LoginService {
             if(!UserService.getInstance().usernameExist(username.trim())) {
 
                 user = new User();
+                user.setVersionDate(ConvertUtil.getDateTimeNow());
                 user.setName(username.trim());
                 user.setEmail(email.trim());
                 UserService.getInstance().createUser(user, null, null, null);

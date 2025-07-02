@@ -11,6 +11,7 @@ import me.universi.user.entities.User;
 import me.universi.user.enums.Authority;
 import me.universi.user.exceptions.UserException;
 import me.universi.util.CastingUtil;
+import me.universi.util.ConvertUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -263,6 +264,7 @@ public class AccountService {
         }
 
         User user = new User();
+        user.setVersionDate(ConvertUtil.getDateTimeNow());
         user.setName(username);
         user.setEmail(email);
         if(isConfirmAccountEnabled()) {

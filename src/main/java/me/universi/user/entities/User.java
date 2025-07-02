@@ -64,7 +64,6 @@ public class User implements UserDetails, Serializable {
     private LocalDateTime recoveryPasswordTokenDate;
 
     @JsonIgnore
-    @CreationTimestamp
     @Column(name = "version_date")
     private LocalDateTime versionDate;
 
