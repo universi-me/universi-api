@@ -158,18 +158,6 @@ public class LoginService {
         }
     }
 
-
-
-    public void updateUserInSession() {
-        User userSession = getUserInSession();
-        if(userSession != null) {
-            User actualUser = UserService.getInstance().find(userSession.getId()).orElse(null);
-            if(actualUser != null) {
-                configureSessionForUser(actualUser, null);
-            }
-        }
-    }
-
     public User getUserInSession() {
         // get current request
         HttpServletRequest request = requestService.getRequest();

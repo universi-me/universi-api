@@ -297,8 +297,6 @@ public class AccountService {
 
             saveRawPasswordToUser(user, newPassword, false);
 
-            loginService.updateUserInSession();
-
         } else {
             throw new UserException("Credenciais Invalidas!");
         }

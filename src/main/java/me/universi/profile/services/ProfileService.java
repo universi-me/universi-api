@@ -115,10 +115,7 @@ public class ProfileService extends EntityService<Profile> {
                 myself.setDepartment( DepartmentService.getInstance().findByIdOrNameOrThrow( id ) );
         } );
 
-        var updated = perfilRepository.saveAndFlush( myself );
-        loginService.updateUserInSession();
-
-        return updated;
+        return perfilRepository.saveAndFlush( myself );
     }
 
     public void delete( @NotNull String idOrUsername ) {
