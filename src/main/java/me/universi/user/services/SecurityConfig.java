@@ -97,7 +97,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(CustomCorsFilter.corsConfigurationSource()))
 
                 .csrf(csrf -> csrf
-                        .ignoringRequestMatchers(publicEndpoints)
+                        .ignoringRequestMatchers("/**")
                 )
 
                 .exceptionHandling(exception -> exception
