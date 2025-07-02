@@ -4,9 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import me.universi.user.entities.User;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -19,10 +17,9 @@ public class JWTFilter extends OncePerRequestFilter {
     protected void doFilterInternal(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull FilterChain filterChain) throws ServletException, IOException {
 
         try {
-            User user = JWTService.getInstance().getUserFromRequest(request);
-            LoginService.getInstance().configureSessionForUser(user, null);
+            LoginService.getInstance().configureSessionForUser(LoginService.getInstance().getUserInSession(), null);
         } catch (Exception e) {
-            SecurityContextHolder.clearContext();
+            LoginService.getInstance().logout();
         }
 
         filterChain.doFilter(request, response);

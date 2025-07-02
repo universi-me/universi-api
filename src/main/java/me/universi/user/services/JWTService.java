@@ -33,7 +33,7 @@ public class JWTService {
     private static final String VERSION_DATE = "versionDate";
     private static final String AUTH_HEADER = "Authorization";
     private static final String AUTHENTICATION_SCHEME = "Bearer ";
-    private static final String JWT_TOKEN = "JWT_TOKEN";
+    public static final String JWT_TOKEN = "JWT_TOKEN";
 
     private SecretKey secretKey;
     private JwtParser jwtParser;
@@ -113,16 +113,13 @@ public class JWTService {
             }
 
             // 2 verify token authentication from cookie
-            if (request.getCookies() != null) {
-                for (Cookie cookie : request.getCookies()) {
-                    if (JWT_TOKEN.equals(cookie.getName())) {
-                        return getUserFromToken(cookie.getValue());
-                    }
-                }
+            String token = RequestService.getInstance().getCookieValue(JWT_TOKEN);
+            if (token != null) {
+                return getUserFromToken(token);
             }
 
         } catch (Exception e) {
-            SecurityContextHolder.clearContext();
+
         }
         return null;
     }

@@ -1,8 +1,6 @@
 package me.universi.user.services;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
-import java.util.List;
 import java.util.Objects;
 import me.universi.Sys;
 import me.universi.group.services.OrganizationService;
@@ -10,7 +8,6 @@ import me.universi.image.services.ImageMetadataService;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.repositories.PerfilRepository;
 import me.universi.user.entities.User;
-import me.universi.user.exceptions.ExceptionResponse;
 import me.universi.user.exceptions.UserException;
 import me.universi.util.ConvertUtil;
 import org.springframework.security.authentication.*;
@@ -18,12 +15,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.session.SessionInformation;
-import org.springframework.security.core.session.SessionRegistry;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
-import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -146,6 +139,7 @@ public class LoginService {
         try {
             logoutUser(getUserInSession());
             SecurityContextHolder.clearContext();
+            RequestService.getInstance().removeCookie(JWTService.JWT_TOKEN);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -171,12 +165,11 @@ public class LoginService {
         return null;
     }
 
-    public void throwErrorSessionInvalidAndRedirectToLogin() {
-        logout();
-        throw new ExceptionResponse("Sessão inválida!", "/login");
-    }
-
     public void configureSessionForUser(User user, AuthenticationManager authenticationManager) {
+
+        if(user == null) {
+            throw new UserException("Falha ao configurar sessão do usuário.");
+        }
 
         authenticationManager = authenticationManager != null ? authenticationManager : Sys.context().getBean("authenticationManager", AuthenticationManager.class);
 
