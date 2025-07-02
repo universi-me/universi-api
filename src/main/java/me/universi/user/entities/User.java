@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
@@ -16,10 +17,7 @@ import me.universi.user.services.JsonEmailOwnerSessionFilter;
 import me.universi.user.services.JsonUserAdminFilter;
 import me.universi.user.services.LoginService;
 import me.universi.user.services.UserService;
-import org.hibernate.annotations.NotFound;
-import org.hibernate.annotations.NotFoundAction;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.SQLRestriction;
+import org.hibernate.annotations.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -66,6 +64,7 @@ public class User implements UserDetails, Serializable {
     private LocalDateTime recoveryPasswordTokenDate;
 
     @JsonIgnore
+    @CreationTimestamp
     @Column(name = "version_date")
     private LocalDateTime versionDate;
 
