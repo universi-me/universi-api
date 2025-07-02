@@ -2,9 +2,13 @@ package me.universi.user.services;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
+import me.universi.Sys;
 import me.universi.user.entities.User;
 import me.universi.user.exceptions.UserException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.PostConstruct;
@@ -16,23 +20,28 @@ import java.util.UUID;
 @Service
 public class JWTService {
 
-    @Value("${jwt.enabled}")
-    public boolean ENABLED;
-
     @Value("${jwt.secret.key}")
     private String secretKeyString;
+
+    @Value("${jwt.issuer}")
+    private String ISSUER;
 
     @Value("${jwt.expiration}")
     public long EXPIRATION; // in seconds
 
-    public static final String issuer = "universi.me";
+    private static final String VERSION_DATE = "versionDate";
+    private static final String AUTH_HEADER = "Authorization";
+    private static final String AUTHENTICATION_SCHEME = "Bearer ";
 
     private SecretKey secretKey;
     private JwtParser jwtParser;
 
+    public static JWTService getInstance() {
+        return Sys.context().getBean("JWTService", JWTService.class);
+    }
+
     @PostConstruct
     public void init() {
-        if (!ENABLED) return;
 
         byte[] keyBytes = secretKeyString.getBytes(StandardCharsets.UTF_8);
         if (keyBytes.length < 64) {
@@ -42,44 +51,66 @@ public class JWTService {
         this.secretKey = Keys.hmacShaKeyFor(keyBytes);
 
         this.jwtParser = Jwts.parser()
-                .setSigningKey(secretKey)
+                .verifyWith(secretKey)
                 .build();
     }
 
+
+
     public String buildTokenForUser(User user) {
-        if (!ENABLED) return null;
 
         long now = System.currentTimeMillis();
         Date issuedAt = new Date(now);
         Date expiration = new Date(now + (EXPIRATION * 1000) ); // convert to ms
 
         return Jwts.builder()
-                .setIssuer(issuer)
-                .setSubject(user.getId().toString())
-                .setIssuedAt(issuedAt)
-                .setExpiration(expiration)
-                .signWith(secretKey, SignatureAlgorithm.HS512)
+                .issuer(ISSUER)
+                .subject(user.getId().toString())
+                .claim(VERSION_DATE, user.getVersionDate().toString())
+                .issuedAt(issuedAt)
+                .expiration(expiration)
+                .signWith(secretKey, Jwts.SIG.HS512)
                 .compact();
     }
 
     public User getUserFromToken(String token) {
-        if (!ENABLED) return null;
-
         Claims claims;
 
         try {
-            claims = jwtParser.parseClaimsJws(token).getBody();
+            claims = jwtParser.parseSignedClaims(token).getPayload();
         } catch (Exception e) {
             throw new UserException("Invalid JWT token");
         }
 
+        // Check if the token is expired
         if (claims.getExpiration().before(new Date())) {
             throw new UserException("JWT Token Expired");
         }
 
-        String userId = claims.getSubject();
-        return UserService.getInstance()
-                .findUnchecked(UUID.fromString(userId))
+        User user = UserService.getInstance()
+                .findUnchecked( UUID.fromString(claims.getSubject()) )
                 .orElseThrow(() -> new UserException("User not found for JWT token"));
+
+        // Additional check date time is before (possibility for force logout user remotely)
+        String versionDate = claims.get(VERSION_DATE, String.class);
+        LocalDateTime versionDateTime = LocalDateTime.parse(versionDate);
+        if (user.getVersionDate() == null || user.getVersionDate().isAfter(versionDateTime)) {
+            throw new UserException("User version date is not valid for this token");
+        }
+
+        return user;
+    }
+
+    public User getUserFromRequest(HttpServletRequest request) {
+        try {
+            String header = request.getHeader(AUTH_HEADER);
+            // use JWT token to authenticate
+            if(header != null && header.startsWith(AUTHENTICATION_SCHEME)) {
+                return getUserFromToken(header.substring(7)); // remove "Bearer " prefix
+            }
+        } catch (Exception e) {
+            SecurityContextHolder.clearContext();
+        }
+        return null;
     }
 }

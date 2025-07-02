@@ -97,7 +97,7 @@ public class AccountService {
         user.setExpired_credentials(false);
         UserService.getInstance().save(user);
         if(logout) {
-            loginService.logoutUsername(user.getUsername());
+            loginService.logoutUser(user);
         }
     }
 
@@ -186,7 +186,6 @@ public class AccountService {
         user.setConfirmed(true);
         UserService.getInstance().save(user);
 
-        loginService.saveInSession("account_confirmed", true);
         return true;
     }
 
@@ -294,10 +293,7 @@ public class AccountService {
 
         User user = loginService.getUserInSession();
 
-        // if logged with google don't check password
-        boolean loggedAsGoogle = (loginService.getInSession("loginViaGoogle") != null);
-
-        if (loggedAsGoogle || passwordValid(user, password)) {
+        if (passwordValid(user, password)) {
 
             saveRawPasswordToUser(user, newPassword, false);
 
@@ -383,7 +379,7 @@ public class AccountService {
         UserService.getInstance().save(userEdit);
 
         // force logout
-        loginService.logoutUsername(usernameOld);
+        loginService.logoutUser(userEdit);
     }
 
     public List<User> adminListAccount(String byRole) {
@@ -397,10 +393,6 @@ public class AccountService {
         GetAccountDTO getAccount = null;
         if(loginService.userIsLoggedIn()) {
             getAccount = new GetAccountDTO(loginService.getUserInSession(), RoleService.getInstance().getAllRolesSession());
-        }
-        if(loginService.getInSession("account_confirmed") != null) {
-            loginService.removeInSession("account_confirmed");
-            loginService.removeInSession("message_account_confirmed");
         }
         return getAccount;
     }

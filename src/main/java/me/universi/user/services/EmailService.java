@@ -4,6 +4,7 @@ import jakarta.mail.internet.MimeMessage;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.Executor;
@@ -110,8 +111,8 @@ public class EmailService {
 
         //check recovery date token if less than 15min
         if(useIntervalCheck && user.getRecoveryPasswordTokenDate() != null) {
-            long diff = ConvertUtil.getDateTimeNow().getTime() - user.getRecoveryPasswordTokenDate().getTime();
-            if(diff < 900000) {
+            Duration diff = Duration.between(user.getRecoveryPasswordTokenDate(), ConvertUtil.getDateTimeNow());
+            if (diff.toMillis() < 900_000) {
                 throw new UserException("Um email de recuperação de senha já foi enviado para esta conta, por favor tente novamente mais tarde.");
             }
         }

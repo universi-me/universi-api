@@ -12,6 +12,7 @@ import me.universi.profile.repositories.PerfilRepository;
 import me.universi.user.entities.User;
 import me.universi.user.exceptions.ExceptionResponse;
 import me.universi.user.exceptions.UserException;
+import me.universi.util.ConvertUtil;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -31,12 +32,10 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 public class LoginService {
 
     private final RequestService requestService;
-    private final SessionRegistry sessionRegistry;
     private final PerfilRepository profileRepository;
 
-    public LoginService(RequestService requestService, SessionRegistry sessionRegistry, PerfilRepository profileRepository) {
+    public LoginService(RequestService requestService, PerfilRepository profileRepository) {
         this.requestService = requestService;
-        this.sessionRegistry = sessionRegistry;
         this.profileRepository = profileRepository;
     }
 
@@ -86,8 +85,6 @@ public class LoginService {
 
                 profileRepository.saveAndFlush(profile);
 
-                saveInSession("novoUsuario", true);
-
             } else {
                 throw new UserException("Usúario \""+username+"\" já existe.");
             }
@@ -101,9 +98,7 @@ public class LoginService {
                 UserService.getInstance().save(user);
             }
 
-            saveInSession("loginViaGoogle", true);
-
-            configureSessionForUser(user, Sys.context().getBean("authenticationManager", AuthenticationManager.class));
+            configureSessionForUser(user, null);
 
             return user;
         }
@@ -112,39 +107,12 @@ public class LoginService {
     }
 
     // logout user remotely
-    public void logoutUsername(String username) {
-        for (Object principal: sessionRegistry.getAllPrincipals()) {
-            if (principal instanceof UserDetails) {
-                String usernameNow = ((UserDetails) principal).getUsername();
-                if(usernameNow.equals(username))  {
-                    for(SessionInformation sInfo : sessionRegistry.getAllSessions(principal, true)) {
-                        sInfo.expireNow();
-                    }
-                    break;
-                }
-            }
+    public void logoutUser(User user) {
+        if (user == null) {
+            return;
         }
-    }
-
-    // check if user has active session
-    public boolean isUsernameOnline(String username) {
-        for (Object principal: sessionRegistry.getAllPrincipals()) {
-            if (principal instanceof UserDetails) {
-                String usernameNow = ((UserDetails) principal).getUsername();
-                if(usernameNow.equals(username))  {
-                    List<SessionInformation> activeSessions = sessionRegistry.getAllSessions(principal, false);
-                    if(activeSessions != null && !activeSessions.isEmpty()) {
-                        return true;
-                    }
-                    break;
-                }
-            }
-        }
-        return false;
-    }
-
-    public String getUrlWhenLogout() {
-        return "/login";
+        user.setVersionDate(ConvertUtil.getDateTimeNow());
+        UserService.getInstance().save(user);
     }
 
     public String manageProfilePath() {
@@ -168,13 +136,6 @@ public class LoginService {
             }
         }
 
-        HttpSession session = getActiveSession();
-        SavedRequest lastRequestSaved = (SavedRequest)session.getAttribute("SPRING_SECURITY_SAVED_REQUEST");
-        if(lastRequestSaved != null) {
-            // return last request url user tried to access
-            return lastRequestSaved.getRedirectUrl();
-        }
-
         return "/";
     }
 
@@ -182,9 +143,8 @@ public class LoginService {
     // logout user from current session
     public void logout() {
         try {
+            logoutUser(getUserInSession());
             SecurityContextHolder.clearContext();
-            HttpSession session = requestService.getRequest().getSession(true);
-            session.invalidate();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -200,20 +160,6 @@ public class LoginService {
 
 
 
-    public HttpSession getActiveSession() {
-        HttpSession session = requestService.getRequest().getSession(true);
-        Object domain = session.getAttribute("domain");
-        if (domain != null) {
-            if(!Objects.equals(domain, requestService.getDomainFromRequest())) {
-                // force logout if session is invalid, due to not same domain
-                throwErrorSessionInvalidAndRedirectToLogin();
-            }
-        }
-        return session;
-    }
-
-
-
     public void updateUserInSession() {
         User userSession = getUserInSession();
         if(userSession != null) {
@@ -224,37 +170,14 @@ public class LoginService {
         }
     }
 
-
-
-    // save in session based in domain
-    public void saveInSession(String key, Object value) {
-        HttpSession session = getActiveSession();
-        session.setAttribute(key, value);
-    }
-
-    // get in session based in domain
-    public Object getInSession(String key) {
-        HttpSession session = getActiveSession();
-        return session.getAttribute(key);
-    }
-
-    // remove in session based in domain
-    public void removeInSession(String key) {
-        HttpSession session = getActiveSession();
-        session.removeAttribute(key);
-    }
-
     public User getUserInSession() {
-        HttpSession session = getActiveSession();
-        if(session != null) {
-            User user = (User) getInSession("user");
+        // get current request
+        HttpServletRequest request = requestService.getRequest();
+        if(request != null) {
+            User user = (User) JWTService.getInstance().getUserFromRequest(request);
             if(user != null) {
                 return user;
             }
-        }
-        if(userIsLoggedIn()) {
-            // force logout if session is invalid, due to logged with no user
-            throwErrorSessionInvalidAndRedirectToLogin();
         }
         return null;
     }
@@ -265,15 +188,6 @@ public class LoginService {
     }
 
     public void configureSessionForUser(User user, AuthenticationManager authenticationManager) {
-        HttpSession session = getActiveSession();
-        // set user session inactivity to 6 months
-        session.setMaxInactiveInterval(6 * 30 * 24 * 60 * 60);
-
-        // save domain in session
-        saveInSession("domain", requestService.getDomainFromRequest());
-
-        // save user based in domain in session
-        saveInSession("user", user);
 
         authenticationManager = authenticationManager != null ? authenticationManager : Sys.context().getBean("authenticationManager", AuthenticationManager.class);
 
@@ -287,17 +201,13 @@ public class LoginService {
             Authentication authentication = authenticationManager.authenticate(preAuthenticatedAuthenticationToken);
             SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
             securityContext.setAuthentication(authentication);
-            session.setAttribute("SPRING_SECURITY_CONTEXT", securityContext);
             SecurityContextHolder.setContext(securityContext);
         }
     }
 
     public boolean userIsLoggedIn() {
         try {
-            return SecurityContextHolder.getContext().getAuthentication() != null &&
-                    SecurityContextHolder.getContext().getAuthentication().isAuthenticated() &&
-                    !(SecurityContextHolder.getContext().getAuthentication()
-                            instanceof AnonymousAuthenticationToken);
+            return getUserInSession() != null;
         } catch (Exception e) {
             return false;
         }
