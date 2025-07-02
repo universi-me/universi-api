@@ -2,6 +2,7 @@ package me.universi.user.services;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import me.universi.Sys;
@@ -32,6 +33,7 @@ public class JWTService {
     private static final String VERSION_DATE = "versionDate";
     private static final String AUTH_HEADER = "Authorization";
     private static final String AUTHENTICATION_SCHEME = "Bearer ";
+    private static final String JWT_TOKEN = "JWT_TOKEN";
 
     private SecretKey secretKey;
     private JwtParser jwtParser;
@@ -103,11 +105,22 @@ public class JWTService {
 
     public User getUserFromRequest(HttpServletRequest request) {
         try {
+
+            // 1 verify token authentication from header
             String header = request.getHeader(AUTH_HEADER);
-            // use JWT token to authenticate
             if(header != null && header.startsWith(AUTHENTICATION_SCHEME)) {
                 return getUserFromToken(header.substring(7)); // remove "Bearer " prefix
             }
+
+            // 2 verify token authentication from cookie
+            if (request.getCookies() != null) {
+                for (Cookie cookie : request.getCookies()) {
+                    if (JWT_TOKEN.equals(cookie.getName())) {
+                        return getUserFromToken(cookie.getValue());
+                    }
+                }
+            }
+
         } catch (Exception e) {
             SecurityContextHolder.clearContext();
         }
