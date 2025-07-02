@@ -65,11 +65,40 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, ConcurrentSessionFilter concurrentSessionFilter, SessionAuthenticationStrategy sessionAuthenticationStrategy, CustomUsernamePasswordAuthenticationFilter customUsernamePasswordAuthenticationFilter) throws Exception {
 
+        String[] publicEndpoints = new String[]{
+                "/",
+                "/health/**",
+                "/login",
+                "/signin",
+                "/login/google",
+                "/login/keycloak",
+                "/login/keycloak/auth",
+                "/signup",
+                "/account",
+                "/departments",
+                "/departments/**",
+
+                "/available/**",
+                "/recovery-password",
+                "/new-password",
+                "/confirm-account/*",
+                "/groups/current-organization",
+
+                "/img",
+                "/img/**",
+
+                "/swagger-ui.html",
+                "/swagger-ui/**",
+                "/v3/api-docs/**"
+        };
+
         HttpSecurity urls = http
 
                 .cors(cors -> cors.configurationSource(CustomCorsFilter.corsConfigurationSource()))
 
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers(publicEndpoints)
+                )
 
                 .exceptionHandling(exception -> exception
                     .accessDeniedHandler(customAccessDeniedHandler)
@@ -77,35 +106,7 @@ public class SecurityConfig {
                 )
 
                 .authorizeHttpRequests((auth) -> auth
-                    .requestMatchers(
-                            "/",
-                            "/health/**",
-                            "/login",
-                            "/signin",
-                            "/login/google",
-                            "/login/keycloak",
-                            "/login/keycloak/auth",
-                            "/signup",
-                            "/account",
-                            "/departments",
-                            "/departments/**",
-
-                            "/available/**",
-                            "/recovery-password",
-                            "/new-password",
-                            "/confirm-account/*",
-                            "/groups/current-organization",
-
-                            "/img",
-                            "/img/**",
-
-                            "/swagger-ui.html",
-                            "/swagger-ui/**",
-                            "/v3/api-docs/**"
-
-
-
-                    ).permitAll()
+                    .requestMatchers(publicEndpoints).permitAll()
                     .requestMatchers("/admin/**").hasRole("ADMIN")
                     .requestMatchers("/h2-console/**").access(new WebExpressionAuthorizationManager(
                         "hasRole('ADMIN') and @environment.getProperty('spring.profiles.active') == 'test'"
