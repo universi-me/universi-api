@@ -48,8 +48,25 @@ public class AccountService {
         return passwordEncoder.encode(rawPassword);
     }
 
+    public static final int MAX_USERNAME_LENGTH = 49;
+    public static final Pattern CHARACTERS_NOT_ALLOWED_ON_USERNAME = Pattern.compile( "[^a-z0-9_.-]" );
     public boolean usernameRegex(String username) {
-        return matchRegex(username, "^[a-z0-9_.-]{1,49}$");
+        return matchRegex(username, "^[a-z0-9_.-]{1," + MAX_USERNAME_LENGTH + "}$");
+    }
+
+    public String createUsernameFromString( String str ) {
+        var username = CHARACTERS_NOT_ALLOWED_ON_USERNAME
+            .matcher( str.toLowerCase() )
+            .replaceAll( "-" );
+
+        return limitUsernameLength( username );
+    }
+
+    public String limitUsernameLength( String username ) {
+        if ( username.length() > MAX_USERNAME_LENGTH )
+            username = username.substring( username.length() - MAX_USERNAME_LENGTH, username.length() - 1 );
+
+        return username;
     }
 
     public boolean passwordRegex(String password) {
