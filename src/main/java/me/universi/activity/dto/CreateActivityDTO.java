@@ -16,7 +16,7 @@ public record CreateActivityDTO(
     @NotBlank String description,
     @NotBlank String type,
     @NotBlank String location,
-    @NotNull Integer workload,
+    Optional<Integer> workload,
     Optional<List<@NotBlank String>> badges,
 
     Optional<UUID> image,
