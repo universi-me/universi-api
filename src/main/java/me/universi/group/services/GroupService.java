@@ -437,7 +437,8 @@ public class GroupService extends EntityService<Group> {
         emailService.sendSystemEmailToUser(profile.getUser(), subject, message, true);
     }
 
-    public Group createGroup( CreateGroupDTO dto ) {
+    public Group createGroup( CreateGroupDTO dto ) { return createGroup( dto, true ); }
+    public Group createGroup( CreateGroupDTO dto, boolean checkTypeAssignment ) {
         if ( dto.parentGroup().isEmpty() && !userService.isUserAdminSession() )
             throw new UniversiBadRequestException( "O Parâmetro 'parentGroup' deve ser informado" );
 
@@ -453,7 +454,9 @@ public class GroupService extends EntityService<Group> {
         group.setDescription( dto.description() );
 
         var groupType = groupTypeService.findByIdOrNameOrThrow( dto.type() );
-        groupTypeService.checkCanBeAssigned( groupType );
+
+        if ( checkTypeAssignment )
+            groupTypeService.checkCanBeAssigned( groupType );
 
         group.setType( groupType );
 

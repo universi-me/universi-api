@@ -165,7 +165,7 @@ public class ActivityService extends EntityService<Activity> {
             false,
             true,
             false
-        ) );
+        ), false );
 
         var activity = new Activity();
         activity.setLocation( location );
