@@ -35,6 +35,7 @@ import me.universi.profile.services.ProfileService;
 import me.universi.role.enums.FeaturesTypes;
 import me.universi.role.enums.Permission;
 import me.universi.role.services.RoleService;
+import me.universi.user.services.AccountService;
 import me.universi.user.services.UserService;
 import me.universi.util.DateUtil;
 
@@ -47,6 +48,7 @@ public class ActivityService extends EntityService<Activity> {
     private @Nullable ActivityTypeService activityTypeService;
     private @Nullable GroupService groupService;
     private @Nullable RoleService roleService;
+    private @Nullable AccountService accountService;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -135,16 +137,23 @@ public class ActivityService extends EntityService<Activity> {
         validateDates( dto );
 
         var name = dto.name().trim();
-        var nickname = dto.nickname().trim();
+        var nickname = accountService().createUsernameFromString( name );
         var description = dto.description().trim();
         var location = dto.location().trim();
         var badges = dto.badges().map( competenceTypeService()::findByIdOrNameOrThrow )
             .orElse( Collections.emptyList() );
         var type = activityTypeService().findByIdOrNameOrThrow( dto.type() );
 
+        var nicknameCounter = 0;
+        var finalNickname = nickname;
+        while ( !groupService().isNicknameAvailable( finalNickname, parentGroup ) ) {
+            nicknameCounter++;
+            finalNickname = accountService().limitUsernameLength( nickname + nicknameCounter );
+        }
+
         var activityGroup = groupService().createGroup( new CreateGroupDTO(
             Optional.of( parentGroup.getId().toString() ),
-            nickname,
+            finalNickname,
             name,
             dto.image(),
             dto.bannerImage(),
@@ -291,6 +300,12 @@ public class ActivityService extends EntityService<Activity> {
     public synchronized @NotNull RoleService roleService() {
         if ( roleService == null ) roleService( RoleService.getInstance() );
         return roleService;
+    }
+
+    public synchronized void accountService( @NotNull AccountService accountService ) { this.accountService = accountService; }
+    public synchronized @NotNull AccountService accountService() {
+        if ( accountService == null ) accountService( AccountService.getInstance() );
+        return accountService;
     }
 
     /**

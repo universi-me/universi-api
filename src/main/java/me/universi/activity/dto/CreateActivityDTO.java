@@ -12,7 +12,6 @@ import jakarta.validation.constraints.NotNull;
 
 public record CreateActivityDTO(
     @NotBlank String name,
-    @NotBlank String nickname,
     @NotBlank String groupType,
     @NotBlank String description,
     @NotBlank String type,
