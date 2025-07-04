@@ -1,0 +1,2 @@
+ALTER TABLE system_group.type
+    ADD COLUMN kind TEXT NOT NULL DEFAULT 'REGULAR';

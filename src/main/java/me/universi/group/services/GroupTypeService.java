@@ -73,7 +73,7 @@ public class GroupTypeService extends UniqueNameEntityService<GroupType> {
 
     @Override
     public boolean hasPermissionToDelete( GroupType groupType ) {
-        return userService().isUserAdminSession();
+        return groupType.isCanBeDeleted() && userService().isUserAdminSession();
     }
 
     public synchronized void repository( @NotNull GroupTypeRepository groupTypeRepository ) { this.groupTypeRepository = groupTypeRepository; }
