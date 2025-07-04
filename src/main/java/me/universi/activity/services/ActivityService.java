@@ -30,6 +30,7 @@ import me.universi.competence.services.CompetenceTypeService;
 import me.universi.group.DTO.CreateGroupDTO;
 import me.universi.group.entities.Group;
 import me.universi.group.services.GroupService;
+import me.universi.group.services.GroupTypeService;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
 import me.universi.role.enums.FeaturesTypes;
@@ -49,6 +50,7 @@ public class ActivityService extends EntityService<Activity> {
     private @Nullable GroupService groupService;
     private @Nullable RoleService roleService;
     private @Nullable AccountService accountService;
+    private @Nullable GroupTypeService groupTypeService;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -159,7 +161,7 @@ public class ActivityService extends EntityService<Activity> {
             dto.bannerImage(),
             Optional.empty(),
             description,
-            dto.groupType(),
+            groupTypeService().getActivityType().getId().toString(),
             false,
             true,
             false
@@ -306,6 +308,12 @@ public class ActivityService extends EntityService<Activity> {
     public synchronized @NotNull AccountService accountService() {
         if ( accountService == null ) accountService( AccountService.getInstance() );
         return accountService;
+    }
+
+    public synchronized void groupTypeService( @NotNull GroupTypeService groupTypeService ) { this.groupTypeService = groupTypeService; }
+    public synchronized @NotNull GroupTypeService groupTypeService() {
+        if ( groupTypeService == null ) groupTypeService( GroupTypeService.getInstance() );
+        return groupTypeService;
     }
 
     /**
