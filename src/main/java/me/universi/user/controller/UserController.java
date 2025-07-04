@@ -1,19 +1,14 @@
 package me.universi.user.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import java.net.URI;
-import java.net.URL;
 import java.util.List;
 import me.universi.user.dto.*;
 import me.universi.user.entities.User;
 import me.universi.user.services.*;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping(value = "")
@@ -74,8 +69,8 @@ public class UserController {
     }
 
     @PostMapping(value = "/login/keycloak", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<User> oauth_keycloak_session( @Valid @RequestBody LoginCodeDTO loginCodeDTO ) {
-        return ResponseEntity.ok( keycloakService.keycloackLogin(loginCodeDTO) );
+    public ResponseEntity<LoginResponseDTO> oauth_keycloak_session( @Valid @RequestBody LoginCodeDTO loginCodeDTO ) {
+        return ResponseEntity.ok( keycloakService.keycloakLogin(loginCodeDTO) );
     }
 
     @GetMapping(value = "/login/keycloak/auth")
@@ -84,7 +79,7 @@ public class UserController {
     }
 
     @PostMapping(value = "/login/google", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<User> login_google( @Valid @RequestBody LoginTokenDTO loginTokenDTO ) {
+    public ResponseEntity<LoginResponseDTO> login_google( @Valid @RequestBody LoginTokenDTO loginTokenDTO ) {
         return ResponseEntity.ok( googleService.googleLogin(loginTokenDTO) );
     }
 

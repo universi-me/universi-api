@@ -27,7 +27,7 @@ public class InstitutionService {
     }
 
     public static InstitutionService getInstance() {
-        return Sys.context.getBean("institutionService", InstitutionService.class);
+        return Sys.context().getBean("institutionService", InstitutionService.class);
     }
 
     public Optional<Institution> find(@NotNull UUID id) {

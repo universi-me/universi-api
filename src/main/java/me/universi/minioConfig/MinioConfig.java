@@ -42,7 +42,7 @@ public class MinioConfig {
 
     public static MinioConfig getInstance() {
         try {
-            return Sys.context.getBean("minioConfig", MinioConfig.class);
+            return Sys.context().getBean("minioConfig", MinioConfig.class);
         } catch (Exception e) {
             return null;
         }

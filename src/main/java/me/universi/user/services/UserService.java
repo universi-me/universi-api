@@ -26,19 +26,15 @@ import org.springframework.stereotype.Service;
 public class UserService extends EntityService<User> implements UserDetailsService {
     private final UserRepository userRepository;
     private final PerfilRepository profileRepository;
-    private final RoleHierarchyImpl roleHierarchy;
-    private final LoginService loginService;
 
-    public UserService(UserRepository userRepository, PerfilRepository profileRepository, RoleHierarchyImpl roleHierarchy, LoginService loginService) {
+    public UserService(UserRepository userRepository, PerfilRepository profileRepository) {
         this.userRepository = userRepository;
         this.profileRepository = profileRepository;
-        this.roleHierarchy = roleHierarchy;
-        this.loginService = loginService;
     }
 
     // UserService bean instance via context
     public static UserService getInstance() {
-        return Sys.context.getBean("userService", UserService.class);
+        return Sys.context().getBean("userService", UserService.class);
     }
 
     @Override
@@ -144,6 +140,7 @@ public class UserService extends EntityService<User> implements UserDetailsServi
         if(equal) {
             return user.getAuthority().equals(authority);
         }
+        RoleHierarchyImpl roleHierarchy = Sys.context().getBean(RoleHierarchyImpl.class);
         Collection<? extends GrantedAuthority> reachableRoles = roleHierarchy.getReachableGrantedAuthorities(user.getAuthorities());
         return reachableRoles.contains(new SimpleGrantedAuthority(authority.toString()));
     }
@@ -165,11 +162,11 @@ public class UserService extends EntityService<User> implements UserDetailsServi
     }
 
     public boolean isUserAdminSession() {
-        return isUserAdmin(loginService.getUserInSession());
+        return isUserAdmin(LoginService.getInstance().getUserInSession(false));
     }
 
     public boolean isUserDevSession() {
-        return isUserDev(loginService.getUserInSession());
+        return isUserDev(LoginService.getInstance().getUserInSession(false));
     }
 
     public boolean userNeedAnProfile(User user, boolean checkAdmin) {
@@ -199,7 +196,7 @@ public class UserService extends EntityService<User> implements UserDetailsServi
 
     @Override
     public boolean hasPermissionToEdit( User user ) {
-        return loginService.isSessionOfUser( user );
+        return LoginService.getInstance().isSessionOfUser( user );
     }
 
     @Override

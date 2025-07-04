@@ -56,7 +56,7 @@ public class ActivityService extends EntityService<Activity> {
     }
 
     public static @NotNull ActivityService getInstance() {
-        return Sys.context.getBean( "activityService", ActivityService.class );
+        return Sys.context().getBean( "activityService", ActivityService.class );
     }
 
     @Override protected Optional<Activity> findUnchecked( UUID id ) { return repository().findById( id ); }
@@ -253,7 +253,7 @@ public class ActivityService extends EntityService<Activity> {
 
     public synchronized void repository( @NotNull ActivityRepository repository ) { this.repository = repository; }
     public synchronized @NotNull ActivityRepository repository() {
-        if ( repository == null ) repository( Sys.context.getBean( "activityRepository", ActivityRepository.class ) );
+        if ( repository == null ) repository( Sys.context().getBean( "activityRepository", ActivityRepository.class ) );
         return repository;
     }
 

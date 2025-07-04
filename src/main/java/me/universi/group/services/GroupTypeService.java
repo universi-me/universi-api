@@ -28,7 +28,7 @@ public class GroupTypeService extends UniqueNameEntityService<GroupType> {
 
     public GroupTypeService() { this.entityName = "Tipo de Grupo"; }
     public static @NotNull GroupTypeService getInstance() {
-        return Sys.context.getBean( "groupTypeService", GroupTypeService.class );
+        return Sys.context().getBean( "groupTypeService", GroupTypeService.class );
     }
 
     @Override protected Optional<GroupType> findUnchecked( UUID id ) { return repository().findById( id ); }
@@ -78,7 +78,7 @@ public class GroupTypeService extends UniqueNameEntityService<GroupType> {
 
     public synchronized void repository( @NotNull GroupTypeRepository groupTypeRepository ) { this.groupTypeRepository = groupTypeRepository; }
     public synchronized @NotNull GroupTypeRepository repository() {
-        if ( groupTypeRepository == null ) repository( Sys.context.getBean( "groupTypeRepository", GroupTypeRepository.class ) );
+        if ( groupTypeRepository == null ) repository( Sys.context().getBean( "groupTypeRepository", GroupTypeRepository.class ) );
         return groupTypeRepository;
     }
 

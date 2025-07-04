@@ -48,7 +48,7 @@ public class GroupFeedService {
     }
 
     public static GroupFeedService getInstance() {
-        return Sys.context.getBean("groupFeedService", GroupFeedService.class);
+        return Sys.context().getBean("groupFeedService", GroupFeedService.class);
     }
 
     public List<GroupPost> getGroupPosts(String groupId) {

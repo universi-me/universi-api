@@ -49,7 +49,7 @@ public class JobService extends EntityService<Job> {
         this.loginService = loginService;
     }
 
-    public static JobService getInstance() { return Sys.context.getBean("jobService", JobService.class); }
+    public static JobService getInstance() { return Sys.context().getBean("jobService", JobService.class); }
 
     @Override
     protected Optional<Job> findUnchecked(UUID id) {
