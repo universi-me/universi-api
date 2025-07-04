@@ -11,7 +11,7 @@ import org.springframework.data.mongodb.config.AbstractMongoClientConfiguration;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
 @Configuration
-@EnableMongoRepositories(basePackages = { "me.universi.feed", }) // Configure here base package that use MongoDB
+@EnableMongoRepositories(basePackages = { "me.universi.feed.*", }) // Configure here base package that use MongoDB
 public class MongoConfig extends AbstractMongoClientConfiguration {
 
     @Value("${database.mongo.name}")

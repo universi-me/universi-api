@@ -3,8 +3,6 @@ package me.universi.user.services;
 import me.universi.api.entities.Response;
 import me.universi.profile.enums.Gender;
 import me.universi.user.entities.User;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.DefaultRedirectStrategy;
@@ -16,26 +14,20 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.security.Principal;
+import org.springframework.stereotype.Component;
 
 /*
     Classe para manipular quando o usuario efetuar o login
  */
+@Component
 public class AuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
-    private final UserService userService;
-    private final AuthenticationManager authenticationManager;
-    private final JWTService jwtService;
-
-    @Autowired
-    public AuthenticationSuccessHandler(UserService userService, AuthenticationManager authenticationManager, JWTService jwtService) {
-        this.userService = userService;
-        this.authenticationManager = authenticationManager;
-        this.jwtService = jwtService;
-    }
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws ServletException, IOException {
         String username;
         User user;
+
+        UserService userService = UserService.getInstance();
 
         if (authentication.getPrincipal() instanceof Principal) {
             username = ((Principal) authentication.getPrincipal()).getName();
@@ -44,7 +36,7 @@ public class AuthenticationSuccessHandler extends SavedRequestAwareAuthenticatio
         }
         if(username != null) {
             user = (User) userService.loadUserByUsername(username);
-            LoginService.getInstance().configureSessionForUser(user, authenticationManager);
+            LoginService.getInstance().configureSessionForUser(user);
         } else {
             user = null;
         }
@@ -59,7 +51,7 @@ public class AuthenticationSuccessHandler extends SavedRequestAwareAuthenticatio
                 else
                     r.message = "Boas vindas, "+user.getName()+".";
                 r.redirectTo = LoginService.getInstance().getUrlWhenLogin();
-                r.token = jwtService.buildTokenForUser(user);
+                r.token = JWTService.getInstance().buildTokenForUser(user);
                 r.body.put("user", user);
             });
 

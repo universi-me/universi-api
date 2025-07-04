@@ -51,7 +51,7 @@ public class ProfileService extends EntityService<Profile> {
     }
 
     public static ProfileService getInstance() {
-        return Sys.context.getBean("profileService", ProfileService.class);
+        return Sys.context().getBean("profileService", ProfileService.class);
     }
 
     @Override
@@ -115,10 +115,7 @@ public class ProfileService extends EntityService<Profile> {
                 myself.setDepartment( DepartmentService.getInstance().findByIdOrNameOrThrow( id ) );
         } );
 
-        var updated = perfilRepository.saveAndFlush( myself );
-        loginService.updateUserInSession();
-
-        return updated;
+        return perfilRepository.saveAndFlush( myself );
     }
 
     public void delete( @NotNull String idOrUsername ) {
@@ -215,7 +212,7 @@ public class ProfileService extends EntityService<Profile> {
     }
 
     public Optional<Profile> getProfileInSession() {
-        var user = loginService.getUserInSession();
+        var user = loginService.getUserInSession(false);
         if ( user == null || user.getProfile() == null || user.getProfile().getId() == null)
             return Optional.empty();
         return find( user.getProfile().getId() );

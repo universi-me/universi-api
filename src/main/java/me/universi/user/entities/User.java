@@ -4,11 +4,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import me.universi.group.entities.Group;
 import me.universi.profile.entities.Profile;
 import me.universi.user.enums.Authority;
@@ -16,10 +17,7 @@ import me.universi.user.services.JsonEmailOwnerSessionFilter;
 import me.universi.user.services.JsonUserAdminFilter;
 import me.universi.user.services.LoginService;
 import me.universi.user.services.UserService;
-import org.hibernate.annotations.NotFound;
-import org.hibernate.annotations.NotFoundAction;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.SQLRestriction;
+import org.hibernate.annotations.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -62,9 +60,12 @@ public class User implements UserDetails, Serializable {
     private String recoveryPasswordToken;
 
     @JsonIgnore
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "recovery_token_date")
-    private Date recoveryPasswordTokenDate;
+    private LocalDateTime recoveryPasswordTokenDate;
+
+    @JsonIgnore
+    @Column(name = "version_date")
+    private LocalDateTime versionDate;
 
 
     @JsonIgnore
@@ -183,12 +184,20 @@ public class User implements UserDetails, Serializable {
         this.recoveryPasswordToken = recoveryPasswordToken;
     }
 
-    public Date getRecoveryPasswordTokenDate() {
+    public LocalDateTime getRecoveryPasswordTokenDate() {
         return recoveryPasswordTokenDate;
     }
 
-    public void setRecoveryPasswordTokenDate(Date recoveryPasswordTokenDate) {
+    public void setRecoveryPasswordTokenDate(LocalDateTime recoveryPasswordTokenDate) {
         this.recoveryPasswordTokenDate = recoveryPasswordTokenDate;
+    }
+
+    public LocalDateTime getVersionDate() {
+        return versionDate;
+    }
+
+    public void setVersionDate(LocalDateTime versionDate) {
+        this.versionDate = versionDate;
     }
 
     public boolean isExpired_user() {

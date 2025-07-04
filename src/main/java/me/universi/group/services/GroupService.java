@@ -72,11 +72,11 @@ public class GroupService extends EntityService<Group> {
 
 
     public static GroupService getInstance() {
-        return Sys.context.getBean("groupService", GroupService.class);
+        return Sys.context().getBean("groupService", GroupService.class);
     }
 
     public static @NotNull GroupRepository getRepository() {
-        return Sys.context.getBean( "groupRepository", GroupRepository.class );
+        return Sys.context().getBean( "groupRepository", GroupRepository.class );
     }
 
     @Override

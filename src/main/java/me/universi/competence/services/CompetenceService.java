@@ -36,11 +36,11 @@ public class CompetenceService extends EntityService<Competence> {
     }
 
     public static CompetenceService getInstance() {
-        return Sys.context.getBean("competenceService", CompetenceService.class);
+        return Sys.context().getBean("competenceService", CompetenceService.class);
     }
 
     public static CompetenceRepository getRepository() {
-        return Sys.context.getBean( "competenceRepository", CompetenceRepository.class );
+        return Sys.context().getBean( "competenceRepository", CompetenceRepository.class );
     }
 
     @Override

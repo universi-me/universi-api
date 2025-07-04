@@ -30,7 +30,7 @@ public class GroupEmailFilterService extends EntityService<GroupEmailFilter> {
     }
 
     public GroupEmailFilterService getInstance() {
-        return Sys.context.getBean( "groupEmailFilterService", GroupEmailFilterService.class );
+        return Sys.context().getBean( "groupEmailFilterService", GroupEmailFilterService.class );
     }
 
     @Override

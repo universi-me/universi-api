@@ -96,7 +96,7 @@ public class FolderService extends EntityService<Folder> {
     }
 
     public static FolderService getInstance() {
-        return Sys.context.getBean("folderService", FolderService.class);
+        return Sys.context().getBean("folderService", FolderService.class);
     }
 
     @Override

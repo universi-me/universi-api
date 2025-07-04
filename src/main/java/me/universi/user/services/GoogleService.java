@@ -10,6 +10,7 @@ import java.util.Map;
 import me.universi.Sys;
 import me.universi.group.entities.GroupEnvironment;
 import me.universi.group.services.OrganizationService;
+import me.universi.user.dto.LoginResponseDTO;
 import me.universi.user.dto.LoginTokenDTO;
 import me.universi.user.entities.User;
 import me.universi.user.exceptions.UserException;
@@ -46,10 +47,10 @@ public class GoogleService {
 
     // bean instance via context
     public static GoogleService getInstance() {
-        return Sys.context.getBean("googleService", GoogleService.class);
+        return Sys.context().getBean("googleService", GoogleService.class);
     }
 
-    public User googleLogin(LoginTokenDTO loginTokenDTO ) {
+    public LoginResponseDTO googleLogin(LoginTokenDTO loginTokenDTO ) {
         if(!isLoginViaGoogleEnabled()) {
             throw new UserException("Login via Google desabilitado!");
         }
@@ -84,7 +85,7 @@ public class GoogleService {
             User user = loginService.configureLoginForOAuth(name, username, email, pictureUrl);
 
             if(user != null) {
-                return user;
+                return new LoginResponseDTO(user, JWTService.getInstance().buildTokenForUser(user));
             }
 
         } else {

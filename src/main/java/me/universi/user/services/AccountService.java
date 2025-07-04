@@ -11,6 +11,7 @@ import me.universi.user.entities.User;
 import me.universi.user.enums.Authority;
 import me.universi.user.exceptions.UserException;
 import me.universi.util.CastingUtil;
+import me.universi.util.ConvertUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -41,7 +42,7 @@ public class AccountService {
 
     // bean instance via context
     public static AccountService getInstance() {
-        return Sys.context.getBean("accountService", AccountService.class);
+        return Sys.context().getBean("accountService", AccountService.class);
     }
 
     public String encodePassword(String rawPassword) {
@@ -114,7 +115,7 @@ public class AccountService {
         user.setExpired_credentials(false);
         UserService.getInstance().save(user);
         if(logout) {
-            loginService.logoutUsername(user.getUsername());
+            loginService.logoutUser(user);
         }
     }
 
@@ -203,7 +204,6 @@ public class AccountService {
         user.setConfirmed(true);
         UserService.getInstance().save(user);
 
-        loginService.saveInSession("account_confirmed", true);
         return true;
     }
 
@@ -281,6 +281,7 @@ public class AccountService {
         }
 
         User user = new User();
+        user.setVersionDate(ConvertUtil.getDateTimeNow());
         user.setName(username);
         user.setEmail(email);
         if(isConfirmAccountEnabled()) {
@@ -311,14 +312,9 @@ public class AccountService {
 
         User user = loginService.getUserInSession();
 
-        // if logged with google don't check password
-        boolean loggedAsGoogle = (loginService.getInSession("loginViaGoogle") != null);
-
-        if (loggedAsGoogle || passwordValid(user, password)) {
+        if (passwordValid(user, password)) {
 
             saveRawPasswordToUser(user, newPassword, false);
-
-            loginService.updateUserInSession();
 
         } else {
             throw new UserException("Credenciais Invalidas!");
@@ -400,7 +396,7 @@ public class AccountService {
         UserService.getInstance().save(userEdit);
 
         // force logout
-        loginService.logoutUsername(usernameOld);
+        loginService.logoutUser(userEdit);
     }
 
     public List<User> adminListAccount(String byRole) {
@@ -413,11 +409,7 @@ public class AccountService {
     public GetAccountDTO getAccountSession() {
         GetAccountDTO getAccount = null;
         if(loginService.userIsLoggedIn()) {
-            getAccount = new GetAccountDTO(loginService.getUserInSession(), RoleService.getInstance().getAllRolesSession());
-        }
-        if(loginService.getInSession("account_confirmed") != null) {
-            loginService.removeInSession("account_confirmed");
-            loginService.removeInSession("message_account_confirmed");
+            getAccount = new GetAccountDTO(loginService.getUserInSession(false), RoleService.getInstance().getAllRolesSession());
         }
         return getAccount;
     }

@@ -9,4 +9,4 @@ if [ -n "$DEBUG_URL_POST" ] && [ -f "$API_DEBUG_FILE" ]; then
 fi
 
 # Execute the Java application
-exec java -XX:+UseContainerSupport -jar /app.jar
+exec java -XX:+UseContainerSupport -XX:InitialRAMPercentage=20 -XX:MaxRAMPercentage=80 -jar /app.jar

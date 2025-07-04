@@ -35,7 +35,7 @@ public class EnvironmentService {
 
     // bean instance via context
     public static EnvironmentService getInstance() {
-        return Sys.context.getBean("environmentService", EnvironmentService.class);
+        return Sys.context().getBean("environmentService", EnvironmentService.class);
     }
 
     public String getPublicUrl() {

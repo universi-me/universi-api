@@ -49,7 +49,7 @@ public class RoleService extends EntityService<Role> {
     }
 
     public static RoleService getInstance() {
-        return Sys.context.getBean("roleService", RoleService.class);
+        return Sys.context().getBean("roleService", RoleService.class);
     }
 
     @Override

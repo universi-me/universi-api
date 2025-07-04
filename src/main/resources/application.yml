@@ -4,6 +4,8 @@ spring:
   flyway:
     out-of-order: true
     ignore-migration-patterns: "*:missing"
+  main:
+    allow-circular-references: true
 
 logging:
   level:
@@ -20,7 +22,7 @@ keycloak:
   client-secret: ${API_KEYCLOAK_CLIENT_SECRET:}
 
 jwt:
-  enabled: ${API_JWT_ENABLED:false}
+  issuer: ${API_JWT_ISSUER:universi.me}
   secret:
     key: ${API_JWT_SECRET_KEY:qcpaA9/W3RB1YTqug4pt1DDmAyvszKDmga3cXOjZygDN+IOJdTzjHsiQTA+hFSCdx6CDTqjBQYjs5pxS/1jFFA==}
   expiration: ${API_JWT_EXPIRATION:3600} # 1 hour
@@ -65,17 +67,12 @@ database:
 # SERVER
 server:
   port: ${API_SERVER_PORT:8080}
+  mvc:
+    servlet:
+      path: ${API_SERVER_CONTEXT_PATH:/api}
   servlet:
     session:
-      timeout: ${API_SERVER_SESSION_TIMEOUT:31536000} # 1 year
-      persistent: ${API_SERVER_SESSION_PERSISTENT:true}
-      store-dir: ${API_SERVER_SESSION_STORE_DIR:}
-      cookie:
-        http-only: ${API_SERVER_SESSION_COOKIE_HTTP_ONLY:true}
-        secure: ${API_SERVER_SESSION_COOKIE_SECURE:false}
-        same-site: ${API_SERVER_SESSION_COOKIE_SAME_SITE:strict}
-        name: ${API_SERVER_SESSION_COOKIE_NAME:UNIVERSIME_SESSION}
-        max-age: ${API_SERVER_SESSION_TIMEOUT:31536000} # 1 year
+      tracking-modes:
     multipart:
       enabled: true
       max-file-size: 200MB
@@ -88,6 +85,7 @@ server:
 # SPRINGDOC
 springdoc:
   version: 1.0
+  enable-kotlin: false
   api-docs:
     path: /v3/api-docs
   swagger-ui:
