@@ -392,7 +392,7 @@ public class AccountService {
     public GetAccountDTO getAccountSession() {
         GetAccountDTO getAccount = null;
         if(loginService.userIsLoggedIn()) {
-            getAccount = new GetAccountDTO(loginService.getUserInSession(), RoleService.getInstance().getAllRolesSession());
+            getAccount = new GetAccountDTO(loginService.getUserInSession(false), RoleService.getInstance().getAllRolesSession());
         }
         return getAccount;
     }

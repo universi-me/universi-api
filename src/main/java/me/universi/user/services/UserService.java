@@ -162,11 +162,11 @@ public class UserService extends EntityService<User> implements UserDetailsServi
     }
 
     public boolean isUserAdminSession() {
-        return isUserAdmin(LoginService.getInstance().getUserInSession());
+        return isUserAdmin(LoginService.getInstance().getUserInSession(false));
     }
 
     public boolean isUserDevSession() {
-        return isUserDev(LoginService.getInstance().getUserInSession());
+        return isUserDev(LoginService.getInstance().getUserInSession(false));
     }
 
     public boolean userNeedAnProfile(User user, boolean checkAdmin) {

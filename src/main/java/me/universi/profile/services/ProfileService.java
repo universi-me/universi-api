@@ -212,7 +212,7 @@ public class ProfileService extends EntityService<Profile> {
     }
 
     public Optional<Profile> getProfileInSession() {
-        var user = loginService.getUserInSession();
+        var user = loginService.getUserInSession(false);
         if ( user == null || user.getProfile() == null || user.getProfile().getId() == null)
             return Optional.empty();
         return find( user.getProfile().getId() );

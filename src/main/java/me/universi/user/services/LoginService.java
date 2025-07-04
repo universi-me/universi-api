@@ -3,6 +3,7 @@ package me.universi.user.services;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Objects;
 import me.universi.Sys;
+import me.universi.api.exceptions.UniversiException;
 import me.universi.group.services.OrganizationService;
 import me.universi.image.services.ImageMetadataService;
 import me.universi.profile.entities.Profile;
@@ -10,6 +11,7 @@ import me.universi.profile.repositories.PerfilRepository;
 import me.universi.user.entities.User;
 import me.universi.user.exceptions.UserException;
 import me.universi.util.ConvertUtil;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -116,7 +118,7 @@ public class LoginService {
     // url redirect when user login
     public String getUrlWhenLogin() {
 
-        User userSession = getUserInSession();
+        User userSession = getUserInSession(false);
         if (userSession != null) {
             if(UserService.getInstance().userNeedAnProfile(userSession, true)) {
                 // go to user profile edit
@@ -137,7 +139,7 @@ public class LoginService {
     // logout user from current session
     public void logout() {
         try {
-            logoutUser(getUserInSession());
+            logoutUser(getUserInSession(false));
             SecurityContextHolder.clearContext();
             RequestService.getInstance().removeCookie(JWTService.JWT_TOKEN);
         } catch (Exception e) {
@@ -147,13 +149,13 @@ public class LoginService {
 
     public boolean isSessionOfUser(User user) {
         try {
-            return (user.getUsername() != null && Objects.equals(getUserInSession().getUsername(), user.getUsername()));
+            return (user.getUsername() != null && Objects.equals(getUserInSession(false).getUsername(), user.getUsername()));
         } catch (Exception e) {
             return false;
         }
     }
 
-    public User getUserInSession() {
+    public User getUserInSession(boolean throwException) throws RuntimeException {
         // get current request
         HttpServletRequest request = requestService.getRequest();
         if(request != null) {
@@ -162,7 +164,14 @@ public class LoginService {
                 return user;
             }
         }
+        if(throwException) {
+            throw new UniversiException("Usuário não está autenticado.", HttpStatus.UNAUTHORIZED);
+        }
         return null;
+    }
+
+    public User getUserInSession() {
+        return getUserInSession(true);
     }
 
     public void configureSessionForUser(User user) {
@@ -189,7 +198,7 @@ public class LoginService {
 
     public boolean userIsLoggedIn() {
         try {
-            return getUserInSession() != null;
+            return getUserInSession(false) != null;
         } catch (Exception e) {
             return false;
         }
