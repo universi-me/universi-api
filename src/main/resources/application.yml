@@ -4,6 +4,8 @@ spring:
   flyway:
     out-of-order: true
     ignore-migration-patterns: "*:missing"
+  main:
+    allow-circular-references: true
 
 logging:
   level:

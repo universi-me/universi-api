@@ -92,7 +92,7 @@ public class LoginService {
                 UserService.getInstance().save(user);
             }
 
-            configureSessionForUser(user, null);
+            configureSessionForUser(user);
 
             return user;
         }
@@ -165,13 +165,13 @@ public class LoginService {
         return null;
     }
 
-    public void configureSessionForUser(User user, AuthenticationManager authenticationManager) {
+    public void configureSessionForUser(User user) {
 
         if(user == null) {
             throw new UserException("Falha ao configurar sessão do usuário.");
         }
 
-        authenticationManager = authenticationManager != null ? authenticationManager : Sys.context().getBean("authenticationManager", AuthenticationManager.class);
+        AuthenticationManager authenticationManager = Sys.context().getBean("authenticationManager", AuthenticationManager.class);
 
         // force authentication
         if(authenticationManager != null) {

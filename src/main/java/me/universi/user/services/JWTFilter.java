@@ -17,7 +17,7 @@ public class JWTFilter extends OncePerRequestFilter {
     protected void doFilterInternal(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull FilterChain filterChain) throws ServletException, IOException {
 
         try {
-            LoginService.getInstance().configureSessionForUser(LoginService.getInstance().getUserInSession(), null);
+            LoginService.getInstance().configureSessionForUser( LoginService.getInstance().getUserInSession() );
         } catch (Exception e) {
             LoginService.getInstance().logout();
         }

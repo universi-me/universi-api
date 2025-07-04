@@ -36,7 +36,7 @@ public class AuthenticationSuccessHandler extends SavedRequestAwareAuthenticatio
         }
         if(username != null) {
             user = (User) userService.loadUserByUsername(username);
-            LoginService.getInstance().configureSessionForUser(user, null);
+            LoginService.getInstance().configureSessionForUser(user);
         } else {
             user = null;
         }
