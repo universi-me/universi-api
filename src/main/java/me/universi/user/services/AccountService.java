@@ -264,7 +264,7 @@ public class AccountService {
         }
 
         User user = new User();
-        user.setVersionDate(ConvertUtil.getDateTimeNow());
+        LoginService.getInstance().refreshUserVersionDate(user);
         user.setName(username);
         user.setEmail(email);
         if(isConfirmAccountEnabled()) {

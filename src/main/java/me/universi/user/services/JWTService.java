@@ -65,6 +65,15 @@ public class JWTService {
         Date issuedAt = new Date(now);
         Date expiration = new Date(now + (EXPIRATION * 1000) ); // convert to ms
 
+        if (user == null || user.getId() == null) {
+            throw new UserException("User information is required to build JWT token");
+        }
+
+        if(user.getVersionDate() == null) {
+            LoginService.getInstance().refreshUserVersionDate(user);
+            UserService.getInstance().save(user);
+        }
+
         return Jwts.builder()
                 .issuer(ISSUER)
                 .subject(user.getId().toString())

@@ -128,11 +128,14 @@ public class UserService extends EntityService<User> implements UserDetailsServi
         return findByEmail( email ).isPresent();
     }
 
-    public void save(User user) {
+    public User save(User user) {
+        if(user == null) {
+            throw new UserException("Usuário não pode ser nulo!");
+        }
         if(user.getOrganization() == null) {
             user.setOrganization(OrganizationService.getInstance().getOrganization());
         }
-        userRepository.saveAndFlush(user);
+        return userRepository.saveAndFlush(user);
     }
 
     // check if user has authority following springsecurity hierarchy
