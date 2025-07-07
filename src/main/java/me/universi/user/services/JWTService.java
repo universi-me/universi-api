@@ -2,6 +2,7 @@ package me.universi.user.services;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.persistence.PersistenceException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
@@ -117,7 +118,7 @@ public class JWTService {
 
             // 1 verify token authentication from header
             String header = request.getHeader(AUTH_HEADER);
-            if(header != null && header.startsWith(AUTHENTICATION_SCHEME)) {
+            if (header != null && header.startsWith(AUTHENTICATION_SCHEME)) {
                 return getUserFromToken(header.substring(7)); // remove "Bearer " prefix
             }
 
@@ -127,9 +128,9 @@ public class JWTService {
                 return getUserFromToken(token);
             }
 
-        } catch (Exception e) {
-
+        } catch (UserException ignored) {
         }
+
         return null;
     }
 }
