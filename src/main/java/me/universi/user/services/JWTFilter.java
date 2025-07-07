@@ -4,6 +4,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import me.universi.api.exceptions.UniversiException;
+import me.universi.user.exceptions.UserException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -18,7 +20,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
         try {
             LoginService.getInstance().configureSessionForUser( LoginService.getInstance().getUserInSession(false) );
-        } catch (Exception e) {
+        } catch (UniversiException e) {
             LoginService.getInstance().logout();
         }
 

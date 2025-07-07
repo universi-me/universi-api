@@ -10,6 +10,7 @@ import me.universi.Sys;
 import me.universi.user.entities.User;
 import me.universi.user.exceptions.UserException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -91,23 +92,23 @@ public class JWTService {
         try {
             claims = jwtParser.parseSignedClaims(token).getPayload();
         } catch (Exception e) {
-            throw new UserException("Invalid JWT token");
+            throw new UserException("Invalid JWT token", HttpStatus.UNAUTHORIZED);
         }
 
         // Check if the token is expired
         if (claims.getExpiration().before(new Date())) {
-            throw new UserException("JWT Token Expired");
+            throw new UserException("JWT Token Expired", HttpStatus.UNAUTHORIZED);
         }
 
         User user = UserService.getInstance()
                 .findUnchecked( UUID.fromString(claims.getSubject()) )
-                .orElseThrow(() -> new UserException("User not found for JWT token"));
+                .orElseThrow(() -> new UserException("User not found for JWT token", HttpStatus.NOT_FOUND));
 
         // Additional check date time is before (possibility for force logout user remotely)
         String versionDate = claims.get(VERSION_DATE, String.class);
         LocalDateTime versionDateTime = LocalDateTime.parse(versionDate);
         if (user.getVersionDate() == null || user.getVersionDate().isAfter(versionDateTime)) {
-            throw new UserException("User version date is not valid for this token");
+            throw new UserException("User version date is not valid for this token", HttpStatus.UNAUTHORIZED);
         }
 
         return user;
@@ -128,7 +129,10 @@ public class JWTService {
                 return getUserFromToken(token);
             }
 
-        } catch (UserException ignored) {
+        } catch (UserException e) {
+            if(e.status != HttpStatus.UNAUTHORIZED) {
+                throw e;
+            }
         }
 
         return null;
