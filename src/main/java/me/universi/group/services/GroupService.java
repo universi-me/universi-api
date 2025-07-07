@@ -437,7 +437,8 @@ public class GroupService extends EntityService<Group> {
         emailService.sendSystemEmailToUser(profile.getUser(), subject, message, true);
     }
 
-    public Group createGroup( CreateGroupDTO dto ) {
+    public Group createGroup( CreateGroupDTO dto ) { return createGroup( dto, true ); }
+    public Group createGroup( CreateGroupDTO dto, boolean checkTypeAssignment ) {
         if ( dto.parentGroup().isEmpty() && !userService.isUserAdminSession() )
             throw new UniversiBadRequestException( "O Parâmetro 'parentGroup' deve ser informado" );
 
@@ -451,7 +452,13 @@ public class GroupService extends EntityService<Group> {
         group.setNickname( nickname );
         group.setName( dto.name() );
         group.setDescription( dto.description() );
-        group.setType( groupTypeService.findByIdOrNameOrThrow( dto.type() ) );
+
+        var groupType = groupTypeService.findByIdOrNameOrThrow( dto.type() );
+
+        if ( checkTypeAssignment )
+            groupTypeService.checkCanBeAssigned( groupType );
+
+        group.setType( groupType );
 
         group.setCanCreateGroup( dto.canCreateSubgroup() );
         group.setPublicGroup( dto.isPublic() );
@@ -498,7 +505,16 @@ public class GroupService extends EntityService<Group> {
         } );
 
         dto.type().ifPresent( typeName -> {
-            group.setType( groupTypeService.findByIdOrNameOrThrow( typeName ) );
+            var type = groupTypeService.findByIdOrNameOrThrow( typeName );
+
+            // Prevents next checks from causing issues
+            if ( group.getType().getId().equals( type.getId() ) ) return;
+
+            groupTypeService.checkCanBeAssigned( type );
+            if ( group.isActivityGroup() )
+                throw new UniversiConflictingOperationException( "Um grupo de Atividade não pode ter seu tipo alterado" );
+
+            group.setType( type );
         } );
 
         dto.image().ifPresent( imageId -> {

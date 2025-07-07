@@ -30,11 +30,13 @@ import me.universi.competence.services.CompetenceTypeService;
 import me.universi.group.DTO.CreateGroupDTO;
 import me.universi.group.entities.Group;
 import me.universi.group.services.GroupService;
+import me.universi.group.services.GroupTypeService;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
 import me.universi.role.enums.FeaturesTypes;
 import me.universi.role.enums.Permission;
 import me.universi.role.services.RoleService;
+import me.universi.user.services.AccountService;
 import me.universi.user.services.UserService;
 import me.universi.util.DateUtil;
 
@@ -47,6 +49,8 @@ public class ActivityService extends EntityService<Activity> {
     private @Nullable ActivityTypeService activityTypeService;
     private @Nullable GroupService groupService;
     private @Nullable RoleService roleService;
+    private @Nullable AccountService accountService;
+    private @Nullable GroupTypeService groupTypeService;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -135,26 +139,33 @@ public class ActivityService extends EntityService<Activity> {
         validateDates( dto );
 
         var name = dto.name().trim();
-        var nickname = dto.nickname().trim();
+        var nickname = accountService().createUsernameFromString( name );
         var description = dto.description().trim();
         var location = dto.location().trim();
         var badges = dto.badges().map( competenceTypeService()::findByIdOrNameOrThrow )
             .orElse( Collections.emptyList() );
         var type = activityTypeService().findByIdOrNameOrThrow( dto.type() );
 
+        var nicknameCounter = 0;
+        var finalNickname = nickname;
+        while ( !groupService().isNicknameAvailable( finalNickname, parentGroup ) ) {
+            nicknameCounter++;
+            finalNickname = accountService().limitUsernameLength( nickname + nicknameCounter );
+        }
+
         var activityGroup = groupService().createGroup( new CreateGroupDTO(
             Optional.of( parentGroup.getId().toString() ),
-            nickname,
+            finalNickname,
             name,
             dto.image(),
             dto.bannerImage(),
             Optional.empty(),
             description,
-            dto.groupType(),
+            groupTypeService().getActivityType().getId().toString(),
             false,
             true,
             false
-        ) );
+        ), false );
 
         var activity = new Activity();
         activity.setLocation( location );
@@ -291,6 +302,18 @@ public class ActivityService extends EntityService<Activity> {
     public synchronized @NotNull RoleService roleService() {
         if ( roleService == null ) roleService( RoleService.getInstance() );
         return roleService;
+    }
+
+    public synchronized void accountService( @NotNull AccountService accountService ) { this.accountService = accountService; }
+    public synchronized @NotNull AccountService accountService() {
+        if ( accountService == null ) accountService( AccountService.getInstance() );
+        return accountService;
+    }
+
+    public synchronized void groupTypeService( @NotNull GroupTypeService groupTypeService ) { this.groupTypeService = groupTypeService; }
+    public synchronized @NotNull GroupTypeService groupTypeService() {
+        if ( groupTypeService == null ) groupTypeService( GroupTypeService.getInstance() );
+        return groupTypeService;
     }
 
     /**

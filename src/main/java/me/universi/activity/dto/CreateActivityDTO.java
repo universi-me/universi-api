@@ -12,12 +12,10 @@ import jakarta.validation.constraints.NotNull;
 
 public record CreateActivityDTO(
     @NotBlank String name,
-    @NotBlank String nickname,
-    @NotBlank String groupType,
     @NotBlank String description,
     @NotBlank String type,
     @NotBlank String location,
-    @NotNull Integer workload,
+    Optional<Integer> workload,
     Optional<List<@NotBlank String>> badges,
 
     Optional<UUID> image,

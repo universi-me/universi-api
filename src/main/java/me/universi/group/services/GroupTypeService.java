@@ -15,6 +15,7 @@ import me.universi.api.interfaces.UniqueNameEntityService;
 import me.universi.group.DTO.CreateGroupTypeDTO;
 import me.universi.group.DTO.UpdateGroupTypeDTO;
 import me.universi.group.entities.GroupType;
+import me.universi.group.enums.GroupTypeKind;
 import me.universi.group.repositories.GroupTypeRepository;
 import me.universi.user.services.UserService;
 import me.universi.util.CastingUtil;
@@ -35,6 +36,10 @@ public class GroupTypeService extends UniqueNameEntityService<GroupType> {
     @Override protected Optional<GroupType> findByNameUnchecked( String name ) { return repository().findFirstByLabelIgnoreCase( name ); }
     @Override protected Optional<GroupType> findByIdOrNameUnchecked( String idOrName ) { return repository().findFirstByIdOrLabelIgnoreCase( CastingUtil.getUUID( idOrName ).orElse( null ), idOrName ); }
     @Override protected List<GroupType> findAllUnchecked() { return repository().findAll(); }
+
+    public @NotNull GroupType getActivityType() {
+        return repository().findFirstByKind( GroupTypeKind.ACTIVITY );
+    }
 
     public @NotNull GroupType create( @Valid @NotNull CreateGroupTypeDTO dto ) {
         checkPermissionToCreate();
@@ -63,6 +68,11 @@ public class GroupTypeService extends UniqueNameEntityService<GroupType> {
         repository().delete( groupType );
     }
 
+    public void checkCanBeAssigned( @NotNull GroupType type ) {
+        if ( !type.isCanBeAssigned() )
+            throw new UniversiConflictingOperationException( "O " + entityName + " '" + type.getLabel() + "' não pode ser atribuído livremente." );
+    }
+
     @Override public boolean hasPermissionToCreate() {
         return userService().isUserAdminSession();
     }
@@ -73,7 +83,7 @@ public class GroupTypeService extends UniqueNameEntityService<GroupType> {
 
     @Override
     public boolean hasPermissionToDelete( GroupType groupType ) {
-        return userService().isUserAdminSession();
+        return groupType.isCanBeDeleted() && userService().isUserAdminSession();
     }
 
     public synchronized void repository( @NotNull GroupTypeRepository groupTypeRepository ) { this.groupTypeRepository = groupTypeRepository; }
