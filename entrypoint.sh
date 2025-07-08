@@ -8,11 +8,14 @@ if [ -n "$DEBUG_URL_POST" ] && [ -f "$API_DEBUG_FILE" ]; then
     rm -rf "$API_DEBUG_FILE"
 fi
 
-INIT_RAM_PERCENTAGE="${API_INIT_RAM_PERCENTAGE:-60}"
-MAX_RAM_PERCENTAGE="${API_MAX_RAM_PERCENTAGE:-90}"
+USE_RAM_PERCENTAGE="${API_USE_RAM_PERCENTAGE:-false}"
 
-# Execute the Java application
-exec java -XX:+UseContainerSupport \
-          -XX:InitialRAMPercentage="$INIT_RAM_PERCENTAGE" \
-          -XX:MaxRAMPercentage="$MAX_RAM_PERCENTAGE" \
-          -jar /app.jar
+JAVA_CMD="java -XX:+UseContainerSupport"
+
+if [ "$USE_RAM_PERCENTAGE" = "true" ]; then
+    INIT_RAM_PERCENTAGE="${API_INIT_RAM_PERCENTAGE:-60}"
+    MAX_RAM_PERCENTAGE="${API_MAX_RAM_PERCENTAGE:-90}"
+    JAVA_CMD="$JAVA_CMD -XX:InitialRAMPercentage=$INIT_RAM_PERCENTAGE -XX:MaxRAMPercentage=$MAX_RAM_PERCENTAGE"
+fi
+
+exec $JAVA_CMD -jar /app.jar
