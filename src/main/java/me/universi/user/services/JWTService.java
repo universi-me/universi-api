@@ -2,6 +2,7 @@ package me.universi.user.services;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -56,6 +57,7 @@ public class JWTService {
 
         this.jwtParser = Jwts.parser()
                 .verifyWith(secretKey)
+                .requireIssuer(ISSUER)
                 .build();
     }
 
@@ -97,18 +99,23 @@ public class JWTService {
 
         // Check if the token is expired
         if (claims.getExpiration().before(new Date())) {
-            throw new UserException("JWT Token Expired", HttpStatus.UNAUTHORIZED);
+            throw new UserException("JWT Token Expired", HttpStatus.PRECONDITION_FAILED);
         }
 
-        User user = UserService.getInstance()
-                .findUnchecked( UUID.fromString(claims.getSubject()) )
-                .orElseThrow(() -> new UserException("User not found for JWT token", HttpStatus.NOT_FOUND));
+        User user;
+        // not found user
+        try {
+            user = UserService.getInstance()
+                    .findUnchecked( UUID.fromString(claims.getSubject()) ).orElseThrow();
+        } catch (EntityNotFoundException | IllegalArgumentException e) {
+            throw new UserException("User not found for this token", HttpStatus.UNAUTHORIZED);
+        }
 
         // Additional check date time is before (possibility for force logout user remotely)
         String versionDate = claims.get(VERSION_DATE, String.class);
         LocalDateTime versionDateTime = LocalDateTime.parse(versionDate);
         if (user.getVersionDate() == null || user.getVersionDate().isAfter(versionDateTime)) {
-            throw new UserException("User version date is not valid for this token", HttpStatus.UNAUTHORIZED);
+            throw new UserException("User version date is not valid for this token", HttpStatus.PRECONDITION_FAILED);
         }
 
         return user;
