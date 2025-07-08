@@ -58,7 +58,7 @@ public class LoginService {
             if(!UserService.getInstance().usernameExist(username.trim())) {
 
                 user = new User();
-                user.setVersionDate(ConvertUtil.getDateTimeNow());
+                refreshUserVersionDate(user);
                 user.setName(username.trim());
                 user.setEmail(email.trim());
                 UserService.getInstance().createUser(user, null, null, null);
@@ -107,8 +107,15 @@ public class LoginService {
         if (user == null) {
             return;
         }
-        user.setVersionDate(ConvertUtil.getDateTimeNow());
+        refreshUserVersionDate(user);
         UserService.getInstance().save(user);
+    }
+
+    public void refreshUserVersionDate(User user) {
+        if (user == null) {
+            return;
+        }
+        user.setVersionDate(ConvertUtil.getDateTimeNow().minusMinutes(1));
     }
 
     public String manageProfilePath() {

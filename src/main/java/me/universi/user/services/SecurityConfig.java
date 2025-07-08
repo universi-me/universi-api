@@ -3,6 +3,7 @@ package me.universi.user.services;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.expression.SecurityExpressionHandler;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
@@ -121,14 +122,15 @@ public class SecurityConfig {
     }
 
     @Bean
-    public RoleHierarchyImpl roleHierarchy() {
-        RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
-        roleHierarchy.setHierarchy("ROLE_DEV > ROLE_ADMIN > ROLE_USER");
-        return roleHierarchy;
+    static RoleHierarchy roleHierarchy() {
+        return RoleHierarchyImpl.withDefaultRolePrefix()
+                .role("DEV").implies("ADMIN")
+                .role("ADMIN").implies("USER")
+                .build();
     }
 
     @Bean
-    public SecurityExpressionHandler<FilterInvocation> expressionHandler(RoleHierarchyImpl roleHierarchy) {
+    public SecurityExpressionHandler<FilterInvocation> expressionHandler(RoleHierarchy roleHierarchy) {
         DefaultWebSecurityExpressionHandler handler = new DefaultWebSecurityExpressionHandler();
         handler.setRoleHierarchy(roleHierarchy);
         return handler;

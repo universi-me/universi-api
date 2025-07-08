@@ -43,7 +43,7 @@ public class RequestService {
         }
     }
 
-    private static Pattern SUBDOMAIN_PATTERN = Pattern.compile( "^([a-zA-Z0-9-]+)\\." );
+    private static final Pattern SUBDOMAIN_PATTERN = Pattern.compile( "^([a-zA-Z0-9-]+)\\." );
     public @Nullable String getSubdomainFromRequest() {
         try {
             var domain = getDomainFromRequest();
@@ -116,7 +116,7 @@ public class RequestService {
         HttpServletRequest request = getRequest();
         for (String header: IP_HEADER_CANDIDATES) {
             String ipList = request.getHeader(header);
-            if (ipList != null && ipList.length() != 0 && !"unknown".equalsIgnoreCase(ipList)) {
+            if (ipList != null && !ipList.isEmpty() && !"unknown".equalsIgnoreCase(ipList)) {
                 String ip = ipList.split(",")[0];
                 return ip;
             }

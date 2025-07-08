@@ -2,6 +2,8 @@ package me.universi.user.services;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.PersistenceException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
@@ -9,6 +11,7 @@ import me.universi.Sys;
 import me.universi.user.entities.User;
 import me.universi.user.exceptions.UserException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -54,6 +57,7 @@ public class JWTService {
 
         this.jwtParser = Jwts.parser()
                 .verifyWith(secretKey)
+                .requireIssuer(ISSUER)
                 .build();
     }
 
@@ -64,6 +68,15 @@ public class JWTService {
         long now = System.currentTimeMillis();
         Date issuedAt = new Date(now);
         Date expiration = new Date(now + (EXPIRATION * 1000) ); // convert to ms
+
+        if (user == null || user.getId() == null) {
+            throw new UserException("User information is required to build JWT token");
+        }
+
+        if(user.getVersionDate() == null) {
+            LoginService.getInstance().refreshUserVersionDate(user);
+            UserService.getInstance().save(user);
+        }
 
         return Jwts.builder()
                 .issuer(ISSUER)
@@ -81,23 +94,28 @@ public class JWTService {
         try {
             claims = jwtParser.parseSignedClaims(token).getPayload();
         } catch (Exception e) {
-            throw new UserException("Invalid JWT token");
+            throw new UserException("Invalid JWT token", HttpStatus.UNAUTHORIZED);
         }
 
         // Check if the token is expired
         if (claims.getExpiration().before(new Date())) {
-            throw new UserException("JWT Token Expired");
+            throw new UserException("JWT Token Expired", HttpStatus.PRECONDITION_FAILED);
         }
 
-        User user = UserService.getInstance()
-                .findUnchecked( UUID.fromString(claims.getSubject()) )
-                .orElseThrow(() -> new UserException("User not found for JWT token"));
+        User user;
+        // not found user
+        try {
+            user = UserService.getInstance()
+                    .findUnchecked( UUID.fromString(claims.getSubject()) ).orElseThrow();
+        } catch (EntityNotFoundException | IllegalArgumentException e) {
+            throw new UserException("User not found for this token", HttpStatus.UNAUTHORIZED);
+        }
 
         // Additional check date time is before (possibility for force logout user remotely)
         String versionDate = claims.get(VERSION_DATE, String.class);
         LocalDateTime versionDateTime = LocalDateTime.parse(versionDate);
         if (user.getVersionDate() == null || user.getVersionDate().isAfter(versionDateTime)) {
-            throw new UserException("User version date is not valid for this token");
+            throw new UserException("User version date is not valid for this token", HttpStatus.PRECONDITION_FAILED);
         }
 
         return user;
@@ -108,7 +126,7 @@ public class JWTService {
 
             // 1 verify token authentication from header
             String header = request.getHeader(AUTH_HEADER);
-            if(header != null && header.startsWith(AUTHENTICATION_SCHEME)) {
+            if (header != null && header.startsWith(AUTHENTICATION_SCHEME)) {
                 return getUserFromToken(header.substring(7)); // remove "Bearer " prefix
             }
 
@@ -118,9 +136,12 @@ public class JWTService {
                 return getUserFromToken(token);
             }
 
-        } catch (Exception e) {
-
+        } catch (UserException e) {
+            if(e.status != HttpStatus.UNAUTHORIZED) {
+                throw e;
+            }
         }
+
         return null;
     }
 }

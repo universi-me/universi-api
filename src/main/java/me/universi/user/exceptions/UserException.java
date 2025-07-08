@@ -1,8 +1,13 @@
 package me.universi.user.exceptions;
 
-public class UserException extends RuntimeException {
+import me.universi.api.exceptions.UniversiException;
+import org.springframework.http.HttpStatus;
 
-    public UserException(String m) {
-        super(m);
+public class UserException extends UniversiException {
+    public UserException(String message, HttpStatus status) {
+        super(message, status);
+    }
+    public UserException(String message) {
+        super(message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

@@ -2,6 +2,7 @@ package me.universi.user.services;
 
 import me.universi.api.entities.Response;
 import me.universi.user.exceptions.UserException;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 
@@ -26,7 +27,7 @@ public class AuthenticationFailedHandler extends SimpleUrlAuthenticationFailureH
                 r.status = 401;
                 r.alertOptions.put("icon", "warning");
                 r.alertOptions.put("title", "Falha na autenticação");
-                throw new UserException(LoginService.getInstance().getLastSpringSecurityError(exception));
+                throw new UserException(LoginService.getInstance().getLastSpringSecurityError(exception), HttpStatus.UNAUTHORIZED);
             });
 
             response.setHeader("Content-Type", "application/json; charset=utf-8");
