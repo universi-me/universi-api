@@ -167,6 +167,19 @@ public class ActivityService extends EntityService<Activity> {
             false
         ), false );
 
+        var roles = roleService().findByGroup( activityGroup.getId() );
+
+        roles.forEach( role -> {
+            dto.enabledFeatures().ifPresent( activityFeatures -> {
+                activityFeatures.forEach( ( feature, isEnabled ) -> {
+                    if ( Boolean.FALSE.equals( isEnabled ) )
+                        role.setPermission( feature, Permission.DISABLED );
+                } );
+            } );
+        } );
+
+        RoleService.getRepository().saveAllAndFlush( roles );
+
         var activity = new Activity();
         activity.setLocation( location );
         activity.setWorkload( dto.workload() );

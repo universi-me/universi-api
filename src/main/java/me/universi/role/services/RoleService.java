@@ -52,6 +52,10 @@ public class RoleService extends EntityService<Role> {
         return Sys.context().getBean("roleService", RoleService.class);
     }
 
+    public static @NotNull RoleRepository getRepository() {
+        return Sys.context().getBean( "roleRepository", RoleRepository.class );
+    }
+
     @Override
     public Optional<Role> findUnchecked( UUID id ) {
         return roleRepository.findById( id );

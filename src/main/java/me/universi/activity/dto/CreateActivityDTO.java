@@ -2,6 +2,7 @@ package me.universi.activity.dto;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -9,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonAlias;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import me.universi.role.enums.FeaturesTypes;
 
 public record CreateActivityDTO(
     @NotBlank String name,
@@ -28,5 +30,8 @@ public record CreateActivityDTO(
     @NotNull Date startDate,
 
     @JsonAlias( { "end" } )
-    @NotNull Date endDate
+    @NotNull Date endDate,
+
+    @JsonAlias( { "features" } )
+    Optional<Map<FeaturesTypes, Boolean>> enabledFeatures
 ) {}
