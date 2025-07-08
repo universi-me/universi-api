@@ -83,9 +83,6 @@ public class Role implements Serializable {
     @Column(name= "job_permission") @JsonIgnore
     @Min(0) @NotNull public int jobPermission = 0;
 
-    @Column(name= "activity_permission") @JsonIgnore
-    @Min(0) @NotNull public int activityPermission = 0;
-
     @Column(name = "role_type")
     @Enumerated(EnumType.STRING)
     @NotNull

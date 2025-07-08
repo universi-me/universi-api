@@ -176,6 +176,9 @@ public class ActivityService extends EntityService<Activity> {
                         role.setPermission( feature, Permission.DISABLED );
                 } );
             } );
+
+            role.setPermission( FeaturesTypes.GROUP, Permission.DISABLED );
+            role.setPermission( FeaturesTypes.JOBS, Permission.DISABLED );
         } );
 
         RoleService.getRepository().saveAllAndFlush( roles );
