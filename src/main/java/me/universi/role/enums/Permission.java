@@ -25,4 +25,13 @@ public class Permission {
         }
     }
 
+    public static int of( int permission ) {
+        if ( permission < NONE )
+            permission = NONE;
+
+        else if ( permission > READ_WRITE_DELETE )
+            permission = READ_WRITE_DELETE;
+
+        return permission;
+    }
 }

@@ -32,6 +32,16 @@ public record CreateActivityDTO(
     @JsonAlias( { "end" } )
     @NotNull Date endDate,
 
-    @JsonAlias( { "features" } )
-    Optional<Map<FeaturesTypes, Boolean>> enabledFeatures
-) {}
+    @JsonAlias( { "rolesFeatures", "rolesConfig" } )
+    Optional<CreateActivityRoleConfigDTO> features
+) {
+    public record CreateActivityRoleConfigDTO(
+        @JsonAlias( { "admin" } )
+        Optional<Map<FeaturesTypes, Integer>> administrator,
+
+        @JsonAlias( { "member" } )
+        Optional<Map<FeaturesTypes, Integer>> participant,
+
+        Optional<Map<FeaturesTypes, Integer>> visitor
+    ) {}
+}

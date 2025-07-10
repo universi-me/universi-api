@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 
 import org.springframework.stereotype.Service;
 
@@ -33,6 +35,7 @@ import me.universi.group.services.GroupService;
 import me.universi.group.services.GroupTypeService;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
+import me.universi.role.entities.Role;
 import me.universi.role.enums.FeaturesTypes;
 import me.universi.role.enums.Permission;
 import me.universi.role.services.RoleService;
@@ -167,16 +170,25 @@ public class ActivityService extends EntityService<Activity> {
             false
         ), false );
 
+        var adminRole = roleService().getGroupAdminRole( activityGroup );
+        var memberRole = roleService().getGroupMemberRole( activityGroup );
+        var visitorRole = roleService().getGroupVisitorRole( activityGroup );
+
         var roles = roleService().findByGroup( activityGroup.getId() );
 
-        roles.forEach( role -> {
-            dto.enabledFeatures().ifPresent( activityFeatures -> {
-                activityFeatures.forEach( ( feature, isEnabled ) -> {
-                    if ( Boolean.FALSE.equals( isEnabled ) )
-                        role.setPermission( feature, Permission.DISABLED );
+        dto.features().ifPresent( activityFeatures -> {
+            BiConsumer<Role, Map<FeaturesTypes, Integer>> setRolePermission = ( role, features ) -> {
+                features.forEach( ( feat, perm ) -> {
+                    role.setPermission( feat, Permission.of( perm ) );
                 } );
-            } );
+            };
 
+            activityFeatures.administrator().ifPresent( adminFeatures -> setRolePermission.accept( adminRole, adminFeatures ) );
+            activityFeatures.participant().ifPresent( memberFeatures -> setRolePermission.accept( memberRole, memberFeatures ) );
+            activityFeatures.visitor().ifPresent( visitorFeatures -> setRolePermission.accept( visitorRole, visitorFeatures ) );
+        } );
+
+        roles.forEach( role -> {
             role.setPermission( FeaturesTypes.GROUP, Permission.DISABLED );
             role.setPermission( FeaturesTypes.JOBS, Permission.DISABLED );
         } );
