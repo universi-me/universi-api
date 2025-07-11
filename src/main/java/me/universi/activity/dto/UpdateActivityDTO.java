@@ -24,6 +24,5 @@ public record UpdateActivityDTO(
     Optional<String> name,
     Optional<String> description,
     Optional<UUID> image,
-    Optional<UUID> bannerImage,
-    Optional<UUID> headerImage
+    Optional<UUID> bannerImage
 ) {}

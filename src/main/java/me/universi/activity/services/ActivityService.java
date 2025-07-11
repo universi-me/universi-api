@@ -223,7 +223,7 @@ public class ActivityService extends EntityService<Activity> {
             dto.name(),
             dto.image(),
             dto.bannerImage(),
-            dto.headerImage(),
+            Optional.empty(),
             dto.description(),
             Optional.empty(),
             Optional.empty(),
