@@ -30,6 +30,7 @@ import me.universi.api.interfaces.EntityService;
 import me.universi.competence.entities.CompetenceType;
 import me.universi.competence.services.CompetenceTypeService;
 import me.universi.group.DTO.CreateGroupDTO;
+import me.universi.group.DTO.UpdateGroupDTO;
 import me.universi.group.entities.Group;
 import me.universi.group.services.GroupService;
 import me.universi.group.services.GroupTypeService;
@@ -216,6 +217,19 @@ public class ActivityService extends EntityService<Activity> {
         var activity = findOrThrow( id );
         checkPermissionToEdit( activity );
         validateDates( activity, dto );
+
+        groupService().updateGroup( new UpdateGroupDTO(
+            activity.getGroup().getId().toString(),
+            dto.name(),
+            dto.image(),
+            dto.bannerImage(),
+            dto.headerImage(),
+            dto.description(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty()
+        ) );
 
         dto.location().ifPresent( location -> activity.setLocation( location.trim() ) );
         dto.workload().ifPresent( activity::setWorkload );
