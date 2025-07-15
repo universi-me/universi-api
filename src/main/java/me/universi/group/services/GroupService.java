@@ -529,9 +529,23 @@ public class GroupService extends EntityService<Group> {
             group.setHeaderImage( imageMetadataService.findOrThrow( headerImageId ) );
         } );
 
-        dto.canCreateSubgroup().ifPresent( group::setCanCreateGroup );
-        dto.isPublic().ifPresent( group::setPublicGroup );
-        dto.canJoin().ifPresent( group::setCanEnter );
+        dto.canCreateSubgroup().ifPresent( canCreateSubgroup -> {
+            if ( group.isActivityGroup() && canCreateSubgroup )
+                throw new UniversiConflictingOperationException( "Um grupo de Atividade não pode ter subgrupos" );
+            group.setCanCreateGroup( canCreateSubgroup );
+        } );
+
+        dto.isPublic().ifPresent( isPublic -> {
+            if ( group.isActivityGroup() && !isPublic )
+                throw new UniversiConflictingOperationException( "Um grupo de Atividade deve ser sempre público" );
+            group.setPublicGroup( isPublic );
+        } );
+
+        dto.canJoin().ifPresent( canJoin -> {
+            if ( group.isActivityGroup() && canJoin )
+                throw new UniversiConflictingOperationException( "Pessoas não podem entrar livremente em um grupo de Atividade" );
+            group.setCanEnter( canJoin );
+        } );
 
         return this.groupRepository.saveAndFlush( group );
     }

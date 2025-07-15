@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 
 import org.springframework.stereotype.Service;
 
@@ -28,11 +30,13 @@ import me.universi.api.interfaces.EntityService;
 import me.universi.competence.entities.CompetenceType;
 import me.universi.competence.services.CompetenceTypeService;
 import me.universi.group.DTO.CreateGroupDTO;
+import me.universi.group.DTO.UpdateGroupDTO;
 import me.universi.group.entities.Group;
 import me.universi.group.services.GroupService;
 import me.universi.group.services.GroupTypeService;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
+import me.universi.role.entities.Role;
 import me.universi.role.enums.FeaturesTypes;
 import me.universi.role.enums.Permission;
 import me.universi.role.services.RoleService;
@@ -167,6 +171,31 @@ public class ActivityService extends EntityService<Activity> {
             false
         ), false );
 
+        var adminRole = roleService().getGroupAdminRole( activityGroup );
+        var memberRole = roleService().getGroupMemberRole( activityGroup );
+        var visitorRole = roleService().getGroupVisitorRole( activityGroup );
+
+        var roles = roleService().findByGroup( activityGroup.getId() );
+
+        dto.features().ifPresent( activityFeatures -> {
+            BiConsumer<Role, Map<FeaturesTypes, Integer>> setRolePermission = ( role, features ) -> {
+                features.forEach( ( feat, perm ) -> {
+                    role.setPermission( feat, Permission.of( perm ) );
+                } );
+            };
+
+            activityFeatures.administrator().ifPresent( adminFeatures -> setRolePermission.accept( adminRole, adminFeatures ) );
+            activityFeatures.participant().ifPresent( memberFeatures -> setRolePermission.accept( memberRole, memberFeatures ) );
+            activityFeatures.visitor().ifPresent( visitorFeatures -> setRolePermission.accept( visitorRole, visitorFeatures ) );
+        } );
+
+        roles.forEach( role -> {
+            role.setPermission( FeaturesTypes.GROUP, Permission.DISABLED );
+            role.setPermission( FeaturesTypes.JOBS, Permission.DISABLED );
+        } );
+
+        RoleService.getRepository().saveAllAndFlush( roles );
+
         var activity = new Activity();
         activity.setLocation( location );
         activity.setWorkload( dto.workload() );
@@ -188,6 +217,19 @@ public class ActivityService extends EntityService<Activity> {
         var activity = findOrThrow( id );
         checkPermissionToEdit( activity );
         validateDates( activity, dto );
+
+        groupService().updateGroup( new UpdateGroupDTO(
+            activity.getGroup().getId().toString(),
+            dto.name(),
+            dto.image(),
+            dto.bannerImage(),
+            Optional.empty(),
+            dto.description(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty()
+        ) );
 
         dto.location().ifPresent( location -> activity.setLocation( location.trim() ) );
         dto.workload().ifPresent( activity::setWorkload );
