@@ -24,7 +24,7 @@ keycloak:
 jwt:
   issuer: ${API_JWT_ISSUER:universi.me}
   secret:
-    key: ${API_JWT_SECRET_KEY:qcpaA9/W3RB1YTqug4pt1DDmAyvszKDmga3cXOjZygDN+IOJdTzjHsiQTA+hFSCdx6CDTqjBQYjs5pxS/1jFFA==}
+    key: ${API_JWT_SECRET_KEY:}
   expiration: ${API_JWT_EXPIRATION:3600} # 1 hour
 
 # MinIO

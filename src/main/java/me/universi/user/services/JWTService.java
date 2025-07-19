@@ -3,8 +3,6 @@ package me.universi.user.services;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.persistence.PersistenceException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import me.universi.Sys;
@@ -12,7 +10,6 @@ import me.universi.user.entities.User;
 import me.universi.user.exceptions.UserException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.PostConstruct;
@@ -47,13 +44,19 @@ public class JWTService {
 
     @PostConstruct
     public void init() {
-
-        byte[] keyBytes = secretKeyString.getBytes(StandardCharsets.UTF_8);
-        if (keyBytes.length < 64) {
-            throw new IllegalArgumentException("JWT secret key must be at least 64 bytes for HS512");
+        if(secretKeyString != null && !secretKeyString.isEmpty()) {
+            byte[] keyBytes = secretKeyString.getBytes(StandardCharsets.UTF_8);
+            if (keyBytes.length < 64) {
+                throw new UserException("JWT secret key specified must be at least 64 bytes for HS512");
+            }
+            this.secretKey = Keys.hmacShaKeyFor(keyBytes);
+        } else {
+            try {
+                this.secretKey = Jwts.SIG.HS512.key().build();
+            } catch (IllegalArgumentException e) {
+                throw new UserException("Failed to generate JWT secret key");
+            }
         }
-
-        this.secretKey = Keys.hmacShaKeyFor(keyBytes);
 
         this.jwtParser = Jwts.parser()
                 .verifyWith(secretKey)
