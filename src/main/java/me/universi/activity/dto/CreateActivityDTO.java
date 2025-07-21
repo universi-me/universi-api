@@ -2,6 +2,7 @@ package me.universi.activity.dto;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -9,15 +10,14 @@ import com.fasterxml.jackson.annotation.JsonAlias;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import me.universi.role.enums.FeaturesTypes;
 
 public record CreateActivityDTO(
     @NotBlank String name,
-    @NotBlank String nickname,
-    @NotBlank String groupType,
     @NotBlank String description,
     @NotBlank String type,
     @NotBlank String location,
-    @NotNull Integer workload,
+    Optional<Integer> workload,
     Optional<List<@NotBlank String>> badges,
 
     Optional<UUID> image,
@@ -30,5 +30,18 @@ public record CreateActivityDTO(
     @NotNull Date startDate,
 
     @JsonAlias( { "end" } )
-    @NotNull Date endDate
-) {}
+    @NotNull Date endDate,
+
+    @JsonAlias( { "rolesFeatures", "rolesConfig" } )
+    Optional<CreateActivityRoleConfigDTO> features
+) {
+    public record CreateActivityRoleConfigDTO(
+        @JsonAlias( { "admin" } )
+        Optional<Map<FeaturesTypes, Integer>> administrator,
+
+        @JsonAlias( { "member" } )
+        Optional<Map<FeaturesTypes, Integer>> participant,
+
+        Optional<Map<FeaturesTypes, Integer>> visitor
+    ) {}
+}

@@ -49,7 +49,11 @@ public class RoleService extends EntityService<Role> {
     }
 
     public static RoleService getInstance() {
-        return Sys.context.getBean("roleService", RoleService.class);
+        return Sys.context().getBean("roleService", RoleService.class);
+    }
+
+    public static @NotNull RoleRepository getRepository() {
+        return Sys.context().getBean( "roleRepository", RoleRepository.class );
     }
 
     @Override
@@ -109,7 +113,16 @@ public class RoleService extends EntityService<Role> {
             role.description = dto.description();
 
         if ( dto.features() != null ) {
-            dto.features().forEach( role::setPermission );
+            dto.features().forEach( ( feature, permission ) -> {
+                if ( role.group.isActivityGroup() && (
+                    feature == FeaturesTypes.GROUP
+                    || feature == FeaturesTypes.JOBS
+                ) ) {
+                   throw new UniversiConflictingOperationException( "Você não pode alterar o nível de permissão de '" + feature.label + "' em grupos de Atividade" );
+                }
+
+                role.setPermission( feature, permission );
+            } );
         }
 
         return roleRepository.saveAndFlush( role );

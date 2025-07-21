@@ -47,7 +47,7 @@ public class ContentService extends EntityService<Content> {
     }
 
     public static ContentService getInstance() {
-        return Sys.context.getBean("contentService", ContentService.class);
+        return Sys.context().getBean("contentService", ContentService.class);
     }
 
     @Override

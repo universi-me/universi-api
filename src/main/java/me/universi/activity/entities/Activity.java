@@ -2,6 +2,7 @@ package me.universi.activity.entities;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.hibernate.annotations.SQLDelete;
@@ -39,8 +40,8 @@ public class Activity {
     @Column( name = "location", nullable = false )
     private String location;
 
-    @NotNull
-    @Column( name = "workload", nullable = false )
+    @Nullable
+    @Column( name = "workload", nullable = true )
     private Integer workload;
 
     @NotNull
@@ -105,8 +106,9 @@ public class Activity {
     public @NotBlank String getLocation() { return location; }
     public void setLocation( @NotBlank String location ) { this.location = location; }
 
-    public @NotNull Integer getWorkload() { return workload; }
-    public void setWorkload( @NotNull Integer workload ) { this.workload = workload; }
+    public Optional<Integer> getWorkload() { return Optional.ofNullable( workload ); }
+    public void setWorkload( @Nullable Integer workload ) { this.workload = workload; }
+    public void setWorkload( Optional<Integer> workload ) { this.workload = workload.orElse( null ); }
 
     public @NotNull Date getStartDate() { return startDate; }
     public void setStartDate( @NotNull Date startDate ) { this.startDate = startDate; }

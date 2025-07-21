@@ -3,6 +3,7 @@ package me.universi.activity.dto;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 
@@ -18,5 +19,10 @@ public record UpdateActivityDTO(
     Optional<Date> startDate,
 
     @JsonAlias( { "end" } )
-    Optional<Date> endDate
+    Optional<Date> endDate,
+
+    Optional<String> name,
+    Optional<String> description,
+    Optional<UUID> image,
+    Optional<UUID> bannerImage
 ) {}

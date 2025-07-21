@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 
 import org.springframework.stereotype.Service;
 
@@ -28,13 +30,17 @@ import me.universi.api.interfaces.EntityService;
 import me.universi.competence.entities.CompetenceType;
 import me.universi.competence.services.CompetenceTypeService;
 import me.universi.group.DTO.CreateGroupDTO;
+import me.universi.group.DTO.UpdateGroupDTO;
 import me.universi.group.entities.Group;
 import me.universi.group.services.GroupService;
+import me.universi.group.services.GroupTypeService;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
+import me.universi.role.entities.Role;
 import me.universi.role.enums.FeaturesTypes;
 import me.universi.role.enums.Permission;
 import me.universi.role.services.RoleService;
+import me.universi.user.services.AccountService;
 import me.universi.user.services.UserService;
 import me.universi.util.DateUtil;
 
@@ -47,6 +53,8 @@ public class ActivityService extends EntityService<Activity> {
     private @Nullable ActivityTypeService activityTypeService;
     private @Nullable GroupService groupService;
     private @Nullable RoleService roleService;
+    private @Nullable AccountService accountService;
+    private @Nullable GroupTypeService groupTypeService;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -56,7 +64,7 @@ public class ActivityService extends EntityService<Activity> {
     }
 
     public static @NotNull ActivityService getInstance() {
-        return Sys.context.getBean( "activityService", ActivityService.class );
+        return Sys.context().getBean( "activityService", ActivityService.class );
     }
 
     @Override protected Optional<Activity> findUnchecked( UUID id ) { return repository().findById( id ); }
@@ -135,26 +143,58 @@ public class ActivityService extends EntityService<Activity> {
         validateDates( dto );
 
         var name = dto.name().trim();
-        var nickname = dto.nickname().trim();
+        var nickname = accountService().createUsernameFromString( name );
         var description = dto.description().trim();
         var location = dto.location().trim();
         var badges = dto.badges().map( competenceTypeService()::findByIdOrNameOrThrow )
             .orElse( Collections.emptyList() );
         var type = activityTypeService().findByIdOrNameOrThrow( dto.type() );
 
+        var nicknameCounter = 0;
+        var finalNickname = nickname;
+        while ( !groupService().isNicknameAvailable( finalNickname, parentGroup ) ) {
+            nicknameCounter++;
+            finalNickname = accountService().limitUsernameLength( nickname + nicknameCounter );
+        }
+
         var activityGroup = groupService().createGroup( new CreateGroupDTO(
             Optional.of( parentGroup.getId().toString() ),
-            nickname,
+            finalNickname,
             name,
             dto.image(),
             dto.bannerImage(),
             Optional.empty(),
             description,
-            dto.groupType(),
+            groupTypeService().getActivityType().getId().toString(),
             false,
             true,
             false
-        ) );
+        ), false );
+
+        var adminRole = roleService().getGroupAdminRole( activityGroup );
+        var memberRole = roleService().getGroupMemberRole( activityGroup );
+        var visitorRole = roleService().getGroupVisitorRole( activityGroup );
+
+        var roles = roleService().findByGroup( activityGroup.getId() );
+
+        dto.features().ifPresent( activityFeatures -> {
+            BiConsumer<Role, Map<FeaturesTypes, Integer>> setRolePermission = ( role, features ) -> {
+                features.forEach( ( feat, perm ) -> {
+                    role.setPermission( feat, Permission.of( perm ) );
+                } );
+            };
+
+            activityFeatures.administrator().ifPresent( adminFeatures -> setRolePermission.accept( adminRole, adminFeatures ) );
+            activityFeatures.participant().ifPresent( memberFeatures -> setRolePermission.accept( memberRole, memberFeatures ) );
+            activityFeatures.visitor().ifPresent( visitorFeatures -> setRolePermission.accept( visitorRole, visitorFeatures ) );
+        } );
+
+        roles.forEach( role -> {
+            role.setPermission( FeaturesTypes.GROUP, Permission.DISABLED );
+            role.setPermission( FeaturesTypes.JOBS, Permission.DISABLED );
+        } );
+
+        RoleService.getRepository().saveAllAndFlush( roles );
 
         var activity = new Activity();
         activity.setLocation( location );
@@ -177,6 +217,19 @@ public class ActivityService extends EntityService<Activity> {
         var activity = findOrThrow( id );
         checkPermissionToEdit( activity );
         validateDates( activity, dto );
+
+        groupService().updateGroup( new UpdateGroupDTO(
+            activity.getGroup().getId().toString(),
+            dto.name(),
+            dto.image(),
+            dto.bannerImage(),
+            Optional.empty(),
+            dto.description(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty()
+        ) );
 
         dto.location().ifPresent( location -> activity.setLocation( location.trim() ) );
         dto.workload().ifPresent( activity::setWorkload );
@@ -253,7 +306,7 @@ public class ActivityService extends EntityService<Activity> {
 
     public synchronized void repository( @NotNull ActivityRepository repository ) { this.repository = repository; }
     public synchronized @NotNull ActivityRepository repository() {
-        if ( repository == null ) repository( Sys.context.getBean( "activityRepository", ActivityRepository.class ) );
+        if ( repository == null ) repository( Sys.context().getBean( "activityRepository", ActivityRepository.class ) );
         return repository;
     }
 
@@ -291,6 +344,18 @@ public class ActivityService extends EntityService<Activity> {
     public synchronized @NotNull RoleService roleService() {
         if ( roleService == null ) roleService( RoleService.getInstance() );
         return roleService;
+    }
+
+    public synchronized void accountService( @NotNull AccountService accountService ) { this.accountService = accountService; }
+    public synchronized @NotNull AccountService accountService() {
+        if ( accountService == null ) accountService( AccountService.getInstance() );
+        return accountService;
+    }
+
+    public synchronized void groupTypeService( @NotNull GroupTypeService groupTypeService ) { this.groupTypeService = groupTypeService; }
+    public synchronized @NotNull GroupTypeService groupTypeService() {
+        if ( groupTypeService == null ) groupTypeService( GroupTypeService.getInstance() );
+        return groupTypeService;
     }
 
     /**

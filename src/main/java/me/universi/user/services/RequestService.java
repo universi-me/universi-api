@@ -1,7 +1,10 @@
 package me.universi.user.services;
 
 import jakarta.annotation.Nullable;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.net.URL;
 import java.util.regex.Pattern;
 import me.universi.Sys;
@@ -19,7 +22,7 @@ public class RequestService {
 
     // bean instance via context
     public static RequestService getInstance() {
-        return Sys.context.getBean("requestService", RequestService.class);
+        return Sys.context().getBean("requestService", RequestService.class);
     }
 
     public HttpServletRequest getRequest() {
@@ -40,7 +43,7 @@ public class RequestService {
         }
     }
 
-    private static Pattern SUBDOMAIN_PATTERN = Pattern.compile( "^([a-zA-Z0-9-]+)\\." );
+    private static final Pattern SUBDOMAIN_PATTERN = Pattern.compile( "^([a-zA-Z0-9-]+)\\." );
     public @Nullable String getSubdomainFromRequest() {
         try {
             var domain = getDomainFromRequest();
@@ -113,11 +116,54 @@ public class RequestService {
         HttpServletRequest request = getRequest();
         for (String header: IP_HEADER_CANDIDATES) {
             String ipList = request.getHeader(header);
-            if (ipList != null && ipList.length() != 0 && !"unknown".equalsIgnoreCase(ipList)) {
+            if (ipList != null && !ipList.isEmpty() && !"unknown".equalsIgnoreCase(ipList)) {
                 String ip = ipList.split(",")[0];
                 return ip;
             }
         }
         return getRequest().getRemoteAddr();
+    }
+
+    public void clearSession() {
+        HttpServletRequest request = getRequest();
+        if (request != null) {
+            HttpSession session = request.getSession(false);
+            if (session != null) {
+                session.invalidate();
+            }
+        }
+    }
+
+    public String getCookieValue(String cookieName) {
+        HttpServletRequest request = getRequest();
+        if (request != null && request.getCookies() != null && cookieName != null) {
+            for (var cookie : request.getCookies()) {
+                if (cookieName.equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null;
+    }
+
+    public boolean hasCookie(String cookieName) {
+        return getCookieValue(cookieName) != null;
+    }
+
+    public HttpServletResponse getResponse() {
+        ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+        return attr.getResponse();
+    }
+
+    public void removeCookie(String cookieName) {
+        if(hasCookie(cookieName)) {
+            Cookie cookie = new Cookie(cookieName, null);
+            cookie.setPath("/");
+            cookie.setMaxAge(0);
+            cookie.setHttpOnly(true);
+            cookie.setSecure(true);
+            HttpServletResponse response = getResponse();
+            response.addCookie(cookie);
+        }
     }
 }

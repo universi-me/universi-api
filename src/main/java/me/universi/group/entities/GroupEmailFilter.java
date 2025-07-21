@@ -7,6 +7,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -42,14 +43,12 @@ public class GroupEmailFilter implements Serializable {
     public String email;
 
     @CreationTimestamp
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "added")
-    public Date added;
+    public LocalDateTime added;
 
     @JsonIgnore
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "removed")
-    public Date removed;
+    public LocalDateTime removed;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER)
@@ -124,11 +123,11 @@ public class GroupEmailFilter implements Serializable {
         this.email = email;
     }
 
-    public Date getRemoved() {
+    public LocalDateTime getRemoved() {
         return removed;
     }
 
-    public void setRemoved(Date removed) {
+    public void setRemoved(LocalDateTime removed) {
         this.removed = removed;
     }
 
@@ -140,7 +139,7 @@ public class GroupEmailFilter implements Serializable {
         this.groupSettings = groupSettings;
     }
 
-    public Date getAdded() {
+    public LocalDateTime getAdded() {
         return added;
     }
 

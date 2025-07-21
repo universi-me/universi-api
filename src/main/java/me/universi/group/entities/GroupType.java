@@ -11,6 +11,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -19,6 +21,7 @@ import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import me.universi.group.enums.GroupTypeKind;
 
 @Entity(name = "GroupType")
 @Table( name = "type", schema = "system_group" )
@@ -41,6 +44,12 @@ public class GroupType {
     @Column( name = "deleted_at" )
     private Date deletedAt;
 
+    @NotNull
+    @JsonIgnore
+    @Column( name = "kind" )
+    @Enumerated( EnumType.STRING )
+    private GroupTypeKind kind;
+
     public GroupType() { }
 
     public @NotBlank String getLabel() { return label; }
@@ -48,4 +57,8 @@ public class GroupType {
 
     public UUID getId() { return id; }
     public @Nullable Date getDeletedAt() { return deletedAt; }
+
+    public @NotNull GroupTypeKind getKind() { return kind; }
+    public boolean isCanBeAssigned() { return kind == GroupTypeKind.REGULAR; }
+    public boolean isCanBeDeleted() { return kind == GroupTypeKind.REGULAR; }
 }

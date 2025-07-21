@@ -30,7 +30,7 @@ public class OrganizationService {
     }
 
     public static @NotNull OrganizationService getInstance() {
-        return Sys.context.getBean( "organizationService", OrganizationService.class );
+        return Sys.context().getBean( "organizationService", OrganizationService.class );
     }
 
     public @NotNull Group getOrganization() {

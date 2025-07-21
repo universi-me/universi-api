@@ -10,13 +10,12 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
 
 import java.io.IOException;
+import org.springframework.stereotype.Component;
 
+@Component
 public class CustomAccessDeniedHandler implements AccessDeniedHandler {
-    private final UserService userService;
 
-    @Autowired
-    public CustomAccessDeniedHandler(UserService userService) {
-        this.userService = userService;
+    public CustomAccessDeniedHandler() {
     }
 
     @Override

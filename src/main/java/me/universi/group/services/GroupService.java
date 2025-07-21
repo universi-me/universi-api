@@ -72,11 +72,11 @@ public class GroupService extends EntityService<Group> {
 
 
     public static GroupService getInstance() {
-        return Sys.context.getBean("groupService", GroupService.class);
+        return Sys.context().getBean("groupService", GroupService.class);
     }
 
     public static @NotNull GroupRepository getRepository() {
-        return Sys.context.getBean( "groupRepository", GroupRepository.class );
+        return Sys.context().getBean( "groupRepository", GroupRepository.class );
     }
 
     @Override
@@ -411,7 +411,7 @@ public class GroupService extends EntityService<Group> {
             return;
         }
 
-        if(!OrganizationService.getInstance().getEnvironment().alert_new_content_enabled) {
+        if(!OrganizationService.getInstance().getEnvironment().message_new_content_enabled) {
             return;
         }
 
@@ -427,7 +427,7 @@ public class GroupService extends EntityService<Group> {
             return;
         }
 
-        if(!OrganizationService.getInstance().getEnvironment().alert_assigned_content_enabled) {
+        if(!OrganizationService.getInstance().getEnvironment().message_assigned_content_enabled) {
             return;
         }
 
@@ -437,7 +437,8 @@ public class GroupService extends EntityService<Group> {
         emailService.sendSystemEmailToUser(profile.getUser(), subject, message, true);
     }
 
-    public Group createGroup( CreateGroupDTO dto ) {
+    public Group createGroup( CreateGroupDTO dto ) { return createGroup( dto, true ); }
+    public Group createGroup( CreateGroupDTO dto, boolean checkTypeAssignment ) {
         if ( dto.parentGroup().isEmpty() && !userService.isUserAdminSession() )
             throw new UniversiBadRequestException( "O Parâmetro 'parentGroup' deve ser informado" );
 
@@ -451,7 +452,13 @@ public class GroupService extends EntityService<Group> {
         group.setNickname( nickname );
         group.setName( dto.name() );
         group.setDescription( dto.description() );
-        group.setType( groupTypeService.findByIdOrNameOrThrow( dto.type() ) );
+
+        var groupType = groupTypeService.findByIdOrNameOrThrow( dto.type() );
+
+        if ( checkTypeAssignment )
+            groupTypeService.checkCanBeAssigned( groupType );
+
+        group.setType( groupType );
 
         group.setCanCreateGroup( dto.canCreateSubgroup() );
         group.setPublicGroup( dto.isPublic() );
@@ -498,7 +505,16 @@ public class GroupService extends EntityService<Group> {
         } );
 
         dto.type().ifPresent( typeName -> {
-            group.setType( groupTypeService.findByIdOrNameOrThrow( typeName ) );
+            var type = groupTypeService.findByIdOrNameOrThrow( typeName );
+
+            // Prevents next checks from causing issues
+            if ( group.getType().getId().equals( type.getId() ) ) return;
+
+            groupTypeService.checkCanBeAssigned( type );
+            if ( group.isActivityGroup() )
+                throw new UniversiConflictingOperationException( "Um grupo de Atividade não pode ter seu tipo alterado" );
+
+            group.setType( type );
         } );
 
         dto.image().ifPresent( imageId -> {
@@ -513,9 +529,23 @@ public class GroupService extends EntityService<Group> {
             group.setHeaderImage( imageMetadataService.findOrThrow( headerImageId ) );
         } );
 
-        dto.canCreateSubgroup().ifPresent( group::setCanCreateGroup );
-        dto.isPublic().ifPresent( group::setPublicGroup );
-        dto.canJoin().ifPresent( group::setCanEnter );
+        dto.canCreateSubgroup().ifPresent( canCreateSubgroup -> {
+            if ( group.isActivityGroup() && canCreateSubgroup )
+                throw new UniversiConflictingOperationException( "Um grupo de Atividade não pode ter subgrupos" );
+            group.setCanCreateGroup( canCreateSubgroup );
+        } );
+
+        dto.isPublic().ifPresent( isPublic -> {
+            if ( group.isActivityGroup() && !isPublic )
+                throw new UniversiConflictingOperationException( "Um grupo de Atividade deve ser sempre público" );
+            group.setPublicGroup( isPublic );
+        } );
+
+        dto.canJoin().ifPresent( canJoin -> {
+            if ( group.isActivityGroup() && canJoin )
+                throw new UniversiConflictingOperationException( "Pessoas não podem entrar livremente em um grupo de Atividade" );
+            group.setCanEnter( canJoin );
+        } );
 
         return this.groupRepository.saveAndFlush( group );
     }

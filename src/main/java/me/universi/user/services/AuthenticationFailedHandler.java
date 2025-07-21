@@ -2,7 +2,7 @@ package me.universi.user.services;
 
 import me.universi.api.entities.Response;
 import me.universi.user.exceptions.UserException;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 
@@ -10,18 +10,13 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import org.springframework.stereotype.Component;
 
 /*
     Classe para manipular a falhas de login
  */
-
+@Component
 public class AuthenticationFailedHandler extends SimpleUrlAuthenticationFailureHandler {
-    private final UserService userService;
-
-    @Autowired
-    public AuthenticationFailedHandler(UserService userService) {
-        this.userService = userService;
-    }
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
@@ -32,7 +27,7 @@ public class AuthenticationFailedHandler extends SimpleUrlAuthenticationFailureH
                 r.status = 401;
                 r.alertOptions.put("icon", "warning");
                 r.alertOptions.put("title", "Falha na autenticação");
-                throw new UserException(LoginService.getInstance().getLastSpringSecurityError(exception));
+                throw new UserException(LoginService.getInstance().getLastSpringSecurityError(exception), HttpStatus.UNAUTHORIZED);
             });
 
             response.setHeader("Content-Type", "application/json; charset=utf-8");
