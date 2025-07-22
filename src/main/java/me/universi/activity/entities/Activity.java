@@ -79,7 +79,10 @@ public class Activity {
     public @NotNull ActivityStatus getStatus() {
         var now = new Date();
 
-        if ( this.getEndDate().before( now ) )
+        // this.endDate saved at 00:00 – adding 24hrs minus 1ms for comparison
+        var endDate = new Date( this.endDate.getTime() + 86_399_999 );
+
+        if ( endDate.before( now ) )
             return ActivityStatus.ENDED;
 
         else if ( this.getStartDate().before( now ) )
