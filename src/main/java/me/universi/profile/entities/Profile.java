@@ -44,7 +44,7 @@ public class Profile implements Serializable {
     @NotNull
     private UUID id;
 
-    @OneToOne(cascade = CascadeType.PERSIST)
+    @OneToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
     @Column(name = "name")
@@ -61,15 +61,15 @@ public class Profile implements Serializable {
     private String bio;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "profile", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "profile", fetch = FetchType.LAZY )
     private Collection<ProfileGroup> groups;
 
     @JsonIgnore
-    @OneToMany( mappedBy = "profile" )
+    @OneToMany( mappedBy = "profile", fetch = FetchType.LAZY )
     private Collection<Education> educations;
 
     @JsonIgnore
-    @OneToMany( mappedBy = "profile" )
+    @OneToMany( mappedBy = "profile", fetch = FetchType.LAZY )
     private Collection<Experience> experiences;
 
     @JsonIgnore
@@ -93,11 +93,11 @@ public class Profile implements Serializable {
     private boolean deleted = Boolean.FALSE;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "assignedTo", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "assignedTo", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Collection<FolderProfile> assignedFolders;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Collection<FolderFavorite> favoriteFolders;
 
     @Transient
@@ -109,7 +109,7 @@ public class Profile implements Serializable {
     private boolean hidden = Boolean.FALSE;
 
     @JsonIgnore
-    @OneToMany( fetch = FetchType.EAGER )
+    @OneToMany( fetch = FetchType.LAZY )
     @JoinTable(
         name = "profile_competence_badges",
         schema = "profile",
