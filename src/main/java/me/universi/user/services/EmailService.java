@@ -116,12 +116,7 @@ public class EmailService {
                 throw new UserException("Um email de recuperação de senha já foi enviado para esta conta, por favor tente novamente mais tarde.");
             }
         }
-
-        String tokenString = AccountService.getInstance().generateRecoveryPasswordTokenForUser(user);
-
-        UserService.getInstance().save(user);
-
-        return tokenString;
+        return AccountService.getInstance().generateRecoveryPasswordTokenForUser(user);
     }
 
     // send recovery password email to user
