@@ -1,6 +1,10 @@
 package me.universi.user.services;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.UUID;
 import java.util.regex.Pattern;
 import me.universi.Sys;
 import me.universi.group.entities.GroupEnvironment;
@@ -107,16 +111,39 @@ public class AccountService {
         checkPassword(userSession, String.valueOf(rawPassword));
     }
 
-    public void saveRawPasswordToUser(User user, String rawPassword, boolean logout) throws UserException {
+    public void saveRawPasswordToUser(User user, String rawPassword, boolean temporarilyPassword, boolean logout) throws UserException {
         if(!passwordRegex(rawPassword)) {
             throw new UserException("Senha está com formato inválido!");
         }
         user.setPassword(encodePassword(rawPassword));
         user.setExpired_credentials(false);
+        if(temporarilyPassword) {
+            generateRecoveryPasswordTokenForUser(user);
+            user.setTemporarilyPassword(true);
+        }
         UserService.getInstance().save(user);
         if(logout) {
             loginService.logoutUser(user);
         }
+    }
+
+    public String generateRecoveryPasswordTokenForUser(User user) throws UserException {
+        String tokenRandom = UUID.randomUUID().toString();
+
+        MessageDigest digest = null;
+        try {
+            digest = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            throw new UserException("Algoritmo sha256 não disponível.");
+        }
+        byte[] encodedHash = digest.digest(tokenRandom.getBytes(StandardCharsets.UTF_8));
+        String tokenString = ConvertUtil.bytesToHex(encodedHash);
+
+        user.setRecoveryPasswordToken(tokenString);
+        user.setRecoveryPasswordTokenDate(ConvertUtil.getDateTimeNow());
+
+        UserService.getInstance().save(user);
+        return tokenString;
     }
 
     public void recoveryPassword( RecoveryPasswordDTO recoveryPasswordDTO ) {
@@ -146,10 +173,6 @@ public class AccountService {
 
     public void recoveryNewPassword( RecoveryNewPasswordDTO recoveryNewPasswordDTO ) {
 
-        if(!isRecoveryEnabled()) {
-            throw new UserException("Recuperação de senha está desativada!");
-        }
-
         String token = recoveryNewPasswordDTO.token();
         String newPassword = recoveryNewPasswordDTO.newPassword();
 
@@ -167,12 +190,17 @@ public class AccountService {
         User user = UserService.getInstance().getUserByRecoveryPasswordToken(token);
 
         if(user == null) {
-            throw new UserException("Token de recuperação de senha inválido ou expirado!");
+            throw new UserException("Link de definição de senha inválido ou expirado!");
+        }
+
+        if(!user.isTemporarilyPassword() && !isRecoveryEnabled()) {
+            throw new UserException("Recuperação de senha está desativada!");
         }
 
         user.setRecoveryPasswordToken(null);
+        user.setTemporarilyPassword(false);
         user.setInactive(false);
-        saveRawPasswordToUser(user, newPassword, true);
+        saveRawPasswordToUser(user, newPassword, false, true);
     }
 
     public void requestConfirmAccountEmail() {
@@ -287,7 +315,7 @@ public class AccountService {
         if(isConfirmAccountEnabled()) {
             user.setInactive(true);
         }
-        saveRawPasswordToUser(user, password, false);
+        saveRawPasswordToUser(user, password, false,false);
 
         UserService.getInstance().createUser(user, firstname, lastname, createAccountDTO.department().orElse(null));
 
@@ -314,7 +342,7 @@ public class AccountService {
 
         if (passwordValid(user, password)) {
 
-            saveRawPasswordToUser(user, newPassword, false);
+            saveRawPasswordToUser(user, newPassword, false,false);
 
         } else {
             throw new UserException("Credenciais Invalidas!");
@@ -370,7 +398,7 @@ public class AccountService {
             }
         }
         if(password != null && !password.isEmpty()) {
-            saveRawPasswordToUser(userEdit, password, false);
+            saveRawPasswordToUser(userEdit, password,true, false);
         }
 
         if(authorityLevel != null && !authorityLevel.isEmpty()) {

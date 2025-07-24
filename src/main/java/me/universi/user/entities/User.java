@@ -103,6 +103,11 @@ public class User implements UserDetails, Serializable {
     private boolean confirmed;
 
     @JsonIgnore
+    @Column(name = "temporarily_password")
+    @NotNull
+    private boolean temporarilyPassword;
+
+    @JsonIgnore
     @Enumerated(EnumType.STRING)
     @Column(name = "authority")
     private Authority authority;
@@ -230,6 +235,14 @@ public class User implements UserDetails, Serializable {
 
     public void setInactive(boolean inactive) {
         this.inactive = inactive;
+    }
+
+    public boolean isTemporarilyPassword() {
+        return temporarilyPassword;
+    }
+
+    public void setTemporarilyPassword(boolean temporarilyPassword) {
+        this.temporarilyPassword = temporarilyPassword;
     }
 
     @JsonIgnore

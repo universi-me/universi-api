@@ -117,21 +117,7 @@ public class EmailService {
             }
         }
 
-        String tokenRandom = UUID.randomUUID().toString();
-
-        MessageDigest digest = null;
-        try {
-            digest = MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException e) {
-            throw new UserException("Algoritmo sha256 não disponível.");
-        }
-        byte[] encodedHash = digest.digest(tokenRandom.getBytes(StandardCharsets.UTF_8));
-        String tokenString = ConvertUtil.bytesToHex(encodedHash);
-
-        user.setRecoveryPasswordToken(tokenString);
-        if(useIntervalCheck) {
-            user.setRecoveryPasswordTokenDate(ConvertUtil.getDateTimeNow());
-        }
+        String tokenString = AccountService.getInstance().generateRecoveryPasswordTokenForUser(user);
 
         UserService.getInstance().save(user);
 

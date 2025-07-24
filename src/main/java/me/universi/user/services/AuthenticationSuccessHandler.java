@@ -1,6 +1,7 @@
 package me.universi.user.services;
 
 import me.universi.api.entities.Response;
+import me.universi.api.exceptions.UniversiException;
 import me.universi.profile.enums.Gender;
 import me.universi.user.entities.User;
 import org.springframework.security.core.Authentication;
@@ -36,6 +37,19 @@ public class AuthenticationSuccessHandler extends SavedRequestAwareAuthenticatio
         }
         if(username != null) {
             user = (User) userService.loadUserByUsername(username);
+
+            if(user != null && user.isTemporarilyPassword()) {
+                Response responseBuild = Response.buildResponse(r -> {
+                    r.status = 201;
+                    r.redirectTo = "/recovery-password/" + user.getRecoveryPasswordToken();
+                });
+                response.setHeader("Content-Type", "application/json; charset=utf-8");
+                response.getWriter().print(responseBuild.toString());
+                response.getWriter().flush();
+                response.getWriter().close();
+                return;
+            }
+
             LoginService.getInstance().configureSessionForUser(user);
         } else {
             user = null;
@@ -58,7 +72,7 @@ public class AuthenticationSuccessHandler extends SavedRequestAwareAuthenticatio
             response.setHeader("Content-Type", "application/json; charset=utf-8");
             response.getWriter().print(responseBuild.toString());
             response.getWriter().flush();
-
+            response.getWriter().close();
         } else {
 
             RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
