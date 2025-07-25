@@ -1,10 +1,8 @@
 package me.universi.user.services;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.util.HexFormat;
 import java.util.List;
-import java.util.UUID;
 import java.util.regex.Pattern;
 import me.universi.Sys;
 import me.universi.group.entities.GroupEnvironment;
@@ -27,6 +25,8 @@ public class AccountService {
     private final LoginService loginService;
     private final EmailService emailService;
     private final GoogleService googleService;
+
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     @Value("${SIGNUP_ENABLED}")
     public boolean signupEnabled;
@@ -128,16 +128,9 @@ public class AccountService {
     }
 
     public String generateRecoveryPasswordTokenForUser(User user) throws UserException {
-        String tokenRandom = UUID.randomUUID().toString();
-
-        MessageDigest digest = null;
-        try {
-            digest = MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException e) {
-            throw new UserException("Algoritmo sha256 não disponível.");
-        }
-        byte[] encodedHash = digest.digest(tokenRandom.getBytes(StandardCharsets.UTF_8));
-        String tokenString = ConvertUtil.bytesToHex(encodedHash);
+        byte[] bytes = new byte[32];
+        SECURE_RANDOM.nextBytes(bytes);
+        String tokenString = HexFormat.of().formatHex(bytes);
 
         user.setRecoveryPasswordToken(tokenString);
         user.setRecoveryPasswordTokenDate(ConvertUtil.getDateTimeNow());
