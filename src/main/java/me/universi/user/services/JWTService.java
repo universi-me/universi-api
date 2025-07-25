@@ -102,7 +102,7 @@ public class JWTService {
 
         // Check if the token is expired
         if (claims.getExpiration().before(new Date())) {
-            throw new UserException("JWT Token Expired", HttpStatus.PRECONDITION_FAILED);
+            throw new UserException("JWT Token Expired", HttpStatus.UNAUTHORIZED);
         }
 
         User user;
@@ -118,7 +118,7 @@ public class JWTService {
         String versionDate = claims.get(VERSION_DATE, String.class);
         LocalDateTime versionDateTime = LocalDateTime.parse(versionDate);
         if (user.getVersionDate() == null || user.getVersionDate().isAfter(versionDateTime)) {
-            throw new UserException("User version date is not valid for this token", HttpStatus.PRECONDITION_FAILED);
+            throw new UserException("User version date is not valid for this token", HttpStatus.UNAUTHORIZED);
         }
 
         return user;
