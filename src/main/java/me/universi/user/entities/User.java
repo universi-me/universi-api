@@ -108,7 +108,7 @@ public class User implements UserDetails, Serializable {
     private Authority authority;
 
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organization")
     @NotNull
     @NotFound(action = NotFoundAction.IGNORE)
