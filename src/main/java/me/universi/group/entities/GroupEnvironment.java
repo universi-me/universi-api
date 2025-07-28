@@ -37,7 +37,7 @@ public class GroupEnvironment implements Serializable {
 
     @JsonIgnore
     @JoinColumn(name="group_settings_id")
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.LAZY)
     @NotNull
     public GroupSettings groupSettings;
 

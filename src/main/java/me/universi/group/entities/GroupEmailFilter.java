@@ -51,7 +51,7 @@ public class GroupEmailFilter implements Serializable {
     public LocalDateTime removed;
 
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="group_settings_id")
     @NotNull
     @NotFound(action = NotFoundAction.IGNORE)

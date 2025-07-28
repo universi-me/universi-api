@@ -147,7 +147,7 @@ public class Group implements Serializable {
     @NotNull
     public boolean publicGroup;
 
-    @ManyToMany(mappedBy = "grantedAccessGroups", fetch = FetchType.EAGER)
+    @ManyToMany(mappedBy = "grantedAccessGroups", fetch = FetchType.LAZY)
     @JsonIgnore
     private Collection<Folder> foldersGrantedAccess;
 

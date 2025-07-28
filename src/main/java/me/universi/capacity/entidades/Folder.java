@@ -64,7 +64,7 @@ public class Folder implements Serializable {
     @Column(name = "created_at")
     private Date createdAt;
 
-    @ManyToMany( mappedBy = "folder" )
+    @ManyToMany( mappedBy = "folder", fetch = FetchType.LAZY)
     @JsonIgnore
     @NotFound(action = NotFoundAction.IGNORE)
     private Collection<FolderContents> folderContents;
@@ -95,11 +95,11 @@ public class Folder implements Serializable {
     @NotFound(action = NotFoundAction.IGNORE)
     private Collection<Group> grantedAccessGroups;
 
-    @OneToMany(mappedBy = "folder")
+    @OneToMany(mappedBy = "folder", fetch = FetchType.LAZY)
     @JsonIgnore
     private Collection<FolderProfile> assignedUsers;
 
-    @OneToMany(mappedBy = "folder")
+    @OneToMany(mappedBy = "folder", fetch = FetchType.LAZY)
     @JsonIgnore
     private Collection<FolderFavorite> favoriteUsers;
 

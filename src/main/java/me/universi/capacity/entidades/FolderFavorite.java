@@ -36,7 +36,7 @@ public class FolderFavorite implements Serializable {
     private UUID id;
 
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn(name="profile_id")
     @NotNull
     @NotFound(action = NotFoundAction.IGNORE)

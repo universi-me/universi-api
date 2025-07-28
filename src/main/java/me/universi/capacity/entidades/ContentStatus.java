@@ -37,7 +37,7 @@ public class ContentStatus implements Serializable {
     private Content content;
 
     @JsonIgnore
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="profile_id")
     @NotFound(action = NotFoundAction.IGNORE)
     private Profile profile;

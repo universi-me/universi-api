@@ -42,14 +42,14 @@ public class ProfileGroup implements Serializable {
     public Date exited;
 
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn(name="profile_id")
     @NotNull
     @NotFound(action = NotFoundAction.IGNORE)
     public Profile profile;
 
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn(name="group_id")
     @NotNull
     @NotFound(action = NotFoundAction.IGNORE)

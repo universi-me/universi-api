@@ -30,7 +30,7 @@ public class GroupSettings implements Serializable {
     private UUID id;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "groupSettings", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "groupSettings", fetch = FetchType.LAZY)
     private Collection<GroupEmailFilter> filterEmails;
 
     @OneToOne(mappedBy = "groupSettings", fetch = FetchType.EAGER)
