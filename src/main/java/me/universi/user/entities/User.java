@@ -102,7 +102,7 @@ public class User implements UserDetails, Serializable {
     @NotNull
     private boolean confirmed;
 
-    @JsonIgnore
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserAdminFilter.class)
     @Column(name = "temporarily_password")
     @NotNull
     private boolean temporarilyPassword;

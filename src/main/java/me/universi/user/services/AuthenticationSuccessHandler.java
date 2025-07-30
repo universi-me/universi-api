@@ -1,7 +1,6 @@
 package me.universi.user.services;
 
 import me.universi.api.entities.Response;
-import me.universi.api.exceptions.UniversiException;
 import me.universi.profile.enums.Gender;
 import me.universi.user.entities.User;
 import org.springframework.security.core.Authentication;
@@ -39,6 +38,9 @@ public class AuthenticationSuccessHandler extends SavedRequestAwareAuthenticatio
             user = (User) userService.loadUserByUsername(username);
 
             if(user != null && user.isTemporarilyPassword()) {
+                if(user.getRecoveryPasswordToken() == null || user.getRecoveryPasswordToken().isEmpty()) {
+                    AccountService.getInstance().generateRecoveryPasswordTokenForUser(user);
+                }
                 Response responseBuild = Response.buildResponse(r -> {
                     r.status = 201;
                     r.redirectTo = "/recovery-password/" + user.getRecoveryPasswordToken();

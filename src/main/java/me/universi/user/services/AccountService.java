@@ -27,6 +27,7 @@ public class AccountService {
     private final GoogleService googleService;
 
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+    private final EnvironmentService environmentService;
 
     @Value("${SIGNUP_ENABLED}")
     public boolean signupEnabled;
@@ -37,11 +38,12 @@ public class AccountService {
     @Value("${RECOVERY_ENABLED}")
     public boolean recoveryEnabled;
 
-    public AccountService(PasswordEncoder passwordEncoder, LoginService loginService, EmailService emailService, GoogleService googleService) {
+    public AccountService(PasswordEncoder passwordEncoder, LoginService loginService, EmailService emailService, GoogleService googleService, EnvironmentService environmentService) {
         this.passwordEncoder = passwordEncoder;
         this.loginService = loginService;
         this.emailService = emailService;
         this.googleService = googleService;
+        this.environmentService = environmentService;
     }
 
     // bean instance via context
@@ -177,20 +179,21 @@ public class AccountService {
         }
 
         if(!passwordRegex(newPassword)) {
-            throw new UserException("Nova Senha está com formato inválido!");
+            throw new UserException("Nova Senha está com formato inválido");
         }
 
         User user = UserService.getInstance().getUserByRecoveryPasswordToken(token);
 
-        if(user == null) {
-            throw new UserException("Link de definição de senha inválido ou expirado!");
+        if(user == null || user.getRecoveryPasswordTokenDate() == null || user.getRecoveryPasswordTokenDate().isBefore(ConvertUtil.getDateTimeNow().minusHours(environmentService.getRecoveryTokenExpirationHours()))) {
+            throw new UserException("Link de definição de senha expirado ou inválido");
         }
 
         if(!user.isTemporarilyPassword() && !isRecoveryEnabled()) {
-            throw new UserException("Recuperação de senha está desativada!");
+            throw new UserException("Definição de senha indisponível");
         }
 
         user.setRecoveryPasswordToken(null);
+        user.setRecoveryPasswordTokenDate(null);
         user.setTemporarilyPassword(false);
         user.setInactive(false);
         saveRawPasswordToUser(user, newPassword, false, true);
@@ -221,6 +224,7 @@ public class AccountService {
         }
 
         user.setRecoveryPasswordToken(null);
+        user.setRecoveryPasswordTokenDate(null);
         user.setInactive(false);
         user.setConfirmed(true);
         UserService.getInstance().save(user);
@@ -362,6 +366,7 @@ public class AccountService {
         Boolean inactiveAccount = editAccountDTO.inactiveAccount();
         Boolean credentialsExpired = editAccountDTO.credentialsExpired();
         Boolean expiredUser = editAccountDTO.expiredUser();
+        Boolean temporarilyPassword = editAccountDTO.temporarilyPassword();
 
         User userEdit = UserService.getInstance().find(userId).orElse( null );
         if(userEdit == null) {
@@ -390,9 +395,6 @@ public class AccountService {
                 throw new UserException("Email está com formato inválido!");
             }
         }
-        if(password != null && !password.isEmpty()) {
-            saveRawPasswordToUser(userEdit, password,true, false);
-        }
 
         if(authorityLevel != null && !authorityLevel.isEmpty()) {
             userEdit.setAuthority(Authority.valueOf(authorityLevel));
@@ -412,6 +414,13 @@ public class AccountService {
         }
         if(expiredUser != null) {
             userEdit.setExpired_user(expiredUser);
+        }
+        if(temporarilyPassword != null) {
+            userEdit.setTemporarilyPassword(temporarilyPassword);
+        }
+
+        if(password != null && !password.isEmpty()) {
+            saveRawPasswordToUser(userEdit, password, temporarilyPassword != null ? temporarilyPassword : true, false);
         }
 
         UserService.getInstance().save(userEdit);
