@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import java.util.UUID;
 
 import jakarta.validation.constraints.NotNull;
+import me.universi.util.HibernateUtil;
 
 @Entity( name = "ImageData" )
 @Table( name = "image_data", schema = "image" )
@@ -14,7 +15,7 @@ public class ImageData {
     private UUID metadataId;
 
     @MapsId
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn( name = "metadata_id", referencedColumnName = "id" )
     @NotNull
     private ImageMetadata metadata;
@@ -29,7 +30,7 @@ public class ImageData {
         this.metadata = metadata;
     }
 
-    public ImageMetadata getMetadata() { return metadata; }
+    public ImageMetadata getMetadata() { return HibernateUtil.resolveLazyHibernateObject(metadata); }
 
     public byte[] getData() { return data; }
     public void setData(byte[] data) { this.data = data; }

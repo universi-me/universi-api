@@ -19,6 +19,7 @@ import jakarta.validation.constraints.NotNull;
 import me.universi.institution.entities.Institution;
 import me.universi.profile.entities.Profile;
 
+import me.universi.util.HibernateUtil;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
@@ -54,7 +55,7 @@ public class Education {
     @Column(name = "end_date")
     private Date endDate;
 
-    @ManyToOne
+    @ManyToOne(fetch =  FetchType.LAZY)
     @JoinColumn( name = "profile_id" )
     @NotNull
     private Profile profile;
@@ -80,10 +81,10 @@ public class Education {
 
     public UUID getId() { return id; }
 
-    public EducationType getEducationType() { return educationType; }
+    public EducationType getEducationType() { return HibernateUtil.resolveLazyHibernateObject(educationType); }
     public void setEducationType(EducationType typeEducation) { this.educationType = typeEducation; }
 
-    public Institution getInstitution() { return institution; }
+    public Institution getInstitution() { return HibernateUtil.resolveLazyHibernateObject(institution); }
     public void setInstitution(Institution institution) { this.institution = institution; }
 
     public Date getStartDate() { return startDate; }
@@ -95,7 +96,7 @@ public class Education {
     public Date getCreationDate() { return creationDate; }
     public void setCreationDate(Date creationDate) { this.creationDate = creationDate; }
 
-    public Profile getProfile() { return profile; }
+    public Profile getProfile() { return HibernateUtil.resolveLazyHibernateObject(profile); }
     public void setProfile(Profile profile) { this.profile = profile; }
 
     public boolean isDeleted() { return deleted; }

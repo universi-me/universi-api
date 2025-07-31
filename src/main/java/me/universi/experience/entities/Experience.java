@@ -18,6 +18,7 @@ import jakarta.validation.constraints.NotNull;
 import me.universi.institution.entities.Institution;
 import me.universi.profile.entities.Profile;
 
+import me.universi.util.HibernateUtil;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
@@ -41,7 +42,7 @@ public class Experience {
     @JoinColumn(name = "experience_type_id")
     private ExperienceType experienceType;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "institution_id", nullable = false)
     private Institution institution;
 
@@ -56,7 +57,7 @@ public class Experience {
     @Column(name = "end_date")
     private Date endDate;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn( name = "profile_id", nullable = false )
     private Profile profile;
 
@@ -82,7 +83,7 @@ public class Experience {
 
     public UUID getId() { return id; }
 
-    public Institution getInstitution() { return institution; }
+    public Institution getInstitution() { return HibernateUtil.resolveLazyHibernateObject(institution); }
     public void setInstitution(Institution institution) { this.institution = institution; }
 
     public String getDescription() { return description; }
@@ -97,10 +98,10 @@ public class Experience {
     public Date getCreationDate() { return creationDate; }
     public void setCreationDate(Date creationDate) { this.creationDate = creationDate; }
 
-    public ExperienceType getExperienceType() { return experienceType; }
+    public ExperienceType getExperienceType() { return HibernateUtil.resolveLazyHibernateObject(experienceType); }
     public void setExperienceType(ExperienceType experienceType) { this.experienceType = experienceType; }
 
-    public Profile getProfile() { return profile; }
+    public Profile getProfile() { return HibernateUtil.resolveLazyHibernateObject(profile); }
     public void setProfile(Profile profile) { this.profile = profile; }
 
     public boolean isDeleted() { return deleted; }

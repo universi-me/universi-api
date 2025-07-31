@@ -25,6 +25,7 @@ import me.universi.image.entities.ImageMetadata;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
 
+import me.universi.util.HibernateUtil;
 import org.hibernate.annotations.*;
 
 @Entity(name = "Content")
@@ -50,7 +51,7 @@ public class Content implements Serializable {
     private String title;
 
     @Nullable
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn( name = "image_metadata_id" )
     private ImageMetadata image;
 
@@ -58,7 +59,7 @@ public class Content implements Serializable {
     @Size(max = 200)
     private String description;
 
-    @OneToMany(cascade = CascadeType.PERSIST)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinTable( name = "content_categories", schema = "capacity" )
     private Collection<Category> categories;
 
@@ -80,7 +81,7 @@ public class Content implements Serializable {
     @Column(name = "created_at")
     private Date createdAt;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="profile_id")
     @NotNull
     @NotFound(action = NotFoundAction.IGNORE)
@@ -119,7 +120,7 @@ public class Content implements Serializable {
         return title;
     }
 
-    public @Nullable ImageMetadata getImage() { return image; }
+    public @Nullable ImageMetadata getImage() { return HibernateUtil.resolveLazyHibernateObject(image); }
     public void setImage(ImageMetadata image) { this.image = image; }
 
     public void setTitle(String title) {
@@ -135,7 +136,7 @@ public class Content implements Serializable {
     }
 
     public Collection<Category> getCategories() {
-        return categories;
+        return HibernateUtil.resolveLazyHibernateObject(categories);
     }
 
     public void setCategories(Collection<Category> categories) {
@@ -159,7 +160,7 @@ public class Content implements Serializable {
     }
 
     public Collection<FolderContents> getFolderContents() {
-        return folderContents;
+        return HibernateUtil.resolveLazyHibernateObject(folderContents);
     }
 
     public void setFolderContents(Collection<FolderContents> folders) {
@@ -167,7 +168,7 @@ public class Content implements Serializable {
     }
 
     public Profile getAuthor() {
-        return author;
+        return HibernateUtil.resolveLazyHibernateObject(author);
     }
 
     public void setAuthor(Profile author) {
@@ -198,7 +199,7 @@ public class Content implements Serializable {
             return null;
 
         return ContentService.getInstance()
-            .findStatusById( id, profile.get().getId() )
+            .findStatusById( getId(), profile.get().getId() )
             .getStatus();
     }
 }

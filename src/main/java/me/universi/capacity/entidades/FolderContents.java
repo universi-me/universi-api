@@ -1,19 +1,12 @@
 package me.universi.capacity.entidades;
 
+import jakarta.persistence.*;
 import java.util.UUID;
 
+import me.universi.util.HibernateUtil;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
 
 @Entity( name = "FolderContents" )
@@ -35,11 +28,11 @@ public class FolderContents {
     @Column(name = "id")
     private UUID id;
 
-    @ManyToOne()
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn( name = "contents_id", nullable = false )
     private Content content;
 
-    @ManyToOne()
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn( name = "folders_id", nullable = false )
     private Folder folder;
 
@@ -56,10 +49,10 @@ public class FolderContents {
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
 
-    public Content getContent() { return content; }
+    public Content getContent() { return HibernateUtil.resolveLazyHibernateObject(content); }
     public void setContent(Content content) { this.content = content; }
 
-    public Folder getFolder() { return folder; }
+    public Folder getFolder() { return HibernateUtil.resolveLazyHibernateObject(folder); }
     public void setFolder(Folder folder) { this.folder = folder; }
 
     public Integer getOrderNum() { return orderNum; }

@@ -22,6 +22,7 @@ import me.universi.activity.entities.Activity;
 import me.universi.activity.services.ActivityService;
 import me.universi.profile.entities.Profile;
 
+import me.universi.util.HibernateUtil;
 import org.hibernate.annotations.*;
 
 import java.util.Date;
@@ -47,7 +48,7 @@ public class Competence {
     private CompetenceType competenceType;
 
     @JoinColumn( name = "profile_id" )
-    @ManyToOne
+    @ManyToOne(fetch =  FetchType.LAZY )
     private Profile profile;
 
     @Column(name = "description", columnDefinition = "TEXT")
@@ -70,14 +71,14 @@ public class Competence {
 
     @Transient
     public boolean isHasBadge() {
-        return this.profile.hasBadge( competenceType );
+        return getProfile().hasBadge( getCompetenceType() );
     }
 
     @Transient
     public List<Activity> getActivities() {
         return ActivityService
             .getInstance()
-            .findByProfileAndCompetenceType( profile, competenceType );
+            .findByProfileAndCompetenceType( getProfile(), getCompetenceType() );
     }
 
     public Competence() {}
@@ -100,12 +101,12 @@ public class Competence {
     public Date getCreationDate() { return creationDate; }
     public void setCreationDate(Date creationDate) { this.creationDate = creationDate; }
 
-    public CompetenceType getCompetenceType() { return competenceType; }
+    public CompetenceType getCompetenceType() { return HibernateUtil.resolveLazyHibernateObject(competenceType); }
     public void setCompetenceType(CompetenceType competenceType) { this.competenceType = competenceType; }
 
     public boolean isDeleted() { return deleted; }
     public void setDeleted(boolean deleted) { this.deleted = deleted; }
 
-    public Profile getProfile() { return profile; }
+    public Profile getProfile() { return HibernateUtil.resolveLazyHibernateObject(profile); }
     public void setProfile(Profile profile) { this.profile = profile; }
 }

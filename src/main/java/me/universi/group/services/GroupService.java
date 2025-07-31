@@ -1,5 +1,6 @@
 package me.universi.group.services;
 
+import jakarta.transaction.Transactional;
 import me.universi.Sys;
 import me.universi.activity.entities.Activity;
 import me.universi.activity.services.ActivityService;
@@ -263,10 +264,10 @@ public class GroupService extends EntityService<Group> {
         if(groupSettings == null) {
             return null;
         }
-        GroupEnvironment groupEnvironment = groupSettings.environment;
+        GroupEnvironment groupEnvironment = groupSettings.getEnvironment();
         if(groupEnvironment == null) {
             groupEnvironment = new GroupEnvironment();
-            groupEnvironment.groupSettings = groupSettings;
+            groupEnvironment.setGroupSettings(groupSettings);
             groupEnvironment = groupEnvironmentRepository.save(groupEnvironment);
         }
         return groupEnvironment;

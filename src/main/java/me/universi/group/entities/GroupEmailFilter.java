@@ -13,6 +13,7 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 import me.universi.group.enums.GroupEmailFilterType;
+import me.universi.util.HibernateUtil;
 import org.hibernate.annotations.*;
 
 
@@ -55,7 +56,7 @@ public class GroupEmailFilter implements Serializable {
     @JoinColumn(name="group_settings_id")
     @NotNull
     @NotFound(action = NotFoundAction.IGNORE)
-    public GroupSettings groupSettings;
+    private GroupSettings groupSettings;
 
     @JsonIgnore
     @Column(name = "deleted")
@@ -132,7 +133,7 @@ public class GroupEmailFilter implements Serializable {
     }
 
     public GroupSettings getGroupSettings() {
-        return groupSettings;
+        return HibernateUtil.resolveLazyHibernateObject(groupSettings);
     }
 
     public void setGroupSettings(GroupSettings groupSettings) {

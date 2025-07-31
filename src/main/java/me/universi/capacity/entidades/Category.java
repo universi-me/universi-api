@@ -11,6 +11,7 @@ import java.io.Serializable;
 
 import me.universi.image.entities.ImageMetadata;
 import me.universi.profile.entities.Profile;
+import me.universi.util.HibernateUtil;
 import org.hibernate.annotations.*;
 
 import java.util.Date;
@@ -35,7 +36,7 @@ public class Category implements Serializable {
     private String name;
 
     @Nullable
-    @OneToOne
+    @OneToOne(fetch =  FetchType.LAZY)
     @JoinColumn( name = "image_metadata_id" )
     private ImageMetadata image;
 
@@ -75,7 +76,7 @@ public class Category implements Serializable {
         return this.name;
     }
 
-    public @Nullable ImageMetadata getImage() { return image; }
+    public @Nullable ImageMetadata getImage() { return HibernateUtil.resolveLazyHibernateObject(image); }
     public void setImage(ImageMetadata image) { this.image = image; }
 
     public Date getCreatedAt() {
@@ -87,7 +88,7 @@ public class Category implements Serializable {
     }
 
     public Profile getAuthor() {
-        return author;
+        return HibernateUtil.resolveLazyHibernateObject(author);
     }
 
     public void setAuthor(Profile author) {

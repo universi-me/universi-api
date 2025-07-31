@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.*;
 
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
+import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
@@ -52,14 +53,14 @@ public class Group implements Serializable {
     
     @Column(name = "nickname")
     @NotNull
-    public String nickname;
+    private String nickname;
 
     @Column(name = "name")
-    public String name;
+    private String name;
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
     @Column(name = "description", columnDefinition = "TEXT")
-    public String description;
+    private String description;
 
     @Nullable
     @OneToOne
@@ -69,12 +70,12 @@ public class Group implements Serializable {
     @Nullable
     @OneToOne
     @JoinColumn( name = "banner_image_metadata_id" )
-    public ImageMetadata bannerImage;
+    private ImageMetadata bannerImage;
 
     @Nullable
     @OneToOne
     @JoinColumn( name = "header_image_metadata_id" )
-    public ImageMetadata headerImage;
+    private ImageMetadata headerImage;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="profile_id")
@@ -101,7 +102,7 @@ public class Group implements Serializable {
     private Group parentGroup;
 
     @Nullable
-    @OneToOne( cascade = CascadeType.ALL )
+    @OneToOne( cascade = CascadeType.ALL, fetch = FetchType.LAZY )
     @JoinColumn( name = "activity_id", nullable = true )
     @NotFound( action = NotFoundAction.IGNORE )
     @JsonIgnoreProperties( { "group" } )
@@ -121,17 +122,17 @@ public class Group implements Serializable {
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
     @Column(name = "can_create_group")
     @NotNull
-    public boolean canCreateGroup;
+    private boolean canCreateGroup;
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
     @Column(name = "can_enter")
     @NotNull
-    public boolean canEnter;
+    private boolean canEnter;
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
     @Column(name = "can_add_participant")
     @NotNull
-    public boolean canAddParticipant;
+    private boolean canAddParticipant;
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
     @CreationTimestamp
@@ -142,7 +143,7 @@ public class Group implements Serializable {
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
     @Column(name = "public_group")
     @NotNull
-    public boolean publicGroup;
+    private boolean publicGroup;
 
     @ManyToMany(mappedBy = "grantedAccessGroups", fetch = FetchType.LAZY)
     @JsonIgnore
@@ -235,10 +236,10 @@ public class Group implements Serializable {
         this.nickname = nickname;
     }
 
-    public Optional<Group> getParentGroup() { return Optional.ofNullable( parentGroup ); }
+    public Optional<Group> getParentGroup() { return Optional.ofNullable( HibernateUtil.resolveLazyHibernateObject(parentGroup) ); }
     public void setParentGroup(Group parentGroup) { this.parentGroup = parentGroup; }
 
-    public Optional<Activity> getActivity() { return Optional.ofNullable( activity ); }
+    public Optional<Activity> getActivity() { return Optional.ofNullable( HibernateUtil.resolveLazyHibernateObject(activity) ); }
     public void setActivity( Activity activity ) { this.activity = activity; }
 
     /**
@@ -373,7 +374,7 @@ public class Group implements Serializable {
     }
 
     public Collection<Folder> getFoldersGrantedAccess() {
-        return foldersGrantedAccess;
+        return HibernateUtil.resolveLazyHibernateObject(this.foldersGrantedAccess);
     }
 
     public void setFoldersGrantedAccess(Collection<Folder> foldersGrantedAccess) {

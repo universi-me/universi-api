@@ -123,7 +123,7 @@ public class GroupParticipantService {
 
         var role = dto.role().map( roleId -> {
             var foundRole = RoleService.getInstance().findOrThrow( roleId );
-            if ( !foundRole.group.getId().equals( group.getId() ) )
+            if ( !foundRole.getGroup().getId().equals( group.getId() ) )
                 throw new UniversiConflictingOperationException( "O Papel indicado não pertence ao grupo" );
             return foundRole;
         } ).orElse(

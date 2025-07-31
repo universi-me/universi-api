@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
+import me.universi.util.HibernateUtil;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -32,7 +33,7 @@ public class Activity {
     private UUID id;
 
     @NotNull
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn( name = "type_id", nullable = false )
     private ActivityType type;
 
@@ -55,12 +56,12 @@ public class Activity {
     private Date endDate;
 
     @NotNull
-    @OneToOne( mappedBy = "activity" )
+    @OneToOne( mappedBy = "activity", fetch = FetchType.LAZY )
     @JsonIgnoreProperties( { "activity" } )
     private Group group;
 
     @NotNull
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         schema = "activity",
         name = "badges",
@@ -95,15 +96,15 @@ public class Activity {
 
     public UUID getId() { return id; }
 
-    @Transient @JsonIgnore public @NotBlank String getName() { return group.getName(); }
-    @Transient @JsonIgnore public @NotBlank String getDescription() { return group.getDescription(); }
-    @Transient @JsonIgnore public Profile getAuthor() { return group.getAdmin(); }
-    @Transient @JsonIgnore public @NotNull Collection<ProfileGroup> getParticipants() { return group.getParticipants(); }
+    @Transient @JsonIgnore public @NotBlank String getName() { return getGroup().getName(); }
+    @Transient @JsonIgnore public @NotBlank String getDescription() { return getGroup().getDescription(); }
+    @Transient @JsonIgnore public Profile getAuthor() { return getGroup().getAdmin(); }
+    @Transient @JsonIgnore public @NotNull Collection<ProfileGroup> getParticipants() { return getGroup().getParticipants(); }
 
-    public @NotNull ActivityType getType() { return type; }
+    public @NotNull ActivityType getType() { return HibernateUtil.resolveLazyHibernateObject(type); }
     public void setType( @NotNull ActivityType activityType ) { this.type = activityType; }
 
-    public @NotNull Collection<CompetenceType> getBadges() { return badges; }
+    public @NotNull Collection<CompetenceType> getBadges() { return HibernateUtil.resolveLazyHibernateObject(badges); }
     public void setBadges(@NotNull Collection<CompetenceType> badges) { this.badges = badges; }
 
     public @NotBlank String getLocation() { return location; }
@@ -119,7 +120,7 @@ public class Activity {
     public @NotNull Date getEndDate() { return endDate; }
     public void setEndDate( @NotNull Date endDate ) { this.endDate = endDate; }
 
-    public @NotNull Group getGroup() { return group; }
+    public @NotNull Group getGroup() { return HibernateUtil.resolveLazyHibernateObject(group); }
     public void setGroup( @NotNull Group group ) { this.group = group; }
 
     public @Nullable Date getDeletedAt() { return deletedAt; }

@@ -9,6 +9,7 @@ import me.universi.profile.entities.Profile;
 import jakarta.persistence.*;
 
 import java.util.UUID;
+import me.universi.util.HibernateUtil;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.SQLDelete;
@@ -74,7 +75,7 @@ public class Link {
     }
 
     public Profile getProfile() {
-        return profile;
+        return HibernateUtil.resolveLazyHibernateObject(profile);
     }
 
     public void setProfile(Profile profile) {

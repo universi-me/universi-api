@@ -55,7 +55,7 @@ public class OrganizationService {
     }
 
     public GroupEnvironment getEnvironment() {
-        return groupService.getGroupEnvironment( getOrganization() );
+        return GroupService.getInstance().getGroupEnvironment( getOrganization() );
     }
 
     public boolean isEmailAvailable( String email ) {
@@ -81,8 +81,8 @@ public class OrganizationService {
             return;
 
         var org = getUserlessOrganization();
-        org.nickname = localOrganizationNickname.trim().toLowerCase();
-        org.name = localOrganizationNickname.trim().toUpperCase();
+        org.setNickname(localOrganizationNickname.trim().toLowerCase());
+        org.setName(localOrganizationNickname.trim().toUpperCase());
 
         groupRepository.saveAndFlush( org );
     }

@@ -14,6 +14,7 @@ import java.util.UUID;
 import me.universi.capacity.enums.ContentStatusType;
 import me.universi.capacity.service.FolderService;
 import me.universi.profile.entities.Profile;
+import me.universi.util.HibernateUtil;
 import org.hibernate.annotations.*;
 
 @Entity(name = "FolderProfile")
@@ -42,19 +43,19 @@ public class FolderProfile implements Serializable {
     @Column(name = "removed")
     public Date removed;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn(name="assigned_by_id")
     @NotNull
     @NotFound(action = NotFoundAction.IGNORE)
     public Profile assignedBy;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn(name="assigned_to_id")
     @NotNull
     @NotFound(action = NotFoundAction.IGNORE)
     public Profile assignedTo;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn(name="folder_id")
     @NotNull
     @NotFound(action = NotFoundAction.IGNORE)
@@ -75,7 +76,7 @@ public class FolderProfile implements Serializable {
     public void setRemoved(Date removed) { this.removed = removed; }
 
     public Profile getAssignedBy() {
-        return assignedBy;
+        return HibernateUtil.resolveLazyHibernateObject(assignedBy);
     }
 
     public void setAssignedBy(Profile assignedBy) {
@@ -83,7 +84,7 @@ public class FolderProfile implements Serializable {
     }
 
     public Profile getAssignedTo() {
-        return assignedTo;
+        return HibernateUtil.resolveLazyHibernateObject(assignedTo);
     }
 
     public void setAssignedTo(Profile assignedTo) {
@@ -91,7 +92,7 @@ public class FolderProfile implements Serializable {
     }
 
     public Folder getFolder() {
-        return folder;
+        return HibernateUtil.resolveLazyHibernateObject(folder);
     }
 
     public void setFolder(Folder folder) {
@@ -100,12 +101,12 @@ public class FolderProfile implements Serializable {
 
     @Transient
     public int getFolderSize() {
-        return this.folder.getFolderContents().size();
+        return getFolder().getFolderContents().size();
     }
 
     @Transient
     public int getDoneUntilNow() {
-        return FolderService.getInstance().getStatuses(assignedTo, folder).stream()
+        return FolderService.getInstance().getStatuses(getAssignedTo(), getFolder()).stream()
             .filter(cs -> cs.getStatus().equals(ContentStatusType.DONE))
             .filter(Objects::nonNull)
             .toList()

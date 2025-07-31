@@ -18,6 +18,7 @@ import me.universi.profile.entities.Profile;
 
 import java.util.Collection;
 import java.util.UUID;
+import me.universi.util.HibernateUtil;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.SQLDelete;
@@ -76,7 +77,7 @@ public class CompetenceType {
 
     public void setReviewed(boolean reviewed) { this.reviewed = reviewed; }
 
-    public Collection<Profile> getProfilesWithAccess() { return profilesWithAccess; }
+    public Collection<Profile> getProfilesWithAccess() { return HibernateUtil.resolveLazyHibernateObject(profilesWithAccess); }
     public void setProfilesWithAccess(Collection<Profile> profilesWithAccess) { this.profilesWithAccess = profilesWithAccess; }
-    public void addProfileWithAccess(Profile profile) { this.profilesWithAccess.add(profile); }
+    public void addProfileWithAccess(Profile profile) { getProfilesWithAccess().add(profile); }
 }

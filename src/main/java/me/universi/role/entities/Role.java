@@ -14,6 +14,7 @@ import me.universi.role.enums.FeaturesTypes;
 import me.universi.role.enums.Permission;
 import me.universi.role.enums.RoleType;
 
+import me.universi.util.HibernateUtil;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
@@ -63,7 +64,7 @@ public class Role implements Serializable {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id")
     @NotNull
-    public Group group;
+    private Group group;
 
     @Column(name= "feed_permission") @JsonIgnore
     @Min(0) @NotNull public int feedPermission = 0;
@@ -99,6 +100,10 @@ public class Role implements Serializable {
 
         Arrays.asList(FeaturesTypes.values())
             .forEach(ft -> this.setPermission(ft, permission));
+    }
+
+    public Group getGroup() {
+        return HibernateUtil.resolveLazyHibernateObject(group);
     }
 
     public static Role makeAdmin(@NotNull Group group) {

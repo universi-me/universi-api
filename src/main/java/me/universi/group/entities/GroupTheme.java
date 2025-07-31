@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.UUID;
+import me.universi.util.HibernateUtil;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -66,10 +67,16 @@ public class GroupTheme  implements Serializable {
     @JoinColumn(name="group_settings_id")
     @OneToOne(fetch = FetchType.LAZY)
     @NotNull
-    public GroupSettings groupSettings;
+    private GroupSettings groupSettings;
 
     public GroupTheme() {
     }
 
+    public GroupSettings getGroupSettings() {
+        return HibernateUtil.resolveLazyHibernateObject(groupSettings);
+    }
 
+    public void setGroupSettings(GroupSettings groupSettings) {
+        this.groupSettings = groupSettings;
+    }
 }

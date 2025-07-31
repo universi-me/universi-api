@@ -23,6 +23,7 @@ import me.universi.link.entities.Link;
 import me.universi.role.entities.Role;
 import me.universi.profile.enums.Gender;
 import me.universi.user.entities.User;
+import me.universi.util.HibernateUtil;
 import org.hibernate.annotations.*;
 
 import java.util.Collection;
@@ -53,7 +54,7 @@ public class Profile implements Serializable {
     private String lastname;
 
     @Nullable
-    @OneToOne
+    @OneToOne( fetch = FetchType.LAZY )
     @JoinColumn( name = "image_metadata_id" )
     private ImageMetadata image;
 
@@ -119,7 +120,7 @@ public class Profile implements Serializable {
     private Collection<CompetenceType> competenceBadges;
 
     @Nullable
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn( name = "department_id" )
     private Department department;
 
@@ -152,7 +153,7 @@ public class Profile implements Serializable {
     }
 
     public Collection<ProfileGroup> getGroups() {
-        return groups;
+        return HibernateUtil.resolveLazyHibernateObject(groups);
     }
 
     public void setGroups(Collection<ProfileGroup> groups) {
@@ -160,7 +161,7 @@ public class Profile implements Serializable {
     }
 
     public Collection<Link> getLinks() {
-        return links;
+        return HibernateUtil.resolveLazyHibernateObject(links);
     }
 
     public void setLinks(Collection<Link> links) {
@@ -192,7 +193,7 @@ public class Profile implements Serializable {
     }
 
     public User getUser() {
-        return user;
+        return HibernateUtil.resolveLazyHibernateObject(user);
     }
 
     public void setUser(User user) {
@@ -200,7 +201,7 @@ public class Profile implements Serializable {
     }
 
     public Gender getGender() {
-        return gender;
+        return HibernateUtil.resolveLazyHibernateObject(gender);
     }
 
     public void setGender(Gender gender) {
@@ -208,7 +209,7 @@ public class Profile implements Serializable {
     }
 
     public Collection<ContentStatus> getContentStatus() {
-        return contentStatus;
+        return HibernateUtil.resolveLazyHibernateObject(contentStatus);
     }
 
     public void setContentStatus(Collection<ContentStatus> contentStatus) {
@@ -220,7 +221,7 @@ public class Profile implements Serializable {
     }
 
     public Collection<Education> getEducations() {
-        return educations;
+        return HibernateUtil.resolveLazyHibernateObject(educations);
     }
 
     public void setEducations(Collection<Education> educations) {
@@ -228,7 +229,7 @@ public class Profile implements Serializable {
     }
 
     public Collection<Experience> getExperiences() {
-        return experiences;
+        return HibernateUtil.resolveLazyHibernateObject(experiences);
     }
 
     public void setExperiences(Collection<Experience> experiences) {
@@ -240,7 +241,7 @@ public class Profile implements Serializable {
     public void setDeleted(boolean deleted) { this.deleted = deleted; }
 
     public Collection<FolderProfile> getAssignedFolders() {
-        return assignedFolders;
+        return HibernateUtil.resolveLazyHibernateObject(assignedFolders);
     }
 
     public void setAssignedFolders(Collection<FolderProfile> assignedFolders) {
@@ -248,7 +249,7 @@ public class Profile implements Serializable {
     }
 
     public Collection<FolderFavorite> getFavoriteFolders() {
-        return favoriteFolders;
+        return HibernateUtil.resolveLazyHibernateObject(favoriteFolders);
     }
 
     public void setFavoriteFolders(Collection<FolderFavorite> favoriteFolders) {
@@ -264,17 +265,17 @@ public class Profile implements Serializable {
     }
 
     public Collection<CompetenceType> getCompetenceBadges() {
-        return competenceBadges;
+        return HibernateUtil.resolveLazyHibernateObject(competenceBadges);
     }
 
     public void setCompetenceBadges(Collection<CompetenceType> competenceBadges) {
         this.competenceBadges = competenceBadges;
     }
 
-    public @Nullable ImageMetadata getImage() { return image; }
+    public @Nullable ImageMetadata getImage() { return HibernateUtil.resolveLazyHibernateObject(image); }
     public void setImage(ImageMetadata image) { this.image = image; }
 
-    public Department getDepartment() { return department; }
+    public Department getDepartment() { return HibernateUtil.resolveLazyHibernateObject(department); }
     public void setDepartment(Department department) { this.department = department; }
 
     @Transient
@@ -285,11 +286,11 @@ public class Profile implements Serializable {
     @Override
     public String toString() {
         return "\nProfile[" +
-                "id='" + id + '\'' +
-                ", user='" + user + '\'' +
-                ", firstname='" + firstname + '\'' +
-                ", lastname='" + lastname + '\'' +
-                ", image='" + ImageMetadataService.getInstance().getUri( image ) + '\'' +
-                ", bio='" + bio + "']\n";
+                "id='" + getId() + '\'' +
+                ", user='" + getUser() + '\'' +
+                ", firstname='" + getFirstname() + '\'' +
+                ", lastname='" + getLastname() + '\'' +
+                ", image='" + ImageMetadataService.getInstance().getUri( getImage() ) + '\'' +
+                ", bio='" + getBio() + "']\n";
     }
 }

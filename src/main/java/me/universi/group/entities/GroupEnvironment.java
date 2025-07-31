@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
 import me.universi.user.services.JsonUserAdminFilter;
+import me.universi.util.HibernateUtil;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
@@ -39,7 +40,7 @@ public class GroupEnvironment implements Serializable {
     @JoinColumn(name="group_settings_id")
     @OneToOne(fetch = FetchType.LAZY)
     @NotNull
-    public GroupSettings groupSettings;
+    private GroupSettings groupSettings;
 
     /** Signup **/
     @Column(name = "signup_enabled")
@@ -146,5 +147,17 @@ public class GroupEnvironment implements Serializable {
 
     public void setAdded(Date added) {
         this.added = added;
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public GroupSettings getGroupSettings() {
+        return HibernateUtil.resolveLazyHibernateObject(groupSettings);
+    }
+
+    public void setGroupSettings(GroupSettings groupSettings) {
+        this.groupSettings = groupSettings;
     }
 }

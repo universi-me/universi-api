@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.UUID;
 import me.universi.capacity.enums.ContentStatusType;
 import me.universi.profile.entities.Profile;
+import me.universi.util.HibernateUtil;
 import org.hibernate.annotations.*;
 
 @Entity(name="ContentStatus")
@@ -32,7 +33,7 @@ public class ContentStatus implements Serializable {
     private ContentStatusType status;
 
     @JsonIgnore
-    @OneToOne
+    @OneToOne(fetch =  FetchType.LAZY)
     @JoinColumn(name="content_id")
     private Content content;
 
@@ -71,7 +72,7 @@ public class ContentStatus implements Serializable {
     }
 
     public Content getContent() {
-        return content;
+        return HibernateUtil.resolveLazyHibernateObject(content);
     }
 
     public void setContent(Content content) {
@@ -79,7 +80,7 @@ public class ContentStatus implements Serializable {
     }
 
     public Profile getProfile() {
-        return profile;
+        return HibernateUtil.resolveLazyHibernateObject(profile);
     }
 
     public void setProfile(Profile profile) {

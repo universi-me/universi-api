@@ -76,7 +76,7 @@ public class RoleService extends EntityService<Role> {
     }
 
     public Optional<Role> findByIdAndGroup( @NotNull UUID id, @NotNull Group group ) {
-        return find( id ).filter( role -> role.group.getId().equals( group.getId() ) );
+        return find( id ).filter( role -> role.getGroup().getId().equals( group.getId() ) );
     }
 
     public Role findByIdAndGroupOrThrow( @NotNull UUID id, @NotNull Group group ) {
@@ -114,7 +114,7 @@ public class RoleService extends EntityService<Role> {
 
         if ( dto.features() != null ) {
             dto.features().forEach( ( feature, permission ) -> {
-                if ( role.group.isActivityGroup() && (
+                if ( role.getGroup().isActivityGroup() && (
                     feature == FeaturesTypes.GROUP
                     || feature == FeaturesTypes.JOBS
                 ) ) {
@@ -133,7 +133,7 @@ public class RoleService extends EntityService<Role> {
         checkPermissionToDelete( role );
 
         // remove role from members before deleting
-        var memberRole = getGroupMemberRole( role.group );
+        var memberRole = getGroupMemberRole( role.getGroup() );
 
         var profileGroups = profileGroupRepository.findAllByRoleId( id );
         profileGroups.stream().forEach( pg -> {
@@ -148,7 +148,7 @@ public class RoleService extends EntityService<Role> {
         var profile = profileService.findByIdOrUsernameOrThrow( profileIdOrUsername );
         var role = findOrThrow( roleId );
 
-        checkIsAdmin( role.group );
+        checkIsAdmin( role.getGroup() );
 
         if ( !role.isCanBeAssigned() )
             throw new UniversiConflictingOperationException( "O papel não pode ser atribuído" );
@@ -156,10 +156,10 @@ public class RoleService extends EntityService<Role> {
         if( profileService.isSessionOfProfile( profile ) )
             throw new UniversiConflictingOperationException( "Você não pode alterar seu próprio papel" );
 
-        if ( role.group.getAdmin().getId().equals( profile.getId() ) )
+        if ( role.getGroup().getAdmin().getId().equals( profile.getId() ) )
             throw new UniversiConflictingOperationException( "O papel do dono do grupo não pode ser alterado" );
 
-        var profileGroup = GroupParticipantService.getInstance().findByGroupAndProfile( role.group, profile )
+        var profileGroup = GroupParticipantService.getInstance().findByGroupAndProfile( role.getGroup(), profile )
             .orElseThrow( () -> new UniversiConflictingOperationException( "Você só pode atribuir o papel à um membro do grupo" ) );
 
         profileGroup.setRole(role);
@@ -332,7 +332,7 @@ public class RoleService extends EntityService<Role> {
             return false;
 
         return ( role.isCanBeEdited()
-            && isAdmin( profile.get(), role.group ) ) || userService.isUserAdmin( profile.get().getUser() );
+            && isAdmin( profile.get(), role.getGroup() ) ) || userService.isUserAdmin( profile.get().getUser() );
     }
 
     @Override

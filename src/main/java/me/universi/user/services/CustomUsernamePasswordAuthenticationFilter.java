@@ -70,7 +70,7 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
                 this.jsonUsername = (String)( mapRequest.containsKey("username")? mapRequest.get("username") : mapRequest.get("email"));
                 this.jsonPassword = (String)mapRequest.get("password");
 
-                GoogleService.getInstance().checkRecaptchaWithToken(mapRequest.get("recaptchaToken"));
+                GoogleService.getInstance().checkRecaptchaWithTokenTransactional(mapRequest.get("recaptchaToken"));
 
             } catch (Exception e) {
                 try {

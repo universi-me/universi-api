@@ -17,6 +17,7 @@ import me.universi.user.services.JsonEmailOwnerSessionFilter;
 import me.universi.user.services.JsonUserAdminFilter;
 import me.universi.user.services.LoginService;
 import me.universi.user.services.UserService;
+import me.universi.util.HibernateUtil;
 import org.hibernate.annotations.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -331,11 +332,11 @@ public class User implements UserDetails, Serializable {
 
     @Override
     public int hashCode() {
-        return (getUsername() + organization.getNickname()).hashCode();
+        return (getUsername() + getOrganization().getNickname()).hashCode();
     }
 
     public Group getOrganization() {
-        return organization;
+        return HibernateUtil.resolveLazyHibernateObject(this.organization);
     }
 
     public void setOrganization(Group organization) {

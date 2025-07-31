@@ -9,6 +9,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.UUID;
+import me.universi.util.HibernateUtil;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -33,13 +34,13 @@ public class GroupSettings implements Serializable {
     @OneToMany(mappedBy = "groupSettings", fetch = FetchType.LAZY)
     private Collection<GroupEmailFilter> filterEmails;
 
-    @OneToOne(mappedBy = "groupSettings", fetch = FetchType.EAGER)
-    public GroupTheme theme;
+    @OneToOne(mappedBy = "groupSettings", fetch = FetchType.LAZY)
+    private GroupTheme theme;
 
     @JsonIgnoreProperties(value = { "signup_confirm_account_enabled", "recaptcha_api_key", "recaptcha_api_project_id", "keycloak_client_id", "keycloak_client_secret", "keycloak_realm", "keycloak_url", "keycloak_redirect_url",
             "message_template_new_content", "message_template_assigned_content", "alert_new_content_enabled", "alert_assigned_content_enabled", "email_enabled", "email_host", "email_port", "email_protocol", "email_username", "email_password"})
-    @OneToOne(mappedBy = "groupSettings", fetch = FetchType.EAGER)
-    public GroupEnvironment environment;
+    @OneToOne(mappedBy = "groupSettings", fetch = FetchType.LAZY)
+    private GroupEnvironment environment;
 
     @JsonIgnore
     @OneToOne( mappedBy = "groupSettings", fetch = FetchType.LAZY )
@@ -61,12 +62,18 @@ public class GroupSettings implements Serializable {
     }
 
     public Collection<GroupEmailFilter> getFilterEmails() {
-        return filterEmails;
+        return HibernateUtil.resolveLazyHibernateObject(filterEmails);
     }
 
     public void setFilterEmails(Collection<GroupEmailFilter> filtersEmail) {
         this.filterEmails = filtersEmail;
     }
 
-    public Group getGroup() { return group; }
+    public Group getGroup() { return HibernateUtil.resolveLazyHibernateObject(group); }
+
+    public GroupEnvironment getEnvironment() { return HibernateUtil.resolveLazyHibernateObject(this.environment); }
+
+    public GroupTheme getTheme() {
+        return HibernateUtil.resolveLazyHibernateObject(theme);
+    }
 }
