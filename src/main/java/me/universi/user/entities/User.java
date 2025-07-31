@@ -32,7 +32,6 @@ import java.util.UUID;
 @Table(name = "system_users", uniqueConstraints = {@UniqueConstraint(name = "system_users_username_organization_key", columnNames = {"username", "organization"})})
 @SQLDelete(sql = "UPDATE system_users SET deleted = true WHERE id=?")
 @SQLRestriction( "NOT deleted" )
-@JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class User implements UserDetails, Serializable {
 
     @Serial
@@ -158,7 +157,7 @@ public class User implements UserDetails, Serializable {
     }
 
     public Profile getProfile() {
-        return profile;
+        return HibernateUtil.resolveLazyHibernateObject(profile);
     }
 
     public void setProfile(Profile profile) {

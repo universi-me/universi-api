@@ -1,6 +1,7 @@
 package me.universi.profile.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import jakarta.annotation.Nullable;
@@ -34,6 +35,7 @@ import java.util.UUID;
 @Table( name = "profile", schema = "profile" )
 @SQLDelete(sql = "UPDATE profile.profile SET deleted = true WHERE id=?")
 @SQLRestriction( "NOT deleted" )
+@JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class Profile implements Serializable {
 
     @Serial
@@ -201,7 +203,7 @@ public class Profile implements Serializable {
     }
 
     public Gender getGender() {
-        return HibernateUtil.resolveLazyHibernateObject(gender);
+        return gender;
     }
 
     public void setGender(Gender gender) {
