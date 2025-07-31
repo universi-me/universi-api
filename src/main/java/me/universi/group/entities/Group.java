@@ -1,9 +1,6 @@
 package me.universi.group.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
 
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
@@ -21,6 +18,7 @@ import me.universi.role.entities.Role;
 import me.universi.role.services.RoleService;
 import me.universi.user.services.EnvironmentService;
 import me.universi.user.services.JsonUserLoggedFilter;
+import me.universi.util.HibernateUtil;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
@@ -78,16 +76,15 @@ public class Group implements Serializable {
     @JoinColumn( name = "header_image_metadata_id" )
     public ImageMetadata headerImage;
 
-    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="profile_id")
     @NotNull
-    public Profile admin;
+    private Profile admin;
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="group_settings_id")
     @NotNull
-    public GroupSettings groupSettings;
+    private GroupSettings groupSettings;
 
     @JsonIgnore
     @Column(name = "deleted")
@@ -196,7 +193,7 @@ public class Group implements Serializable {
     }
 
     public Profile getAdmin() {
-        return admin;
+        return HibernateUtil.resolveLazyHibernateObject(admin);
     }
 
     public void setAdmin(Profile admin) {
@@ -204,9 +201,10 @@ public class Group implements Serializable {
     }
 
     public Collection<ProfileGroup> getParticipants() {
-        return this.participants == null
+        Collection<ProfileGroup> participants = HibernateUtil.resolveLazyHibernateObject(this.participants);
+        return participants == null
             ? Collections.emptyList()
-            : this.participants;
+            : participants;
     }
 
     public void setParticipants(Collection<ProfileGroup> participants) {
@@ -359,7 +357,7 @@ public class Group implements Serializable {
     public void setDeleted(boolean deleted) { this.deleted = deleted; }
 
     public GroupSettings getGroupSettings() {
-        return groupSettings;
+        return HibernateUtil.resolveLazyHibernateObject(this.groupSettings);
     }
 
     public void setGroupSettings(GroupSettings groupSettings) {

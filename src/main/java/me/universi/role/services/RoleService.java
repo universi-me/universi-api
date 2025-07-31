@@ -137,7 +137,7 @@ public class RoleService extends EntityService<Role> {
 
         var profileGroups = profileGroupRepository.findAllByRoleId( id );
         profileGroups.stream().forEach( pg -> {
-            pg.role = memberRole;
+            pg.setRole(memberRole);
         } );
 
         profileGroupRepository.saveAllAndFlush( profileGroups );
@@ -162,8 +162,8 @@ public class RoleService extends EntityService<Role> {
         var profileGroup = GroupParticipantService.getInstance().findByGroupAndProfile( role.group, profile )
             .orElseThrow( () -> new UniversiConflictingOperationException( "Você só pode atribuir o papel à um membro do grupo" ) );
 
-        profileGroup.role = role;
-        return profileGroupRepository.saveAndFlush( profileGroup ).role;
+        profileGroup.setRole(role);
+        return profileGroupRepository.saveAndFlush( profileGroup ).getRole();
     }
 
     public Collection<Role> findByGroup( UUID groupId ) {
@@ -278,7 +278,7 @@ public class RoleService extends EntityService<Role> {
 
     private Role getAssignedRole( Profile profile, Group group ) {
         return GroupParticipantService.getInstance().findByGroupAndProfile( group, profile )
-            .map( pg -> pg.role )
+            .map( pg -> pg.getRole() )
             .orElseGet( () -> getGroupVisitorRole( group ) );
     }
 
@@ -289,7 +289,7 @@ public class RoleService extends EntityService<Role> {
         return profileGroupRepository.findAllByProfile(profile)
             .stream()
             .filter(profile::equals)
-            .map(pg -> pg.role)
+            .map(pg -> pg.getRole())
             .toList();
     }
 
@@ -347,7 +347,7 @@ public class RoleService extends EntityService<Role> {
 
         return group.getParticipants()
             .stream()
-            .map(pg -> new ProfileRoleDTO(pg.profile, getAssignedRole(pg.profile, group)))
+            .map(pg -> new ProfileRoleDTO(pg.getProfile(), getAssignedRole(pg.getProfile(), group)))
             .toList();
     }
 }

@@ -50,7 +50,7 @@ public class GroupEmailFilterService extends EntityService<GroupEmailFilter> {
         groupService.checkPermissionToEdit( group );
 
         GroupEmailFilter groupEmailFilter = new GroupEmailFilter();
-        groupEmailFilter.groupSettings = group.groupSettings;
+        groupEmailFilter.groupSettings = group.getGroupSettings();
         groupEmailFilter.email = createEmailFilterDTO.email();
         groupEmailFilter.type = CastingUtil.getEnum( GroupEmailFilterType.class, createEmailFilterDTO.type() )
             .orElseThrow( () -> new UniversiBadRequestException( "Tipo de " + this.entityName + " de valor '" + createEmailFilterDTO.type() + "' não existe" ) );

@@ -318,7 +318,7 @@ public class GroupService extends EntityService<Group> {
         }
         Collection<ProfileGroup> participants = group.getParticipants();
         for(ProfileGroup profileGroup : participants) {
-            Profile profile = profileGroup.profile;
+            Profile profile = profileGroup.getProfile();
             if(profile != null && profile.getUser() != null) {
                 emailService.sendSystemEmailToUser(profile.getUser(), subject, message, true);
             }
