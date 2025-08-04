@@ -1,7 +1,6 @@
 package me.universi.group.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
@@ -12,7 +11,6 @@ import java.util.UUID;
 import me.universi.profile.entities.Profile;
 import me.universi.role.entities.Role;
 
-import me.universi.util.HibernateUtil;
 import org.hibernate.annotations.*;
 
 
@@ -20,7 +18,6 @@ import org.hibernate.annotations.*;
 @Table(name = "profile_group", schema = "system_group")
 @SQLDelete(sql = "UPDATE system_group.profile_group SET deleted = true, exited = NOW() WHERE id=?")
 @SQLRestriction( value = "NOT deleted" )
-@JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class ProfileGroup implements Serializable {
 
     @Serial
@@ -46,14 +43,12 @@ public class ProfileGroup implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn(name="profile_id")
     @NotNull
-    @NotFound(action = NotFoundAction.IGNORE)
     private Profile profile;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn(name="group_id")
     @NotNull
-    @NotFound(action = NotFoundAction.IGNORE)
     private Group group;
 
     @JsonIgnore
@@ -74,7 +69,7 @@ public class ProfileGroup implements Serializable {
     @Transient @JsonIgnore public boolean isCustom() { return this.getRole().isCustom(); }
 
     public Profile getProfile() {
-        return HibernateUtil.resolveLazyHibernateObject(this.profile);
+        return this.profile;
     }
 
     public void setProfile(Profile profile) {
@@ -82,7 +77,7 @@ public class ProfileGroup implements Serializable {
     }
 
     public Group getGroup() {
-        return HibernateUtil.resolveLazyHibernateObject(this.group);
+        return this.group;
     }
 
     public void setGroup(Group group) {
@@ -93,6 +88,6 @@ public class ProfileGroup implements Serializable {
         return this.joined;
     }
 
-    public @NotNull Role getRole() { return HibernateUtil.resolveLazyHibernateObject(this.role); }
+    public @NotNull Role getRole() { return this.role; }
     public void setRole( @NotNull Role role ) { this.role = role; }
 }

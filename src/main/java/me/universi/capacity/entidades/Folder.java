@@ -21,7 +21,6 @@ import me.universi.image.entities.ImageMetadata;
 import me.universi.profile.entities.Profile;
 import me.universi.profile.services.ProfileService;
 
-import me.universi.util.HibernateUtil;
 import org.hibernate.annotations.*;
 
 @Entity(name="Folder")
@@ -67,7 +66,6 @@ public class Folder implements Serializable {
 
     @ManyToMany( mappedBy = "folder", fetch = FetchType.LAZY)
     @JsonIgnore
-    @NotFound(action = NotFoundAction.IGNORE)
     private Collection<FolderContents> folderContents;
 
     @Column
@@ -79,7 +77,6 @@ public class Folder implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="profile_id")
     @NotNull
-    @NotFound(action = NotFoundAction.IGNORE)
     private Profile author;
 
     @Column(name = "public_folder")
@@ -93,7 +90,6 @@ public class Folder implements Serializable {
         joinColumns = @JoinColumn(name = "folder_id"),
         inverseJoinColumns = @JoinColumn(name = "granted_access_groups_id")
     )
-    @NotFound(action = NotFoundAction.IGNORE)
     private Collection<Group> grantedAccessGroups;
 
     @OneToMany(mappedBy = "folder", fetch = FetchType.LAZY)
@@ -141,7 +137,7 @@ public class Folder implements Serializable {
         return this.name;
     }
 
-    public @Nullable ImageMetadata getImage() { return HibernateUtil.resolveLazyHibernateObject(image); }
+    public @Nullable ImageMetadata getImage() { return image; }
     public void setImage(ImageMetadata image) { this.image = image; }
 
     public void setDescription(String description) {
@@ -153,7 +149,7 @@ public class Folder implements Serializable {
     }
 
     public Collection<Category> getCategories() {
-        return HibernateUtil.resolveLazyHibernateObject(categories);
+        return categories;
     }
 
     public void setCategories(Collection<Category> categories) {
@@ -173,7 +169,7 @@ public class Folder implements Serializable {
     }
 
     public Collection<FolderContents> getFolderContents() {
-        return HibernateUtil.resolveLazyHibernateObject(this.folderContents);
+        return this.folderContents;
     }
 
     public void setRating(Integer rating) {
@@ -185,7 +181,7 @@ public class Folder implements Serializable {
     }
 
     public Profile getAuthor() {
-        return HibernateUtil.resolveLazyHibernateObject(author);
+        return author;
     }
 
     public void setAuthor(Profile author) {
@@ -201,7 +197,7 @@ public class Folder implements Serializable {
     }
 
     public Collection<Group> getGrantedAccessGroups() {
-        return HibernateUtil.resolveLazyHibernateObject(grantedAccessGroups);
+        return grantedAccessGroups;
     }
 
     public void setGrantedAccessGroups(Collection<Group> grantedAccessGroups) {
@@ -209,7 +205,7 @@ public class Folder implements Serializable {
     }
 
     public Collection<FolderProfile> getAssignedUsers() {
-        return HibernateUtil.resolveLazyHibernateObject(assignedUsers);
+        return assignedUsers;
     }
 
     public void setAssignedUsers(Collection<FolderProfile> assignedUsers) {
@@ -233,14 +229,14 @@ public class Folder implements Serializable {
     }
 
     public Collection<CompetenceType> getGrantsBadgeToCompetences() {
-        return HibernateUtil.resolveLazyHibernateObject(grantsBadgeToCompetences);
+        return grantsBadgeToCompetences;
     }
 
     public void setGrantsBadgeToCompetences(Collection<CompetenceType> grantsBadgeToCompetences) {
         this.grantsBadgeToCompetences = grantsBadgeToCompetences;
     }
 
-    public Collection<FolderFavorite> getFavoriteUsers() { return HibernateUtil.resolveLazyHibernateObject(favoriteUsers); }
+    public Collection<FolderFavorite> getFavoriteUsers() { return favoriteUsers; }
     public void setFavoriteUsers(Collection<FolderFavorite> favoriteUsers) { this.favoriteUsers = favoriteUsers; }
 
     @Transient

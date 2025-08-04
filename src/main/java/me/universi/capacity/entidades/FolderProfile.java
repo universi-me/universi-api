@@ -14,14 +14,12 @@ import java.util.UUID;
 import me.universi.capacity.enums.ContentStatusType;
 import me.universi.capacity.service.FolderService;
 import me.universi.profile.entities.Profile;
-import me.universi.util.HibernateUtil;
 import org.hibernate.annotations.*;
 
 @Entity(name = "FolderProfile")
 @Table( name = "folder_profile", schema = "capacity" )
 @SQLDelete( sql = "UPDATE capacity.folder_profile SET removed = CURRENT_TIMESTAMP WHERE id=?" )
 @SQLRestriction( "removed IS NULL" )
-@JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class FolderProfile implements Serializable {
 
     @Serial
@@ -46,19 +44,16 @@ public class FolderProfile implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn(name="assigned_by_id")
     @NotNull
-    @NotFound(action = NotFoundAction.IGNORE)
     public Profile assignedBy;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn(name="assigned_to_id")
     @NotNull
-    @NotFound(action = NotFoundAction.IGNORE)
     public Profile assignedTo;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn(name="folder_id")
     @NotNull
-    @NotFound(action = NotFoundAction.IGNORE)
     public Folder folder;
 
     public FolderProfile() {
@@ -76,7 +71,7 @@ public class FolderProfile implements Serializable {
     public void setRemoved(Date removed) { this.removed = removed; }
 
     public Profile getAssignedBy() {
-        return HibernateUtil.resolveLazyHibernateObject(assignedBy);
+        return assignedBy;
     }
 
     public void setAssignedBy(Profile assignedBy) {
@@ -84,7 +79,7 @@ public class FolderProfile implements Serializable {
     }
 
     public Profile getAssignedTo() {
-        return HibernateUtil.resolveLazyHibernateObject(assignedTo);
+        return assignedTo;
     }
 
     public void setAssignedTo(Profile assignedTo) {
@@ -92,7 +87,7 @@ public class FolderProfile implements Serializable {
     }
 
     public Folder getFolder() {
-        return HibernateUtil.resolveLazyHibernateObject(folder);
+        return folder;
     }
 
     public void setFolder(Folder folder) {

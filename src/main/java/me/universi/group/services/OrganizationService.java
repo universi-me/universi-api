@@ -12,6 +12,7 @@ import me.universi.api.exceptions.UniversiServerException;
 import me.universi.group.entities.Group;
 import me.universi.group.entities.GroupEnvironment;
 import me.universi.group.repositories.GroupRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class OrganizationService {

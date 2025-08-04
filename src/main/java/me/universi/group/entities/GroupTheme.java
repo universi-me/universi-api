@@ -1,14 +1,12 @@
 package me.universi.group.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.UUID;
-import me.universi.util.HibernateUtil;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -16,7 +14,6 @@ import org.hibernate.annotations.SQLRestriction;
 @Table(name = "group_theme", schema = "system_group")
 @SQLDelete(sql = "UPDATE system_group.group_theme SET deleted = true WHERE id=?")
 @SQLRestriction( value = "NOT deleted" )
-@JsonIgnoreProperties({"hibernateLazyInitializer"})
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class GroupTheme  implements Serializable {
 
@@ -73,7 +70,7 @@ public class GroupTheme  implements Serializable {
     }
 
     public GroupSettings getGroupSettings() {
-        return HibernateUtil.resolveLazyHibernateObject(groupSettings);
+        return groupSettings;
     }
 
     public void setGroupSettings(GroupSettings groupSettings) {

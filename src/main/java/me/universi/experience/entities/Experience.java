@@ -18,7 +18,7 @@ import jakarta.validation.constraints.NotNull;
 import me.universi.institution.entities.Institution;
 import me.universi.profile.entities.Profile;
 
-import me.universi.util.HibernateUtil;
+
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
@@ -83,7 +83,7 @@ public class Experience {
 
     public UUID getId() { return id; }
 
-    public Institution getInstitution() { return HibernateUtil.resolveLazyHibernateObject(institution); }
+    public Institution getInstitution() { return institution; }
     public void setInstitution(Institution institution) { this.institution = institution; }
 
     public String getDescription() { return description; }
@@ -98,10 +98,10 @@ public class Experience {
     public Date getCreationDate() { return creationDate; }
     public void setCreationDate(Date creationDate) { this.creationDate = creationDate; }
 
-    public ExperienceType getExperienceType() { return HibernateUtil.resolveLazyHibernateObject(experienceType); }
+    public ExperienceType getExperienceType() { return experienceType; }
     public void setExperienceType(ExperienceType experienceType) { this.experienceType = experienceType; }
 
-    public Profile getProfile() { return HibernateUtil.resolveLazyHibernateObject(profile); }
+    public Profile getProfile() { return profile; }
     public void setProfile(Profile profile) { this.profile = profile; }
 
     public boolean isDeleted() { return deleted; }

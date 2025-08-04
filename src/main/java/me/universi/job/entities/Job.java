@@ -4,9 +4,6 @@ import jakarta.persistence.*;
 import java.util.Collection;
 import java.util.UUID;
 
-import me.universi.util.HibernateUtil;
-import org.hibernate.annotations.NotFound;
-import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.validator.constraints.Length;
@@ -48,7 +45,6 @@ public class Job {
         joinColumns = @JoinColumn(name = "job_id"),
         inverseJoinColumns = @JoinColumn(name = "competence_type_id")
     )
-    @NotFound(action = NotFoundAction.IGNORE)
     private Collection<CompetenceType> requiredCompetences;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -81,16 +77,16 @@ public class Job {
     public String getShortDescription() { return shortDescription; }
     public void setShortDescription(String shortDescription) { this.shortDescription = shortDescription; }
 
-    public Institution getInstitution() { return HibernateUtil.resolveLazyHibernateObject(institution); }
+    public Institution getInstitution() { return institution; }
     public void setInstitution(Institution institution) { this.institution = institution; }
 
     public String getLongDescription() { return longDescription; }
     public void setLongDescription(String longDescription) { this.longDescription = longDescription; }
 
-    public Collection<CompetenceType> getRequiredCompetences() { return HibernateUtil.resolveLazyHibernateObject(requiredCompetences); }
+    public Collection<CompetenceType> getRequiredCompetences() { return requiredCompetences; }
     public void setRequiredCompetences(Collection<CompetenceType> requiredCompetences) { this.requiredCompetences = requiredCompetences; }
 
-    public Profile getAuthor() { return HibernateUtil.resolveLazyHibernateObject(author); }
+    public Profile getAuthor() { return author; }
     public void setAuthor(Profile author) { this.author = author; }
 
     public boolean isClosed() { return closed; }

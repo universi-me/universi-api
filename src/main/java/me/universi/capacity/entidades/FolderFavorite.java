@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
 
-import me.universi.util.HibernateUtil;
 import org.hibernate.annotations.*;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -40,13 +39,11 @@ public class FolderFavorite implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn(name="profile_id")
     @NotNull
-    @NotFound(action = NotFoundAction.IGNORE)
     private Profile profile;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn(name="folder_id")
     @NotNull
-    @NotFound(action = NotFoundAction.IGNORE)
     private Folder folder;
 
     @CreationTimestamp
@@ -68,10 +65,10 @@ public class FolderFavorite implements Serializable {
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
 
-    public Profile getProfile() { return HibernateUtil.resolveLazyHibernateObject(profile); }
+    public Profile getProfile() { return profile; }
     public void setProfile(Profile profile) { this.profile = profile; }
 
-    public Folder getFolder() { return HibernateUtil.resolveLazyHibernateObject(folder); }
+    public Folder getFolder() { return folder; }
     public void setFolder(Folder folder) { this.folder = folder; }
 
     public Date getCreated() { return created; }

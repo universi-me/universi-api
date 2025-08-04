@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.*;
 
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
-import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
@@ -19,10 +18,7 @@ import me.universi.role.entities.Role;
 import me.universi.role.services.RoleService;
 import me.universi.user.services.EnvironmentService;
 import me.universi.user.services.JsonUserLoggedFilter;
-import me.universi.util.HibernateUtil;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.NotFound;
-import org.hibernate.annotations.NotFoundAction;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -38,7 +34,6 @@ import org.hibernate.annotations.SQLRestriction;
 @Table( name = "system_group", schema = "system_group" )
 @SQLDelete(sql = "UPDATE system_group.system_group SET deleted = true WHERE id=?")
 @SQLRestriction( value = "NOT deleted" )
-@JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class Group implements Serializable {
 
     @Serial
@@ -98,14 +93,11 @@ public class Group implements Serializable {
     @JsonIgnore
     @ManyToOne( fetch = FetchType.LAZY )
     @JoinColumn( name = "parent_group_id", nullable = true, referencedColumnName = "id" )
-    @NotFound( action = NotFoundAction.IGNORE )
     private Group parentGroup;
 
     @Nullable
     @OneToOne( cascade = CascadeType.ALL, fetch = FetchType.LAZY )
     @JoinColumn( name = "activity_id", nullable = true )
-    @NotFound( action = NotFoundAction.IGNORE )
-    @JsonIgnoreProperties( { "group" } )
     private Activity activity;
 
     @JsonIgnore
@@ -194,7 +186,7 @@ public class Group implements Serializable {
     }
 
     public Profile getAdmin() {
-        return HibernateUtil.resolveLazyHibernateObject(admin);
+        return admin;
     }
 
     public void setAdmin(Profile admin) {
@@ -202,10 +194,9 @@ public class Group implements Serializable {
     }
 
     public Collection<ProfileGroup> getParticipants() {
-        Collection<ProfileGroup> participants = HibernateUtil.resolveLazyHibernateObject(this.participants);
-        return participants == null
+        return this.participants == null
             ? Collections.emptyList()
-            : participants;
+            : this.participants;
     }
 
     public void setParticipants(Collection<ProfileGroup> participants) {
@@ -236,10 +227,10 @@ public class Group implements Serializable {
         this.nickname = nickname;
     }
 
-    public Optional<Group> getParentGroup() { return Optional.ofNullable( HibernateUtil.resolveLazyHibernateObject(parentGroup) ); }
+    public Optional<Group> getParentGroup() { return Optional.ofNullable( parentGroup ); }
     public void setParentGroup(Group parentGroup) { this.parentGroup = parentGroup; }
 
-    public Optional<Activity> getActivity() { return Optional.ofNullable( HibernateUtil.resolveLazyHibernateObject(activity) ); }
+    public Optional<Activity> getActivity() { return Optional.ofNullable( activity ); }
     public void setActivity( Activity activity ) { this.activity = activity; }
 
     /**
@@ -260,7 +251,7 @@ public class Group implements Serializable {
     /** The group's ability to be accessed directly through the URL (parent of all groups) */
     @Transient
     public boolean isRootGroup() {
-        return parentGroup == null;
+        return this.parentGroup == null;
     }
 
     public boolean isCanCreateGroup() {
@@ -358,7 +349,7 @@ public class Group implements Serializable {
     public void setDeleted(boolean deleted) { this.deleted = deleted; }
 
     public GroupSettings getGroupSettings() {
-        return HibernateUtil.resolveLazyHibernateObject(this.groupSettings);
+        return this.groupSettings;
     }
 
     public void setGroupSettings(GroupSettings groupSettings) {
@@ -374,7 +365,7 @@ public class Group implements Serializable {
     }
 
     public Collection<Folder> getFoldersGrantedAccess() {
-        return HibernateUtil.resolveLazyHibernateObject(this.foldersGrantedAccess);
+        return this.foldersGrantedAccess;
     }
 
     public void setFoldersGrantedAccess(Collection<Folder> foldersGrantedAccess) {

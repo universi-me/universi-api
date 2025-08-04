@@ -1,11 +1,11 @@
 package me.universi.activity.entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
-import me.universi.util.HibernateUtil;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -20,6 +20,7 @@ import me.universi.competence.entities.CompetenceType;
 import me.universi.group.entities.Group;
 import me.universi.group.entities.ProfileGroup;
 import me.universi.profile.entities.Profile;
+import org.springframework.beans.BeanUtils;
 
 @Entity( name = "Activity" )
 @Table( schema = "activity", name = "activity" )
@@ -56,8 +57,8 @@ public class Activity {
     private Date endDate;
 
     @NotNull
-    @OneToOne( mappedBy = "activity", fetch = FetchType.LAZY )
-    @JsonIgnoreProperties( { "activity" } )
+    @OneToOne( mappedBy = "activity", fetch = FetchType.LAZY)
+    @JsonIgnore
     private Group group;
 
     @NotNull
@@ -101,10 +102,10 @@ public class Activity {
     @Transient @JsonIgnore public Profile getAuthor() { return getGroup().getAdmin(); }
     @Transient @JsonIgnore public @NotNull Collection<ProfileGroup> getParticipants() { return getGroup().getParticipants(); }
 
-    public @NotNull ActivityType getType() { return HibernateUtil.resolveLazyHibernateObject(type); }
+    public @NotNull ActivityType getType() { return type; }
     public void setType( @NotNull ActivityType activityType ) { this.type = activityType; }
 
-    public @NotNull Collection<CompetenceType> getBadges() { return HibernateUtil.resolveLazyHibernateObject(badges); }
+    public @NotNull Collection<CompetenceType> getBadges() { return badges; }
     public void setBadges(@NotNull Collection<CompetenceType> badges) { this.badges = badges; }
 
     public @NotBlank String getLocation() { return location; }
@@ -120,8 +121,18 @@ public class Activity {
     public @NotNull Date getEndDate() { return endDate; }
     public void setEndDate( @NotNull Date endDate ) { this.endDate = endDate; }
 
-    public @NotNull Group getGroup() { return HibernateUtil.resolveLazyHibernateObject(group); }
+    public @NotNull Group getGroup() { return group; }
     public void setGroup( @NotNull Group group ) { this.group = group; }
+
+    @Transient
+    @JsonProperty( "group" )
+    public @NotNull Group getGroupDTO() {
+        Group groupSafe = new Group();
+        BeanUtils.copyProperties(this.group, groupSafe);
+        // Avoid circular reference in serialization
+        groupSafe.setActivity(null);
+        return groupSafe;
+    }
 
     public @Nullable Date getDeletedAt() { return deletedAt; }
     public void setDeletedAt( @Nullable Date deletedAt ) { this.deletedAt = deletedAt; }

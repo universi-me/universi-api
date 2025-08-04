@@ -180,7 +180,7 @@ public class CompetenceTypeService extends UniqueNameEntityService<CompetenceTyp
 
     @Override
     public boolean isValid( CompetenceType competenceType ) {
-        return competenceType != null;
+        return competenceType != null && competenceTypeRepository.existsByIdAndDeletedFalse(competenceType.getId());
     }
 
     @Override

@@ -14,7 +14,6 @@ import me.universi.role.enums.FeaturesTypes;
 import me.universi.role.enums.Permission;
 import me.universi.role.enums.RoleType;
 
-import me.universi.util.HibernateUtil;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
@@ -103,7 +102,7 @@ public class Role implements Serializable {
     }
 
     public Group getGroup() {
-        return HibernateUtil.resolveLazyHibernateObject(group);
+        return group;
     }
 
     public static Role makeAdmin(@NotNull Group group) {

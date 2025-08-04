@@ -1,7 +1,6 @@
 package me.universi.group.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -10,7 +9,6 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
 import me.universi.user.services.JsonUserAdminFilter;
-import me.universi.util.HibernateUtil;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
@@ -19,7 +17,6 @@ import org.hibernate.annotations.SQLRestriction;
 @Table( name = "group_environment", schema = "system_group" )
 @SQLDelete(sql = "UPDATE system_group.group_environment SET deleted = true WHERE id=?")
 @SQLRestriction( value = "NOT deleted" )
-@JsonIgnoreProperties({"hibernateLazyInitializer"})
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class GroupEnvironment implements Serializable {
 
@@ -154,7 +151,7 @@ public class GroupEnvironment implements Serializable {
     }
 
     public GroupSettings getGroupSettings() {
-        return HibernateUtil.resolveLazyHibernateObject(groupSettings);
+        return groupSettings;
     }
 
     public void setGroupSettings(GroupSettings groupSettings) {

@@ -7,10 +7,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
 
-import me.universi.util.HibernateUtil;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.NotFound;
-import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -48,7 +45,6 @@ public class ImageMetadata implements Serializable {
     @Nullable
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn( name = "profile_id" )
-    @NotFound( action = NotFoundAction.IGNORE )
     private Profile profile;
 
     @NotNull
@@ -91,7 +87,7 @@ public class ImageMetadata implements Serializable {
     public boolean isPublic() { return isPublic; }
     public void setPublic( boolean isPublic ) { this.isPublic = isPublic; }
 
-    public Profile getProfile() { return HibernateUtil.resolveLazyHibernateObject(profile); }
+    public Profile getProfile() { return profile; }
 
     public ImageStoreLocation getImageStore() { return imageStore; }
     public void setImageStore(ImageStoreLocation imageStore) { this.imageStore = imageStore; }

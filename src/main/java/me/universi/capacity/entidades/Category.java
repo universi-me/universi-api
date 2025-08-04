@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
@@ -11,7 +12,6 @@ import java.io.Serializable;
 
 import me.universi.image.entities.ImageMetadata;
 import me.universi.profile.entities.Profile;
-import me.universi.util.HibernateUtil;
 import org.hibernate.annotations.*;
 
 import java.util.Date;
@@ -50,7 +50,6 @@ public class Category implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="profile_id")
     @NotNull
-    @NotFound(action = NotFoundAction.IGNORE)
     private Profile author;
 
     @JsonIgnore
@@ -76,7 +75,7 @@ public class Category implements Serializable {
         return this.name;
     }
 
-    public @Nullable ImageMetadata getImage() { return HibernateUtil.resolveLazyHibernateObject(image); }
+    public @Nullable ImageMetadata getImage() { return image; }
     public void setImage(ImageMetadata image) { this.image = image; }
 
     public Date getCreatedAt() {
@@ -88,7 +87,7 @@ public class Category implements Serializable {
     }
 
     public Profile getAuthor() {
-        return HibernateUtil.resolveLazyHibernateObject(author);
+        return author;
     }
 
     public void setAuthor(Profile author) {

@@ -11,4 +11,6 @@ import java.util.UUID;
 public interface CompetenceTypeRepository extends JpaRepository<CompetenceType, UUID> {
     Optional<CompetenceType> findFirstByNameIgnoreCase(String name);
     Optional<CompetenceType> findFirstByIdOrNameIgnoringCase( UUID uuid, String name );
+
+    boolean existsByIdAndDeletedFalse(UUID id);
 }

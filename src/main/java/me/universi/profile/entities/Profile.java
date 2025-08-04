@@ -1,7 +1,6 @@
 package me.universi.profile.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import jakarta.annotation.Nullable;
@@ -24,7 +23,6 @@ import me.universi.link.entities.Link;
 import me.universi.role.entities.Role;
 import me.universi.profile.enums.Gender;
 import me.universi.user.entities.User;
-import me.universi.util.HibernateUtil;
 import org.hibernate.annotations.*;
 
 import java.util.Collection;
@@ -35,7 +33,6 @@ import java.util.UUID;
 @Table( name = "profile", schema = "profile" )
 @SQLDelete(sql = "UPDATE profile.profile SET deleted = true WHERE id=?")
 @SQLRestriction( "NOT deleted" )
-@JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class Profile implements Serializable {
 
     @Serial
@@ -155,7 +152,7 @@ public class Profile implements Serializable {
     }
 
     public Collection<ProfileGroup> getGroups() {
-        return HibernateUtil.resolveLazyHibernateObject(groups);
+        return groups;
     }
 
     public void setGroups(Collection<ProfileGroup> groups) {
@@ -163,7 +160,7 @@ public class Profile implements Serializable {
     }
 
     public Collection<Link> getLinks() {
-        return HibernateUtil.resolveLazyHibernateObject(links);
+        return links;
     }
 
     public void setLinks(Collection<Link> links) {
@@ -195,7 +192,7 @@ public class Profile implements Serializable {
     }
 
     public User getUser() {
-        return HibernateUtil.resolveLazyHibernateObject(user);
+        return user;
     }
 
     public void setUser(User user) {
@@ -211,7 +208,7 @@ public class Profile implements Serializable {
     }
 
     public Collection<ContentStatus> getContentStatus() {
-        return HibernateUtil.resolveLazyHibernateObject(contentStatus);
+        return contentStatus;
     }
 
     public void setContentStatus(Collection<ContentStatus> contentStatus) {
@@ -223,7 +220,7 @@ public class Profile implements Serializable {
     }
 
     public Collection<Education> getEducations() {
-        return HibernateUtil.resolveLazyHibernateObject(educations);
+        return educations;
     }
 
     public void setEducations(Collection<Education> educations) {
@@ -231,7 +228,7 @@ public class Profile implements Serializable {
     }
 
     public Collection<Experience> getExperiences() {
-        return HibernateUtil.resolveLazyHibernateObject(experiences);
+        return experiences;
     }
 
     public void setExperiences(Collection<Experience> experiences) {
@@ -243,7 +240,7 @@ public class Profile implements Serializable {
     public void setDeleted(boolean deleted) { this.deleted = deleted; }
 
     public Collection<FolderProfile> getAssignedFolders() {
-        return HibernateUtil.resolveLazyHibernateObject(assignedFolders);
+        return assignedFolders;
     }
 
     public void setAssignedFolders(Collection<FolderProfile> assignedFolders) {
@@ -251,7 +248,7 @@ public class Profile implements Serializable {
     }
 
     public Collection<FolderFavorite> getFavoriteFolders() {
-        return HibernateUtil.resolveLazyHibernateObject(favoriteFolders);
+        return favoriteFolders;
     }
 
     public void setFavoriteFolders(Collection<FolderFavorite> favoriteFolders) {
@@ -267,17 +264,17 @@ public class Profile implements Serializable {
     }
 
     public Collection<CompetenceType> getCompetenceBadges() {
-        return HibernateUtil.resolveLazyHibernateObject(competenceBadges);
+        return competenceBadges;
     }
 
     public void setCompetenceBadges(Collection<CompetenceType> competenceBadges) {
         this.competenceBadges = competenceBadges;
     }
 
-    public @Nullable ImageMetadata getImage() { return HibernateUtil.resolveLazyHibernateObject(image); }
+    public @Nullable ImageMetadata getImage() { return image; }
     public void setImage(ImageMetadata image) { this.image = image; }
 
-    public Department getDepartment() { return HibernateUtil.resolveLazyHibernateObject(department); }
+    public Department getDepartment() { return department; }
     public void setDepartment(Department department) { this.department = department; }
 
     @Transient

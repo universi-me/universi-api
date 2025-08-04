@@ -3,7 +3,6 @@ package me.universi.capacity.entidades;
 import jakarta.persistence.*;
 import java.util.UUID;
 
-import me.universi.util.HibernateUtil;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -49,10 +48,10 @@ public class FolderContents {
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
 
-    public Content getContent() { return HibernateUtil.resolveLazyHibernateObject(content); }
+    public Content getContent() { return content; }
     public void setContent(Content content) { this.content = content; }
 
-    public Folder getFolder() { return HibernateUtil.resolveLazyHibernateObject(folder); }
+    public Folder getFolder() { return folder; }
     public void setFolder(Folder folder) { this.folder = folder; }
 
     public Integer getOrderNum() { return orderNum; }

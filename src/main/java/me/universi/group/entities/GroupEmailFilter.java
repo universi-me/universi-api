@@ -1,19 +1,16 @@
 package me.universi.group.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
 import me.universi.group.enums.GroupEmailFilterType;
-import me.universi.util.HibernateUtil;
 import org.hibernate.annotations.*;
 
 
@@ -21,7 +18,6 @@ import org.hibernate.annotations.*;
 @Table( name = "group_email_filter", schema = "system_group" )
 @SQLDelete(sql = "UPDATE system_group.group_email_filter SET deleted = true WHERE id=?")
 @SQLRestriction( value = "NOT deleted" )
-@JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class GroupEmailFilter implements Serializable {
 
     @Serial
@@ -55,7 +51,6 @@ public class GroupEmailFilter implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="group_settings_id")
     @NotNull
-    @NotFound(action = NotFoundAction.IGNORE)
     private GroupSettings groupSettings;
 
     @JsonIgnore
@@ -133,7 +128,7 @@ public class GroupEmailFilter implements Serializable {
     }
 
     public GroupSettings getGroupSettings() {
-        return HibernateUtil.resolveLazyHibernateObject(groupSettings);
+        return groupSettings;
     }
 
     public void setGroupSettings(GroupSettings groupSettings) {

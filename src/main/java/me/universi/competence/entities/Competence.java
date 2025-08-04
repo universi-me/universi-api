@@ -1,7 +1,6 @@
 package me.universi.competence.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
@@ -22,7 +21,6 @@ import me.universi.activity.entities.Activity;
 import me.universi.activity.services.ActivityService;
 import me.universi.profile.entities.Profile;
 
-import me.universi.util.HibernateUtil;
 import org.hibernate.annotations.*;
 
 import java.util.Date;
@@ -33,7 +31,6 @@ import java.util.UUID;
 @Table( name = "competence", schema = "competence" )
 @SQLDelete(sql = "UPDATE competence.competence SET deleted = true WHERE id=?")
 @SQLRestriction( "NOT deleted")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Competence {
 
     @Id
@@ -44,7 +41,6 @@ public class Competence {
 
     @ManyToOne( fetch = FetchType.LAZY )
     @JoinColumn(name = "competence_type_id")
-    @NotFound(action = NotFoundAction.IGNORE)
     private CompetenceType competenceType;
 
     @JoinColumn( name = "profile_id" )
@@ -101,12 +97,12 @@ public class Competence {
     public Date getCreationDate() { return creationDate; }
     public void setCreationDate(Date creationDate) { this.creationDate = creationDate; }
 
-    public CompetenceType getCompetenceType() { return HibernateUtil.resolveLazyHibernateObject(competenceType); }
+    public CompetenceType getCompetenceType() { return competenceType; }
     public void setCompetenceType(CompetenceType competenceType) { this.competenceType = competenceType; }
 
     public boolean isDeleted() { return deleted; }
     public void setDeleted(boolean deleted) { this.deleted = deleted; }
 
-    public Profile getProfile() { return HibernateUtil.resolveLazyHibernateObject(profile); }
+    public Profile getProfile() { return profile; }
     public void setProfile(Profile profile) { this.profile = profile; }
 }

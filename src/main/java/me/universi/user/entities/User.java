@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
@@ -17,7 +18,7 @@ import me.universi.user.services.JsonEmailOwnerSessionFilter;
 import me.universi.user.services.JsonUserAdminFilter;
 import me.universi.user.services.LoginService;
 import me.universi.user.services.UserService;
-import me.universi.util.HibernateUtil;
+
 import org.hibernate.annotations.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -111,7 +112,6 @@ public class User implements UserDetails, Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organization")
     @NotNull
-    @NotFound(action = NotFoundAction.IGNORE)
     private Group organization;
 
     @JsonIgnore
@@ -157,7 +157,7 @@ public class User implements UserDetails, Serializable {
     }
 
     public Profile getProfile() {
-        return HibernateUtil.resolveLazyHibernateObject(profile);
+        return profile;
     }
 
     public void setProfile(Profile profile) {
@@ -326,16 +326,11 @@ public class User implements UserDetails, Serializable {
     public boolean equals(Object otherUser) {
         if(otherUser == null) return false;
         else if (!(otherUser instanceof UserDetails)) return false;
-        else return (otherUser.hashCode() == hashCode());
-    }
-
-    @Override
-    public int hashCode() {
-        return (getUsername() + getOrganization().getNickname()).hashCode();
+        else return (((UserDetails) otherUser).getUsername().equals(getUsername()));
     }
 
     public Group getOrganization() {
-        return HibernateUtil.resolveLazyHibernateObject(this.organization);
+        return this.organization;
     }
 
     public void setOrganization(Group organization) {
