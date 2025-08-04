@@ -1,5 +1,6 @@
 package me.universi.activity.entities;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Collection;
 import java.util.Date;
@@ -10,7 +11,6 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
@@ -126,6 +126,7 @@ public class Activity {
 
     @Transient
     @JsonProperty( "group" )
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public @NotNull Group getGroupDTO() {
         Group groupSafe = new Group();
         BeanUtils.copyProperties(this.group, groupSafe);
