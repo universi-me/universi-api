@@ -36,6 +36,22 @@ public class AuthenticationSuccessHandler extends SavedRequestAwareAuthenticatio
         }
         if(username != null) {
             user = (User) userService.loadUserByUsername(username);
+
+            if(user != null && user.isTemporarilyPassword()) {
+                if(user.getRecoveryPasswordToken() == null || user.getRecoveryPasswordToken().isEmpty()) {
+                    AccountService.getInstance().generateRecoveryPasswordTokenForUser(user);
+                }
+                Response responseBuild = Response.buildResponse(r -> {
+                    r.status = 201;
+                    r.redirectTo = "/recovery-password/" + user.getRecoveryPasswordToken();
+                });
+                response.setHeader("Content-Type", "application/json; charset=utf-8");
+                response.getWriter().print(responseBuild.toString());
+                response.getWriter().flush();
+                response.getWriter().close();
+                return;
+            }
+
             LoginService.getInstance().configureSessionForUser(user);
         } else {
             user = null;
@@ -58,7 +74,7 @@ public class AuthenticationSuccessHandler extends SavedRequestAwareAuthenticatio
             response.setHeader("Content-Type", "application/json; charset=utf-8");
             response.getWriter().print(responseBuild.toString());
             response.getWriter().flush();
-
+            response.getWriter().close();
         } else {
 
             RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();

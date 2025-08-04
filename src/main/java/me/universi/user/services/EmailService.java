@@ -116,26 +116,7 @@ public class EmailService {
                 throw new UserException("Um email de recuperação de senha já foi enviado para esta conta, por favor tente novamente mais tarde.");
             }
         }
-
-        String tokenRandom = UUID.randomUUID().toString();
-
-        MessageDigest digest = null;
-        try {
-            digest = MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException e) {
-            throw new UserException("Algoritmo sha256 não disponível.");
-        }
-        byte[] encodedHash = digest.digest(tokenRandom.getBytes(StandardCharsets.UTF_8));
-        String tokenString = ConvertUtil.bytesToHex(encodedHash);
-
-        user.setRecoveryPasswordToken(tokenString);
-        if(useIntervalCheck) {
-            user.setRecoveryPasswordTokenDate(ConvertUtil.getDateTimeNow());
-        }
-
-        UserService.getInstance().save(user);
-
-        return tokenString;
+        return AccountService.getInstance().generateRecoveryPasswordTokenForUser(user);
     }
 
     // send recovery password email to user

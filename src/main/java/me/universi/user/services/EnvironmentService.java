@@ -30,6 +30,9 @@ public class EnvironmentService {
     @Value( "${server.servlet.context-path}" )
     private String contextPath;
 
+    @Value("${RECOVERY_TOKEN_EXPIRATION_HOURS}")
+    public int RECOVERY_TOKEN_EXPIRATION_HOURS;
+
     public EnvironmentService() {
     }
 
@@ -79,6 +82,10 @@ public class EnvironmentService {
             return BUILD_HASH_ENV;
         }
         return BUILD_HASH;
+    }
+
+    public int getRecoveryTokenExpirationHours() {
+        return RECOVERY_TOKEN_EXPIRATION_HOURS;
     }
 
 }
