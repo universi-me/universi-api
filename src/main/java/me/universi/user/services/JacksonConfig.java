@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
 import com.fasterxml.jackson.databind.ser.std.BeanSerializerBase;
-import com.fasterxml.jackson.databind.util.NameTransformer;
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import org.hibernate.Hibernate;
@@ -31,13 +30,6 @@ public class JacksonConfig {
         SimpleModule module = new SimpleModule();
         module.setSerializerModifier(new SafeHibernateProxySerializerModifier());
         objectMapper.registerModule(module);
-
-        //objectMapper.setSerializationInclusion(JsonInclude.Include.ALWAYS);
-        //objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-        // ignore not found error
-        //objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-        //objectMapper.configure(DeserializationFeature.FAIL_ON_SUBTYPE_CLASS_NOT_REGISTERED, false);
     }
 
     public abstract static class HibernateProxyMixin {
@@ -65,10 +57,7 @@ public class JacksonConfig {
             BeanDescription beanDesc;
 
             protected HibernateProxyUnwrappingSerializer(BeanSerializerBase defaultSerializer, BeanDescription beanDesc) {
-
-                //super(defaultSerializer.handledType());
                 this.defaultSerializer = defaultSerializer;
-
                 this.beanDesc = beanDesc;
             }
 
@@ -92,17 +81,6 @@ public class JacksonConfig {
             @Override
             public boolean isUnwrappingSerializer() {
                 return defaultSerializer.isUnwrappingSerializer();
-            }
-
-            @Override
-            public boolean isEmpty(SerializerProvider provider, Object value) {
-                return defaultSerializer.isEmpty(provider, value);
-            }
-
-            @Override
-            // ignore the type of the value
-            public JsonSerializer<Object> unwrappingSerializer(NameTransformer unwrapper) {
-                return defaultSerializer.unwrappingSerializer(unwrapper);
             }
         }
     }
