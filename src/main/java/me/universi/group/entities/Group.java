@@ -72,6 +72,7 @@ public class Group implements Serializable {
     @JoinColumn( name = "header_image_metadata_id" )
     private ImageMetadata headerImage;
 
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="profile_id")
     @NotNull
@@ -95,6 +96,7 @@ public class Group implements Serializable {
     @JoinColumn( name = "parent_group_id", nullable = true, referencedColumnName = "id" )
     private Group parentGroup;
 
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
     @Nullable
     @OneToOne( cascade = CascadeType.ALL, fetch = FetchType.LAZY )
     @JoinColumn( name = "activity_id", nullable = true )
@@ -105,6 +107,7 @@ public class Group implements Serializable {
     @NotNull
     private Collection<Group> subGroups;
 
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
     @NotNull
     @ManyToOne
     @JoinColumn( name = "type_id", nullable = false )
