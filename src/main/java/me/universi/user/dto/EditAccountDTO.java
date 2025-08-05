@@ -14,6 +14,7 @@ public record EditAccountDTO(
         Boolean blockedAccount,
         Boolean inactiveAccount,
         Boolean credentialsExpired,
-        Boolean expiredUser
+        Boolean expiredUser,
+        Boolean temporarilyPassword
 ) {
 }

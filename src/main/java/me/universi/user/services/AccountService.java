@@ -1,5 +1,7 @@
 package me.universi.user.services;
 
+import java.security.SecureRandom;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.regex.Pattern;
 import me.universi.Sys;
@@ -24,6 +26,9 @@ public class AccountService {
     private final EmailService emailService;
     private final GoogleService googleService;
 
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+    private final EnvironmentService environmentService;
+
     @Value("${SIGNUP_ENABLED}")
     public boolean signupEnabled;
 
@@ -33,11 +38,12 @@ public class AccountService {
     @Value("${RECOVERY_ENABLED}")
     public boolean recoveryEnabled;
 
-    public AccountService(PasswordEncoder passwordEncoder, LoginService loginService, EmailService emailService, GoogleService googleService) {
+    public AccountService(PasswordEncoder passwordEncoder, LoginService loginService, EmailService emailService, GoogleService googleService, EnvironmentService environmentService) {
         this.passwordEncoder = passwordEncoder;
         this.loginService = loginService;
         this.emailService = emailService;
         this.googleService = googleService;
+        this.environmentService = environmentService;
     }
 
     // bean instance via context
@@ -107,16 +113,32 @@ public class AccountService {
         checkPassword(userSession, String.valueOf(rawPassword));
     }
 
-    public void saveRawPasswordToUser(User user, String rawPassword, boolean logout) throws UserException {
+    public void saveRawPasswordToUser(User user, String rawPassword, boolean temporarilyPassword, boolean logout) throws UserException {
         if(!passwordRegex(rawPassword)) {
             throw new UserException("Senha está com formato inválido!");
         }
         user.setPassword(encodePassword(rawPassword));
         user.setExpired_credentials(false);
+        if(temporarilyPassword) {
+            generateRecoveryPasswordTokenForUser(user);
+            user.setTemporarilyPassword(true);
+        }
         UserService.getInstance().save(user);
         if(logout) {
             loginService.logoutUser(user);
         }
+    }
+
+    public String generateRecoveryPasswordTokenForUser(User user) throws UserException {
+        byte[] bytes = new byte[32];
+        SECURE_RANDOM.nextBytes(bytes);
+        String tokenString = HexFormat.of().formatHex(bytes);
+
+        user.setRecoveryPasswordToken(tokenString);
+        user.setRecoveryPasswordTokenDate(ConvertUtil.getDateTimeNow());
+
+        UserService.getInstance().save(user);
+        return tokenString;
     }
 
     public void recoveryPassword( RecoveryPasswordDTO recoveryPasswordDTO ) {
@@ -146,10 +168,6 @@ public class AccountService {
 
     public void recoveryNewPassword( RecoveryNewPasswordDTO recoveryNewPasswordDTO ) {
 
-        if(!isRecoveryEnabled()) {
-            throw new UserException("Recuperação de senha está desativada!");
-        }
-
         String token = recoveryNewPasswordDTO.token();
         String newPassword = recoveryNewPasswordDTO.newPassword();
 
@@ -161,18 +179,24 @@ public class AccountService {
         }
 
         if(!passwordRegex(newPassword)) {
-            throw new UserException("Nova Senha está com formato inválido!");
+            throw new UserException("Nova Senha está com formato inválido");
         }
 
         User user = UserService.getInstance().getUserByRecoveryPasswordToken(token);
 
-        if(user == null) {
-            throw new UserException("Token de recuperação de senha inválido ou expirado!");
+        if(user == null || user.getRecoveryPasswordTokenDate() == null || user.getRecoveryPasswordTokenDate().isBefore(ConvertUtil.getDateTimeNow().minusHours(environmentService.getRecoveryTokenExpirationHours()))) {
+            throw new UserException("Link de definição de senha expirado ou inválido");
+        }
+
+        if(!user.isTemporarilyPassword() && !isRecoveryEnabled()) {
+            throw new UserException("Definição de senha indisponível");
         }
 
         user.setRecoveryPasswordToken(null);
+        user.setRecoveryPasswordTokenDate(null);
+        user.setTemporarilyPassword(false);
         user.setInactive(false);
-        saveRawPasswordToUser(user, newPassword, true);
+        saveRawPasswordToUser(user, newPassword, false, true);
     }
 
     public void requestConfirmAccountEmail() {
@@ -200,6 +224,7 @@ public class AccountService {
         }
 
         user.setRecoveryPasswordToken(null);
+        user.setRecoveryPasswordTokenDate(null);
         user.setInactive(false);
         user.setConfirmed(true);
         UserService.getInstance().save(user);
@@ -287,7 +312,7 @@ public class AccountService {
         if(isConfirmAccountEnabled()) {
             user.setInactive(true);
         }
-        saveRawPasswordToUser(user, password, false);
+        saveRawPasswordToUser(user, password, false,false);
 
         UserService.getInstance().createUser(user, firstname, lastname, createAccountDTO.department().orElse(null));
 
@@ -314,7 +339,7 @@ public class AccountService {
 
         if (passwordValid(user, password)) {
 
-            saveRawPasswordToUser(user, newPassword, false);
+            saveRawPasswordToUser(user, newPassword, false,false);
 
         } else {
             throw new UserException("Credenciais Invalidas!");
@@ -341,6 +366,7 @@ public class AccountService {
         Boolean inactiveAccount = editAccountDTO.inactiveAccount();
         Boolean credentialsExpired = editAccountDTO.credentialsExpired();
         Boolean expiredUser = editAccountDTO.expiredUser();
+        Boolean temporarilyPassword = editAccountDTO.temporarilyPassword();
 
         User userEdit = UserService.getInstance().find(userId).orElse( null );
         if(userEdit == null) {
@@ -369,9 +395,6 @@ public class AccountService {
                 throw new UserException("Email está com formato inválido!");
             }
         }
-        if(password != null && !password.isEmpty()) {
-            saveRawPasswordToUser(userEdit, password, false);
-        }
 
         if(authorityLevel != null && !authorityLevel.isEmpty()) {
             userEdit.setAuthority(Authority.valueOf(authorityLevel));
@@ -391,6 +414,13 @@ public class AccountService {
         }
         if(expiredUser != null) {
             userEdit.setExpired_user(expiredUser);
+        }
+        if(temporarilyPassword != null) {
+            userEdit.setTemporarilyPassword(temporarilyPassword);
+        }
+
+        if(password != null && !password.isEmpty()) {
+            saveRawPasswordToUser(userEdit, password, temporarilyPassword != null ? temporarilyPassword : true, false);
         }
 
         UserService.getInstance().save(userEdit);
