@@ -13,10 +13,12 @@ import java.io.Serializable;
 import me.universi.capacity.entidades.ContentStatus;
 import me.universi.capacity.entidades.FolderFavorite;
 import me.universi.capacity.entidades.FolderProfile;
+import me.universi.capacity.service.FolderService;
 import me.universi.competence.entities.CompetenceType;
 import me.universi.education.entities.Education;
 import me.universi.experience.entities.Experience;
 import me.universi.group.entities.ProfileGroup;
+import me.universi.group.services.GroupService;
 import me.universi.image.entities.ImageMetadata;
 import me.universi.image.services.ImageMetadataService;
 import me.universi.link.entities.Link;
@@ -152,7 +154,7 @@ public class Profile implements Serializable {
     }
 
     public Collection<ProfileGroup> getGroups() {
-        return groups;
+        return groups.stream().filter(Pg -> GroupService.getInstance().isValid(Pg.getGroup())).toList();
     }
 
     public void setGroups(Collection<ProfileGroup> groups) {

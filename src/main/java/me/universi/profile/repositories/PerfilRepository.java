@@ -15,4 +15,6 @@ public interface PerfilRepository extends JpaRepository<Profile, UUID> {
     Optional<Profile> findByIdOrUsername( UUID id, String username );
 
     Collection<Profile> findTop5ByFirstnameContainingIgnoreCase(String firstName);
+
+    boolean existsByIdAndDeletedFalse(UUID id);
 }

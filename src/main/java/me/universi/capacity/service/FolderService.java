@@ -432,7 +432,10 @@ public class FolderService extends EntityService<Folder> {
 
         return entityManager
             .createQuery( query )
-            .getResultList();
+            .getResultList()
+            .stream()
+            .filter(Fp -> this.isValid(Fp.getFolder()))
+            .toList();
     }
 
     public void favorite( String idOrReference ) throws UniversiForbiddenAccessException {
@@ -643,5 +646,10 @@ public class FolderService extends EntityService<Folder> {
     @Override
     public boolean hasPermissionToDelete( Folder folder ) {
         return hasPermissionToEdit( folder );
+    }
+
+    @Override
+    public boolean isValid( Folder folder ) {
+        return folder != null && folderRepository.existsByIdAndDeletedFalse(folder.getId());
     }
 }

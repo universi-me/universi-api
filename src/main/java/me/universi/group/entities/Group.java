@@ -199,7 +199,9 @@ public class Group implements Serializable {
     public Collection<ProfileGroup> getParticipants() {
         return this.participants == null
             ? Collections.emptyList()
-            : this.participants;
+            : this.participants.stream()
+                    .filter( pg -> ProfileService.getInstance().isValid(pg.getProfile()) )
+                    .toList();
     }
 
     public void setParticipants(Collection<ProfileGroup> participants) {
@@ -210,6 +212,7 @@ public class Group implements Serializable {
     @JsonIgnore
     public Collection<ProfileGroup> getAdministrators() {
         return this.getParticipants().stream()
+            .filter( pg -> ProfileService.getInstance().isValid(pg.getProfile()) )
             .filter( ProfileGroup::isAdmin )
             .toList();
     }

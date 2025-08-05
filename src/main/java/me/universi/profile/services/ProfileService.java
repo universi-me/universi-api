@@ -279,4 +279,9 @@ public class ProfileService extends EntityService<Profile> {
     public boolean hasPermissionToDelete(Profile profile) {
         return hasPermissionToEdit( profile ) || userService.isUserAdminSession();
     }
+
+    @Override
+    public boolean isValid( Profile profile ) {
+        return profile != null && perfilRepository.existsByIdAndDeletedFalse( profile.getId() );
+    }
 }
