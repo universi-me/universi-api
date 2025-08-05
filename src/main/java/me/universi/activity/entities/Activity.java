@@ -2,11 +2,13 @@ package me.universi.activity.entities;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
+import me.universi.activity.services.ActivitySerializeGroup;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -58,7 +60,7 @@ public class Activity {
 
     @NotNull
     @OneToOne( mappedBy = "activity", fetch = FetchType.LAZY)
-    @JsonIgnore
+    @JsonSerialize(using = ActivitySerializeGroup.class)
     private Group group;
 
     @NotNull
@@ -123,17 +125,6 @@ public class Activity {
 
     public @NotNull Group getGroup() { return group; }
     public void setGroup( @NotNull Group group ) { this.group = group; }
-
-    @Transient
-    @JsonProperty( "group" )
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    public @NotNull Group getGroupDTO() {
-        Group groupSafe = new Group();
-        BeanUtils.copyProperties(this.group, groupSafe);
-        // Avoid circular reference in serialization
-        groupSafe.setActivity(null);
-        return groupSafe;
-    }
 
     public @Nullable Date getDeletedAt() { return deletedAt; }
     public void setDeletedAt( @Nullable Date deletedAt ) { this.deletedAt = deletedAt; }
