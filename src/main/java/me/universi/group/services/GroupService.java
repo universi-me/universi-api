@@ -82,7 +82,7 @@ public class GroupService extends EntityService<Group> {
 
     @Override
     public boolean isValid( Group group ) {
-        if ( group == null || group.isDeleted() )
+        if ( group == null || !groupRepository.existsByIdAndDeletedFalse(group.getId()) )
             return false;
 
         if ( group.isRootGroup() )
