@@ -177,6 +177,14 @@ public class LoginService {
         return null;
     }
 
+    public boolean isViaOauth() {
+        try {
+            return JWTService.getInstance().isViaOauthFromRequest(requestService.getRequest());
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     public User getUserInSession() {
         return getUserInSession(true);
     }

@@ -165,7 +165,7 @@ public class KeycloakService {
             User user = loginService.configureLoginForOAuth(name, username, email, pictureUrl);
 
             if (user != null) {
-                return new LoginResponseDTO(user, JWTService.getInstance().buildTokenForUser(user));
+                return new LoginResponseDTO(user, JWTService.getInstance().buildTokenForUser(user, true));
             }
         } catch (Exception e) {
             if(e.getClass() == UserException.class) {

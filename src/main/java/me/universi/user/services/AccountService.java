@@ -337,7 +337,7 @@ public class AccountService {
 
         User user = loginService.getUserInSession();
 
-        if (passwordValid(user, password)) {
+        if ( (user.getPassword() == null || loginService.isViaOauth()) || passwordValid(user, password)) {
 
             saveRawPasswordToUser(user, newPassword, false,false);
 

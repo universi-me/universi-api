@@ -9,6 +9,7 @@ import me.universi.Sys;
 import me.universi.user.entities.User;
 import me.universi.user.exceptions.UserException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -28,9 +29,10 @@ public class JWTService {
     private String ISSUER;
 
     @Value("${jwt.expiration}")
-    public long EXPIRATION; // in seconds
+    private long EXPIRATION; // in seconds
 
     private static final String VERSION_DATE = "versionDate";
+    private static final String IS_VIA_OAUTH = "isViaOauth";
     private static final String AUTH_HEADER = "Authorization";
     private static final String AUTHENTICATION_SCHEME = "Bearer ";
     public static final String JWT_TOKEN = "JWT_TOKEN";
@@ -43,7 +45,7 @@ public class JWTService {
     }
 
     @PostConstruct
-    public void init() {
+    private void init() {
         if(secretKeyString != null && !secretKeyString.isEmpty()) {
             byte[] keyBytes = secretKeyString.getBytes(StandardCharsets.UTF_8);
             if (keyBytes.length < 64) {
@@ -64,9 +66,11 @@ public class JWTService {
                 .build();
     }
 
-
-
     public String buildTokenForUser(User user) {
+        return buildTokenForUser(user, false);
+    }
+
+    public String buildTokenForUser(User user, boolean isViaOauth) {
 
         long now = System.currentTimeMillis();
         Date issuedAt = new Date(now);
@@ -85,15 +89,15 @@ public class JWTService {
                 .issuer(ISSUER)
                 .subject(user.getId().toString())
                 .claim(VERSION_DATE, user.getVersionDate().toString())
+                .claim(IS_VIA_OAUTH, isViaOauth)
                 .issuedAt(issuedAt)
                 .expiration(expiration)
                 .signWith(secretKey, Jwts.SIG.HS512)
                 .compact();
     }
 
-    public User getUserFromToken(String token) {
+    private Claims getClaimsFromToken(String token) {
         Claims claims;
-
         try {
             claims = jwtParser.parseSignedClaims(token).getPayload();
         } catch (Exception e) {
@@ -104,6 +108,11 @@ public class JWTService {
         if (claims.getExpiration().before(new Date())) {
             throw new UserException("JWT Token Expired", HttpStatus.UNAUTHORIZED);
         }
+        return claims;
+    }
+
+    private User getUserFromToken(String token) {
+        Claims claims = getClaimsFromToken(token);
 
         User user;
         // not found user
@@ -124,27 +133,38 @@ public class JWTService {
         return user;
     }
 
-    public User getUserFromRequest(HttpServletRequest request) {
+    private String getTokenFromRequest(HttpServletRequest request) {
         try {
-
             // 1 verify token authentication from header
             String header = request.getHeader(AUTH_HEADER);
             if (header != null && header.startsWith(AUTHENTICATION_SCHEME)) {
-                return getUserFromToken(header.substring(7)); // remove "Bearer " prefix
+                return header.substring(7); // remove "Bearer " prefix
             }
 
             // 2 verify token authentication from cookie
             String token = RequestService.getInstance().getCookieValue(JWT_TOKEN);
             if (token != null) {
-                return getUserFromToken(token);
+                return token;
             }
+        } catch (Exception ignored) {
+        }
 
+        return null;
+    }
+
+    public User getUserFromRequest(HttpServletRequest request) {
+        try {
+            return getUserFromToken(getTokenFromRequest(request));
         } catch (UserException e) {
             if(e.status != HttpStatus.UNAUTHORIZED) {
                 throw e;
             }
         }
-
         return null;
+    }
+
+    public boolean isViaOauthFromRequest(HttpServletRequest request) {
+        Claims claims = getClaimsFromToken(getTokenFromRequest(request));
+        return claims.get(IS_VIA_OAUTH, Boolean.class);
     }
 }
