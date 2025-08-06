@@ -90,7 +90,7 @@ public class RoleService extends EntityService<Role> {
 
         var existingRole = findByNameAndGroup( dto.name(), group.getId() );
         if ( existingRole.isPresent() )
-            throw new UniversiConflictingOperationException( "O grupo já possui um papel de nome '" + existingRole.get().name + "'" );
+            throw new UniversiConflictingOperationException( "O grupo já possui um papel de nome '" + existingRole.get().getName() + "'" );
 
         var role = Role.makeCustom(
             dto.name().trim(),
@@ -107,10 +107,10 @@ public class RoleService extends EntityService<Role> {
         checkPermissionToEdit( role );
 
         if ( dto.name() != null && !dto.name().isBlank() )
-            role.name = dto.name();
+            role.setName(dto.name());
 
         if ( dto.description() != null && !dto.description().isBlank() )
-            role.description = dto.description();
+            role.setDescription(dto.description());
 
         if ( dto.features() != null ) {
             dto.features().forEach( ( feature, permission ) -> {
@@ -181,13 +181,10 @@ public class RoleService extends EntityService<Role> {
             throw new RolesException("Grupo não encontrado.");
         }
 
-        return getAssignedRole( profile, group ).isAdmin();
+        return userService.isUserAdmin( profile.getUser() ) || getAssignedRole( profile, group ).isAdmin();
     }
 
     public void checkIsAdmin(Profile profile, Group group) {
-        if(userService.isUserAdminSession()) {
-            return;
-        }
         if (!isAdmin(profile,  group)) {
             throw new RolesException("Você precisa ser administrador para executar esta ação.");
         }

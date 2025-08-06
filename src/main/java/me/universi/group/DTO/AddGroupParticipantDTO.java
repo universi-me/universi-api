@@ -28,7 +28,7 @@ public record AddGroupParticipantDTO(
             participant.getId().toString(),
             role == null
                 ? Optional.empty()
-                : Optional.of( role.id )
+                : Optional.of( role.getId() )
         );
     }
 }
