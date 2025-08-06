@@ -85,7 +85,7 @@ public class GoogleService {
             User user = loginService.configureLoginForOAuth(name, username, email, pictureUrl);
 
             if(user != null) {
-                return new LoginResponseDTO(user, JWTService.getInstance().buildTokenForUser(user));
+                return new LoginResponseDTO(user, JWTService.getInstance().buildTokenForUser(user, true));
             }
 
         } else {
