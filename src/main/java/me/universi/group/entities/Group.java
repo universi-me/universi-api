@@ -257,7 +257,7 @@ public class Group implements Serializable {
     /** The group's ability to be accessed directly through the URL (parent of all groups) */
     @Transient
     public boolean isRootGroup() {
-        return this.parentGroup == null;
+        return this.getParentGroup().isEmpty();
     }
 
     public boolean isCanCreateGroup() {
@@ -324,11 +324,12 @@ public class Group implements Serializable {
     @JsonInclude(value = JsonInclude.Include.NON_NULL)
     @Transient
     private @Nullable Group getJsonOrganization() {
-        return isRootGroup()
-            ? null
-        : parentGroup.isRootGroup()
-            ? parentGroup
-        : parentGroup.getJsonOrganization();
+        return this.getParentGroup()
+            .map( parent -> parent.isRootGroup()
+                ? parent
+                : parent.getJsonOrganization()
+            )
+            .orElse( null );
     }
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
