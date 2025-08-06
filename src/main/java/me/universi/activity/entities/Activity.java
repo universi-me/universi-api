@@ -1,18 +1,15 @@
 package me.universi.activity.entities;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
-import me.universi.activity.services.ActivitySerializeGroup;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
@@ -22,7 +19,6 @@ import me.universi.competence.entities.CompetenceType;
 import me.universi.group.entities.Group;
 import me.universi.group.entities.ProfileGroup;
 import me.universi.profile.entities.Profile;
-import org.springframework.beans.BeanUtils;
 
 @Entity( name = "Activity" )
 @Table( schema = "activity", name = "activity" )
@@ -60,7 +56,7 @@ public class Activity {
 
     @NotNull
     @OneToOne( mappedBy = "activity", fetch = FetchType.LAZY)
-    @JsonSerialize(using = ActivitySerializeGroup.class)
+    @JsonIgnoreProperties( { "activity" } )
     private Group group;
 
     @NotNull

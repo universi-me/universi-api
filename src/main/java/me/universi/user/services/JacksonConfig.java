@@ -46,34 +46,27 @@ public class JacksonConfig {
         public JsonSerializer<?> modifySerializer(SerializationConfig config,
                                                   BeanDescription beanDesc,
                                                   JsonSerializer<?> serializer) {
-            if (HibernateProxy.class.isAssignableFrom(beanDesc.getBeanClass()) && serializer instanceof BeanSerializerBase) {
-                return new HibernateProxyUnwrappingSerializer((BeanSerializerBase) serializer, beanDesc);
+            if ( beanDesc instanceof HibernateProxy && serializer instanceof BeanSerializerBase beanSerializer ) {
+                return new HibernateProxyUnwrappingSerializer( beanSerializer );
             }
             return serializer;
         }
 
         public static class HibernateProxyUnwrappingSerializer extends JsonSerializer<Object> {
             private final BeanSerializerBase defaultSerializer;
-            BeanDescription beanDesc;
 
-            protected HibernateProxyUnwrappingSerializer(BeanSerializerBase defaultSerializer, BeanDescription beanDesc) {
+            protected HibernateProxyUnwrappingSerializer(BeanSerializerBase defaultSerializer) {
                 this.defaultSerializer = defaultSerializer;
-                this.beanDesc = beanDesc;
             }
 
             @Override
-            public void serialize(Object value, JsonGenerator gen, SerializerProvider provider)
-                    throws IOException {
+            public void serialize(Object value, JsonGenerator gen, SerializerProvider provider) throws IOException {
                 if (value instanceof HibernateProxy proxy) {
                         // Resolve the lazy-loaded Hibernate object
                         if(!Hibernate.isInitialized(proxy)) {
                             Hibernate.initialize(proxy);
                         }
                         value = Hibernate.unproxy(proxy);
-
-                        JsonSerializer<Object> serializer = provider.findValueSerializer(value.getClass());
-                        serializer.serialize(value, gen, provider);
-                        return;
                 }
                 defaultSerializer.serialize(value, gen, provider);
             }
