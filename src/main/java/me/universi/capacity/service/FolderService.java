@@ -258,13 +258,14 @@ public class FolderService extends EntityService<Folder> {
         var folder = findByIdOrReferenceOrThrow( idOrReference );
         checkPermissionToEdit( folder );
 
-        List<FolderContents> newContentList = new ArrayList<>( folder.getFolderContents() );
+        List<FolderContents> contentList = folder.getFolderContents().stream().filter(fc->ContentService.getInstance().isValid(fc.getContent())).toList();
+        List<FolderContents> newContentList = new ArrayList<>( contentList );
 
         if ( changeFolderContentsDTO.addContentsIds() != null ) {
-            var nextIndex = folder.getFolderContents().size();
+            var nextIndex = contentList.size();
 
             for ( var cId : changeFolderContentsDTO.addContentsIds() ) {
-                if ( folder.getFolderContents().stream().anyMatch( c -> c.getId().equals( cId ) ) )
+                if ( contentList.stream().anyMatch( fc -> fc.getContent().getId().equals( cId ) ) )
                     // Content already in folder
                     continue;
 
