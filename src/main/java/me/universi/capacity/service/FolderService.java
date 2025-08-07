@@ -278,10 +278,12 @@ public class FolderService extends EntityService<Folder> {
         }
 
         if ( changeFolderContentsDTO.removeContentsIds() != null )
-            newContentList = newContentList.stream()
-                .filter( fc -> changeFolderContentsDTO.removeContentsIds().stream()
-                    .noneMatch( cId -> fc.getContent().getId().equals( cId ) )
-                ).toList();
+            newContentList.stream()
+                    .filter(fc -> changeFolderContentsDTO.removeContentsIds().stream()
+                            .anyMatch(cId -> fc.getContent().getId().equals(cId))
+                    ).forEach(
+                            fc -> fc.setDeleted( true )
+                    );
 
         folderContentsRepository.saveAllAndFlush( newContentList );
     }
@@ -482,6 +484,7 @@ public class FolderService extends EntityService<Folder> {
             throw new UniversiForbiddenAccessException( "Você não pode checar o progresso deste usuário para esse conteúdo" );
 
         return folderContentsRepository.findByFolderIdOrderByOrderNumAsc( folder.getId() ).stream()
+            .filter(fc -> ContentService.getInstance().isValid(fc.getContent()))
             .map( c -> new WatchProfileProgressDTO( profile , c.getContent() ) )
             .toList();
     }
@@ -509,7 +512,9 @@ public class FolderService extends EntityService<Folder> {
         ) );
 
         changeContents( copy.getId().toString(), new ChangeFolderContentsDTO(
-            folder.getFolderContents().stream().map( fc -> fc.getContent().getId() ).toList(),
+            folder.getFolderContents().stream()
+                    .filter(fc -> ContentService.getInstance().isValid(fc.getContent()))
+                    .map( fc -> fc.getContent().getId() ).toList(),
             null
         ) );
 
