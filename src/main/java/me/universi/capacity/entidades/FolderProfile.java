@@ -96,7 +96,7 @@ public class FolderProfile implements Serializable {
 
     @Transient
     public int getFolderSize() {
-        return getFolder().getFolderContents().size();
+        return FolderService.getInstance().getFolderContents(getFolder()).size();
     }
 
     @Transient

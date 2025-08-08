@@ -211,8 +211,7 @@ public class Group implements Serializable {
     @Transient
     @JsonIgnore
     public Collection<ProfileGroup> getAdministrators() {
-        return this.getParticipants().stream()
-            .filter( pg -> ProfileService.getInstance().isValid(pg.getProfile()) )
+        return getParticipants().stream()
             .filter( ProfileGroup::isAdmin )
             .toList();
     }

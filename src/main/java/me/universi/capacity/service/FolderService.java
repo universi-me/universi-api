@@ -142,6 +142,11 @@ public class FolderService extends EntityService<Folder> {
         return findByCategory(UUID.fromString(categoryId));
     }
 
+    @NotNull
+    public List<FolderContents> getFolderContents(@NotNull Folder folder) {
+        return folder.getFolderContents().stream().filter(fc -> ContentService.getInstance().isValid(fc.getContent())).toList();
+    }
+
     private Folder saveOrUpdate( Folder folder ) {
         return folderRepository.saveAndFlush( folder );
     }
@@ -258,7 +263,7 @@ public class FolderService extends EntityService<Folder> {
         var folder = findByIdOrReferenceOrThrow( idOrReference );
         checkPermissionToEdit( folder );
 
-        List<FolderContents> contentList = folder.getFolderContents().stream().filter(fc->ContentService.getInstance().isValid(fc.getContent())).toList();
+        List<FolderContents> contentList = getFolderContents(folder);
         List<FolderContents> newContentList = new ArrayList<>( contentList );
 
         if ( changeFolderContentsDTO.addContentsIds() != null ) {
@@ -296,7 +301,7 @@ public class FolderService extends EntityService<Folder> {
         if ( !folderContainsContent( folder.getId(), contentId ) )
             throw new IllegalArgumentException( "O conteúdo não possui o material informado" );
 
-        var size = folder.getFolderContents().size();
+        var size = getFolderContents(folder).size();
         if ( changeContentPositionDTO.moveTo() > size )
             throw new IllegalArgumentException(
                 "O conteúdo possui apenas '" + size + "' materiais. Informada posição '"
@@ -351,7 +356,7 @@ public class FolderService extends EntityService<Folder> {
 
         folderProfileRepository.saveAllAndFlush(
             changeFolderAssignmentsDTO.addProfileIds().stream()
-                .filter( p -> folder.getFolderContents().stream().noneMatch( p2 -> p2.getId().equals( p ) ) )
+                .filter( p -> getFolderContents(folder).stream().noneMatch( p2 -> p2.getId().equals( p ) ) )
                 .map( id -> {
                     var folderProfile = new FolderProfile();
                     folderProfile.setAssignedBy( profileInSession );
@@ -513,8 +518,7 @@ public class FolderService extends EntityService<Folder> {
         ) );
 
         changeContents( copy.getId().toString(), new ChangeFolderContentsDTO(
-            folder.getFolderContents().stream()
-                    .filter(fc -> ContentService.getInstance().isValid(fc.getContent()))
+                getFolderContents(folder).stream()
                     .map( fc -> fc.getContent().getId() ).toList(),
             null
         ) );
@@ -581,7 +585,7 @@ public class FolderService extends EntityService<Folder> {
     }
 
     public List<ContentStatus> getStatuses(Profile profile, Folder folder) {
-        return folder.getFolderContents().stream()
+        return getFolderContents(folder).stream()
             .map(c -> contentStatusRepository.findFirstByProfileIdAndContentId(profile.getId(), c.getId()))
             .filter(Objects::nonNull)
             .toList();
@@ -590,8 +594,8 @@ public class FolderService extends EntityService<Folder> {
     public boolean isComplete(@NotNull Profile profile, @NotNull Folder folder) {
         var statuses = getStatuses(profile, folder);
 
-        return !folder.getFolderContents().isEmpty()
-            && statuses.size() == folder.getFolderContents().size()
+        return !getFolderContents(folder).isEmpty()
+            && statuses.size() == getFolderContents(folder).size()
             && statuses.stream()
                 .allMatch(cs -> cs.getStatus() == ContentStatusType.DONE);
     }
