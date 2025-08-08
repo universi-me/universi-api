@@ -282,6 +282,6 @@ public class ProfileService extends EntityService<Profile> {
 
     @Override
     public boolean isValid( Profile profile ) {
-        return profile != null && perfilRepository.existsByIdAndDeletedFalse( profile.getId() );
+        return profile != null && perfilRepository.existsByIdAndDeletedFalse( profile.getId() ) && UserService.getInstance().isValid( profile.getUser() );
     }
 }

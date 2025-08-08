@@ -1,6 +1,5 @@
 package me.universi.group.services;
 
-import jakarta.transaction.Transactional;
 import me.universi.Sys;
 import me.universi.activity.entities.Activity;
 import me.universi.activity.services.ActivityService;
