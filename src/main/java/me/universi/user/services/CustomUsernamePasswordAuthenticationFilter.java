@@ -1,21 +1,14 @@
 package me.universi.user.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import me.universi.Sys;
 import me.universi.api.entities.Response;
-import me.universi.user.exceptions.UserException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.BufferedReader;
 import java.util.Map;
-import org.springframework.stereotype.Component;
 
 /*
     Classe para compatibilidade de login via JSON
@@ -24,31 +17,26 @@ import org.springframework.stereotype.Component;
 public class CustomUsernamePasswordAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private String jsonUsername;
     private String jsonPassword;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     protected String obtainPassword(HttpServletRequest request) {
-        String password = null;
 
         if ("application/json".equals(request.getHeader("Content-Type"))) {
-            password = this.jsonPassword;
-        }else{
-            password = super.obtainPassword(request);
+            return this.jsonPassword;
         }
 
-        return password;
+        return super.obtainPassword(request);
     }
 
     @Override
     protected String obtainUsername(HttpServletRequest request){
-        String username = null;
 
         if ("application/json".equals(request.getHeader("Content-Type"))) {
-            username = this.jsonUsername;
-        }else{
-            username = super.obtainUsername(request);
+            return this.jsonUsername;
         }
 
-        return username;
+        return super.obtainUsername(request);
     }
 
     @Override
@@ -56,16 +44,7 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
         if (request.getMethod().equals("POST") && "application/json".equals(request.getHeader("Content-Type"))) {
             try {
 
-                StringBuffer sb = new StringBuffer();
-                String line = null;
-
-                BufferedReader reader = request.getReader();
-                while ((line = reader.readLine()) != null){
-                    sb.append(line);
-                }
-
-                ObjectMapper mapper = new ObjectMapper();
-                Map mapRequest = mapper.readValue(sb.toString(), Map.class);
+                Map mapRequest = objectMapper.readValue(request.getInputStream().readAllBytes(), Map.class);
 
                 this.jsonUsername = (String)( mapRequest.containsKey("username")? mapRequest.get("username") : mapRequest.get("email"));
                 this.jsonPassword = (String)mapRequest.get("password");
@@ -96,10 +75,4 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
     public void setAuthenticationManager(AuthenticationManager authenticationManager) {
         super.setAuthenticationManager(authenticationManager);
     }
-
-    //@Override
-    //@Autowired
-    //public void setAuthenticationManager(AuthenticationManager authenticationManager) {
-    //    super.setAuthenticationManager(authenticationManager);
-    //}
 }
