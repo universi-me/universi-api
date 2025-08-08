@@ -68,6 +68,7 @@ public class ContentService extends EntityService<Content> {
     public List<Content> findByFolder(UUID folderId) throws CapacityException {
         return folderContentsRepository.findByFolderIdOrderByOrderNumAsc( folderId ).stream()
             .map( fc -> fc.getContent() )
+            .filter(this::isValid)
             .filter(Objects::nonNull)
             .toList();
     }
@@ -207,5 +208,10 @@ public class ContentService extends EntityService<Content> {
     @Override
     public boolean hasPermissionToDelete( Content content ) {
         return hasPermissionToEdit( content );
+    }
+
+    @Override
+    public boolean isValid(Content content) {
+        return content != null && contentRepository.existsByIdAndDeletedFalse(content.getId());
     }
 }

@@ -31,10 +31,10 @@ public class GroupThemeService {
             return null;
         }
 
-        GroupTheme groupTheme = groupSettings.theme;
+        GroupTheme groupTheme = groupSettings.getTheme();
         if (groupTheme == null) {
             groupTheme = new GroupTheme();
-            groupTheme.groupSettings = groupSettings;
+            groupTheme.setGroupSettings(groupSettings);
             groupTheme = groupThemeRepository.save(groupTheme);
         }
         if (updateGroupThemeDTO.primary_color() != null) {

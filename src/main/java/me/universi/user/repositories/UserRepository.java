@@ -28,4 +28,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     @Query( "SELECT u FROM User u WHERE ( u.organization.id = :organizationId ) AND ( u.email = :nameOrEmail OR u.name = :nameOrEmail )" )
     Optional<User> findFirstByEmailOrNameAndOrganizationId( @Param("nameOrEmail") String nameOrEmail, @Param("organizationId") UUID organizationId );
+
+    boolean existsByIdAndDeletedFalse(UUID id);
 }

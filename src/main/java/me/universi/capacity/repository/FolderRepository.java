@@ -13,4 +13,6 @@ public interface FolderRepository extends JpaRepository<Folder, UUID> {
     Optional<Folder> findFirstByIdOrReference(UUID id, String reference);
 
     List<Folder> findByCategories(Category category);
+
+    boolean existsByIdAndDeletedFalse(UUID id);
 }

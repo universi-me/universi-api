@@ -1,7 +1,6 @@
 package me.universi.group.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -15,7 +14,6 @@ import org.hibernate.annotations.SQLRestriction;
 @Table(name = "group_theme", schema = "system_group")
 @SQLDelete(sql = "UPDATE system_group.group_theme SET deleted = true WHERE id=?")
 @SQLRestriction( value = "NOT deleted" )
-@JsonIgnoreProperties({"hibernateLazyInitializer"})
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class GroupTheme  implements Serializable {
 
@@ -64,12 +62,18 @@ public class GroupTheme  implements Serializable {
 
     @JsonIgnore
     @JoinColumn(name="group_settings_id")
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.LAZY)
     @NotNull
-    public GroupSettings groupSettings;
+    private GroupSettings groupSettings;
 
     public GroupTheme() {
     }
 
+    public GroupSettings getGroupSettings() {
+        return groupSettings;
+    }
 
+    public void setGroupSettings(GroupSettings groupSettings) {
+        this.groupSettings = groupSettings;
+    }
 }

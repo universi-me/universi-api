@@ -142,6 +142,11 @@ public class FolderService extends EntityService<Folder> {
         return findByCategory(UUID.fromString(categoryId));
     }
 
+    @NotNull
+    public List<FolderContents> getFolderContents(@NotNull Folder folder) {
+        return folder.getFolderContents().stream().filter(fc -> ContentService.getInstance().isValid(fc.getContent())).toList();
+    }
+
     private Folder saveOrUpdate( Folder folder ) {
         return folderRepository.saveAndFlush( folder );
     }
@@ -258,13 +263,14 @@ public class FolderService extends EntityService<Folder> {
         var folder = findByIdOrReferenceOrThrow( idOrReference );
         checkPermissionToEdit( folder );
 
-        List<FolderContents> newContentList = new ArrayList<>( folder.getFolderContents() );
+        List<FolderContents> contentList = getFolderContents(folder);
+        List<FolderContents> newContentList = new ArrayList<>( contentList );
 
         if ( changeFolderContentsDTO.addContentsIds() != null ) {
-            var nextIndex = folder.getFolderContents().size();
+            var nextIndex = contentList.size();
 
             for ( var cId : changeFolderContentsDTO.addContentsIds() ) {
-                if ( folder.getFolderContents().stream().anyMatch( c -> c.getId().equals( cId ) ) )
+                if ( contentList.stream().anyMatch( fc -> fc.getContent().getId().equals( cId ) ) )
                     // Content already in folder
                     continue;
 
@@ -278,10 +284,12 @@ public class FolderService extends EntityService<Folder> {
         }
 
         if ( changeFolderContentsDTO.removeContentsIds() != null )
-            newContentList = newContentList.stream()
-                .filter( fc -> changeFolderContentsDTO.removeContentsIds().stream()
-                    .noneMatch( cId -> fc.getContent().getId().equals( cId ) )
-                ).toList();
+            newContentList.stream()
+                    .filter(fc -> changeFolderContentsDTO.removeContentsIds().stream()
+                            .anyMatch(cId -> fc.getContent().getId().equals(cId))
+                    ).forEach(
+                            fc -> fc.setDeleted( true )
+                    );
 
         folderContentsRepository.saveAllAndFlush( newContentList );
     }
@@ -293,7 +301,7 @@ public class FolderService extends EntityService<Folder> {
         if ( !folderContainsContent( folder.getId(), contentId ) )
             throw new IllegalArgumentException( "O conteúdo não possui o material informado" );
 
-        var size = folder.getFolderContents().size();
+        var size = getFolderContents(folder).size();
         if ( changeContentPositionDTO.moveTo() > size )
             throw new IllegalArgumentException(
                 "O conteúdo possui apenas '" + size + "' materiais. Informada posição '"
@@ -348,7 +356,7 @@ public class FolderService extends EntityService<Folder> {
 
         folderProfileRepository.saveAllAndFlush(
             changeFolderAssignmentsDTO.addProfileIds().stream()
-                .filter( p -> folder.getFolderContents().stream().noneMatch( p2 -> p2.getId().equals( p ) ) )
+                .filter( p -> getFolderContents(folder).stream().noneMatch( p2 -> p2.getId().equals( p ) ) )
                 .map( id -> {
                     var folderProfile = new FolderProfile();
                     folderProfile.setAssignedBy( profileInSession );
@@ -432,7 +440,10 @@ public class FolderService extends EntityService<Folder> {
 
         return entityManager
             .createQuery( query )
-            .getResultList();
+            .getResultList()
+            .stream()
+            .filter(Fp -> this.isValid(Fp.getFolder()))
+            .toList();
     }
 
     public void favorite( String idOrReference ) throws UniversiForbiddenAccessException {
@@ -479,6 +490,7 @@ public class FolderService extends EntityService<Folder> {
             throw new UniversiForbiddenAccessException( "Você não pode checar o progresso deste usuário para esse conteúdo" );
 
         return folderContentsRepository.findByFolderIdOrderByOrderNumAsc( folder.getId() ).stream()
+            .filter(fc -> ContentService.getInstance().isValid(fc.getContent()))
             .map( c -> new WatchProfileProgressDTO( profile , c.getContent() ) )
             .toList();
     }
@@ -506,7 +518,8 @@ public class FolderService extends EntityService<Folder> {
         ) );
 
         changeContents( copy.getId().toString(), new ChangeFolderContentsDTO(
-            folder.getFolderContents().stream().map( fc -> fc.getContent().getId() ).toList(),
+                getFolderContents(folder).stream()
+                    .map( fc -> fc.getContent().getId() ).toList(),
             null
         ) );
 
@@ -572,7 +585,7 @@ public class FolderService extends EntityService<Folder> {
     }
 
     public List<ContentStatus> getStatuses(Profile profile, Folder folder) {
-        return folder.getFolderContents().stream()
+        return getFolderContents(folder).stream()
             .map(c -> contentStatusRepository.findFirstByProfileIdAndContentId(profile.getId(), c.getId()))
             .filter(Objects::nonNull)
             .toList();
@@ -581,8 +594,8 @@ public class FolderService extends EntityService<Folder> {
     public boolean isComplete(@NotNull Profile profile, @NotNull Folder folder) {
         var statuses = getStatuses(profile, folder);
 
-        return !folder.getFolderContents().isEmpty()
-            && statuses.size() == folder.getFolderContents().size()
+        return !getFolderContents(folder).isEmpty()
+            && statuses.size() == getFolderContents(folder).size()
             && statuses.stream()
                 .allMatch(cs -> cs.getStatus() == ContentStatusType.DONE);
     }
@@ -643,5 +656,10 @@ public class FolderService extends EntityService<Folder> {
     @Override
     public boolean hasPermissionToDelete( Folder folder ) {
         return hasPermissionToEdit( folder );
+    }
+
+    @Override
+    public boolean isValid( Folder folder ) {
+        return folder != null && folderRepository.existsByIdAndDeletedFalse(folder.getId());
     }
 }

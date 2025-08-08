@@ -11,4 +11,6 @@ public interface ContentRepository extends JpaRepository<Content, UUID> {
     boolean existsByTitle(String title);
     boolean existsByUrl(String url);
     List<Content> findByCategories(Category category);
+
+    boolean existsByIdAndDeletedFalse(UUID id);
 }

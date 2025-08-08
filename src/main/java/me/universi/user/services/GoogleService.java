@@ -16,6 +16,7 @@ import me.universi.user.entities.User;
 import me.universi.user.exceptions.UserException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 @Service
@@ -176,5 +177,10 @@ public class GoogleService {
                 throw new UserException("Recaptcha inválido.");
             }
         }
+    }
+
+    @Transactional(readOnly = true)
+    public void checkRecaptchaWithTokenTransactional(Object gToken) {
+        checkRecaptchaWithToken(gToken);
     }
 }

@@ -1,7 +1,6 @@
 package me.universi.competence.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
@@ -32,7 +31,6 @@ import java.util.UUID;
 @Table( name = "competence", schema = "competence" )
 @SQLDelete(sql = "UPDATE competence.competence SET deleted = true WHERE id=?")
 @SQLRestriction( "NOT deleted")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Competence {
 
     @Id
@@ -43,11 +41,10 @@ public class Competence {
 
     @ManyToOne( fetch = FetchType.LAZY )
     @JoinColumn(name = "competence_type_id")
-    @NotFound(action = NotFoundAction.IGNORE)
     private CompetenceType competenceType;
 
     @JoinColumn( name = "profile_id" )
-    @ManyToOne
+    @ManyToOne(fetch =  FetchType.LAZY )
     private Profile profile;
 
     @Column(name = "description", columnDefinition = "TEXT")
@@ -70,14 +67,14 @@ public class Competence {
 
     @Transient
     public boolean isHasBadge() {
-        return this.profile.hasBadge( competenceType );
+        return getProfile().hasBadge( getCompetenceType() );
     }
 
     @Transient
     public List<Activity> getActivities() {
         return ActivityService
             .getInstance()
-            .findByProfileAndCompetenceType( profile, competenceType );
+            .findByProfileAndCompetenceType( getProfile(), getCompetenceType() );
     }
 
     public Competence() {}

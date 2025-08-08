@@ -13,10 +13,12 @@ import java.io.Serializable;
 import me.universi.capacity.entidades.ContentStatus;
 import me.universi.capacity.entidades.FolderFavorite;
 import me.universi.capacity.entidades.FolderProfile;
+import me.universi.capacity.service.FolderService;
 import me.universi.competence.entities.CompetenceType;
 import me.universi.education.entities.Education;
 import me.universi.experience.entities.Experience;
 import me.universi.group.entities.ProfileGroup;
+import me.universi.group.services.GroupService;
 import me.universi.image.entities.ImageMetadata;
 import me.universi.image.services.ImageMetadataService;
 import me.universi.link.entities.Link;
@@ -53,7 +55,7 @@ public class Profile implements Serializable {
     private String lastname;
 
     @Nullable
-    @OneToOne
+    @OneToOne( fetch = FetchType.LAZY )
     @JoinColumn( name = "image_metadata_id" )
     private ImageMetadata image;
 
@@ -119,7 +121,7 @@ public class Profile implements Serializable {
     private Collection<CompetenceType> competenceBadges;
 
     @Nullable
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn( name = "department_id" )
     private Department department;
 
@@ -152,7 +154,7 @@ public class Profile implements Serializable {
     }
 
     public Collection<ProfileGroup> getGroups() {
-        return groups;
+        return groups.stream().filter(Pg -> GroupService.getInstance().isValid(Pg.getGroup())).toList();
     }
 
     public void setGroups(Collection<ProfileGroup> groups) {
@@ -285,11 +287,11 @@ public class Profile implements Serializable {
     @Override
     public String toString() {
         return "\nProfile[" +
-                "id='" + id + '\'' +
-                ", user='" + user + '\'' +
-                ", firstname='" + firstname + '\'' +
-                ", lastname='" + lastname + '\'' +
-                ", image='" + ImageMetadataService.getInstance().getUri( image ) + '\'' +
-                ", bio='" + bio + "']\n";
+                "id='" + getId() + '\'' +
+                ", user='" + getUser() + '\'' +
+                ", firstname='" + getFirstname() + '\'' +
+                ", lastname='" + getLastname() + '\'' +
+                ", image='" + ImageMetadataService.getInstance().getUri( getImage() ) + '\'' +
+                ", bio='" + getBio() + "']\n";
     }
 }

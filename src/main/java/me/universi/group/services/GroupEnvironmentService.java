@@ -62,10 +62,10 @@ public class GroupEnvironmentService {
         if(groupSettings == null) {
             return null;
         }
-        GroupEnvironment groupEnvironment = groupSettings.environment;
+        GroupEnvironment groupEnvironment = groupSettings.getEnvironment();
         if(groupEnvironment == null) {
             groupEnvironment = new GroupEnvironment();
-            groupEnvironment.groupSettings = groupSettings;
+            groupEnvironment.setGroupSettings(groupSettings);
             groupEnvironment = groupEnvironmentRepository.save(groupEnvironment);
         }
         if(updateGroupEnvironment.signup_enabled() != null) {

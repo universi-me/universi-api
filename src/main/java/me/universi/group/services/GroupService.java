@@ -81,7 +81,7 @@ public class GroupService extends EntityService<Group> {
 
     @Override
     public boolean isValid( Group group ) {
-        if ( group == null || group.isDeleted() )
+        if ( group == null || !groupRepository.existsByIdAndDeletedFalse(group.getId()) )
             return false;
 
         if ( group.isRootGroup() )
@@ -263,10 +263,10 @@ public class GroupService extends EntityService<Group> {
         if(groupSettings == null) {
             return null;
         }
-        GroupEnvironment groupEnvironment = groupSettings.environment;
+        GroupEnvironment groupEnvironment = groupSettings.getEnvironment();
         if(groupEnvironment == null) {
             groupEnvironment = new GroupEnvironment();
-            groupEnvironment.groupSettings = groupSettings;
+            groupEnvironment.setGroupSettings(groupSettings);
             groupEnvironment = groupEnvironmentRepository.save(groupEnvironment);
         }
         return groupEnvironment;
@@ -318,7 +318,7 @@ public class GroupService extends EntityService<Group> {
         }
         Collection<ProfileGroup> participants = group.getParticipants();
         for(ProfileGroup profileGroup : participants) {
-            Profile profile = profileGroup.profile;
+            Profile profile = profileGroup.getProfile();
             if(profile != null && profile.getUser() != null) {
                 emailService.sendSystemEmailToUser(profile.getUser(), subject, message, true);
             }

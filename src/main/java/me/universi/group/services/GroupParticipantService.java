@@ -82,7 +82,7 @@ public class GroupParticipantService {
         var profileGroup = new ProfileGroup();
         profileGroup.setGroup( group );
         profileGroup.setProfile( profile );
-        profileGroup.role = RoleService.getInstance().getGroupMemberRole( group );
+        profileGroup.setRole(RoleService.getInstance().getGroupMemberRole( group ));
 
         return profileGroupRepository.saveAndFlush( profileGroup );
     }
@@ -97,7 +97,7 @@ public class GroupParticipantService {
         var profileGroup = new ProfileGroup();
         profileGroup.setGroup( organization );
         profileGroup.setProfile( profile );
-        profileGroup.role = RoleService.getInstance().getGroupMemberRole( organization );
+        profileGroup.setRole(RoleService.getInstance().getGroupMemberRole( organization ));
 
         return profileGroupRepository.saveAndFlush( profileGroup );
     }
@@ -123,7 +123,7 @@ public class GroupParticipantService {
 
         var role = dto.role().map( roleId -> {
             var foundRole = RoleService.getInstance().findOrThrow( roleId );
-            if ( !foundRole.group.getId().equals( group.getId() ) )
+            if ( !foundRole.getGroup().getId().equals( group.getId() ) )
                 throw new UniversiConflictingOperationException( "O Papel indicado não pertence ao grupo" );
             return foundRole;
         } ).orElse(
@@ -133,7 +133,7 @@ public class GroupParticipantService {
         var profileGroup = new ProfileGroup();
         profileGroup.setGroup( group );
         profileGroup.setProfile( participant );
-        profileGroup.role = role;
+        profileGroup.setRole(role);
 
         return profileGroupRepository.saveAndFlush( profileGroup );
     }
