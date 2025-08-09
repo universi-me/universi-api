@@ -10,6 +10,7 @@ import org.hibernate.annotations.SQLRestriction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonSetter;
 
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
@@ -110,7 +111,7 @@ public class Activity {
     public void setLocation( @NotBlank String location ) { this.location = location; }
 
     public Optional<Integer> getWorkload() { return Optional.ofNullable( workload ); }
-    public void setWorkload( @Nullable Integer workload ) { this.workload = workload; }
+    @JsonSetter public void setWorkload( @Nullable Integer workload ) { this.workload = workload; }
     public void setWorkload( Optional<Integer> workload ) { this.workload = workload.orElse( null ); }
 
     public @NotNull Date getStartDate() { return startDate; }
