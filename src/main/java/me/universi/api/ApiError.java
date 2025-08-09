@@ -5,20 +5,29 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-public record ApiError (
+@Schema( description = "Default error response" )
+public record ApiError(
 
         @JsonFormat(pattern="dd-MM-yyyy HH:mm:ss")
         LocalDateTime timestamp,
 
         @JsonSerialize(using = StatusCodeToValueParse.class)
+        @Schema( implementation = StatusCodeSchema.class )
         HttpStatus status,
 
+        @Schema(
+            example = "[\"O template de mensagem para conteúdo atribuído não pode ter mais de 6000 caracteres.\", \"O parâmetro 'nickname' não foi informado\"]",
+            description = "Contains human-readable message of which error(s) occurred, *most* times with only 1 item"
+        )
         List<String> errors
 
 ) {
@@ -66,4 +75,17 @@ public record ApiError (
                         gen.writeEndObject();
                 }
         }
+
+        private record StatusCodeSchema(
+            @Schema(
+                example = "404",
+                description = "Will always be the same as the HTTP response code"
+            )
+            int code,
+
+            @Schema(
+                example = "NOT_FOUND"
+            )
+            String description
+        ) { }
 }
