@@ -25,7 +25,7 @@ public record ApiError(
         HttpStatus status,
 
         @Schema(
-            example = "[\"O template de mensagem para conteúdo atribuído não pode ter mais de 6000 caracteres.\", \"O parâmetro 'nickname' não foi informado\"]",
+            examples = { "Human-readable message describing the error", },
             description = "Contains human-readable message of which error(s) occurred, *most* times with only 1 item"
         )
         List<String> errors
