@@ -20,7 +20,6 @@ import org.hibernate.annotations.*;
 @Table( name = "folder_profile", schema = "capacity" )
 @SQLDelete( sql = "UPDATE capacity.folder_profile SET removed = CURRENT_TIMESTAMP WHERE id=?" )
 @SQLRestriction( "removed IS NULL" )
-@JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class FolderProfile implements Serializable {
 
     @Serial
@@ -42,22 +41,19 @@ public class FolderProfile implements Serializable {
     @Column(name = "removed")
     public Date removed;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn(name="assigned_by_id")
     @NotNull
-    @NotFound(action = NotFoundAction.IGNORE)
     public Profile assignedBy;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn(name="assigned_to_id")
     @NotNull
-    @NotFound(action = NotFoundAction.IGNORE)
     public Profile assignedTo;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn(name="folder_id")
     @NotNull
-    @NotFound(action = NotFoundAction.IGNORE)
     public Folder folder;
 
     public FolderProfile() {
@@ -100,12 +96,12 @@ public class FolderProfile implements Serializable {
 
     @Transient
     public int getFolderSize() {
-        return this.folder.getFolderContents().size();
+        return FolderService.getInstance().getFolderContents(getFolder()).size();
     }
 
     @Transient
     public int getDoneUntilNow() {
-        return FolderService.getInstance().getStatuses(assignedTo, folder).stream()
+        return FolderService.getInstance().getStatuses(getAssignedTo(), getFolder()).stream()
             .filter(cs -> cs.getStatus().equals(ContentStatusType.DONE))
             .filter(Objects::nonNull)
             .toList()

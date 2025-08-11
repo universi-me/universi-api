@@ -249,10 +249,10 @@ public class ActivityService extends EntityService<Activity> {
         var activity = findOrThrow( id );
         checkPermissionToDelete( activity );
 
-        groupService().deleteGroup( activity.getGroup().getId() );
-
         activity.setDeletedAt( new Date() );
-        repository().saveAndFlush( activity );
+
+        // delete group of activity and cascade will save deleted changes of activity
+        groupService().deleteGroup( activity.getGroup().getId() );
     }
 
     public void validateDates( @Valid CreateActivityDTO dto ) {

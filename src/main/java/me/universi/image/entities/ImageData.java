@@ -14,7 +14,7 @@ public class ImageData {
     private UUID metadataId;
 
     @MapsId
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn( name = "metadata_id", referencedColumnName = "id" )
     @NotNull
     private ImageMetadata metadata;

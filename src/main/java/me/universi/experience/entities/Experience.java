@@ -18,6 +18,7 @@ import jakarta.validation.constraints.NotNull;
 import me.universi.institution.entities.Institution;
 import me.universi.profile.entities.Profile;
 
+
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
@@ -41,7 +42,7 @@ public class Experience {
     @JoinColumn(name = "experience_type_id")
     private ExperienceType experienceType;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "institution_id", nullable = false)
     private Institution institution;
 
@@ -56,7 +57,7 @@ public class Experience {
     @Column(name = "end_date")
     private Date endDate;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn( name = "profile_id", nullable = false )
     private Profile profile;
 

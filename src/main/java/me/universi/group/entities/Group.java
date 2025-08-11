@@ -1,9 +1,6 @@
 package me.universi.group.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
 
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
@@ -22,8 +19,6 @@ import me.universi.role.services.RoleService;
 import me.universi.user.services.EnvironmentService;
 import me.universi.user.services.JsonUserLoggedFilter;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.NotFound;
-import org.hibernate.annotations.NotFoundAction;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -39,7 +34,6 @@ import org.hibernate.annotations.SQLRestriction;
 @Table( name = "system_group", schema = "system_group" )
 @SQLDelete(sql = "UPDATE system_group.system_group SET deleted = true WHERE id=?")
 @SQLRestriction( value = "NOT deleted" )
-@JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class Group implements Serializable {
 
     @Serial
@@ -54,14 +48,14 @@ public class Group implements Serializable {
     
     @Column(name = "nickname")
     @NotNull
-    public String nickname;
+    private String nickname;
 
     @Column(name = "name")
-    public String name;
+    private String name;
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
     @Column(name = "description", columnDefinition = "TEXT")
-    public String description;
+    private String description;
 
     @Nullable
     @OneToOne
@@ -71,23 +65,23 @@ public class Group implements Serializable {
     @Nullable
     @OneToOne
     @JoinColumn( name = "banner_image_metadata_id" )
-    public ImageMetadata bannerImage;
+    private ImageMetadata bannerImage;
 
     @Nullable
     @OneToOne
     @JoinColumn( name = "header_image_metadata_id" )
-    public ImageMetadata headerImage;
+    private ImageMetadata headerImage;
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="profile_id")
     @NotNull
-    public Profile admin;
+    private Profile admin;
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="group_settings_id")
     @NotNull
-    public GroupSettings groupSettings;
+    private GroupSettings groupSettings;
 
     @JsonIgnore
     @Column(name = "deleted")
@@ -100,14 +94,12 @@ public class Group implements Serializable {
     @JsonIgnore
     @ManyToOne( fetch = FetchType.LAZY )
     @JoinColumn( name = "parent_group_id", nullable = true, referencedColumnName = "id" )
-    @NotFound( action = NotFoundAction.IGNORE )
     private Group parentGroup;
 
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
     @Nullable
-    @OneToOne( cascade = CascadeType.ALL )
+    @OneToOne( cascade = CascadeType.ALL, fetch = FetchType.LAZY )
     @JoinColumn( name = "activity_id", nullable = true )
-    @NotFound( action = NotFoundAction.IGNORE )
-    @JsonIgnoreProperties( { "group" } )
     private Activity activity;
 
     @JsonIgnore
@@ -115,6 +107,7 @@ public class Group implements Serializable {
     @NotNull
     private Collection<Group> subGroups;
 
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
     @NotNull
     @ManyToOne
     @JoinColumn( name = "type_id", nullable = false )
@@ -124,17 +117,17 @@ public class Group implements Serializable {
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
     @Column(name = "can_create_group")
     @NotNull
-    public boolean canCreateGroup;
+    private boolean canCreateGroup;
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
     @Column(name = "can_enter")
     @NotNull
-    public boolean canEnter;
+    private boolean canEnter;
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
     @Column(name = "can_add_participant")
     @NotNull
-    public boolean canAddParticipant;
+    private boolean canAddParticipant;
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
     @CreationTimestamp
@@ -145,9 +138,9 @@ public class Group implements Serializable {
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
     @Column(name = "public_group")
     @NotNull
-    public boolean publicGroup;
+    private boolean publicGroup;
 
-    @ManyToMany(mappedBy = "grantedAccessGroups", fetch = FetchType.EAGER)
+    @ManyToMany(mappedBy = "grantedAccessGroups", fetch = FetchType.LAZY)
     @JsonIgnore
     private Collection<Folder> foldersGrantedAccess;
 
@@ -206,7 +199,9 @@ public class Group implements Serializable {
     public Collection<ProfileGroup> getParticipants() {
         return this.participants == null
             ? Collections.emptyList()
-            : this.participants;
+            : this.participants.stream()
+                    .filter( pg -> ProfileService.getInstance().isValid(pg.getProfile()) )
+                    .toList();
     }
 
     public void setParticipants(Collection<ProfileGroup> participants) {
@@ -216,7 +211,7 @@ public class Group implements Serializable {
     @Transient
     @JsonIgnore
     public Collection<ProfileGroup> getAdministrators() {
-        return this.getParticipants().stream()
+        return getParticipants().stream()
             .filter( ProfileGroup::isAdmin )
             .toList();
     }
@@ -261,7 +256,7 @@ public class Group implements Serializable {
     /** The group's ability to be accessed directly through the URL (parent of all groups) */
     @Transient
     public boolean isRootGroup() {
-        return parentGroup == null;
+        return this.getParentGroup().isEmpty();
     }
 
     public boolean isCanCreateGroup() {
@@ -328,11 +323,12 @@ public class Group implements Serializable {
     @JsonInclude(value = JsonInclude.Include.NON_NULL)
     @Transient
     private @Nullable Group getJsonOrganization() {
-        return isRootGroup()
-            ? null
-        : parentGroup.isRootGroup()
-            ? parentGroup
-        : parentGroup.getJsonOrganization();
+        return this.getParentGroup()
+            .map( parent -> parent.isRootGroup()
+                ? parent
+                : parent.getJsonOrganization()
+            )
+            .orElse( null );
     }
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
@@ -359,7 +355,7 @@ public class Group implements Serializable {
     public void setDeleted(boolean deleted) { this.deleted = deleted; }
 
     public GroupSettings getGroupSettings() {
-        return groupSettings;
+        return this.groupSettings;
     }
 
     public void setGroupSettings(GroupSettings groupSettings) {
@@ -375,7 +371,7 @@ public class Group implements Serializable {
     }
 
     public Collection<Folder> getFoldersGrantedAccess() {
-        return foldersGrantedAccess;
+        return this.foldersGrantedAccess;
     }
 
     public void setFoldersGrantedAccess(Collection<Folder> foldersGrantedAccess) {

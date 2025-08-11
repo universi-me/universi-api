@@ -37,51 +37,51 @@ public class Role implements Serializable {
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id")
     @NotNull
-    public UUID id;
+    private UUID id;
 
     @JsonIgnore
     @Column(name = "deleted")
-    public boolean deleted = Boolean.FALSE;
+    private boolean deleted = Boolean.FALSE;
 
     @Column(name = "name")
-    public String name;
+    private String name;
 
     @Column(name = "description")
-    public String description;
+    private String description;
 
     @CreationTimestamp
     @Column(name = "created")
     @Temporal(TemporalType.TIMESTAMP)
-    public Date created;
+    private Date created;
 
     @JsonIgnore
     @Column(name = "removed")
     @Temporal(TemporalType.TIMESTAMP)
-    public Date removed;
+    private Date removed;
 
     @JsonIgnore
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id")
     @NotNull
-    public Group group;
+    private Group group;
 
     @Column(name= "feed_permission") @JsonIgnore
-    @Min(0) @NotNull public int feedPermission = 0;
+    @Min(0) @NotNull private int feedPermission = 0;
 
     @Column(name= "content_permission") @JsonIgnore
-    @Min(0) @NotNull public int contentPermission = 0;
+    @Min(0) @NotNull private int contentPermission = 0;
 
     @Column(name= "group_permission") @JsonIgnore
-    @Min(0) @NotNull public int groupPermission = 0;
+    @Min(0) @NotNull private int groupPermission = 0;
 
     @Column(name= "people_permission") @JsonIgnore
-    @Min(0) @NotNull public int peoplePermission = 0;
+    @Min(0) @NotNull private int peoplePermission = 0;
 
     @Column(name= "competence_permission") @JsonIgnore
-    @Min(0) @NotNull public int competencePermission = 0;
+    @Min(0) @NotNull private int competencePermission = 0;
 
     @Column(name= "job_permission") @JsonIgnore
-    @Min(0) @NotNull public int jobPermission = 0;
+    @Min(0) @NotNull private int jobPermission = 0;
 
     @Column(name = "role_type")
     @Enumerated(EnumType.STRING)
@@ -99,6 +99,52 @@ public class Role implements Serializable {
 
         Arrays.asList(FeaturesTypes.values())
             .forEach(ft -> this.setPermission(ft, permission));
+    }
+
+    public Group getGroup() {
+        return group;
+    }
+
+    public void setGroup(Group group) {
+        this.group = group;
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Date getCreated() {
+        return created;
+    }
+
+    public Date getRemoved() {
+        return removed;
+    }
+
+    public void setRemoved(Date removed) {
+        this.removed = removed;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 
     public static Role makeAdmin(@NotNull Group group) {

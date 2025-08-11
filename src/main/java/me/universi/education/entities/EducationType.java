@@ -22,7 +22,6 @@ import org.hibernate.annotations.SQLRestriction;
 @Table( name = "education_type", schema = "education" )
 @SQLDelete(sql = "UPDATE education_type SET deleted = true WHERE id=?")
 @SQLRestriction( "NOT deleted" )
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class EducationType {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

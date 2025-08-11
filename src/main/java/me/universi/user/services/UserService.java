@@ -15,6 +15,7 @@ import me.universi.user.entities.User;
 import me.universi.user.enums.Authority;
 import me.universi.user.exceptions.UserException;
 import me.universi.user.repositories.UserRepository;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -62,6 +63,7 @@ public class UserService extends EntityService<User> implements UserDetailsServi
             : userRepository.findFirstByEmailAndOrganizationId( email, organization.getId() );
     }
 
+    @NotNull
     @Override
     public User loadUserByUsername( String username ) throws UsernameNotFoundException {
         return findByUsernameOrEmail( username )
@@ -205,5 +207,10 @@ public class UserService extends EntityService<User> implements UserDetailsServi
     @Override
     public boolean hasPermissionToDelete( User user ) {
         return hasPermissionToEdit( user ) || isUserAdminSession();
+    }
+
+    @Override
+    public boolean isValid(User user) {
+        return user != null && userRepository.existsByIdAndDeletedFalse( user.getId() );
     }
 }
