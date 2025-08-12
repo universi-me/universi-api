@@ -3,6 +3,7 @@ package me.universi.capacity.entidades;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
@@ -47,6 +48,7 @@ import org.hibernate.annotations.*;
 @Table( name = "content", schema = "capacity" )
 @SQLDelete(sql = "UPDATE capacity.content SET deleted = true WHERE id=?")
 @SQLRestriction( "NOT deleted" )
+@Schema( description = "Stores a URL to some capacitation material, like a video or file" )
 public class Content implements Serializable {
 
     @Serial
@@ -59,23 +61,28 @@ public class Content implements Serializable {
 
     @Column(name = "url")
     @Size(max = 2048)
+    @Schema( description = "Direct URL of this Content material", example = "http://example.site/path/to/lesson" )
     private String url;
     
     @Column(name = "title")
     @Size(max = 100)
+    @Schema( description = "A plain text title of this Content, shortly describing what it is", example = "Example tutorial on Subject" )
     private String title;
 
     @Nullable
     @OneToOne
     @JoinColumn( name = "image_metadata_id" )
+    @Schema( description = "Path or full URL to the Content image" )
     private ImageMetadata image;
 
     @Column(name = "description")
     @Size(max = 200)
+    @Schema( description = "Short plain text describing this Content in more depth than the title" )
     private String description;
 
     @OneToMany(cascade = CascadeType.PERSIST)
     @JoinTable( name = "content_categories", schema = "capacity" )
+    @Schema( description = "All Categories this Content matches" )
     private Collection<Category> categories;
 
     @ManyToMany(mappedBy = "content")
@@ -89,6 +96,7 @@ public class Content implements Serializable {
     @NotNull
     @Min( MIN_RATING )
     @Max( MAX_RATING )
+    @Schema( description = "A rating of this Content's quality" )
     private Integer rating;
 
     @CreationTimestamp
@@ -100,10 +108,12 @@ public class Content implements Serializable {
     @JoinColumn(name="profile_id")
     @NotNull
     @NotFound(action = NotFoundAction.IGNORE)
+    @Schema( description = "The creator of this Content" )
     private Profile author;
 
     @Column(name = "type")
     @Enumerated(EnumType.STRING)
+    @Schema( description = "The type of this Content" )
     public ContentType type;
 
     @JsonIgnore

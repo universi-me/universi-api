@@ -1,8 +1,9 @@
 package me.universi.capacity.entidades;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
-import jakarta.persistence.Table;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -16,6 +17,7 @@ import org.hibernate.annotations.*;
 @Table( name = "content_status", schema = "capacity" )
 @SQLDelete(sql = "UPDATE capacity.content_status SET deleted = true WHERE id=?")
 @SQLRestriction( "NOT deleted" )
+@Schema( description = "Current status of the Content for a specific Profile" )
 public class ContentStatus implements Serializable {
 
     @Serial

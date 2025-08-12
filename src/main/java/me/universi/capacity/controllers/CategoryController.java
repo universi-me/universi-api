@@ -50,6 +50,7 @@ public class CategoryController {
     }
 
     @Operation( summary = "Lists all Categories" )
+    @ApiResponse( responseCode = "200" )
     @GetMapping( path = "", produces = MediaType.APPLICATION_JSON_VALUE )
     public ResponseEntity<List<Category>> list() {
         return ResponseEntity.ok( categoryService.findAll() );
@@ -83,7 +84,7 @@ public class CategoryController {
         return new ResponseEntity<>( categoryService.create( createCategoryDTO ), HttpStatus.CREATED );
     }
 
-    @Operation( summary = "Updates an existing category" )
+    @Operation( summary = "Updates an existing Category", description = "A Category can only be updated by the user who created it or by a system administrator." )
     @ApiResponse( responseCode = "200" )
     @PatchMapping( path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE )
     public ResponseEntity<Category> update(
@@ -93,7 +94,7 @@ public class CategoryController {
         return ResponseEntity.ok( categoryService.update( id, updateCategoryDTO ) );
     }
 
-    @Operation( summary = "Deletes an existing category" )
+    @Operation( summary = "Deletes an existing Category", description = "A Category can only be deleted by the user who created it or by a system administrator." )
     @ApiResponse( responseCode = "204" )
     @DeleteMapping( path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE )
     public ResponseEntity<Void> delete( @Valid @PathVariable @NotNull( message = "ID inválido" ) UUID id ) {
