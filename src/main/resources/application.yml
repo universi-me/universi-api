@@ -91,6 +91,9 @@ springdoc:
   swagger-ui:
     enabled: ${API_SWAGGER_ENABLED:true}
     path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: method
+  writer-with-order-by-keys: true
 
 # BUILD HASH
 BUILD_HASH: ${API_BUILD_HASH:development}
