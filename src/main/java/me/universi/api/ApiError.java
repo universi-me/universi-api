@@ -84,7 +84,8 @@ public record ApiError(
             int code,
 
             @Schema(
-                example = "NOT_FOUND"
+                example = "NOT_FOUND",
+                description = "A descriptive name for the HTTP status code error. Will always be one of the one the names for the Spring HttpStatus enum"
             )
             String description
         ) { }
