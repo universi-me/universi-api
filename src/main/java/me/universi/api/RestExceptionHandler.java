@@ -40,13 +40,6 @@ public class RestExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ApiResponse(
-        description = "Default response in case of an error",
-        content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE,
-            schema = @Schema( implementation = ApiError.class )
-        )
-    )
     public ResponseEntity<ApiError> argumentNotValidException(MethodArgumentNotValidException ex) {
         List<String> errorList = ex.getBindingResult()
                 .getFieldErrors()
@@ -72,13 +65,6 @@ public class RestExceptionHandler {
     }
 
     @ExceptionHandler( UniversiException.class )
-    @ApiResponse(
-        description = "Default response in case of an error",
-        content = @Content(
-            mediaType = MediaType.APPLICATION_JSON_VALUE,
-            schema = @Schema( implementation = ApiError.class )
-        )
-    )
     public ResponseEntity<ApiError> universiExceptionHandler( UniversiException ex ) {
         ex.printStackTrace();
         return ex.toApiError().toResponseEntity();
