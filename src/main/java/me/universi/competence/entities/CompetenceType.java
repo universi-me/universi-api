@@ -3,6 +3,7 @@ package me.universi.competence.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -28,6 +29,7 @@ import org.hibernate.annotations.SQLRestriction;
 @SQLDelete(sql = "UPDATE competence.competence_type SET deleted = true WHERE id=?")
 @SQLRestriction( "NOT deleted" )
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@Schema( description = "The subject a Profile can create a Competence on" )
 public class CompetenceType {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -36,6 +38,10 @@ public class CompetenceType {
     private UUID id;
 
     @Column(name = "name", unique=true)
+    @Schema(
+        description = "The name of this CompetenceType. It is unique between all other CompetenceTypes",
+        examples = { "Python", "BPMN", "Engenharia de Software" }
+    )
     private String name;
 
     @JsonIgnore
@@ -43,6 +49,7 @@ public class CompetenceType {
     private boolean deleted = Boolean.FALSE;
 
     @Column(name = "reviewed")
+    @Schema( description = "If true, this CompetenceType has been reviewed by a system administrator and is public, otherwise this CompetenceType and all Competences using it become private and can only be seen by it's owners" )
     private boolean reviewed = Boolean.FALSE;
 
     @JsonIgnore

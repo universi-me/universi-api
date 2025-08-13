@@ -3,6 +3,7 @@ package me.universi.competence.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -33,6 +34,7 @@ import java.util.UUID;
 @SQLDelete(sql = "UPDATE competence.competence SET deleted = true WHERE id=?")
 @SQLRestriction( "NOT deleted")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@Schema( description = "A self-declared measurement of a Profile's proficiency on a subject" )
 public class Competence {
 
     @Id
@@ -51,12 +53,14 @@ public class Competence {
     private Profile profile;
 
     @Column(name = "description", columnDefinition = "TEXT")
+    @Schema( description = "A short plain text description of this Competence" )
     private String description;
 
     public static final int MIN_LEVEL = 0;
     public static final int MAX_LEVEL = 3;
     @Column(name = "level")
     @Min( MIN_LEVEL ) @Max( MAX_LEVEL )
+    @Schema( description = "The level of the Profile's proficiency in the CompetenceType" )
     private int level;
 
     @CreationTimestamp
@@ -69,11 +73,13 @@ public class Competence {
     private boolean deleted = Boolean.FALSE;
 
     @Transient
+    @Schema( description = "If true, this profile has a Competence badge of this CompetenceType for completing a Folder with this CompetenceType" )
     public boolean isHasBadge() {
         return this.profile.hasBadge( competenceType );
     }
 
     @Transient
+    @Schema( description = "All Activities this Profile participates which lists this CompetenceType" )
     public List<Activity> getActivities() {
         return ActivityService
             .getInstance()
