@@ -2,11 +2,13 @@ package me.universi.capacity.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import me.universi.capacity.entidades.Content;
 import me.universi.capacity.enums.ContentStatusType;
 import me.universi.capacity.service.ContentService;
 import me.universi.profile.entities.Profile;
 
+@Schema( description = "A DTO for the ContentStatus of a Content for a different user" )
 public class WatchProfileProgressDTO {
     @JsonIgnore
     private Profile profile;
