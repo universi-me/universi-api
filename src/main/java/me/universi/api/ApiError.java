@@ -25,7 +25,7 @@ public record ApiError(
         HttpStatus status,
 
         @Schema(
-            examples = { "Human-readable message describing the error", },
+            example = "[\"Human-readable message describing the error\"]",
             description = "Contains human-readable message of which error(s) occurred, *most* times with only 1 item"
         )
         List<String> errors
