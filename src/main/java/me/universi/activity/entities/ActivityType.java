@@ -8,6 +8,7 @@ import org.hibernate.annotations.SQLRestriction;
 
 import com.fasterxml.jackson.annotation.*;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -16,6 +17,7 @@ import jakarta.validation.constraints.*;
 @Table( schema = "activity", name = "type" )
 @SQLDelete( sql = "UPDATE activity.type SET deleted_at = NOW() WHERE id = ?" )
 @SQLRestriction( "deleted_at IS NULL" )
+@Schema( description = "Describes which type the Activity is" )
 public class ActivityType {
     @Id
     @NotNull
@@ -25,6 +27,7 @@ public class ActivityType {
 
     @NotBlank
     @Column( name = "name", nullable = false )
+    @Schema( description = "The name of this ActivityType", examples = { "Meeting", "Reunion", "Workshop" } )
     private String name;
 
     @Nullable

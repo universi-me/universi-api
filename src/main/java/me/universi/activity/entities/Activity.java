@@ -12,9 +12,24 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSetter;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.annotation.Nullable;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import me.universi.activity.enums.ActivityStatus;
 import me.universi.competence.entities.CompetenceType;
 import me.universi.group.entities.Group;
@@ -25,6 +40,7 @@ import me.universi.profile.entities.Profile;
 @Table( schema = "activity", name = "activity" )
 @SQLDelete( sql = "UPDATE activity.activity SET deleted_at = NOW() WHERE id = ?" )
 @SQLRestriction( "deleted_at IS NULL" )
+@Schema( description = "Stores data related to events external to the Universi.me system, like meetings and workshops" )
 public class Activity {
     @Id
     @NotNull
@@ -39,25 +55,33 @@ public class Activity {
 
     @NotBlank
     @Column( name = "location", nullable = false )
+    @Schema(
+        description = "Where this Activity will take place, usually with an address or meeting URL and time of the day",
+        examples = { "At 5555 Example Street in Example City at 3 p.m.", "https://fake.example.site/meeting-id at 7 a.m." }
+    )
     private String location;
 
     @Nullable
     @Column( name = "workload", nullable = true )
+    @Schema( description = "How many hours will this Activity take", example = "3" )
     private Integer workload;
 
     @NotNull
     @Temporal( TemporalType.DATE )
     @Column(name = "start_date")
+    @Schema( description = "The date this Activity takes place or starts, if it takes multiple days" )
     private Date startDate;
 
     @NotNull
     @Temporal( TemporalType.DATE )
     @Column(name = "end_date")
+    @Schema( description = "The date this Activity ends. Should always be after `startDate` or equal if this event takes place on the same day" )
     private Date endDate;
 
     @NotNull
     @OneToOne( mappedBy = "activity" )
     @JsonIgnoreProperties( { "activity" } )
+    @Schema( description = "The group used by this Activity to store relevant data, such as name, description, Contents, participants etc." )
     private Group group;
 
     @NotNull
@@ -68,6 +92,7 @@ public class Activity {
         joinColumns = @JoinColumn( name = "activity_id" ),
         inverseJoinColumns = @JoinColumn( name = "competence_type_id" )
     )
+    @Schema( description = "The CompetenceType badges this Activity grants. A participant with a Competence with any of these types gain a Competence badge" )
     private Collection<CompetenceType> badges;
 
     @Nullable
