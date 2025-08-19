@@ -8,6 +8,7 @@ import org.hibernate.annotations.SQLRestriction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -27,6 +28,7 @@ import me.universi.group.enums.GroupTypeKind;
 @Table( name = "type", schema = "system_group" )
 @SQLDelete( sql = "UPDATE system_group.type SET deleted_at = NOW() WHERE id=?" )
 @SQLRestriction( value = "deleted_at IS NULL" )
+@Schema( description = "Describes which type the Group is" )
 public class GroupType {
     @Id
     @NotNull
@@ -36,6 +38,7 @@ public class GroupType {
 
     @NotBlank
     @Column( name = "label", nullable = false )
+    @Schema( description = "The name of this GroupType", examples = { "Department", "Team", "Campus" } )
     private String label;
 
     @Nullable
@@ -59,6 +62,10 @@ public class GroupType {
     public @Nullable Date getDeletedAt() { return deletedAt; }
 
     public @NotNull GroupTypeKind getKind() { return kind; }
+
+    @Schema( description = "If true, this GroupType can be assigned to Groups as normal. Otherwise, it's restricted and can only be assigned automatically" )
     public boolean isCanBeAssigned() { return kind == GroupTypeKind.REGULAR; }
+
+    @Schema( description = "If true, this GroupType can be deleted by a system administrator" )
     public boolean isCanBeDeleted() { return kind == GroupTypeKind.REGULAR; }
 }
