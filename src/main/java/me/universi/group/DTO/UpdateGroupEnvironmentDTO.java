@@ -1,7 +1,9 @@
 package me.universi.group.DTO;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 
+@Schema( description = "Request body for updating the organization GroupEnvironment" )
 public record UpdateGroupEnvironmentDTO(
         Boolean signup_enabled,
         Boolean signup_confirm_account_enabled,

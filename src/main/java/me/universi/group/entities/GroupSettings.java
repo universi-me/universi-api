@@ -37,13 +37,11 @@ public class GroupSettings implements Serializable {
     private Collection<GroupEmailFilter> filterEmails;
 
     @OneToOne(mappedBy = "groupSettings", fetch = FetchType.EAGER)
-    @Schema( description = "The theme this organization is using, with every key declaring a CSS color to be used" )
     public GroupTheme theme;
 
     @JsonIgnoreProperties(value = { "signup_confirm_account_enabled", "recaptcha_api_key", "recaptcha_api_project_id", "keycloak_client_id", "keycloak_client_secret", "keycloak_realm", "keycloak_url", "keycloak_redirect_url",
             "message_template_new_content", "message_template_assigned_content", "alert_new_content_enabled", "alert_assigned_content_enabled", "email_enabled", "email_host", "email_port", "email_protocol", "email_username", "email_password"})
     @OneToOne(mappedBy = "groupSettings", fetch = FetchType.EAGER)
-    @Schema( description = "The environment this organization is running on, with every public setting available" )
     public GroupEnvironment environment;
 
     @JsonIgnore
