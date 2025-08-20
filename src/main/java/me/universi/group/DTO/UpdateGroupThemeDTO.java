@@ -4,9 +4,13 @@ import jakarta.validation.constraints.NotBlank;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema( description = "Request body for updating the organization GroupTheme. Each key other than `group` is a CSS color to be used on the Web Client" )
 public record UpdateGroupThemeDTO(
         @NotBlank
         @JsonAlias( { "groupId", "groupPath" } )
+        @Schema( description = "The organization Group ID or path" )
         String group,
 
         String primary_color,
