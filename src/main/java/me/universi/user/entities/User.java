@@ -3,6 +3,8 @@ package me.universi.user.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;
 import jakarta.validation.constraints.NotNull;
@@ -32,6 +34,7 @@ import java.util.UUID;
 @SQLDelete(sql = "UPDATE system_users SET deleted = true WHERE id=?")
 @SQLRestriction( "NOT deleted" )
 @JsonIgnoreProperties({"hibernateLazyInitializer"})
+@Schema( description = "A auxiliary entity to Profile, storing data related to authorization and authentication" )
 public class User implements UserDetails, Serializable {
 
     @Serial
@@ -45,10 +48,12 @@ public class User implements UserDetails, Serializable {
 
     @Column(name = "username")
     @NotNull
+    @Schema( description = "An unique username used to identify this user easier, instead of through an UUID" )
     private String name;
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonEmailOwnerSessionFilter.class)
     @Column(name = "email")
+    @Schema( description = "The email this user registered at signup, used to communicate with the platform's notification system" )
     private String email;
 
     @JsonIgnore
@@ -85,6 +90,7 @@ public class User implements UserDetails, Serializable {
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserAdminFilter.class)
     @Column(name = "blocked_account")
     @NotNull
+    @Schema( description = "Visible only to system administrators, if true this user has been banned of the platform and cannot be seen by regular users" )
     private boolean blocked_account;
 
     @JsonIgnore
@@ -105,6 +111,7 @@ public class User implements UserDetails, Serializable {
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserAdminFilter.class)
     @Column(name = "temporarily_password")
     @NotNull
+    @Schema( description = "Visible only to system administrators, if true, this user is currently using a temporary password which they will be prompted to reset once they login" )
     private boolean temporarilyPassword;
 
     @JsonIgnore
@@ -260,6 +267,7 @@ public class User implements UserDetails, Serializable {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @Transient
+    @Schema( implementation = Authority.class )
     public String getAccessLevel() {
         if(authority == null || !(getOwnerOfSession() || UserService.getInstance().isUserAdminSession())) {
             return null;
@@ -313,17 +321,20 @@ public class User implements UserDetails, Serializable {
     }
 
     @Transient
+    @Schema( description = "If true, this user is the currently authenticated user" )
     public boolean getOwnerOfSession() {
         return LoginService.getInstance().isSessionOfUser(this);
     }
 
     @Transient
+    @Schema( description = "If true, this user's Profile is fully unavailable due to being missing information" )
     public boolean isNeedProfile() {
         return UserService.getInstance().userNeedAnProfile(this, false);
     }
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @Transient
+    @Schema( description = "Visible only to yourself or system administrators, if true it means this user has not set a password for themselves yet and is unable to login through a username/password combination" )
     public Boolean isHasPassword() {
         if(!(getOwnerOfSession() || UserService.getInstance().isUserAdminSession())) {
             return null;
