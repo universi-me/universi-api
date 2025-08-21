@@ -23,7 +23,7 @@ import me.universi.activity.entities.ActivityType;
 @SecurityRequirement( name = OpenAPIConfig.AUTHORIZATION )
 @Tag(
     name = "ActivityType",
-    description = "ActivityTypes different kinds of Activities, such as meetings and workshops"
+    description = "ActivityTypes are used to differentiate kinds of Activities, such as meetings and workshops"
 )
 public class ActivityTypeController {
     private final ActivityTypeService activityTypeService;
