@@ -38,7 +38,7 @@ public class GroupType {
 
     @NotBlank
     @Column( name = "label", nullable = false )
-    @Schema( description = "The name of this GroupType", examples = { "Department", "Team", "Campus" } )
+    @Schema( description = "The name of this GroupType. Unique amongst other GroupTypes", examples = { "Department", "Team", "Campus" } )
     private String label;
 
     @Nullable
