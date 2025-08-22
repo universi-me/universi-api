@@ -9,9 +9,11 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonAlias;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema.AdditionalPropertiesValue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import me.universi.role.enums.FeaturesTypes;
+import me.universi.role.openapi.FeatureToLevelSchema;
 
 @Schema( description = "Request body for creating new Activities" )
 public record CreateActivityDTO(
@@ -57,14 +59,14 @@ public record CreateActivityDTO(
 ) {
     public record CreateActivityRoleConfigDTO(
         @JsonAlias( { "admin" } )
-        @Schema( description = "Configures permission level for each feature for Group administrators" )
+        @Schema( description = "Configures permission level for each feature for Group administrators", ref = FeatureToLevelSchema.REF_STRING, additionalProperties = AdditionalPropertiesValue.FALSE )
         Optional<Map<FeaturesTypes, Integer>> administrator,
 
         @JsonAlias( { "member" } )
-        @Schema( description = "Configures permission level for each feature for Group participants" )
+        @Schema( description = "Configures permission level for each feature for Group participants", ref = FeatureToLevelSchema.REF_STRING, additionalProperties = AdditionalPropertiesValue.FALSE )
         Optional<Map<FeaturesTypes, Integer>> participant,
 
-        @Schema( description = "Configures permission level for each feature for Group visitors" )
+        @Schema( description = "Configures permission level for each feature for Group visitors", ref = FeatureToLevelSchema.REF_STRING, additionalProperties = AdditionalPropertiesValue.FALSE )
         Optional<Map<FeaturesTypes, Integer>> visitor
     ) {}
 }
