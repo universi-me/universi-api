@@ -1,7 +1,6 @@
 package me.universi.group.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
@@ -21,7 +20,6 @@ import org.hibernate.annotations.*;
 @Table(name = "profile_group", schema = "system_group")
 @SQLDelete(sql = "UPDATE system_group.profile_group SET deleted = true, exited = NOW() WHERE id=?")
 @SQLRestriction( value = "NOT deleted" )
-@JsonIgnoreProperties({"hibernateLazyInitializer"})
 @Schema( description = "Unites the Group and Profile entities to store Group participants and their Role" )
 public class ProfileGroup implements Serializable {
 
@@ -45,36 +43,34 @@ public class ProfileGroup implements Serializable {
     public Date exited;
 
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn(name="profile_id")
     @NotNull
-    @NotFound(action = NotFoundAction.IGNORE)
-    public Profile profile;
+    private Profile profile;
 
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn(name="group_id")
     @NotNull
-    @NotFound(action = NotFoundAction.IGNORE)
-    public Group group;
+    private Group group;
 
     @JsonIgnore
     @Column(name = "deleted")
     public boolean deleted = Boolean.FALSE;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @NotNull
     @PrimaryKeyJoinColumn(name="role_id")
     @Schema( description = "Role assigned to the participant" )
-    public Role role;
+    private Role role;
 
     public ProfileGroup() {
     }
 
-    @Transient @JsonIgnore public boolean isAdmin() { return this.role.isAdmin(); }
-    @Transient @JsonIgnore public boolean isParticipant() { return this.role.isParticipant(); }
-    @Transient @JsonIgnore public boolean isVisitor() { return this.role.isVisitor(); }
-    @Transient @JsonIgnore public boolean isCustom() { return this.role.isCustom(); }
+    @Transient @JsonIgnore public boolean isAdmin() { return this.getRole().isAdmin(); }
+    @Transient @JsonIgnore public boolean isParticipant() { return this.getRole().isParticipant(); }
+    @Transient @JsonIgnore public boolean isVisitor() { return this.getRole().isVisitor(); }
+    @Transient @JsonIgnore public boolean isCustom() { return this.getRole().isCustom(); }
 
     public Profile getProfile() {
         return this.profile;
@@ -96,6 +92,6 @@ public class ProfileGroup implements Serializable {
         return this.joined;
     }
 
-    public @NotNull Role getRole() { return role; }
+    public @NotNull Role getRole() { return this.role; }
     public void setRole( @NotNull Role role ) { this.role = role; }
 }

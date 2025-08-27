@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
@@ -19,6 +20,7 @@ import me.universi.user.services.JsonEmailOwnerSessionFilter;
 import me.universi.user.services.JsonUserAdminFilter;
 import me.universi.user.services.LoginService;
 import me.universi.user.services.UserService;
+
 import org.hibernate.annotations.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -33,7 +35,6 @@ import java.util.UUID;
 @Table(name = "system_users", uniqueConstraints = {@UniqueConstraint(name = "system_users_username_organization_key", columnNames = {"username", "organization"})})
 @SQLDelete(sql = "UPDATE system_users SET deleted = true WHERE id=?")
 @SQLRestriction( "NOT deleted" )
-@JsonIgnoreProperties({"hibernateLazyInitializer"})
 @Schema( description = "A auxiliary entity to Profile, storing data related to authorization and authentication" )
 public class User implements UserDetails, Serializable {
 
@@ -120,10 +121,9 @@ public class User implements UserDetails, Serializable {
     private Authority authority;
 
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organization")
     @NotNull
-    @NotFound(action = NotFoundAction.IGNORE)
     private Group organization;
 
     @JsonIgnore
@@ -350,16 +350,11 @@ public class User implements UserDetails, Serializable {
     public boolean equals(Object otherUser) {
         if(otherUser == null) return false;
         else if (!(otherUser instanceof UserDetails)) return false;
-        else return (otherUser.hashCode() == hashCode());
-    }
-
-    @Override
-    public int hashCode() {
-        return (getUsername() + organization.getNickname()).hashCode();
+        else return (((UserDetails) otherUser).getUsername().equals(getUsername()));
     }
 
     public Group getOrganization() {
-        return organization;
+        return this.organization;
     }
 
     public void setOrganization(Group organization) {

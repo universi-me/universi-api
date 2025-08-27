@@ -14,20 +14,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.annotation.Nullable;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
-import jakarta.persistence.Transient;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import me.universi.activity.enums.ActivityStatus;
@@ -49,7 +36,7 @@ public class Activity {
     private UUID id;
 
     @NotNull
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn( name = "type_id", nullable = false )
     private ActivityType type;
 
@@ -79,13 +66,13 @@ public class Activity {
     private Date endDate;
 
     @NotNull
-    @OneToOne( mappedBy = "activity" )
+    @OneToOne( mappedBy = "activity", fetch = FetchType.LAZY)
     @JsonIgnoreProperties( { "activity" } )
     @Schema( description = "The group used by this Activity to store relevant data, such as name, description, Contents, participants etc." )
     private Group group;
 
     @NotNull
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         schema = "activity",
         name = "badges",
@@ -121,10 +108,10 @@ public class Activity {
 
     public UUID getId() { return id; }
 
-    @Transient @JsonIgnore public @NotBlank String getName() { return group.getName(); }
-    @Transient @JsonIgnore public @NotBlank String getDescription() { return group.getDescription(); }
-    @Transient @JsonIgnore public Profile getAuthor() { return group.getAdmin(); }
-    @Transient @JsonIgnore public @NotNull Collection<ProfileGroup> getParticipants() { return group.getParticipants(); }
+    @Transient @JsonIgnore public @NotBlank String getName() { return getGroup().getName(); }
+    @Transient @JsonIgnore public @NotBlank String getDescription() { return getGroup().getDescription(); }
+    @Transient @JsonIgnore public Profile getAuthor() { return getGroup().getAdmin(); }
+    @Transient @JsonIgnore public @NotNull Collection<ProfileGroup> getParticipants() { return getGroup().getParticipants(); }
 
     public @NotNull ActivityType getType() { return type; }
     public void setType( @NotNull ActivityType activityType ) { this.type = activityType; }

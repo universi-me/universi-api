@@ -51,7 +51,7 @@ public class Folder implements Serializable {
     private String name;
 
     @Nullable
-    @OneToOne
+    @OneToOne(fetch =  FetchType.LAZY)
     @JoinColumn( name = "image_metadata_id" )
     private ImageMetadata image;
 
@@ -60,7 +60,7 @@ public class Folder implements Serializable {
     @Schema( description = "A plain text describing this Folder, longer and more in-depth than the title", example = "An introductory course to Python programming language where you'll learn..." )
     private String description;
 
-    @OneToMany(cascade = CascadeType.PERSIST)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinTable( name = "folder_categories", schema = "capacity" )
     @Schema( description = "All Categories this Folder matches" )
     private Collection<Category> categories;
@@ -70,9 +70,8 @@ public class Folder implements Serializable {
     @Column(name = "created_at")
     private Date createdAt;
 
-    @ManyToMany( mappedBy = "folder" )
+    @ManyToMany( mappedBy = "folder", fetch = FetchType.LAZY)
     @JsonIgnore
-    @NotFound(action = NotFoundAction.IGNORE)
     private Collection<FolderContents> folderContents;
 
     @Column
@@ -82,10 +81,9 @@ public class Folder implements Serializable {
     @Schema( description = "A rating of this Folder's quality" )
     private Integer rating;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="profile_id")
     @NotNull
-    @NotFound(action = NotFoundAction.IGNORE)
     @Schema( description = "The creator of this Folder" )
     private Profile author;
 
@@ -94,22 +92,21 @@ public class Folder implements Serializable {
     @Schema( description = "A public Folder can be seen by anyone, while a non-public folder can only be seen by a participant of a Group this Folder is in" )
     public boolean publicFolder;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinTable(
         name = "folder_granted_access_groups",
         schema = "capacity",
         joinColumns = @JoinColumn(name = "folder_id"),
         inverseJoinColumns = @JoinColumn(name = "granted_access_groups_id")
     )
-    @NotFound(action = NotFoundAction.IGNORE)
     @Schema( description = "A list of Groups this Folder is in" )
     private Collection<Group> grantedAccessGroups;
 
-    @OneToMany(mappedBy = "folder")
+    @OneToMany(mappedBy = "folder", fetch = FetchType.LAZY)
     @JsonIgnore
     private Collection<FolderProfile> assignedUsers;
 
-    @OneToMany(mappedBy = "folder")
+    @OneToMany(mappedBy = "folder", fetch = FetchType.LAZY)
     @JsonIgnore
     private Collection<FolderFavorite> favoriteUsers;
 
@@ -117,7 +114,7 @@ public class Folder implements Serializable {
     @Column(name = "deleted")
     private boolean deleted = Boolean.FALSE;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "folder_competences",
         schema = "capacity",
@@ -262,7 +259,7 @@ public class Folder implements Serializable {
     @Transient
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public List<Profile> getAssignedBy() {
-        return this.assignedUsers.stream()
+        return getAssignedUsers().stream()
             .filter(u -> ProfileService.getInstance().isSessionOfProfile(u.getAssignedTo()))
             .map( fp -> fp.getAssignedBy() )
             .filter(Objects::nonNull)
@@ -272,7 +269,7 @@ public class Folder implements Serializable {
     @Transient
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public Boolean isFavorite() {
-        FolderFavorite favorite = this.favoriteUsers.stream()
+        FolderFavorite favorite = getFavoriteUsers().stream()
             .filter(f -> ProfileService.getInstance().isSessionOfProfile(f.getProfile()))
             .findAny()
             .orElse(null);

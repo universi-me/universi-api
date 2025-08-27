@@ -21,7 +21,6 @@ import org.hibernate.annotations.*;
 @Table( name = "folder_profile", schema = "capacity" )
 @SQLDelete( sql = "UPDATE capacity.folder_profile SET removed = CURRENT_TIMESTAMP WHERE id=?" )
 @SQLRestriction( "removed IS NULL" )
-@JsonIgnoreProperties({"hibernateLazyInitializer"})
 @Schema( description = "A assignment of a Folder to a Profile by another Profile" )
 public class FolderProfile implements Serializable {
 
@@ -45,24 +44,21 @@ public class FolderProfile implements Serializable {
     @Column(name = "removed")
     public Date removed;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn(name="assigned_by_id")
     @NotNull
-    @NotFound(action = NotFoundAction.IGNORE)
     @Schema( description = "The Profile who assigned the Folder" )
     public Profile assignedBy;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn(name="assigned_to_id")
     @NotNull
-    @NotFound(action = NotFoundAction.IGNORE)
     @Schema( description = "The Profile whose the Folder was assigned to" )
     public Profile assignedTo;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn(name="folder_id")
     @NotNull
-    @NotFound(action = NotFoundAction.IGNORE)
     @Schema( description = "The assigned Folder" )
     public Folder folder;
 
@@ -106,12 +102,12 @@ public class FolderProfile implements Serializable {
 
     @Transient
     public int getFolderSize() {
-        return this.folder.getFolderContents().size();
+        return FolderService.getInstance().getFolderContents(getFolder()).size();
     }
 
     @Transient
     public int getDoneUntilNow() {
-        return FolderService.getInstance().getStatuses(assignedTo, folder).stream()
+        return FolderService.getInstance().getStatuses(getAssignedTo(), getFolder()).stream()
             .filter(cs -> cs.getStatus().equals(ContentStatusType.DONE))
             .filter(Objects::nonNull)
             .toList()

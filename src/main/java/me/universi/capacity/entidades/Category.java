@@ -4,17 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.annotation.Nullable;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
@@ -51,7 +42,7 @@ public class Category implements Serializable {
     private String name;
 
     @Nullable
-    @OneToOne
+    @OneToOne(fetch =  FetchType.LAZY)
     @JoinColumn( name = "image_metadata_id" )
     private ImageMetadata image;
 
@@ -62,10 +53,9 @@ public class Category implements Serializable {
     private Date createdAt;
 
     @JsonIgnore
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="profile_id")
     @NotNull
-    @NotFound(action = NotFoundAction.IGNORE)
     private Profile author;
 
     @JsonIgnore

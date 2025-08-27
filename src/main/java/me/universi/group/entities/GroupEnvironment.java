@@ -1,7 +1,6 @@
 package me.universi.group.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -20,7 +19,6 @@ import org.hibernate.annotations.SQLRestriction;
 @Table( name = "group_environment", schema = "system_group" )
 @SQLDelete(sql = "UPDATE system_group.group_environment SET deleted = true WHERE id=?")
 @SQLRestriction( value = "NOT deleted" )
-@JsonIgnoreProperties({"hibernateLazyInitializer"})
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 @Schema( description = "The environment this organization is running on, with every public setting available" )
 public class GroupEnvironment implements Serializable {
@@ -40,9 +38,9 @@ public class GroupEnvironment implements Serializable {
 
     @JsonIgnore
     @JoinColumn(name="group_settings_id")
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.LAZY)
     @NotNull
-    public GroupSettings groupSettings;
+    private GroupSettings groupSettings;
 
     /** Signup **/
     @Column(name = "signup_enabled")
@@ -149,5 +147,17 @@ public class GroupEnvironment implements Serializable {
 
     public void setAdded(Date added) {
         this.added = added;
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public GroupSettings getGroupSettings() {
+        return groupSettings;
+    }
+
+    public void setGroupSettings(GroupSettings groupSettings) {
+        this.groupSettings = groupSettings;
     }
 }

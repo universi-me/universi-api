@@ -12,6 +12,7 @@ import me.universi.api.exceptions.UniversiServerException;
 import me.universi.group.entities.Group;
 import me.universi.group.entities.GroupEnvironment;
 import me.universi.group.repositories.GroupRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class OrganizationService {
@@ -55,7 +56,7 @@ public class OrganizationService {
     }
 
     public GroupEnvironment getEnvironment() {
-        return groupService.getGroupEnvironment( getOrganization() );
+        return GroupService.getInstance().getGroupEnvironment( getOrganization() );
     }
 
     public boolean isEmailAvailable( String email ) {
@@ -81,8 +82,8 @@ public class OrganizationService {
             return;
 
         var org = getUserlessOrganization();
-        org.nickname = localOrganizationNickname.trim().toLowerCase();
-        org.name = localOrganizationNickname.trim().toUpperCase();
+        org.setNickname(localOrganizationNickname.trim().toLowerCase());
+        org.setName(localOrganizationNickname.trim().toUpperCase());
 
         groupRepository.saveAndFlush( org );
     }

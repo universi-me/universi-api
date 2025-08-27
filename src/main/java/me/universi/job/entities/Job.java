@@ -1,25 +1,13 @@
 package me.universi.job.entities;
 
+import jakarta.persistence.*;
 import java.util.Collection;
 import java.util.UUID;
 
-import org.hibernate.annotations.NotFound;
-import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.validator.constraints.Length;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 import me.universi.competence.entities.CompetenceType;
 import me.universi.institution.entities.Institution;
 import me.universi.profile.entities.Profile;
@@ -46,21 +34,20 @@ public class Job {
     @Column(name = "long_description", nullable = false)
     private String longDescription;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "institution_id", nullable = false)
     private Institution institution;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "job_competences",
         schema = "job",
         joinColumns = @JoinColumn(name = "job_id"),
         inverseJoinColumns = @JoinColumn(name = "competence_type_id")
     )
-    @NotFound(action = NotFoundAction.IGNORE)
     private Collection<CompetenceType> requiredCompetences;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
     private Profile author;
 

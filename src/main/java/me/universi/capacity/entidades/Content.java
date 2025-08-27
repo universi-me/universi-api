@@ -4,26 +4,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
+import jakarta.persistence.*;
 import jakarta.annotation.Nullable;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Transient;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Table;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -70,7 +55,7 @@ public class Content implements Serializable {
     private String title;
 
     @Nullable
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn( name = "image_metadata_id" )
     @Schema( description = "Path or full URL to the Content image" )
     private ImageMetadata image;
@@ -80,13 +65,12 @@ public class Content implements Serializable {
     @Schema( description = "Short plain text describing this Content in more depth than the title" )
     private String description;
 
-    @OneToMany(cascade = CascadeType.PERSIST)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinTable( name = "content_categories", schema = "capacity" )
     @Schema( description = "All Categories this Content matches" )
     private Collection<Category> categories;
 
-    @ManyToMany(mappedBy = "content")
-    @NotFound(action = NotFoundAction.IGNORE)
+    @ManyToMany(mappedBy = "content", fetch = FetchType.LAZY)
     @JsonIgnore
     private Collection<FolderContents> folderContents;
 
@@ -104,10 +88,9 @@ public class Content implements Serializable {
     @Column(name = "created_at")
     private Date createdAt;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="profile_id")
     @NotNull
-    @NotFound(action = NotFoundAction.IGNORE)
     @Schema( description = "The creator of this Content" )
     private Profile author;
 
@@ -224,7 +207,7 @@ public class Content implements Serializable {
             return null;
 
         return ContentService.getInstance()
-            .findStatusById( id, profile.get().getId() )
+            .findStatusById( getId(), profile.get().getId() )
             .getStatus();
     }
 }

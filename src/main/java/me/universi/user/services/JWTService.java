@@ -5,6 +5,7 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
+import java.util.NoSuchElementException;
 import me.universi.Sys;
 import me.universi.user.entities.User;
 import me.universi.user.exceptions.UserException;
@@ -119,7 +120,7 @@ public class JWTService {
         try {
             user = UserService.getInstance()
                     .findUnchecked( UUID.fromString(claims.getSubject()) ).orElseThrow();
-        } catch (EntityNotFoundException | IllegalArgumentException e) {
+        } catch (EntityNotFoundException | IllegalArgumentException | NoSuchElementException e) {
             throw new UserException("User not found for this token", HttpStatus.UNAUTHORIZED);
         }
 

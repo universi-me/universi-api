@@ -1,7 +1,6 @@
 package me.universi.competence.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Table;
@@ -33,7 +32,6 @@ import java.util.UUID;
 @Table( name = "competence", schema = "competence" )
 @SQLDelete(sql = "UPDATE competence.competence SET deleted = true WHERE id=?")
 @SQLRestriction( "NOT deleted")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Schema( description = "A self-declared measurement of a Profile's proficiency on a subject" )
 public class Competence {
 
@@ -45,11 +43,10 @@ public class Competence {
 
     @ManyToOne( fetch = FetchType.LAZY )
     @JoinColumn(name = "competence_type_id")
-    @NotFound(action = NotFoundAction.IGNORE)
     private CompetenceType competenceType;
 
     @JoinColumn( name = "profile_id" )
-    @ManyToOne
+    @ManyToOne(fetch =  FetchType.LAZY )
     private Profile profile;
 
     @Column(name = "description", columnDefinition = "TEXT")
@@ -75,7 +72,7 @@ public class Competence {
     @Transient
     @Schema( description = "If true, this profile has a Competence badge of this CompetenceType for completing a Folder with this CompetenceType" )
     public boolean isHasBadge() {
-        return this.profile.hasBadge( competenceType );
+        return getProfile().hasBadge( getCompetenceType() );
     }
 
     @Transient
@@ -83,7 +80,7 @@ public class Competence {
     public List<Activity> getActivities() {
         return ActivityService
             .getInstance()
-            .findByProfileAndCompetenceType( profile, competenceType );
+            .findByProfileAndCompetenceType( getProfile(), getCompetenceType() );
     }
 
     public Competence() {}

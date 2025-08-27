@@ -1,7 +1,6 @@
 package me.universi.competence.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
@@ -19,8 +18,6 @@ import me.universi.profile.entities.Profile;
 
 import java.util.Collection;
 import java.util.UUID;
-import org.hibernate.annotations.NotFound;
-import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -28,7 +25,6 @@ import org.hibernate.annotations.SQLRestriction;
 @Table( name = "competence_type", schema = "competence" )
 @SQLDelete(sql = "UPDATE competence.competence_type SET deleted = true WHERE id=?")
 @SQLRestriction( "NOT deleted" )
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Schema( description = "The subject a Profile can create a Competence on" )
 public class CompetenceType {
     @Id
@@ -60,7 +56,6 @@ public class CompetenceType {
         joinColumns = @JoinColumn(name = "competence_type_id"),
         inverseJoinColumns = @JoinColumn(name = "profile_id")
     )
-    @NotFound(action = NotFoundAction.IGNORE)
     private Collection<Profile> profilesWithAccess;
 
     public UUID getId() {
@@ -85,5 +80,5 @@ public class CompetenceType {
 
     public Collection<Profile> getProfilesWithAccess() { return profilesWithAccess; }
     public void setProfilesWithAccess(Collection<Profile> profilesWithAccess) { this.profilesWithAccess = profilesWithAccess; }
-    public void addProfileWithAccess(Profile profile) { this.profilesWithAccess.add(profile); }
+    public void addProfileWithAccess(Profile profile) { getProfilesWithAccess().add(profile); }
 }
