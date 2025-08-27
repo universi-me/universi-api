@@ -2,6 +2,7 @@ package me.universi.capacity.entidades;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
@@ -21,6 +22,7 @@ import java.util.UUID;
 @Table( name = "category", schema = "capacity" )
 @SQLDelete(sql = "UPDATE capacity.category SET deleted = true WHERE id=?")
 @SQLRestriction( "NOT deleted" )
+@Schema( name = "Category", description = "Category used as a tag on Content and Folder" )
 public class Category implements Serializable {
 
     @Serial
@@ -33,6 +35,10 @@ public class Category implements Serializable {
 
     @Column(name = "name")
     @Size(max = 100)
+    @Schema(
+        description = "The name of this Category. It is unique between all other categories",
+        examples = { "Python", "Arquitetura de Software", "BPMN", }
+    )
     private String name;
 
     @Nullable

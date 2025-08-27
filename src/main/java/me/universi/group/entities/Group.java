@@ -2,6 +2,8 @@ package me.universi.group.entities;
 
 import com.fasterxml.jackson.annotation.*;
 
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -34,6 +36,7 @@ import org.hibernate.annotations.SQLRestriction;
 @Table( name = "system_group", schema = "system_group" )
 @SQLDelete(sql = "UPDATE system_group.system_group SET deleted = true WHERE id=?")
 @SQLRestriction( value = "NOT deleted" )
+@Schema( description = "Hierarchy-based entity that groups Profiles and other entities" )
 public class Group implements Serializable {
 
     @Serial
@@ -48,39 +51,47 @@ public class Group implements Serializable {
     
     @Column(name = "nickname")
     @NotNull
+    @Schema( description = "Short name used to identify this Group amongst other Groups with the same parent Group. Used in this Group's path", examples = { "company.name", "department.name", "team.name" } )
     private String nickname;
 
     @Column(name = "name")
+    @Schema( description = "Short name used to quickly identify this Group", examples = { "Company Ltda.", "Example Department", "Example Team" } )
     private String name;
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
     @Column(name = "description", columnDefinition = "TEXT")
+    @Schema( description = "HTML text describing this Group to the users" )
     private String description;
 
     @Nullable
     @OneToOne
     @JoinColumn( name = "image_metadata_id" )
+    @Schema( description = "The path or full URL for this Group's image" )
     private ImageMetadata image;
 
     @Nullable
     @OneToOne
     @JoinColumn( name = "banner_image_metadata_id" )
+    @Schema( description = "The path or full URL for this Group's banner image, used in the Group page as a page header" )
     private ImageMetadata bannerImage;
 
     @Nullable
     @OneToOne
     @JoinColumn( name = "header_image_metadata_id" )
+    @Schema( description = "The path or full URL for this Organization's header image, used in the web client header. Should be `null`, except in the organization", example = "null" )
     private ImageMetadata headerImage;
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="profile_id")
     @NotNull
+    @Schema( description = "The Profile responsible for creating this Group" )
     private Profile admin;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="group_settings_id")
     @NotNull
+    @Schema( description = "This Group's settings. Its contents should be `null`, except in the organization" )
     private GroupSettings groupSettings;
 
     @JsonIgnore
@@ -100,6 +111,7 @@ public class Group implements Serializable {
     @Nullable
     @OneToOne( cascade = CascadeType.ALL, fetch = FetchType.LAZY )
     @JoinColumn( name = "activity_id", nullable = true )
+    @Schema( description = "The Activity that uses this Group as an Activity Group, if there is one" )
     private Activity activity;
 
     @JsonIgnore
@@ -117,16 +129,19 @@ public class Group implements Serializable {
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
     @Column(name = "can_create_group")
     @NotNull
+    @Schema( description = "If true, this Group can have subgroups" )
     private boolean canCreateGroup;
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
     @Column(name = "can_enter")
     @NotNull
+    @Schema( description = "If true, any user can join this Group" )
     private boolean canEnter;
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
     @Column(name = "can_add_participant")
     @NotNull
+    @Schema( description = "If true, Group administrators can add new participants" )
     private boolean canAddParticipant;
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
@@ -138,6 +153,7 @@ public class Group implements Serializable {
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
     @Column(name = "public_group")
     @NotNull
+    @Schema( description = "If true, this Group can be visualized by any user of the platform. Otherwise, they must be a participant to see it" )
     private boolean publicGroup;
 
     @ManyToMany(mappedBy = "grantedAccessGroups", fetch = FetchType.LAZY)
@@ -242,6 +258,7 @@ public class Group implements Serializable {
      * Checks if the Group is a regular group or an special group ( eg. an {@link Activity} group )
      * @return {@code true} if group is regular, otherwise returns {@code false};
      */
+    @Schema( description = "If true, this Group is a regular Group, otherwise it's some kind of special Group, for example, an Activity Group" )
     @Transient public boolean isRegularGroup() { return activity == null; }
     @Transient @JsonIgnore public boolean isActivityGroup() { return activity != null; }
 
@@ -255,6 +272,7 @@ public class Group implements Serializable {
 
     /** The group's ability to be accessed directly through the URL (parent of all groups) */
     @Transient
+    @Schema( description = "Indicates if this Group is an organization" )
     public boolean isRootGroup() {
         return this.getParentGroup().isEmpty();
     }
@@ -309,6 +327,7 @@ public class Group implements Serializable {
     public static final String PATH_DIVISOR = "/";
 
     @Transient
+    @Schema( description = "This Group's full path, used to identify it using its nickname in the Group hierarchy", example = "/company.name/department.name/team.name" )
     public String getPath() {
         return getParentGroup().map( Group::getPath ).orElse( "" ) + PATH_DIVISOR + this.nickname;
     }
@@ -322,6 +341,7 @@ public class Group implements Serializable {
     @JsonProperty( "organization" )
     @JsonInclude(value = JsonInclude.Include.NON_NULL)
     @Transient
+    @Schema( description = "This Group's organization. Only present if this Group itself is not an organization", hidden = true )
     private @Nullable Group getJsonOrganization() {
         return this.getParentGroup()
             .map( parent -> parent.isRootGroup()
@@ -333,6 +353,7 @@ public class Group implements Serializable {
 
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = JsonUserLoggedFilter.class)
     @Transient
+    @Schema( description = "If true, the authenticated user is an administrator of this Group" )
     public boolean isCanEdit() {
         return GroupService.getInstance().hasPermissionToEdit(this);
     }
@@ -379,6 +400,7 @@ public class Group implements Serializable {
     }
 
     @Transient
+    @Schema( description = "The application version. Only present if this Group is an organization" )
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public String getBuildHash() {
         if(!this.isRootGroup()) {
@@ -389,6 +411,7 @@ public class Group implements Serializable {
 
     @Transient
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    @Schema( description = "The authenticated user Role in this Group" )
     public @Nullable Role getRole() {
         return ProfileService.getInstance()
             .getProfileInSession()

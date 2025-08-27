@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import me.universi.image.enums.ImageStoreLocation;
@@ -27,6 +28,7 @@ import me.universi.profile.entities.Profile;
 @SQLDelete( sql = "UPDATE image.image_metadata SET deleted = TRUE WHERE id=?" )
 @SQLRestriction( "NOT deleted" )
 @JsonSerialize(using = ImageMetadataSerializer.class)
+@Schema( implementation = String.class, description = "Path or full URL to this image", examples = { "/img/minio/40be3304-0225-4546-8d58-11b4fb3c6dfb", "https://fake.example.site/image.png" } )
 public class ImageMetadata implements Serializable {
     @Id
     @GeneratedValue( strategy = GenerationType.UUID )

@@ -3,10 +3,11 @@ package me.universi.capacity.entidades;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;
-import jakarta.persistence.Table;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -27,6 +28,7 @@ import org.hibernate.annotations.*;
 @Table( name = "folder", schema = "capacity" )
 @SQLDelete(sql = "UPDATE capacity.folder SET deleted = true WHERE id=?")
 @SQLRestriction( value = "NOT deleted" )
+@Schema( description = "An ordered collection of Contents, grouping multiple materials together" )
 public class Folder implements Serializable {
 
     @Serial
@@ -40,10 +42,12 @@ public class Folder implements Serializable {
     public static final int FOLDER_REFERENCE_SIZE = 15;
     public static final String FOLDER_REFERENCE_AVAILABLE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     @Column(name = "reference", unique = true, length = FOLDER_REFERENCE_SIZE)
+    @Schema( description = "A small randomly generated text used to identify this Folder", example = "lS5zyuJOc7vQr8b" )
     private String reference;
 
     @Column
     @Size(max = 100)
+    @Schema( description = "A short plain text describing this Folder", example = "Basic Python Course" )
     private String name;
 
     @Nullable
@@ -53,10 +57,12 @@ public class Folder implements Serializable {
 
     @Column
     @Size(max = 200)
+    @Schema( description = "A plain text describing this Folder, longer and more in-depth than the title", example = "An introductory course to Python programming language where you'll learn..." )
     private String description;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinTable( name = "folder_categories", schema = "capacity" )
+    @Schema( description = "All Categories this Folder matches" )
     private Collection<Category> categories;
 
     @CreationTimestamp
@@ -72,15 +78,18 @@ public class Folder implements Serializable {
     @NotNull
     @Min(0)
     @Max(5)
+    @Schema( description = "A rating of this Folder's quality" )
     private Integer rating;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="profile_id")
     @NotNull
+    @Schema( description = "The creator of this Folder" )
     private Profile author;
 
     @Column(name = "public_folder")
     @NotNull
+    @Schema( description = "A public Folder can be seen by anyone, while a non-public folder can only be seen by a participant of a Group this Folder is in" )
     public boolean publicFolder;
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
@@ -90,6 +99,7 @@ public class Folder implements Serializable {
         joinColumns = @JoinColumn(name = "folder_id"),
         inverseJoinColumns = @JoinColumn(name = "granted_access_groups_id")
     )
+    @Schema( description = "A list of Groups this Folder is in" )
     private Collection<Group> grantedAccessGroups;
 
     @OneToMany(mappedBy = "folder", fetch = FetchType.LAZY)
@@ -111,6 +121,7 @@ public class Folder implements Serializable {
         joinColumns = @JoinColumn(name = "folder_id"),
         inverseJoinColumns = @JoinColumn(name = "competence_type_id")
     )
+    @Schema( description = "A list of CompetenceTypes this Folder grants a capacitation badge on completion" )
     private Collection<CompetenceType> grantsBadgeToCompetences;
 
     public Folder() {
@@ -164,6 +175,7 @@ public class Folder implements Serializable {
         this.createdAt = createdAt;
     }
 
+    @Hidden
     public void setContents(Collection<FolderContents> folderContents) {
         this.folderContents = folderContents;
     }

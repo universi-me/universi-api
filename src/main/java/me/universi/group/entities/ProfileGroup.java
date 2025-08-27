@@ -1,6 +1,8 @@
 package me.universi.group.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
@@ -18,6 +20,7 @@ import org.hibernate.annotations.*;
 @Table(name = "profile_group", schema = "system_group")
 @SQLDelete(sql = "UPDATE system_group.profile_group SET deleted = true, exited = NOW() WHERE id=?")
 @SQLRestriction( value = "NOT deleted" )
+@Schema( description = "Unites the Group and Profile entities to store Group participants and their Role" )
 public class ProfileGroup implements Serializable {
 
     @Serial
@@ -58,6 +61,7 @@ public class ProfileGroup implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @NotNull
     @PrimaryKeyJoinColumn(name="role_id")
+    @Schema( description = "Role assigned to the participant" )
     private Role role;
 
     public ProfileGroup() {

@@ -8,6 +8,7 @@ import org.hibernate.annotations.*;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -26,6 +27,7 @@ import me.universi.profile.entities.Profile;
 @Table( name = "folder_favorite", schema = "capacity" )
 @SQLDelete(sql = "UPDATE capacity.folder_favorite SET deleted = true, removed = CURRENT_TIMESTAMP WHERE id=?")
 @SQLRestriction( "NOT deleted" )
+@Schema( description = "A Folder a Profile marked as favorite" )
 public class FolderFavorite implements Serializable {
     private static final long serialVersionUID = 2134355147415946228L;
 
@@ -44,6 +46,7 @@ public class FolderFavorite implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn(name="folder_id")
     @NotNull
+    @Schema( description = "The Folder marked as favorite" )
     private Folder folder;
 
     @CreationTimestamp

@@ -2,8 +2,9 @@ package me.universi.capacity.entidades;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
-import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
@@ -20,6 +21,7 @@ import org.hibernate.annotations.*;
 @Table( name = "folder_profile", schema = "capacity" )
 @SQLDelete( sql = "UPDATE capacity.folder_profile SET removed = CURRENT_TIMESTAMP WHERE id=?" )
 @SQLRestriction( "removed IS NULL" )
+@Schema( description = "A assignment of a Folder to a Profile by another Profile" )
 public class FolderProfile implements Serializable {
 
     @Serial
@@ -34,6 +36,7 @@ public class FolderProfile implements Serializable {
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created")
+    @Schema( description = "When this folder was assigned" )
     public Date created;
 
     @JsonIgnore
@@ -44,16 +47,19 @@ public class FolderProfile implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn(name="assigned_by_id")
     @NotNull
+    @Schema( description = "The Profile who assigned the Folder" )
     public Profile assignedBy;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn(name="assigned_to_id")
     @NotNull
+    @Schema( description = "The Profile whose the Folder was assigned to" )
     public Profile assignedTo;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn(name="folder_id")
     @NotNull
+    @Schema( description = "The assigned Folder" )
     public Folder folder;
 
     public FolderProfile() {

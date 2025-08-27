@@ -10,6 +10,7 @@ import org.hibernate.annotations.SQLRestriction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -24,6 +25,7 @@ import jakarta.persistence.TemporalType;
 @Table( name = "department", schema = "profile" )
 @SQLDelete( sql = "UPDATE profile.department SET deleted_at = NOW() WHERE id = ?" )
 @SQLRestriction( "deleted_at IS NULL" )
+@Schema( description = "A subdivision of the company this platform represents, used to group and filter users" )
 public class Department implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -31,9 +33,11 @@ public class Department implements Serializable {
     private UUID id;
 
     @Column(name = "acronym", nullable = false)
+    @Schema( description = "An acronym for this Department", example = "EDN" )
     private String acronym;
 
     @Column(name = "name", nullable = false)
+    @Schema( description = "The name of this Department", example = "Example Department Name" )
     private String name;
 
     @CreationTimestamp

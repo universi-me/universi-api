@@ -1,8 +1,9 @@
 package me.universi.group.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
-import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
@@ -18,6 +19,7 @@ import org.hibernate.annotations.*;
 @Table( name = "group_email_filter", schema = "system_group" )
 @SQLDelete(sql = "UPDATE system_group.group_email_filter SET deleted = true WHERE id=?")
 @SQLRestriction( value = "NOT deleted" )
+@Schema( description = "A filter to be applied to validate new user's emails" )
 public class GroupEmailFilter implements Serializable {
 
     @Serial
@@ -30,6 +32,7 @@ public class GroupEmailFilter implements Serializable {
     private UUID id;
 
     @Column(name = "enabled")
+    @Schema( description = "If false, this filter will not be applied" )
     public boolean enabled = Boolean.FALSE;
 
     @Column(name = "type")
@@ -37,6 +40,7 @@ public class GroupEmailFilter implements Serializable {
     public GroupEmailFilterType type = GroupEmailFilterType.END_WITH;
 
     @Column(name = "email")
+    @Schema( description = "The filter declared" )
     public String email;
 
     @CreationTimestamp

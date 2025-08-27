@@ -2,6 +2,8 @@ package me.universi.group.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
@@ -18,6 +20,7 @@ import org.hibernate.annotations.SQLRestriction;
 @SQLDelete(sql = "UPDATE system_group.group_environment SET deleted = true WHERE id=?")
 @SQLRestriction( value = "NOT deleted" )
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+@Schema( description = "The environment this organization is running on, with every public setting available" )
 public class GroupEnvironment implements Serializable {
 
     @Serial

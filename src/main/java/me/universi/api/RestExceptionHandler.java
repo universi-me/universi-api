@@ -4,18 +4,29 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import me.universi.api.exceptions.UniversiException;
 
 @RestControllerAdvice
 public class RestExceptionHandler {
 
     @ExceptionHandler(Exception.class)
+    @ApiResponse(
+        description = "Default response in case of an error",
+        content = @Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE,
+            schema = @Schema( implementation = ApiError.class )
+        )
+    )
     public ResponseEntity<ApiError> genericException(@NotNull Exception ex) {
         ex.printStackTrace();
         ApiError apiError = ApiError

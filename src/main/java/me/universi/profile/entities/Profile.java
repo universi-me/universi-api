@@ -3,10 +3,10 @@ package me.universi.profile.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;
-import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
@@ -35,6 +35,7 @@ import java.util.UUID;
 @Table( name = "profile", schema = "profile" )
 @SQLDelete(sql = "UPDATE profile.profile SET deleted = true WHERE id=?")
 @SQLRestriction( "NOT deleted" )
+@Schema( description = "Stores information of a user of the platform, such as name and biography" )
 public class Profile implements Serializable {
 
     @Serial
@@ -50,7 +51,9 @@ public class Profile implements Serializable {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
     @Column(name = "name")
+    @Schema( description = "This user's firstname", example = "John" )
     private String firstname;
+    @Schema( description = "This user's lastname", example = "Smith" )
     @Column(name = "lastname")
     private String lastname;
 
@@ -60,6 +63,7 @@ public class Profile implements Serializable {
     private ImageMetadata image;
 
     @Column(name = "bio", columnDefinition = "TEXT")
+    @Schema( description = "Short plain text with a description of this user", example = "Working at Team Name on Department Name as a Function Name" )
     private String bio;
 
     @JsonIgnore
@@ -104,6 +108,7 @@ public class Profile implements Serializable {
 
     @Transient
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    @Schema( deprecated = true )
     public Role role;
 
     @JsonIgnore

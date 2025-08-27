@@ -1,6 +1,9 @@
 package me.universi.role.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema.AdditionalPropertiesValue;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -13,6 +16,7 @@ import me.universi.group.entities.Group;
 import me.universi.role.enums.FeaturesTypes;
 import me.universi.role.enums.Permission;
 import me.universi.role.enums.RoleType;
+import me.universi.role.openapi.FeatureToLevelSchema;
 
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -28,6 +32,7 @@ import org.hibernate.annotations.SQLRestriction;
 @Table( name = "role", schema = "system_group" )
 @SQLDelete( sql = "UPDATE role SET deleted = true WHERE id=?" )
 @SQLRestriction( "NOT deleted" )
+@Schema( description = "Stores users levels of Permissions on Groups. Each Group participant is assigned a Role that describes their Permissions on a module of said Group" )
 public class Role implements Serializable {
 
     @Serial
@@ -44,9 +49,11 @@ public class Role implements Serializable {
     private boolean deleted = Boolean.FALSE;
 
     @Column(name = "name")
+    @Schema( description = "An identifiable name for this Role, unique per Group", examples = { "Leader", } )
     private String name;
 
     @Column(name = "description")
+    @Schema( description = "Short plain text describing this Role", deprecated = true )
     private String description;
 
     @CreationTimestamp
@@ -179,10 +186,12 @@ public class Role implements Serializable {
     }
 
     @Transient
+    @Schema( description = "If true, this Role can be edited by a Group administrator. Otherwise is one of the default Roles" )
     public boolean isCanBeEdited() {
         return this.isCustom();
     }
     @Transient
+    @Schema( description = "If true, this Role can be assigned to users by a Group administrator. Otherwise is a special Role that cannot be assigned, such as the `VISITOR` Role" )
     public boolean isCanBeAssigned() {
         return !this.isVisitor();
     }
@@ -233,6 +242,7 @@ public class Role implements Serializable {
     }
 
     @Transient
+    @Schema( description = "This Role's Permission level for each Feature", ref = FeatureToLevelSchema.REF_STRING, additionalProperties = AdditionalPropertiesValue.FALSE )
     public Map<FeaturesTypes, Integer> getPermissions() {
         return Arrays.asList(FeaturesTypes.values())
             .stream()
